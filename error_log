@@ -1,0 +1,3 @@
+[18-Nov-2024 09:51:14 UTC] PHP Fatal error:  Allowed memory size of 2147483648 bytes exhausted (tried to allocate 67108864 bytes) in phar:///usr/local/bin/composer1.phar/src/Composer/DependencyResolver/RuleSetGenerator.php on line 129
+[18-Nov-2024 11:03:34 UTC] PHP Fatal error:  Allowed memory size of 2147483648 bytes exhausted (tried to allocate 20480 bytes) in phar:///usr/local/bin/composer1.phar/src/Composer/DependencyResolver/GenericRule.php on line 36
+[10-Dec-2024 12:41:02 UTC] PHP Fatal error:  Allowed memory size of 1610612736 bytes exhausted (tried to allocate 83886080 bytes) in phar:///usr/local/bin/composer1.phar/src/Composer/DependencyResolver/RuleSet.php on line 90
