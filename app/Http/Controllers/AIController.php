@@ -115,7 +115,7 @@ class AIController extends Controller
             }
 
 
-            // Genrating Description with our AI helper integration
+            // Replace this with your actual AI helper integration
             $description = generate_description($fullPrompt);
 
             if ($description['error']) {
