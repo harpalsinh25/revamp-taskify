@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Laravel
 /vendor/
 node_modules/
@@ -35,4 +36,24 @@ public/assets/demo_data/public.zip
 vite.config.js
 vite.config.ts
 
+=======
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
 /public/assets/demo_data/public.zip

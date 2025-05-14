@@ -19,8 +19,12 @@
             <form class="modal-content form-submit-event" action="{{ url('status/store') }}" method="POST">
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_status', 'Create status') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_status', 'Create status') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -28,18 +32,28 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="nameBasic" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select select-bg-label-primary" id="color" name="color">
                                 <option class="badge bg-label-primary" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
@@ -47,6 +61,7 @@
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary"
                                     {{ old('color') == 'secondary' ? 'selected' : '' }}>
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success"
@@ -68,6 +83,23 @@
                                 <option class="badge bg-label-dark" value="dark"
                                     {{ old('color') == 'dark' ? 'selected' : '' }}>
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success"
+                                    {{ old('color') == 'success' ? 'selected' : '' }}>
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger"
+                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning"
+                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"
+                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"
+                                    {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -75,12 +107,20 @@
                     @if ($isAdminOrHasAllDataAccess)
                         <div class="row">
                             <div class="col-12 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label">
                                     <?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
                                     <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
                                         data-bs-offset="0,4" data-bs-placement="top" title=""
                                         data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i>
                                 </label>
+=======
+                                <label
+                                    class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
+                                    <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
+                                        data-bs-offset="0,4" data-bs-placement="top" title=""
+                                        data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-control js-example-basic-multiple" name="role_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
@@ -99,9 +139,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?></label>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('create', 'Create') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('create', 'Create') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -114,8 +159,12 @@
                 <input type="hidden" name="id" id="status_id">
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_status', 'Update status') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_status', 'Update status') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -123,24 +172,35 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="status_title" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select select-bg-label-primary" id="status_color" name="color"
                                 required>
                                 <option class="badge bg-label-primary" value="primary">
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary">
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success">
@@ -157,6 +217,18 @@
                                 </option>
                                 <option class="badge bg-label-dark" value="dark">
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success">
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger">
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning">
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -164,12 +236,20 @@
                     @if ($isAdminOrHasAllDataAccess)
                         <div class="row">
                             <div class="col-12 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label">
                                     <?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
                                     <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
                                         data-bs-offset="0,4" data-bs-placement="top" title=""
                                         data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i>
                                 </label>
+=======
+                                <label
+                                    class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
+                                    <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
+                                        data-bs-offset="0,4" data-bs-placement="top" title=""
+                                        data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-control js-example-basic-multiple" name="role_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
@@ -188,9 +268,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?></label>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('update', 'Update') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('update', 'Update') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -209,26 +294,40 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_priority', 'Create Priority') ?>
                     </h5>
+=======
+                        <?= get_label('create_priority', 'Create Priority') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="nameBasic" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select select-bg-label-primary" id="color" name="color">
                                 <option class="badge bg-label-primary" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
@@ -236,6 +335,7 @@
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary"
                                     {{ old('color') == 'secondary' ? 'selected' : '' }}>
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success"
@@ -257,6 +357,23 @@
                                 <option class="badge bg-label-dark" value="dark"
                                     {{ old('color') == 'dark' ? 'selected' : '' }}>
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success"
+                                    {{ old('color') == 'success' ? 'selected' : '' }}>
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger"
+                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning"
+                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"
+                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"
+                                    {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -266,9 +383,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?></label>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('create', 'Create') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('create', 'Create') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -282,32 +404,47 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_priority', 'Update Priority') ?>
                     </h5>
+=======
+                        <?= get_label('update_priority', 'Update Priority') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="priority_title" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select select-bg-label-primary" id="priority_color" name="color"
                                 required>
                                 <option class="badge bg-label-primary" value="primary">
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary">
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success">
@@ -324,6 +461,18 @@
                                 </option>
                                 <option class="badge bg-label-dark" value="dark">
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success">
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger">
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning">
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -333,9 +482,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?></label>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('update', 'Update') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('update', 'Update') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -351,27 +505,41 @@
             <form class="modal-content form-submit-event" action="{{ url('tags/store') }}" method="POST">
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_tag', 'Create tag') ?>
                     </h5>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_tag', 'Create tag') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="nameBasic" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select select-bg-label-primary" id="color" name="color">
                                 <option class="badge bg-label-primary" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
@@ -379,6 +547,7 @@
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary"
                                     {{ old('color') == 'secondary' ? 'selected' : '' }}>
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success"
@@ -400,6 +569,23 @@
                                 <option class="badge bg-label-dark" value="dark"
                                     {{ old('color') == 'dark' ? 'selected' : '' }}>
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success"
+                                    {{ old('color') == 'success' ? 'selected' : '' }}>
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger"
+                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning"
+                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"
+                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"
+                                    {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -409,9 +595,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?></label>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('create', 'Create') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('create', 'Create') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -424,32 +615,47 @@
                 <input type="hidden" name="dnr">
                 <input type="hidden" name="id" id="tag_id">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_tag', 'Update tag') ?>
                     </h5>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_tag', 'Update tag') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="tag_title" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select select-bg-label-primary" id="tag_color" name="color">
                                 <option class="badge bg-label-primary" value="primary">
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary">
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success">
@@ -466,6 +672,18 @@
                                 </option>
                                 <option class="badge bg-label-dark" value="dark">
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success">
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger">
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning">
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -475,9 +693,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?></label>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('update', 'Update') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('update', 'Update') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -488,8 +711,12 @@
         <div class="modal-dialog" role="document">
             <form class="modal-content form-submit-event" action="{{ url('todos/store') }}" method="POST">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_todo', 'Create todo') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_todo', 'Create todo') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -497,15 +724,21 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('priority', 'Priority') ?> <span class="asterisk">*</span>
                             </label>
@@ -525,12 +758,28 @@
                     <label for="description" class="form-label">
                         <?= get_label('description', 'Description') ?>
                     </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('priority', 'Priority') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="form-select" name="priority">
+                                <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>
+                                    <?= get_label('low', 'Low') ?></option>
+                                <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>
+                                    <?= get_label('medium', 'Medium') ?></option>
+                                <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>
+                                    <?= get_label('high', 'High') ?></option>
+                            </select>
+                        </div>
+                    </div>
+                    <label for="description" class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <textarea class="form-control" name="description"
                         placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label for="reminder-switch"
+<<<<<<< HEAD
                                     class="form-label">{{ get_label(
                                         'enable_reminder',
                                         'Enable
@@ -538,6 +787,11 @@
                                     ) }}</label>
                                 <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"
                                     data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true" title=""
+=======
+                                    class="form-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
+                                <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"data-bs-offset="0,4"
+                                    data-bs-placement="top" data-bs-html="true"title=""
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     data-bs-original-title="<b>{{ get_label('todo_reminder', 'Todo Reminder') }}:</b> {{ get_label('todo_reminder_info', 'Enable this option to set reminders for tasks. You can configure reminder frequencies (daily, weekly, or monthly), specific times, and customize alerts to ensure you stay on track with todo deadlines.') }}"></i>
                                 <div class="form-check form-switch">
                                     <input type="checkbox" class="form-check-input" id="reminder-switch"
@@ -550,11 +804,15 @@
                                 <!-- Frequency Type -->
                                 <div class="mb-3">
                                     <label for="frequency-type"
+<<<<<<< HEAD
                                         class="form-label">{{ get_label(
                                             'frequency_type',
                                             'Frequency
                                                                             Type',
                                         ) }}</label>
+=======
+                                        class="form-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     <select class="form-select" id="frequency-type" name="frequency_type" required>
                                         <option value="daily">{{ get_label('daily', 'Daily') }}</option>
                                         <option value="weekly">{{ get_label('weekly', 'Weekly') }}</option>
@@ -563,12 +821,17 @@
                                 </div>
                                 <!-- Day of Week (Weekly Only) -->
                                 <div class="d-none mb-3" id="day-of-week-group">
+<<<<<<< HEAD
                                     <label for="day-of-week"
                                         class="form-label">{{ get_label(
                                             'day_of_the_week',
                                             'Day of the
                                                                             Week',
                                         ) }}</label>
+=======
+                                    <label
+                                        for="day-of-week"class="form-label">{{ get_label('day_of_the_week', 'Day of the Week') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     <select class="form-select" id="day-of-week" name="day_of_week">
                                         <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                         <option value="1">{{ get_label('monday', 'Monday') }}</option>
@@ -583,11 +846,15 @@
                                 <!-- Day of Month (Monthly Only) -->
                                 <div class="d-none mb-3" id="day-of-month-group">
                                     <label for="day-of-month"
+<<<<<<< HEAD
                                         class="form-label">{{ get_label(
                                             'day_of_the_month',
                                             'Day of
                                                                             the Month',
                                         ) }}</label>
+=======
+                                        class="form-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     <select class="form-select" id="day-of-month" name="day_of_month">
                                         <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                         @foreach (range(1, 31) as $day)
@@ -610,9 +877,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -623,23 +895,33 @@
                 <input type="hidden" name="id" id="todo_id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_todo', 'Update todo') ?></span>
                     </h5>
+=======
+                        <?= get_label('update_todo', 'Update todo') ?></span></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="todo_title" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('priority', 'Priority') ?> <span class="asterisk">*</span>
                             </label>
@@ -659,12 +941,25 @@
                     <label for="description" class="form-label">
                         <?= get_label('description', 'Description') ?>
                     </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('priority', 'Priority') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="form-select" id="todo_priority" name="priority">
+                                <option value="low"><?= get_label('low', 'Low') ?></option>
+                                <option value="medium"><?= get_label('medium', 'Medium') ?></option>
+                                <option value="high"><?= get_label('high', 'High') ?></option>
+                            </select>
+                        </div>
+                    </div>
+                    <label for="description" class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <textarea class="form-control" id="todo_description" name="description"
                         placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
 
                     <div class="col-md-12">
                         <div class="mb-3">
                             <label for="reminder-switch"
+<<<<<<< HEAD
                                 class="form-label">{{ get_label(
                                     'enable_reminder',
                                     'Enable
@@ -672,6 +967,11 @@
                                 ) }}</label>
                             <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip" data-bs-offset="0,4"
                                 data-bs-placement="top" data-bs-html="true" title=""
+=======
+                                class="form-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
+                            <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"data-bs-offset="0,4"
+                                data-bs-placement="top" data-bs-html="true"title=""
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 data-bs-original-title="<b>{{ get_label('task_reminder', 'Task Reminder') }}:</b> {{ get_label('task_reminder_info', 'Enable this option to set reminders for tasks. You can configure reminder frequencies (daily, weekly, or monthly), specific times, and customize alerts to ensure you stay on track with task deadlines.') }}"></i>
                             <div class="form-check form-switch">
                                 <input type="checkbox" class="form-check-input" id="edit-todo-reminder-switch"
@@ -711,11 +1011,15 @@
                         <!-- Day of Month (Monthly Only) -->
                         <div class="d-none mb-3" id="edit-todo-day-of-month-group">
                             <label for="day-of-month"
+<<<<<<< HEAD
                                 class="form-label">{{ get_label(
                                     'day_of_the_month',
                                     'Day of the
                                                             Month',
                                 ) }}</label>
+=======
+                                class="form-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select" id="edit-todo-day-of-month" name="day_of_month">
                                 <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                 @foreach (range(1, 31) as $day)
@@ -737,9 +1041,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('update', 'Update') ?></span>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('update', 'Update') ?></span></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -749,6 +1058,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -758,14 +1068,25 @@
                 <p>
                     <?= get_label('set_primary_lang_alert', 'Are you want to set as your primary language?') ?>
                 </p>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('set_primary_lang_alert', 'Are you want to set as your primary language?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirm">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary" id="confirm"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -774,6 +1095,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -783,14 +1105,25 @@
                 <p>
                     <?= get_label('set_default_view_alert', 'Are You Want to Set as Default View?') ?>
                 </p>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('set_default_view_alert', 'Are You Want to Set as Default View?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirm">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary" id="confirm"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -799,6 +1132,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -808,14 +1142,25 @@
                 <p>
                     <?= get_label('save_column_visibility_alert', 'Are You Want to Save Column Visibility?') ?>
                 </p>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('save_column_visibility_alert', 'Are You Want to Save Column Visibility?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirm">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary" id="confirm"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -824,9 +1169,13 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('warning', 'Warning!') ?>
                 </h6>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h6>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -836,9 +1185,13 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-danger" id="confirm">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-danger" id="confirm"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -847,8 +1200,12 @@
     <div class="modal-dialog modal-sm" role="document">
         <form class="modal-content form-submit-event" action="{{ url('settings/languages/store') }}" method="POST">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h5 class="modal-title" id="exampleModalLabel1">
                     <?= get_label('create_language', 'Create language') ?>
+=======
+                <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_language', 'Create language') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -856,18 +1213,28 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col mb-3">
+<<<<<<< HEAD
                         <label for="nameBasic" class="form-label">
                             <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <input type="text" class="form-control" name="name"
                             placeholder="For Example: English" />
                     </div>
                 </div>
                 <div class="row">
                     <div class="col mb-3">
+<<<<<<< HEAD
                         <label for="nameBasic" class="form-label">
                             <?= get_label('code', 'Code') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="nameBasic" class="form-label"><?= get_label('code', 'Code') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <input type="text" class="form-control" name="code" placeholder="For Example: en" />
                     </div>
                 </div>
@@ -876,9 +1243,14 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" id="submit_btn" class="btn btn-primary">
                     <?= get_label('create', 'Create') ?>
                 </button>
+=======
+                <button type="submit" id="submit_btn"
+                    class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </form>
     </div>
@@ -889,8 +1261,12 @@
             method="POST">
             <input type="hidden" name="id" id="language_id">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h5 class="modal-title" id="exampleModalLabel1">
                     <?= get_label('update_language', 'Update language') ?>
+=======
+                <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_language', 'Update language') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -898,9 +1274,14 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col mb-3">
+<<<<<<< HEAD
                         <label for="nameBasic" class="form-label">
                             <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <input type="text" class="form-control" name="name" id="language_title"
                             placeholder="For Example: English" />
                     </div>
@@ -910,9 +1291,14 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" id="submit_btn" class="btn btn-primary">
                     <?= get_label('update', 'Update') ?>
                 </button>
+=======
+                <button type="submit" id="submit_btn"
+                    class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </form>
     </div>
@@ -925,8 +1311,12 @@
                 <input type="hidden" name="table" value="lr_table">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_leave_requet', 'Create leave request') ?>
                     </h5>
+=======
+                        <?= get_label('create_leave_requet', 'Create leave request') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
@@ -934,9 +1324,15 @@
                     <div class="row">
                         @if (is_admin_or_leave_editor())
                             <div class="col-12 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="user_id">
                                     <?= get_label('select_user', 'Select user') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label"
+                                    for="user_id"><?= get_label('select_user', 'Select user') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select users_select"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     name="user_id" data-single-select="true">
@@ -955,27 +1351,43 @@
                             </div>
                         </div>
                         <div class="col-5 leave-from-date-div mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('from_date', 'From date') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('from_date', 'From date') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="start_date" name="from_date" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
                         <div class="col-5 leave-to-date-div mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('to_date', 'To date') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('to_date', 'To date') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="lr_end_date" name="to_date" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
                         <div class="col-2 leave-from-time-div d-none mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('from_time', 'From Time') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('from_time', 'From Time') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="time" name="from_time" class="form-control"
                                 value="{{ old('from_time') }}">
                         </div>
                         <div class="col-2 leave-to-time-div d-none mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('to_time', 'To Time') ?> <span class="asterisk">*</span>
                             </label>
@@ -985,6 +1397,14 @@
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('days', 'Days') ?>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('to_time', 'To Time') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input type="time" name="to_time" class="form-control" value="{{ old('to_time') }}">
+                        </div>
+                        <div class="col-2 mb-3">
+                            <label for="nameBasic" class="form-label"><?= get_label('days', 'Days') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="total_days" class="form-control" value="1"
                                 placeholder="" disabled>
                         </div>
@@ -992,6 +1412,7 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input leaveVisibleToAll" type="checkbox"
                                     name="leaveVisibleToAll" id="leaveVisibleToAll">
+<<<<<<< HEAD
                                 <label class="form-check-label" for="leaveVisibleToAll">
                                     <?= get_label('visible_to_all', 'Visible To All') ?>? <i
                                         class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
@@ -999,6 +1420,14 @@
                                         data-bs-html="true"
                                         data-bs-original-title="{{ get_label('leave_visible_to_info', 'Disabled: Requestee, Admin, and Leave Editors, along with selected users, will be able to know when the requestee is on leave. Enabled: All team members will be able to know when the requestee is on leave.') }}"></i>
                                 </label>
+=======
+                                <label class="form-check-label"
+                                    for="leaveVisibleToAll"><?= get_label('visible_to_all', 'Visible To All') ?>? <i
+                                        class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
+                                        data-bs-offset="0,4" data-bs-placement="top" title=""
+                                        data-bs-html="true"
+                                        data-bs-original-title="{{ get_label('leave_visible_to_info', 'Disabled: Requestee, Admin, and Leave Editors, along with selected users, will be able to know when the requestee is on leave. Enabled: All team members will be able to know when the requestee is on leave.') }}"></i></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             </div>
                         </div>
                         <div class="col-12 leaveVisibleToDiv mb-3">
@@ -1009,17 +1438,26 @@
                         </div>
                     </div>
                     <div class="col-12 mb-3">
+<<<<<<< HEAD
                         <label for="description" class="form-label">
                             <?= get_label('reason', 'Reason') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="description" class="form-label"><?= get_label('reason', 'Reason') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <textarea class="form-control" name="reason"
                             placeholder="<?= get_label('please_enter_leave_reason', 'Please enter leave reason') ?>"></textarea>
                     </div>
                     @if (is_admin_or_leave_editor())
                         <div class="col-12 mb-3">
+<<<<<<< HEAD
                             <label for="comment" class="form-label">
                                 <?= get_label('comment', 'Comment') ?>
                             </label>
+=======
+                            <label for="comment" class="form-label"><?= get_label('comment', 'Comment') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="comment"
                                 placeholder="<?= get_label('optional_comment_placeholder', 'Please Enter Comment, if Any') ?>"></textarea>
                         </div>
@@ -1030,6 +1468,7 @@
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                                     <input type="radio" class="btn-check" name="status" id="create_lr_pending"
                                         value="pending" checked>
+<<<<<<< HEAD
                                     <label class="btn btn-outline-primary" for="create_lr_pending">
                                         <?= get_label('pending', 'Pending') ?>
                                     </label>
@@ -1043,6 +1482,18 @@
                                     <label class="btn btn-outline-primary" for="create_lr_rejected">
                                         <?= get_label('rejected', 'Rejected') ?>
                                     </label>
+=======
+                                    <label class="btn btn-outline-primary"
+                                        for="create_lr_pending"><?= get_label('pending', 'Pending') ?></label>
+                                    <input type="radio" class="btn-check" name="status" id="create_lr_approved"
+                                        value="approved">
+                                    <label class="btn btn-outline-primary"
+                                        for="create_lr_approved"><?= get_label('approved', 'Approved') ?></label>
+                                    <input type="radio" class="btn-check" name="status" id="create_lr_rejected"
+                                        value="rejected">
+                                    <label class="btn btn-outline-primary"
+                                        for="create_lr_rejected"><?= get_label('rejected', 'Rejected') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </div>
                             </div>
                         </div>
@@ -1052,9 +1503,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1068,8 +1524,12 @@
                 <input type="hidden" name="id" id="lr_id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_leave_request', 'Update leave request') ?>
                     </h5>
+=======
+                        <?= get_label('update_leave_request', 'Update leave request') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
@@ -1077,9 +1537,14 @@
                     <div class="row">
                         @if (is_admin_or_leave_editor())
                             <div class="col-12 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label">
                                     <?= get_label('user', 'User') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label"><?= get_label('user', 'User') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" id="leaveUser" class="form-control" disabled>
                             </div>
                         @endif
@@ -1087,6 +1552,7 @@
                             <div class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" id="updatePartialLeave"
                                     name="partialLeave">
+<<<<<<< HEAD
                                 <label class="form-check-label" for="updatePartialLeave">
                                     <?= get_label('partial_leave', 'Partial Leave') ?>?
                                 </label>
@@ -1096,17 +1562,32 @@
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('from_date', 'From date') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                                <label class="form-check-label"
+                                    for="updatePartialLeave"><?= get_label('partial_leave', 'Partial Leave') ?>?</label>
+                            </div>
+                        </div>
+                        <div class="col-5 leave-from-date-div mb-3">
+                            <label for="nameBasic" class="form-label"><?= get_label('from_date', 'From date') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_start_date" name="from_date" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
                         <div class="col-5 leave-to-date-div mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('to_date', 'To date') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('to_date', 'To date') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_end_date" name="to_date" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
                         <div class="col-2 leave-from-time-div d-none mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('from_time', 'From Time') ?> <span class="asterisk">*</span>
                             </label>
@@ -1122,6 +1603,19 @@
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('days', 'Days') ?>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('from_time', 'From Time') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input type="time" name="from_time" class="form-control">
+                        </div>
+                        <div class="col-2 leave-to-time-div d-none mb-3">
+                            <label class="form-label" for=""><?= get_label('to_time', 'To Time') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input type="time" name="to_time" class="form-control">
+                        </div>
+                        <div class="col-2 mb-3">
+                            <label for="nameBasic" class="form-label"><?= get_label('days', 'Days') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_total_days" class="form-control" value="1"
                                 placeholder="" disabled>
                         </div>
@@ -1129,6 +1623,7 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input leaveVisibleToAll" type="checkbox"
                                     name="leaveVisibleToAll" id="updateLeaveVisibleToAll">
+<<<<<<< HEAD
                                 <label class="form-check-label" for="updateLeaveVisibleToAll">
                                     <?= get_label('visible_to_all', 'Visible To All') ?>?
                                     <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
@@ -1136,6 +1631,14 @@
                                         data-bs-html="true"
                                         data-bs-original-title="{{ get_label('leave_visible_to_info', 'Disabled: Requestee, Admin, and Leave Editors, along with selected users, will be able to know when the requestee is on leave. Enabled: All team members will be able to know when the requestee is on leave.') }}"></i>
                                 </label>
+=======
+                                <label class="form-check-label"
+                                    for="updateLeaveVisibleToAll"><?= get_label('visible_to_all', 'Visible To All') ?>?
+                                    <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
+                                        data-bs-offset="0,4" data-bs-placement="top" title=""
+                                        data-bs-html="true"
+                                        data-bs-original-title="{{ get_label('leave_visible_to_info', 'Disabled: Requestee, Admin, and Leave Editors, along with selected users, will be able to know when the requestee is on leave. Enabled: All team members will be able to know when the requestee is on leave.') }}"></i></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             </div>
                         </div>
                         <div class="col-12 leaveVisibleToDiv mb-3">
@@ -1145,17 +1648,27 @@
                             </select>
                         </div>
                         <div class="col-12 mb-3">
+<<<<<<< HEAD
                             <label for="description" class="form-label">
                                 <?= get_label('reason', 'Reason') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="description" class="form-label"><?= get_label('reason', 'Reason') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="reason"
                                 placeholder="<?= get_label('please_enter_leave_reason', 'Please enter leave reason') ?>"></textarea>
                         </div>
                         @if (is_admin_or_leave_editor())
                             <div class="col-12 mb-3">
+<<<<<<< HEAD
                                 <label for="comment" class="form-label">
                                     <?= get_label('comment', 'Comment') ?>
                                 </label>
+=======
+                                <label for="comment"
+                                    class="form-label"><?= get_label('comment', 'Comment') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea class="form-control" name="comment"
                                     placeholder="<?= get_label('optional_comment_placeholder', 'Please Enter Comment, if Any') ?>"></textarea>
                             </div>
@@ -1168,6 +1681,7 @@
                             <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                                 <input type="radio" class="btn-check" name="status" id="update_lr_pending"
                                     value="pending" {{ $disabled }}>
+<<<<<<< HEAD
                                 <label class="btn btn-outline-primary" for="update_lr_pending">
                                     <?= get_label('pending', 'Pending') ?>
                                 </label>
@@ -1181,6 +1695,18 @@
                                 <label class="btn btn-outline-primary" for="update_lr_rejected">
                                     <?= get_label('rejected', 'Rejected') ?>
                                 </label>
+=======
+                                <label class="btn btn-outline-primary"
+                                    for="update_lr_pending"><?= get_label('pending', 'Pending') ?></label>
+                                <input type="radio" class="btn-check" name="status" id="update_lr_approved"
+                                    value="approved" {{ $disabled }}>
+                                <label class="btn btn-outline-primary"
+                                    for="update_lr_approved"><?= get_label('approved', 'Approved') ?></label>
+                                <input type="radio" class="btn-check" name="status" id="update_lr_rejected"
+                                    value="rejected" {{ $disabled }}>
+                                <label class="btn btn-outline-primary"
+                                    for="update_lr_rejected"><?= get_label('rejected', 'Rejected') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             </div>
                         </div>
                     </div>
@@ -1189,9 +1715,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('update', 'Update') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('update', 'Update') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1204,16 +1735,25 @@
             <input type="hidden" name="dnr">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                     <?= get_label('create_contract_type', 'Create contract type') ?>
                 </h5>
+=======
+                    <?= get_label('create_contract_type', 'Create contract type') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col mb-3">
+<<<<<<< HEAD
                         <label for="nameBasic" class="form-label">
                             <?= get_label('type', 'Type') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <input type="text" class="form-control" name="type"
                             placeholder="<?= get_label('please_enter_contract_type', 'Please enter contract type') ?>" />
                     </div>
@@ -1223,9 +1763,14 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" id="submit_btn" class="btn btn-primary">
                     <?= get_label('create', 'Create') ?>
                 </button>
+=======
+                <button type="submit" id="submit_btn"
+                    class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </form>
     </div>
@@ -1238,16 +1783,25 @@
             <input type="hidden" id="update_contract_type_id" name="id">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                     <?= get_label('update_contract_type', 'Update contract type') ?>
                 </h5>
+=======
+                    <?= get_label('update_contract_type', 'Update contract type') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col mb-3">
+<<<<<<< HEAD
                         <label for="nameBasic" class="form-label">
                             <?= get_label('type', 'Type') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <input type="text" class="form-control" name="type" id="contract_type"
                             placeholder="<?= get_label('please_enter_contract_type', 'Please enter contract type') ?>" />
                     </div>
@@ -1257,9 +1811,14 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" id="submit_btn" class="btn btn-primary">
                     <?= get_label('update', 'Update') ?>
                 </button>
+=======
+                <button type="submit" id="submit_btn"
+                    class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </form>
     </div>
@@ -1272,24 +1831,38 @@
                 <input type="hidden" name="table" value="contracts_table">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_contract', 'Create contract') ?>
                     </h5>
+=======
+                        <?= get_label('create_contract', 'Create contract') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" name="title" class="form-control"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                         </div>
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('value', 'Value') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('value', 'Value') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input type="text" name="value" class="form-control currency"
@@ -1297,24 +1870,40 @@
                             </div>
                         </div>
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('starts_at', 'Starts at') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('starts_at', 'Starts at') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="start_date" name="start_date" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('ends_at', 'Ends at') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('ends_at', 'Ends at') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="end_date" name="end_date" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
                         @if (!isClient())
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('select_client', 'Select client') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label"
+                                for=""><?= get_label('select_client', 'Select client') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="col-12 mb-3">
                                 <select class="form-select clients_select" name="client_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
@@ -1322,19 +1911,31 @@
                                 </select>
                             </div>
                         @endif
+<<<<<<< HEAD
                         <label class="form-label" for="">
                             <?= get_label('select_project', 'Select project') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label class="form-label"
+                            for=""><?= get_label('select_project', 'Select project') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="col-12 mb-3">
                             <select class="form-select projects_select" name="project_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
                         </div>
+<<<<<<< HEAD
                         <label class="form-label" for="">
                             <?= get_label('select_contract_type', 'Select contract type') ?> <span
                                 class="asterisk">*</span>
                         </label>
+=======
+                        <label class="form-label"
+                            for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="col-12 mb-3">
                             <select class="form-select contract_types_select" name="contract_type_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
@@ -1354,9 +1955,14 @@
                             </div>
                         </div>
                     </div>
+<<<<<<< HEAD
                     <label for="description" class="form-label">
                         <?= get_label('description', 'Description') ?>
                     </label>
+=======
+                    <label for="description"
+                        class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <textarea class="form-control" name="description" id="contract_description"
                         placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                 </div>
@@ -1364,9 +1970,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1380,24 +1991,38 @@
                 <input type="hidden" id="contract_id" name="id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_contract', 'Update contract') ?>
                     </h5>
+=======
+                        <?= get_label('update_contract', 'Update contract') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="title" name="title" class="form-control"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                         </div>
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('value', 'Value') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('value', 'Value') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input type="text" id="value" name="value"
@@ -1406,14 +2031,20 @@
                             </div>
                         </div>
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('starts_at', 'Starts at') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('starts_at', 'Starts at') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_start_date" name="start_date" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
                         <div class="col-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('ends_at', 'Ends at') ?> <span class="asterisk">*</span>
                             </label>
@@ -1424,25 +2055,46 @@
                             <?= get_label('select_client', 'Select client') ?>
                             <span class="asterisk">*</span>
                         </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('ends_at', 'Ends at') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input type="text" id="update_end_date" name="end_date" class="form-control"
+                                placeholder="" autocomplete="off">
+                        </div>
+                        <label class="form-label" for=""><?= get_label('select_client', 'Select client') ?>
+                            <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="col-12 mb-3">
                             <select class="form-select clients_select" id="client_id" name="client_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
                         </div>
+<<<<<<< HEAD
                         <label class="form-label" for="">
                             <?= get_label('select_project', 'Select project') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label class="form-label"
+                            for=""><?= get_label('select_project', 'Select project') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="col-12 mb-3">
                             <select class="form-select projects_select" id="project_id" name="project_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
                         </div>
+<<<<<<< HEAD
                         <label class="form-label" for="">
                             <?= get_label('select_contract_type', 'Select contract type') ?> <span
                                 class="asterisk">*</span>
                         </label>
+=======
+                        <label class="form-label"
+                            for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="col-12 mb-3">
                             <select class="form-select contract_types_select" id="contract_type_id"
                                 name="contract_type_id"
@@ -1463,6 +2115,7 @@
                             </div>
                         </div>
                     </div>
+<<<<<<< HEAD
                     <label for="description" class="form-label">
                         <?= get_label('description', 'Description') ?>
                     </label>
@@ -1473,6 +2126,16 @@
                             <?= get_label('contract_pdf', 'Contract PDF') ?> <small class="text-muted">
                                 ({{ get_label('leave_blank_if_no_change', 'Leave it blank if no change') }})</small>
                         </label>
+=======
+                    <label for="description"
+                        class="form-label"><?= get_label('description', 'Description') ?></label>
+                    <textarea class="form-control" name="description" id="update_contract_description"
+                        placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    <div class="col-12 mb-3 mt-3">
+                        <label class="form-label"><?= get_label('contract_pdf', 'Contract PDF') ?> <small
+                                class="text-muted">
+                                ({{ get_label('leave_blank_if_no_change', 'Leave it blank if no change') }})</small></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="dropzone dz-clickable" id="contract-dropzone"></div>
                     </div>
                 </div>
@@ -1480,9 +2143,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1496,17 +2164,26 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_payment_method', 'Create payment method') ?>
                     </h5>
+=======
+                        <?= get_label('create_payment_method', 'Create payment method') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
@@ -1516,9 +2193,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1531,17 +2213,26 @@
                 <input type="hidden" id="pm_id" name="id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_payment_method', 'Update payment method') ?>
                     </h5>
+=======
+                        <?= get_label('update_payment_method', 'Update payment method') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title" id="pm_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
@@ -1551,9 +2242,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1566,24 +2262,38 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_allowance', 'Create allowance') ?>
                     </h5>
+=======
+                        <?= get_label('create_allowance', 'Create allowance') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" name="amount"
@@ -1596,9 +2306,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1611,24 +2326,38 @@
                 <input type="hidden" name="id" id="allowance_id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_allowance', 'Update allowance') ?>
                     </h5>
+=======
+                        <?= get_label('update_allowance', 'Update allowance') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" id="allowance_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" id="allowance_amount"
@@ -1642,9 +2371,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1657,21 +2391,31 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_deduction', 'Create deduction') ?>
                     </h5>
+=======
+                        <?= get_label('create_deduction', 'Create deduction') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('type', 'Type') ?> <span class="asterisk">*</span>
                             </label>
@@ -1691,6 +2435,19 @@
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select id="deduction_type" name="type" class="form-select">
+                                <option value=""><?= get_label('please_select', 'Please select') ?></option>
+                                <option value="amount"><?= get_label('amount', 'Amount') ?></option>
+                                <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 d-none mb-3" id="amount_div">
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" name="amount"
@@ -1698,10 +2455,15 @@
                             </div>
                         </div>
                         <div class="col-md-12 d-none mb-3" id="percentage_div">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="number" name="percentage" min="0"
                                 max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>">
@@ -1712,9 +2474,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1727,21 +2494,31 @@
                 <input type="hidden" id="deduction_id" name="id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_deduction', 'Update deduction') ?>
                     </h5>
+=======
+                        <?= get_label('update_deduction', 'Update deduction') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" id="deduction_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('type', 'Type') ?> <span class="asterisk">*</span>
                             </label>
@@ -1761,6 +2538,19 @@
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select id="update_deduction_type" name="type" class="form-select">
+                                <option value=""><?= get_label('please_select', 'Please select') ?></option>
+                                <option value="amount"><?= get_label('amount', 'Amount') ?></option>
+                                <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3" id="update_amount_div">
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" id="deduction_amount"
@@ -1769,10 +2559,15 @@
                             </div>
                         </div>
                         <div class="col-md-12 mb-3" id="update_percentage_div">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="number" id="deduction_percentage"
                                 name="percentage" min="0" max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>">
@@ -1783,9 +2578,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1797,8 +2597,12 @@
             <form class="modal-content form-submit-event" action="{{ url('taxes/store') }}" method="POST">
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_tax', 'Create tax') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_tax', 'Create tax') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -1806,13 +2610,19 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('type', 'Type') ?> <span class="asterisk">*</span>
                             </label>
@@ -1832,6 +2642,19 @@
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select id="deduction_type" name="type" class="form-select">
+                                <option value=""><?= get_label('please_select', 'Please select') ?></option>
+                                <option value="amount"><?= get_label('amount', 'Amount') ?></option>
+                                <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 d-none mb-3" id="amount_div">
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" name="amount"
@@ -1839,10 +2662,15 @@
                             </div>
                         </div>
                         <div class="col-md-12 d-none mb-3" id="percentage_div">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="number" name="percentage" min="0"
                                 max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>">
@@ -1853,9 +2681,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1866,8 +2699,12 @@
                 <input type="hidden" name="dnr">
                 <input type="hidden" id="tax_id" name="id">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_tax', 'Update tax') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_tax', 'Update tax') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -1875,13 +2712,19 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" id="tax_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('type', 'Type') ?> <span class="asterisk">*</span>
                             </label>
@@ -1901,6 +2744,19 @@
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select id="update_tax_type" name="type" class="form-select" disabled>
+                                <option value=""><?= get_label('please_select', 'Please select') ?></option>
+                                <option value="amount"><?= get_label('amount', 'Amount') ?></option>
+                                <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3" id="update_amount_div">
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" id="tax_amount"
@@ -1910,10 +2766,15 @@
                             </div>
                         </div>
                         <div class="col-md-12 mb-3" id="update_percentage_div">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="number" id="tax_percentage" name="percentage"
                                 min="0" max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>"
@@ -1925,9 +2786,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1939,8 +2805,12 @@
             <form class="modal-content form-submit-event" action="{{ url('units/store') }}" method="POST">
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_unit', 'Create unit') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_unit', 'Create unit') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -1948,16 +2818,26 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('description', 'Description') ?>
                             </label>
+=======
+                            <label for="nameBasic"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
@@ -1967,9 +2847,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -1980,8 +2865,12 @@
                 <input type="hidden" name="dnr">
                 <input type="hidden" id="unit_id" name="id">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_unit', 'Update unit') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_unit', 'Update unit') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -1989,16 +2878,26 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" id="unit_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('description', 'Description') ?>
                             </label>
+=======
+                            <label for="nameBasic"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" id="unit_description" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
@@ -2008,9 +2907,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -2022,8 +2926,12 @@
             <form class="modal-content form-submit-event" action="{{ url('items/store') }}" method="POST">
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_item', 'Create item') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_item', 'Create item') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -2031,24 +2939,38 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('price', 'Price') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('price', 'Price') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control currency" name="price"
                                 placeholder="<?= get_label('please_enter_price', 'Please enter price') ?>" />
                         </div>
                         @if (isset($units) && is_iterable($units))
                             <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('unit', 'Unit') ?>
                                 </label>
+=======
+                                <label for="nameBasic" class="form-label"><?= get_label('unit', 'Unit') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select js-example-basic-multiple" name="unit_id"
                                     data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                     data-allow-clear="true">
@@ -2060,9 +2982,14 @@
                             </div>
                         @endif
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('description', 'Description') ?>
                             </label>
+=======
+                            <label for="nameBasic"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
@@ -2072,9 +2999,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -2085,8 +3017,12 @@
                 <input type="hidden" name="dnr">
                 <input type="hidden" id="item_id" name="id">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_item', 'Update item') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_item', 'Update item') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -2094,24 +3030,38 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" id="item_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('price', 'Price') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('price', 'Price') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control currency" id="item_price" name="price"
                                 placeholder="<?= get_label('please_enter_price', 'Please enter price') ?>" />
                         </div>
                         @if (isset($units) && is_iterable($units))
                             <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('unit', 'Unit') ?>
                                 </label>
+=======
+                                <label for="nameBasic" class="form-label"><?= get_label('unit', 'Unit') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select js-example-basic-multiple" id="item_unit_id"
                                     name="unit_id"
                                     data-placeholder="<?= get_label('Please select', 'Please select') ?>"
@@ -2124,9 +3074,14 @@
                             </div>
                         @endif
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('description', 'Description') ?>
                             </label>
+=======
+                            <label for="nameBasic"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" id="item_description" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
@@ -2136,9 +3091,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -2151,8 +3111,12 @@
             <form class="modal-content form-submit-event" action="{{ url('notes/store') }}" method="POST"
                 enctype="multipart/form-data">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_note', 'Create note') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_note', 'Create note') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -2161,6 +3125,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="noteType" class="form-label">
                                 <?= get_label('note_type', 'Note Type') ?>
                                 <span class="asterisk">*</span>
@@ -2172,15 +3137,27 @@
                                 <option value="drawing">
                                     <?= get_label('drawing_note', 'Drawing Note') ?>
                                 </option>
+=======
+                            <label for="noteType" class="form-label"><?= get_label('note_type', 'Note Type') ?>
+                                <span class="asterisk">*</span></label>
+                            <select id="noteType" class="form-select" name="note_type">
+                                <option value="text" selected><?= get_label('text_note', 'Text Note') ?></option>
+                                <option value="drawing"><?= get_label('drawing_note', 'Drawing Note') ?></option>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             </select>
                         </div>
                     </div>
                     <!-- Text Note Section -->
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="nameBasic" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
                         </div>
@@ -2188,9 +3165,14 @@
                     <div id="text-note-section">
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="noteDescription" class="form-label">
                                     <?= get_label('description', 'Description') ?>
                                 </label>
+=======
+                                <label for="noteDescription"
+                                    class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea id="noteDescription" class="form-control description" name="description"
                                     placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                             </div>
@@ -2200,9 +3182,14 @@
                     <div id="drawing-note-section" class="d-none">
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="drawing-container" class="form-label">
                                     <?= get_label('drawing', 'Drawing') ?>
                                 </label>
+=======
+                                <label for="drawing-container"
+                                    class="form-label"><?= get_label('drawing', 'Drawing') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <div id="drawing-container" class="drawing-container"></div>
                                 <input type="hidden" id="drawing_data" name="drawing_data" value="">
 
@@ -2212,9 +3199,14 @@
                     <!-- Color Selection -->
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="noteColor" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="noteColor" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select id="noteColor" class="form-select select-bg-label-success" name="color">
                                 <option class="badge bg-label-success" value="info"
                                     {{ old('color') == 'info' ? 'selected' : '' }}>
@@ -2236,9 +3228,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -2248,8 +3245,12 @@
             <form class="modal-content form-submit-event" action="{{ url('notes/update') }}" method="POST">
                 <input type="hidden" name="id" id="note_id">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_note', 'Update note') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_note', 'Update note') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -2258,19 +3259,29 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="noteType" class="form-label">
                                 <?= get_label('note_type', 'Note Type') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="noteType" class="form-label"><?= get_label('note_type', 'Note Type') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="hidden" id="editNoteType" name="note_type" value="">
                             <input type="text" class="form-control" id="editNoteTypeDisplay" readonly>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" id="note_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
@@ -2278,9 +3289,14 @@
                     <div id="edit-text-note-section">
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('description', 'Description') ?>
                                 </label>
+=======
+                                <label for="nameBasic"
+                                    class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea class="form-control description" id="note_description" name="description"
                                     placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                             </div>
@@ -2290,9 +3306,14 @@
                     <div id="edit-drawing-note-section" class="d-none">
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="drawing-container" class="form-label">
                                     <?= get_label('drawing', 'Drawing') ?>
                                 </label>
+=======
+                                <label for="drawing-container"
+                                    class="form-label"><?= get_label('drawing', 'Drawing') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <div id="edit_drawing-container" class="drawing-container"></div>
                                 <input type="hidden" id="edit_drawing_data" name="drawing_data" value="">
                             </div>
@@ -2300,6 +3321,7 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                             </label>
@@ -2315,6 +3337,19 @@
                                 <option class="badge bg-label-danger" value="danger"
                                     {{ old('color') == 'danger' ? 'selected' : '' }}>
                                     <?= get_label('red', 'Red') ?>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="form-select select-bg-label-success" id="note_color" name="color">
+                                <option class="badge bg-label-info" value="info"
+                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('green', 'Green') ?>
+                                </option>
+                                <option class="badge bg-label-warning" value="warning"
+                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                    <?= get_label('yellow', 'Yellow') ?></option>
+                                <option class="badge bg-label-danger" value="danger"
+                                    {{ old('color') == 'danger' ? 'selected' : '' }}><?= get_label('red', 'Red') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -2324,9 +3359,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?></label>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" class="btn btn-primary" id="submit_btn">
                         <?= get_label('update', 'Update') ?></label>
                     </button>
+=======
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('update', 'Update') ?></label></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -2336,6 +3376,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('warning', 'Warning!') ?>
                 </h6>
@@ -2345,14 +3386,26 @@
                 <p>
                     <?= get_label('delete_account_alert', 'Are you sure you want to delete your account?') ?>
                 </p>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('delete_account_alert', 'Are you sure you want to delete your account?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-danger" id="confirmDeleteAccount">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-danger"
+                    id="confirmDeleteAccount"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -2361,6 +3414,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h5 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('warning', 'Warning!') ?>
                 </h5>
@@ -2370,14 +3424,26 @@
                 <p>
                     <?= get_label('delete_alert', 'Are you sure you want to delete?') ?>
                 </p>
+=======
+                <h5 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> '</button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('delete_alert', 'Are you sure you want to delete?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-danger" id="confirmDelete">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-danger"
+                    id="confirmDelete"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -2386,6 +3452,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h5 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('warning', 'Warning!') ?>
                 </h5>
@@ -2395,14 +3462,26 @@
                 <p>
                     <?= get_label('delete_selected_alert', 'Are you sure you want to delete selected record(s)?') ?>
                 </p>
+=======
+                <h5 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> '</button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('delete_selected_alert', 'Are you sure you want to delete selected record(s)?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-danger" id="confirmDeleteSelections">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-danger"
+                    id="confirmDeleteSelections"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -2411,6 +3490,7 @@
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('warning', 'Warning!') ?>
                 </h6>
@@ -2432,24 +3512,50 @@
                             <?= get_label('users_clients_duplicate_info', 'Users and Clients will be duplicated by default') ?>)
                         </small>
                     </label>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('duplicate_warning', 'Are you sure you want to duplicate?') ?></p>
+                <div id="titleDiv" class="d-none"><label
+                        class="form-label"><?= get_label('update_title', 'Update Title') ?></label><input
+                        type="text" class="form-control" id="updateTitle"
+                        placeholder="<?= get_label('enter_title_duplicate', 'Enter Title For Item Being Duplicated') ?>">
+                </div>
+                <div id="selectionDiv" class="mb-3 mt-3">
+                    <label class="form-label"><?= get_label('select_data_to_duplicate', 'Select Data to Duplicate') ?>
+                        <small
+                            class="text-muted">(<?= get_label('users_clients_duplicate_info', 'Users and Clients will be duplicated by default') ?>)</small></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <div class="d-flex flex-wrap">
                         <div class="me-3">
                             <input type="checkbox" id="duplicateProjects" value="projects"
                                 class="duplicate-option">
+<<<<<<< HEAD
                             <label for="duplicateProjects">
                                 <?= get_label('projects', 'Projects') ?>
                             </label>
+=======
+                            <label for="duplicateProjects"><?= get_label('projects', 'Projects') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </div>
                         <div class="me-3">
                             <input type="checkbox" id="duplicateProjectTasks" value="project_tasks"
                                 class="duplicate-option" disabled>
+<<<<<<< HEAD
                             <label for="duplicateProjectTasks">
                                 <?= get_label('tasks_if_projects', 'Tasks (if Projects selected)') ?>
                             </label>
+=======
+                            <label
+                                for="duplicateProjectTasks"><?= get_label('tasks_if_projects', 'Tasks (if Projects selected)') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </div>
                         <div class="me-3">
                             <input type="checkbox" id="duplicateMeetings" value="meetings"
                                 class="duplicate-option">
+<<<<<<< HEAD
                             <label for="duplicateMeetings">
                                 <?= get_label('meetings', 'Meetings') ?>
                             </label>
@@ -2465,6 +3571,17 @@
                             <label for="duplicateTodos">
                                 <?= get_label('todos', 'Todos') ?>
                             </label>
+=======
+                            <label for="duplicateMeetings"><?= get_label('meetings', 'Meetings') ?></label>
+                        </div>
+                        <div class="me-3">
+                            <input type="checkbox" id="duplicateNotes" value="notes" class="duplicate-option">
+                            <label for="duplicateNotes"><?= get_label('notes', 'Notes') ?></label>
+                        </div>
+                        <div class="me-3">
+                            <input type="checkbox" id="duplicateTodos" value="todos" class="duplicate-option">
+                            <label for="duplicateTodos"><?= get_label('todos', 'Todos') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </div>
                     </div>
                 </div>
@@ -2473,9 +3590,14 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirmDuplicate">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary"
+                    id="confirmDuplicate"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -2484,8 +3606,12 @@
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('time_tracker', 'Time tracker') ?>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('time_tracker', 'Time tracker') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -2494,23 +3620,35 @@
                     <div class="stopwatch_time">
                         <input type="text" name="hour" id="hour" value="00"
                             class="form-control stopwatch_time_input" readonly>
+<<<<<<< HEAD
                         <div class="stopwatch_time_lable">
                             <?= get_label('hours', 'Hours') ?>
                         </div>
+=======
+                        <div class="stopwatch_time_lable"><?= get_label('hours', 'Hours') ?></div>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                     <div class="stopwatch_time">
                         <input type="text" name="minute" id="minute" value="00"
                             class="form-control stopwatch_time_input" readonly>
+<<<<<<< HEAD
                         <div class="stopwatch_time_lable">
                             <?= get_label('minutes', 'Minutes') ?>
                         </div>
+=======
+                        <div class="stopwatch_time_lable"><?= get_label('minutes', 'Minutes') ?></div>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                     <div class="stopwatch_time">
                         <input type="text" name="second" id="second" value="00"
                             class="form-control stopwatch_time_input" readonly>
+<<<<<<< HEAD
                         <div class="stopwatch_time_lable">
                             <?= get_label('second', 'Second') ?>
                         </div>
+=======
+                        <div class="stopwatch_time_lable"><?= get_label('second', 'Second') ?></div>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </div>
                 <div class="selectgroup selectgroup-pills d-flex justify-content-around mt-3">
@@ -2531,17 +3669,25 @@
                     </label>
                 </div>
                 <div class="form-group mb-0 mt-3">
+<<<<<<< HEAD
                     <label class="label">
                         <?= get_label('message', 'Message') ?>:
                     </label>
+=======
+                    <label class="label"><?= get_label('message', 'Message') ?>:</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <textarea class="form-control" id="time_tracker_message"
                         placeholder="<?= get_label('please_enter_your_message', 'Please enter your message') ?>" name="message"></textarea>
                 </div>
                 @if (getAuthenticatedUser()->can('manage_timesheet'))
                     <div class="modal-footer justify-content-center">
                         <a href="{{ url('time-tracker') }}" class="btn btn-primary"><i class="bx bxs-time"></i>
+<<<<<<< HEAD
                             <?= get_label('view_timesheet', 'View timesheet') ?>
                         </a>
+=======
+                            <?= get_label('view_timesheet', 'View timesheet') ?></a>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 @endif
             </div>
@@ -2557,6 +3703,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h5 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('warning', 'Warning!') ?>
                 </h5>
@@ -2566,14 +3713,26 @@
                 <p>
                     <?= get_label('stop_timer_alert', 'Are you sure you want to stop the timer?') ?>
                 </p>
+=======
+                <h5 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> '</button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('stop_timer_alert', 'Are you sure you want to stop the timer?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-danger" id="confirmStop">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-danger"
+                    id="confirmStop"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -2584,64 +3743,98 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_billing_details', 'Update billing details') ?>
                     </h5>
+=======
+                        <?= get_label('update_billing_details', 'Update billing details') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                         '</button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('name', 'Name') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('name', 'Name') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input name="update_name" id="update_name" class="form-control"
                                 placeholder="<?= get_label('please_enter_name', 'Please enter name') ?>"
                                 value="{{ $estimate_invoice->name ?? '' }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('contact', 'Contact') ?>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('contact', 'Contact') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input name="update_contact" id="update_contact" class="form-control"
                                 placeholder="<?= get_label('please_enter_contact', 'Please enter contact') ?>"
                                 value="{{ $estimate_invoice->phone ?? '' }}">
                         </div>
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('address', 'Address') ?>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('address', 'Address') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" placeholder="<?= get_label('please_enter_address', 'Please enter address') ?>"
                                 name="update_address" id="update_address" required>{{ $estimate_invoice->address ?? '' }}</textarea>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('city', 'City') ?>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('city', 'City') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input name="update_city" id="update_city" class="form-control"
                                 placeholder="<?= get_label('please_enter_city', 'Please enter city') ?>"
                                 value="{{ $estimate_invoice->city ?? '' }}">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('state', 'State') ?>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('state', 'State') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input name="update_contact" id="update_state" class="form-control"
                                 placeholder="<?= get_label('please_enter_state', 'Please enter state') ?>"
                                 value="{{ $estimate_invoice->city ?? '' }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('country', 'Country') ?>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('country', 'Country') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input name="update_country" id="update_country" class="form-control"
                                 placeholder="<?= get_label('please_enter_country', 'Please enter country') ?>"
                                 value="{{ $estimate_invoice->country ?? '' }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('zip_code', 'Zip code') ?>
                             </label>
+=======
+                            <label for="nameBasic"
+                                class="form-label"><?= get_label('zip_code', 'Zip code') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input name="update_zip_code" id="update_zip_code" class="form-control"
                                 placeholder="<?= get_label('please_enter_zip_code', 'Please enter zip code') ?>"
                                 value="{{ $estimate_invoice->zip_code ?? '' }}" required>
@@ -2652,9 +3845,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="button" class="btn btn-primary" id="apply_billing_details">
                         <?= get_label('apply', 'Apply') ?>
                     </button>
+=======
+                    <button type="button" class="btn btn-primary"
+                        id="apply_billing_details"><?= get_label('apply', 'Apply') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </div>
         </div>
@@ -2668,24 +3866,38 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_expense_type', 'Create expense type') ?>
                     </h5>
+=======
+                        <?= get_label('create_expense_type', 'Create expense type') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="description" class="form-label">
                                 <?= get_label('description', 'Description') ?>
                             </label>
+=======
+                            <label for="description"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
@@ -2695,9 +3907,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -2710,24 +3927,38 @@
                 <input type="hidden" id="update_expense_type_id" name="id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_expense_type', 'Update expense type') ?>
                     </h5>
+=======
+                        <?= get_label('update_expense_type', 'Update expense type') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" name="title" id="expense_type_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="description" class="form-label">
                                 <?= get_label('description', 'Description') ?>
                             </label>
+=======
+                            <label for="description"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="description" id="expense_type_description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
@@ -2737,9 +3968,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -2752,24 +3988,38 @@
                     <input type="hidden" name="dnr">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                             <?= get_label('create_expense', 'Create expense') ?>
                         </h5>
+=======
+                            <?= get_label('create_expense', 'Create expense') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" class="form-control" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                             </div>
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label class="form-label">
                                     <?= get_label('expense_type', 'Expense type') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label"><?= get_label('expense_type', 'Expense type') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select expense_types_select" name="expense_type_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true" data-allow-clear="false">
@@ -2778,18 +4028,27 @@
                         </div>
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label class="form-label">
                                     <?= get_label('user', 'User') ?>
                                 </label>
+=======
+                                <label class="form-label"><?= get_label('user', 'User') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select users_select" name="user_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true">
                                 </select>
                             </div>
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <div class="input-group input-group-merge">
                                     <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                     <input class="form-control currency" type="text" name="amount"
@@ -2799,16 +4058,26 @@
                         </div>
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('expense_date', 'Expense date') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="nameBasic"
+                                    class="form-label"><?= get_label('expense_date', 'Expense date') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" id="expense_date" name="expense_date" class="form-control"
                                     placeholder="" autocomplete="off">
                             </div>
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('note', 'Note') ?>
                                 </label>
+=======
+                                <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea class="form-control" name="note"
                                     placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
                             </div>
@@ -2818,9 +4087,14 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
+<<<<<<< HEAD
                         <button type="submit" id="submit_btn" class="btn btn-primary">
                             <?= get_label('create', 'Create') ?>
                         </button>
+=======
+                        <button type="submit" id="submit_btn"
+                            class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -2833,24 +4107,38 @@
                     <input type="hidden" id="update_expense_id" name="id">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                             <?= get_label('update_expense', 'Update expense') ?>
                         </h5>
+=======
+                            <?= get_label('update_expense', 'Update expense') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" class="form-control" id="expense_title" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                             </div>
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label class="form-label">
                                     <?= get_label('expense_type', 'Expense type') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label"><?= get_label('expense_type', 'Expense type') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select expense_types_select" id="expense_type_id"
                                     name="expense_type_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
@@ -2860,18 +4148,27 @@
                         </div>
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label class="form-label">
                                     <?= get_label('user', 'User') ?>
                                 </label>
+=======
+                                <label class="form-label"><?= get_label('user', 'User') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select users_select" id="expense_user_id" name="user_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true">
                                 </select>
                             </div>
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <div class="input-group input-group-merge">
                                     <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                     <input class="form-control currency" type="text" id="expense_amount"
@@ -2882,16 +4179,26 @@
                         </div>
                         <div class="row">
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('expense_date', 'Expense date') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="nameBasic"
+                                    class="form-label"><?= get_label('expense_date', 'Expense date') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" id="update_expense_date" name="expense_date"
                                     class="form-control" placeholder="" autocomplete="off">
                             </div>
                             <div class="col mb-3">
+<<<<<<< HEAD
                                 <label for="nameBasic" class="form-label">
                                     <?= get_label('note', 'Note') ?>
                                 </label>
+=======
+                                <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea class="form-control" id="expense_note" name="note"
                                     placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
                             </div>
@@ -2901,9 +4208,14 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
+<<<<<<< HEAD
                         <button type="submit" id="submit_btn" class="btn btn-primary">
                             <?= get_label('update', 'Update') ?>
                         </button>
+=======
+                        <button type="submit" id="submit_btn"
+                            class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -2917,26 +4229,38 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_payment', 'Create payment') ?>
                     </h5>
+=======
+                        <?= get_label('create_payment', 'Create payment') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('user', 'User') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('user', 'User') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select users_select" name="user_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('invoice', 'Invoice') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('invoice', 'Invoice') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select invoices_select" name="invoice_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
@@ -2945,9 +4269,13 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('payment_method', 'Payment method') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('payment_method', 'Payment method') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select js-example-basic-multiple" name="payment_method_id"
                                 data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                 data-allow-clear="true">
@@ -2960,9 +4288,14 @@
                             </select>
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" name="amount"
@@ -2972,17 +4305,27 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('payment_date', 'Payment date') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic"
+                                class="form-label"><?= get_label('payment_date', 'Payment date') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="payment_date" name="payment_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('note', 'Note') ?>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="note"
                                 placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
                         </div>
@@ -2992,9 +4335,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -3006,26 +4354,38 @@
                 <input type="hidden" id="update_payment_id" name="id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_payment', 'Update payment') ?>
                     </h5>
+=======
+                        <?= get_label('update_payment', 'Update payment') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('user', 'User') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('user', 'User') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select users_select" name="user_id" id="payment_user_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('invoice', 'Invoice') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('invoice', 'Invoice') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select invoices_select" name="invoice_id" id="payment_invoice_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
@@ -3034,9 +4394,13 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('payment_method', 'Payment method') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('payment_method', 'Payment method') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select js-example-basic-multiple" name="payment_method_id"
                                 id="payment_pm_id"
                                 data-placeholder="<?= get_label('Please select', 'Please select') ?>"
@@ -3050,9 +4414,14 @@
                             </select>
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('amount', 'Amount') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" name="amount"
@@ -3063,16 +4432,26 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('payment_date', 'Payment date') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="nameBasic"
+                                class="form-label"><?= get_label('payment_date', 'Payment date') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" name="payment_date" class="form-control"
                                 id="update_payment_date" placeholder="" autocomplete="off">
                         </div>
                         <div class="col mb-3">
+<<<<<<< HEAD
                             <label for="nameBasic" class="form-label">
                                 <?= get_label('note', 'Note') ?>
                             </label>
+=======
+                            <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="note" id="payment_note"
                                 placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
                         </div>
@@ -3082,9 +4461,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -3094,6 +4478,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -3102,15 +4487,27 @@
             <div class="modal-body">
                 <p>
                     <?= get_label('mark_all_notifications_as_read_alert', 'Are you sure you want to mark all notifications as read?') ?>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('mark_all_notifications_as_read_alert', 'Are you sure you want to mark all notifications as read?') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirmMarkAllAsRead">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary"
+                    id="confirmMarkAllAsRead"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -3119,6 +4516,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -3127,15 +4525,27 @@
             <div class="modal-body">
                 <p>
                     <?= get_label('update_notifications_status_alert', 'Are you sure you want to update notification status?') ?>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('update_notifications_status_alert', 'Are you sure you want to update notification status?') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirmNotificationStatus">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary"
+                    id="confirmNotificationStatus"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -3144,6 +4554,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -3152,15 +4563,27 @@
             <div class="modal-body">
                 <p>
                     <?= get_label('confirm_restore_default_template', 'Are you sure you want to restore default template?') ?>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('confirm_restore_default_template', 'Are you sure you want to restore default template?') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirmRestoreDefault">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary"
+                    id="confirmRestoreDefault"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -3170,8 +4593,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                     <?= get_label('permission_settings_instructions', 'Permission Settings Instructions') ?>
                 </h5>
+=======
+                    <?= get_label('permission_settings_instructions', 'Permission Settings Instructions') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -3251,6 +4678,7 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
+<<<<<<< HEAD
                 <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -3258,13 +4686,26 @@
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
                             <input class="form-control ai-title" type="text" name="title"
+=======
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input class="form-control" type="text" name="title"
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="status">
                                 <?= get_label('status', 'Status') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select statusDropdown" name="status_id">
                                 @isset($statuses)
                                     @foreach ($statuses as $status)
@@ -3290,9 +4731,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('priority', 'Priority') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select priorityDropdown" name="priority_id"
                                 data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                                 <option></option>
@@ -3320,18 +4765,29 @@
 
                     <div class="row">
                         <?php $project_id = 0;
+<<<<<<< HEAD
                         if (!isset($project->id)) {
                                             ?>
                         <div class="mb-3">
                             <label class="form-label" for="user_id">
                                 <?= get_label('select_project', 'Select project') ?> <span class="asterisk">*</span>
                             </label>
+=======
+
+                                                                                                                                                                                                                                                                                                                                                                                                                    if (!isset($project->id)) {
+                                                                                                                                                                                                                                                                                                                                                                                                                    ?>
+                        <div class="mb-3">
+                            <label class="form-label"
+                                for="user_id"><?= get_label('select_project', 'Select project') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control selectTaskProject projects_select" name="project"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true" data-allow-clear="false">
                             </select>
                         </div>
                         <?php } else {
+<<<<<<< HEAD
                         $project_id=$project->id ?>
                         <input type="hidden" name="project" value="{{ $project_id }}">
                         <div class="mb-3">
@@ -3339,12 +4795,21 @@
                                 <?= get_label('project', 'Project') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+
+                                                                                                                                                                                                                                                                                                                                                                                                                        $project_id = $project->id ?>
+                        <input type="hidden" name="project" value="{{ $project_id }}">
+                        <div class="mb-3">
+                            <label for="project_title" class="form-label"><?= get_label('project', 'Project') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="text" value="{{ $project->title }}" readonly>
                         </div>
                         <?php } ?>
                     </div>
                     <div class="row" id="selectTaskUsers">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="user_id">
                                 <?= get_label('select_users', 'Select users') ?> <span
                                     id="users_associated_with_project"></span>
@@ -3354,6 +4819,14 @@
                                 <b>{{ $project->title }}</b>)
                                 <?php } ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="user_id"><?= get_label('select_users', 'Select users') ?> <span
+                                    id="users_associated_with_project"></span><?php if (!empty($project_id)) { ?>
+                                (<?= get_label('users_associated_with_project', 'Users associated with project') ?>
+                                <b>{{ $project->title }}</b>)
+                                <?php } ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control" name="user_id[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                             </select>
@@ -3361,17 +4834,26 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="start_date">
                                 <?= get_label('starts_at', 'Starts at') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="task_start_date" name="start_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="due_date">
                                 <?= get_label('ends_at', 'Ends at') ?>
                             </label>
+=======
+                            <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="task_end_date" name="due_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
@@ -3405,6 +4887,7 @@
                             </div>
                         </div>
                     @endif
+<<<<<<< HEAD
                     <div class="row align-items-center mb-2">
                         <!-- Description Label -->
                         <div class="col-md-6">
@@ -3452,6 +4935,15 @@
                     <div class="mb-3">
                         <textarea class="form-control description ai-output" rows="5" name="description"
                             placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
+=======
+                    <div class="row">
+                        <div class="mb-3">
+                            <label for="description"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="form-control description" rows="5" name="description"
+                                placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>">{{ old('description') }}</textarea>
+                        </div>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
 
                     <div class="row">
@@ -3484,9 +4976,13 @@
 
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('note', 'Note') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="note" rows="3"
                                 placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                         </div>
@@ -3500,6 +4996,7 @@
                     <div class="col-md-12">
                         <div class="mb-3">
                             <label for="reminder-switch"
+<<<<<<< HEAD
                                 class="form-label">{{ get_label(
                                     'enable_reminder',
                                     'Enable
@@ -3507,6 +5004,11 @@
                                 ) }}</label>
                             <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"
                                 data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true" title=""
+=======
+                                class="form-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
+                            <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"data-bs-offset="0,4"
+                                data-bs-placement="top" data-bs-html="true"title=""
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 data-bs-original-title="<b>{{ get_label('task_reminder', 'Task Reminder') }}:</b> {{ get_label('task_reminder_info', 'Enable this option to set reminders for tasks. You can configure reminder frequencies (daily, weekly, or monthly), specific times, and customize alerts to ensure you stay on track with task deadlines.') }}"></i>
                             <div class="form-check form-switch">
                                 <input type="checkbox" class="form-check-input" id="reminder-switch"
@@ -3519,11 +5021,15 @@
                             <!-- Frequency Type -->
                             <div class="mb-3">
                                 <label for="frequency-type"
+<<<<<<< HEAD
                                     class="form-label">{{ get_label(
                                         'frequency_type',
                                         'Frequency
                                                                     Type',
                                     ) }}</label>
+=======
+                                    class="form-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select" id="frequency-type" name="frequency_type" required>
                                     <option value="daily">{{ get_label('daily', 'Daily') }}</option>
                                     <option value="weekly">{{ get_label('weekly', 'Weekly') }}</option>
@@ -3532,12 +5038,17 @@
                             </div>
                             <!-- Day of Week (Weekly Only) -->
                             <div class="d-none mb-3" id="day-of-week-group">
+<<<<<<< HEAD
                                 <label for="day-of-week"
                                     class="form-label">{{ get_label(
                                         'day_of_the_week',
                                         'Day of the
                                                                     Week',
                                     ) }}</label>
+=======
+                                <label
+                                    for="day-of-week"class="form-label">{{ get_label('day_of_the_week', 'Day of the Week') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select" id="day-of-week" name="day_of_week">
                                     <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                     <option value="1">{{ get_label('monday', 'Monday') }}</option>
@@ -3552,11 +5063,15 @@
                             <!-- Day of Month (Monthly Only) -->
                             <div class="d-none mb-3" id="day-of-month-group">
                                 <label for="day-of-month"
+<<<<<<< HEAD
                                     class="form-label">{{ get_label(
                                         'day_of_the_month',
                                         'Day of the
                                                                     Month',
                                     ) }}</label>
+=======
+                                    class="form-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-select" id="day-of-month" name="day_of_month">
                                     <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                     @foreach (range(1, 31) as $day)
@@ -3675,9 +5190,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -3711,13 +5231,18 @@
                     <input type="hidden" name="table" value="task_table">
                 @endif
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_task', 'Update Task') ?>
+=======
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_task', 'Update Task') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 @csrf
+<<<<<<< HEAD
                 <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -3725,13 +5250,26 @@
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
                             <input class="form-control ai-title" type="text" id="title" name="title"
+=======
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input class="form-control" type="text" id="title" name="title"
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="status">
                                 <?= get_label('status', 'Status') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select statusDropdown" name="status_id" id="task_status_id">
                                 @isset($statuses)
                                     @foreach ($statuses as $status)
@@ -3755,9 +5293,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('priority', 'Priority') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select priorityDropdown" name="priority_id" id="priority_id"
                                 data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                                 <option></option>
@@ -3784,19 +5326,30 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label for="project_title" class="form-label">
                                 <?= get_label('project', 'Project') ?>
                                 <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="project_title" class="form-label"><?= get_label('project', 'Project') ?>
+                                <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="text" id="update_project_title" readonly>
                         </div>
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="user_id">
                                 <?= get_label('select_users', 'Select users') ?> <span
                                     id="task_update_users_associated_with_project"></span>
                             </label>
+=======
+                            <label class="form-label"
+                                for="user_id"><?= get_label('select_users', 'Select users') ?> <span
+                                    id="task_update_users_associated_with_project"></span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control" name="user_id[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                             </select>
@@ -3804,17 +5357,26 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="start_date">
                                 <?= get_label('starts_at', 'Starts at') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_start_date" name="start_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="due_date">
                                 <?= get_label('ends_at', 'Ends at') ?>
                             </label>
+=======
+                            <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_end_date" name="due_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
@@ -3845,6 +5407,7 @@
                             <option value="">Select a task list</option>
                         </select>
                     </div>
+<<<<<<< HEAD
                     <div class="row align-items-center mb-2">
                         <!-- Description Label -->
                         <div class="col-md-6">
@@ -3892,6 +5455,15 @@
                     <div class="mb-3">
                         <textarea class="form-control description ai-output" rows="5" name="description" id="task_description"
                             placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
+=======
+                    <div class="row">
+                        <div class="mb-3">
+                            <label for="description"
+                                class="form-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="form-control description" id="task_description" rows="5" name="description"
+                                placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>">{{ old('description') }}</textarea>
+                        </div>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
 
                     <div class="row">
@@ -3925,9 +5497,13 @@
 
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('note', 'Note') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="note" rows="3" id="taskNote"
                                 placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                         </div>
@@ -3936,6 +5512,7 @@
                     <div class="col-md-12">
                         <div class="mb-3">
                             <label for="reminder-switch"
+<<<<<<< HEAD
                                 class="form-label">{{ get_label(
                                     'enable_reminder',
                                     'Enable
@@ -3943,6 +5520,11 @@
                                 ) }}</label>
                             <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"
                                 data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true" title=""
+=======
+                                class="form-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
+                            <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"data-bs-offset="0,4"
+                                data-bs-placement="top" data-bs-html="true"title=""
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 data-bs-original-title="<b>{{ get_label('task_reminder', 'Task Reminder') }}:</b> {{ get_label('task_reminder_info', 'Enable this option to set reminders for tasks. You can configure reminder frequencies (daily, weekly, or monthly), specific times, and customize alerts to ensure you stay on track with task deadlines.') }}"></i>
                             <div class="form-check form-switch">
                                 <input type="checkbox" class="form-check-input" id="edit-reminder-switch"
@@ -3982,11 +5564,15 @@
                         <!-- Day of Month (Monthly Only) -->
                         <div class="d-none mb-3" id="edit-day-of-month-group">
                             <label for="day-of-month"
+<<<<<<< HEAD
                                 class="form-label">{{ get_label(
                                     'day_of_the_month',
                                     'Day of the
                                                             Month',
                                 ) }}</label>
+=======
+                                class="form-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select" id="edit-day-of-month" name="day_of_month">
                                 <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                 @foreach (range(1, 31) as $day)
@@ -4154,9 +5740,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -4166,6 +5757,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -4175,6 +5767,13 @@
                 <p>
                     <?= get_label('confirm_update_status', 'Do You Want to Update the Status?') ?>
                 </p>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('confirm_update_status', 'Do You Want to Update the Status?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 <textarea class="form-control" id="statusNote" placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
             </div>
             <div class="modal-footer">
@@ -4182,9 +5781,14 @@
                     data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirmUpdateStatus">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary"
+                    id="confirmUpdateStatus"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -4193,6 +5797,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
+<<<<<<< HEAD
                 <h6 class="modal-title" id="exampleModalLabel2">
                     <?= get_label('confirm', 'Confirm!') ?>
                 </h6>
@@ -4202,15 +5807,27 @@
                 <p>
                     <?= get_label('confirm_update_priority', 'Do You Want to Update the Priority?') ?>
                 </p>
+=======
+                <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><?= get_label('confirm_update_priority', 'Do You Want to Update the Priority?') ?></p>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" id="declineUpdatePriority"
                     data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
                 </button>
+<<<<<<< HEAD
                 <button type="submit" class="btn btn-primary" id="confirmUpdatePriority">
                     <?= get_label('yes', 'Yes') ?>
                 </button>
+=======
+                <button type="submit" class="btn btn-primary"
+                    id="confirmUpdatePriority"><?= get_label('yes', 'Yes') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </div>
     </div>
@@ -4236,8 +5853,12 @@
                 <input type="hidden" name="is_favorite" id="is_favorite" value="0">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('create_project', 'Create Project') ?>
                     </h5>
+=======
+                        <?= get_label('create_project', 'Create Project') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -4245,17 +5866,27 @@
                 <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="title" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control ai-title" type="text" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="status">
                                 <?= get_label('status', 'Status') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control statusDropdown" name="status_id">
                                 @isset($statuses)
                                     @foreach ($statuses as $status)
@@ -4281,9 +5912,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('priority', 'Priority') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select priorityDropdown" name="priority_id"
                                 data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                                 <option></option>
@@ -4309,9 +5944,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="budget" class="form-label">
                                 <?= get_label('budget', 'Budget') ?>
                             </label>
+=======
+                            <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" id="budget"
@@ -4323,17 +5962,26 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="start_date">
                                 <?= get_label('starts_at', 'Starts at') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="start_date" name="start_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="due_date">
                                 <?= get_label('ends_at', 'Ends at') ?>
                             </label>
+=======
+                            <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="end_date" name="end_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
@@ -4350,11 +5998,17 @@
                                     data-bs-toggle="tooltip" data-bs-placement="top"></i>
                             </label>
                             <select class="form-select" name="task_accessibility">
+<<<<<<< HEAD
                                 <option value="assigned_users">
                                     <?= get_label('assigned_users', 'Assigned Users') ?>
                                 </option>
                                 <option value="project_users">
                                     <?= get_label('project_users', 'Project Users') ?>
+=======
+                                <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?>
+                                </option>
+                                <option value="project_users"><?= get_label('project_users', 'Project Users') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -4394,9 +6048,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="user_id">
                                 <?= get_label('select_users', 'Select users') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="user_id"><?= get_label('select_users', 'Select users') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control users_select" name="user_id[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                                 @if ($guard == 'web')
@@ -4408,9 +6067,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="client_id">
                                 <?= get_label('select_clients', 'Select clients') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control clients_select" name="client_id[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                                 @if ($guard == 'client')
@@ -4422,9 +6086,14 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('select_tags', 'Select tags') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for=""><?= get_label('select_tags', 'Select tags') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control tags_select" name="tag_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                             </select>
@@ -4454,7 +6123,11 @@
                         <div class="col-md-6 text-md-end mt-md-0 mt-2">
                             <div class="d-inline-flex align-items-center">
                                 <div class="form-check form-switch me-3">
+<<<<<<< HEAD
                                     <input class="form-check-input enableCustomPrompt" type="checkbox">
+=======
+                                    <input class="form-check-input enableCustomPrompt" type="checkbox" >
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     <label class="form-check-label" for="enableCustomPrompt">
                                         <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
                                     </label>
@@ -4473,7 +6146,12 @@
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
 
+<<<<<<< HEAD
                                 <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+=======
+                                <div class="spinner-border text-primary ai-loader ms-2" role="status"
+                                    style="display: none; width: 20px; height: 20px;">
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
@@ -4481,7 +6159,11 @@
                     </div>
 
                     <!-- Custom Prompt Input (initially hidden) -->
+<<<<<<< HEAD
                     <div class="customPromptContainer mb-2 mt-2 d-none" >
+=======
+                    <div  class="mb-2 mt-2 customPromptContainer" style="display: none;">
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
@@ -4495,9 +6177,13 @@
 
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('note', 'Note') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="note" rows="3"
                                 placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                         </div>
@@ -4518,9 +6204,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -4551,8 +6242,12 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
+<<<<<<< HEAD
                         <?= get_label('update_project', 'Update Project') ?>
                     </h5>
+=======
+                        <?= get_label('update_project', 'Update Project') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -4560,18 +6255,29 @@
                 <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="title" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
                             <input class="form-control ai-title" type="text" name="title"
                                 id="project_title"
+=======
+                            <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input class="form-control ai-title" type="text" name="title" id="project_title"
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="status">
                                 <?= get_label('status', 'Status') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control statusDropdown" name="status_id" id="project_status_id">
                                 @isset($statuses)
                                     @foreach ($statuses as $status)
@@ -4595,9 +6301,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('priority', 'Priority') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-select priorityDropdown" name="priority_id"
                                 id="project_priority_id"
                                 data-placeholder="<?= get_label('please_select', 'Please select') ?>">
@@ -4623,9 +6333,13 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label for="budget" class="form-label">
                                 <?= get_label('budget', 'Budget') ?>
                             </label>
+=======
+                            <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
                                 <input class="form-control currency" type="text" id="project_budget"
@@ -4637,17 +6351,26 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="start_date">
                                 <?= get_label('starts_at', 'Starts at') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_start_date" name="start_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
                         </div>
                         <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="due_date">
                                 <?= get_label('ends_at', 'Ends at') ?>
                             </label>
+=======
+                            <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" id="update_end_date" name="end_date" class="form-control"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
@@ -4664,11 +6387,17 @@
                                     data-bs-toggle="tooltip" data-bs-placement="top"></i>
                             </label>
                             <select class="form-select" name="task_accessibility" id="task_accessibility">
+<<<<<<< HEAD
                                 <option value="assigned_users">
                                     <?= get_label('assigned_users', 'Assigned Users') ?>
                                 </option>
                                 <option value="project_users">
                                     <?= get_label('project_users', 'Project Users') ?>
+=======
+                                <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?>
+                                </option>
+                                <option value="project_users"><?= get_label('project_users', 'Project Users') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -4708,9 +6437,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="user_id">
                                 <?= get_label('select_users', 'Select users') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="user_id"><?= get_label('select_users', 'Select users') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control users_select" name="user_id[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                             </select>
@@ -4718,9 +6452,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="client_id">
                                 <?= get_label('select_clients', 'Select clients') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control clients_select" name="client_id[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                             </select>
@@ -4728,9 +6467,14 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="">
                                 <?= get_label('select_tags', 'Select tags') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for=""><?= get_label('select_tags', 'Select tags') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control tags_select" name="tag_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                             </select>
@@ -4776,7 +6520,12 @@
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
 
+<<<<<<< HEAD
                                 <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+=======
+                                <div class="spinner-border text-primary ai-loader ms-2" role="status"
+                                    style="display: none; width: 20px; height: 20px;">
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
@@ -4784,7 +6533,11 @@
                     </div>
 
                     <!-- Custom Prompt Input (initially hidden) -->
+<<<<<<< HEAD
                     <div class="customPromptContainer mb-2 mt-2 d-none">
+=======
+                    <div  class="mb-2 mt-2 customPromptContainer" style="display: none;">
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
@@ -4796,9 +6549,13 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label">
                                 <?= get_label('note', 'Note') ?>
                             </label>
+=======
+                            <label class="form-label"><?= get_label('note', 'Note') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea class="form-control" name="note" id="projectNote" rows="3"
                                 placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                         </div>
@@ -4813,9 +6570,14 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
+<<<<<<< HEAD
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -4837,8 +6599,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><span id="typePlaceholder"></span>
+<<<<<<< HEAD
                         <?= get_label('quick_view', 'Quick View') ?>
                     </h5>
+=======
+                        <?= get_label('quick_view', 'Quick View') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -4851,8 +6617,13 @@
                                     <button type="button" class="nav-link active" role="tab"
                                         data-bs-toggle="tab" data-bs-target="#navs-top-quick-view-users"
                                         aria-controls="navs-top-quick-view-users">
+<<<<<<< HEAD
                                         <i class="menu-icon tf-icons bx bx-group text-primary"></i>
                                         <?= get_label('users', 'Users') ?>
+=======
+                                        <i
+                                            class="menu-icon tf-icons bx bx-group text-primary"></i><?= get_label('users', 'Users') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     </button>
                                 </li>
                             @endif
@@ -4863,8 +6634,13 @@
                                         role="tab" data-bs-toggle="tab"
                                         data-bs-target="#navs-top-quick-view-clients"
                                         aria-controls="navs-top-quick-view-clients">
+<<<<<<< HEAD
                                         <i class="menu-icon tf-icons bx bx-group text-warning"></i>
                                         <?= get_label('clients', 'Clients') ?>
+=======
+                                        <i
+                                            class="menu-icon tf-icons bx bx-group text-warning"></i><?= get_label('clients', 'Clients') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     </button>
                                 </li>
                             @endif
@@ -4874,8 +6650,13 @@
                                     role="tab" data-bs-toggle="tab"
                                     data-bs-target="#navs-top-quick-view-description"
                                     aria-controls="navs-top-quick-view-description">
+<<<<<<< HEAD
                                     <i class="menu-icon tf-icons bx bx-notepad text-success"></i>
                                     <?= get_label('description', 'Description') ?>
+=======
+                                    <i
+                                        class="menu-icon tf-icons bx bx-notepad text-success"></i><?= get_label('description', 'Description') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </button>
                             </li>
                         </ul>
@@ -4902,6 +6683,7 @@
                                                 <tr>
                                                     <th data-checkbox="true"></th>
                                                     <th data-sortable="true" data-field="id">
+<<<<<<< HEAD
                                                         <?= get_label('id', 'ID') ?>
                                                     </th>
                                                     <th data-field="profile">
@@ -4925,6 +6707,21 @@
                                                     {{-- <th data-formatter="actionFormatterUsers">
                                                 <?= get_label('actions', 'Actions') ?>
                                             </th> --}}
+=======
+                                                        <?= get_label('id', 'ID') ?></th>
+                                                    <th data-field="profile"><?= get_label('users', 'Users') ?></th>
+                                                    <th data-field="role"><?= get_label('role', 'Role') ?></th>
+                                                    <th data-field="phone" data-sortable="true"
+                                                        data-visible="false">
+                                                        <?= get_label('phone_number', 'Phone number') ?></th>
+                                                    <th data-sortable="true" data-field="created_at"
+                                                        data-visible="false">
+                                                        <?= get_label('created_at', 'Created at') ?></th>
+                                                    <th data-sortable="true" data-field="updated_at"
+                                                        data-visible="false">
+                                                        <?= get_label('updated_at', 'Updated at') ?></th>
+                                                    {{-- <th data-formatter="actionFormatterUsers"><?= get_label('actions', 'Actions') ?></th> --}}
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                                 </tr>
                                             </thead>
                                         </table>
@@ -4951,6 +6748,7 @@
                                                 <tr>
                                                     <th data-checkbox="true"></th>
                                                     <th data-sortable="true" data-field="id">
+<<<<<<< HEAD
                                                         <?= get_label('id', 'ID') ?>
                                                     </th>
                                                     <th data-field="profile">
@@ -4972,6 +6770,22 @@
                                                         data-visible="false">
                                                         <?= get_label('updated_at', 'Updated at') ?>
                                                     </th>
+=======
+                                                        <?= get_label('id', 'ID') ?></th>
+                                                    <th data-field="profile"><?= get_label('client', 'Client') ?></th>
+                                                    <th data-field="company" data-sortable="true"
+                                                        data-visible="false"><?= get_label('company', 'Company') ?>
+                                                    </th>
+                                                    <th data-field="phone" data-sortable="true"
+                                                        data-visible="false">
+                                                        <?= get_label('phone_number', 'Phone number') ?></th>
+                                                    <th data-sortable="true" data-field="created_at"
+                                                        data-visible="false">
+                                                        <?= get_label('created_at', 'Created at') ?></th>
+                                                    <th data-sortable="true" data-field="updated_at"
+                                                        data-visible="false">
+                                                        <?= get_label('updated_at', 'Updated at') ?></th>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                                 </tr>
                                             </thead>
                                         </table>
@@ -5006,9 +6820,14 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label for="title" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="text" id="title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
@@ -5016,9 +6835,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="user_id">
                                 <?= get_label('select_users', 'Select users') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="user_id"><?= get_label('select_users', 'Select users') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control users_select" name="user_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
@@ -5031,9 +6855,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="client_id">
                                 <?= get_label('select_clients', 'Select clients') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control clients_select" name="client_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
@@ -5067,12 +6896,19 @@
                     @endif
                 </div>
                 <div class="modal-footer">
+<<<<<<< HEAD
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('create', 'Create') ?>
                     </button>
+=======
+                    <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"><?= get_label('close', 'Close') ?></button>
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -5091,9 +6927,14 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label for="title" class="form-label">
                                 <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="text" name="title" id="workspace_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
@@ -5101,9 +6942,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="user_id">
                                 <?= get_label('select_users', 'Select users') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="user_id"><?= get_label('select_users', 'Select users') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control users_select" name="user_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
@@ -5112,9 +6958,14 @@
                     </div>
                     <div class="row">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label class="form-label" for="client_id">
                                 <?= get_label('select_clients', 'Select clients') ?>
                             </label>
+=======
+                            <label class="form-label"
+                                for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <select class="form-control clients_select" name="client_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
@@ -5139,12 +6990,19 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+<<<<<<< HEAD
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
                     <button type="submit" id="submit_btn" class="btn btn-primary">
                         <?= get_label('update', 'Update') ?>
                     </button>
+=======
+                    <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"><?= get_label('close', 'Close') ?></button>
+                    <button type="submit" id="submit_btn"
+                        class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                 </div>
             </form>
         </div>
@@ -5167,23 +7025,34 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="mb-3">
+<<<<<<< HEAD
                                 <label for="title" class="form-label">
                                     <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input class="form-control" type="text" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-4 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('starts_at', 'Starts at') ?>
                                     <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('starts_at', 'Starts at') ?>
+                                    <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" id="start_date" name="start_date" class="form-control"
                                     value="">
                             </div>
                             <div class="col-md-2 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('time', 'Time') ?> <span class="asterisk">*</span>
                                 </label>
@@ -5194,21 +7063,40 @@
                                     <?= get_label('ends_at', 'Ends at') ?>
                                     <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('time', 'Time') ?> <span
+                                        class="asterisk">*</span></label>
+                                <input type="time" name="start_time" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="end_date_time"><?= get_label('ends_at', 'Ends at') ?>
+                                    <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" id="end_date" name="end_date" class="form-control"
                                     value="">
                             </div>
                             <div class="col-md-2 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('time', 'Time') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('time', 'Time') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="time" name="end_time" class="form-control">
                             </div>
                         </div>
                         <div class="row">
                             <div class="mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="user_id">
                                     <?= get_label('select_users', 'Select users') ?>
                                 </label>
+=======
+                                <label class="form-label"
+                                    for="user_id"><?= get_label('select_users', 'Select users') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-control users_select" name="user_ids[]" multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                                     @if ($guard == 'web')
@@ -5220,9 +7108,14 @@
                         </div>
                         <div class="row">
                             <div class="mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="client_id">
                                     <?= get_label('select_clients', 'Select clients') ?>
                                 </label>
+=======
+                                <label class="form-label"
+                                    for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-control clients_select" name="client_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
@@ -5240,12 +7133,19 @@
                         @endif
                     </div>
                     <div class="modal-footer">
+<<<<<<< HEAD
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
                         <button type="submit" id="submit_btn" class="btn btn-primary me-2">
                             <?= get_label('create', 'Create') ?>
                         </button>
+=======
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"><?= get_label('close', 'Close') ?></button>
+                        <button type="submit" id="submit_btn"
+                            class="btn btn-primary me-2"><?= get_label('create', 'Create') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -5266,50 +7166,80 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="mb-3">
+<<<<<<< HEAD
                                 <label for="title" class="form-label">
                                     <?= get_label('title', 'Title') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input class="form-control" type="text" id="meeting_title" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-4 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('starts_at', 'Starts at') ?>
                                     <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('starts_at', 'Starts at') ?>
+                                    <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" id="update_start_date" name="start_date"
                                     class="form-control" value="">
                             </div>
                             <div class="col-md-2 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('time', 'Time') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('time', 'Time') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="time" id="meeting_start_time" name="start_time"
                                     class="form-control">
                             </div>
                             <div class="col-md-4 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="end_date_time">
                                     <?= get_label('ends_at', 'Ends at') ?>
                                     <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for="end_date_time"><?= get_label('ends_at', 'Ends at') ?>
+                                    <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="text" id="update_end_date" name="end_date" class="form-control"
                                     value="">
                             </div>
                             <div class="col-md-2 mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="">
                                     <?= get_label('time', 'Time') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label class="form-label" for=""><?= get_label('time', 'Time') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <input type="time" id="meeting_end_time" name="end_time"
                                     class="form-control">
                             </div>
                         </div>
                         <div class="row">
                             <div class="mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="user_id">
                                     <?= get_label('select_users', 'Select users') ?>
                                 </label>
+=======
+                                <label class="form-label"
+                                    for="user_id"><?= get_label('select_users', 'Select users') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-control users_select" name="user_ids[]" multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                                 </select>
@@ -5317,9 +7247,14 @@
                         </div>
                         <div class="row">
                             <div class="mb-3">
+<<<<<<< HEAD
                                 <label class="form-label" for="client_id">
                                     <?= get_label('select_clients', 'Select clients') ?>
                                 </label>
+=======
+                                <label class="form-label"
+                                    for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <select class="form-control clients_select" name="client_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
@@ -5328,12 +7263,19 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+<<<<<<< HEAD
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
                         <button type="submit" id="submit_btn" class="btn btn-primary">
                             <?= get_label('update', 'Update') ?>
                         </button>
+=======
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"><?= get_label('close', 'Close') ?></button>
+                        <button type="submit" id="submit_btn"
+                            class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -5356,16 +7298,26 @@
                                 <button type="button" class="nav-link active" role="tab"
                                     data-bs-toggle="tab" data-bs-target="#navs-top-view-assigned-projects"
                                     aria-controls="navs-top-view-assigned-projects">
+<<<<<<< HEAD
                                     <i class="menu-icon tf-icons bx bx-briefcase-alt-2 text-success"></i>
                                     <?= get_label('projects', 'Projects') ?>
+=======
+                                    <i
+                                        class="menu-icon tf-icons bx bx-briefcase-alt-2 text-success"></i><?= get_label('projects', 'Projects') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
                                     data-bs-target="#navs-top-view-assigned-tasks"
                                     aria-controls="navs-top-view-assigned-tasks">
+<<<<<<< HEAD
                                     <i class="menu-icon tf-icons bx bx-task text-primary"></i>
                                     <?= get_label('tasks', 'Tasks') ?>
+=======
+                                    <i
+                                        class="menu-icon tf-icons bx bx-task text-primary"></i><?= get_label('tasks', 'Tasks') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </button>
                             </li>
                         </ul>
@@ -5376,11 +7328,15 @@
                                     <x-projects-card :viewAssigned="1" />
                                 @else
                                     <div class="alert alert-primary" role="alert">
+<<<<<<< HEAD
                                         {{ get_label(
                                             'no_projects_view_permission',
                                             'You don\'t have permission to view
                                                                         projects.',
                                         ) }}
+=======
+                                        {{ get_label('no_projects_view_permission', 'You don\'t have permission to view projects.') }}
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                     </div>
                                 @endif
                             </div>
@@ -5420,20 +7376,28 @@
                 <form id="testSmsSettingsForm">
                     <div class="modal-body">
                         <small
+<<<<<<< HEAD
                             class="text-muted">{{ get_label(
                                 'test_sms_notification_settings_info',
                                 'This is where you can
                                                     test your SMS notification settings. Before testing, please update the settings if they haven\'t
                                                     been updated already.',
                             ) }}</small>
+=======
+                            class="text-muted">{{ get_label('test_sms_notification_settings_info', 'This is where you can test your SMS notification settings. Before testing, please update the settings if they haven\'t been updated already.') }}</small>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="my-3">
                             <label
                                 class="form-label">{{ get_label('recipient_country_code', 'Recipient Country Code') }}
                                 (<small
+<<<<<<< HEAD
                                     class="text-muted">{{ get_label(
                                         'notification_test_recipient_country_code_info',
                                         'Enter if required for the platform you are using.',
                                     ) }}</small>)</label>
+=======
+                                    class="text-muted">{{ get_label('notification_test_recipient_country_code_info', 'Enter if required for the platform you are using.') }}</small>)</label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input type="text" class="form-control" id="testSmsRecipientCountryCode">
                         </div>
                         <div class="mb-3">
@@ -5480,12 +7444,16 @@
                 <form id="testWhatsappSettingsForm">
                     <div class="modal-body">
                         <small
+<<<<<<< HEAD
                             class="text-muted">{{ get_label(
                                 'test_whatsapp_notification_settings_info',
                                 'This is where
                                                     you can test your WhatsApp notification settings. Before testing, please update the settings if
                                                     they haven\'t been updated already.',
                             ) }}</small>
+=======
+                            class="text-muted">{{ get_label('test_whatsapp_notification_settings_info', 'This is where you can test your WhatsApp notification settings. Before testing, please update the settings if they haven\'t been updated already.') }}</small>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="my-3">
                             <label
                                 class="form-label">{{ get_label('recipient_country_code', 'Recipient Country Code') }}
@@ -5537,12 +7505,16 @@
                 <form id="testSlackSettingsForm">
                     <div class="modal-body">
                         <small
+<<<<<<< HEAD
                             class="text-muted">{{ get_label(
                                 'test_slack_notification_settings_info',
                                 'This is where you
                                                     can test your Slack notification settings. Before testing, please update the settings if they
                                                     haven\'t been updated already.',
                             ) }}</small>
+=======
+                            class="text-muted">{{ get_label('test_slack_notification_settings_info', 'This is where you can test your Slack notification settings. Before testing, please update the settings if they haven\'t been updated already.') }}</small>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <div class="my-3">
                             <label class="form-label">{{ get_label('recipient_email', 'Recipient Email') }} <span
                                     class="asterisk">*</span></label>
@@ -5644,8 +7616,12 @@
                     <input type="hidden" name="parent_id" value="">
 
                     <div class="modal-header">
+<<<<<<< HEAD
                         <h5 class="modal-title" id="commentModalLabel">
                             <?= get_label('add_comment', 'Add Comment') ?>
+=======
+                        <h5 class="modal-title" id="commentModalLabel"><?= get_label('add_comment', 'Add Comment') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
@@ -5654,9 +7630,15 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                                 <label for="project-comment-content" class="form-label">
                                     <?= get_label('comment', 'Comment') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="project-comment-content"
+                                    class="form-label"><?= get_label('comment', 'Comment') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea id="project-comment-content" name="content" rows="4" class="form-control comment"
                                     data-mention-type="project" data-mention-id="{{ $project->id }}"
                                     placeholder="<?= get_label('please_enter_comment', 'Please enter comment') ?>"></textarea>
@@ -5684,9 +7666,13 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary">
                             <?= get_label('submit', 'Submit') ?>
                         </button>
+=======
+                        <button type="submit" class="btn btn-primary"><?= get_label('submit', 'Submit') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -5700,8 +7686,12 @@
                     <input type="hidden" name="comment_id" id="comment_id" value="">
 
                     <div class="modal-header">
+<<<<<<< HEAD
                         <h5 class="modal-title" id="commentModalLabel">
                             <?= get_label('edit_comment', 'Edit Comment') ?>
+=======
+                        <h5 class="modal-title" id="commentModalLabel"><?= get_label('edit_comment', 'Edit Comment') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
@@ -5710,9 +7700,15 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                                 <label for="edit-project-comment-content" class="form-label">
                                     <?= get_label('comment', 'Comment') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="edit-project-comment-content"
+                                    class="form-label"><?= get_label('comment', 'Comment') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea id="edit-project-comment-content" name="content" rows="4" class="form-control comment"
                                     data-mention-type="project" data-mention-id="{{ $project->id }}"
                                     placeholder="<?= get_label('please_enter_comment', 'Please enter comment') ?>"></textarea>
@@ -5724,9 +7720,14 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary" id="submit_btn">
                             <?= get_label('update', 'Update') ?>
                         </button>
+=======
+                        <button type="submit" class="btn btn-primary"
+                            id="submit_btn"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -5776,9 +7777,13 @@
                     <input type="hidden" name="model_id" value="{{ $task->id }}">
 
                     <div class="modal-header">
+<<<<<<< HEAD
                         <h5 class="modal-title" id="replyModalLabel">
                             <?= get_label('post_reply', 'Post Reply') ?>
                         </h5>
+=======
+                        <h5 class="modal-title" id="replyModalLabel"><?= get_label('post_reply', 'Post Reply') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -5786,10 +7791,15 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                                 <label for="task-reply-content" class="form-label">
                                     <?= get_label('reply', 'Reply') ?>
                                     <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="task-reply-content" class="form-label"><?= get_label('reply', 'Reply') ?>
+                                    <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea id="task-reply-content" data-mention-type="task" data-mention-id="{{ $task->id }}"
                                     name="content" rows="4" class="form-control comment"
                                     placeholder="<?= get_label('please_enter_reply', 'Please Enter Reply') ?>"></textarea>
@@ -5816,9 +7826,13 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary">
                             <?= get_label('submit', 'Submit') ?>
                         </button>
+=======
+                        <button type="submit" class="btn btn-primary"><?= get_label('submit', 'Submit') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -5836,8 +7850,12 @@
 
                     <div class="modal-header">
                         <h5 class="modal-title" id="task_commentModalLabel">
+<<<<<<< HEAD
                             <?= get_label('add_comment', 'Add Comment') ?>
                         </h5>
+=======
+                            <?= get_label('add_comment', 'Add Comment') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -5845,9 +7863,15 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
+<<<<<<< HEAD
                                 <label for="task-comment-content" class="form-label">
                                     <?= get_label('comment', 'Comment') ?> <span class="asterisk">*</span>
                                 </label>
+=======
+                                <label for="task-comment-content"
+                                    class="form-label"><?= get_label('comment', 'Comment') ?> <span
+                                        class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <textarea id="task-comment-content" data-mention-type="task" data-mention-id="{{ $task->id }}"
                                     name="content" rows="4" class="form-control comment"
                                     placeholder="<?= get_label('please_enter_comment', 'Please enter comment') ?>"></textarea>
@@ -5874,9 +7898,13 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary">
                             <?= get_label('submit', 'Submit') ?>
                         </button>
+=======
+                        <button type="submit" class="btn btn-primary"><?= get_label('submit', 'Submit') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -5891,8 +7919,12 @@
                     <input type="hidden" name="comment_id" id="comment_id" value="">
 
                     <div class="modal-header">
+<<<<<<< HEAD
                         <h5 class="modal-title" id="commentModalLabel">
                             <?= get_label('edit_comment', 'Edit Comment') ?>
+=======
+                        <h5 class="modal-title" id="commentModalLabel"><?= get_label('edit_comment', 'Edit Comment') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
@@ -5900,9 +7932,15 @@
 
                     <div class="modal-body">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label for="task-comment-edit-content" class="form-label">
                                 <?= get_label('comment', 'Comment') ?> <span class="asterisk">*</span>
                             </label>
+=======
+                            <label for="task-comment-edit-content"
+                                class="form-label"><?= get_label('comment', 'Comment') ?> <span
+                                    class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <textarea id="task-comment-edit-content" data-mention-type="task" data-mention-id="{{ $task->id }}"
                                 name="content" rows="4" class="form-control comment"
                                 placeholder="<?= get_label('please_enter_comment', 'Please Enter Comment') ?>"></textarea>
@@ -5913,9 +7951,14 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
                         </button>
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary" id="submit_btn">
                             <?= get_label('update', 'Update') ?>
                         </button>
+=======
+                        <button type="submit" class="btn btn-primary"
+                            id="submit_btn"><?= get_label('update', 'Update') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -6270,6 +8313,7 @@
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary"
                                     {{ old('color') == 'secondary' ? 'selected' : '' }}>
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success"
@@ -6291,6 +8335,23 @@
                                 <option class="badge bg-label-dark" value="dark"
                                     {{ old('color') == 'dark' ? 'selected' : '' }}>
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success"
+                                    {{ old('color') == 'success' ? 'selected' : '' }}>
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger"
+                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning"
+                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"
+                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"
+                                    {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -6345,6 +8406,7 @@
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary"
                                     {{ old('color') == 'secondary' ? 'selected' : '' }}>
+<<<<<<< HEAD
                                     <?= get_label('secondary', 'Secondary') ?>
                                 </option>
                                 <option class="badge bg-label-success" value="success"
@@ -6366,6 +8428,23 @@
                                 <option class="badge bg-label-dark" value="dark"
                                     {{ old('color') == 'dark' ? 'selected' : '' }}>
                                     <?= get_label('dark', 'Dark') ?>
+=======
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success"
+                                    {{ old('color') == 'success' ? 'selected' : '' }}>
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger"
+                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning"
+                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"
+                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"
+                                    {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 </option>
                             </select>
                         </div>
@@ -6403,15 +8482,25 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label for="template-name"
+<<<<<<< HEAD
                         class="form-label">{{ get_label('template_name', 'Template Name') }}
                         <span class="text-danger">*</span></label>
+=======
+                        class="form-label">{{ get_label('template_name', 'Template Name') }} <span
+                            class="text-danger">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <input type="text" name="name" id="template-name" class="form-control" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="template-subject"
+<<<<<<< HEAD
                         class="form-label">{{ get_label('email_subject', 'Email Subject') }}
                         <span class="text-danger">*</span></label>
+=======
+                        class="form-label">{{ get_label('email_subject', 'Email Subject') }} <span
+                            class="text-danger">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <input type="text" name="subject" id="template-subject" class="form-control" required>
                 </div>
 
@@ -6436,11 +8525,15 @@
                 <button type="button" class="btn btn-outline-secondary"
                     data-bs-dismiss="modal">{{ get_label('cancel', 'Cancel') }}</button>
                 <button type="submit" id="submit_btn"
+<<<<<<< HEAD
                     class="btn btn-primary">{{ get_label(
                         'save_template',
                         'Save
                                         Template',
                     ) }}</button>
+=======
+                    class="btn btn-primary">{{ get_label('save_template', 'Save Template') }}</button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             </div>
         </form>
     </div>
@@ -6485,11 +8578,15 @@
                             <code>{{ '{name}' }}</code>,
                             <code>{{ '{email}' }}</code>,
                             <code>{{ '{project_title}' }}</code>
+<<<<<<< HEAD
                             {{ get_label(
                                 'placeholder_hint',
                                 'etc. – these will be dynamically replaced when sending the
                                                         email.',
                             ) }}
+=======
+                            {{ get_label('placeholder_hint', 'etc. – these will be dynamically replaced when sending the email.') }}
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </div>
 
                         <textarea class="form-control" id="editBody" name="content" required>@include('partials.default_email_template')</textarea>
@@ -6580,8 +8677,12 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                         <label for="module" class="form-label">{{ get_label('module', 'Module') }} <span
                                 class="asterisk">*</span></label>
+=======
+                        <label for="module" class="form-label">{{ get_label('module', 'Module') }} <span class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <select class="form-select" id="module" name="module" required>
                             <option value="">{{ get_label('select_module', 'Select Module') }}</option>
                             <option value="project">{{ get_label('project', 'Project') }}</option>
@@ -6590,10 +8691,15 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                         <label for="field_label" class="form-label">{{ get_label('field_label', 'Field Label') }} <span
                                 class="asterisk">*</span></label>
                         <input type="text" class="form-control" id="field_label" name="field_label"
                             placeholder="{{ get_label('enter_field_label', 'Enter Field Label') }}" required>
+=======
+                        <label for="field_label" class="form-label">{{ get_label('field_label', 'Field Label') }} <span class="asterisk">*</span></label>
+                        <input type="text" class="form-control" id="field_label" name="field_label" placeholder="{{ get_label('enter_field_label', 'Enter Field Label') }}" required>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </div>
 
@@ -6602,6 +8708,7 @@
                         <label class="form-label">{{ get_label('is_required', 'Is Required') }}</label>
                         <div class="d-flex gap-2">
                             <div class="form-check">
+<<<<<<< HEAD
                                 <input class="form-check-input" type="radio" name="required" id="required_yes"
                                     value="1">
                                 <label class="form-check-label" for="required_yes">{{ get_label('yes', 'Yes') }}</label>
@@ -6609,6 +8716,13 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="required" id="required_no" value="0"
                                     checked>
+=======
+                                <input class="form-check-input" type="radio" name="required" id="required_yes" value="1">
+                                <label class="form-check-label" for="required_yes">{{ get_label('yes', 'Yes') }}</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="required" id="required_no" value="0" checked>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                                 <label class="form-check-label" for="required_no">{{ get_label('no', 'No') }}</label>
                             </div>
                         </div>
@@ -6632,8 +8746,12 @@
                 <div class="row">
                     <div class="col-md-12 mb-3">
                         <div class="form-check form-switch">
+<<<<<<< HEAD
                             <input class="form-check-input" type="checkbox" id="show_in_table" name="visibility"
                                 value="1">
+=======
+                            <input class="form-check-input" type="checkbox" id="show_in_table" name="visibility" value="1">
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <label class="form-check-label" for="show_in_table">
                                 {{ get_label('show_in_table_view', 'Show in Table View') }}
                             </label>
@@ -6854,11 +8972,15 @@
                                 <ul class="list-group list-group-sm file-names-list" id="file-names"></ul>
                             </div>
                             <small
+<<<<<<< HEAD
                                 class="text-muted d-block mt-2">{{ get_label(
                                     'accepted_file_types',
                                     'Accepted file
                                                                 types: pdf, doc, docx, jpg, png',
                                 ) }}</small>
+=======
+                                class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </div>
                     </div>
 
@@ -6953,11 +9075,15 @@
                                 <ul class="list-group list-group-sm file-names-list" id="file-names"></ul>
                             </div>
                             <small
+<<<<<<< HEAD
                                 class="text-muted d-block mt-2">{{ get_label(
                                     'accepted_file_types',
                                     'Accepted file
                                                                 types: pdf, doc, docx, jpg, png',
                                 ) }}</small>
+=======
+                                class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         </div>
                     </div>
 
@@ -7014,9 +9140,14 @@
                             placeholder="Enter status name" required>
                     </div>
                     <div class="mb-3">
+<<<<<<< HEAD
                         <label for="nameBasic" class="form-label">
                             <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <select class="form-select select-bg-label-primary" id="color" name="color">
                             <option class="badge bg-label-primary" value="primary"
                                 {{ old('color') == 'primary' ? 'selected' : '' }}>
@@ -7024,6 +9155,7 @@
                             </option>
                             <option class="badge bg-label-secondary" value="secondary"
                                 {{ old('color') == 'secondary' ? 'selected' : '' }}>
+<<<<<<< HEAD
                                 <?= get_label('secondary', 'Secondary') ?>
                             </option>
                             <option class="badge bg-label-success" value="success"
@@ -7045,6 +9177,23 @@
                             <option class="badge bg-label-dark" value="dark"
                                 {{ old('color') == 'dark' ? 'selected' : '' }}>
                                 <?= get_label('dark', 'Dark') ?>
+=======
+                                <?= get_label('secondary', 'Secondary') ?></option>
+                            <option class="badge bg-label-success" value="success"
+                                {{ old('color') == 'success' ? 'selected' : '' }}>
+                                <?= get_label('success', 'Success') ?></option>
+                            <option class="badge bg-label-danger" value="danger"
+                                {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                <?= get_label('danger', 'Danger') ?></option>
+                            <option class="badge bg-label-warning" value="warning"
+                                {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                <?= get_label('warning', 'Warning') ?></option>
+                            <option class="badge bg-label-info" value="info"
+                                {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                            </option>
+                            <option class="badge bg-label-dark" value="dark"
+                                {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             </option>
                         </select>
                     </div>
@@ -7083,15 +9232,21 @@
                             placeholder="Enter new name" required>
                     </div>
                     <div class="mb-3">
+<<<<<<< HEAD
                         <label for="nameBasic" class="form-label">
                             <?= get_label('color', 'Color') ?> <span class="asterisk">*</span>
                         </label>
+=======
+                        <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                class="asterisk">*</span></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                         <select class="form-select select-bg-label-primary" id="status_color" name="color"
                             required>
                             <option class="badge bg-label-primary" value="primary">
                                 <?= get_label('primary', 'Primary') ?>
                             </option>
                             <option class="badge bg-label-secondary" value="secondary">
+<<<<<<< HEAD
                                 <?= get_label('secondary', 'Secondary') ?>
                             </option>
                             <option class="badge bg-label-success" value="success">
@@ -7108,6 +9263,18 @@
                             </option>
                             <option class="badge bg-label-dark" value="dark">
                                 <?= get_label('dark', 'Dark') ?>
+=======
+                                <?= get_label('secondary', 'Secondary') ?></option>
+                            <option class="badge bg-label-success" value="success">
+                                <?= get_label('success', 'Success') ?></option>
+                            <option class="badge bg-label-danger" value="danger">
+                                <?= get_label('danger', 'Danger') ?></option>
+                            <option class="badge bg-label-warning" value="warning">
+                                <?= get_label('warning', 'Warning') ?></option>
+                            <option class="badge bg-label-info" value="info"><?= get_label('info', 'Info') ?>
+                            </option>
+                            <option class="badge bg-label-dark" value="dark"><?= get_label('dark', 'Dark') ?>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             </option>
                         </select>
                     </div>
@@ -7128,9 +9295,13 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
+<<<<<<< HEAD
                     <h5 class="modal-title">
                         <?= get_label('upload_attachment', 'Upload Attachment') ?>
                     </h5>
+=======
+                    <h5 class="modal-title"><?= get_label('upload_attachment', 'Upload Attachment') ?></h5>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -7143,9 +9314,14 @@
                     <input type="hidden" id="editStatusId" />
                     <div class="modal-body">
                         <div class="mb-3">
+<<<<<<< HEAD
                             <label for="attachments" class="form-label">
                                 <?= get_label('select_files', 'Select Files') ?>
                             </label>
+=======
+                            <label for="attachments"
+                                class="form-label"><?= get_label('select_files', 'Select Files') ?></label>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                             <input class="form-control" type="file" id="attachments" name="attachments[]"
                                 multiple>
                             <div class="form-text">
@@ -7155,12 +9331,18 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" id="submit_btn" class="btn btn-outline-secondary"
+<<<<<<< HEAD
                             data-bs-dismiss="modal">
                             <?= get_label('cancel', 'Cancel') ?>
                         </button>
                         <button type="submit" id='status_btn' class="btn btn-primary">
                             <?= get_label('upload', 'Upload') ?>
                         </button>
+=======
+                            data-bs-dismiss="modal"><?= get_label('cancel', 'Cancel') ?></button>
+                        <button type="submit" id='status_btn'
+                            class="btn btn-primary"><?= get_label('upload', 'Upload') ?></button>
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     </div>
                 </form>
             </div>
@@ -7278,8 +9460,12 @@
             <div class="modal-content">
                 <form id="editInterviewForm" method="POST" class="form-submit-event">
                     @csrf
+<<<<<<< HEAD
                     @method('PUT')
                     <!-- This is important for updating -->
+=======
+                    @method('PUT') <!-- This is important for updating -->
+>>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
                     <input type="hidden" name="dnr" />
                     <input type="hidden" name="table" value="table" />
                     <input type="hidden" id="editStatusId" />
