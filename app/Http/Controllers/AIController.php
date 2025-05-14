@@ -88,6 +88,8 @@ class AIController extends Controller
             User Request:
             {$userPrompt}
 
+
+
             Instructions:
             - Improve or rewrite the description in clean, mobile-friendly HTML.
             - Use <p> for paragraphs, <ul><li> for bullets, and <strong> for emphasis.
