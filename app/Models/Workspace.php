@@ -167,17 +167,22 @@ class Workspace extends Model
 
     public function lead_sources()
     {
-        return $this->hasMany(LeadSource::class, 'workspace_id')
+        return DB::table('lead_sources')
+            ->where('workspace_id', $this->id)
             ->orWhere(function ($query) {
-                $query->whereNull('workspace_id')->where('is_default', true);
+            $query->whereNull('workspace_id')
+                ->where('is_default', 1);
             });
     }
 
+
     public function lead_stages()
     {
-        return $this->hasMany(LeadStage::class, 'workspace_id')
+        return DB::table('lead_stages')
+            ->where('workspace_id', $this->id)
             ->orWhere(function ($query) {
-                $query->whereNull('workspace_id')->where('is_default', true);
+            $query->whereNull('workspace_id')
+                ->where('is_default', 1);
             });
     }
 

@@ -72,8 +72,4 @@
     </div>
 </div>
 <!-- / Content -->
-<<<<<<< HEAD
 @endsection
-=======
-@endsection
->>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991

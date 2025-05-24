@@ -570,7 +570,7 @@
 }
 
 .statisticsDiv {
-    height: 600px;
+    height: 550px;
 }
 
 #confirmSaveColumnVisibility,
@@ -2145,4 +2145,60 @@ html:not([dir="rtl"]) .timeline-item {
 /* Ensure the select container doesn't overflow */
 #mapping-body table td .select2-container {
     min-width: 200px;
+}
+/* Style for the dragged (ghost) item */
+.sortable-ghost {
+    opacity: 0.7;
+    background: #f7f7f7;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+}
+
+/* Style for the placeholder where the item will be dropped */
+.sortable-placeholder {
+    background: #e9ecef;
+    border: 2px dashed #007bff;
+    height: 100%; /* Matches the height of the dragged item */
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+/* Ensure items stack properly on smaller screens */
+#dashboard-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Space between items */
+}
+
+.draggable-item {
+    flex: 1 1 calc(33.333% - 15px); /* 3 items per row, with gap adjustment */
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+    .draggable-item {
+        flex: 1 1 calc(50% - 15px); /* 2 items per row */
+    }
+}
+
+@media (max-width: 576px) {
+    .draggable-item {
+        flex: 1 1 100%; /* 1 item per row */
+    }
+}
+
+.draggable-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sortable-ghost {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+.draggable-item:active {
+    cursor: grabbing;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
 }

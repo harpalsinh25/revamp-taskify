@@ -357,7 +357,86 @@ INTRO,
                 'POST /estimates-invoices/update',
                 'DELETE /estimates-invoices/destroy/{id}',
                 'GET /estimates-invoices/pdf/{id}'
+            ],
+            'Human Resource Management' => [
+                // candidate
+                'POST /candidate/store',
+                'POST /candidate/update/{id}',
+                'POST /candidate/update_status',
+                'DELETE /candidate/destroy/{id}',
+                'GET /candidate/list/{id?}',
+                'GET /candidate/{id}/interviews',
+                'POST /candidate/{id}/upload-attachment',
+                'DELETE /candidate/candidate-media/destroy/{id}',
+                'GET /candidate/{id}/attachments/list',
+                'GET /candidate/{candidateId}/attachment/{mediaId}/download',
+                'GET /candidate/{candidateId}/attachment/{mediaId}/view',
+                'GET /candidate/{id}/quick-view',
+                // candidate status
+                'POST /candidate_status/store',
+                'POST /candidate_status/update/{id}',
+                'DELETE /candidate_status/destroy/{id}',
+                'POST /candidate_status/reorder',
+                'GET /candidate_status/list/{id?}',
+                // candidate interview
+                'POST /interviews/store',
+                'POST /interviews/update/{id}',
+                'DELETE /interviews/destroy/{id}',
+                'GET /interviews/list/{id?}'
+            ],
+            'Email Management' => [
+                // Email Templates
+                'POST /email-templates/store',
+                'POST /email-templates/update/{id}',
+                'DELETE /email-templates/destroy/{id}',
+                'GET /email-templates/list/{id?}',
+
+                // Email Sending
+                'POST /emails/preview',
+                'POST /emails/store',
+                'GET /emails/historyList/{id?}',
+                'DELETE /emails/history/destroy/{id}',
+                'GET /emails/template-data/{id}',
+            ],
+            'Leads Management' => [
+                // Leads
+                'POST /leads/store',
+                'GET /leads/get/{id?}',
+                'GET /leads/list',
+                'POST /leads/update/{id}',
+                'DELETE /leads/destroy/{id}',
+                'POST /leads/stage-change',
+                'POST /leads/{lead}/convert-to-client',
+
+                // Lead Follow Ups
+                'POST /leads/follow-up/store',
+                'GET /leads/follow-up/get/{id}',
+                'POST /leads/follow-up/update',
+                'DELETE /leads/follow-up/destroy/{id}',
+
+                // View Preference
+                'PUT /save-leads-view-preference',
+            ],
+            'Leads Source Management' => [
+                // Lead Sources
+                'POST /lead-sources/store',
+                'GET /lead-sources/get/{id?}',
+                'GET /lead-sources/list',
+                'POST /lead-sources/update',
+                'DELETE /lead-sources/destroy/{id}'
+            ],
+            'Leads Stage Management' => [
+                // Lead Stages
+                'POST /lead-stages/store',
+                'GET /lead-stages/get/{id?}',
+                'GET /lead-stages/list',
+                'POST /lead-stages/update',
+                'DELETE /lead-stages/destroy/{id}',
+                'POST /lead-stages/reorder',
             ]
+
+
+
         ]
 
     ],
@@ -414,7 +493,7 @@ INTRO,
                 [
                     // 'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
-                    'workspace-id' => 1,
+                    'workspace_id' => 1,
                 ]
             ]
         ],

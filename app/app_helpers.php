@@ -30,7 +30,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Request;
@@ -165,6 +164,7 @@ if (!function_exists('create_label')) {
         ";
     }
 }
+
 
 function get_label($label, $default, $locale = '')
 {
@@ -316,28 +316,7 @@ if (!function_exists('isClient')) {
         return Auth::guard('client')->check(); // Assuming 'role' is a field in the user model.
     }
 }
-if (!function_exists('generateUniqueSlug')) {
-    function generateUniqueSlug($title, $model, $id = null)
-    {
-        $slug = Str::slug($title);
-        $count = 2;
 
-        // If an ID is provided, add a where clause to exclude it
-        if ($id !== null) {
-            while ($model::where('slug', $slug)->where('id', '!=', $id)->exists()) {
-                $slug = Str::slug($title) . '-' . $count;
-                $count++;
-            }
-        } else {
-            while ($model::where('slug', $slug)->exists()) {
-                $slug = Str::slug($title) . '-' . $count;
-                $count++;
-            }
-        }
-
-        return $slug;
-    }
-}
 if (!function_exists('duplicateRecord')) {
     function duplicateRecord($model, $id, $relatedTables = [], $title = '')
     {
@@ -806,6 +785,7 @@ function get_tax_data($tax_id, $total_amount, $currency_symbol = 0)
 if (!function_exists('processNotifications')) {
     function processNotifications($data, $recipients)
     {
+
         // Define an array of types for which email notifications should be sent
         $emailNotificationTypes = ['project_assignment', 'project_status_updation', 'interview_assignment', 'interview_status_update', 'task_assignment', 'task_status_updation', 'workspace_assignment', 'meeting_assignment', 'leave_request_creation', 'leave_request_status_updation', 'team_member_on_leave_alert'];
         $smsNotificationTypes = ['project_assignment', 'project_status_updation', 'interview_assignment', 'interview_status_update', 'task_assignment', 'task_status_updation', 'workspace_assignment', 'meeting_assignment', 'leave_request_creation', 'leave_request_status_updation', 'team_member_on_leave_alert'];
@@ -846,6 +826,7 @@ if (!function_exists('processNotifications')) {
                 } elseif (substr($recipient, 0, 2) === 'ca') {
                     $recipientModel = Candidate::find($recipientId);
                 }
+
                 // Check if recipient was found
                 if ($recipientModel) {
                     if (!$systemNotificationTemplate || ($systemNotificationTemplate->status !== 0)) {
@@ -1108,12 +1089,16 @@ if (!function_exists('getNotificationTemplate')) {
             ->where('name', $type . '_assignment')
             ->first();
 
+
+
         if (!$template) {
             // If template with $type . '_assignment' name not found, check for template with $type name
             $template = Template::where('type', $emailOrSMS)
                 ->where('name', $type)
                 ->first();
         }
+
+        // dd($template);
 
         return $template;
     }
@@ -2659,6 +2644,134 @@ if (!function_exists('formatWorkspace')) {
         ];
     }
 }
+
+// formating email templates for api
+if (!function_exists('formatEmailTemplate')) {
+    function formatEmailTemplate($template)
+    {
+        return [
+            'id' => $template->id,
+            'name' => $template->name,
+            'subject' => $template->subject,
+            'body' => $template->body,
+            'workspace_id' => $template->workspace_id,
+            'placeholders' => $template->placeholders,
+            'created_at' => format_date($template->created_at, to_format: 'Y-m-d'),
+            'updated_at' => format_date($template->updated_at, to_format: 'Y-m-d'),
+        ];
+    }
+}
+
+/// formating sent email for api
+if (!function_exists('formatEmailSend')) {
+    function formatEmailSend($email)
+    {
+        return [
+            'id' => $email->id,
+            'user_id' => $email->user_id,
+            'email_template_id' => $email->email_template_id,
+            'workspace_id' => $email->workspace_id,
+            'to_email' => $email->to_email,
+            'subject' => $email->subject,
+            'body' => $email->body,
+            'placeholders' => $email->placeholders ?? null,
+            'status' => $email->status,
+            'scheduled_at' => $email->scheduled_at ? format_date($email->scheduled_at, to_format: 'Y-m-d H:i:s') : null,
+            'attachments' => $email->getMedia('email-media')->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'file_name' => $media->file_name,
+                    'url' => $media->getUrl(),
+                    'size' => $media->size,
+                    'mime_type' => $media->mime_type,
+                ];
+            })->toArray(),
+            'created_at' => format_date($email->created_at, to_format: 'Y-m-d'),
+            'updated_at' => format_date($email->updated_at, to_format: 'Y-m-d'),
+        ];
+    }
+}
+
+// formating candidates for api
+
+if (!function_exists('formatCandidate')) {
+    function formatCandidate($candidate)
+    {
+        return [
+            'id' => $candidate->id,
+            'name' => $candidate->name,
+            'email' => $candidate->email,
+            'phone' => $candidate->phone,
+            'position' => $candidate->position,
+            'source' => $candidate->source,
+            'status' => [
+                'id' => $candidate->status_id,
+                'name' => $candidate->status ? $candidate->status->name : null,
+            ],
+            'attachments' => $candidate->getMedia('candidate-media')->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'file_name' => $media->file_name,
+                    'url' => $media->getUrl(),
+                    'size' => round($media->size / 1024, 2) . ' KB',
+                    'mime_type' => $media->mime_type,
+                    'uploaded_date' => format_date($media->created_at)
+                ];
+            })->toArray(),
+            'interviews' => $candidate->interviews->map(function ($interview) {
+                return [
+                    'id' => $interview->id,
+                    'candidate_name' => $interview->candidate->name,
+                    'interviewer' => $interview->interviewer->first_name . ' ' . $interview->interviewer->last_name,
+                    'round' => $interview->round,
+                    'scheduled_at' => $interview->scheduled_at,
+                    'status' => $interview->status,
+                    'location' => $interview->location,
+                    'mode' => $interview->mode,
+                    'created_at' => format_date($interview->created_at),
+                    'updated_at' => format_date($interview->updated_at),
+                ];
+            }),
+            'created_at' => format_date($candidate->created_at, to_format: 'Y-m-d'),
+            'updated_at' => format_date($candidate->updated_at, to_format: 'Y-m-d'),
+        ];
+    }
+}
+
+if (!function_exists('formatCandidateStuses')) {
+    function formatCandidateStatus($status)
+    {
+        return [
+            'id' => $status->id,
+            'name' => $status->name,
+            'order' => $status->order,
+            'color' => $status->color,
+            'created_at' => format_date($status->created_at),
+            'updated_at' => format_date($status->updated_at),
+            'can_edit' => checkPermission('edit_candidate_status'),
+            'can_delete' => checkPermission('delete_candidate_status'),
+        ];
+    }
+}
+
+if (!function_exists('formatInterview')) {
+    function formatInterview($interview)
+    {
+        return [
+            'id' => $interview->id,
+            'candidate_id' => $interview->candidate->id,
+            'candidate_name' => $interview->candidate->name,
+            'interviewer_id' => $interview->interviewer->id,
+            'interviewer_name' => $interview->interviewer->first_name  . " " . $interview->interviewer->last_name,
+            'round' => $interview->round,
+            'scheduled_at' => format_date($interview->scheduled_at, true, to_format: 'Y-m-d'),
+            'mode' => $interview->mode,
+            'location' => $interview->location,
+            'status' => $interview->status,
+        ];
+    }
+}
+
 if (!function_exists('formatMeeting')) {
     function formatMeeting($meeting)
     {
@@ -3783,12 +3896,6 @@ if (!function_exists('getMenus')) {
                         'class' => 'menu-item' . (Request::is('settings/google-calendar') ? ' active' : ''),
                     ],
                     [
-                        'id' => 'ai_models',
-                        'label' => get_label('ai_models', 'AI Models'),
-                        'url' => route('ai_model.index'),
-                        'class' => 'menu-item' . (Request::is('settings/ai-models') ? ' active' : ''),
-                    ],
-                    [
                         'id' => 'pusher',
                         'label' => get_label('pusher', 'Pusher'),
                         'url' => url('settings/pusher'),
@@ -4162,7 +4269,6 @@ if (!function_exists('getPinnedStatus')) {
     }
 }
 
-if (!function_exists('logActivity')) {
 function logActivity($type, $typeId, $title, $operation = 'created', $parentId = null, $parentType = null)
 {
     // Retrieve necessary values once
@@ -4201,7 +4307,7 @@ function logActivity($type, $typeId, $title, $operation = 'created', $parentId =
     // Create the activity log entry
     ActivityLog::create($logData);
 }
-}
+
 // Function for sending reminders for tasks or birthday or work anniversary
 if (!function_exists('sendReminderNotification')) {
 
@@ -4754,496 +4860,23 @@ if (!function_exists('formatLeadUserHtml')) {
                 </div>
             </div>";
     }
-}
 
+    if (!function_exists('formatLeadFollowUp')) {
 
-if (!function_exists('get_ai_settings')) {
-    /**
-     * Retrieve AI model settings from the database
-     *
-     * @param string|null $provider Specific provider to get settings for
-     * @return array AI settings from the database with defaults applied
-     */
-    function get_ai_settings(?string $provider = null): array
-    {
-        $settings = Setting::where('variable', 'ai_model_settings')->first();
-
-        if (!$settings) {
-            // Return default settings if none found
-            return [
-                'is_active' => 'openrouter',
-                'openrouter_endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-                'openrouter_system_prompt' => 'You are a helpful assistant that writes concise, professional project or task descriptions.',
-                'openrouter_temperature' => 0.7,
-                'openrouter_max_tokens' => 1024,
-                'openrouter_top_p' => 0.95,
-
-                'gemini_endpoint' => 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent',
-                'gemini_temperature' => 0.7,
-                'gemini_top_k' => 40,
-                'gemini_top_p' => 0.95,
-                'gemini_max_output_tokens' => 1024,
-
-                'rate_limit_per_minute' => 15,
-                'rate_limit_per_day' => 1500,
-                'max_retries' => 2,
-                'retry_delay' => 1,
-                'request_timeout' => 15,
-                'max_prompt_length' => 1000,
-            ];
-        }
-
-        $settings = json_decode($settings->value, true);
-
-        // If a specific provider is requested, only return those settings
-        if ($provider) {
-            $providerSettings = [];
-
-            // Get all settings that belong to the requested provider
-            foreach ($settings as $key => $value) {
-                if (strpos($key, $provider) === 0 || !str_contains($key, 'openrouter_') && !str_contains($key, 'gemini_')) {
-                    $providerSettings[$key] = $value;
-                }
-            }
-
-            // Add global settings that aren't provider-specific
-            $globalKeys = [
-                'is_active',
-                'rate_limit_per_minute',
-                'rate_limit_per_day',
-                'max_retries',
-                'retry_delay',
-                'request_timeout',
-                'max_prompt_length',
-                'enable_fallback',
-                'fallback_provider'
-            ];
-
-            foreach ($globalKeys as $key) {
-                if (isset($settings[$key])) {
-                    $providerSettings[$key] = $settings[$key];
-                }
-            }
-
-            return $providerSettings;
-        }
-
-        return $settings;
-    }
-}
-
-if (!function_exists('generate_description_openrouter')) {
-    /**
-     * Generates a project/task description using OpenRouter's API.
-     *
-     * @param string $prompt The input for generating the description.
-     * @param string|null $apiKey Optional API key to override settings
-     * @return array{error: bool, data?: string, message?: string} Response array with status and data/message
-     */
-    function generate_description_openrouter(string $prompt, $apiKey = null): array
-    {
-        // Get settings from database
-        $settings = get_ai_settings('openrouter');
-
-        // Use provided API key or get from settings
-        $apiKey = $apiKey ?: $settings['openrouter_api_key'] ?? null;
-
-        if (empty($apiKey)) {
-            Log::error('Missing OpenRouter API key');
-            return [
-                'error' => true,
-                'message' => 'System configuration error: Missing API key.',
-            ];
-        }
-
-        // Get dynamic settings
-        $endpoint = $settings['openrouter_endpoint'] ?? 'https://openrouter.ai/api/v1/chat/completions';
-        $model = $settings['openrouter_model'] ?? 'nousresearch/deephermes-3-mistral-24b-preview:free';
-        $systemPrompt = $settings['openrouter_system_prompt'] ?? 'You are a helpful assistant that writes concise, professional project or task descriptions.';
-        $temperature = $settings['openrouter_temperature'] ?? 0.7;
-        $maxTokens = $settings['openrouter_max_tokens'] ?? 1024;
-        $topP = $settings['openrouter_top_p'] ?? 0.95;
-        $frequencyPenalty = $settings['openrouter_frequency_penalty'] ?? 0;
-        $presencePenalty = $settings['openrouter_presence_penalty'] ?? 0;
-        $timeout = $settings['request_timeout'] ?? 15;
-        $maxRetries = $settings['max_retries'] ?? 2;
-
-        // Apply prompt formatting if configured
-        $formattedPrompt = $prompt;
-        if (!empty($settings['default_prompt_prefix'])) {
-            $formattedPrompt = $settings['default_prompt_prefix'] . ' ' . $formattedPrompt;
-        }
-        if (!empty($settings['default_prompt_suffix'])) {
-            $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
-        }
-
-        // Check prompt length
-        $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
-        if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
-            return [
-                'error' => true,
-                'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
-            ];
-        }
-
-        $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
-        $attempt = 0;
-
-        while ($attempt < $maxRetries) {
-            try {
-                $response = $client->post($endpoint, [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $apiKey,
-                        'HTTP-Referer' => config('app.url'),
-                        'X-Title' => 'Taskify', // Optional: Name your app
-                        'Content-Type' => 'application/json',
-                    ],
-                    'json' => [
-                        'model' => $model,
-                        'messages' => [
-                            ['role' => 'system', 'content' => $systemPrompt],
-                            ['role' => 'user', 'content' => $formattedPrompt],
-                        ],
-                        'temperature' => (float)$temperature,
-                        'max_tokens' => (int)$maxTokens,
-                        'top_p' => (float)$topP,
-                        'frequency_penalty' => (float)$frequencyPenalty,
-                        'presence_penalty' => (float)$presencePenalty,
-                    ],
-                ]);
-
-                $body = json_decode($response->getBody(), true);
-
-                if (isset($body['choices'][0]['message']['content'])) {
-                    return [
-                        'error' => false,
-                        'data' => $body['choices'][0]['message']['content'],
-                    ];
-                }
-
-                return [
-                    'error' => true,
-                    'message' => $body['error']['message'],
-                ];
-            } catch (\Exception $e) {
-                $attempt++;
-                if ($attempt >= $maxRetries) {
-                    Log::error('OpenRouter API Error', [
-                        'message' => $e->getMessage(),
-                    ]);
-
-                    // Try fallback if enabled
-                    if (
-                        !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
-                        !empty($settings['fallback_provider']) && $settings['fallback_provider'] === 'gemini'
-                    ) {
-                        $fallbackResult = generate_description_gemini($prompt);
-                        if (!$fallbackResult['error']) {
-                            // Add note that fallback was used
-                            $fallbackResult['data'] = '[Generated using fallback provider] ' . $fallbackResult['data'];
-                        }
-                        return $fallbackResult;
-                    }
-
-                    return [
-                        'error' => true,
-                        'message' => 'An error occurred while generating the description using OpenRouter API.',
-                    ];
-                }
-
-                // Wait before retrying
-                $retryDelay = $settings['retry_delay'] ?? 1;
-                sleep($retryDelay);
-            }
-        }
-
-        // Should not reach here, but just in case
-        return [
-            'error' => true,
-            'message' => 'Failed to generate description after multiple attempts.',
-        ];
-    }
-}
-
-if (!function_exists('generate_description_gemini')) {
-    /**
-     * Generates a project/task description using Gemini API.
-     *
-     * @param string $prompt The input for generating the description.
-     * @param string|null $apiKey Optional API key to override settings
-     * @return array{error: bool, data?: string, message?: string} Response array with status and data/message
-     */
-    function generate_description_gemini(string $prompt, $apiKey = null)
-    {
-        try {
-            // Get settings from database
-            $settings = get_ai_settings('gemini');
-
-            // Use provided API key or get from settings
-            $apiKey = $apiKey ?: $settings['gemini_api_key'] ?? null;
-
-            if (empty($apiKey)) {
-                Log::error('Missing Gemini API key');
-                return [
-                    'error' => true,
-                    'message' => 'System configuration error: Missing API key.',
-                ];
-            }
-
-            // Get dynamic settings
-            $model = $settings['gemini_model'] ?? 'gemini-2.0-flash';
-            $endpointTemplate = $settings['gemini_endpoint'] ?? 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
-            $endpoint = sprintf($endpointTemplate, $model);
-
-            if (strpos($endpoint, '?key=') === false) {
-                $endpoint .= '?key=' . $apiKey;
-            }
-
-            $temperature = $settings['gemini_temperature'] ?? 0.7;
-            $topK = $settings['gemini_top_k'] ?? 40;
-            $topP = $settings['gemini_top_p'] ?? 0.95;
-            $maxOutputTokens = $settings['gemini_max_output_tokens'] ?? 1024;
-            $timeout = $settings['request_timeout'] ?? 15;
-            $maxRetries = $settings['max_retries'] ?? 2;
-
-            // Rate limiting settings
-            $MAX_REQUESTS_PER_MINUTE = $settings['rate_limit_per_minute'] ?? 15;
-            $MAX_REQUESTS_PER_DAY = $settings['rate_limit_per_day'] ?? 1500;
-
-            $userId = auth()->user()?->id ?? request()->ip();
-            $minuteKey = "gemini_rate_minute_{$userId}";
-            $dayKey = "gemini_rate_day_{$userId}";
-            $currentTime = now();
-
-            $minuteRequests = Cache::get($minuteKey, 0);
-            if ($minuteRequests >= $MAX_REQUESTS_PER_MINUTE) {
-                $retryAfter = 60 - $currentTime->second;
-                return [
-                    'error' => true,
-                    'message' => "Rate limit exceeded. Please try again in {$retryAfter} seconds.",
-                ];
-            }
-
-            $dayRequests = Cache::get($dayKey, 0);
-            if ($dayRequests >= $MAX_REQUESTS_PER_DAY) {
-                $tomorrow = $currentTime->addDay()->startOfDay();
-                $hoursRemaining = $currentTime->diffInHours($tomorrow);
-                return [
-                    'error' => true,
-                    'message' => "Daily limit exceeded. Please try again in {$hoursRemaining} hours.",
-                ];
-            }
-
-            // Apply prompt formatting if configured
-            $formattedPrompt = $prompt;
-            if (!empty($settings['default_prompt_prefix'])) {
-                $formattedPrompt = $settings['default_prompt_prefix'] . ' ' . $formattedPrompt;
-            }
-            if (!empty($settings['default_prompt_suffix'])) {
-                $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
-            }
-
-            // Set default prompt prefix for Gemini if not specified
-            if (strpos($formattedPrompt, "Generate a concise") === false) {
-                $formattedPrompt = "Generate a concise, professional description for the following: {$formattedPrompt}";
-            }
-
-            $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
-            if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
-                return [
-                    'error' => true,
-                    'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
-                ];
-            }
-
-            $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
-            $attempt = 0;
-
-            while ($attempt < $maxRetries) {
-                try {
-                    $response = $client->post($endpoint, [
-                        'headers' => [
-                            'Content-Type' => 'application/json',
-                        ],
-                        'json' => [
-                            'contents' => [
-                                [
-                                    'parts' => [
-                                        [
-                                            'text' => $formattedPrompt
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            'generationConfig' => [
-                                'temperature' => (float)$temperature,
-                                'topK' => (int)$topK,
-                                'topP' => (float)$topP,
-                                'maxOutputTokens' => (int)$maxOutputTokens,
-                            ]
-                        ]
-                    ]);
-
-                    $result = json_decode($response->getBody(), true);
-
-                    if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                        return [
-                            'error' => true,
-                            'message' => 'Invalid API response. Please Contact Support'
-                        ];
-                    }
-
-                    Cache::put($minuteKey, $minuteRequests + 1, now()->addMinutes(1));
-                    Cache::put($dayKey, $dayRequests + 1, now()->addDays(1));
-
-                    return [
-                        'error' => false,
-                        'data' => $result['candidates'][0]['content']['parts'][0]['text'],
-                    ];
-                } catch (\Exception $e) {
-                    $attempt++;
-                    if ($attempt >= $maxRetries) {
-                        Log::error('Gemini API Error', [
-                            'message' => $e->getMessage(),
-                        ]);
-
-                        // Try fallback if enabled
-                        if (
-                            !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
-                            !empty($settings['fallback_provider']) && $settings['fallback_provider'] === 'openrouter'
-                        ) {
-                            $fallbackResult = generate_description_openrouter($prompt);
-                            if (!$fallbackResult['error']) {
-                                // Add note that fallback was used
-                                $fallbackResult['data'] = '[Generated using fallback provider] ' . $fallbackResult['data'];
-                            }
-                            return $fallbackResult;
-                        }
-
-                        return [
-                            'error' => true,
-                            'message' => 'Failed to generate description. Please try again later.',
-                        ];
-                    }
-
-                    // Wait before retrying
-                    $retryDelay = $settings['retry_delay'] ?? 1;
-                    sleep($retryDelay);
-                }
-            }
-        } catch (\Exception $e) {
-            Log::critical('Unexpected Error in generate_description_gemini', [
-                'error' => $e->getMessage(),
-            ]);
-            dd($e);
-            return [
-                'error' => true,
-                'message' => 'An unexpected error occurred. Please try again later.',
-            ];
-        }
-    }
-}
-if (!function_exists('generate_description')) {
-    /**
-     * Determines which AI model to use and generates a description.
-     *
-     * @param string $prompt The input for generating the description.
-     * @return mixed The generated description or error response.
-     */
-    function generate_description(string $prompt)
-    {
-        $ai_model_settings = get_settings('ai_model_settings');
-
-        $selectedModel = $ai_model_settings['is_active']; // Assume this is stored in app settings
-
-        if ($selectedModel === 'openrouter') {
-            Log::info('Creating Description Using Openrouter AI Model/API');
-            return generate_description_openrouter($prompt, $ai_model_settings['openrouter_api_key']);
-        } elseif ($selectedModel === 'gemini') {
-            Log::info('Creating Description Using Google Gemini AI Model/API');
-            return generate_description_gemini($prompt, $ai_model_settings['gemini_api_key']);
-        } else {
+        function formatLeadFollowUp($followUp)
+        {
 
             return [
-                'error' => true,
-                'message' => 'Invalid AI model selected. Please update your settings.'
+                'id' => $followUp->id,
+                'lead_id' => $followUp->lead_id,
+                'assigned_to' => $followUp->assigned_to,
+                'followUp_at' => $followUp->follow_up_data,
+                'type' => $followUp->type,
+                'status' => $followUp->status,
+                'note' => $followUp->note,
+                'created_at' => format_date($followUp->created_at, to_format: 'Y-m-d'),
+                'updated_at' => format_date($followUp->updated_at, to_format: 'Y-m-d'),
             ];
         }
-    }
-}
-
-
-// formating email templates for api
-if (!function_exists('formatEmailTemplate')) {
-    function formatEmailTemplate($template)
-    {
-        return [
-            'id' => $template->id,
-            'name' => $template->name,
-            'subject' => $template->subject,
-            'body' => $template->body,
-            'workspace_id' => $template->workspace_id,
-            'placeholders' => $template->placeholders,
-            'created_at' => format_date($template->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($template->updated_at, to_format: 'Y-m-d'),
-        ];
-    }
-}
-/// formating sent email for api
-if (!function_exists('formatEmailSend')) {
-    function formatEmailSend($email)
-    {
-        return [
-            'id' => $email->id,
-            'user_id' => $email->user_id,
-            'email_template_id' => $email->email_template_id,
-            'workspace_id' => $email->workspace_id,
-            'to_email' => $email->to_email,
-            'subject' => $email->subject,
-            'body' => $email->body,
-            'placeholders' => $email->placeholders ?? null,
-            'status' => $email->status,
-            'scheduled_at' => $email->scheduled_at ? format_date($email->scheduled_at, to_format: 'Y-m-d H:i:s') : null,
-            'attachments' => $email->getMedia('email-media')->map(function ($media) {
-                return [
-                    'id' => $media->id,
-                    'file_name' => $media->file_name,
-                    'url' => $media->getUrl(),
-                    'size' => $media->size,
-                    'mime_type' => $media->mime_type,
-                ];
-            })->toArray(),
-            'created_at' => format_date($email->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($email->updated_at, to_format: 'Y-m-d'),
-        ];
-    }
-}
-// formating candidates for api
-if (!function_exists('formatCandidate')) {
-    function formatCandidate($candidate)
-    {
-        return [
-            'id' => $candidate->id,
-            'name' => $candidate->name,
-            'email' => $candidate->email,
-            'phone' => $candidate->phone,
-            'position' => $candidate->position,
-            'source' => $candidate->source,
-            'status' => [
-                'id' => $candidate->status_id,
-                'name' => $candidate->status ? $candidate->status->name : null,
-            ],
-            'attachments' => $candidate->getMedia('candidate-media')->map(function ($media) {
-                return [
-                    'id' => $media->id,
-                    'file_name' => $media->file_name,
-                    'url' => $media->getUrl(),
-                    'size' => $media->size,
-                    'mime_type' => $media->mime_type,
-                ];
-            })->toArray(),
-            'created_at' => format_date($candidate->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($candidate->updated_at, to_format: 'Y-m-d'),
-        ];
     }
 }

@@ -17,6 +17,7 @@ class LeadController extends Controller
 {
     protected $workspace;
     protected $user;
+
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
@@ -26,18 +27,15 @@ class LeadController extends Controller
             return $next($request);
         });
     }
-    /**
-     * Display a listing of the resource.
-     */
+
+
     public function index()
     {
         $leads = $this->workspace->leads();
         return view('leads.index', compact('leads'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         $lead_sources = LeadSource::where(function ($query) {
@@ -58,7 +56,129 @@ class LeadController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Retrieve a specific lead.
+     *
+     * This endpoint retrieves the details of a specific lead by its ID. The user must be authenticated and authorized to access the lead.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @urlParam id integer required The ID of the lead to retrieve. Must exist in the `leads` table. Example: 5
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead retrieved successfully!",
+     *   "data": {
+     *     "id": 5,
+     *     "first_name": "John",
+     *     "last_name": "Doe",
+     *     "email": "john.doe@example.com",
+     *     "phone": "1234567890",
+     *     "company": "Acme Corp",
+     *     "stage_id": 2,
+     *     "source_id": 3,
+     *     "assigned_to": 7,
+     *     "created_at": "2025-05-10T12:30:00.000000Z",
+     *     "updated_at": "2025-05-15T09:12:00.000000Z"
+     *   }
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Lead not found."
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while retrieving the lead."
+     * }
+     */
+    public function get($id)
+    {
+        try {
+            $lead = Lead::findOrFail($id);
+
+            return formatApiResponse(
+                false,
+                'Lead retrieved successfully!',
+                [
+                    'data' => formatLead($lead),
+                ],
+                200
+            );
+        } catch (\Exception $e) {
+            return formatApiResponse(
+                true,
+                config('app.debug') ? $e->getMessage() : 'An error occurred',
+                [],
+                500
+            );
+        }
+    }
+
+    /**
+     * Create a new lead.
+     *
+     * This endpoint creates a new lead in the system. The user must be authenticated and belong to the workspace. All required fields must be provided, and the email must be unique.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @bodyParam first_name string required The first name of the lead. Max 255 characters. Example: John
+     * @bodyParam last_name string required The last name of the lead. Max 255 characters. Example: Doe
+     * @bodyParam email string required The email address of the lead. Must be unique. Example: john.doe@example.com
+     * @bodyParam phone string required The phone number of the lead. Max 20 characters. Example: 1234567890
+     * @bodyParam country_code string required The country code for the phone number. Max 5 characters. Example: +1
+     * @bodyParam country_iso_code string required The ISO 2-letter country code. Example: US
+     * @bodyParam source_id integer required The ID of the lead source. Must exist in `lead_sources`. Example: 3
+     * @bodyParam stage_id integer required The ID of the lead stage. Must exist in `lead_stages`. Example: 2
+     * @bodyParam assigned_to integer required The ID of the user assigned to this lead. Must exist in `users`. Example: 7
+     * @bodyParam job_title string optional The lead’s job title. Max 255 characters. Example: Marketing Manager
+     * @bodyParam industry string optional The industry the lead belongs to. Max 255 characters. Example: Technology
+     * @bodyParam company string required The company name. Max 255 characters. Example: Acme Corp
+     * @bodyParam website string optional The company website URL. Must be a valid URL. Example: https://acme.com
+     * @bodyParam linkedin string optional The LinkedIn profile URL. Must be a valid URL. Example: https://linkedin.com/in/johndoe
+     * @bodyParam instagram string optional The Instagram profile URL. Must be a valid URL. Example: https://instagram.com/johndoe
+     * @bodyParam facebook string optional The Facebook profile URL. Must be a valid URL. Example: https://facebook.com/johndoe
+     * @bodyParam pinterest string optional The Pinterest profile URL. Must be a valid URL. Example: https://pinterest.com/johndoe
+     * @bodyParam city string optional The city of the lead. Max 255 characters. Example: New York
+     * @bodyParam state string optional The state of the lead. Max 255 characters. Example: NY
+     * @bodyParam zip string optional The zip/postal code. Max 20 characters. Example: 10001
+     * @bodyParam country string optional The country of the lead. Max 255 characters. Example: United States
+     * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead created successfully!",
+     *   "data": {
+     *     "id": 1,
+     *     "first_name": "John",
+     *     "last_name": "Doe",
+     *     "email": "john.doe@example.com",
+     *     "phone": "1234567890",
+     *     "company": "Acme Corp",
+     *     "stage_id": 2,
+     *     "source_id": 3,
+     *     "assigned_to": 7,
+     *     "created_at": "2025-05-15T10:00:00.000000Z",
+     *     "updated_at": "2025-05-15T10:00:00.000000Z"
+     *   }
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "email": ["The email field is required."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while creating the lead."
+     * }
      */
     public function store(Request $request)
     {
@@ -99,9 +219,9 @@ class LeadController extends Controller
                     false,
                     'Lead Created Successfully.',
                     [
-                        'id' => $lead->id,
                         'data' => formatLead($lead),
-                    ]
+                    ],
+                    200
                 );
             } else {
                 return response()->json([
@@ -127,18 +247,13 @@ class LeadController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $lead = Lead::findOrFail($id);
         return view('leads.show', compact('lead'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(string $id)
     {
         $lead = Lead::findOrFail($id);
@@ -146,7 +261,73 @@ class LeadController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a specific lead.
+     *
+     * This endpoint updates the details of an existing lead. The user must be authenticated and belong to the workspace. The email must remain unique among other leads.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @urlParam id integer required The ID of the lead to update. Must exist in the `leads` table. Example: 5
+     * @bodyParam first_name string required The first name of the lead. Max 255 characters. Example: John
+     * @bodyParam last_name string required The last name of the lead. Max 255 characters. Example: Doe
+     * @bodyParam email string required The email address. Must be unique except for this lead. Example: john.doe@example.com
+     * @bodyParam phone string required The phone number. Max 20 characters. Example: 1234567890
+     * @bodyParam country_code string required The country code for the phone number. Max 5 characters. Example: +1
+     * @bodyParam country_iso_code string required The ISO 2-letter country code. Example: US
+     * @bodyParam source_id integer required The ID of the lead source. Must exist in `lead_sources`. Example: 3
+     * @bodyParam stage_id integer required The ID of the lead stage. Must exist in `lead_stages`. Example: 2
+     * @bodyParam assigned_to integer required The ID of the user assigned to this lead. Must exist in `users`. Example: 7
+     * @bodyParam job_title string optional The lead’s job title. Max 255 characters. Example: CTO
+     * @bodyParam industry string optional The industry the lead belongs to. Max 255 characters. Example: SaaS
+     * @bodyParam company string required The company name. Max 255 characters. Example: Acme Corp
+     * @bodyParam website string optional The company website URL. Must be a valid URL. Example: https://acme.com
+     * @bodyParam linkedin string optional The LinkedIn profile URL. Must be a valid URL. Example: https://linkedin.com/in/johndoe
+     * @bodyParam instagram string optional The Instagram profile URL. Must be a valid URL. Example: https://instagram.com/johndoe
+     * @bodyParam facebook string optional The Facebook profile URL. Must be a valid URL. Example: https://facebook.com/johndoe
+     * @bodyParam pinterest string optional The Pinterest profile URL. Must be a valid URL. Example: https://pinterest.com/johndoe
+     * @bodyParam city string optional The city of the lead. Max 255 characters. Example: San Francisco
+     * @bodyParam state string optional The state of the lead. Max 255 characters. Example: CA
+     * @bodyParam zip string optional The zip/postal code. Max 20 characters. Example: 94107
+     * @bodyParam country string optional The country of the lead. Max 255 characters. Example: United States
+     * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead updated successfully!",
+     *   "data": {
+     *     "id": 5,
+     *     "first_name": "John",
+     *     "last_name": "Doe",
+     *     "email": "john.doe@example.com",
+     *     "phone": "1234567890",
+     *     "company": "Acme Corp",
+     *     "stage_id": 2,
+     *     "source_id": 3,
+     *     "assigned_to": 7,
+     *     "created_at": "2025-05-10T12:30:00.000000Z",
+     *     "updated_at": "2025-05-15T09:12:00.000000Z"
+     *   }
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Lead not found."
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "email": ["The email has already been taken."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while updating the lead."
+     * }
      */
     public function update(Request $request, string $id)
     {
@@ -181,7 +362,6 @@ class LeadController extends Controller
                 'country'           => 'nullable|string|max:255',
             ]);
 
-
             $lead->update($formFields);
 
             if ($isApi) {
@@ -189,7 +369,6 @@ class LeadController extends Controller
                     false,
                     'Lead Updated Successfully.',
                     [
-                        'id' => $lead->id,
                         'data' => formatLead($lead),
                     ]
                 );
@@ -226,9 +405,31 @@ class LeadController extends Controller
         }
     }
 
-
     /**
-     * Remove the specified resource from storage.
+     * Delete a specific lead.
+     *
+     * This endpoint deletes a specific lead by its ID. The user must be authenticated and have appropriate permissions to perform the deletion.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @urlParam id integer required The ID of the lead to delete. Must exist in the `leads` table. Example: 5
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead deleted successfully!"
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Lead not found."
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while deleting the lead."
+     * }
      */
     public function destroy(string $id)
     {
@@ -236,17 +437,16 @@ class LeadController extends Controller
         return $response;
     }
 
+
     public function destroy_multiple(Request $request)
     {
-        // Validate the incoming request
         $validatedData = $request->validate([
-            'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:leads,id' // Ensure each ID in 'ids' is an integer and exists in the 'projects' table
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:leads,id'
         ]);
         $ids = $validatedData['ids'];
         $deletedLeads = [];
         $deletedLeadsTitles = [];
-        // Perform deletion using validated IDs
         foreach ($ids as $id) {
             $lead = Lead::find($id);
             if ($lead) {
@@ -258,6 +458,8 @@ class LeadController extends Controller
         }
         return response()->json(['error' => false, 'message' => 'Lead(s) deleted successfully.', 'id' => $deletedLeads, 'titles' => $deletedLeadsTitles]);
     }
+
+
     public function list()
     {
         $search = request('search');
@@ -279,7 +481,7 @@ class LeadController extends Controller
             ? $this->workspace->leads()
             : $this->user->leads();
 
-        $leads = $leads->with(['source', 'stage', 'assigned_user']); // eager load if needed
+        $leads = $leads->with(['source', 'stage', 'assigned_user']);
         $leads = $leads->orderBy($sort, $order);
 
         if ($search) {
@@ -307,8 +509,11 @@ class LeadController extends Controller
         $total = $leads->count();
 
         $leads = $leads->paginate($limit)->through(function ($lead) {
-
-            $stage = '<span class="badge bg-' . $lead->stage->color . '">' . $lead->stage->name . '</span>';
+            if ($lead->stage) {
+                $stage = '<span class="badge bg-' . $lead->stage->color . '">' . $lead->stage->name . '</span>';
+            } else {
+                $stage = "-";
+            }
 
             return [
                 'id' => $lead->id,
@@ -332,52 +537,135 @@ class LeadController extends Controller
             'total' => $total,
         ]);
     }
-    private function getActions($lead)
+
+    /**
+     * List leads with optional filters, sorting, and pagination.
+     *
+     * This endpoint retrieves a paginated list of leads accessible to the authenticated user, with optional search, source and stage filters, date range filtering, and sorting. Permissions for editing and deleting are included in the response.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @queryParam search string optional Filters leads by first name, last name, email, phone, company, job title, or ID. Example: John
+     * @queryParam source_ids array optional Filters leads by one or more source IDs. Example: [1, 2]
+     * @queryParam stage_ids array optional Filters leads by one or more stage IDs. Example: [3, 4]
+     * @queryParam start_date string optional Filters leads created on or after this date (YYYY-MM-DD). Example: 2025-01-01
+     * @queryParam end_date string optional Filters leads created on or before this date (YYYY-MM-DD). Example: 2025-05-01
+     * @queryParam sort string optional Sorts leads by criteria (newest, oldest, recently-updated, earliest-updated). Defaults to newest. Example: newest
+     * @queryParam limit integer optional Number of leads per page (1-100). Defaults to 10. Example: 20
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Leads retrieved successfully!",
+     *   "data": {
+     *     "total": 50,
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "first_name": "John",
+     *         "last_name": "Doe",
+     *         "email": "john.doe@example.com",
+     *         "phone": "1234567890",
+     *         "company": "Acme Corp",
+     *         "job_title": "Manager",
+     *         "source": { "id": 1, "name": "Website" },
+     *         "stage": { "id": 2, "name": "Negotiation", "color": "primary" },
+     *         "assigned_user": { "id": 5, "name": "Jane Smith" },
+     *         "created_at": "2025-01-10T12:00:00.000000Z",
+     *         "updated_at": "2025-05-15T10:00:00.000000Z",
+     *         "can_edit": true,
+     *         "can_delete": true
+     *       }
+     *     ],
+     *     "permissions": {
+     *       "can_edit": true,
+     *       "can_delete": true
+     *     }
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while retrieving the leads."
+     * }
+     */
+    public function apiList()
     {
-        $actions = '';
-        $canEdit = checkPermission('edit_leads');  // Replace with your actual condition
-        $canDelete = checkPermission('delete_leads'); // Replace with your actual condition
-        $isConverted = $lead->is_converted == 1 ? true : false;
+        try {
+            $search = request('search');
+            $sortOptions = [
+                'newest' => ['created_at', 'desc'],
+                'oldest' => ['created_at', 'asc'],
+                'recently-updated' => ['updated_at', 'desc'],
+                'earliest-updated' => ['updated_at', 'asc'],
+            ];
+            [$sort, $order] = $sortOptions[request()->input('sort')] ?? ['id', 'desc'];
+            $source_ids  = request('source_ids', []);
+            $stage_ids   = request('stage_ids', []);
+            $start_date = request('start_date');
+            $end_date = request('end_date');
 
+            $limit = request('limit', 10);
 
-        $actions = '<div class="d-flex align-items-center">';
+            $leads = isAdminOrHasAllDataAccess()
+                ? $this->workspace->leads()
+                : $this->user->leads();
 
-        $actions .= '<a href="' . route('leads.show', ['id' => $lead->id]) . '"
-                class="text-info btn btn-sm p-1 me-1"
-                data-id="' . $lead->id . '"
-                title="' . get_label('view', 'View') . '">
-                <i class="bx bx-show"></i>
-            </a>';
+            $leads = $leads->with(['source', 'stage', 'assigned_user']);
+            $leads = $leads->orderBy($sort, $order);
 
-        if ($canEdit) {
-            $actions .= '<a href="' . route('leads.edit', ['id' => $lead->id]) . '"
-                    class="text-primary btn btn-sm  p-1 me-1"
-                    data-id="' . $lead->id . '"
-                    title="' . get_label('update', 'Update') . '">
-                    <i class="bx bx-edit"></i>
-                </a>';
+            if ($search) {
+                $leads->where(function ($query) use ($search) {
+                    $query->where('first_name', 'like', "%$search%")
+                        ->orWhere('last_name', 'like', "%$search%")
+                        ->orWhere('email', 'like', "%$search%")
+                        ->orWhere('phone', 'like', "%$search%")
+                        ->orWhere('company', 'like', "%$search%")
+                        ->orWhere('job_title', 'like', "%$search%")
+                        ->orWhere('id', 'like', "%$search%");
+                });
+            }
+
+            if (!empty($source_ids)) {
+                $leads->whereIn('source_id', $source_ids);
+            }
+            if (!empty($stage_ids)) {
+                $leads->whereIn('stage_id', $stage_ids);
+            }
+            if ($start_date && $end_date) {
+                $leads->whereBetween('created_at', [$start_date, $end_date]);
+            }
+
+            $total = $leads->count();
+
+            $leads = $leads->take($limit)->get()->map(function ($lead) {
+                return formatLead($lead);
+            });
+
+            return formatApiResponse(
+                false,
+                'Lead(s) retrieved successfully',
+                [
+                    'total' => $total,
+                    'data' => $leads,
+                    'permissions' => [
+                        'can_edit' => checkPermission('edit_leads'),
+                        'can_delete' => checkPermission('delete_leads')
+                    ]
+                ],
+                200
+            );
+        } catch (\Exception $e) {
+            return formatApiResponse(
+                false,
+                config('app.debug') ? $e->getMessage() : 'An error occurred',
+                [],
+                200
+            );
         }
-
-        if ($canDelete) {
-            $actions .= '<button title="' . get_label('delete', 'Delete') . '"
-                    type="button"
-                    class="btn btn-sm p-1 delete text-danger"
-                    data-id="' . $lead->id . '"
-                    data-type="leads"
-                    data-table="table">
-                    <i class="bx bx-trash"></i>
-                </button>';
-        }
-        if (!$isConverted) {
-            $actions .= '<button class="btn btn-sm text-primary convert-to-client" title="' . get_label('convert_to_client', 'Convert To Client') . '"
-                             data-id="' . $lead->id . '"><i
-                            class="bx bxs-analyse me-1 p-1"></i>
-                        </button>';
-        }
-
-        $actions .= '</div>';
-        return $actions;
     }
+
 
     public function kanban(Request $request)
     {
@@ -417,10 +705,50 @@ class LeadController extends Controller
             ->orderBy('order', 'ASC')
             ->get();
 
-
         return view('leads.kanban', compact('leads', 'lead_stages'));
     }
 
+    /**
+     * Change the stage of a lead.
+     *
+     * This endpoint updates the stage of a specific lead by its ID. The user must be authenticated and authorized to modify the lead.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @bodyParam id integer required The ID of the lead to update. Must exist in the `leads` table. Example: 123
+     * @bodyParam stage_id integer required The ID of the new lead stage. Must exist in the `lead_stages` table. Example: 5
+     * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead stage updated successfully!",
+     *   "data": {
+     *     "id": 123,
+     *     "type": "lead",
+     *     "activity_message": "Lead Stage Changed to Negotiation"
+     *   }
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Lead not found."
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "stage_id": ["The selected stage_id is invalid."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while updating the lead stage."
+     * }
+     */
     public function stageChange(Request $request)
     {
         $isApi = $request->get('isApi', false);
@@ -434,6 +762,19 @@ class LeadController extends Controller
 
             $lead->save();
 
+            if ($isApi) {
+                return formatApiResponse(
+                    false,
+                    'Lead Stage Updated Successfully.',
+                    [
+                        'data' => [
+                            'id' => $lead->id,
+                            'type' => 'lead',
+                            'activity_message' => 'Lead Stage Changed to ' . $lead->stage->name,
+                        ]
+                    ]
+                );
+            }
             return response()->json([
                 'error' => false,
                 'message' => 'Lead Stage Updated Successfully.',
@@ -466,8 +807,32 @@ class LeadController extends Controller
         }
     }
 
+    /**
+     * Save the default view preference for leads.
+     *
+     * This endpoint sets the default view preference (e.g., list or Kanban) for the authenticated user or client when viewing leads.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @bodyParam view string required The preferred view type (e.g., list, kanban). Example: kanban
+     * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Default view set successfully!"
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while setting the default view."
+     * }
+     */
     public function saveViewPreference(Request $request)
     {
+        $isApi = request()->get('isApi', false);
+
         $view = $request->input('view');
         $prefix = isClient() ? 'c_' : 'u_';
         if (
@@ -476,12 +841,68 @@ class LeadController extends Controller
                 ['default_view' => $view]
             )
         ) {
-            return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
+            if ($isApi) {
+                return formatApiResponse(
+                    false,
+                    'Default View Set Successfully.',
+                    [],
+                    200
+                );
+            } else {
+                return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
+            }
         } else {
             return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
         }
     }
 
+    /**
+     * Convert a lead to a client.
+     *
+     * This endpoint converts a lead to a client by creating a new client record with the lead's data. The user must be authenticated, and the lead must not already be converted.
+     *
+     * @authenticated
+     *
+     * @group Leads Management
+     *
+     * @urlParam lead integer required The ID of the lead to convert. Must exist in the `leads` table. Example: 5
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead converted to client successfully!",
+     *   "data": {
+     *     "id": 5,
+     *     "first_name": "John",
+     *     "last_name": "Doe",
+     *     "email": "john.doe@example.com",
+     *     "company": "Acme Corp"
+     *   }
+     * }
+     *
+     * @response 400 {
+     *   "error": true,
+     *   "message": "Lead is already converted to the client.",
+     *   "id": 5
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Lead not found."
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "email": ["The email has already been taken."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while converting the lead."
+     * }
+     */
     public function convertToClient(Request $request, Lead $lead)
     {
         if ($lead->is_converted == 1) {
@@ -494,7 +915,6 @@ class LeadController extends Controller
             );
         }
 
-        // Prepare new request data
         $clientData = [
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
@@ -507,29 +927,23 @@ class LeadController extends Controller
             'state' => $lead->state,
             'country' => $lead->country,
             'zip' => $lead->zip,
-            'internal_purpose' => 'on', // so password is optional
+            'internal_purpose' => 'on',
         ];
 
-        // Use ClientController directly to reuse store logic
         $clientRequest = new Request($clientData);
         $clientController = new \App\Http\Controllers\ClientController();
         $response = $clientController->store($clientRequest);
 
-        // Decode the response body (assuming JSON response)
         $responseBody = json_decode($response->getContent(), true);
 
-        // Check if the response contains an error flag or status
         if (isset($responseBody['error']) && $responseBody['error'] === true) {
-            // Handle the error
             return formatApiValidationError(
                 true,
                 $responseBody['errors'] ?? []
             );
         }
 
-        // Check if response status code is not 200 (error scenario)
         if ($response->getStatusCode() != 200) {
-            // Handle the error response (non-200 status code)
             return formatApiResponse(
                 true,
                 'Something went wrong while converting the lead.',
@@ -537,9 +951,59 @@ class LeadController extends Controller
             );
         }
 
-        // If successful, update the lead and return the successful response
         $lead->update(['is_converted' => 1, 'converted_at' => now()]);
 
-        return $response; // Return the success response
+        return $response;
+    }
+
+    /**
+     * Get actions for a lead.
+     *
+     * This private method generates HTML for action buttons (view, edit, delete, convert) for a lead based on user permissions and lead status. It is not an API endpoint.
+     */
+    private function getActions($lead)
+    {
+        $actions = '';
+        $canEdit = checkPermission('edit_leads');
+        $canDelete = checkPermission('delete_leads');
+        $isConverted = $lead->is_converted == 1 ? true : false;
+
+        $actions = '<div class="d-flex align-items-center">';
+
+        $actions .= '<a href="' . route('leads.show', ['id' => $lead->id]) . '"
+                class="text-info btn btn-sm p-1 me-1"
+                data-id="' . $lead->id . '"
+                title="' . get_label('view', 'View') . '">
+                <i class="bx bx-show"></i>
+            </a>';
+
+        if ($canEdit) {
+            $actions .= '<a href="' . route('leads.edit', ['id' => $lead->id]) . '"
+                    class="text-primary btn btn-sm  p-1 me-1"
+                    data-id="' . $lead->id . '"
+                    title="' . get_label('update', 'Update') . '">
+                    <i class="bx bx-edit"></i>
+                </a>';
+        }
+
+        if ($canDelete) {
+            $actions .= '<button title="' . get_label('delete', 'Delete') . '"
+                    type="button"
+                    class="btn btn-sm p-1 delete text-danger"
+                    data-id="' . $lead->id . '"
+                    data-type="leads"
+                    data-table="table">
+                    <i class="bx bx-trash"></i>
+                </button>';
+        }
+        if (!$isConverted) {
+            $actions .= '<button class="btn btn-sm text-primary convert-to-client" title="' . get_label('convert_to_client', 'Convert To Client') . '"
+                             data-id="' . $lead->id . '"><i
+                            class="bx bxs-analyse me-1 p-1"></i>
+                        </button>';
+        }
+
+        $actions .= '</div>';
+        return $actions;
     }
 }

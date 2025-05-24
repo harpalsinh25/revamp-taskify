@@ -7257,10 +7257,9 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
         loaderSelector: '.ai-loader',
         customPromptSwitchSelector: '.enableCustomPrompt',
         customPromptContainerSelector: '.customPromptContainer',
-        endpoint: 'ai/generate-description'
+        endpoint: '/ai/generate-description'
     };
     const settings = { ...defaultOptions, ...options };
-<<<<<<< HEAD
     // Toggle custom prompt textarea visibility using Bootstrap's d-none
     $(document).on('change', settings.customPromptSwitchSelector, function () {
         const isChecked = $(this).is(':checked');
@@ -7274,15 +7273,6 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
     });
 
 
-=======
-
-    // Toggle custom prompt textarea visibility
-    $(document).on('change', settings.customPromptSwitchSelector, function () {
-        const isChecked = $(this).is(':checked');
-        $(settings.customPromptContainerSelector).toggle(isChecked);
-    });
-
->>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
     $(document).on('click', generateBtnSelector, function () {
         const $btn = $(this);
         const $scope = $btn.closest('.ai-wrapper');
@@ -7309,11 +7299,7 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
         const $loader = $scope.find(settings.loaderSelector);
 
         $btn.prop('disabled', true);
-<<<<<<< HEAD
         if ($loader.length) $loader.removeClass('d-none');
-=======
-        if ($loader.length) $loader.show();
->>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
 
         $.ajax({
             url: settings.endpoint,
@@ -7344,11 +7330,7 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
             },
             complete: function () {
                 $btn.prop('disabled', false);
-<<<<<<< HEAD
                 if ($loader.length) $loader.addClass('d-none');
-=======
-                if ($loader.length) $loader.hide();
->>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
             }
         });
     });

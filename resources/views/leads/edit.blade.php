@@ -107,8 +107,9 @@
                                     class="text-danger">*</span></label>
                             <select class="form-select" name="stage_id" id="select_lead_stage" data-single-select="true"
                                 data-allow-clear="false" data-consider-workspace="true" required>
+                                @if($lead->stage )
                                 <option value="{{ $lead->stage->id }}">{{ ucwords($lead->stage->name) }}</option>
-
+                                @endif
                             </select>
                             @error('stage_id')
                                 <span class="text-danger">{{ $message }}</span>

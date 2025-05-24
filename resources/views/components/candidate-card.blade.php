@@ -8,6 +8,10 @@
                 <div class="input-group input-group-merge">
                     <input type="text" class="form-control" id="candidate_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
                 </div>
+
+                <input type="hidden" id="candidate_date_between_from" name="startDate" />
+                <input type="hidden" id="candidate_date_between_to" name="EndDate" />
+
         </div>
         <div class="col-md-3 mb-3">
             <select class="form-select js-example-basic-multiple" id="sort" name="sort" aria-label="Default select example" data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">

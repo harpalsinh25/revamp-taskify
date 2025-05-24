@@ -7,6 +7,8 @@
                         <input type="text" class="form-control" id="interview_date_between"
                             placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
                     </div>
+                    <input type="hidden" id="interview_date_between_from" name="start_date" />
+                                <input type="hidden" id="interview_date_between_to" name="end_date" />
                 </div>
                 <div class="col-md-3 mb-3">
                     <select class="form-select js-example-basic-multiple" id="sort" name="sort"

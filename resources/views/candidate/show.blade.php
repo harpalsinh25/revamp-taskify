@@ -34,10 +34,20 @@
                 <div class="card mb-4 shadow-sm">
                     <!-- Candidate -->
                     <div class="card-body">
+                        @php
+                            $initials = collect(explode(' ', $candidate->name))
+                                ->map(fn($n) => strtoupper($n[0]))
+                                ->implode('');
+                            $colors = ['#f8d7da', '#d1ecf1', '#d4edda', '#fff3cd', '#e2e3e5'];
+                            $bgColor = $colors[$candidate->id % count($colors)];
+                        @endphp
+
                         <div class="d-flex align-items-center gap-4">
-                            <!-- Reverted Candidate Avatar -->
-                            <img src="/users-avatar/avatar.png"
-                                alt="candidate-avatar" class="rounded" height="100" width="100" />
+                            <!-- Candidate Initials Avatar -->
+                            <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                style="background-color: {{ $bgColor }}; color: #333; width: 100px; height: 100px; font-size: 36px; font-weight: bold;">
+                                {{ $initials }}
+                            </div>
                             <div>
                                 <h4 class="card-title fw-bold">{{ $candidate->name }}</h4>
                                 <div class="d-flex align-items-center">

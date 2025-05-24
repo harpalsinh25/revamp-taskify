@@ -16,8 +16,14 @@ class LeadSource extends Model
     ];
     protected static function booted(): void
     {
-        static::addGlobalScope('defaultOnly', function (Builder $builder) {
-            $builder->where('is_default', true)->whereNull('workspace_id');
+        static::addGlobalScope('defaultOrWorkspace', function (Builder $builder) {
+            $workspaceId = getWorkspaceId(); // 🔁 Replace with your actual helper or logic
+
+            $builder->where(function ($query) use ($workspaceId) {
+                $query->where(function ($q) {
+                    $q->where('is_default', true)->whereNull('workspace_id');
+                })->orWhere('workspace_id', $workspaceId);
+            });
         });
     }
     public function leads()

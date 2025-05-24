@@ -4,6 +4,7 @@ use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\TagsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ItemsController;
@@ -23,12 +24,21 @@ use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\PriorityController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\EmailSendController;
+use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\LeadStageController;
+use App\Http\Controllers\LeadImportController;
+use App\Http\Controllers\LeadSourceController;
 use App\Http\Controllers\WorkspacesController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\LeadFollowUpController;
 use App\Http\Controllers\LeaveRequestController;
+use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PaymentMethodsController;
+use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\EstimatesInvoicesController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
@@ -332,4 +342,96 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
         Route::post('/estimates-invoices/update', [EstimatesInvoicesController::class, 'update'])->middleware(['customcan:edit_estimates_invoices', 'log.activity']);
         Route::delete('/estimates-invoices/destroy/{id}', [EstimatesInvoicesController::class, 'destroy'])->middleware(['demo_restriction', 'customcan:delete_estimates_invoices', 'checkAccess:App\Models\EstimatesInvoice,estimates_invoices,id,estimates_invoices', 'log.activity']);
     });
+
+
+    //Email Templates
+    Route::middleware(['customcan:manage_email_template', 'isApi'])->group(function () {
+        Route::post('/email-templates/store', [EmailTemplateController::class, 'store'])->name('email.templates.store')->middleware('customcan:create_email_template');
+        Route::post('/email-templates/update/{id}', [EmailTemplateController::class, 'update'])->name('email.templates.update')->middleware('customcan:edit_email_template');
+        Route::delete('/email-templates/destroy/{id}', [EmailTemplateController::class, 'destroy'])->name('email.templates.delete')->middleware('customcan:delete_email_template');
+        Route::get('/email-templates/list/{id?}', [EmailTemplateController::class, 'apiList'])->name('email.templates.list');
+    });
+
+
+    // Email Sending Routes
+    Route::prefix('emails')->middleware('customcan:send_email, isApi')->group(function () {
+        Route::post('/preview', [EmailSendController::class, 'preview'])->name('emails.preview');
+        Route::post('/store', [EmailSendController::class, 'store'])->name('emails.store')->middleware('log.activity');
+        Route::get('/historyList/{id?}', [EmailSendController::class, 'apihistoryList'])->name('emails.historyList');
+        Route::delete('/history/destroy/{id}', [EmailSendController::class, 'destroy'])->name('emails.history.destroy');
+        Route::get('/template-data/{id}', [EmailSendController::class, 'getTemplateData']);
+    })->middleware(['auth:web']);
+
+
+    // Routes for Candidates
+    Route::prefix('candidate')->middleware('customcan:manage_candidate', 'isApi')->group(function () {
+        Route::post('/store', [CandidateController::class, 'store'])->name('candidate.store')->middleware('customcan:create_candidate');
+        Route::post('/update/{id}', [CandidateController::class, 'update'])->name('candidate.update')->middleware('customcan:edit_candidate');
+        Route::post('/{id}/update_status', [CandidateController::class, 'update_status'])->name('candidate.update.status')->middleware('customcan:edit_candidate');
+        Route::delete('/destroy/{id}', [CandidateController::class, 'destroy'])->name('candidate.destroy')->middleware('customcan:delete_candidate');
+        Route::get('/list/{id?}', [CandidateController::class, 'apiList'])->name('candidate.list');
+        Route::get('/{id}/interviews', [CandidateController::class, 'getInterviewDetails'])->name('candidate.interviews.details');
+        Route::post('/{id}/upload-attachment', [CandidateController::class, 'uploadAttachment'])
+            ->name('candidate.upload-attachment');
+        Route::delete('/candidate-media/destroy/{id}', [CandidateController::class, 'deleteAttachment'])
+            ->name('candidate.delete-attachment');
+        Route::get('/{id}/attachments/list', [CandidateController::class, 'apiAttachmentsList'])->name('candidate.attachments.list');
+        Route::get('/{candidateId}/attachment/{mediaId}/download', [CandidateController::class, 'downloadAttachment'])
+            ->name('candidate.attachment.download');
+        Route::get('/{candidateId}/attachment/{mediaId}/view', [CandidateController::class, 'viewAttachment'])
+            ->name('candidate.attachment.view');
+        Route::get('/{id}/quick-view', [CandidateController::class, 'getCandidate'])->name('candidate.quick-view');
+    });
+
+    Route::prefix('candidate_status')->middleware('customcan:manage_candidate_status')->group(function () {
+        Route::post('/store', [CandidateStatusController::class, 'store'])->name('candidate.status.store')->middleware('customcan:create_candidate_status');
+        Route::post('/update/{id}', [CandidateStatusController::class, 'update'])->name('candidate.status.update')->middleware('customcan:edit_candidate_status');
+        Route::delete('/destroy/{id}', [CandidateStatusController::class, 'destroy'])->name('candidate.status.destroy')->middleware('customcan:delete_candidate_status');
+        Route::post('/reorder', [CandidateStatusController::class, 'reorder'])->name('candidate.status.reorder');
+        Route::get('/list/{id?}', [CandidateStatusController::class, 'apiList'])->name('candidate.status.list');
+    });
+
+
+    Route::post('/interviews/store', [InterviewController::class, 'store'])->name('interviews.store')->middleware(['customcan:create_interview', 'log.activity']);
+    Route::post('/interviews/update/{id}', [InterviewController::class, 'update'])->name('interviews.update')->middleware(['customcan:edit_interview', 'log.activity']);
+    Route::delete('/interviews/destroy/{id}', [InterviewController::class, 'destroy'])->name('interviews.destroy')->middleware(['customcan:delete_interview', 'log.activity']);
+    Route::get('/interviews/list/{id?}', [InterviewController::class, 'apiList'])->name('interviews.list')->middleware('customcan:manage_interview');
+
+
+    // Lead Sources
+    Route::prefix('lead-sources')->middleware(['customcan:manage_leads', 'isApi'])->group(function () {
+        Route::post('/store', [LeadSourceController::class, 'store'])->name('lead-sources.store')->middleware(['customcan:create_leads', 'log.activity']);
+        Route::get('/get/{id?}', [LeadSourceController::class, 'get'])->name('lead-sources.get');
+        Route::get('/list', [LeadSourceController::class, 'apiList'])->name('lead-sources.list');
+        Route::post('/update', [LeadSourceController::class, 'update'])->name('lead-sources.update')->middleware(['customcan:edit_leads', 'log.activity']);
+        Route::delete('/destroy/{id}', [LeadSourceController::class, 'destroy'])->name('lead-sources.destroy')->middleware(['customcan:delete_leads', 'demo_restriction', 'log.activity']);
+    });
+
+    // Lead Stages
+    Route::prefix('lead-stages')->middleware(['customcan:manage_leads', 'isApi'])->group(function () {
+        Route::post('/store', [LeadStageController::class, 'store'])->name('lead-stages.store')->middleware(['customcan:create_leads', 'log.activity']);
+        Route::get('/get/{id?}', [LeadStageController::class, 'get'])->name('lead-stages.get'); //why optional?
+        Route::get('/list', [LeadStageController::class, 'apiList'])->name('lead-stages.list');
+        Route::post('/update', [LeadStageController::class, 'update'])->name('lead-stages.update')->middleware(['customcan:edit_leads', 'log.activity']);
+        Route::delete('/destroy/{id}', [LeadStageController::class, 'destroy'])->name('lead-stages.destroy')->middleware(['customcan:delete_leads', 'demo_restriction', 'log.activity']);
+        Route::post('/reorder', [LeadStageController::class, 'reorder'])->name('lead-stages.reorder');
+    });
+
+    // Leads
+    Route::prefix('leads')->middleware(['customcan:manage_leads', 'isApi'])->group(function () {
+
+        Route::post('/store', [LeadController::class, 'store'])->name('leads.store')->middleware(['customcan:create_leads', 'log.activity']);
+        Route::get('/get/{id?}', [LeadController::class, 'get'])->name('leads.get');
+        Route::get('/list', [LeadController::class, 'apiList'])->name('leads.list');
+        Route::post('/update/{id}', [LeadController::class, 'update'])->name('leads.update')->middleware(['customcan:edit_leads', 'log.activity']);
+        Route::delete('/destroy/{id}', [LeadController::class, 'destroy'])->name('leads.destroy')->middleware(['customcan:delete_leads', 'demo_restriction', 'log.activity']);
+        // Lead Follow Up
+        Route::post('/follow-up/store', [LeadFollowUpController::class, 'store'])->name('lead_follow_up.store');
+        Route::get('/follow-up/get/{id}', [LeadFollowUpController::class, 'edit'])->name('lead_follow_up.edit');
+        Route::post('/follow-up/update', [LeadFollowUpController::class, 'update'])->name('lead_follow_up.update');
+        Route::delete('/follow-up/destroy/{id}', [LeadFollowUpController::class, 'destroy'])->name('lead_follow_up.destroy');
+        Route::post('/stage-change', [LeadController::class, 'stageChange'])->name('leads.stage_change')->middleware(['customcan:edit_leads', 'log.activity']);
+        Route::post('/{lead}/convert-to-client', [LeadController::class, 'convertToClient'])->name('leads.convert_to_client');
+    });
+    Route::put('/save-leads-view-preference', [LeadController::class, 'saveViewPreference'])->name('leads.save_view_preference');
 });

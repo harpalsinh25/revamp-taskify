@@ -30,7 +30,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(PathGenerator::class, CustomPathGenerator::class);
     }
-
     /**
      * Bootstrap any application services.
      *
@@ -39,14 +38,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Paginator::useBootstrapFive();
-
         // Attach data to modal views
         $this->composeModalViews();
-
         // Load database configurations and settings
         $this->loadDatabaseSettings();
     }
-
     /**
      * Attach data to specific views.
      */
@@ -57,7 +53,6 @@ class AppServiceProvider extends ServiceProvider
                 ->with('toSelectWorkspaceClients', Client::select('id', 'first_name', 'last_name')->get());
         });
     }
-
     /**
      * Load configurations and share global data from the database.
      */
@@ -65,10 +60,8 @@ class AppServiceProvider extends ServiceProvider
     {
         try {
             DB::connection()->getPdo();
-
             // General Settings
             $generalSettings = $this->loadGeneralSettings();
-
             // Pusher, Email, and Media Storage Settings
             $pusherSettings = $this->loadPusherSettings();
             $emailSettings = $this->loadEmailSettings();
@@ -77,7 +70,6 @@ class AppServiceProvider extends ServiceProvider
             // Other Settings
             $dateFormats = $this->parseDateFormats($generalSettings['date_format'] ?? 'DD-MM-YYYY|d-m-Y');
             $customFields = $this->loadCustomFields();
-
             $sharedData = [
                 'general_settings' => $generalSettings,
                 'email_settings' => $emailSettings,
@@ -95,24 +87,20 @@ class AppServiceProvider extends ServiceProvider
                 'company_info' => $this->loadCompanyInfo(),
                 'ai_model_settings' => $this->loadAIModels(),
             ];
-
             // Share data globally with all views
             view()->share($sharedData);
-
             // Configure application defaults
             $this->configureAppDefaults($generalSettings, $pusherSettings, $emailSettings, $mediaStorageSettings);
         } catch (\Exception $e) {
             // Handle exceptions silently or log them if needed
         }
     }
-
     /**
      * Load general settings and apply defaults.
      */
     private function loadGeneralSettings()
     {
         $general_settings = get_settings('general_settings') ?? [];
-
         $defaults = [
             'full_logo' => 'storage/logos/default_full_logo.png',
             'half_logo' => 'storage/logos/default_half_logo.png',
@@ -138,7 +126,6 @@ class AppServiceProvider extends ServiceProvider
         }
         return $general_settings;
     }
-
     /**
      * Load Pusher settings and apply defaults.
      */
@@ -151,7 +138,6 @@ class AppServiceProvider extends ServiceProvider
             'pusher_app_cluster' => '',
         ];
     }
-
     /**
      * Load email settings and apply defaults.
      */
@@ -166,7 +152,6 @@ class AppServiceProvider extends ServiceProvider
             'smtp_encryption' => '',
         ];
     }
-
     /**
      * Load media storage settings and apply defaults.
      */
@@ -180,7 +165,6 @@ class AppServiceProvider extends ServiceProvider
             's3_bucket' => '',
         ];
     }
-
     /**
      * Parse date formats into JS and PHP formats.
      */
@@ -192,7 +176,6 @@ class AppServiceProvider extends ServiceProvider
             'php' => $formats[1] ?? 'd-m-Y',
         ];
     }
-
     /**
      * Load custom fields for tasks and projects.
      */
@@ -203,7 +186,6 @@ class AppServiceProvider extends ServiceProvider
             'project' => CustomField::where('module', 'project')->get(),
         ];
     }
-
     /**
      * Load company information and apply defaults.
      */
@@ -221,7 +203,6 @@ class AppServiceProvider extends ServiceProvider
             'companyVatNumber' => '',
         ], get_settings('company_information') ?? []);
     }
-
     /**
      * Configure application defaults based on settings.
      */
@@ -229,7 +210,6 @@ class AppServiceProvider extends ServiceProvider
     {
         config()->set('app.timezone', $generalSettings['timezone'] ?? 'UTC');
         config()->set('media-library.max_file_size', 1024 * 1024 * $generalSettings['allowed_max_upload_size']);
-
         // Pusher
         config()->set('chatify.pusher', [
             'key' => $pusherSettings['pusher_app_key'],
@@ -237,11 +217,12 @@ class AppServiceProvider extends ServiceProvider
             'app_id' => $pusherSettings['pusher_app_id'],
             'options' => ['cluster' => $pusherSettings['pusher_app_cluster']],
         ]);
-
         // Mail
+        config()->set('mail.default', 'smtp');
         config()->set('mail.mailers.smtp', [
             'host' => $emailSettings['smtp_host'],
             'port' => $emailSettings['smtp_port'],
+            'transport' => 'smtp',
             'encryption' => $emailSettings['smtp_encryption'],
             'username' => $emailSettings['email'],
             'password' => $emailSettings['password'],
@@ -250,7 +231,6 @@ class AppServiceProvider extends ServiceProvider
             'name' => $generalSettings['company_title'],
             'address' => $emailSettings['email'],
         ]);
-
         // Filesystem
         config()->set('filesystems.disks.s3', [
             'key' => $mediaStorageSettings['s3_key'],
@@ -259,14 +239,12 @@ class AppServiceProvider extends ServiceProvider
             'bucket' => $mediaStorageSettings['s3_bucket'],
         ]);
     }
-
     /**
      * Load AI Models and apply defaults.
      */
     private function loadAIModels()
     {
         $ai_model_settings = get_settings('ai_model_settings') ?? [];
-
         return array_merge([
             "openrouter_endpoint" => "https://openrouter.ai/api/v1/chat/completions",
             "openrouter_system_prompt" => "You are a helpful assistant that writes concise, professional project or task descriptions.",
@@ -293,10 +271,8 @@ class AppServiceProvider extends ServiceProvider
             "openrouter_frequency_penalty" => "0",
             "openrouter_presence_penalty" => "0",
             "gemini_model" => "gemini-2.0-flash",
-
         ], $ai_model_settings);
     }
-
     /**
      * Load Google Calendar Settings and apply defaults.
      */

@@ -141,7 +141,7 @@ Route::post('/installer/config-db', [InstallerController::class, 'config_db'])->
 Route::post('/installer/install', [InstallerController::class, 'install'])->middleware('guest');
 
 Route::get('/meetings/join/web-view/{id}', [MeetingsController::class, 'joinWebView']);
-
+Route::get('/estimates-invoices/pdf-api/{id}', [EstimatesInvoicesController::class, 'pdf']);
 
 Route::middleware(['CheckInstallation'])->group(function () {
 

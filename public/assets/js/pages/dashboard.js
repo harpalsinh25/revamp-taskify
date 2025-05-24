@@ -2,7 +2,7 @@
  * Dashboard Analytics
  */
 "use strict";
-
+loadDashboardOrder();
 (function () {
     let cardColor, headingColor, axisColor, borderColor;
 
@@ -570,4 +570,112 @@ $(document).ready(function () {
             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
         }
     });
+});
+$(document).ready(function () {
+    const $dashboardContainer = $('#dashboard-items');
+
+    // Load the saved layout from localStorage on page load
+
+
+    // Initialize Sortable.js
+    Sortable.create($dashboardContainer[0], {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        handle: '.draggable-item',
+        onStart: function (evt) {
+            // Dynamically set the placeholder size to match the dragged item
+            const draggedItem = evt.item;
+            const placeholder = evt.clone; // Clone of the dragged item
+            $(placeholder).css({
+                height: $(draggedItem).outerHeight(),
+                width: $(draggedItem).outerWidth()
+            });
+        },
+        onEnd: function (evt) {
+            const oldIndex = evt.oldIndex;
+            const newIndex = evt.newIndex;
+
+            console.log(`Item moved from position ${oldIndex} to ${newIndex}`);
+
+            // Save the new order and dimensions to localStorage
+            saveDashboardOrder();
+        }
+    });
+
+    /**
+     * Save the new order and dimensions to localStorage
+     */
+    function saveDashboardOrder() {
+        const order = [];
+
+        // Iterate through each draggable item
+        $('#dashboard-items .draggable-item').each(function (index) {
+            const $this = $(this);
+            const id = $this.data('id');
+            const height = $this.outerHeight(); // Get height of the item
+            const width = $this.outerWidth(); // Get width of the item
+            const position = index + 1; // Current position in the order
+
+            order.push({
+                id: id,
+                height: height,
+                width: width,
+                position: position
+            });
+        });
+
+        // Save the order in localStorage
+        localStorage.setItem('dashboardOrder', JSON.stringify(order));
+
+        console.log('Dashboard order saved to localStorage:', order);
+    }
+
+
+});
+/**
+ * Load the saved layout from localStorage
+ */
+function loadDashboardOrder() {
+    const savedOrder = localStorage.getItem('dashboardOrder');
+    const $dashboardContainer = $('#dashboard-items');
+    if (savedOrder) {
+        const order = JSON.parse(savedOrder);
+
+        console.log('Loaded dashboard order from localStorage:', order);
+
+        // Reorder the items based on the saved order
+        order.forEach(function (item) {
+            const $item = $(`#dashboard-items .draggable-item[data-id="${item.id}"]`);
+
+            // Set the height and width of the item
+            $item.css({
+                height: item.height + 'px',
+                width: item.width + 'px'
+            });
+
+            // Append the item in the correct position
+            $dashboardContainer.append($item);
+        });
+    }
+}
+
+$(document).ready(function () {
+    // Loop through all draggable items
+    $('.draggable-item').each(function () {
+        // Make sure parent is relatively positioned for absolute icon
+        $(this).addClass('position-relative');
+
+        // Create the tooltip icon element
+        const tooltipIcon = `
+            <span class="drag-tooltip-icon end-0 fs-4 me-4 mt-2 position-absolute top-0" data-bs-toggle="tooltip" title="Drag to reorder">
+                <i class="bx bx-move text-muted small"></i>
+            </span>
+        `;
+
+        // Append it to the item
+        $(this).append(tooltipIcon);
+    });
+
+    // Initialize Bootstrap tooltip
+    $('[data-bs-toggle="tooltip"]').tooltip();
 });
