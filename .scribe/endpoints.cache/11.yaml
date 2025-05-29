@@ -18,9 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: multipart/form-data
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -30,7 +30,7 @@ endpoints:
         name: id
         description: 'The ID of the project to which media files are being uploaded.'
         required: true
-        example: 16
+        example: 19
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -45,7 +45,7 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      id: 16
+      id: 19
     fileParameters:
       'media_files[]': null
     responses:
@@ -101,7 +101,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer eEa3gvcdkP8654ahDZbfV16'
+      - 'Bearer 6dfD4cagav5Zk1heEbPV683'
     controller: null
     method: null
     route: null
@@ -121,26 +121,27 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose media files are to be retrieved.'
         required: true
-        example: 17
+        example: 2
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 17
+      id: 2
     queryParameters:
       search:
         name: search
         description: 'optional A search query to filter media files by name, ID, or upload date.'
         required: false
-        example: dolorem
+        example: ullam
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -149,7 +150,7 @@ endpoints:
         name: sort
         description: 'optional The column to sort by (default: "id").'
         required: false
-        example: quae
+        example: aut
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -158,15 +159,15 @@ endpoints:
         name: order
         description: 'optional The sorting order: "ASC" or "DESC" (default: "DESC").'
         required: false
-        example: in
+        example: ut
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanQueryParameters:
-      search: dolorem
-      sort: quae
-      order: in
+      search: ullam
+      sort: aut
+      order: ut
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -217,7 +218,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ZE3g5Vk8P1a664evchdDbfa'
+      - 'Bearer 1VaZ54Ec8bPf3ekgv6D6adh'
     controller: null
     method: null
     route: null
@@ -237,14 +238,15 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the delete medium.'
         required: true
-        example: fugiat
+        example: numquam
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -253,14 +255,14 @@ endpoints:
         name: mediaId
         description: 'The ID of the media file to delete.'
         required: true
-        example: 9
+        example: 17
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: fugiat
-      mediaId: 9
+      id: numquam
+      mediaId: 17
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -306,7 +308,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer gkv341DEfc6P56eZbda8Vha'
+      - 'Bearer bv685d31k4ZE6feVaDgPhca'
     controller: null
     method: null
     route: null

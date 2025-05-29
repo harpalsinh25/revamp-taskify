@@ -16,9 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -212,7 +212,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Vkd1v63DZEebfac48hga65P'
+      - 'Bearer haE46cDVkb3a8P6gd5fevZ1'
     controller: null
     method: null
     route: null
@@ -232,9 +232,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -427,7 +427,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 5
+          - 8
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -437,7 +437,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 16
+          - 8
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -447,7 +447,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 2
+          - 15
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -457,7 +457,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 12
+          - 15
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -467,22 +467,22 @@ endpoints:
         description: ''
         required: false
         example:
-          - 19
+          - 11
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
       user_ids:
-        - 5
+        - 8
       client_ids:
-        - 16
+        - 8
       priority_ids:
-        - 2
+        - 15
       project_ids:
-        - 12
+        - 15
       status_ids:
-        - 19
+        - 11
     fileParameters: []
     responses:
       -
@@ -559,7 +559,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Zvh6k58PdfgaEceD143Vb6a'
+      - 'Bearer 5cf3VhE64d18e6aZDkavPgb'
     controller: null
     method: null
     route: null
@@ -579,9 +579,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -771,7 +771,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Dfbgkh56vVZ1ae6a4dP8c3E'
+      - 'Bearer 665vEfbca8Vgda4ZP31Dhek'
     controller: null
     method: null
     route: null
@@ -791,21 +791,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the task to update.'
         required: true
-        example: 14
+        example: 6
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 14
+      id: 6
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -813,13 +813,13 @@ endpoints:
         name: is_favorite
         description: 'Indicates whether the task is a favorite. Use 1 for true and 0 for false.'
         required: true
-        example: 9
+        example: 10
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      is_favorite: 9
+      is_favorite: 10
     fileParameters: []
     responses:
       -
@@ -877,7 +877,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 54deh636EbkaafDgV1cvPZ8'
+      - 'Bearer dE5bkcgfZ1PehVv46aa386D'
     controller: null
     method: null
     route: null
@@ -897,21 +897,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the task to update.'
         required: true
-        example: 14
+        example: 7
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 14
+      id: 7
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -919,13 +919,13 @@ endpoints:
         name: is_pinned
         description: 'Indicates whether the task is pinned. Use 1 for true and 0 for false.'
         required: true
-        example: 13
+        example: 11
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      is_pinned: 13
+      is_pinned: 11
     fileParameters: []
     responses:
       -
@@ -983,7 +983,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer v3hg1aZ66PVkcfD8da4bE5e'
+      - 'Bearer ZVva368e41kEfDcbhgd56Pa'
     controller: null
     method: null
     route: null
@@ -1003,9 +1003,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -1132,7 +1132,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer kZ8dV66e3EbvDPca1ag45fh'
+      - 'Bearer 6v5PghZbVDd3fca4k8a6Ee1'
     controller: null
     method: null
     route: null
@@ -1152,9 +1152,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -1261,7 +1261,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer fgDEeP64Zh8aV1kv56badc3'
+      - 'Bearer aVhkPZ5468cbva3d1Ee6gfD'
     controller: null
     method: null
     route: null
@@ -1281,8 +1281,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -1341,7 +1342,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 1ekV6hf5E486vPDab3cZgda'
+      - 'Bearer Vakf4Z3vbd16c6P8aDeEhg5'
     controller: null
     method: null
     route: null
@@ -1361,8 +1362,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -1433,7 +1435,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer fg68aEd5e1k4bvhDPVcZ3a6'
+      - 'Bearer c3dPvfD4gaZ8Ekeab1hV566'
     controller: null
     method: null
     route: null

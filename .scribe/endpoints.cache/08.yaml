@@ -18,9 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -213,7 +213,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 10
+          - 18
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -223,7 +223,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 10
+          - 13
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -233,7 +233,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 2
+          - 7
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -243,7 +243,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - 4
+          - 19
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
@@ -253,22 +253,22 @@ endpoints:
         description: ''
         required: false
         example:
-          - 9
+          - 13
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
       user_ids:
-        - 10
+        - 18
       client_ids:
-        - 10
+        - 13
       priority_ids:
-        - 2
+        - 7
       tag_ids:
-        - 4
+        - 19
       status_ids:
-        - 9
+        - 13
     fileParameters: []
     responses:
       -
@@ -339,7 +339,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer bPgZ8c6DV316akf5d4veEah'
+      - 'Bearer v5abcDgVPhfa68kE6ed31Z4'
     controller: null
     method: null
     route: null
@@ -359,9 +359,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -605,7 +605,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer gbZaPeD366Vfv814ckhE5ad'
+      - 'Bearer V58vabgDfEPkZcd36h4e1a6'
     controller: null
     method: null
     route: null
@@ -625,9 +625,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -882,7 +882,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer vkha8661fegDZ4cbVP3adE5'
+      - 'Bearer fg5a41e638b6DPvEkVcahdZ'
     controller: null
     method: null
     route: null
@@ -902,21 +902,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project to update.'
         required: true
-        example: 3
+        example: 13
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 3
+      id: 13
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -924,13 +924,13 @@ endpoints:
         name: is_favorite
         description: 'Indicates whether the project is a favorite. Use 1 for true and 0 for false.'
         required: true
-        example: 4
+        example: 5
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      is_favorite: 4
+      is_favorite: 5
     fileParameters: []
     responses:
       -
@@ -1020,7 +1020,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer e8v6ZP3ka61cd5hgEfab4DV'
+      - 'Bearer bfE5dv1geDaP68Zchk4a36V'
     controller: null
     method: null
     route: null
@@ -1040,21 +1040,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project to update.'
         required: true
-        example: 9
+        example: 18
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 9
+      id: 18
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1062,13 +1062,13 @@ endpoints:
         name: is_pinned
         description: 'Indicates whether the project is pinned. Use 1 for true and 0 for false.'
         required: true
-        example: 14
+        example: 5
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      is_pinned: 14
+      is_pinned: 5
     fileParameters: []
     responses:
       -
@@ -1126,7 +1126,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer VZ3ak46decgb8P5vhfDE6a1'
+      - 'Bearer 66hZa1k5cDv8a3fedVE4Pbg'
     controller: null
     method: null
     route: null
@@ -1146,21 +1146,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose status is to be updated.'
         required: true
-        example: 5
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 5
+      id: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1168,7 +1168,7 @@ endpoints:
         name: statusId
         description: 'The ID of the new status to set for the project.'
         required: true
-        example: 18
+        example: 19
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -1177,14 +1177,14 @@ endpoints:
         name: note
         description: 'optional An optional note to attach to the project update.'
         required: false
-        example: reiciendis
+        example: vitae
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      statusId: 18
-      note: reiciendis
+      statusId: 19
+      note: vitae
     fileParameters: []
     responses:
       -
@@ -1279,7 +1279,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 3ZbeD6da6Vgk4PEhf8a1vc5'
+      - 'Bearer Pe8dh4EDafkZV56ag63bcv1'
     controller: null
     method: null
     route: null
@@ -1299,9 +1299,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -1321,13 +1321,13 @@ endpoints:
         name: priorityId
         description: 'The ID of the new priority to set for the project.'
         required: true
-        example: 17
+        example: 14
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      priorityId: 17
+      priorityId: 14
     fileParameters: []
     responses:
       -
@@ -1412,7 +1412,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer faV658641kghbaeDZPdEc3v'
+      - 'Bearer a5Zv8d3bkPhDe1c646gVfaE'
     controller: null
     method: null
     route: null
@@ -1432,8 +1432,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -1490,7 +1491,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer fk8VPgaZhvc315dDaEe6b64'
+      - 'Bearer 4PeD1h3c85baaf6gdV6EkZv'
     controller: null
     method: null
     route: null
@@ -1510,20 +1511,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose status timeline is to be retrieved.'
         required: true
-        example: 5
+        example: 3
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 5
+      id: 3
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1582,7 +1584,181 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer aDgdk4vfZh68baE516eV3Pc'
+      - 'Bearer 4Zdcg63P1kabhEVa86Dve5f'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/projects/{id}/mind-map'
+    metadata:
+      groupName: 'Project Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get Mind Map Data of a specific project.'
+      description: 'This endpoint retrieves mind map data of a specific project by its ID.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the data to retrieve.'
+        required: true
+        example: 3
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanUrlParameters:
+      id: 3
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "data":  {
+                "id": "project_2",
+                "topic": "hola",
+          "link": "https://dev-taskify.taskhub.company/projects/information/2",
+          "isroot": true,
+          "level": 1,
+          "children": [
+          {
+          "id": "tasks",
+          "topic": "Tasks",
+          "level": 2,
+          "children": [
+          {
+          "id": "task_4",
+          "topic": "Test",
+          "link": "https://dev-taskify.taskhub.company/tasks/information/4",
+          "children": [
+          {
+          "id": "task_users_4",
+          "topic": "Users",
+          "children": [
+          {
+          "id": "task_user_4_1",
+          "topic": "Admin User",
+          "link": "https://dev-taskify.taskhub.company/users/profile/1"
+          }
+          ]
+          },
+          {
+          "id": "task_clients_4",
+          "topic": "Clients",
+          "children": []
+          }
+          ]
+          },
+          {
+          "id": "task_5",
+          "topic": "test",
+          "link": "https://dev-taskify.taskhub.company/tasks/information/5",
+          "children": [
+          {
+          "id": "task_users_5",
+          "topic": "Users",
+          "children": [
+          {
+          "id": "task_user_5_1",
+          "topic": "Admin User",
+          "link": "https://dev-taskify.taskhub.company/users/profile/1"
+          }
+          ]
+          },
+          {
+          "id": "task_clients_5",
+          "topic": "Clients",
+          "children": []
+          }
+          ]
+          },
+          {
+          "id": "task_6",
+          "topic": "test 1",
+          "link": "https://dev-taskify.taskhub.company/tasks/information/6",
+          "children": [
+          {
+          "id": "task_users_6",
+          "topic": "Users",
+          "children": [
+          {
+          "id": "task_user_6_1",
+          "topic": "Admin User",
+          "link": "https://dev-taskify.taskhub.company/users/profile/1"
+          }
+          ]
+          },
+          {
+          "id": "task_clients_6",
+          "topic": "Clients",
+          "children": []
+          }
+          ]
+          }
+          ]
+          },
+          {
+          "id": "users",
+          "topic": "Users",
+          "children": [
+          {
+          "id": "user_1",
+          "topic": "Admin User",
+          "link": "https://dev-taskify.taskhub.company/users/profile/1"
+          }
+          ]
+          },
+          {
+          "id": "clients",
+          "topic": "Clients",
+          "children": []
+          },
+          {
+          "id": "milestones",
+          "topic": "Milestones",
+          "children": []
+          },
+          {
+          "id": "media",
+          "topic": "Media",
+          "children": []
+          }
+          ]
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "error": true,
+            "message": "Project not found."
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 83fbgc6Eehv4aPZda56V1kD'
     controller: null
     method: null
     route: null

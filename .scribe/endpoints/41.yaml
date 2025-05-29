@@ -1,0 +1,373 @@
+name: 'Custom Field Management'
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/custom-fields
+    metadata:
+      groupName: 'Custom Field Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create a new custom field.'
+      description: |-
+        This endpoint allows the creation of a new custom field for either the project or task module.
+        Depending on the field type, options may be required (for example: radio, checkbox, select).
+        User must be authenticated.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      module:
+        name: module
+        description: 'The module this custom field belongs to. Must be one of: `project`, `task`.'
+        required: true
+        example: task
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      field_label:
+        name: field_label
+        description: 'The label for the custom field.'
+        required: true
+        example: Priority
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      field_type:
+        name: field_type
+        description: 'The type of the custom field. Must be one of: `text`, `number`, `password`, `textarea`, `radio`, `date`, `checkbox`, `select`.'
+        required: true
+        example: select
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      options:
+        name: options
+        description: 'optional Required if field_type is `radio`, `checkbox`, or `select`. Provide one option per line.'
+        required: false
+        example: High\nMedium\nLow
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      required:
+        name: required
+        description: 'optional Whether this field is required.'
+        required: false
+        example: '1'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      visibility:
+        name: visibility
+        description: 'optional Whether this field is visible to end users.'
+        required: false
+        example: '1'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+    cleanBodyParameters:
+      module: task
+      field_label: Priority
+      field_type: select
+      options: High\nMedium\nLow
+      required: '1'
+      visibility: '1'
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "Custom Field Created Successfully",
+            "data": {
+              "id": 12,
+              "type": "custom_field"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "error": true,
+            "message": "Validation failed.",
+            "data": {
+              "field_label": ["The field label field is required."]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "error": true,
+            "message": "Custom Field Couldn't Created.",
+            "data": {
+              "error": "Exception message",
+              "line": 85,
+              "file": "/var/www/html/app/Http/Controllers/CustomFieldController.php"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer Edf6a1Pgbkv58h63De4caZV'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: 'api/custom-fields/{id}'
+    metadata:
+      groupName: 'Custom Field Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update an existing custom field.'
+      description: |-
+        This endpoint updates the details of a custom field identified by its ID.
+        Options are required if the field type is `radio`, `checkbox`, or `select`.
+        User must be authenticated.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the custom field to update.'
+        required: true
+        example: 12
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+    cleanUrlParameters:
+      id: 12
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      module:
+        name: module
+        description: 'The module this custom field belongs to. Must be one of: `project`, `task`.'
+        required: true
+        example: project
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      field_label:
+        name: field_label
+        description: 'The label for the custom field.'
+        required: true
+        example: Status
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      field_type:
+        name: field_type
+        description: 'The type of the custom field. Must be one of: `text`, `number`, `password`, `textarea`, `radio`, `date`, `checkbox`, `select`.'
+        required: true
+        example: radio
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      options:
+        name: options
+        description: 'optional Required if field_type is `radio`, `checkbox`, or `select`. Provide one option per line.'
+        required: false
+        example: Active\nInactive
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      required:
+        name: required
+        description: 'optional Whether this field is required.'
+        required: false
+        example: '1'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+      visibility:
+        name: visibility
+        description: 'optional Whether this field is visible to end users.'
+        required: false
+        example: '0'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+    cleanBodyParameters:
+      module: project
+      field_label: Status
+      field_type: radio
+      options: Active\nInactive
+      required: '1'
+      visibility: '0'
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "Custom field updated successfully",
+            "data": {
+              "id": 12,
+              "type": "custom_field"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "error": true,
+            "message": "Validation failed.",
+            "data": {
+              "field_label": ["The field label field is required."]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "error": true,
+            "message": "An error occurred.",
+            "data": {
+              "error": "Exception message",
+              "line": 78,
+              "file": "/var/www/html/app/Http/Controllers/CustomFieldController.php"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer akgaPeDEZcv3b8d4hf65V61'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/custom-fields/{id}'
+    metadata:
+      groupName: 'Custom Field Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a custom field.'
+      description: |-
+        This endpoint deletes a specific custom field by ID.
+        User must be authenticated.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the custom field to delete.'
+        required: true
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        custom: []
+    cleanUrlParameters:
+      id: 15
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "CustomField deleted successfully",
+            "data": []
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "error": true,
+            "message": "CustomField not found.",
+            "data": []
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "error": true,
+            "message": "An error occurred.",
+            "data": []
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer D6ekZdch54aP1bvf36gaEV8'
+    controller: null
+    method: null
+    route: null
+    custom: []

@@ -16,8 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -126,7 +127,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer a6ea1vZb6Pdc534kgEfhDV8'
+      - 'Bearer DE4Vbd3ke5fc6ahZ681Pgva'
     controller: null
     method: null
     route: null
@@ -146,8 +147,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -256,7 +258,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6eck4EhZ8bvfD3aaPVg165d'
+      - 'Bearer hZ1cka4ad3fE6eP8Vb6Dv5g'
     controller: null
     method: null
     route: null
@@ -278,8 +280,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -400,7 +403,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ekfEgc618hZPa3Dbd5Va64v'
+      - 'Bearer gvZhDfcbdak1aVe365684PE'
     controller: null
     method: null
     route: null
@@ -420,8 +423,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -492,7 +496,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer V4vZ18hda3ge5cEDPfk6ba6'
+      - 'Bearer bg6PDceda8aE16k3vhf5V4Z'
     controller: null
     method: null
     route: null

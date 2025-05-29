@@ -33,6 +33,7 @@ use App\Http\Controllers\LeadSourceController;
 use App\Http\Controllers\WorkspacesController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\LeadFollowUpController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\EmailTemplateController;
@@ -434,4 +435,12 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
         Route::post('/{lead}/convert-to-client', [LeadController::class, 'convertToClient'])->name('leads.convert_to_client');
     });
     Route::put('/save-leads-view-preference', [LeadController::class, 'saveViewPreference'])->name('leads.save_view_preference');
+
+
+    Route::post('/custom-fields', [CustomFieldController::class, 'store'])->name('custom_fields.store');
+    Route::get('/custom-fields/list', [CustomFieldController::class, 'list'])->name('custom_fields.list');
+
+    Route::get('/custom-fields/{id}/edit', [CustomFieldController::class, 'edit'])->name('custom_fields.edit');
+    Route::put('/custom-fields/{id}', [CustomFieldController::class, 'update'])->name('custom_fields.update');
+    Route::delete('/custom-fields/{id}', [CustomFieldController::class, 'destroy'])->name('custom_fields.destroy');
 });

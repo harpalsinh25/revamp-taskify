@@ -18,9 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -114,7 +114,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Vv4Zcd583hEa6kgef1a6bDP'
+      - 'Bearer h68e3ka16b4VgZEc5DavPfd'
     controller: null
     method: null
     route: null
@@ -134,8 +134,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -265,7 +266,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer efd4b6a3E1cVvkhP68D5agZ'
+      - 'Bearer kZ5D3g6a48e1bPVhEcva6fd'
     controller: null
     method: null
     route: null
@@ -285,9 +286,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -392,7 +393,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer gdv65EZ86b1akfDea3PVhc4'
+      - 'Bearer EaeDgZP6h3d5cb1V4v6fka8'
     controller: null
     method: null
     route: null
@@ -412,8 +413,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -470,7 +472,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer e4va6hEgd15PfcaVZ3D86bk'
+      - 'Bearer gaEb61PVDaeZ3h4fd6kvc85'
     controller: null
     method: null
     route: null

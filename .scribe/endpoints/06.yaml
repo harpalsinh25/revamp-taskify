@@ -16,8 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -197,7 +198,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer E6DdZ4cvfah38P6eV1bakg5'
+      - 'Bearer 4a6dbkgDh5aP8cVv36fEeZ1'
     controller: null
     method: null
     route: null
@@ -217,9 +218,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: multipart/form-data
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -499,7 +500,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer b1Z4Paae6cDkvfdhEg856V3'
+      - 'Bearer bcZ51Vvdef6aaDgPh68Ek43'
     controller: null
     method: null
     route: null
@@ -519,9 +520,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: multipart/form-data
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -811,7 +812,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer cPb16aVhegv683Da54fkZEd'
+      - 'Bearer chD4163fk6gbdPaVZveE5a8'
     controller: null
     method: null
     route: null
@@ -831,8 +832,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -895,7 +897,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ah6g4f8ZE3d51PDb6ecVavk'
+      - 'Bearer 618bag6ZfhEveak35V4cdPD'
     controller: null
     method: null
     route: null

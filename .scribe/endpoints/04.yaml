@@ -16,8 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -65,7 +66,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ZVaP1hdvEae6b64k358gfcD'
+      - 'Bearer faea3Egb1VcZ4hDv65d6Pk8'
     controller: null
     method: null
     route: null
@@ -88,9 +89,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: multipart/form-data
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -197,7 +198,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Z3f6acebDahVkgd81P45E6v'
+      - 'Bearer ePZb61hgkvd5faD836E4cVa'
     controller: null
     method: null
     route: null
@@ -217,21 +218,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the user whose profile is being updated.'
         required: true
-        example: 5
+        example: 4
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 5
+      id: 4
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -466,7 +467,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 3fDE1c6aVZvgk5aeb64Phd8'
+      - 'Bearer ZvEgahkdafcV8eP663541Db'
     controller: null
     method: null
     route: null
@@ -486,8 +487,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -532,7 +534,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 5V6DZh68kv34cEdbePagf1a'
+      - 'Bearer Ed5Dbkfv3eV6hgcaZ86aP41'
     controller: null
     method: null
     route: null

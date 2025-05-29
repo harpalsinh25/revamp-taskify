@@ -18,8 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -136,7 +137,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 1agZ36kcd8PVE6hab4vef5D'
+      - 'Bearer VbZD6vgaf35h1a46cPdE8ke'
     controller: null
     method: null
     route: null
@@ -156,9 +157,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -168,7 +169,7 @@ endpoints:
         name: title
         description: 'The title of the status.'
         required: true
-        example: eligendi
+        example: officiis
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -177,7 +178,7 @@ endpoints:
         name: color
         description: 'The color code associated with the status.'
         required: true
-        example: eligendi
+        example: ut
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -187,16 +188,16 @@ endpoints:
         description: 'optional An array of role IDs to be associated with the status.'
         required: false
         example:
-          - fugiat
+          - qui
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      title: eligendi
-      color: eligendi
+      title: officiis
+      color: ut
       role_ids:
-        - fugiat
+        - qui
     fileParameters: []
     responses:
       -
@@ -244,7 +245,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ak15f36evZDgcEbPV8d46ah'
+      - 'Bearer 1a6eh6g3f84baVd5PckDEZv'
     controller: null
     method: null
     route: null
@@ -264,9 +265,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -276,7 +277,7 @@ endpoints:
         name: id
         description: 'The ID of the status to update.'
         required: true
-        example: 10
+        example: 15
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -285,7 +286,7 @@ endpoints:
         name: title
         description: 'The updated title of the status.'
         required: true
-        example: ad
+        example: ipsa
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -294,7 +295,7 @@ endpoints:
         name: color
         description: 'The updated color code associated with the status.'
         required: true
-        example: et
+        example: laboriosam
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -304,17 +305,17 @@ endpoints:
         description: 'optional An array of role IDs to associate with the status.'
         required: false
         example:
-          - dolore
+          - facilis
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      id: 10
-      title: ad
-      color: et
+      id: 15
+      title: ipsa
+      color: laboriosam
       role_ids:
-        - dolore
+        - facilis
     fileParameters: []
     responses:
       -
@@ -367,7 +368,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer kadVDbfec84EvZ136hga65P'
+      - 'Bearer aV1hv4gb65P83DefZEd6kca'
     controller: null
     method: null
     route: null
@@ -387,20 +388,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the status to retrieve.'
         required: true
-        example: 6
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 6
+      id: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -448,7 +450,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 1VDd646ac8EP5hbkga3vfeZ'
+      - 'Bearer ba5fkPg4ca3e8dv1h6DEVZ6'
     controller: null
     method: null
     route: null
@@ -470,20 +472,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the status to delete.'
         required: true
-        example: 5
+        example: 2
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 5
+      id: 2
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -526,7 +529,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 5bPd6g6eaa1hcv8Ef43VDkZ'
+      - 'Bearer V15acakDgZhEb43f6dve6P8'
     controller: null
     method: null
     route: null

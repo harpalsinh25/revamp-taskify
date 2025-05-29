@@ -65,7 +65,7 @@ class CandidateStatusController extends Controller
         $isApi = request()->get('isApi', false);
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:candidate_statuses,name',
             'color' => 'required'
         ]);
 
@@ -80,7 +80,7 @@ class CandidateStatusController extends Controller
         if (!$isApi) {
             return formatApiResponse(
                 false,
-                'Candidate status retrieved successfully!',
+                'Candidate status Created successfully!',
                 [
                     'data' => formatCandidateStatus($candidate_status)
                 ],
@@ -454,7 +454,7 @@ class CandidateStatusController extends Controller
             // Validate query parameters
             $validated = $request->validate([
                 'search' => 'nullable|string|max:255',
-                'sort' => 'nullable|string|in:id,to_email,subject,scheduled_at,created_at,updated_at',
+                'sort' => 'nullable|string|in:id,name,to_email,subject,scheduled_at,created_at,updated_at',
                 'order' => 'nullable|string|in:ASC,DESC',
                 'limit' => 'nullable|integer|min:1|max:100',
                 'offset' => 'nullable|integer|min:0',

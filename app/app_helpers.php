@@ -316,7 +316,28 @@ if (!function_exists('isClient')) {
         return Auth::guard('client')->check(); // Assuming 'role' is a field in the user model.
     }
 }
+if (!function_exists('generateUniqueSlug')) {
+    function generateUniqueSlug($title, $model, $id = null)
+    {
+        $slug = Str::slug($title);
+        $count = 2;
 
+        // If an ID is provided, add a where clause to exclude it
+        if ($id !== null) {
+            while ($model::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                $slug = Str::slug($title) . '-' . $count;
+                $count++;
+            }
+        } else {
+            while ($model::where('slug', $slug)->exists()) {
+                $slug = Str::slug($title) . '-' . $count;
+                $count++;
+            }
+        }
+
+        return $slug;
+    }
+}
 if (!function_exists('duplicateRecord')) {
     function duplicateRecord($model, $id, $relatedTables = [], $title = '')
     {
@@ -4770,11 +4791,13 @@ if (!function_exists('formatEstimateInvoice')) {
 if (!function_exists('formatLeadSource')) {
     function formatLeadSource($lead_source)
     {
+
         return [
             'id' => $lead_source->id,
             'name' => $lead_source->name,
-            'created_at' => format_date($lead_source->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($lead_source->updated_at, to_format: 'Y-m-d'),
+            'created_at' => format_date($lead_source->created_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
+            'updated_at' => format_date($lead_source->updated_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
+
         ];
     }
 }
@@ -4787,8 +4810,8 @@ if (!function_exists('formatLeadStage')) {
             'slug' => $lead_stage->slug,
             'order' => $lead_stage->order,
             'color' => $lead_stage->color,
-            'created_at' => format_date($lead_stage->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($lead_stage->updated_at, to_format: 'Y-m-d'),
+            'created_at' => format_date($lead_stage->created_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
+            'updated_at' => format_date($lead_stage->updated_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
         ];
     }
 }
@@ -4805,9 +4828,9 @@ if (!function_exists('formatLead')) {
             'country_code' => $lead->country_code,
             'country_iso_code' => $lead->country_iso_code,
             'lead_source_id' => $lead->source_id,
-            'lead_source' => $lead->source->name,
+            'lead_source' => $lead->source ? $lead->source->name : '-',
             'lead_stage_id' => $lead->stage_id,
-            'lead_stage' => $lead->stage->name,
+            'lead_stage' => $lead->stage ? $lead->stage->name : '-',
             'assigned_to' => $lead->assigned_to,
             'assigned_user' => ucfirst($lead->assigned_user->first_name) . ' ' . ucfirst($lead->assigned_user->last_name),
             'job_title' => $lead->job_title,
@@ -4876,6 +4899,23 @@ if (!function_exists('formatLeadUserHtml')) {
                 'note' => $followUp->note,
                 'created_at' => format_date($followUp->created_at, to_format: 'Y-m-d'),
                 'updated_at' => format_date($followUp->updated_at, to_format: 'Y-m-d'),
+            ];
+        }
+    }
+
+    if (!function_exists('formatCustomField')) {
+        function formatCustomField($field)
+        {
+
+            return [
+                'id' => $field->id,
+                'module' => $field->module,
+                'field_label' => $field->field_label,
+                'field_type' => $field->field_type,
+                'options' => $field->options,
+                'required' => $field->required,
+                'visibility' => $field,
+
             ];
         }
     }

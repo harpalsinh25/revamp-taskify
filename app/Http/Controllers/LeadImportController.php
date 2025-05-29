@@ -299,8 +299,7 @@ class LeadImportController extends Controller
                     // Process stage
                     if (!empty($leadData['stage'])) {
                         // Get the maximum order value
-                        $maxOrder = LeadStage::where('workspace_id', getWorkspaceId())
-                            ->max('order') ?? 0;
+                        $maxOrder = LeadStage::getNextOrderForWorkspace(getWorkspaceId());
 
                         $stage = LeadStage::where('name', $leadData['stage'])
                             ->where(function ($query) {
@@ -312,6 +311,7 @@ class LeadImportController extends Controller
                             ->first(); // Look for a matching stage based on name and workspace
 
                         if (!$stage) {
+
                             // If no matching stage is found, create a new one
                             $stage = LeadStage::create([
                                 'workspace_id' => getWorkspaceId(),
@@ -380,6 +380,7 @@ class LeadImportController extends Controller
                 }
 
                 try {
+
                     $lead = Lead::create($leadData);
                     $ids[] = $lead->id;
                     $importedLeads[] = $lead->toArray();

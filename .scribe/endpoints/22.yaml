@@ -16,8 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -204,7 +205,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Zdab66gDP148hVE53ckvfea'
+      - 'Bearer 8kP4VE65a3ehD6gvcZa1bdf'
     controller: null
     method: null
     route: null
@@ -224,8 +225,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -280,7 +282,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 1Vc3fd4aZ65g8EDakbv6heP'
+      - 'Bearer 6fDP3aak45vEe6VbdgZc81h'
     controller: null
     method: null
     route: null
@@ -303,8 +305,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -367,7 +370,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6bae36hVvdcfg1akZDP485E'
+      - 'Bearer VEgP6ev1Z6adDfah3ck4b85'
     controller: null
     method: null
     route: null

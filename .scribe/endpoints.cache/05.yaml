@@ -18,8 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -220,7 +221,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer dV66aE35k8P4fa1hgbZDvce'
+      - 'Bearer cEghdkae68f4Db5VZ3aP1v6'
     controller: null
     method: null
     route: null
@@ -240,9 +241,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: multipart/form-data
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -516,7 +517,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer hEef4b6VPZ6dgvD5aa138kc'
+      - 'Bearer chV63EeDavfPdZ18ga4k65b'
     controller: null
     method: null
     route: null
@@ -536,9 +537,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: multipart/form-data
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -809,7 +810,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 3a4a1gVbP6k5vEef8ZhDc6d'
+      - 'Bearer gckDhPZ5VaE46f61abv38ed'
     controller: null
     method: null
     route: null
@@ -829,8 +830,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -887,7 +889,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer k6a4PfV8g5c1DEZbeh3dav6'
+      - 'Bearer 1P5kgve64fEZ3b6aacDVd8h'
     controller: null
     method: null
     route: null

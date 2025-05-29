@@ -526,7 +526,6 @@ class InterviewController extends Controller
 
     public function apiList(Request $request, $id = null)
     {
-
         try {
 
             // Validate query parameters
@@ -534,6 +533,7 @@ class InterviewController extends Controller
                 'search' => 'nullable|string|max:255',
                 'sort' => 'nullable|string|in:id,newest,oldest,recently-updated,earliest-updated',
                 'limit' => 'nullable|integer|min:1|max:100',
+                'candidate_id' => 'nullable|exists:candidates,id',
                 'offset' => 'nullable|integer|min:0',
                 'candidate_status' => 'nullable|array',
                 'candidate_status.*' => 'integer|exists:candidate_statuses,id',
@@ -549,6 +549,7 @@ class InterviewController extends Controller
             $sortInput = $validated['sort'] ?? 'id';
             $limit = $validated['limit'] ?? config('pagination.default_limit', 10);
             $offset = $validated['offset'] ?? 0;
+            $candidate_id = $validated['candidate_id'] ?? null;
             $interviewStatus = request('status');
             $startDate = request()->input('start_date');
             $endDate = request()->input('end_date');
@@ -640,6 +641,9 @@ class InterviewController extends Controller
 
             if ($interviewStatus) {
                 $query->where('status', $interviewStatus);
+            }
+            if ($candidate_id) {
+                $query->where('candidate_id', $candidate_id);
             }
 
             if ($startDate && $endDate) {

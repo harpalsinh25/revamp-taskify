@@ -3758,6 +3758,7 @@
                             </div>
                             <div class="row">
                                 {!! create_label('interviews', 'Interviews', Session::get('locale')) !!}
+                                {!! create_label('interview','Interview', Session::get('locale')) !!}
                                 {!! create_label('source', 'Source', Session::get('locale')) !!}
                             </div>
                             <div class="row">
@@ -3788,6 +3789,21 @@
                                 {!! create_label('task_lists', 'Task Lists', Session::get('locale')) !!}
                                 {!! create_label('create_task_list', 'Create Task List', Session::get('locale')) !!}
                                 {!! create_label('HRMS', 'HRMS', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!!  create_label('monday','Monday',Session::get('locale')) !!}
+                                {!!  create_label('tuesday','Tuesday',Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!!  create_label('wednesday','Wednesday',Session::get('locale')) !!}
+                                {!!  create_label('thursday','Thursday',Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!!  create_label('friday','Friday',Session::get('locale')) !!}
+                                {!!  create_label('saturday','Saturday',Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!!  create_label('sunday','Sunday',Session::get('locale')) !!}
                             </div>
 
                             <div class="row">

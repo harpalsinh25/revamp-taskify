@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+# Ignore files and directories in a Laravel project
 # Laravel
 /vendor/
 node_modules/
@@ -36,7 +36,7 @@ public/assets/demo_data/public.zip
 vite.config.js
 vite.config.ts
 
-=======
+
 /node_modules
 /public/build
 /public/hot
@@ -55,5 +55,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
->>>>>>> bccc967e9817f68ebeed09283ef3673b8a5e0991
 /public/assets/demo_data/public.zip

@@ -86,9 +86,9 @@ class UserController extends Controller
      * @bodyParam doj string nullable The date of joining in the format specified in the general settings. Example: 2024-01-01
      * @bodyParam role integer required The ID of the role for the user. Example: 1
      * @bodyParam profile file nullable The profile photo of the user.
-     * @bodyParam status boolean required 0 or 1. If Deactivated (0), the user won't be able to log in to their account. 
+     * @bodyParam status boolean required 0 or 1. If Deactivated (0), the user won't be able to log in to their account.
      * Can only specify if `is_admin_or_has_all_data_access` is true for the logged-in user, else 0 will be considered by default. Example: 1
-     * @bodyParam require_ev boolean required 0 or 1. If Yes (1) is selected, the user will receive a verification link via email. 
+     * @bodyParam require_ev boolean required 0 or 1. If Yes (1) is selected, the user will receive a verification link via email.
      * Can only specify if `is_admin_or_has_all_data_access` is true for the logged-in user, else 1 will be considered by default. Example: 1
      *
      * @response 200 {
@@ -118,7 +118,7 @@ class UserController extends Controller
      *     "tasks": 0
      *   }
      * }
-     * 
+     *
      * }
      * @response 422 {
      * "error": true,
@@ -638,7 +638,7 @@ class UserController extends Controller
      *   "error": false,
      *   "message": "User deleted successfully.",
      *   "id": "1",
-     *   "title": "John Doe",     
+     *   "title": "John Doe",
      *   "data": []
      * }
      *
@@ -752,7 +752,7 @@ class UserController extends Controller
 
     /**
      * Log in an existing user.
-     * 
+     *
      * This endpoint allows a user to log in by providing their email and password. Upon successful authentication, a token is returned for accessing protected resources.
      *
      * @group User Authentication
@@ -1124,15 +1124,15 @@ class UserController extends Controller
 
     /**
      * List or search users.
-     * 
+     *
      * This endpoint retrieves a list of users based on various filters. The user must be authenticated to perform this action. The request allows filtering by status, search term, role, type, type_id, and other parameters.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @group User Management
      *
      * @urlParam id int optional The ID of the user to retrieve. Example: 1
-     * 
+     *
      * @queryParam search string optional The search term to filter users by id, first name, last name, phone, or email. Example: John
      * @queryParam sort string optional The field to sort by. Defaults to "id". Sortable fields include: id, phone, dob, doj, created_at, and updated_at. Example: id
      * @queryParam order string optional The sort order, either "ASC" or "DESC". Defaults to "DESC". Example: ASC
@@ -1142,7 +1142,7 @@ class UserController extends Controller
      * @queryParam type_id int optional The ID associated with the type filter. Example: 3
      * @queryParam limit int optional The number of users per page for pagination. Example: 10
      * @queryParam offset int optional The offset for pagination, indicating the starting point of results. Example: 0
-     * 
+     *
      * @response 200 {
      *  "error": false,
      *  "message": "Users retrieved successfully",
@@ -1173,28 +1173,28 @@ class UserController extends Controller
      *    }
      *  ]
      * }
-     * 
+     *
      * @response 200 {
      *   "error": true,
      *   "message": "User not found",
      *   "total": 0,
-     *   "data": []     
+     *   "data": []
      * }
-     * 
+     *
      * @response 200 {
      *   "error": true,
      *   "message": "Users not found",
      *   "total": 0,
      *   "data": []
      * }
-     * 
+     *
      * @response 200 {
      *   "error": true,
      *   "message": "Project not found",
      *   "total": 0,
      *   "data": []
      * }
-     * 
+     *
      * @response 200 {
      *   "error": true,
      *   "message": "Task not found",
@@ -1280,7 +1280,7 @@ class UserController extends Controller
                         ->orWhere('email', 'like', '%' . $search . '%')
                         ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
                 });
-            });            
+            });
 
             if ($status != '') {
                 $usersQuery->where('status', $status);
@@ -1323,7 +1323,9 @@ class UserController extends Controller
 
     /**
      * Update FCM Token.
-     * 
+     *
+     * @header workspace-id int required The workspace ID Example: 1
+     * @header Accept string required Example: application/json
      * This endpoint allows an authenticated user or client to update their FCM token for push notifications.
      *
      * @bodyParam fcm_token string required The new FCM token for push notifications. Example: dXkJz7KYZ9o:APA91bGfLa_qwAeD...

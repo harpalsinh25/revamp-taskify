@@ -41,7 +41,13 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="base_url" class="form-label">{{get_label('base_url','Base URL')}} <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="base_url" value="{{$sms_gateway_settings['base_url'] ?? ''}}">
+                                <input type="text" class="form-control" name="base_url"  value="{{
+                                    isset($sms_gateway_settings['base_url'])
+                                        ? (config('constants.ALLOW_MODIFICATION') === 0
+                                            ? str_repeat('*', strlen($sms_gateway_settings['base_url']))
+                                            : $sms_gateway_settings['base_url'])
+                                        : ''
+                                }}">
                             </div>
                             <div class="col-md-6">
                                 <label for="sms_gateway_method" class="form-label">{{get_label('method','Method')}} <span class="asterisk">*</span></label>
@@ -276,11 +282,23 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="whatsapp_access_token" class="form-label">{{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }} <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="whatsapp_access_token" value="{{$whatsapp_settings['whatsapp_access_token'] ?? ''}}" placeholder="{{ get_label('please_enter', 'Please Enter') }} {{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }}">
+                                <input type="text" class="form-control" name="whatsapp_access_token"  value="{{
+                                    isset($whatsapp_settings['whatsapp_access_token'])
+                                        ? (config('constants.ALLOW_MODIFICATION') === 0
+                                            ? str_repeat('*', strlen($whatsapp_settings['whatsapp_access_token']))
+                                            : $whatsapp_settings['whatsapp_access_token'])
+                                        : ''
+                                }}" placeholder="{{ get_label('please_enter', 'Please Enter') }} {{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }}">
                             </div>
                             <div class="col-md-6">
                                 <label for="whatsapp_phone_number_id" class="form-label">{{get_label('whatsapp_phone_number_id', 'WhatsApp Phone Number ID')}} <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="whatsapp_phone_number_id" value="{{$whatsapp_settings['whatsapp_phone_number_id'] ?? ''}}" placeholder="{{ get_label('please_enter', 'Please Enter') }} {{ get_label('whatsapp_phone_number_id', 'WhatsApp phone number ID') }}">
+                                <input type="text" class="form-control" name="whatsapp_phone_number_id" value="{{
+                                    isset($whatsapp_settings['whatsapp_phone_number_id'])
+                                        ? (config('constants.ALLOW_MODIFICATION') === 0
+                                            ? str_repeat('*', strlen($whatsapp_settings['whatsapp_phone_number_id']))
+                                            : $whatsapp_settings['whatsapp_phone_number_id'])
+                                        : ''
+                                }}" placeholder="{{ get_label('please_enter', 'Please Enter') }} {{ get_label('whatsapp_phone_number_id', 'WhatsApp phone number ID') }}">
                             </div>
                         </div>
                         <div class="mt-2">
@@ -311,7 +329,13 @@
                                     class="form-label">{{ get_label('slack_bot_token', 'Slack bot token') }}
                                     <span class="asterisk">*</span></label>
                                 <input type="text" class="form-control" name="slack_bot_token"
-                                    value="{{ $slack_settings['slack_bot_token'] ?? '' }}"
+                                value="{{
+                                    isset($slack_settings['slack_bot_token'])
+                                        ? (config('constants.ALLOW_MODIFICATION') === 0
+                                            ? str_repeat('*', strlen($slack_settings['slack_bot_token']))
+                                            : $slack_settings['slack_bot_token'])
+                                        : ''
+                                }}"
                                     placeholder="{{ get_label('slack_bot_token', 'Slack bot token') }}">
                             </div>
                         </div>

@@ -14,7 +14,8 @@ class LeadStage extends Model
         'workspace_id',
         'name',
         'order',
-        'color'
+        'color',
+        'slug'
     ];
 
     protected static function booted(): void

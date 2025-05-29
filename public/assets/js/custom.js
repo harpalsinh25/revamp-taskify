@@ -2970,7 +2970,7 @@ if (
     // setInterval(updateUnreadNotifications, 30000);
 }
 $(
-    "textarea#email_verify_email,textarea#email_account_creation,textarea#email_forgot_password,textarea#email_project_assignment,textarea#email_task_assignment,textarea#email_workspace_assignment,textarea#email_meeting_assignment,textarea#email_leave_request_creation,textarea#email_leave_request_status_updation,textarea#email_project_status_updation,textarea#email_task_status_updation,textarea#email_team_member_on_leave_alert,textarea#email_birthday_wish,#email_work_anniversary_wish,textarea#email_task_reminder,textarea#email_recurring_task,textarea#template-body,textarea#editBody"
+    "textarea#email_verify_email,textarea#email_account_creation,textarea#email_forgot_password,textarea#email_project_assignment,textarea#email_task_assignment,textarea#email_workspace_assignment,textarea#email_meeting_assignment,textarea#email_leave_request_creation,textarea#email_leave_request_status_updation,textarea#email_project_status_updation,textarea#email_task_status_updation,textarea#email_team_member_on_leave_alert,textarea#email_birthday_wish,#email_work_anniversary_wish,textarea#email_task_reminder,textarea#email_recurring_task,textarea#template-body,textarea#editBody,textarea#email_interview_assignment,textarea#email_interview_status_update"
 ).tinymce({
     height: 821,
     menubar: true,

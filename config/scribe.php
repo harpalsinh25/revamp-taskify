@@ -11,8 +11,8 @@ return [
 
     // The base URL displayed in the docs. If this is empty, Scribe will use the value of config('app.url') at generation time.
     // If you're using `laravel` type, you can set this to a dynamic string, like '{{ config("app.tenant_url") }}' to get a dynamic base URL.
-    // 'base_url' => 'http://localhost:8000/',
-    'base_url' => env('APP_URL'),
+    'base_url' => 'http://localhost:8000/',
+    // 'base_url' => env('APP_URL'),
 
     'routes' => [
         [
@@ -37,6 +37,11 @@ return [
             'exclude' => [
                 // 'GET /health', 'admin.*'
             ],
+
+            'apply' => [
+                'headers' => ['Api-Version' => 'v2']
+            ]
+
         ],
     ],
 
@@ -45,7 +50,7 @@ return [
     // - "laravel" will generate the documentation as a Blade view, so you can add routing and authentication.
     // - "external_static" and "external_laravel" do the same as above, but generate a basic template,
     // passing the OpenAPI spec as a URL, allowing you to easily use the docs with an external generator
-    'type' => 'static',
+    'type' => 'static ',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
     'theme' => 'default',
@@ -433,7 +438,43 @@ INTRO,
                 'POST /lead-stages/update',
                 'DELETE /lead-stages/destroy/{id}',
                 'POST /lead-stages/reorder',
-            ]
+            ],
+            'Custom Field Management' => [
+                // Custome Fields
+                'POST /custom-fields',
+                'PUT /custom-fields/{id}',
+                'GET /custom-fields/list/{id?}',
+                'DELETE /custom-fields/{id}',
+            ],
+
+            'Payslip Management' => [
+                // Payslip
+                'POST /payslips/store',
+                'POST /payslips/update',
+                'DELETE /payslips/destroy/{id}',
+                'GET /payslips/list',
+            ],
+            'Contracts Management' => [
+                // Contracts
+                'POST /contracts/store',
+                'POST /contracts/update',
+                'GET /contracts/list',
+                'GET /contracts/get/{id}',
+                'GET /contracts/sign/{id}',
+                'POST /contracts/create-sign',
+                'DELETE /contracts/destroy/{id}',
+                'DELETE /contracts/delete-sign/{id}',
+            ],
+
+            'Contract Types Management' => [
+                // Contract Types
+                'POST /contracts/store-contract-type',
+                'POST /contracts/update-contract-type',
+                'GET /contracts/contract-types-list',
+                'GET /contracts/get-contract-type/{id}',
+                'DELETE /contracts/delete-contract-type/{id}',
+            ],
+
 
 
 
@@ -491,11 +532,11 @@ INTRO,
             [
                 'override',
                 [
-                    // 'Content-Type' => 'application/json',
+                    'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
-                    'workspace_id' => 1,
+                    'workspace-id' => 1,  // Note: use hyphen, not underscore
                 ]
-            ]
+            ],
         ],
         'bodyParameters' => [
             Strategies\BodyParameters\GetFromFormRequest::class,

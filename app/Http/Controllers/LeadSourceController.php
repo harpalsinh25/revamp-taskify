@@ -27,7 +27,7 @@ class LeadSourceController extends Controller
 
     public function index()
     {
-        $lead_sources = $this->workspace->lead_sources;
+        $lead_sources = $this->workspace->lead_sources();
         return view('lead_sources.index', compact('lead_sources'));
     }
 
@@ -406,77 +406,83 @@ class LeadSourceController extends Controller
      */
     public function apiList()
     {
-        $limit = request('limit', 10);
-        $offset = request('offset', 0);
-        $id = request('id', null);
-        $search = request('search');
-        $sort = request('sort', "id");
-        $order = request('order', "DESC");
-        $limit = request('limit', 10);
 
-        $lead_sources = $this->workspace->lead_sources();
-        $lead_sources  = $lead_sources->orderBy($sort, $order);
+        try {
 
-        if ($search) {
-            $lead_sources->where(function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('id', 'like', '%' . $search . '%');
-            });
-        }
+            $limit = request('limit', 10);
+            $offset = request('offset', 0);
+            $id = request('id', null);
+            $search = request('search');
+            $sort = request('sort', "id");
+            $order = request('order', "DESC");
+            $limit = request('limit', 10);
 
-        $total = $lead_sources->count();
+            $lead_sources = $this->workspace->lead_sources();
+            $lead_sources  = $lead_sources->orderBy($sort, $order);
 
-        if ($id) {
-            $lead_source = $lead_sources->find($id);
-            if (!$lead_source) {
+            if ($search) {
+                $lead_sources->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('id', 'like', '%' . $search . '%');
+                });
+            }
+
+            $total = $lead_sources->count();
+            // dd($total);
+            if ($id) {
+                $lead_source = $lead_sources->find($id);
+                if (!$lead_source) {
+                    return formatApiResponse(
+                        false,
+                        'Lead Source Not Found.',
+                        [
+                            'total' => 0,
+                            'data' => []
+                        ],
+                        404
+                    );
+                }
                 return formatApiResponse(
                     false,
-                    'Lead Source Not Found.',
+                    'Lead Source Retrived Successfully.',
                     [
-                        'total' => 0,
-                        'data' => []
+                        'total' => 1,
+                        'data' => formatLeadSource($lead_source)
                     ],
-                    404
+                    200
                 );
-            }
-            return formatApiResponse(
-                false,
-                'Lead Source Retrived Successfully.',
-                [
-                    'total' => 1,
-                    'data' => formatLeadSource($lead_source)
-                ],
-                200
-            );
-        } else {
-            $lead_sources = $lead_sources->orderBy($sort, $order)->skip($offset)->take($limit)->get();
-            if ($lead_sources->isEmpty()) {
+            } else {
+                $lead_sources = $lead_sources->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+                if ($lead_sources->isEmpty()) {
+                    return formatApiResponse(
+                        false,
+                        'Lead Sources Not Found.',
+                        [
+                            'total' => 0,
+                            'data' => []
+                        ],
+                        404
+                    );
+                }
+                $data = $lead_sources->map(function ($lead_source) {
+                    return formatLeadSource($lead_source);
+                });
                 return formatApiResponse(
                     false,
-                    'Lead Sources Not Found.',
+                    'Lead Sources Retrived Successfully.',
                     [
-                        'total' => 0,
-                        'data' => []
+                        'total' => $total,
+                        'data' => $data,
+                        'permissions' => [
+                            'can_delete' => checkPermission('manage_leads'),
+                            'can_edit' => checkPermission('manage_leads')
+                        ]
                     ],
-                    404
+                    200
                 );
             }
-            $data = $lead_sources->map(function ($lead_source) {
-                return formatLeadSource($lead_source);
-            });
-            return formatApiResponse(
-                false,
-                'Lead Sources Retrived Successfully.',
-                [
-                    'total' => $total,
-                    'data' => $data,
-                    'permissions' => [
-                        'can_delete' => checkPermission('manage_leads'),
-                        'can_edit' => checkPermission('manage_leads')
-                    ]
-                ],
-                200
-            );
+        } catch (\Exception $e) {
+            dd($e);
         }
     }
 

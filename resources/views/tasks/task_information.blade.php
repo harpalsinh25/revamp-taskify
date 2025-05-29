@@ -261,13 +261,13 @@
                                                         <i class="bx bx-calendar text-dark me-1"></i>
                                                         @php
                                                             $dayNames = [
-                                                                1 => 'Monday',
-                                                                2 => 'Tuesday',
-                                                                3 => 'Wednesday',
-                                                                4 => 'Thursday',
-                                                                5 => 'Friday',
-                                                                6 => 'Saturday',
-                                                                7 => 'Sunday',
+                                                                1 => get_label('monday', 'Monday'),
+                                                                2 => get_label('tuesday', 'Tuesday'),
+                                                                3 => get_label('wednesday', 'Wednesday'),
+                                                                4 => get_label('thursday', 'Thursday'),
+                                                                5 => get_label('friday', 'Friday'),
+                                                                6 => get_label('saturday', 'Saturday'),
+                                                                7 => get_label('sunday', 'Sunday'),
                                                             ];
                                                             $dayName = $reminder->day_of_week
                                                                 ? get_label(
@@ -343,7 +343,7 @@
                             </div>
                         </div>
 
-                        
+
                         <!-- Recurring Task-->
                         <div class="col-md-12 mb-4">
                         <div class="shadow-sm">
@@ -525,7 +525,7 @@
                 }
                 @endphp
                 @endif
-            
+
                 @if(!$task->parent_id)
                  <li class="nav-item">
                     <button type="button" class="nav-link {{ $activeTab == 'sub_task' ? 'active' : '' }}" role="tab"
@@ -600,11 +600,11 @@
                 @endif
 
 
-               
+
             </ul>
 
             <div class="tab-content">
-              
+
                 @if (Auth::guard('web')->check() || $task->client_can_discuss)
                 <div class="tab-pane fade {{ $activeTab == 'discussions' ? 'active show' : '' }}" id="navs-top-discussions"
                     role="tabpanel">
@@ -648,7 +648,7 @@
                     </div>
                 </div>
                 @endif
- 
+
                 <div class="tab-pane fade {{ $activeTab == 'status_timeline' ? 'active show' : '' }}"
                     id="navs-top-status_timeline" role="tabpanel">
                     <!-- Status timeline content -->
@@ -672,7 +672,7 @@
                     </div>
                     <x-tasks-card :tasks="$subtasks" :id="$id" :project="$project" :favorites="$is_favorites" />
                 </div>
-                 
+
                 @if ($auth_user->can('manage_activity_log'))
                 <div class="tab-pane fade {{ $activeTab == 'activity_log' ? 'active show' : '' }}" id="navs-top-activity-log" role="tabpanel">
                     <div class="col-12">
@@ -752,7 +752,7 @@
 
                 @if ($task->project->enable_tasks_time_entries == 1)
                     <div class="tab-pane fade" id="navs-top-time-entries" role="tabpanel">
-                        <x-task-time-entries-card :task="$task" /> 
+                        <x-task-time-entries-card :task="$task" />
                     </div>
                 @endif
             </div>
@@ -893,7 +893,7 @@
                     </form>
                 </div>
         </div>
-       
+
     </div>
     <script>
         var label_delete = '<?= get_label('delete', 'Delete') ?>';

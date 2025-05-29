@@ -18,9 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -214,7 +214,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Ehebgf4v5PD6daV6a3k1c8Z'
+      - 'Bearer vgeaEk1h436c8PbVd65DfZa'
     controller: null
     method: null
     route: null
@@ -234,8 +234,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -447,7 +448,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer faP63h81dDaZvk4E6eg5bcV'
+      - 'Bearer 8ga4Pceb1a53E6kvf6VhZDd'
     controller: null
     method: null
     route: null
@@ -467,9 +468,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -667,7 +668,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 3ka6a1DfvZ6bhPEc5dVe8g4'
+      - 'Bearer Va5bgEkd4136vZchefP6Da8'
     controller: null
     method: null
     route: null
@@ -687,8 +688,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
@@ -745,7 +747,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Ph8Zcgabv4e566EDa1df3Vk'
+      - 'Bearer b8veaf6gD54P13ZdakE6hVc'
     controller: null
     method: null
     route: null

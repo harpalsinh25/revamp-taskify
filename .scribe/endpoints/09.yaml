@@ -16,9 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -28,7 +28,7 @@ endpoints:
         name: project_id
         description: 'The ID of the project to which the milestone belongs.'
         required: true
-        example: 8
+        example: 12
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -37,7 +37,7 @@ endpoints:
         name: title
         description: 'The title of the milestone.'
         required: true
-        example: cum
+        example: dolore
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -46,7 +46,7 @@ endpoints:
         name: status
         description: 'The status of the milestone.'
         required: true
-        example: voluptas
+        example: magni
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -55,7 +55,7 @@ endpoints:
         name: start_date
         description: 'optional The start date of the milestone (YYYY-MM-DD).'
         required: false
-        example: eligendi
+        example: enim
         type: date
         enumValues: []
         exampleWasSpecified: false
@@ -64,7 +64,7 @@ endpoints:
         name: end_date
         description: 'optional The end date of the milestone (YYYY-MM-DD).'
         required: false
-        example: quia
+        example: tenetur
         type: date
         enumValues: []
         exampleWasSpecified: false
@@ -73,7 +73,7 @@ endpoints:
         name: cost
         description: 'The cost of the milestone.'
         required: true
-        example: ut
+        example: sunt
         type: numeric
         enumValues: []
         exampleWasSpecified: false
@@ -82,19 +82,19 @@ endpoints:
         name: description
         description: 'optional A description of the milestone.'
         required: false
-        example: 'Quod atque ea modi ut.'
+        example: 'Omnis et eaque voluptatem omnis expedita.'
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      project_id: 8
-      title: cum
-      status: voluptas
-      start_date: eligendi
-      end_date: quia
-      cost: ut
-      description: 'Quod atque ea modi ut.'
+      project_id: 12
+      title: dolore
+      status: magni
+      start_date: enim
+      end_date: tenetur
+      cost: sunt
+      description: 'Omnis et eaque voluptatem omnis expedita.'
     fileParameters: []
     responses:
       -
@@ -140,7 +140,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 14d8b36g6PefhDkVEaZa5vc'
+      - 'Bearer eZ5d8c3vgE6V1Dab4h6kfPa'
     controller: null
     method: null
     route: null
@@ -162,26 +162,27 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose milestones are to be retrieved.'
         required: true
-        example: 17
+        example: 12
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 17
+      id: 12
     queryParameters:
       search:
         name: search
         description: 'optional Search for milestones by title, ID, cost, or description.'
         required: false
-        example: voluptas
+        example: animi
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -190,7 +191,7 @@ endpoints:
         name: sort
         description: 'optional Field to sort by (default: "id").'
         required: false
-        example: totam
+        example: quibusdam
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -199,7 +200,7 @@ endpoints:
         name: order
         description: 'optional Sorting order (ASC/DESC, default: "DESC").'
         required: false
-        example: non
+        example: quos
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -209,7 +210,7 @@ endpoints:
         description: 'optional Filter by milestone statuses.'
         required: false
         example:
-          - aut
+          - alias
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
@@ -218,7 +219,7 @@ endpoints:
         name: date_between_from
         description: 'date optional Filter milestones starting from this date.'
         required: false
-        example: ut
+        example: autem
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -227,7 +228,7 @@ endpoints:
         name: date_between_to
         description: 'date optional Filter milestones ending at this date.'
         required: false
-        example: sint
+        example: rerum
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -236,7 +237,7 @@ endpoints:
         name: start_date_from
         description: 'date optional Filter milestones with a start date after this date.'
         required: false
-        example: iste
+        example: repellendus
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -245,7 +246,7 @@ endpoints:
         name: start_date_to
         description: 'date optional Filter milestones with a start date before this date.'
         required: false
-        example: voluptatem
+        example: et
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -254,7 +255,7 @@ endpoints:
         name: end_date_from
         description: 'date optional Filter milestones with an end date after this date.'
         required: false
-        example: quo
+        example: maxime
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -263,7 +264,7 @@ endpoints:
         name: end_date_to
         description: 'date optional Filter milestones with an end date before this date.'
         required: false
-        example: nobis
+        example: et
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -278,17 +279,17 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanQueryParameters:
-      search: voluptas
-      sort: totam
-      order: non
+      search: animi
+      sort: quibusdam
+      order: quos
       statuses:
-        - aut
-      date_between_from: ut
-      date_between_to: sint
-      start_date_from: iste
-      start_date_to: voluptatem
-      end_date_from: quo
-      end_date_to: nobis
+        - alias
+      date_between_from: autem
+      date_between_to: rerum
+      start_date_from: repellendus
+      start_date_to: et
+      end_date_from: maxime
+      end_date_to: et
       limit: 9
     bodyParameters: []
     cleanBodyParameters: []
@@ -333,7 +334,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer fhEZaDV5e41abvdPk36g8c6'
+      - 'Bearer 83dbh5E4gVekDva6aPfc61Z'
     controller: null
     method: null
     route: null
@@ -353,20 +354,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the milestone to retrieve.'
         required: true
-        example: 1
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 1
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -407,7 +409,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer PVD4c18EZ5f3aeah6vkdgb6'
+      - 'Bearer a8EfZ5hVbPDve6cg613ad4k'
     controller: null
     method: null
     route: null
@@ -427,21 +429,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Accept: application/json
-      workspace_id: 1
       Content-Type: application/json
+      Accept: application/json
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the milestone to be updated.'
         required: true
-        example: 13
+        example: 6
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 13
+      id: 6
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -449,7 +451,7 @@ endpoints:
         name: title
         description: 'The updated title of the milestone.'
         required: true
-        example: porro
+        example: sit
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -458,7 +460,7 @@ endpoints:
         name: status
         description: 'The updated status of the milestone.'
         required: true
-        example: libero
+        example: quis
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -467,7 +469,7 @@ endpoints:
         name: start_date
         description: 'optional The updated start date of the milestone (YYYY-MM-DD).'
         required: false
-        example: harum
+        example: cum
         type: date
         enumValues: []
         exampleWasSpecified: false
@@ -476,7 +478,7 @@ endpoints:
         name: end_date
         description: 'optional The updated end date of the milestone (YYYY-MM-DD).'
         required: false
-        example: quo
+        example: ut
         type: date
         enumValues: []
         exampleWasSpecified: false
@@ -485,7 +487,7 @@ endpoints:
         name: cost
         description: 'The updated cost of the milestone.'
         required: true
-        example: architecto
+        example: in
         type: numeric
         enumValues: []
         exampleWasSpecified: false
@@ -494,7 +496,7 @@ endpoints:
         name: progress
         description: 'The updated progress percentage of the milestone.'
         required: true
-        example: 8
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -503,19 +505,19 @@ endpoints:
         name: description
         description: 'optional An updated description of the milestone.'
         required: false
-        example: 'Et quia neque eius voluptas.'
+        example: 'Autem quis fuga repellendus quaerat mollitia aliquam.'
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      title: porro
-      status: libero
-      start_date: harum
-      end_date: quo
-      cost: architecto
-      progress: 8
-      description: 'Et quia neque eius voluptas.'
+      title: sit
+      status: quis
+      start_date: cum
+      end_date: ut
+      cost: in
+      progress: 16
+      description: 'Autem quis fuga repellendus quaerat mollitia aliquam.'
     fileParameters: []
     responses:
       -
@@ -571,7 +573,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 61fbh8Vg5Ek4caZD6evadP3'
+      - 'Bearer ga66f5b1VZD8Pached4Ekv3'
     controller: null
     method: null
     route: null
@@ -591,20 +593,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
       Accept: application/json
-      workspace_id: 1
+      workspace-id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the milestone to delete.'
         required: true
-        example: 15
+        example: 17
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: 15
+      id: 17
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -650,7 +653,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer cD36ae4kh1PvVd6g5af8EZb'
+      - 'Bearer 1kb86P4v6cae53hfZdaEVgD'
     controller: null
     method: null
     route: null

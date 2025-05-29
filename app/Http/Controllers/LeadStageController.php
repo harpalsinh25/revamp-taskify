@@ -539,6 +539,7 @@ class LeadStageController extends Controller
                 200
             );
         } catch (\Exception $e) {
+            dd($e);
             return formatApiResponse(
                 true,
                 config('app.debug') ? $e->getMessage() : 'An error occurred.',
