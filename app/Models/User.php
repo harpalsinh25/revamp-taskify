@@ -39,7 +39,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'doj',
         'status',
         'email_verified_at',
-        'default_workspace_id'
+        'default_workspace_id',
+        'fcm_token',
     ];
 
     /**

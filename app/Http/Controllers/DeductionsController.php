@@ -31,44 +31,124 @@ class DeductionsController extends Controller
         return view('deductions.list', ['deductions' => $deductions]);
     }
 
+
+    /**
+     * Create a new deduction.
+     *
+     * Creates a deduction in the current workspace. Deductions can be of type `amount` or `percentage`.
+     *
+     * @group Deduction Management
+     *
+     * @bodyParam title string required The name/title of the deduction. Must be unique. Example: Income Tax
+     * @bodyParam type string required The type of deduction. Either "amount" or "percentage". Example: percentage
+     * @bodyParam amount string The fixed amount for the deduction. Required if type is "amount". Example: 150.00
+     * @bodyParam percentage numeric The percentage value of the deduction. Required if type is "percentage". Example: 5
+     * @bodyParam isApi boolean optional Whether to return a formatted API response. Defaults to false. Example: true
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Deduction created successfully.",
+     *   "data": {
+     *     "id": 9,
+     *     "title": "Income Tax",
+     *     "type": "Percentage",
+     *     "percentage": 5,
+     *     "amount": "0.00",
+     *     "created_at": "30 May, 2025",
+     *     "updated_at": "30 May, 2025"
+     *   }
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "The given data was invalid.",
+     *   "data": {
+     *     "errors": {
+     *       "title": ["The title field is required."],
+     *       "type": ["The type field is required."]
+     *     }
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred",
+     *   "data": []
+     * }
+     */
+
     public function store(Request $request)
     {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'title' => 'required|unique:deductions,title',
-            'type' => [
-                'required',
-                Rule::in(['amount', 'percentage']),
-            ],
-            'amount' => [
-                Rule::requiredIf(function () use ($request) {
-                    return $request->type === 'amount';
-                }),
-                'nullable',
-                function ($attribute, $value, $fail) {
-                    $error = validate_currency_format($value, 'amount');
-                    if ($error) {
-                        $fail($error);
+
+        try {
+
+            $isApi = request()->get('isApi', false);
+
+            // Validate the request data
+            $validatedData = $request->validate([
+                'title' => 'required|unique:deductions,title',
+                'type' => [
+                    'required',
+                    Rule::in(['amount', 'percentage']),
+                ],
+                'amount' => [
+                    Rule::requiredIf(function () use ($request) {
+                        return $request->type === 'amount';
+                    }),
+                    'nullable',
+                    function ($attribute, $value, $fail) {
+                        $error = validate_currency_format($value, 'amount');
+                        if ($error) {
+                            $fail($error);
+                        }
                     }
+                ],
+                'percentage' => [
+                    Rule::requiredIf(function () use ($request) {
+                        return $request->type === 'percentage';
+                    }),
+                    'nullable',
+                    'numeric',
+                ],
+            ], [
+                'percentage.numeric' => 'Percentage must be a numeric value.'
+            ]);
+            $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
+            $validatedData['amount'] = $validatedData['amount'] !== '' ? $validatedData['amount'] : null;
+            $validatedData['workspace_id'] = $this->workspace->id;
+            if ($deduction = Deduction::create($validatedData)) {
+
+                if ($isApi) {
+                    return formatApiResponse(
+                        false,
+                        'Deduction created successfully.',
+                        [
+                            'data' => formatDeduction($deduction)
+                        ]
+                    );
                 }
-            ],
-            'percentage' => [
-                Rule::requiredIf(function () use ($request) {
-                    return $request->type === 'percentage';
-                }),
-                'nullable',
-                'numeric',
-            ],
-        ], [
-            'percentage.numeric' => 'Percentage must be a numeric value.'
-        ]);
-        $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
-        $validatedData['amount'] = $validatedData['amount'] !== '' ? $validatedData['amount'] : null;
-        $validatedData['workspace_id'] = $this->workspace->id;
-        if ($deduction = Deduction::create($validatedData)) {
-            return response()->json(['error' => false, 'message' => 'Deduction created successfully.', 'id' => $deduction->id, 'deduction' => $deduction]);
-        } else {
-            return response()->json(['error' => true, 'message' => 'Deduction couldn\'t created.']);
+
+                return response()->json(['error' => false, 'message' => 'Deduction created successfully.', 'id' => $deduction->id, 'deduction' => $deduction]);
+            } else {
+
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Deduction couldn\'t created.',
+                        [],
+
+                    );
+                }
+
+                return response()->json(['error' => true, 'message' => 'Deduction couldn\'t created.']);
+            }
+        } catch (\Exception $e) {
+            return formatApiResponse(
+                true,
+                config('app.debug') ? $e->getMessage() : 'An error occurred.',
+                [],
+                500
+            );
         }
     }
 
@@ -133,68 +213,308 @@ class DeductionsController extends Controller
     }
 
 
+    /**
+     * Get list of deductions.
+     *
+     * Returns a list of deductions for the current workspace in API format, with optional filtering and sorting.
+     *
+     * @group Deduction Management
+     *
+     * @queryParam search string optional Search keyword to filter deductions. Example: Tax
+     * @queryParam sort string optional Field to sort by. Defaults to "id". Example: title
+     * @queryParam order string optional Sort order: ASC or DESC. Defaults to DESC. Example: ASC
+     * @queryParam limit integer optional Number of records to return. Defaults to 10. Example: 25
+     * @queryParam types[] string[] optional Filter by deduction types. Options: amount, percentage. Example: ["percentage"]
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Deductions retrieved successfully.",
+     *     "total": 1,
+     *     "data": [
+     *       {
+     *         "id": 1
+     *         "title": "Income Tax",
+     *         "type": "Percentage",
+     *         "percentage": 5,
+     *         "amount": "0.00",
+     *         "created_at": "30 May, 2025",
+     *         "updated_at": "30 May, 2025"
+     *       }
+     *     ]
+     * }
+     */
+
+
+    public function apiList()
+    {
+        $search = request('search');
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
+        $limit = (request('order')) ? request('limit') : 10;
+        $types = request('types');
+        $deductions = $this->workspace->deductions();
+        if ($search) {
+            $deductions = $deductions->where(function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('amount', 'like', '%' . $search . '%')
+                    ->orWhere('percentage', 'like', '%' . $search . '%')
+                    ->orWhere('type', 'like', '%' . $search . '%')
+                    ->orWhere('id', 'like', '%' . $search . '%');
+            });
+        }
+        if (!empty($types)) {
+            $deductions = $deductions->whereIn('type', $types);
+        }
+
+        $total = $deductions->count();
+        $deductions = $deductions->orderBy($sort, $order)
+            ->take($limit)
+            ->get()
+            ->map(function ($deduction) {
+
+                return formatDeduction($deduction);
+            });
+
+
+        return formatApiResponse(
+            false,
+            'Deduction retrieved successfully.',
+            [
+                'total' => $total,
+                'data' => $deductions
+            ]
+        );
+    }
+
+
+    /**
+     * Get a deduction by ID.
+     *
+     * Retrieves a specific deduction using its ID.
+     *
+     * @group Deduction Management
+     *
+     * @urlParam id integer required The ID of the deduction to retrieve. Must exist in the `deductions` table. Example: 1
+     * @queryParam isApi boolean optional Whether to return a formatted API response. Defaults to false. Example: true
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Deduction retrieved successfully.",
+     *   "data": {
+     *     "id": 1,
+     *     "title": "Income Tax",
+     *     "type": "Percentage",
+     *     "percentage": 5,
+     *     "amount": "0.00",
+     *     "created_at": "30 May, 2025",
+     *     "updated_at": "30 May, 2025"
+     *   }
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "No query results for model [App\\Models\\Deduction] 9999",
+     *   "data": []
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred",
+     *   "data": []
+     * }
+     */
 
     public function get($id)
     {
-        $deduction = Deduction::findOrFail($id);
-        $deduction->amount = format_currency($deduction->amount, false, false);
-        return response()->json(['deduction' => $deduction]);
-    }
+        try {
 
-    public function update(Request $request)
-    {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'title' => 'required|unique:deductions,title,' . $request->id,
-            'type' => [
-                'required',
-                Rule::in(['amount', 'percentage']),
-            ],
-            'amount' => [
-                Rule::requiredIf(function () use ($request) {
-                    return $request->type === 'amount';
-                }),
-                'nullable',
-                function ($attribute, $value, $fail) {
-                    $error = validate_currency_format($value, 'amount');
-                    if ($error) {
-                        $fail($error);
-                    }
-                }
-            ],
-            'percentage' => [
-                Rule::requiredIf(function () use ($request) {
-                    return $request->type === 'percentage';
-                }),
-                'nullable',
-                'numeric',
-            ],
-        ], [
-            'percentage.numeric' => 'Percentage must be a numeric value.'
-        ]);
+            $isApi = request()->get('isApi', false);
 
-        $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
-        // Set workspace_id
-        $validatedData['workspace_id'] = $this->workspace->id;
+            $deduction = Deduction::findOrFail($id);
+            $deduction->amount = format_currency($deduction->amount, false, false);
 
-        // Ensure deduction exists
-        $deduction = Deduction::findOrFail($request->id);
+            if ($isApi) {
+                return formatApiResponse(
+                    false,
+                    'Deduction retrieved successfully.',
+                    [
+                        'data' => formatDeduction($deduction)
+                    ]
+                );
+            }
 
-        // Update deduction
-        if ($deduction->update($validatedData)) {
-            return response()->json([
-                'error' => false,
-                'message' => 'Deduction updated successfully.',
-                'id' => $deduction->id,
-            ]);
-        } else {
-            return response()->json([
-                'error' => true,
-                'message' => 'Deduction couldn\'t be updated.',
-            ]);
+            return response()->json(['deduction' => $deduction]);
+        } catch (\Exception $e) {
+
+            return formatApiResponse(
+                true,
+                config('app.debug') ? $e->getMessage() : 'An error occurred',
+                [],
+                500
+            );
         }
     }
 
+    /**
+     * Update an existing deduction.
+     *
+     * Updates the specified deduction in the current workspace.
+     *
+     * @group Deduction Management
+     *
+     * @bodyParam id integer required The ID of the deduction to update. Must exist in the `deductions` table. Example: 1
+     * @bodyParam title string required The name/title of the deduction. Must be unique. Example: Updated Income Tax
+     * @bodyParam type string required The type of deduction. Either "amount" or "percentage". Example: amount
+     * @bodyParam amount string optional The fixed amount for the deduction. Required if type is "amount". Example: 100.00
+     * @bodyParam percentage numeric optional The percentage value of the deduction. Required if type is "percentage". Example: 10
+     * @bodyParam isApi boolean optional Whether to return a formatted API response. Defaults to false. Example: true
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Deduction updated successfully.",
+     *   "data": {
+     *     "id": 1,
+     *     "title": "Updated Income Tax",
+     *     "type": "Amount",
+     *     "percentage": null,
+     *     "amount": "100.00",
+     *     "created_at": "30 May, 2025",
+     *     "updated_at": "30 May, 2025"
+     *   }
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "No query results for model [App\\Models\\Deduction] 9999",
+     *   "data": []
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "The given data was invalid.",
+     *   "data": {
+     *     "errors": {
+     *       "title": ["The title has already been taken."]
+     *     }
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred",
+     *   "data": []
+     * }
+     */
+
+
+    public function update(Request $request)
+    {
+
+        try {
+
+            $isApi = request()->get('isApi', false);
+
+            // Validate the request data
+            $validatedData = $request->validate([
+                'title' => 'required|unique:deductions,title,' . $request->id,
+                'type' => [
+                    'required',
+                    Rule::in(['amount', 'percentage']),
+                ],
+                'amount' => [
+                    Rule::requiredIf(function () use ($request) {
+                        return $request->type === 'amount';
+                    }),
+                    'nullable',
+                    function ($attribute, $value, $fail) {
+                        $error = validate_currency_format($value, 'amount');
+                        if ($error) {
+                            $fail($error);
+                        }
+                    }
+                ],
+                'percentage' => [
+                    Rule::requiredIf(function () use ($request) {
+                        return $request->type === 'percentage';
+                    }),
+                    'nullable',
+                    'numeric',
+                ],
+            ], [
+                'percentage.numeric' => 'Percentage must be a numeric value.'
+            ]);
+
+            $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
+            // Set workspace_id
+            $validatedData['workspace_id'] = $this->workspace->id;
+
+            // Ensure deduction exists
+            $deduction = Deduction::findOrFail($request->id);
+
+            // Update deduction
+            if ($deduction->update($validatedData)) {
+
+                if ($isApi) {
+                    return formatApiResponse(
+                        false,
+                        'Deduction updated successfully.',
+                        [
+                            'data' => formatDeduction($deduction)
+                        ]
+                    );
+                }
+
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Deduction updated successfully.',
+                    'id' => $deduction->id,
+                ]);
+            } else {
+
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Deduction couldn\'t be updated.',
+                        []
+                    );
+                }
+
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Deduction couldn\'t be updated.',
+                ]);
+            }
+        } catch (\Exception $e) {
+            return formatApiResponse(
+                true,
+                config('app.debug') ? $e->getMessage() : 'An error occurred ',
+                [],
+                500
+            );
+        }
+    }
+
+    /**
+     * Delete a deduction.
+     *
+     * Deletes the deduction with the given ID and detaches associated payslips.
+     *
+     * @group Deduction Management
+     *
+     * @urlParam id integer required The ID of the deduction to delete. Must exist in the `deductions` table. Example: 2
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Deduction deleted successfully.",
+     *   "data": []
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Deduction not found.",
+     *   "data": []
+     * }
+     */
 
     public function destroy($id)
     {

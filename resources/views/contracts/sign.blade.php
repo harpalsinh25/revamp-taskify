@@ -111,15 +111,19 @@
                         <h5>
                             <?= get_label('promiser_sign', 'Promisor sign') ?>
                         </h5>
+
                         @if (!is_null($contract->promisor_sign))
+
                         <p><img src="{{asset('storage/signatures/'.$contract->promisor_sign)}}" width="150px" alt="" /></p>
                         @if ((getAuthenticatedUser()->id == $contract->created_by || isAdminOrHasAllDataAccess()) && !getAuthenticatedUser()->hasRole('client'))
+
                         <div id="section-not-to-print">
                             <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_contract_sign_modal"><button type="button" data-id="{{$contract->id}}" class="btn btn-sm btn-danger mx-3 delete_contract_sign" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('delete_signature', 'Delete signature') ?>"><i class="bx bx-trash"></i></button></a>
                         </div>
                         @endif
                         @else
                         @if ((getAuthenticatedUser()->id == $contract->created_by || isAdminOrHasAllDataAccess()) && !getAuthenticatedUser()->hasRole('client'))
+
                         <p><?= get_label('not_signed', 'Not signed') ?></p>
                         <div id="section-not-to-print">
                             <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_contract_sign_modal"><button type="button" class="btn btn-sm btn-primary mx-4" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_signature', 'Create signature') ?>"><i class="bx bx-plus"></i></button></a>

@@ -5,103 +5,34 @@ namespace App\Providers;
 use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\User;
+use App\Models\Client;
 use App\Models\Status;
-use App\Models\Priority;
 use App\Models\Setting;
 use App\Models\Language;
-use Illuminate\Support\Facades\View;
-use App\Models\Client;
+use App\Models\Priority;
 use App\Models\CustomField;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\ServiceProvider;
-use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
+use Illuminate\Support\Facades\View;
 use App\Services\CustomPathGenerator;
+use Illuminate\Support\Facades\Config;
+use App\Services\CustomManifestService;
+use Illuminate\Support\ServiceProvider;
+use LaravelPWA\Services\ManifestService;
+use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
-     *
-     * @return void
+     * Cache for loaded settings to avoid repeated database queries
      */
-    public function register()
-    {
-        $this->app->singleton(PathGenerator::class, CustomPathGenerator::class);
-    }
+    private array $settingsCache = [];
+
     /**
-     * Bootstrap any application services.
-     *
-     * @return void
+     * Default configuration values
      */
-    public function boot()
-    {
-        Paginator::useBootstrapFive();
-        // Attach data to modal views
-        $this->composeModalViews();
-        // Load database configurations and settings
-        $this->loadDatabaseSettings();
-    }
-    /**
-     * Attach data to specific views.
-     */
-    private function composeModalViews()
-    {
-        View::composer('modals', function ($view) {
-            $view->with('toSelectWorkspaceUsers', User::select('id', 'first_name', 'last_name')->get())
-                ->with('toSelectWorkspaceClients', Client::select('id', 'first_name', 'last_name')->get());
-        });
-    }
-    /**
-     * Load configurations and share global data from the database.
-     */
-    private function loadDatabaseSettings()
-    {
-        try {
-            DB::connection()->getPdo();
-            // General Settings
-            $generalSettings = $this->loadGeneralSettings();
-            // Pusher, Email, and Media Storage Settings
-            $pusherSettings = $this->loadPusherSettings();
-            $emailSettings = $this->loadEmailSettings();
-            $mediaStorageSettings = $this->loadMediaStorageSettings();
-            $google_calendar_settings = $this->loadGoogleCalendarSettings();
-            // Other Settings
-            $dateFormats = $this->parseDateFormats($generalSettings['date_format'] ?? 'DD-MM-YYYY|d-m-Y');
-            $customFields = $this->loadCustomFields();
-            $sharedData = [
-                'general_settings' => $generalSettings,
-                'email_settings' => $emailSettings,
-                'pusher_settings' => $pusherSettings,
-                'media_storage_settings' => $mediaStorageSettings,
-                'languages' => Language::all(),
-                'statuses' => Status::all(),
-                'tags' => Tag::all(),
-                'priorities' => Priority::all(),
-                'js_date_format' => $dateFormats['js'],
-                'php_date_format' => $dateFormats['php'],
-                'taskCustomFields' => $customFields['task'],
-                'projectCustomFields' => $customFields['project'],
-                'google_calendar_settings' => $google_calendar_settings,
-                'company_info' => $this->loadCompanyInfo(),
-                'ai_model_settings' => $this->loadAIModels(),
-            ];
-            // Share data globally with all views
-            view()->share($sharedData);
-            // Configure application defaults
-            $this->configureAppDefaults($generalSettings, $pusherSettings, $emailSettings, $mediaStorageSettings);
-        } catch (\Exception $e) {
-            // Handle exceptions silently or log them if needed
-        }
-    }
-    /**
-     * Load general settings and apply defaults.
-     */
-    private function loadGeneralSettings()
-    {
-        $general_settings = get_settings('general_settings') ?? [];
-        $defaults = [
+    private const DEFAULTS = [
+        'general' => [
             'full_logo' => 'storage/logos/default_full_logo.png',
             'half_logo' => 'storage/logos/default_half_logo.png',
             'favicon' => 'storage/logos/default_favicon.png',
@@ -116,82 +47,30 @@ class AppServiceProvider extends ServiceProvider
             'allowed_file_types' => '.png,.jpg,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.txt',
             'max_files_allowed' => '10',
             'allowed_max_upload_size' => '512',
-        ];
-        foreach ($defaults as $key => $value) {
-            if (!isset($general_settings[$key]) || empty($general_settings[$key])) {
-                $general_settings[$key] = $value;
-            } elseif (in_array($key, ['full_logo', 'half_logo', 'favicon', 'footer_logo'])) {
-                $general_settings[$key] = 'storage/' . $general_settings[$key];
-            }
-        }
-        return $general_settings;
-    }
-    /**
-     * Load Pusher settings and apply defaults.
-     */
-    private function loadPusherSettings()
-    {
-        return get_settings('pusher_settings') ?? [
+            'timezone' => 'UTC',
+        ],
+        'pusher' => [
             'pusher_app_id' => '',
             'pusher_app_key' => '',
             'pusher_app_secret' => '',
             'pusher_app_cluster' => '',
-        ];
-    }
-    /**
-     * Load email settings and apply defaults.
-     */
-    private function loadEmailSettings()
-    {
-        return get_settings('email_settings') ?? [
+        ],
+        'email' => [
             'email' => '',
             'password' => '',
             'smtp_host' => '',
             'smtp_port' => '',
             'email_content_type' => '',
             'smtp_encryption' => '',
-        ];
-    }
-    /**
-     * Load media storage settings and apply defaults.
-     */
-    private function loadMediaStorageSettings()
-    {
-        return get_settings('media_storage_settings') ?? [
+        ],
+        'media_storage' => [
             'media_storage_type' => '',
             's3_key' => '',
             's3_secret' => '',
             's3_region' => '',
             's3_bucket' => '',
-        ];
-    }
-    /**
-     * Parse date formats into JS and PHP formats.
-     */
-    private function parseDateFormats($dateFormat)
-    {
-        $formats = explode('|', $dateFormat);
-        return [
-            'js' => $formats[0] ?? 'DD-MM-YYYY',
-            'php' => $formats[1] ?? 'd-m-Y',
-        ];
-    }
-    /**
-     * Load custom fields for tasks and projects.
-     */
-    private function loadCustomFields()
-    {
-        return [
-            'task' => CustomField::where('module', 'task')->get(),
-            'project' => CustomField::where('module', 'project')->get(),
-        ];
-    }
-    /**
-     * Load company information and apply defaults.
-     */
-    private function loadCompanyInfo()
-    {
-        return array_merge([
+        ],
+        'company_info' => [
             'companyEmail' => '',
             'companyPhone' => '',
             'companyAddress' => '',
@@ -201,51 +80,13 @@ class AppServiceProvider extends ServiceProvider
             'companyZip' => '',
             'companyWebsite' => '',
             'companyVatNumber' => '',
-        ], get_settings('company_information') ?? []);
-    }
-    /**
-     * Configure application defaults based on settings.
-     */
-    private function configureAppDefaults($generalSettings, $pusherSettings, $emailSettings, $mediaStorageSettings)
-    {
-        config()->set('app.timezone', $generalSettings['timezone'] ?? 'UTC');
-        config()->set('media-library.max_file_size', 1024 * 1024 * $generalSettings['allowed_max_upload_size']);
-        // Pusher
-        config()->set('chatify.pusher', [
-            'key' => $pusherSettings['pusher_app_key'],
-            'secret' => $pusherSettings['pusher_app_secret'],
-            'app_id' => $pusherSettings['pusher_app_id'],
-            'options' => ['cluster' => $pusherSettings['pusher_app_cluster']],
-        ]);
-        // Mail
-        config()->set('mail.default', 'smtp');
-        config()->set('mail.mailers.smtp', [
-            'host' => $emailSettings['smtp_host'],
-            'port' => $emailSettings['smtp_port'],
-            'transport' => 'smtp',
-            'encryption' => $emailSettings['smtp_encryption'],
-            'username' => $emailSettings['email'],
-            'password' => $emailSettings['password'],
-        ]);
-        config()->set('mail.from', [
-            'name' => $generalSettings['company_title'],
-            'address' => $emailSettings['email'],
-        ]);
-        // Filesystem
-        config()->set('filesystems.disks.s3', [
-            'key' => $mediaStorageSettings['s3_key'],
-            'secret' => $mediaStorageSettings['s3_secret'],
-            'region' => $mediaStorageSettings['s3_region'],
-            'bucket' => $mediaStorageSettings['s3_bucket'],
-        ]);
-    }
-    /**
-     * Load AI Models and apply defaults.
-     */
-    private function loadAIModels()
-    {
-        $ai_model_settings = get_settings('ai_model_settings') ?? [];
-        return array_merge([
+        ],
+        'google_calendar' => [
+            'api_key' => '',
+            'calendar_id' => '',
+            'calendar_name' => '',
+        ],
+        'ai_models' => [
             "openrouter_endpoint" => "https://openrouter.ai/api/v1/chat/completions",
             "openrouter_system_prompt" => "You are a helpful assistant that writes concise, professional project or task descriptions.",
             "openrouter_temperature" => "0.7",
@@ -271,18 +112,384 @@ class AppServiceProvider extends ServiceProvider
             "openrouter_frequency_penalty" => "0",
             "openrouter_presence_penalty" => "0",
             "gemini_model" => "gemini-2.0-flash",
-        ], $ai_model_settings);
-    }
+        ]
+    ];
+
     /**
-     * Load Google Calendar Settings and apply defaults.
+     * Register any application services.
      */
-    private function loadGoogleCalendarSettings()
+    public function register(): void
     {
-        $google_calendar_settings = get_settings('google_calendar_settings') ?? [];
-        return array_merge([
-            'api_key' => '',
-            'calendar_id' => '',
-            'calendar_name' => '',
-        ], $google_calendar_settings);
+        $this->app->singleton(PathGenerator::class, CustomPathGenerator::class);
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        Paginator::useBootstrapFive();
+
+        // Compose modal views
+        $this->composeModalViews();
+
+        // Load database configurations and settings
+        $this->loadDatabaseSettings();
+
+        // Configure PWA settings
+        $this->configurePwaSettings();
+
+        // Register PHP date format singleton
+        $this->registerDateFormatSingleton();
+    }
+
+    /**
+     * Attach data to specific views.
+     */
+    private function composeModalViews(): void
+    {
+        View::composer('modals', function ($view) {
+            $view->with([
+                'toSelectWorkspaceUsers' => User::select('id', 'first_name', 'last_name')->get(),
+                'toSelectWorkspaceClients' => Client::select('id', 'first_name', 'last_name')->get()
+            ]);
+        });
+    }
+
+    /**
+     * Load configurations and share global data from the database.
+     */
+    private function loadDatabaseSettings(): void
+    {
+        if (!$this->isDatabaseConnected()) {
+            return;
+        }
+
+        try {
+            // Load all settings in bulk to minimize database queries
+            $allSettings = $this->loadAllSettings();
+
+            // Parse date formats
+            $dateFormats = $this->parseDateFormats($allSettings['general']['date_format']);
+
+            // Load custom fields
+            $customFields = $this->loadCustomFields();
+
+            // Prepare shared data
+            $sharedData = [
+                'general_settings' => $allSettings['general'],
+                'email_settings' => $allSettings['email'],
+                'pusher_settings' => $allSettings['pusher'],
+                'media_storage_settings' => $allSettings['media_storage'],
+                'google_calendar_settings' => $allSettings['google_calendar'],
+                'company_info' => $allSettings['company_info'],
+                'ai_model_settings' => $allSettings['ai_models'],
+                'languages' => Language::all(),
+                'statuses' => Status::all(),
+                'tags' => Tag::all(),
+                'priorities' => Priority::all(),
+                'js_date_format' => $dateFormats['js'],
+                'php_date_format' => $dateFormats['php'],
+                'taskCustomFields' => $customFields['task'],
+                'projectCustomFields' => $customFields['project'],
+            ];
+
+            // Share data globally with all views
+            view()->share($sharedData);
+
+            // Configure application defaults
+            $this->configureAppDefaults($allSettings);
+        } catch (\Exception $e) {
+            // Log error if needed, but don't break the application
+            // logger()->error('Failed to load database settings: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Check if database connection is available.
+     */
+    private function isDatabaseConnected(): bool
+    {
+        try {
+            DB::connection()->getPdo();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Load all settings efficiently with caching.
+     */
+    private function loadAllSettings(): array
+    {
+        if (!empty($this->settingsCache)) {
+            return $this->settingsCache;
+        }
+
+        $settings = [
+            'general' => $this->getSettingsWithDefaults('general_settings', self::DEFAULTS['general']),
+            'pusher' => $this->getSettingsWithDefaults('pusher_settings', self::DEFAULTS['pusher']),
+            'email' => $this->getSettingsWithDefaults('email_settings', self::DEFAULTS['email']),
+            'media_storage' => $this->getSettingsWithDefaults('media_storage_settings', self::DEFAULTS['media_storage']),
+            'google_calendar' => $this->getSettingsWithDefaults('google_calendar_settings', self::DEFAULTS['google_calendar']),
+            'company_info' => $this->getSettingsWithDefaults('company_information', self::DEFAULTS['company_info']),
+            'ai_models' => $this->getSettingsWithDefaults('ai_model_settings', self::DEFAULTS['ai_models']),
+        ];
+
+        // Process logo paths for general settings
+        $settings['general'] = $this->processLogosPaths($settings['general']);
+
+        $this->settingsCache = $settings;
+        return $settings;
+    }
+
+    /**
+     * Get settings with defaults applied.
+     */
+    private function getSettingsWithDefaults(string $key, array $defaults): array
+    {
+        $settings = get_settings($key) ?? [];
+        return array_merge($defaults, $settings);
+    }
+
+    /**
+     * Process logo paths by adding storage prefix if needed.
+     */
+    private function processLogosPaths(array $generalSettings): array
+    {
+        $logoKeys = ['full_logo', 'half_logo', 'favicon', 'footer_logo'];
+
+        foreach ($logoKeys as $key) {
+            if (
+                isset($generalSettings[$key]) &&
+                !empty($generalSettings[$key]) &&
+                !str_starts_with($generalSettings[$key], 'storage/')
+            ) {
+                $generalSettings[$key] = 'storage/' . $generalSettings[$key];
+            }
+        }
+
+        return $generalSettings;
+    }
+
+    /**
+     * Parse date formats into JS and PHP formats.
+     */
+    private function parseDateFormats(string $dateFormat): array
+    {
+        $formats = explode('|', $dateFormat);
+        return [
+            'js' => $formats[0] ?? 'DD-MM-YYYY',
+            'php' => $formats[1] ?? 'd-m-Y',
+        ];
+    }
+
+    /**
+     * Load custom fields for tasks and projects.
+     */
+    private function loadCustomFields(): array
+    {
+        return [
+            'task' => CustomField::where('module', 'task')->get(),
+            'project' => CustomField::where('module', 'project')->get(),
+        ];
+    }
+
+    /**
+     * Configure application defaults based on settings.
+     */
+    private function configureAppDefaults(array $settings): void
+    {
+        // Application timezone
+        config(['app.timezone' => $settings['general']['timezone']]);
+
+        // Media library max file size
+        config(['media-library.max_file_size' => 1024 * 1024 * $settings['general']['allowed_max_upload_size']]);
+
+        // Pusher configuration
+        $this->configurePusher($settings['pusher']);
+
+        // Mail configuration
+        $this->configureMail($settings['email'], $settings['general']['company_title']);
+
+        // Filesystem configuration
+        $this->configureFilesystem($settings['media_storage']);
+    }
+
+    /**
+     * Configure Pusher settings.
+     */
+    private function configurePusher(array $pusherSettings): void
+    {
+        config([
+            'chatify.pusher' => [
+                'key' => $pusherSettings['pusher_app_key'],
+                'secret' => $pusherSettings['pusher_app_secret'],
+                'app_id' => $pusherSettings['pusher_app_id'],
+                'options' => ['cluster' => $pusherSettings['pusher_app_cluster']],
+            ]
+        ]);
+    }
+
+    /**
+     * Configure mail settings.
+     */
+    private function configureMail(array $emailSettings, string $companyTitle): void
+    {
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp' => [
+                'host' => $emailSettings['smtp_host'],
+                'port' => $emailSettings['smtp_port'],
+                'transport' => 'smtp',
+                'encryption' => $emailSettings['smtp_encryption'],
+                'username' => $emailSettings['email'],
+                'password' => $emailSettings['password'],
+            ],
+            'mail.from' => [
+                'name' => $companyTitle,
+                'address' => $emailSettings['email'],
+            ]
+        ]);
+    }
+
+    /**
+     * Configure filesystem settings.
+     */
+    private function configureFilesystem(array $mediaStorageSettings): void
+    {
+        config([
+            'filesystems.disks.s3' => [
+                'key' => $mediaStorageSettings['s3_key'],
+                'secret' => $mediaStorageSettings['s3_secret'],
+                'region' => $mediaStorageSettings['s3_region'],
+                'bucket' => $mediaStorageSettings['s3_bucket'],
+            ]
+        ]);
+    }
+
+    /**
+     * Configure PWA settings.
+     */
+    private function configurePwaSettings(): void
+    {
+        try {
+            $pwaSettings = $this->getPwaSettings();
+
+            if (empty($pwaSettings)) {
+                return;
+            }
+
+            $this->setPwaConfig($pwaSettings);
+        } catch (\Exception $e) {
+            // Handle silently to prevent breaking the application
+        }
+    }
+
+    /**
+     * Get PWA settings from database.
+     */
+    private function getPwaSettings(): array
+    {
+        $pwaSettings = Setting::where('variable', 'pwa_settings')->value('value');
+
+        if (!$pwaSettings) {
+            return [];
+        }
+
+        $decoded = json_decode($pwaSettings, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * Set PWA configuration values.
+     */
+    private function setPwaConfig(array $pwaSettings): void
+    {
+        $configMap = [
+            'laravelpwa.manifest.name' => $pwaSettings['name'] ?? 'Taskify',
+            'laravelpwa.manifest.short_name' => $pwaSettings['short_name'] ?? 'Taskify',
+            'laravelpwa.manifest.description' => $pwaSettings['description'] ?? '',
+            'laravelpwa.manifest.theme_color' => $pwaSettings['theme_color'] ?? '#000000',
+            'laravelpwa.manifest.background_color' => $pwaSettings['background_color'] ?? '#ffffff',
+        ];
+
+        foreach ($configMap as $key => $value) {
+            Config::set($key, $value);
+        }
+
+        // Set custom icons if logo is provided
+        if (!empty($pwaSettings['logo'])) {
+            $this->setPwaIcons($pwaSettings['logo']);
+        }
+    }
+
+    /**
+     * Set PWA icons configuration.
+     */
+    private function setPwaIcons(string $logoPath): void
+    {
+        $icons = [
+            '512x512' => [
+                'path' => $logoPath,
+                'sizes' => '512x512',
+                'purpose' => 'any'
+            ],
+        ];
+
+        Config::set('laravelpwa.manifest.icons', $icons);
+    }
+
+    /**
+     * Register PHP date format singleton.
+     */
+    private function registerDateFormatSingleton(): void
+    {
+        $generalSettings = $this->settingsCache['general'] ?? self::DEFAULTS['general'];
+        $dateFormats = $this->parseDateFormats($generalSettings['date_format']);
+
+        $this->app->singleton('php_date_format', function () use ($dateFormats) {
+            return $dateFormats['php'];
+        });
+    }
+
+    /**
+     * Load PWA manifest settings and merge defaults with database values.
+     */
+    private function loadPwaManifestSettings(): array
+    {
+        // Load manifest defaults from config
+        $manifestDefaults = config('laravelpwa.manifest', []);
+
+        // Get dynamic pwa_settings from database
+        $pwaSettings = [];
+        try {
+            $dbSettings = get_settings('pwa_settings');
+            if (is_string($dbSettings)) {
+                $dbSettings = json_decode($dbSettings, true);
+            }
+            if (is_array($dbSettings)) {
+                $pwaSettings = $dbSettings;
+            }
+        } catch (\Exception $e) {
+            // Handle exception silently
+            $pwaSettings = [];
+        }
+
+        // Merge database settings into manifest defaults
+        $manifest = array_merge($manifestDefaults, $pwaSettings);
+
+        // Handle logo/icon override
+        if (!empty($pwaSettings['logo']) && isset($manifest['icons'][0]) && is_array($manifest['icons'][0])) {
+            $manifest['icons'][0]['path'] = $pwaSettings['logo'];
+        }
+
+        // Handle splash screens override
+        if (!empty($pwaSettings['splash']) && is_array($pwaSettings['splash'])) {
+            $manifest['splash'] = array_merge($manifestDefaults['splash'] ?? [], $pwaSettings['splash']);
+        }
+
+        return $manifest;
     }
 }

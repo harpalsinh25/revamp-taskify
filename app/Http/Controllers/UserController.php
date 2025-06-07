@@ -1324,8 +1324,6 @@ class UserController extends Controller
     /**
      * Update FCM Token.
      *
-     * @header workspace-id int required The workspace ID Example: 1
-     * @header Accept string required Example: application/json
      * This endpoint allows an authenticated user or client to update their FCM token for push notifications.
      *
      * @bodyParam fcm_token string required The new FCM token for push notifications. Example: dXkJz7KYZ9o:APA91bGfLa_qwAeD...
@@ -1365,6 +1363,7 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return formatApiValidationError(true, $e->errors());
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'error' => true,
                 'message' => 'An unexpected error occurred. Please try again later.',

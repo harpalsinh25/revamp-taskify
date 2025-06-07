@@ -656,7 +656,7 @@ class CandidateController extends Controller
           'mime_type' => $media->mime_type,
           'size' => round($media->size / 1024, 2) . ' KB',
           'created_at' => format_date($media->created_at),
-          'download_url' => route('candidate.attachment.download', ['mediaId' => $media->id, 'candidateId' => $candidate->id]),
+          'download_url' => asset('/storage/candidate-media/' . $media->file_name),
           'view_url' => $viewUrl,
           'can_delete' => $canDelete,
         ];

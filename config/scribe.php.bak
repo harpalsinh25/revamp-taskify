@@ -45,10 +45,10 @@ return [
     // - "laravel" will generate the documentation as a Blade view, so you can add routing and authentication.
     // - "external_static" and "external_laravel" do the same as above, but generate a basic template,
     // passing the OpenAPI spec as a URL, allowing you to easily use the docs with an external generator
-    'type' => 'static',
+    'type' => 'external_laravel',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
-    'theme' => 'default',
+    'theme' => 'scalar',
 
     'static' => [
         // HTML documentation, assets and Postman collection will be generated to this folder.
@@ -469,38 +469,8 @@ INTRO,
                 'GET /contracts/get-contract-type/{id}',
                 'DELETE /contracts/delete-contract-type/{id}',
             ],
-            'Deduction Management' => [
-                // Deductions
-                'POST /deductions/store',
-                'POST /deductions/update',
-                'GET /deductions/list',
-                'GET /deductions/get/{id}',
-                'DELETE /deductions/destroy/{id}',
-            ],
-            'Allowance Management' => [
-                // Allowances
-                'POST /allowances/store',
-                'POST /allowances/update',
-                'GET /allowances/list',
-                'GET /allowances/get/{id}',
-                'DELETE /allowances/destroy/{id}',
-            ],
 
-            'Time Tracker Management' => [
-                // Time Trackers
-                'POST /time-tracker/store',
-                'POST /time-tracker/update',
-                'GET /time-tracker/list',
-                'DELETE /time-tracker/destroy/{id}',
-            ],
-            'Task List Management' => [
-                // Task Lists
-                'POST /task-lists/store',
-                'POST /task-lists/update',
-                'GET /task-lists/get/{id}',
-                'DELETE /task-lists/destroy/{id}',
-                'GET /task-lists/list',
-            ],
+
 
 
         ]
@@ -531,6 +501,10 @@ INTRO,
         // By default, Scribe will try the model's factory, and if that fails, try fetching the first from the database.
         // You can reorder or remove strategies here.
         'models_source' => ['factoryCreate', 'factoryMake', 'databaseFirst'],
+    ],
+    'example_headers' => [
+        'Accept' => 'application/json',
+        'workspace-id' => '1',
     ],
 
     // The strategies Scribe will use to extract information about your routes at each stage.

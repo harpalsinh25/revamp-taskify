@@ -15,6 +15,7 @@ use App\Models\Template;
 use App\Models\Candidate;
 use App\Models\Workspace;
 use App\Models\ActivityLog;
+use App\Models\CustomField;
 use App\Models\LeaveEditor;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -849,6 +850,7 @@ if (!function_exists('processNotifications')) {
                 }
 
                 // Check if recipient was found
+                // dd($recipientModel);
                 if ($recipientModel) {
                     if (!$systemNotificationTemplate || ($systemNotificationTemplate->status !== 0)) {
                         if (
@@ -862,6 +864,7 @@ if (!function_exists('processNotifications')) {
                             $isSystem = 1;
                         }
                     }
+
                     if (!$pushNotificationTemplate || ($pushNotificationTemplate->status !== 0)) {
                         if (
                             (is_array($enabledNotifications) && empty($enabledNotifications)) || (
@@ -875,6 +878,7 @@ if (!function_exists('processNotifications')) {
                             try {
                                 sendPushNotification($recipientModel, $data);
                             } catch (\Exception $e) {
+                                // dd($e);
                             }
                         }
                     }
@@ -963,8 +967,9 @@ if (!function_exists('processNotifications')) {
 if (!function_exists('sendPushNotification')) {
     function sendPushNotification($recipientModel, $data)
     {
+        // dd($recipientModel, $data);
         // Path to your service account key
-        $serviceAccountPath = public_path('storage/app/firebase/firebase-service-account.json');
+        $serviceAccountPath = storage_path('app/firebase/firebase-service-account.json');
 
         // Set up the Google Client for authentication
         $googleClient = new GoogleClient();
@@ -1070,6 +1075,7 @@ if (!function_exists('sendPushNotification')) {
                 ]);
 
                 // Uncomment for debugging
+                // dd($projectId);
                 // dd($response);
             } catch (\Exception $e) {
                 // Handle the error for the current token
@@ -2514,6 +2520,41 @@ if (!function_exists('getGuardName')) {
 if (!function_exists('formatProject')) {
     function formatProject($project)
     {
+        $customFields = CustomField::where('module', 'project')->get();
+
+        $customFields->transform(function ($field) {
+            // Check if options is not already a string (or is an array/object)
+            if (is_string($field->options)) {
+                $field->options = json_decode($field->options);
+            }
+
+            return $field;
+        });
+
+        // dd($project->customFieldValues);
+        // Prepare custom field values for the view
+        $customFieldValues = [];
+
+        foreach ($project->customFieldValues as $fieldValue) {
+            $value = $fieldValue->value;
+
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
+                // Replace all nulls with empty string
+                array_walk_recursive($decoded, function (&$item) {
+                    if (is_null($item)) {
+                        $item = '';
+                    }
+                });
+                $customFieldValues[$fieldValue->custom_field_id] = $decoded;
+            } else {
+                // If it's a single null value, also convert to empty string
+                $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
+            }
+        }
+
+
         $auth_user = getAuthenticatedUser();
         return [
             'id' => $project->id,
@@ -2561,6 +2602,10 @@ if (!function_exists('formatProject')) {
             'client_can_discuss' => $project->client_can_discuss,
             'created_at' => format_date($project->created_at, to_format: 'Y-m-d'),
             'updated_at' => format_date($project->updated_at, to_format: 'Y-m-d'),
+            'customFields' => $customFields,
+            'customFieldValues' => $customFieldValues
+
+
         ];
     }
 }
@@ -2571,7 +2616,39 @@ if (!function_exists('formatTask')) {
         $task->load('reminders', 'recurringTask');
         $reminder = $task->reminders[0] ?? null;
         $recurringTask = $task->recurringTask ?? null;
+        $customFields = CustomField::where('module', 'task')->get();
 
+        $customFields->transform(function ($field) {
+            // Check if options is not already a string (or is an array/object)
+            if (is_string($field->options)) {
+                $field->options = json_decode($field->options);
+            }
+
+            return $field;
+        });
+
+
+        // Prepare custom field values for the view
+        $customFieldValues = [];
+
+        foreach ($task->customFieldValues as $fieldValue) {
+            $value = $fieldValue->value;
+
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
+                // Replace all nulls with empty string
+                array_walk_recursive($decoded, function (&$item) {
+                    if (is_null($item)) {
+                        $item = '';
+                    }
+                });
+                $customFieldValues[$fieldValue->custom_field_id] = $decoded;
+            } else {
+                // If it's a single null value, also convert to empty string
+                $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
+            }
+        }
         return [
             'id' => $task->id,
             'workspace_id' => $task->workspace_id,
@@ -2627,6 +2704,8 @@ if (!function_exists('formatTask')) {
             'billing_type' => $task->billing_type,
             'completion_percentage' => $task->completion_percentage,
             'task_list_id' => $task->task_list_id,
+            'customFields' => $customFields,
+            'customFieldValues' => $customFieldValues,
 
         ];
     }
@@ -2980,6 +3059,7 @@ if (!function_exists('formatLeaveRequest')) {
 if (!function_exists('formatUser')) {
     function formatUser($user, $isSignup = false)
     {
+        $fcmToken = FcmToken::where('user_id', $user->id)->latest()->value('fcm_token');
         return [
             'id' => $user->id,
             'first_name' => $user->first_name,
@@ -3002,7 +3082,7 @@ if (!function_exists('formatUser')) {
             'zip' => $user->zip,
             'profile' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg'),
             'status' => $user->status,
-            'fcm_token' => $user->fcm_token,
+            'fcm_token' => $fcmToken,
             'created_at' => format_date($user->created_at, to_format: 'Y-m-d'),
             'updated_at' => format_date($user->updated_at, to_format: 'Y-m-d'),
             'assigned' => $isSignup ? [
@@ -3905,6 +3985,12 @@ if (!function_exists('getMenus')) {
                         'class' => 'menu-item' . (Request::is('settings/email') ? ' active' : ''),
                     ],
                     [
+                        'id' => 'ai_model_settings',
+                        'label' => get_label('ai_model_settings', 'AI Model Settings'),
+                        'url' => url('settings/ai-model-settings'),
+                        'class' => 'menu-item' . (Request::is('settings/ai-model-settings') ? ' active' : ''),
+                    ],
+                    [
                         'id' => 'sms_gateway',
                         'label' => get_label('messaging_and_integrations', 'Messaging & Integrations'),
                         'url' => url('settings/sms-gateway'),
@@ -3945,6 +4031,12 @@ if (!function_exists('getMenus')) {
                         'label' => get_label('system_updater', 'System updater'),
                         'url' => url('settings/system-updater'),
                         'class' => 'menu-item' . (Request::is('settings/system-updater') ? ' active' : ''),
+                    ],
+                    [
+                        'id' => 'pwa',
+                        'label' => get_label('pwa_settings', 'PWA Settings'),
+                        'url' => url('settings/pwa-settings'),
+                        'class' => 'menu-item' . (Request::is('settings/pwa-settings') ? ' active' : ''),
                     ]
                 ]
             ]
@@ -4845,6 +4937,7 @@ if (!function_exists('formatLead')) {
             'state' => $lead->state,
             'zip' => $lead->zip,
             'country' => $lead->country,
+            'isConverted' => $lead->is_converted == 1 ? true : false,
             'created_at' => format_date($lead->created_at, to_format: 'Y-m-d'),
             'updated_at' => format_date($lead->updated_at, to_format: 'Y-m-d'),
         ];
@@ -4912,11 +5005,530 @@ if (!function_exists('formatLeadUserHtml')) {
                 'module' => $field->module,
                 'field_label' => $field->field_label,
                 'field_type' => $field->field_type,
-                'options' => $field->options,
+                'options' => json_decode($field->options, true),
                 'required' => $field->required,
-                'visibility' => $field,
+                'show_in_table' => $field->visibility
 
             ];
         }
+    }
+
+
+    if (!function_exists('formatPayslip')) {
+        function formatPayslip($payslip)
+        {
+            return [
+                'id' => $payslip->id,
+                'user_id' => $payslip->user_id,
+                'user_name' => $payslip->user ? ($payslip->user->full_name ?? ($payslip->user->first_name . ' ' . $payslip->user->last_name)) : '-',
+                'month' => Carbon::parse($payslip->month),
+                'basic_salary' => $payslip->basic_salary,
+                'working_days' => $payslip->working_days,
+                'lop_days' => $payslip->lop_days,
+                'paid_days' => $payslip->paid_days,
+                'bonus' => $payslip->bonus,
+                'incentives' => $payslip->incentives,
+                'leave_deduction' => $payslip->leave_deduction,
+                'ot_hours' => $payslip->ot_hours,
+                'ot_rate' => $payslip->ot_rate,
+                'ot_payment' => $payslip->ot_payment,
+                'total_allowance' => $payslip->total_allowance,
+                'total_deductions' => $payslip->total_deductions,
+                'total_earnings' => $payslip->total_earnings,
+                'net_pay' => $payslip->net_pay,
+                'status' => $payslip->status,
+                'status_label' => match ((int)$payslip->status) {
+                    0 => 'Pending',
+                    1 => 'Paid',
+                    default => 'Unknown',
+                },
+                'payment_method_id' => $payslip->payment_method_id,
+                'payment_method' => $payslip->paymentMethod->name ?? '-',
+                'payment_date' =>  $payslip->payment_date !== null ? Carbon::parse($payslip->payment_date) : '',
+                'note' => $payslip->note,
+                'created_at' => format_date($payslip->created_at, to_format: 'Y-m-d'),
+                'updated_at' => format_date($payslip->updated_at, to_format: 'Y-m-d'),
+            ];
+        }
+    }
+
+    if (!function_exists('formatAllowance')) {
+        function formatAllowance($allowance)
+        {
+            return [
+                'id' => $allowance->id,
+                'title' => $allowance->title,
+                'amount' => format_currency($allowance->amount),
+                'created_at' => format_date($allowance->created_at, true),
+                'updated_at' => format_date($allowance->updated_at, 'H:i:s'),
+            ];
+        }
+    }
+
+    if (!function_exists('formatDeduction')) {
+        function formatDeduction($deduction)
+        {
+
+            return [
+                'id' => $deduction->id,
+                'title' => $deduction->title,
+                'type' => ucfirst($deduction->type),
+                'percentage' => $deduction->percentage,
+                'amount' => format_currency($deduction->amount),
+                'created_at' => format_date($deduction->created_at),
+                'updated_at' => format_date($deduction->updated_at)
+
+            ];
+        }
+    }
+
+
+    if (!function_exists('formatContract')) {
+        function formatContract($contract)
+        {
+            return [
+                'id' => $contract->id,
+                'title' => $contract->title,
+                'value' => format_currency($contract->value),
+                'start_date' => format_date($contract->start_date),
+                'end_date' => format_date($contract->end_date),
+                'client_id' => $contract->client_id,
+                'project_id' => $contract->project_id,
+                'contract_type_id' => $contract->contract_type_id,
+                'description' => $contract->description,
+                'workspace_id' => $contract->workspace_id,
+                'created_by' => $contract->created_by,
+                'created_at' => format_date($contract->created_at, true),
+                'updated_at' => format_date($contract->updated_at, true)
+            ];
+        }
+    }
+
+    if (!function_exists('formatContractType')) {
+        function formatContractType($contract_type)
+        {
+            return [
+                'id' => $contract_type->id,
+                'type' => $contract_type->type,
+                'created_at' => format_date($contract_type->created_at, true),
+                'updated_at' => format_date($contract_type->updated_at, true),
+            ];
+        }
+    }
+}
+
+
+if (!function_exists('generate_description_openrouter')) {
+    /**
+     * Generates a project/task description using OpenRouter's API.
+     *
+     * @param string $prompt The input for generating the description.
+     * @param string|null $apiKey Optional API key to override settings
+     * @return array{error: bool, data?: string, message?: string} Response array with status and data/message
+     */
+    function generate_description_openrouter(string $prompt, $apiKey = null): array
+    {
+        // Get settings from database
+        $settings = get_ai_settings('openrouter');
+
+        // Use provided API key or get from settings
+        $apiKey = $apiKey ?: $settings['openrouter_api_key'] ?? null;
+
+        if (empty($apiKey)) {
+            Log::error('Missing OpenRouter API key');
+            return [
+                'error' => true,
+                'message' => 'System configuration error: Missing API key.',
+            ];
+        }
+
+        // Get dynamic settings
+        $endpoint = $settings['openrouter_endpoint'] ?? 'https://openrouter.ai/api/v1/chat/completions';
+        $model = $settings['openrouter_model'] ?? 'nousresearch/deephermes-3-mistral-24b-preview:free';
+        $systemPrompt = $settings['openrouter_system_prompt'] ?? 'You are a helpful assistant that writes concise, professional project or task descriptions.';
+        $temperature = $settings['openrouter_temperature'] ?? 0.7;
+        $maxTokens = $settings['openrouter_max_tokens'] ?? 1024;
+        $topP = $settings['openrouter_top_p'] ?? 0.95;
+        $frequencyPenalty = $settings['openrouter_frequency_penalty'] ?? 0;
+        $presencePenalty = $settings['openrouter_presence_penalty'] ?? 0;
+        $timeout = $settings['request_timeout'] ?? 15;
+        $maxRetries = $settings['max_retries'] ?? 2;
+
+        // Apply prompt formatting if configured
+        $formattedPrompt = $prompt;
+        if (!empty($settings['default_prompt_prefix'])) {
+            $formattedPrompt = $settings['default_prompt_prefix'] . ' ' . $formattedPrompt;
+        }
+        if (!empty($settings['default_prompt_suffix'])) {
+            $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
+        }
+
+        // Check prompt length
+        $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
+        if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
+            return [
+                'error' => true,
+                'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
+            ];
+        }
+
+        $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
+        $attempt = 0;
+
+        while ($attempt < $maxRetries) {
+            try {
+                $response = $client->post($endpoint, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $apiKey,
+                        'HTTP-Referer' => config('app.url'),
+                        'X-Title' => 'Taskify', // Optional: Name your app
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        'model' => $model,
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => $formattedPrompt],
+                        ],
+                        'temperature' => (float)$temperature,
+                        'max_tokens' => (int)$maxTokens,
+                        'top_p' => (float)$topP,
+                        'frequency_penalty' => (float)$frequencyPenalty,
+                        'presence_penalty' => (float)$presencePenalty,
+                    ],
+                ]);
+
+                $body = json_decode($response->getBody(), true);
+
+                if (isset($body['choices'][0]['message']['content'])) {
+                    return [
+                        'error' => false,
+                        'data' => $body['choices'][0]['message']['content'],
+                    ];
+                }
+
+                return [
+                    'error' => true,
+                    'message' => $body['error']['message'],
+                ];
+            } catch (\Exception $e) {
+                $attempt++;
+                if ($attempt >= $maxRetries) {
+                    Log::error('OpenRouter API Error', [
+                        'message' => $e->getMessage(),
+                    ]);
+
+                    // Try fallback if enabled
+                    if (
+                        !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
+                        !empty($settings['fallback_provider']) && $settings['fallback_provider'] === 'gemini'
+                    ) {
+                        $fallbackResult = generate_description_gemini($prompt);
+                        if (!$fallbackResult['error']) {
+                            // Add note that fallback was used
+                            $fallbackResult['data'] = '[Generated using fallback provider] ' . $fallbackResult['data'];
+                        }
+                        return $fallbackResult;
+                    }
+
+                    return [
+                        'error' => true,
+                        'message' => 'An error occurred while generating the description using OpenRouter API.',
+                    ];
+                }
+
+                // Wait before retrying
+                $retryDelay = $settings['retry_delay'] ?? 1;
+                sleep($retryDelay);
+            }
+        }
+
+        // Should not reach here, but just in case
+        return [
+            'error' => true,
+            'message' => 'Failed to generate description after multiple attempts.',
+        ];
+    }
+}
+
+if (!function_exists('generate_description_gemini')) {
+    /**
+     * Generates a project/task description using Gemini API.
+     *
+     * @param string $prompt The input for generating the description.
+     * @param string|null $apiKey Optional API key to override settings
+     * @return array{error: bool, data?: string, message?: string} Response array with status and data/message
+     */
+    function generate_description_gemini(string $prompt, $apiKey = null)
+    {
+        try {
+            // Get settings from database
+            $settings = get_ai_settings('gemini');
+
+            // Use provided API key or get from settings
+            $apiKey = $apiKey ?: $settings['gemini_api_key'] ?? null;
+
+            if (empty($apiKey)) {
+                Log::error('Missing Gemini API key');
+                return [
+                    'error' => true,
+                    'message' => 'System configuration error: Missing API key.',
+                ];
+            }
+
+            // Get dynamic settings
+            $model = $settings['gemini_model'] ?? 'gemini-2.0-flash';
+            $endpointTemplate = $settings['gemini_endpoint'] ?? 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
+            $endpoint = sprintf($endpointTemplate, $model);
+
+            if (strpos($endpoint, '?key=') === false) {
+                $endpoint .= '?key=' . $apiKey;
+            }
+
+            $temperature = $settings['gemini_temperature'] ?? 0.7;
+            $topK = $settings['gemini_top_k'] ?? 40;
+            $topP = $settings['gemini_top_p'] ?? 0.95;
+            $maxOutputTokens = $settings['gemini_max_output_tokens'] ?? 1024;
+            $timeout = $settings['request_timeout'] ?? 15;
+            $maxRetries = $settings['max_retries'] ?? 2;
+
+            // Rate limiting settings
+            $MAX_REQUESTS_PER_MINUTE = $settings['rate_limit_per_minute'] ?? 15;
+            $MAX_REQUESTS_PER_DAY = $settings['rate_limit_per_day'] ?? 1500;
+
+            $userId = auth()->user()?->id ?? request()->ip();
+            $minuteKey = "gemini_rate_minute_{$userId}";
+            $dayKey = "gemini_rate_day_{$userId}";
+            $currentTime = now();
+
+            $minuteRequests = Cache::get($minuteKey, 0);
+            if ($minuteRequests >= $MAX_REQUESTS_PER_MINUTE) {
+                $retryAfter = 60 - $currentTime->second;
+                return [
+                    'error' => true,
+                    'message' => "Rate limit exceeded. Please try again in {$retryAfter} seconds.",
+                ];
+            }
+
+            $dayRequests = Cache::get($dayKey, 0);
+            if ($dayRequests >= $MAX_REQUESTS_PER_DAY) {
+                $tomorrow = $currentTime->addDay()->startOfDay();
+                $hoursRemaining = $currentTime->diffInHours($tomorrow);
+                return [
+                    'error' => true,
+                    'message' => "Daily limit exceeded. Please try again in {$hoursRemaining} hours.",
+                ];
+            }
+
+            // Apply prompt formatting if configured
+            $formattedPrompt = $prompt;
+            if (!empty($settings['default_prompt_prefix'])) {
+                $formattedPrompt = $settings['default_prompt_prefix'] . ' ' . $formattedPrompt;
+            }
+            if (!empty($settings['default_prompt_suffix'])) {
+                $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
+            }
+
+            // Set default prompt prefix for Gemini if not specified
+            if (strpos($formattedPrompt, "Generate a concise") === false) {
+                $formattedPrompt = "Generate a concise, professional description for the following: {$formattedPrompt}";
+            }
+
+            $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
+            if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
+                return [
+                    'error' => true,
+                    'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
+                ];
+            }
+
+            $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
+            $attempt = 0;
+
+            while ($attempt < $maxRetries) {
+                try {
+                    $response = $client->post($endpoint, [
+                        'headers' => [
+                            'Content-Type' => 'application/json',
+                        ],
+                        'json' => [
+                            'contents' => [
+                                [
+                                    'parts' => [
+                                        [
+                                            'text' => $formattedPrompt
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            'generationConfig' => [
+                                'temperature' => (float)$temperature,
+                                'topK' => (int)$topK,
+                                'topP' => (float)$topP,
+                                'maxOutputTokens' => (int)$maxOutputTokens,
+                            ]
+                        ]
+                    ]);
+
+                    $result = json_decode($response->getBody(), true);
+
+                    if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                        return [
+                            'error' => true,
+                            'message' => 'Invalid API response. Please Contact Support'
+                        ];
+                    }
+
+                    Cache::put($minuteKey, $minuteRequests + 1, now()->addMinutes(1));
+                    Cache::put($dayKey, $dayRequests + 1, now()->addDays(1));
+
+                    return [
+                        'error' => false,
+                        'data' => $result['candidates'][0]['content']['parts'][0]['text'],
+                    ];
+                } catch (\Exception $e) {
+                    $attempt++;
+                    if ($attempt >= $maxRetries) {
+                        Log::error('Gemini API Error', [
+                            'message' => $e->getMessage(),
+                        ]);
+
+                        // Try fallback if enabled
+                        if (
+                            !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
+                            !empty($settings['fallback_provider']) && $settings['fallback_provider'] === 'openrouter'
+                        ) {
+                            $fallbackResult = generate_description_openrouter($prompt);
+                            if (!$fallbackResult['error']) {
+                                // Add note that fallback was used
+                                $fallbackResult['data'] = '[Generated using fallback provider] ' . $fallbackResult['data'];
+                            }
+                            return $fallbackResult;
+                        }
+
+                        return [
+                            'error' => true,
+                            'message' => 'Failed to generate description. Please try again later.',
+                        ];
+                    }
+
+                    // Wait before retrying
+                    $retryDelay = $settings['retry_delay'] ?? 1;
+                    sleep($retryDelay);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::critical('Unexpected Error in generate_description_gemini', [
+                'error' => $e->getMessage(),
+            ]);
+            dd($e);
+            return [
+                'error' => true,
+                'message' => 'An unexpected error occurred. Please try again later.',
+            ];
+        }
+    }
+}
+if (!function_exists('generate_description')) {
+    /**
+     * Determines which AI model to use and generates a description.
+     *
+     * @param string $prompt The input for generating the description.
+     * @return mixed The generated description or error response.
+     */
+    function generate_description(string $prompt)
+    {
+        $ai_model_settings = get_settings('ai_model_settings');
+
+        $selectedModel = $ai_model_settings['is_active']; // Assume this is stored in app settings
+
+        if ($selectedModel === 'openrouter') {
+            Log::info('Creating Description Using Openrouter AI Model/API');
+            return generate_description_openrouter($prompt, $ai_model_settings['openrouter_api_key']);
+        } elseif ($selectedModel === 'gemini') {
+            Log::info('Creating Description Using Google Gemini AI Model/API');
+            return generate_description_gemini($prompt, $ai_model_settings['gemini_api_key']);
+        } else {
+
+            return [
+                'error' => true,
+                'message' => 'Invalid AI model selected. Please update your settings.'
+            ];
+        }
+    }
+}
+
+if (!function_exists('get_ai_settings')) {
+    /**
+     * Retrieve AI model settings from the database
+     *
+     * @param string|null $provider Specific provider to get settings for
+     * @return array AI settings from the database with defaults applied
+     */
+    function get_ai_settings(?string $provider = null): array
+    {
+        $settings = Setting::where('variable', 'ai_model_settings')->first();
+
+        if (!$settings) {
+            // Return default settings if none found
+            return [
+                'is_active' => 'openrouter',
+                'openrouter_endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+                'openrouter_system_prompt' => 'You are a helpful assistant that writes concise, professional project or task descriptions.',
+                'openrouter_temperature' => 0.7,
+                'openrouter_max_tokens' => 1024,
+                'openrouter_top_p' => 0.95,
+
+                'gemini_endpoint' => 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent',
+                'gemini_temperature' => 0.7,
+                'gemini_top_k' => 40,
+                'gemini_top_p' => 0.95,
+                'gemini_max_output_tokens' => 1024,
+
+                'rate_limit_per_minute' => 15,
+                'rate_limit_per_day' => 1500,
+                'max_retries' => 2,
+                'retry_delay' => 1,
+                'request_timeout' => 15,
+                'max_prompt_length' => 1000,
+            ];
+        }
+
+        $settings = json_decode($settings->value, true);
+
+        // If a specific provider is requested, only return those settings
+        if ($provider) {
+            $providerSettings = [];
+
+            // Get all settings that belong to the requested provider
+            foreach ($settings as $key => $value) {
+                if (strpos($key, $provider) === 0 || !str_contains($key, 'openrouter_') && !str_contains($key, 'gemini_')) {
+                    $providerSettings[$key] = $value;
+                }
+            }
+
+            // Add global settings that aren't provider-specific
+            $globalKeys = [
+                'is_active',
+                'rate_limit_per_minute',
+                'rate_limit_per_day',
+                'max_retries',
+                'retry_delay',
+                'request_timeout',
+                'max_prompt_length',
+                'enable_fallback',
+                'fallback_provider'
+            ];
+
+            foreach ($globalKeys as $key) {
+                if (isset($settings[$key])) {
+                    $providerSettings[$key] = $settings[$key];
+                }
+            }
+
+            return $providerSettings;
+        }
+
+        return $settings;
     }
 }

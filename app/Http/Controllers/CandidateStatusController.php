@@ -63,7 +63,7 @@ class CandidateStatusController extends Controller
     {
 
         $isApi = request()->get('isApi', false);
-
+        try {
         $request->validate([
             'name' => 'required|string|max:255|unique:candidate_statuses,name',
             'color' => 'required'
@@ -77,7 +77,7 @@ class CandidateStatusController extends Controller
             'color' => $request->color
         ]);
 
-        if (!$isApi) {
+            if ($isApi) {
             return formatApiResponse(
                 false,
                 'Candidate status Created successfully!',
@@ -93,6 +93,19 @@ class CandidateStatusController extends Controller
             'message' => 'Status Created Successfully!',
             'candidate_statuses' => $candidate_status
         ]);
+        } catch (ValidationException $e) {
+            return formatApiValidationError($isApi, $e->errors(), 'Validation failed while creating candidate status.');
+        } catch (\Exception $e) {
+            Log::error('Error creating candidate status', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'input' => $request->all(),
+            ]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while creating the candidate status.'
+            ], 500);
+        }
     }
 
 
@@ -220,7 +233,7 @@ class CandidateStatusController extends Controller
 
         if ($candidateCount > 0) {
             return response()->json([
-                'error' => 'false',
+                'error' => false,
                 'message' => ' Cannot delete . This status is assigned to one or more candidates . '
             ]);
         }

@@ -24,7 +24,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body ">
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
@@ -2822,12 +2822,12 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input class="form-control" type="text" name="title"
+                            <input class="form-control ai-title" type="text" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
@@ -2966,13 +2966,53 @@
                             </div>
                         </div>
                     @endif
-                    <div class="row">
-                        <div class="mb-3">
-                            <label for="description"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control description" rows="5" name="description"
-                                placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>">{{ old('description') }}</textarea>
+                    <div class="row align-items-center mb-2">
+                        <!-- Description Label -->
+                        <div class="col-md-6">
+                            <label for="description" class="form-label mb-0">
+                                <?= get_label('description', 'Description') ?>
+                            </label>
                         </div>
+                        <!-- Custom Prompt Switch + Generate Button -->
+                        <div class="col-md-6 text-md-end mt-md-0 mt-2">
+                            <div class="d-inline-flex align-items-center">
+                                <div class="form-check form-switch me-3">
+                                    <input class="form-check-input enableCustomPrompt" type="checkbox">
+                                    <label class="form-check-label" for="enableCustomPrompt">
+                                        <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
+                                    </label>
+                                </div>
+
+
+
+                                <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
+                                    <i class="fas fa-magic me-1"></i>
+                                    <?= get_label('generate_with_ai', 'Generate with AI') ?>
+                                </button>
+
+                                <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
+                                    data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
+                                    title=""
+                                    data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
+                                </i>
+
+                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Prompt Input (initially hidden) -->
+                    <div class="customPromptContainer mb-2 mt-2 d-none">
+                        <textarea class="form-control ai-custom-prompt" rows="2"
+                            placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
+                    </div>
+
+                    <!-- Description Textarea -->
+                    <div class="mb-3">
+                        <textarea class="form-control description ai-output" rows="5" name="description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                     </div>
 
                     <div class="row">
@@ -3219,12 +3259,12 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input class="form-control" type="text" id="title" name="title"
+                            <input class="form-control ai-title" type="text" id="title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
@@ -3336,13 +3376,53 @@
                             <option value="">Select a task list</option>
                         </select>
                     </div>
-                    <div class="row">
-                        <div class="mb-3">
-                            <label for="description"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control description" id="task_description" rows="5" name="description"
-                                placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>">{{ old('description') }}</textarea>
+                    <div class="row align-items-center mb-2">
+                        <!-- Description Label -->
+                        <div class="col-md-6">
+                            <label for="description" class="form-label mb-0">
+                                <?= get_label('description', 'Description') ?>
+                            </label>
                         </div>
+                        <!-- Custom Prompt Switch + Generate Button -->
+                        <div class="col-md-6 text-md-end mt-md-0 mt-2">
+                            <div class="d-inline-flex align-items-center">
+                                <div class="form-check form-switch me-3">
+                                    <input class="form-check-input enableCustomPrompt" type="checkbox">
+                                    <label class="form-check-label" for="enableCustomPrompt">
+                                        <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
+                                    </label>
+                                </div>
+
+
+
+                                <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
+                                    <i class="fas fa-magic me-1"></i>
+                                    <?= get_label('generate_with_ai', 'Generate with AI') ?>
+                                </button>
+
+                                <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
+                                    data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
+                                    title=""
+                                    data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
+                                </i>
+
+                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Prompt Input (initially hidden) -->
+                    <div class="customPromptContainer mb-2 mt-2 d-none">
+                        <textarea class="form-control ai-custom-prompt" rows="2"
+                            placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
+                    </div>
+
+                    <!-- Description Textarea -->
+                    <div class="mb-3">
+                        <textarea class="form-control description ai-output" rows="5" name="description" id="task_description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                     </div>
 
                     <div class="row">
@@ -3671,12 +3751,12 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input class="form-control" type="text" name="title"
+                            <input class="form-control ai-title" type="text" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
@@ -3857,13 +3937,54 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="mb-3">
-                            <label for="description"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control description" rows="5" name="description"
-                                placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>">{{ old('description') }}</textarea>
+                    <div class="row align-items-center mb-2">
+                        <!-- Description Label -->
+                        <div class="col-md-6">
+                            <label for="description" class="form-label mb-0">
+                                <?= get_label('description', 'Description') ?>
+                            </label>
                         </div>
+
+                        <!-- Custom Prompt Switch + Generate Button -->
+                        <div class="col-md-6 text-md-end mt-md-0 mt-2">
+                            <div class="d-inline-flex align-items-center">
+                                <div class="form-check form-switch me-3">
+                                    <input class="form-check-input enableCustomPrompt" type="checkbox">
+                                    <label class="form-check-label" for="enableCustomPrompt">
+                                        <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
+                                    </label>
+                                </div>
+
+
+
+                                <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
+                                    <i class="fas fa-magic me-1"></i>
+                                    <?= get_label('generate_with_ai', 'Generate with AI') ?>
+                                </button>
+
+                                <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
+                                    data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
+                                    title=""
+                                    data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
+                                </i>
+
+                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Prompt Input (initially hidden) -->
+                    <div class="customPromptContainer mb-2 mt-2 d-none" >
+                        <textarea class="form-control ai-custom-prompt" rows="2"
+                            placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
+                    </div>
+
+                    <!-- Description Textarea -->
+                    <div class="mb-3">
+                        <textarea class="form-control description ai-output" rows="5" name="description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                     </div>
                     <div class="row">
                         <div class="mb-3">
@@ -3925,12 +4046,12 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body ai-wrapper">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input class="form-control" type="text" name="title" id="project_title"
+                            <input class="form-control ai-title" type="text" name="title" id="project_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
@@ -4101,13 +4222,51 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="mb-3">
-                            <label for="description"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control description" rows="5" name="description" id="project_description"
-                                placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>">{{ old('description') }}</textarea>
+                    <div class="row align-items-center mb-2">
+                        <!-- Description Label -->
+                        <div class="col-md-6">
+                            <label for="description" class="form-label mb-0">
+                                <?= get_label('description', 'Description') ?>
+                            </label>
                         </div>
+
+                        <!-- Custom Prompt Switch + Generate Button -->
+                        <div class="col-md-6 text-md-end mt-md-0 mt-2">
+                            <div class="d-inline-flex align-items-center">
+                                <div class="form-check form-switch me-3">
+                                    <input class="form-check-input enableCustomPrompt" type="checkbox">
+                                    <label class="form-check-label" for="enableCustomPrompt">
+                                        <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
+                                    </label>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
+                                    <i class="fas fa-magic me-1"></i>
+                                    <?= get_label('generate_with_ai', 'Generate with AI') ?>
+                                </button>
+
+                                <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
+                                    data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
+                                    title=""
+                                    data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
+                                </i>
+
+                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Prompt Input (initially hidden) -->
+                    <div class="customPromptContainer mb-2 mt-2 d-none">
+                        <textarea class="form-control ai-custom-prompt" rows="2"
+                            placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
+                    </div>
+
+                    <!-- Description Textarea -->
+                    <div class="mb-3">
+                        <textarea class="form-control description ai-output" rows="5" name="description" id="project_description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                     </div>
                     <div class="row">
                         <div class="mb-3">

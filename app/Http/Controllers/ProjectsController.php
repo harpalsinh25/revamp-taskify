@@ -667,6 +667,7 @@ class ProjectsController extends Controller
      */
     public function update(Request $request)
     {
+
         $isApi = request()->get('isApi', false);
         if ($request->input('priority_id') == 0) {
             $request->merge(['priority_id' => null]);
@@ -794,6 +795,7 @@ class ProjectsController extends Controller
 
             // Update custom field values
             if ($request->has('custom_fields')) {
+
                 foreach ($request->custom_fields as $field_id => $value) {
                     // Handle checkboxes (arrays)
                     if (is_array($value)) {

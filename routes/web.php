@@ -9,6 +9,7 @@ use GuzzleHttp\Client as HttpClient;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AIController;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Session;
@@ -54,6 +55,8 @@ use App\Http\Controllers\WorkspacesController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\CustomFieldController;
+use App\Http\Controllers\PwaManifestController;
+use App\Http\Controllers\PwaSettingsController;
 use App\Http\Controllers\TimeTrackerController;
 use App\Http\Controllers\LeadFollowUpController;
 use App\Http\Controllers\LeaveRequestController;
@@ -632,6 +635,9 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
             Route::put('/settings/store_email', [SettingsController::class, 'store_email_settings'])->middleware(['demo_restriction']);
 
+            Route::get('/settings/ai-models', [SettingsController::class, 'ai_model_settings'])->middleware(['demo_restriction'])->name('settings.ai_models_setting');
+            Route::put('/settings/store-ai-models-settings', [SettingsController::class, 'store_ai_model_settings'])->middleware(['demo_restriction'])->name('settings.store_ai_models');
+
             Route::get('/settings/sms-gateway', [SettingsController::class, 'sms_gateway']);
 
             Route::put('/settings/store_sms_gateway', [SettingsController::class, 'store_sms_gateway_settings'])->middleware(['demo_restriction']);
@@ -677,8 +683,13 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/custom-fields/list', [CustomFieldController::class, 'list'])->name('custom_fields.list');
 
                 Route::get('/custom-fields/{id}/edit', [CustomFieldController::class, 'edit'])->name('custom_fields.edit');
-                Route::post('/custom-fields/{id}', [CustomFieldController::class, 'update'])->name('custom_fields.update');
-                Route::delete('/custom-fields/{id}', [CustomFieldController::class, 'destroy'])->name('custom_fields.destroy');
+                Route::post('/custom-fields/update/{id}', [CustomFieldController::class, 'update'])->name('custom_fields.update');
+                Route::delete('/custom-fields/destroy/{id}', [CustomFieldController::class, 'destroy'])->name('custom_fields.destroy');
+                Route::post('/custom-fields/destroy_multiple', [CustomFieldController::class, 'destroy_multiple'])->name('custom_fields.destroy_multiple');
+            });
+            Route::prefix('/settings')->group(function () {
+                Route::get('/pwa-settings', [PwaSettingsController::class, 'index'])->name('pwa-settings.index');
+                Route::post('/pwa-settings/update', [PwaSettingsController::class, 'update'])->middleware('auth')->name('pwa-settings.update');
             });
         });
 
@@ -1010,5 +1021,8 @@ Route::middleware(['CheckInstallation'])->group(function () {
         Route::delete('/interviews/destroy/{id}', [InterviewController::class, 'destroy'])->name('interviews.destroy')->middleware(['customcan:delete_interview', 'log.activity']);
         Route::post('/interviews/destroy_multiple', [InterviewController::class, 'destroy_multiple'])->name('interviews.destroy_multiple')->middleware(['customcan:delete_interview', 'log.activity']);
         Route::get('/interviews/list', [InterviewController::class, 'list'])->name('interviews.list')->middleware('customcan:manage_interview');
+
+        Route::post('/ai/generate-description', [AIController::class, 'generateDescription'])
+            ->name('generate.description');
     });
 });

@@ -21,19 +21,25 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\MeetingsController;
 use App\Http\Controllers\PaymentsController;
+use App\Http\Controllers\PayslipsController;
 use App\Http\Controllers\PriorityController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\TaskListController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\ContractsController;
 use App\Http\Controllers\EmailSendController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\LeadStageController;
+use App\Http\Controllers\AllowancesController;
+use App\Http\Controllers\DeductionsController;
 use App\Http\Controllers\LeadImportController;
 use App\Http\Controllers\LeadSourceController;
 use App\Http\Controllers\WorkspacesController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\CustomFieldController;
+use App\Http\Controllers\TimeTrackerController;
 use App\Http\Controllers\LeadFollowUpController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\EmailTemplateController;
@@ -438,9 +444,80 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
 
 
     Route::post('/custom-fields', [CustomFieldController::class, 'store'])->name('custom_fields.store');
-    Route::get('/custom-fields/list', [CustomFieldController::class, 'list'])->name('custom_fields.list');
+    Route::get('/custom-fields/list', [CustomFieldController::class, 'apiList'])->name('custom_fields.list');
 
     Route::get('/custom-fields/{id}/edit', [CustomFieldController::class, 'edit'])->name('custom_fields.edit');
-    Route::put('/custom-fields/{id}', [CustomFieldController::class, 'update'])->name('custom_fields.update');
-    Route::delete('/custom-fields/{id}', [CustomFieldController::class, 'destroy'])->name('custom_fields.destroy');
+    Route::put('/custom-fields/update/{id}', [CustomFieldController::class, 'update'])->name('custom_fields.update');
+    Route::delete('/custom-fields/destroy/{id}', [CustomFieldController::class, 'destroy'])->name('custom_fields.destroy');
+
+    // Payslip
+    Route::middleware(['customcan:manage_payslips', 'isApi'])->group(function () {
+        Route::post('/payslips/store', [PayslipsController::class, 'store'])->middleware(['customcan:create_payslips', 'log.activity']);
+        Route::post('/payslips/update', [PayslipsController::class, 'update'])->middleware(['customcan:edit_payslips', 'log.activity']);
+        Route::delete('/payslips/destroy/{id}', [PayslipsController::class, 'destroy'])->middleware(['demo_restriction', 'customcan:delete_payslips', 'checkAccess:App\Models\Payslip,payslips,id,payslips', 'log.activity']);
+        Route::get('/payslips/list', [PayslipsController::class, 'apiList']);
+    });
+
+    // Allowances
+    Route::middleware(['customcan:manage_allowances', 'isApi'])->group(function () {
+        Route::post('/allowances/store', [AllowancesController::class, 'store'])->middleware(['customcan:create_allowances', 'log.activity']);
+        Route::post('/allowances/update', [AllowancesController::class, 'update'])->middleware(['customcan:edit_allowances', 'log.activity']);
+        Route::get('/allowances/list', [AllowancesController::class, 'apiList']);
+        Route::get('/allowances/get/{id}', [AllowancesController::class, 'get']);
+        Route::delete('/allowances/destroy/{id}', [AllowancesController::class, 'destroy'])->middleware(['customcan:delete_allowances', 'demo_restriction', 'log.activity']);
+    });
+
+    // Deduction
+    Route::middleware(['customcan:manage_deductions', 'isApi'])->group(function () {
+        Route::post('/deductions/store', [DeductionsController::class, 'store'])->middleware(['customcan:create_deductions', 'log.activity']);
+        Route::get('/deductions/get/{id}', [DeductionsController::class, 'get']);
+        Route::get('/deductions/list', [DeductionsController::class, 'apiList']);
+        Route::post('/deductions/update', [DeductionsController::class, 'update'])->middleware(['customcan:edit_deductions', 'log.activity']);
+        Route::delete('/deductions/destroy/{id}', [DeductionsController::class, 'destroy'])->middleware(['customcan:delete_deductions', 'demo_restriction', 'log.activity']);
+    });
+
+    // Contracts
+    Route::middleware(['customcan:manage_contracts', 'isApi'])->group(function () {
+        Route::post('/contracts/store', [ContractsController::class, 'store'])->middleware(['customcan:create_contracts', 'log.activity']);
+        Route::post('/contracts/update', [ContractsController::class, 'update'])->middleware(['customcan:edit_contracts', 'log.activity']);
+        Route::get('/contracts/list', [ContractsController::class, 'apiList']);
+        Route::get('/contracts/get/{id}', [ContractsController::class, 'get'])->middleware(['checkAccess:App\Models\Contract,contracts,id']);
+
+        Route::post('/contracts/create-sign', [ContractsController::class, 'create_sign'])->middleware('log.activity');
+
+        Route::delete('/contracts/destroy/{id}', [ContractsController::class, 'destroy'])->middleware(['customcan:delete_contracts', 'demo_restriction', 'checkAccess:App\Models\Contract,contracts,id,contracts', 'log.activity']);
+
+        Route::delete('/contracts/delete-sign/{id}', [ContractsController::class, 'delete_sign'])->middleware('log.activity');
+    });
+
+    // Contracts Types
+    Route::middleware(['customcan:manage_contract_types', 'isApi'])->group(function () {
+
+        Route::post('/contracts/store-contract-type', [ContractsController::class, 'store_contract_type'])->middleware(['customcan:create_contract_types', 'log.activity']);
+
+        Route::post('/contracts/update-contract-type', [ContractsController::class, 'update_contract_type'])->middleware(['customcan:edit_contract_types', 'log.activity']);
+
+
+        Route::get('/contracts/contract-types-list', [ContractsController::class, 'contract_types_apiList']);
+
+        Route::get('/contracts/get-contract-type/{id}', [ContractsController::class, 'get_contract_type']);
+
+        Route::delete('/contracts/delete-contract-type/{id}', [ContractsController::class, 'delete_contract_type'])->middleware(['customcan:delete_contract_types', 'demo_restriction', 'log.activity']);
+    });
+
+    // TimeTracker
+    Route::post('/time-tracker/store', [TimeTrackerController::class, 'store'])->middleware(['customcan:create_timesheet', 'log.activity'])->middleware('isApi');
+    Route::post('/time-tracker/update', [TimeTrackerController::class, 'update'])->middleware('log.activity')->middleware('isApi');
+    Route::get('/time-tracker/list', [TimeTrackerController::class, 'apiList'])->middleware(['customcan:manage_timesheet'])->middleware('isApi');
+    Route::delete('/time-tracker/destroy/{id}', [TimeTrackerController::class, 'destroy'])->middleware(['customcan:delete_timesheet', 'log.activity'])->middleware('isApi');
+
+    // TaskiList
+    Route::prefix('/task-lists')->middleware('isApi')->group(function () {
+        Route::post('/store', [TaskListController::class, 'store'])->name('task_lists.store');
+        Route::post('/update', [TaskListController::class, 'update'])->name('task_lists.update');
+        Route::get('/get/{id}', [TaskListController::class, 'get'])->name('task_lists.get');
+        Route::delete('/destroy/{id}', [TaskListController::class, 'destroy'])->name('task_lists.destroy');
+        Route::get('/list', [TaskListController::class, 'apiList'])->name('task_lists.list');
+        // Route::get('/search', [TaskListController::class, 'searchTaskLists'])->name('task-lists.search');
+    });
 });

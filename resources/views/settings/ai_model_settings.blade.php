@@ -24,7 +24,7 @@
         <div class="alert alert-primary" role="alert">
             <?= get_label('configure_ai_model_settings', 'Configure settings for various AI models and select the active model.') ?>
         </div>
-        <form action="{{ route('ai_model.store') }}" class="form-submit-event" method="POST">
+        <form action="{{ route('settings.store_ai_models') }}" class="form-submit-event" method="POST">
             <input type="hidden" name="dnr">
             @csrf
             @method('PUT')

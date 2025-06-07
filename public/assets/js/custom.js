@@ -123,6 +123,11 @@ $(document).on("click", ".delete-selected", function (e) {
                 $("#confirmDeleteSelections")
                     .html(label_please_wait)
                     .attr("disabled", true);
+
+                console.log("Selected IDs:", selectedIds); // Debugging line to check selected IDs
+                console.log("Type:", type); // Debugging line to check type
+                console.log("Destroy action:", destroy); // Debugging line to check destroy action
+
                 $.ajax({
                     url: baseUrl + "/" + type + "/" + destroy,
                     data: {

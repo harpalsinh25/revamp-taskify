@@ -227,8 +227,8 @@ class InterviewController extends Controller
                 'interviewer_last_name' => $interviewer->last_name,
                 'old_status' => $oldStatus,
                 'new_status' => $request->status,
-                'updater_first_name' => auth()->user()->first_name,
-                'updater_last_name' => auth()->user()->last_name,
+                'updater_first_name' => getAuthenticatedUser()->first_name,
+                'updater_last_name' => getAuthenticatedUser()->last_name,
                 'access_url' => 'interviews',
                 'action' => 'update'
             ];

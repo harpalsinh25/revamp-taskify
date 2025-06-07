@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\CustomField;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class CustomFieldController extends Controller
@@ -79,14 +80,13 @@ class CustomFieldController extends Controller
     public function store(Request $request)
     {
 
-
         $isApi = $request->get('isApi', false);
         try {
             $request->validate([
                 'module' => 'required|string|in:project,task',
                 'field_label' => 'required|string',
                 'field_type' => 'required|string|in:text,number,password,textarea,radio,date,checkbox,select',
-                'options' => 'nullable|string|required_if:field_type,radio,checkbox,select',
+                'options' => 'nullable|array|required_if:field_type,radio,checkbox,select',
                 'required' => 'nullable|string',
                 'visibility' => 'nullable|string',
             ]);
@@ -96,7 +96,7 @@ class CustomFieldController extends Controller
             $customField->field_label = $request->field_label;
             $customField->name = '';
             $customField->options = in_array($request->field_type, ['radio', 'checkbox', 'select'])
-                ? json_encode(preg_split('/\r\n|\r|\n/', trim($request->options)))
+                ? json_encode(($request->options))
                 : null;
 
             $customField->required = $request->required;
@@ -108,6 +108,7 @@ class CustomFieldController extends Controller
                 [
                     'id' => $customField->id,
                     'type' => 'custom_field',
+                    'data' => formatCustomField($customField)
                 ],
                 200
             );
@@ -138,13 +139,12 @@ class CustomFieldController extends Controller
 
     public function edit(string $id)
     {
-        $field = CustomField::find($id);
 
+        $field = CustomField::find($id);
         // Decode JSON options for radio, checkbox, select
         if (in_array($field->field_type, ['radio', 'checkbox', 'select']) && $field->options) {
             $field->options = json_decode($field->options, true);
         }
-
         return response()->json(['success' => true, 'data' => $field]);
     }
 
@@ -198,7 +198,6 @@ class CustomFieldController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
         $field = CustomField::find($id);
 
 
@@ -206,7 +205,7 @@ class CustomFieldController extends Controller
             'module' => 'required|string|in:project,task',
             'field_label' => 'required|string',
             'field_type' => 'required|string|in:text,number,password,textarea,radio,date,checkbox,select',
-            'options' => 'nullable|string|required_if:field_type,radio,checkbox,select',
+            'options' => 'nullable|array|required_if:field_type,radio,checkbox,select',
             'required' => 'nullable|string',
             'visibility' => 'nullable|string',
         ];
@@ -223,7 +222,7 @@ class CustomFieldController extends Controller
         $field->field_label = $request->field_label;
         $field->field_type = $request->field_type;
         $field->options = in_array($request->field_type, ['radio', 'checkbox', 'select'])
-            ? json_encode(preg_split('/\r\n|\r|\n/', trim($request->options)))
+            ? json_encode($request->options)
             : null;
         $field->required = $request->required;
         $field->visibility = $request->visibility;
@@ -236,6 +235,7 @@ class CustomFieldController extends Controller
             [
                 'id' => $field->id,
                 'type' => 'custom_field',
+                'data' => formatCustomField($field)
             ],
             200
 
@@ -277,14 +277,9 @@ class CustomFieldController extends Controller
         try {
             $field = CustomField::find($id);
 
-            $field->delete();
+            $response = DeletionService::delete(CustomField::class, $field->id, 'CustomeField');
 
-            return formatApiResponse(
-                'false',
-                'CustomField deleted successfully',
-                [],
-                200
-            );
+            return $response;
         } catch (\Exception $e) {
 
             return formatApiResponse(
@@ -318,20 +313,48 @@ class CustomFieldController extends Controller
 
         $total = $customFields->count();
 
+        $canEdit = isAdminOrHasAllDataAccess();
+        $canDelete = isAdminOrHasAllDataAccess();
+
         $customFields = $customFields
             ->skip($offset)
             ->take($limit)
             ->get()
             ->map(
-                fn($field) => [
+            function ($field) use ($canEdit, $canDelete) {
+
+                $actions = '';
+
+
+
+                if ($canEdit) {
+                    $actions .= '<a href="javascript:void(0);" class="edit-custom-field"
+                                        data-id=' . $field->id . '
+                                        title="' . get_label('update', 'Update') . '">
+                                        <i class="bx bx-edit mx-1"></i>
+                                    </a>';
+                }
+
+                if ($canDelete) {
+                    $actions .= '<button type="button"
+                                        class="btn delete"
+                                        data-id="' . $field->id . '"
+                                        data-type="settings/custom-fields"
+                                        title="' . get_label('delete', 'Delete') . '">
+                                        <i class="bx bx-trash text-danger mx-1"></i>
+                                    </button>';
+                }
+
+                return [
                     'id' => $field->id,
                     'module' => $field->module,
                     'field_label' => $field->field_label,
                     'field_type' => $field->field_type,
                     'required' => ($field->required == '1') ? 'Yes' : 'No',
                     'visibility' => ($field->visibility == '1') ? 'Yes' : 'No',
-                    'actions' => ''
-                ]
+                    'actions' => $actions ?: '-'
+                ];
+            }
             );
 
         return response()->json([
@@ -475,5 +498,26 @@ class CustomFieldController extends Controller
                 500
             );
         }
+    }
+
+    public function destroy_multiple(Request $request)
+    {
+
+        $validatedData = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:custom_fields,id'
+        ]);
+
+        $ids = $validatedData['ids'];
+        $deletedIds = [];
+        $deletedTitles = [];
+        foreach ($ids as $id) {
+            $custom_field = CustomField::findOrFail($id);
+            $deletedIds[] = $id;
+            $deletedTitles[] = $custom_field->field_label;
+            DeletionService::delete(CustomField::class, $id, 'custom_field');
+        }
+
+        return response()->json(['error' => false, 'message' => 'Custom Field(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
     }
 }

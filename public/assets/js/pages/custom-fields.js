@@ -1,7 +1,7 @@
 $(document).ready(function () {
     // Initialize Bootstrap table for custom fields if the table exists
-    if ($("#custom_fields_table").length) {
-        $("#custom_fields_table").bootstrapTable({});
+    if ($("#table").length) {
+        $("#table").bootstrapTable({});
     }
 
     // Show add field modal when button is clicked
@@ -67,45 +67,38 @@ $(document).ready(function () {
         // Debug - check if field_type is selected
         console.log("Field type selected:", $("#field_type").val());
 
-        // Collect options[] array and join into a string
         const options = form
             .find('input[name="options[]"]')
             .map(function () {
-                return $(this).val();
+                return $(this).val().trim();
             })
             .get()
-            .filter((val) => val.trim() !== "")
-            .join("\n");
+            .filter(val => val !== "");
 
-        console.log("Options being sent:", options);
-        // Create a new form data object to include options as a string
-        const formData = form.serializeArray();
+        // Create standard JSON payload
+        const formData = {};
+        form.serializeArray().forEach(item => {
+            if (item.name !== "options[]") {
+                formData[item.name] = item.value;
+            }
+        });
 
-        console.log("Should show options:", field_type === "radio" || field_type === "checkbox" || field_type === "select");
-        // Remove individual options[] from formData
-        const filteredFormData = formData.filter(
-            (item) => item.name !== "options[]"
-        );
-
-        // Debug - check if field_type is in filtered data
-        console.log("Filtered formData:", filteredFormData);
-
-        // Add options as a single string
-        if (options) {
-            filteredFormData.push({ name: "options", value: options });
-        }
-
-        // Debug - final data being sent
-        console.log("Final data being sent:", $.param(filteredFormData));
-
+        formData.options = options; // ✅ Add options as array
         $.ajax({
             url: actionUrl,
             method: "POST",
-            data: $.param(filteredFormData),
+            data: $.param(formData),
             success: function (response) {
-                toastr.success(response.success);
-                $("#add_field_modal").modal("hide");
-                $("#custom_fields_table").bootstrapTable("refresh");
+                console.log("Success response:", response);
+                if (response.error) {
+                    toastr.error(response.message);
+                }
+                else {
+                    toastr.success(response.message);
+                    $("#add_field_modal").modal("hide");
+                    $("#table").bootstrapTable("refresh");
+                }
+
             },
             error: function (xhr) {
                 console.log("Error response:", xhr.responseJSON);
@@ -129,7 +122,9 @@ $(document).ready(function () {
     // Handle edit button click for custom fields
     $(document).on("click", ".edit-custom-field", function () {
         console.log('here');
+        console.log($(this));
         var id = $(this).data("id");
+        console.log("Editing field with ID:", id);
         $.ajax({
             url: "/settings/custom-fields/" + id + "/edit",
             type: "get",
@@ -166,25 +161,22 @@ $(document).ready(function () {
                     ) {
                         // Trigger change to render the options container
                         $("#field_type").trigger("change");
-
                         // Ensure the options list exists
                         const optionsList = $("#options_list");
                         if (optionsList.length) {
                             optionsList.empty(); // Clear default option input
-
                             // Use options directly (now an array from server)
                             const options = Array.isArray(field.options)
                                 ? field.options
                                 : field.options.split("\n").filter((opt) => opt.trim() !== "");
-
                             // Append each option to the options list
                             options.forEach((option) => {
                                 optionsList.append(`
-                                    <div class="input-group mb-2 option-item">
-                                        <input type="text" class="form-control" name="options[]" value="${option}">
-                                        <button type="button" class="btn btn-danger remove-option">Remove</button>
-                                    </div>
-                                `);
+                                <div class="input-group mb-2 option-item">
+                                    <input type="text" class="form-control" name="options[]" value="${option}">
+                                    <button type="button" class="btn btn-danger remove-option">Remove</button>
+                                </div>
+                            `);
                             });
                         } else {
                             console.error("Options list container not found");
@@ -192,18 +184,19 @@ $(document).ready(function () {
                         }
                     }
 
+
                     // Change form action to update route
                     $(".form-submit-event2").attr(
                         "action",
-                        "/settings/custom-fields/" + id
+                        "/settings/custom-fields/update/" + id
                     );
-                    if ($('input[name="_method"]').length === 0) {
-                        $(".form-submit-event2").append(
-                            '<input type="hidden" name="_method" value="PUT">'
-                        );
-                    } else {
-                        $('input[name="_method"]').val("PUT");
-                    }
+                    // if ($('input[name="_method"]').length === 0) {
+                    //     $(".form-submit-event2").append(
+                    //         '<input type="hidden" name="_method" value="PUT">'
+                    //     );
+                    // } else {
+                    //     $('input[name="_method"]').val("PUT");
+                    // }
 
                     $("#edit_custom_field").text("Edit Field");
                     $("#add_field_modal").modal("show");
@@ -228,43 +221,6 @@ $(document).ready(function () {
         $("#exampleModalLabel1").text("Add Field");
     });
 
-    // Handle delete button click for custom fields
-    $(document).on("click", ".delete-custom-field", function () {
-        const fieldId = $(this).data("id");
-
-        // Store fieldId in modal's data for use on confirm
-        $("#delete_field_modal").data("field-id", fieldId);
-
-        // Show the delete confirmation modal
-        $("#delete_field_modal").modal("show");
-    });
-
-    // Handle confirm delete button click
-    $(document).on("click", "#confirm_delete_btn", function () {
-        const fieldId = $("#delete_field_modal").data("field-id");
-
-        $.ajax({
-            url: "/settings/custom-fields/" + fieldId,
-            type: "DELETE",
-            data: {
-                _token: $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                if (response.success) {
-                    $("#custom_fields_table").bootstrapTable("refresh");
-                    toastr.success("Field deleted successfully");
-                    $("#delete_field_modal").modal("hide");
-                } else {
-                    showErrorMessage(
-                        response.message || "Could not delete field"
-                    );
-                }
-            },
-            error: function () {
-                showErrorMessage("An error occurred while deleting the field");
-            },
-        });
-    });
 });
 
 function customFieldActionsFormatter(value, row, index) {
@@ -272,7 +228,7 @@ function customFieldActionsFormatter(value, row, index) {
         '<a href="javascript:void(0);" class="edit-custom-field" data-id=' +
         row.id +
         ' title="Edit" class="card-link"><i class="bx bx-edit mx-1"></i></a>' +
-        '<button title="Delete" type="button" class="btn delete-custom-field" data-id=' +
+        '<button title="Delete" type="button" class="btn delete" data-type"settings/custom-fields" data-id=' +
         row.id +
         ">" +
         '<i class="bx bx-trash text-danger mx-1"></i>' +

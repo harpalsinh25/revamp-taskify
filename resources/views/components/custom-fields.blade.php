@@ -63,14 +63,14 @@
                             >
                             @break
 
-                            @case('select')
+                           @case('select')
                             <select
-                                id="cf_{{ $field->id }}"
-                                name="custom_fields[{{ $field->id }}]"
-                                class="form-select form-select-md"
-                                @if($isRequired) required @endif
+                               id="{{ $isEdit ? 'edit_cf_' . $field->id : 'cf_' . $field->id }}"
+                               name="custom_fields[{{ $field->id }}]"
+                               class="form-select form-select-md"
+                               @if($isRequired) required @endif
                             >
-                                <option value="">{{ get_label('please_select', 'Please select') }}</option>
+                                <option value="{{ $field->field_label }}">{{ $field->field_label }}</option>
                                 @foreach(json_decode($field->options, true) ?? [] as $option)
                                     <option value="{{ $option }}" {{ $fieldValue == $option ? 'selected' : '' }}>
                                         {{ $option }}
@@ -78,6 +78,7 @@
                                 @endforeach
                             </select>
                             @break
+
 
                             @case('radio')
                             <div class="d-flex flex-wrap gap-2">

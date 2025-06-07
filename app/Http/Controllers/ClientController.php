@@ -238,6 +238,7 @@ class ClientController extends Controller
                 $workspace->clients()->attach($client->id);
                 $client->assignRole($role_id);
                 if (!$internal_purpose && isEmailConfigured()) {
+
                     $account_creation_template = Template::where('type', 'email')
                         ->where('name', 'account_creation')
                         ->first();
