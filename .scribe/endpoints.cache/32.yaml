@@ -18,9 +18,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -30,6 +29,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -42,6 +42,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       sort:
         name: sort
@@ -51,6 +52,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       order:
         name: order
@@ -60,6 +62,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       limit:
         name: limit
@@ -69,6 +72,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       offset:
         name: offset
@@ -78,6 +82,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       search: INVC-1001
@@ -145,7 +150,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Zh8aP1vk4ce3bEaVdgD665f'
+      - 'Bearer eh4VcaDf3bZPvd6g6E8k1a5'
     controller: null
     method: null
     route: null
@@ -167,9 +172,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -183,6 +188,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_id:
         name: client_id
@@ -192,6 +198,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       name:
         name: name
@@ -201,6 +208,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       address:
         name: address
@@ -210,6 +218,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       city:
         name: city
@@ -219,6 +228,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       state:
         name: state
@@ -228,6 +238,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country:
         name: country
@@ -237,6 +248,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       zip_code:
         name: zip_code
@@ -246,6 +258,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       phone:
         name: phone
@@ -255,6 +268,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       note:
         name: note
@@ -264,6 +278,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       personal_note:
         name: personal_note
@@ -273,6 +288,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       from_date:
         name: from_date
@@ -282,6 +298,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       to_date:
         name: to_date
@@ -291,6 +308,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status:
         name: status
@@ -300,6 +318,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       total:
         name: total
@@ -309,6 +328,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       tax_amount:
         name: tax_amount
@@ -318,6 +338,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       final_total:
         name: final_total
@@ -327,6 +348,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       item_ids:
         name: item_ids
@@ -338,6 +360,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       item:
         name: item
@@ -349,6 +372,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       quantity:
         name: quantity
@@ -360,6 +384,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       unit:
         name: unit
@@ -371,6 +396,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       rate:
         name: rate
@@ -382,6 +408,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       tax:
         name: tax
@@ -393,6 +420,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       amount:
         name: amount
@@ -404,6 +432,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       type: invoice
@@ -510,7 +539,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ag4Z5vEkD6dVecPah81fb36'
+      - 'Bearer aevc68E16DgbZ3hPdafV54k'
     controller: null
     method: null
     route: null
@@ -532,9 +561,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -548,6 +577,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       type:
         name: type
@@ -557,6 +587,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_id:
         name: client_id
@@ -566,6 +597,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       name:
         name: name
@@ -575,6 +607,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       address:
         name: address
@@ -584,6 +617,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       city:
         name: city
@@ -593,6 +627,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       state:
         name: state
@@ -602,6 +637,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country:
         name: country
@@ -611,6 +647,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       zip_code:
         name: zip_code
@@ -620,6 +657,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       phone:
         name: phone
@@ -629,6 +667,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       note:
         name: note
@@ -638,6 +677,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       personal_note:
         name: personal_note
@@ -647,6 +687,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       from_date:
         name: from_date
@@ -656,6 +697,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       to_date:
         name: to_date
@@ -665,6 +707,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status:
         name: status
@@ -674,6 +717,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       total:
         name: total
@@ -683,6 +727,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       tax_amount:
         name: tax_amount
@@ -692,6 +737,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       final_total:
         name: final_total
@@ -701,6 +747,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       item:
         name: item
@@ -713,6 +760,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       'quantity.*':
         name: 'quantity.*'
@@ -722,6 +770,7 @@ endpoints:
         type: numeric
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       'unit.*':
         name: 'unit.*'
@@ -731,6 +780,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       'rate.*':
         name: 'rate.*'
@@ -740,6 +790,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       'tax.*':
         name: 'tax.*'
@@ -749,6 +800,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       'amount.*':
         name: 'amount.*'
@@ -758,6 +810,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       id: 5
@@ -835,7 +888,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer eV456b3E1caka8vZdPDfgh6'
+      - 'Bearer DcVE1hda5P3f6agZb48evk6'
     controller: null
     method: null
     route: null
@@ -855,9 +908,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -867,6 +919,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -913,7 +966,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer vcaVP1Z5dbgaE64kef8Dh63'
+      - 'Bearer aPZDfagcb548e13hV6dEv6k'
     controller: null
     method: null
     route: null

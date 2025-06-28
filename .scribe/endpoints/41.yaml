@@ -19,9 +19,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -35,6 +35,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       field_label:
         name: field_label
@@ -44,6 +45,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       field_type:
         name: field_type
@@ -53,6 +55,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       options:
         name: options
@@ -62,6 +65,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       required:
         name: required
@@ -71,6 +75,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       visibility:
         name: visibility
@@ -80,6 +85,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       module: task
@@ -136,7 +142,167 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Edf6a1Pgbkv58h63De4caZV'
+      - 'Bearer 6vdVcakeDhaP356fZEb4g81'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/custom-fields/list
+    metadata:
+      groupName: 'Custom Field Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List custom fields or retrieve a single custom field.'
+      description: |-
+        This endpoint retrieves a paginated list of custom fields or a single custom field by ID.
+        Supports optional search, sorting, pagination, and filtering by module, label, or field type.
+        User must be authenticated to access this endpoint.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Accept: application/json
+      workspace_id: 1
+    urlParameters:
+      id:
+        name: id
+        description: 'optional The ID of the custom field to retrieve. If provided, returns a single custom field.'
+        required: false
+        example: 3
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 3
+    queryParameters:
+      search:
+        name: search
+        description: 'optional Filter custom fields by module, field label, or field type.'
+        required: false
+        example: priority
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      sort:
+        name: sort
+        description: 'optional Field to sort by. Default is id.'
+        required: false
+        example: field_label
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      order:
+        name: order
+        description: 'optional Sort direction: ASC or DESC. Default is DESC.'
+        required: false
+        example: ASC
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      limit:
+        name: limit
+        description: 'optional Number of custom fields to return per page. Default is 10.'
+        required: false
+        example: 20
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      offset:
+        name: offset
+        description: 'optional The number of custom fields to skip. Default is 0.'
+        required: false
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      search: priority
+      sort: field_label
+      order: ASC
+      limit: 20
+      offset: 5
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "CustomFields retrieved successfully!",
+            "data": {
+              "total": 2,
+              "data": [
+                {
+                  "id": 3,
+                  "module": "task",
+                  "field_type": "select",
+                  "field_label": "Priority",
+                  "options": ["High", "Medium", "Low"],
+                  "required": "1",
+                  "visibility": "1"
+                }
+              ]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "error": true,
+            "message": "CustomField not found",
+            "data": []
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "error": true,
+            "message": "Validation failed: The search field must be a string.",
+            "data": []
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "error": true,
+            "message": "An error occurred.",
+            "data": []
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 1he6gDdaVbkvaEP4c58Z63f'
     controller: null
     method: null
     route: null
@@ -144,7 +310,7 @@ endpoints:
   -
     httpMethods:
       - PUT
-    uri: 'api/custom-fields/{id}'
+    uri: 'api/custom-fields/update/{id}'
     metadata:
       groupName: 'Custom Field Management'
       groupDescription: ''
@@ -159,9 +325,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
@@ -171,6 +337,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 12
@@ -185,6 +352,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       field_label:
         name: field_label
@@ -194,6 +362,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       field_type:
         name: field_type
@@ -203,6 +372,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       options:
         name: options
@@ -212,6 +382,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: true
         custom: []
       required:
         name: required
@@ -221,6 +392,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: true
         custom: []
       visibility:
         name: visibility
@@ -230,6 +402,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: true
         custom: []
     cleanBodyParameters:
       module: project
@@ -286,7 +459,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer akgaPeDEZcv3b8d4hf65V61'
+      - 'Bearer 4ZVd36ahE8fkgev5a1D6Pcb'
     controller: null
     method: null
     route: null
@@ -294,7 +467,7 @@ endpoints:
   -
     httpMethods:
       - DELETE
-    uri: 'api/custom-fields/{id}'
+    uri: 'api/custom-fields/destroy/{id}'
     metadata:
       groupName: 'Custom Field Management'
       groupDescription: ''
@@ -308,9 +481,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -320,6 +492,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 15
@@ -366,7 +539,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer D6ekZdch54aP1bvf36gaEV8'
+      - 'Bearer kehZ3g6cDd1EVaa4f5vP68b'
     controller: null
     method: null
     route: null

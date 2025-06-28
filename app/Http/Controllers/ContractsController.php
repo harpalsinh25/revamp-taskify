@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ContractsController extends Controller
 {
@@ -102,14 +103,14 @@ class ContractsController extends Controller
 
     public function store(Request $request)
     {
-
         try {
-
             $isApi = request()->get('isApi', false);
 
             if (isClient()) {
                 $request->merge(['client_id' => $this->user->id]);
             }
+
+            // Simple validation with Laravel's built-in date validation
             $formFields = $request->validate([
                 'title' => ['required'],
                 'value' => [
@@ -121,34 +122,8 @@ class ContractsController extends Controller
                         }
                     }
                 ],
-                'start_date' => [
-                    'required',
-                    function ($attribute, $value, $fail) {
-                        $endDate = request()->input('end_date');
-                        $errors = validate_date_format_and_order($value, $endDate);
-
-                        // Check and handle errors for start_date specifically
-                        if (!empty($errors['start_date'])) {
-                            foreach ($errors['start_date'] as $error) {
-                                $fail($error);
-                            }
-                        }
-                    },
-                ],
-                'end_date' => [
-                    'required',
-                    function ($attribute, $value, $fail) {
-                        $startDate = request()->input('start_date');
-                        $errors = validate_date_format_and_order($startDate, $value);
-
-                        // Check and handle errors for end_date specifically
-                        if (!empty($errors['end_date'])) {
-                            foreach ($errors['end_date'] as $error) {
-                                $fail($error);
-                            }
-                        }
-                    },
-                ],
+                'start_date' => ['required', 'date'],
+                'end_date' => ['required', 'date', 'after_or_equal:start_date'],
                 'client_id' => ['required'],
                 'project_id' => ['required'],
                 'contract_type_id' => ['required'],
@@ -156,18 +131,20 @@ class ContractsController extends Controller
             ], [
                 'client_id.required' => 'The client field is required.',
                 'project_id.required' => 'The project field is required.',
-                'contract_type_id.required' => 'The contract type field is required.'
+                'contract_type_id.required' => 'The contract type field is required.',
+                'start_date.date' => 'The start date must be a valid date.',
+                'end_date.date' => 'The end date must be a valid date.',
+                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.'
             ]);
 
-            $start_date = $request->input('start_date');
-            $end_date = $request->input('end_date');
-            $formFields['start_date'] = format_date($start_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            $formFields['end_date'] = format_date($end_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+            // Format dates for storage
+            $formFields['start_date'] = format_date($formFields['start_date'], false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+            $formFields['end_date'] = format_date($formFields['end_date'], false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
             $formFields['value'] = str_replace(',', '', $request->input('value'));
             $formFields['workspace_id'] = $this->workspace->id;
             $formFields['created_by'] = isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id;
-            if ($contract = Contract::create($formFields)) {
 
+            if ($contract = Contract::create($formFields)) {
                 if ($isApi) {
                     return formatApiResponse(
                         false,
@@ -180,7 +157,6 @@ class ContractsController extends Controller
                 }
                 return response()->json(['error' => false, 'message' => 'Contract created successfully.', 'id' => $contract->id]);
             } else {
-
                 if ($isApi) {
                     return formatApiResponse(
                         true,
@@ -199,7 +175,6 @@ class ContractsController extends Controller
             );
         }
     }
-
     /**
      * Update an existing contract.
      *
@@ -271,14 +246,12 @@ class ContractsController extends Controller
      *   "data": []
      * }
      */
-
     public function update(Request $request)
     {
-
         try {
-
             $isApi = request()->get('isApi', false);
 
+            // Validation (simplified and consistent with store)
             $formFields = $request->validate([
                 'id' => 'required|exists:contracts,id',
                 'title' => ['required'],
@@ -291,34 +264,8 @@ class ContractsController extends Controller
                         }
                     }
                 ],
-                'start_date' => [
-                    'required',
-                    function ($attribute, $value, $fail) {
-                        $endDate = request()->input('end_date');
-                        $errors = validate_date_format_and_order($value, $endDate);
-
-                        // Check and handle errors for start_date specifically
-                        if (!empty($errors['start_date'])) {
-                            foreach ($errors['start_date'] as $error) {
-                                $fail($error);
-                            }
-                        }
-                    },
-                ],
-                'end_date' => [
-                    'required',
-                    function ($attribute, $value, $fail) {
-                        $startDate = request()->input('start_date');
-                        $errors = validate_date_format_and_order($startDate, $value);
-
-                        // Check and handle errors for end_date specifically
-                        if (!empty($errors['end_date'])) {
-                            foreach ($errors['end_date'] as $error) {
-                                $fail($error);
-                            }
-                        }
-                    },
-                ],
+                'start_date' => ['required', 'date'],
+                'end_date' => ['required', 'date', 'after_or_equal:start_date'],
                 'client_id' => ['required'],
                 'project_id' => ['required'],
                 'contract_type_id' => ['required'],
@@ -329,31 +276,35 @@ class ContractsController extends Controller
                 'project_id.required' => 'The project field is required.',
                 'contract_type_id.required' => 'The contract type field is required.',
                 'signed_pdf.mimes' => 'The file must be a PDF.',
-                'signed_pdf.max' => 'The file size must be less than 10 MB.'
+                'signed_pdf.max' => 'The file size must be less than 10 MB.',
+                'start_date.date' => 'The start date must be a valid date.',
+                'end_date.date' => 'The end date must be a valid date.',
+                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.'
             ]);
 
+            // Fetch the contract to update
             $contract = Contract::findOrFail($formFields['id']);
+
+            // Handle signed PDF if uploaded
             if ($request->hasFile('signed_pdf')) {
-                // Delete the old file if it exists
                 if ($contract->signed_pdf && Storage::disk('public')->exists('contracts/' . $contract->signed_pdf)) {
                     Storage::disk('public')->delete('contracts/' . $contract->signed_pdf);
                 }
 
                 $file = $request->file('signed_pdf');
-                $filePath = $file->store('contracts/', 'public'); // Store file in public disk
-
-                // Extract the file name from the stored path
-                $fileName = basename($filePath);
-
-                $formFields['signed_pdf'] = $fileName;
+                $filePath = $file->store('contracts/', 'public');
+                $formFields['signed_pdf'] = basename($filePath);
             }
-            $start_date = $request->input('start_date');
-            $end_date = $request->input('end_date');
-            $formFields['start_date'] = format_date($start_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            $formFields['end_date'] = format_date($end_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            $formFields['value'] = str_replace(',', '', $request->input('value'));
-            if ($contract->update($formFields)) {
 
+            // Format dates for storage
+            $formFields['start_date'] = format_date($formFields['start_date'], false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+            $formFields['end_date'] = format_date($formFields['end_date'], false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+
+            // Clean currency value
+            $formFields['value'] = str_replace(',', '', $request->input('value'));
+
+            // Update the contract
+            if ($contract->update($formFields)) {
                 if ($isApi) {
                     return formatApiResponse(
                         false,
@@ -365,22 +316,19 @@ class ContractsController extends Controller
                     );
                 }
 
-                return response()->json(['error' => false, 'message' => 'Contract updated successfully.', 'id' => $formFields['id']]);
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Contract updated successfully.',
+                    'id' => $formFields['id']
+                ]);
             } else {
-
                 if ($isApi) {
-                    return formatApiResponse(
-                        true,
-                        'Contract couldn\'t updated.',
-                        [],
-
-                    );
+                    return formatApiResponse(true, 'Contract couldn\'t be updated.', [], 500);
                 }
 
-                return response()->json(['error' => true, 'message' => 'Contract couldn\'t updated.']);
+                return response()->json(['error' => true, 'message' => 'Contract couldn\'t be updated.']);
             }
         } catch (\Exception $e) {
-
             return formatApiResponse(
                 true,
                 config('app.debug') ? $e->getMessage() : 'An error occurred',
@@ -389,6 +337,7 @@ class ContractsController extends Controller
             );
         }
     }
+
 
     public function list()
     {
@@ -639,9 +588,7 @@ class ContractsController extends Controller
 
     public function apiList()
     {
-
         try {
-
             $search = request('search');
             $sort = (request('sort')) ? request('sort') : "id";
             $order = (request('order')) ? request('order') : "DESC";
@@ -668,7 +615,6 @@ class ContractsController extends Controller
                 ->leftJoin('clients', 'contracts.client_id', '=', 'clients.id')
                 ->leftJoin('contract_types', 'contracts.contract_type_id', '=', 'contract_types.id')
                 ->leftJoin('projects', 'contracts.project_id', '=', 'projects.id');
-
 
             if (!isAdminOrHasAllDataAccess()) {
                 $contracts = $contracts->where(function ($query) {
@@ -722,7 +668,7 @@ class ContractsController extends Controller
                 $contracts = $contracts->whereBetween('contracts.start_date', [$start_date_from, $start_date_to]);
             }
             if ($end_date_from && $end_date_to) {
-                $contracts  = $contracts->whereBetween('contracts.end_date', [$end_date_from, $end_date_to]);
+                $contracts = $contracts->whereBetween('contracts.end_date', [$end_date_from, $end_date_to]);
             }
             if ($search) {
                 $contracts = $contracts->where(function ($query) use ($search) {
@@ -737,23 +683,15 @@ class ContractsController extends Controller
             $contracts->where($where);
             $total = $contracts->count();
 
-
-
-
             $contracts = $contracts->orderBy($sort, $order)
                 ->take($limit)
                 ->get()
                 ->map(function ($contract) {
-                    // Format "from_date" and "to_date" with labels
-                    $formattedDates = format_date($contract->start_date, false) . ' ' . get_label('to', 'To') . ' ' . format_date($contract->end_date, false);
-
-
-                    $data = formatContract($contract);
-                    $data['duration'] = $formattedDates;
-
+                $formattedDates = format_date($contract->start_date, to_format: 'Y-m-d') . ' ' . get_label('to', 'To') . ' ' . format_date($contract->end_date, to_format: 'Y-m-d');
+                $data = formatContract($contract);
+                $data['duration'] = $formattedDates;
                     return $data;
                 });
-
 
             return formatApiResponse(
                 false,
@@ -867,6 +805,9 @@ class ContractsController extends Controller
             }
 
             return response()->json(['error' => false, 'contract' => $contract]);
+        } catch (ModelNotFoundException $e) {
+
+            return formatApiResponse(true, 'Contract not found.', [], 404);
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -984,24 +925,27 @@ class ContractsController extends Controller
             // $imageData = base64_decode($base64Data);
             $filename = 'signature_' . uniqid() . '.png';
             Storage::put('public/signatures/' . $filename, $imageData);
+            $signedAs = null;
             if (($this->user->id == $contract->created_by || isAdminOrHasAllDataAccess()) && !isClient()) {
                 $contract->promisor_sign = $filename;
+                $signedAs = 'promisor';
             } elseif (($this->user->id == $contract->client_id) && isClient()) {
                 $contract->promisee_sign = $filename;
+                $signedAs = 'promisee';
             }
             if ($contract->save()) {
                 Session::flash('message', 'Signature created successfully.');
 
-                if ($isApi) {
-                    return formatApiResponse(
-                        false,
-                        trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' signed contract ' . trim($contract->title),
-                        [
-                            'id' => $formFields['id']
-                        ],
-                        200
-                    );
-                }
+                return formatApiResponse(
+                    false,
+                    trim($this->user->first_name) . ' ' . trim($this->user->last_name) . " signed contract {$contract->title} as {$signedAs}.",
+                    [
+                        'id' => $formFields['id'],
+                        'signed_as' => $signedAs
+                    ],
+                    200
+                );
+
 
                 return response()->json(['error' => false, 'id' => $formFields['id'], 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' signed contract ' . trim($contract->title)]);
             } else {

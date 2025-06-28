@@ -15,9 +15,8 @@ endpoints:
       authenticated: false
       custom: []
     headers:
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -27,6 +26,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -39,6 +39,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       sort:
         name: sort
@@ -48,6 +49,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       order:
         name: order
@@ -57,6 +59,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       limit:
         name: limit
@@ -66,6 +69,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       offset:
         name: offset
@@ -75,6 +79,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       search: Admin
@@ -164,9 +169,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       permission:
         name: permission
@@ -335,6 +339,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       permission: |-
@@ -534,7 +539,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer kgfaE8aDdZvh1Vb5Pe4366c'
+      - 'Bearer 6d4vEgakPeVD6Z153fabc8h'
     controller: null
     method: null
     route: null
@@ -554,9 +559,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -570,6 +575,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       permissions:
         name: permissions
@@ -582,6 +588,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       name: '"Supervisor"'
@@ -643,7 +650,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 1PbEh3keV5cv4a8d66fDZag'
+      - 'Bearer 3Vk8Ebaac45dhv1P6efZDg6'
     controller: null
     method: null
     route: null
@@ -663,9 +670,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
@@ -675,6 +682,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 5
@@ -689,6 +697,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       permissions:
         name: permissions
@@ -701,6 +710,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       name: '"Supervisor"'
@@ -767,7 +777,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 45hgZdaPek3b1f6DE6Vc8av'
+      - 'Bearer 3k4Z568feVab6Dah1dPcgvE'
     controller: null
     method: null
     route: null
@@ -787,21 +797,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the role to delete.'
         required: true
-        example: 11
+        example: 17
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 11
+      id: 17
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -852,7 +862,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer v3gZ1edaEhDcbkV668f45aP'
+      - 'Bearer 4vcEk85a1gaP36ebdfDhVZ6'
     controller: null
     method: null
     route: null
@@ -872,21 +882,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the role to retrieve.'
         required: true
-        example: 20
+        example: 7
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 20
+      id: 7
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -919,7 +929,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Pdg1fe5Ea36k6bacDh4Z8vV'
+      - 'Bearer 561Zkaa8fEvVcb4D3h6Pgde'
     controller: null
     method: null
     route: null
@@ -938,9 +948,8 @@ endpoints:
       authenticated: false
       custom: []
     headers:
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []

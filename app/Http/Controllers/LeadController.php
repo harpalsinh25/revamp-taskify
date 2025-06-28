@@ -232,8 +232,10 @@ class LeadController extends Controller
                 ]);
             }
         } catch (ValidationException $e) {
+            
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
+            
             return formatApiResponse(
                 true,
                 'Lead Couldn\'t Created.',

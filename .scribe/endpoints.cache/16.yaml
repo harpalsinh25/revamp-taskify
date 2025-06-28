@@ -18,9 +18,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -30,6 +29,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -42,6 +42,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       sort:
         name: sort
@@ -51,6 +52,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       order:
         name: order
@@ -60,6 +62,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       limit:
         name: limit
@@ -69,6 +72,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       offset:
         name: offset
@@ -78,6 +82,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       search: High
@@ -137,7 +142,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer fc41V63EbDdvaghkeaZP568'
+      - 'Bearer d5ag6aPV8kEv3Dbhf6c4eZ1'
     controller: null
     method: null
     route: null
@@ -157,9 +162,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -169,23 +174,25 @@ endpoints:
         name: title
         description: 'The title of the priority.'
         required: true
-        example: quasi
+        example: est
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       color:
         name: color
         description: 'The color code associated with the priority.'
         required: true
-        example: non
+        example: deleniti
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      title: quasi
-      color: non
+      title: est
+      color: deleniti
     fileParameters: []
     responses:
       -
@@ -233,7 +240,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 5v663hfVkPdaD4b8e1acEgZ'
+      - 'Bearer E86bk3eV6cD541avagPdZfh'
     controller: null
     method: null
     route: null
@@ -253,9 +260,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -265,33 +272,36 @@ endpoints:
         name: id
         description: 'The ID of the priority to update.'
         required: true
-        example: 19
+        example: 6
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       title:
         name: title
         description: 'The updated title of the priority.'
         required: true
-        example: et
+        example: dolor
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       color:
         name: color
         description: 'The updated color code associated with the priority.'
         required: true
-        example: tempore
+        example: dicta
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      id: 19
-      title: et
-      color: tempore
+      id: 6
+      title: dolor
+      color: dicta
     fileParameters: []
     responses:
       -
@@ -344,7 +354,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 5hDdvcg8ZVf4P1bE6a6e3ka'
+      - 'Bearer daVPbZ46ckhvaD3fg65e18E'
     controller: null
     method: null
     route: null
@@ -364,21 +374,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the priority to retrieve.'
         required: true
-        example: 10
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 10
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -427,7 +437,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 865Z3Ddv4eagPV1ahEck6bf'
+      - 'Bearer gfdVae6h13kv84EPD6c5aZb'
     controller: null
     method: null
     route: null
@@ -449,21 +459,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the priority to delete.'
         required: true
-        example: 2
+        example: 20
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 2
+      id: 20
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -506,7 +516,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 5kcZeDgva1d6bE6h483aPVf'
+      - 'Bearer Z5aaEvkPd43e8hVf6c6bg1D'
     controller: null
     method: null
     route: null

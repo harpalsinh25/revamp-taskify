@@ -330,14 +330,14 @@ $(document).on("click", ".clear-upcoming-mol-filters", function (e) {
     $("#mol_table").bootstrapTable("refresh");
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    let incomeExpenseChart = null; // Initialize the chart variable
+// alert('here');
 
+$(function () {
+    let incomeExpenseChart = null; // Initialize the chart variable
     function getFilters() {
         // Get the values from hidden inputs
         var startDate = $("#filter_date_range_from").val();
         var endDate = $("#filter_date_range_to").val();
-
         // Check if the input values are not empty
         if (startDate && endDate) {
             return {
@@ -345,41 +345,33 @@ document.addEventListener("DOMContentLoaded", function () {
                 end_date: endDate,
             };
         }
-
         // If dates are not set or input is empty, return null
         return {
             start_date: null,
             end_date: null,
         };
     }
-
     function parseCurrencyValue(currencyString) {
         // Remove currency symbol and commas, then convert to float
         return parseFloat(currencyString.replace(/[^0-9.-]+/g, ""));
     }
-
     function groupByDate(data, type) {
         const grouped = {};
-
         data.forEach((item) => {
             const date =
                 type === "invoice" ? item.from_date : item.expense_date;
             const amount = parseCurrencyValue(item.amount);
-
             if (!grouped[date]) {
                 grouped[date] = 0;
             }
             grouped[date] += amount;
         });
-
         return grouped;
     }
-
     function transformData(response) {
         // Group invoices and expenses by date
         const invoicesByDate = groupByDate(response.invoices, "invoice");
         const expensesByDate = groupByDate(response.expenses, "expense");
-
         // Get all unique dates
         const allDates = [
             ...new Set([
@@ -387,25 +379,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 ...Object.keys(expensesByDate),
             ]),
         ].sort();
-
         // Prepare series data
         const categories = [];
         const incomeData = [];
         const expenseData = [];
-
         allDates.forEach((date) => {
             categories.push(date);
             incomeData.push(invoicesByDate[date] || 0);
             expenseData.push((expensesByDate[date] || 0)); // Make expenses negative
         });
-
         return {
             categories,
             incomeData,
             expenseData,
         };
     }
-
     function updateIEChart() {
         $.ajax({
             type: "GET",
@@ -414,7 +402,6 @@ document.addEventListener("DOMContentLoaded", function () {
             data: getFilters(),
             success: function (response) {
                 const chartData = transformData(response);
-
                 const options = {
                     series: [
                         {
@@ -448,13 +435,13 @@ document.addEventListener("DOMContentLoaded", function () {
                             opacityTo: 0.1,
                         },
                     },
-                    colors: ["#22c55e", "#ef4444"], // Green for income, Red for expenses
+                    colors: ["#22C55E", "#EF4444"], // Green for income, Red for expenses
                     xaxis: {
                         categories: chartData.categories,
                         labels: {
                             rotate: -45,
                             style: {
-                                colors: "#64748b",
+                                colors: "#64748B",
                                 fontSize: "12px",
                             },
                         },
@@ -471,13 +458,13 @@ document.addEventListener("DOMContentLoaded", function () {
                                 return "$ " + Math.abs(val).toLocaleString();
                             },
                             style: {
-                                colors: "#64748b",
+                                colors: "#64748B",
                                 fontSize: "12px",
                             },
                         },
                     },
                     grid: {
-                        borderColor: "#e2e8f0",
+                        borderColor: "#E2E8F0",
                         strokeDashArray: 4,
                         xaxis: {
                             lines: {
@@ -508,7 +495,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         },
                     },
                 };
-
                 if (incomeExpenseChart) {
                     incomeExpenseChart.updateOptions(options);
                 } else {
@@ -524,14 +510,13 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         });
     }
-
     $("#filter_date_range_income_expense").on("apply.daterangepicker", function (ev, picker) {
+        // alert("Date range applied: " + picker.startDate.format("YYYY-MM-DD") + " to " + picker.endDate.format("YYYY-MM-DD"));
         // Set the values in hidden inputs
         $("#filter_date_range_from").val(picker.startDate.format("YYYY-MM-DD"));
         $("#filter_date_range_to").val(picker.endDate.format("YYYY-MM-DD"));
         updateIEChart(); // Update report when dates are applied
     });
-
     $("#filter_date_range_income_expense").on("cancel.daterangepicker", function (ev, picker) {
         $(this).val("");
         // Clear the hidden inputs
@@ -542,10 +527,20 @@ document.addEventListener("DOMContentLoaded", function () {
         picker.updateElement();
         updateIEChart(); // Update report when dates are cleared
     });
-
     // Initial chart update
     updateIEChart();
 });
+
+
+
+
+
+
+
+
+
+
+
 $(document).ready(function () {
     if (typeof moment === 'undefined') {
         console.error("Moment.js is NOT loaded!");

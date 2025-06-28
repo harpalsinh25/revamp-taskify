@@ -18,9 +18,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -120,7 +119,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer v8fe5h6cEdkg13a6V4ZbaDP'
+      - 'Bearer vhP5a66bDg34e8ka1VcdfZE'
     controller: null
     method: null
     route: null

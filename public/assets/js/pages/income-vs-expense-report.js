@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function getFilters() {
         // Get the values from hidden inputs
         var startDate = $('#filter_date_range_from').val();
+        console.log(startDate);
         var endDate = $('#filter_date_range_to').val();
 
         // Check if the input values are not empty
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
         picker.setStartDate(moment());
         picker.setEndDate(moment());
         picker.updateElement();
-        updateReport(); // Update report when dates are cleared        
+        updateReport(); // Update report when dates are cleared
     });
 
     // Initialize report with default filters

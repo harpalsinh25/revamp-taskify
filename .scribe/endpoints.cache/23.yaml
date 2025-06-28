@@ -18,9 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -34,6 +34,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       from_date:
         name: from_date
@@ -43,6 +44,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       to_date:
         name: to_date
@@ -52,6 +54,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       from_time:
         name: from_time
@@ -61,6 +64,7 @@ endpoints:
         type: time
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       to_time:
         name: to_time
@@ -70,6 +74,7 @@ endpoints:
         type: time
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status:
         name: status
@@ -79,6 +84,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       leaveVisibleToAll:
         name: leaveVisibleToAll
@@ -88,6 +94,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       visible_to_ids:
         name: visible_to_ids
@@ -100,6 +107,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_id:
         name: user_id
@@ -109,6 +117,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       partialLeave:
         name: partialLeave
@@ -118,6 +127,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       comment:
         name: comment
@@ -127,6 +137,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       reason: 'Family function'
@@ -214,7 +225,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer vgeaEk1h436c8PbVd65DfZa'
+      - 'Bearer PDdZ514e86agakcb3f6EVhv'
     controller: null
     method: null
     route: null
@@ -234,9 +245,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -246,6 +256,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -258,6 +269,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       sort:
         name: sort
@@ -267,6 +279,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       order:
         name: order
@@ -276,6 +289,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status:
         name: status
@@ -285,6 +299,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_id:
         name: user_id
@@ -294,6 +309,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       action_by_id:
         name: action_by_id
@@ -303,6 +319,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       start_date_from:
         name: start_date_from
@@ -312,6 +329,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       start_date_to:
         name: start_date_to
@@ -321,6 +339,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       end_date_from:
         name: end_date_from
@@ -330,6 +349,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       end_date_to:
         name: end_date_to
@@ -339,6 +359,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       type:
         name: type
@@ -348,6 +369,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       limit:
         name: limit
@@ -357,6 +379,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       offset:
         name: offset
@@ -366,6 +389,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       search: Vacation
@@ -448,7 +472,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 8ga4Pceb1a53E6kvf6VhZDd'
+      - 'Bearer 436begDvPV5fEZhkaa81c6d'
     controller: null
     method: null
     route: null
@@ -468,9 +492,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -484,6 +508,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       reason:
         name: reason
@@ -493,6 +518,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       from_date:
         name: from_date
@@ -502,6 +528,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       to_date:
         name: to_date
@@ -511,6 +538,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       from_time:
         name: from_time
@@ -520,6 +548,7 @@ endpoints:
         type: time
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       to_time:
         name: to_time
@@ -529,6 +558,7 @@ endpoints:
         type: time
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status:
         name: status
@@ -538,6 +568,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       leaveVisibleToAll:
         name: leaveVisibleToAll
@@ -547,6 +578,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       visible_to_ids:
         name: visible_to_ids
@@ -559,6 +591,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       partialLeave:
         name: partialLeave
@@ -568,6 +601,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       comment:
         name: comment
@@ -577,6 +611,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       id: 1
@@ -668,7 +703,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Va5bgEkd4136vZchefP6Da8'
+      - 'Bearer DV4Z5v6g1Ph83a6ekdfcabE'
     controller: null
     method: null
     route: null
@@ -688,9 +723,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -700,6 +734,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -747,7 +782,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer b8veaf6gD54P13ZdakE6hVc'
+      - 'Bearer 5aE3kDb1PcgfZda6Vh48v6e'
     controller: null
     method: null
     route: null

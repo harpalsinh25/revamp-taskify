@@ -18,9 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: multipart/form-data
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: multipart/form-data
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -30,10 +30,11 @@ endpoints:
         name: id
         description: 'The ID of the project to which media files are being uploaded.'
         required: true
-        example: 19
+        example: 5
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       'media_files[]':
         name: 'media_files[]'
@@ -43,9 +44,10 @@ endpoints:
         type: file
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      id: 19
+      id: 5
     fileParameters:
       'media_files[]': null
     responses:
@@ -101,7 +103,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6dfD4cagav5Zk1heEbPV683'
+      - 'Bearer PVDva8bfgEehdk5c46Z36a1'
     controller: null
     method: null
     route: null
@@ -121,53 +123,56 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose media files are to be retrieved.'
         required: true
-        example: 2
+        example: 11
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 2
+      id: 11
     queryParameters:
       search:
         name: search
         description: 'optional A search query to filter media files by name, ID, or upload date.'
         required: false
-        example: ullam
+        example: et
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       sort:
         name: sort
         description: 'optional The column to sort by (default: "id").'
         required: false
-        example: aut
+        example: sed
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       order:
         name: order
         description: 'optional The sorting order: "ASC" or "DESC" (default: "DESC").'
         required: false
-        example: ut
+        example: dolore
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanQueryParameters:
-      search: ullam
-      sort: aut
-      order: ut
+      search: et
+      sort: sed
+      order: dolore
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -218,7 +223,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 1VaZ54Ec8bPf3ekgv6D6adh'
+      - 'Bearer PhDv63EZV5ega68d1bka4cf'
     controller: null
     method: null
     route: null
@@ -238,18 +243,18 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the delete medium.'
         required: true
-        example: numquam
+        example: sunt
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       mediaId:
         name: mediaId
@@ -259,9 +264,10 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: numquam
+      id: sunt
       mediaId: 17
     queryParameters: []
     cleanQueryParameters: []
@@ -308,7 +314,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer bv685d31k4ZE6feVaDgPhca'
+      - 'Bearer PbVfdEa8ZgDev61a635kc4h'
     controller: null
     method: null
     route: null

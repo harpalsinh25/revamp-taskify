@@ -16,9 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -32,6 +32,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_ids:
         name: user_ids
@@ -41,6 +42,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_ids:
         name: client_ids
@@ -50,6 +52,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       primaryWorkspace:
         name: primaryWorkspace
@@ -59,6 +62,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       title: 'Design Team'
@@ -130,7 +134,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ZVPk6ba8feh1456gv3dEcDa'
+      - 'Bearer c5436hZvbaPf8V16DdEgeak'
     controller: null
     method: null
     route: null
@@ -150,9 +154,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -162,6 +165,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -174,6 +178,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       sort:
         name: sort
@@ -183,6 +188,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       order:
         name: order
@@ -192,6 +198,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_id:
         name: user_id
@@ -201,6 +208,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_id:
         name: client_id
@@ -210,6 +218,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       limit:
         name: limit
@@ -219,6 +228,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       offset:
         name: offset
@@ -228,6 +238,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       search: Workspace
@@ -305,7 +316,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 5akEP4f8hcedVba3vZ61D6g'
+      - 'Bearer EefDP6b4h5v8Vd6acZ3a1gk'
     controller: null
     method: null
     route: null
@@ -325,9 +336,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -341,6 +352,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       title:
         name: title
@@ -350,6 +362,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_ids:
         name: user_ids
@@ -359,6 +372,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_ids:
         name: client_ids
@@ -368,6 +382,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       primaryWorkspace:
         name: primaryWorkspace
@@ -377,6 +392,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       id: 438
@@ -449,7 +465,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer vDag6hf5kePaVEZ8d3c1b64'
+      - 'Bearer gfhD16aPd4vZ6ebkE8c35Va'
     controller: null
     method: null
     route: null
@@ -469,9 +485,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -481,6 +496,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -528,7 +544,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6VDvcZ1a846khbPEe35fgad'
+      - 'Bearer V18bPZa64d5f6ceghDvka3E'
     controller: null
     method: null
     route: null
@@ -548,21 +564,22 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
         description: 'The ID of the workspace to update.'
         required: true
-        example: 12
+        example: 5
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 12
+      id: 5
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -570,13 +587,14 @@ endpoints:
         name: is_default
         description: 'Indicates whether the workspace should be set as default. Use 1 for setting as default and 0 for removing it as default.'
         required: true
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      is_default: true
+      is_default: false
     fileParameters: []
     responses:
       -
@@ -615,7 +633,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer DPaVd5eag6bhkf36vZ18c4E'
+      - 'Bearer 6vPEa4cad5bhVefZg61Dk38'
     controller: null
     method: null
     route: null
@@ -635,9 +653,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -674,7 +691,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer gD6658d43fkceVv1ZEahbPa'
+      - 'Bearer d5hbac3PVD16eZgf4vE8ka6'
     controller: null
     method: null
     route: null

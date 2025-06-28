@@ -16,9 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -30,6 +30,7 @@ endpoints:
         type: boolean
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       isApi: true
@@ -42,6 +43,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       last_name:
         name: last_name
@@ -51,6 +53,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       email:
         name: email
@@ -60,6 +63,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       phone:
         name: phone
@@ -69,6 +73,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country_code:
         name: country_code
@@ -78,6 +83,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country_iso_code:
         name: country_iso_code
@@ -87,6 +93,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       source_id:
         name: source_id
@@ -96,6 +103,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       stage_id:
         name: stage_id
@@ -105,6 +113,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       assigned_to:
         name: assigned_to
@@ -114,6 +123,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       job_title:
         name: job_title
@@ -123,6 +133,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       industry:
         name: industry
@@ -132,6 +143,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       company:
         name: company
@@ -141,6 +153,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       website:
         name: website
@@ -150,6 +163,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       linkedin:
         name: linkedin
@@ -159,6 +173,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       instagram:
         name: instagram
@@ -168,6 +183,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       facebook:
         name: facebook
@@ -177,6 +193,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       pinterest:
         name: pinterest
@@ -186,6 +203,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       city:
         name: city
@@ -195,6 +213,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       state:
         name: state
@@ -204,6 +223,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       zip:
         name: zip
@@ -213,6 +233,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country:
         name: country
@@ -222,6 +243,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       first_name: John
@@ -297,7 +319,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer hcb18aZf43DePaEVg56k6dv'
+      - 'Bearer DV86v45P3aEfdbk1gah6ceZ'
     controller: null
     method: null
     route: null
@@ -317,9 +339,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -329,6 +350,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 5
@@ -385,7 +407,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Ed6kch3aP8V6eZvD1f5bga4'
+      - 'Bearer P61ha4cfbEvVgD8dZkae635'
     controller: null
     method: null
     route: null
@@ -405,9 +427,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -419,6 +440,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       source_ids:
         name: source_ids
@@ -430,6 +452,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       stage_ids:
         name: stage_ids
@@ -441,6 +464,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       start_date:
         name: start_date
@@ -450,6 +474,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       end_date:
         name: end_date
@@ -459,6 +484,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       sort:
         name: sort
@@ -468,6 +494,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       limit:
         name: limit
@@ -477,6 +504,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       search: John
@@ -543,7 +571,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer da8kVD5fh46gPvZ31cbeaE6'
+      - 'Bearer Z8e6Dd36cE4bvakhfaVP15g'
     controller: null
     method: null
     route: null
@@ -563,9 +591,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
@@ -575,6 +603,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 5
@@ -587,6 +616,7 @@ endpoints:
         type: boolean
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       isApi: true
@@ -599,6 +629,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       last_name:
         name: last_name
@@ -608,6 +639,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       email:
         name: email
@@ -617,6 +649,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       phone:
         name: phone
@@ -626,6 +659,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country_code:
         name: country_code
@@ -635,6 +669,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country_iso_code:
         name: country_iso_code
@@ -644,6 +679,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       source_id:
         name: source_id
@@ -653,6 +689,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       stage_id:
         name: stage_id
@@ -662,6 +699,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       assigned_to:
         name: assigned_to
@@ -671,6 +709,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       job_title:
         name: job_title
@@ -680,6 +719,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       industry:
         name: industry
@@ -689,6 +729,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       company:
         name: company
@@ -698,6 +739,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       website:
         name: website
@@ -707,6 +749,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       linkedin:
         name: linkedin
@@ -716,6 +759,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       instagram:
         name: instagram
@@ -725,6 +769,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       facebook:
         name: facebook
@@ -734,6 +779,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       pinterest:
         name: pinterest
@@ -743,6 +789,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       city:
         name: city
@@ -752,6 +799,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       state:
         name: state
@@ -761,6 +809,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       zip:
         name: zip
@@ -770,6 +819,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country:
         name: country
@@ -779,6 +829,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       first_name: John
@@ -864,7 +915,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer aZbghvf4k6Dc36e1Va8PEd5'
+      - 'Bearer ZghcDk5Va1Evf68bde3a4P6'
     controller: null
     method: null
     route: null
@@ -884,9 +935,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -896,6 +946,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 5
@@ -939,7 +990,455 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer bEh31dc84f6gkeaZaPV6Dv5'
+      - 'Bearer fdD5Ekc83466bvh1PeaZVga'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/leads/follow-up/store
+    metadata:
+      groupName: 'Leads Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create a new lead follow-up.'
+      description: 'This endpoint creates a follow-up activity (such as call, email, or meeting) for a specific lead. The date and time are converted to UTC before storing.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Accept: application/json
+      workspace_id: 1
+      Content-Type: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      lead_id:
+        name: lead_id
+        description: 'The ID of the lead to associate the follow-up with.'
+        required: true
+        example: 12
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      assigned_to:
+        name: assigned_to
+        description: 'The ID of the user assigned to the follow-up.'
+        required: true
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      type:
+        name: type
+        description: 'The type of follow-up. One of: email, sms, call, meeting, other.'
+        required: true
+        example: call
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      status:
+        name: status
+        description: 'The current status of the follow-up. One of: pending, completed, rescheduled.'
+        required: true
+        example: pending
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      follow_up_at:
+        name: follow_up_at
+        description: 'The follow-up date and time in local format (Y-m-d\TH:i).'
+        required: true
+        example: '2025-06-20T14:30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      note:
+        name: note
+        description: 'optional Additional notes for the follow-up. Max 255 characters.'
+        required: false
+        example: 'Call scheduled with client to discuss proposal.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      lead_id: 12
+      assigned_to: 5
+      type: call
+      status: pending
+      follow_up_at: '2025-06-20T14:30'
+      note: 'Call scheduled with client to discuss proposal.'
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "Follow Up Created Successfully",
+            "data": {
+              "id": 101,
+              "type": "lead_follow_up"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "error": true,
+            "message": "The given data was invalid.",
+            "errors": {
+              "lead_id": ["The lead id field is required."]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "error": true,
+            "message": "Follow Up Couldn't Created.",
+            "data": {
+              "error": "...",
+              "line": 123,
+              "file": "/app/Http/Controllers/LeadFollowUpController.php"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer PcbV3Ddae686E51Zafgvhk4'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/leads/follow-up/get/{id}'
+    metadata:
+      groupName: 'Leads Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Retrieve a specific lead follow-up.'
+      description: 'This endpoint fetches the details of a lead follow-up for editing or displaying, including the related lead and assigned user.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Accept: application/json
+      workspace_id: 1
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the follow-up to retrieve.'
+        required: true
+        example: 101
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 101
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "Follow Up Retrived Successfully",
+            "follow_up": {
+              "id": 101,
+              "lead_id": 12,
+              "assigned_to": 5,
+              "type": "call",
+              "status": "pending",
+              "follow_up_at": "2025-06-20T09:00:00.000000Z",
+              "note": "Discuss proposal",
+              "lead": {
+                "id": 12,
+                "first_name": "John",
+                "last_name": "Doe"
+              },
+              "assigned_to_user": {
+                "id": 5,
+                "name": "Jane Smith"
+              }
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "message": "No query results for model [App\\Models\\LeadFollowUp] 101"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer fvcV58461PEkDbhd6Zaaeg3'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/leads/follow-up/update
+    metadata:
+      groupName: 'Leads Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update an existing lead follow-up.'
+      description: 'This endpoint updates the details of an existing follow-up activity for a lead, including reassignment, type, and follow-up date.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Accept: application/json
+      workspace_id: 1
+      Content-Type: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      id:
+        name: id
+        description: 'The ID of the follow-up to update.'
+        required: true
+        example: 101
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      assigned_to:
+        name: assigned_to
+        description: 'The ID of the user assigned to the follow-up.'
+        required: true
+        example: 6
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      type:
+        name: type
+        description: 'The type of follow-up. One of: email, sms, call, meeting, other.'
+        required: true
+        example: email
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      status:
+        name: status
+        description: 'The current status. One of: pending, completed, rescheduled.'
+        required: true
+        example: completed
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      follow_up_at:
+        name: follow_up_at
+        description: 'The updated follow-up datetime in local format (Y-m-d\TH:i).'
+        required: true
+        example: '2025-06-21T16:00'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      note:
+        name: note
+        description: 'optional Optional follow-up notes. Max 255 characters.'
+        required: false
+        example: 'Follow-up completed.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      id: 101
+      assigned_to: 6
+      type: email
+      status: completed
+      follow_up_at: '2025-06-21T16:00'
+      note: 'Follow-up completed.'
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "Follow Up Updated Successfully",
+            "data": {
+              "id": 101,
+              "type": "lead_follow_up"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "error": true,
+            "message": "The given data was invalid.",
+            "errors": {
+              "follow_up_at": ["The follow up at must be a valid date."]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "error": true,
+            "message": "Follow Up Couldn't Be Updated.",
+            "data": {
+              "error": "...",
+              "line": 123,
+              "file": "/app/Http/Controllers/LeadFollowUpController.php"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer Ec3eP8DhgkV5a164d6abZfv'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/leads/follow-up/destroy/{id}'
+    metadata:
+      groupName: 'Leads Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a lead follow-up.'
+      description: 'This endpoint deletes a follow-up record permanently from the system.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Accept: application/json
+      workspace_id: 1
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the follow-up to delete.'
+        required: true
+        example: 101
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 101
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "error": false,
+            "message": "Lead Follow Up deleted successfully"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "error": true,
+            "message": "Lead Follow Up not found"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "error": true,
+            "message": "An error occurred while deleting Lead Follow Up.",
+            "data": {
+              "error": "...",
+              "line": 123,
+              "file": "/app/Services/DeletionService.php"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 8gZDvbVfd561acPa6e4h3kE'
     controller: null
     method: null
     route: null
@@ -959,9 +1458,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -973,6 +1472,7 @@ endpoints:
         type: boolean
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       isApi: true
@@ -985,6 +1485,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       stage_id:
         name: stage_id
@@ -994,6 +1495,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       id: 123
@@ -1052,7 +1554,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer V6Zda1PvaDgc4b8f6kE3he5'
+      - 'Bearer k6Z68a3a51vDhcPbeV4Edfg'
     controller: null
     method: null
     route: null
@@ -1072,18 +1574,18 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       lead_id:
         name: lead_id
         description: 'The ID of the lead.'
         required: true
-        example: 1
+        example: 43
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       lead:
         name: lead
@@ -1093,9 +1595,10 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
-      lead_id: 1
+      lead_id: 43
       lead: 5
     queryParameters: []
     cleanQueryParameters: []
@@ -1168,7 +1671,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer d63kha4cVbfZa1e5v6D8gPE'
+      - 'Bearer be4VP6Dd85a631agckfZhvE'
     controller: null
     method: null
     route: null
@@ -1188,9 +1691,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -1202,6 +1705,7 @@ endpoints:
         type: boolean
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       isApi: true
@@ -1214,6 +1718,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       view: kanban
@@ -1243,7 +1748,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Z3bDPfaa685ghVE6c1e4dkv'
+      - 'Bearer 3Vhk6baD1evc5PE64dZgaf8'
     controller: null
     method: null
     route: null

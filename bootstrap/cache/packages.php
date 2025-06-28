@@ -1,14 +1,32 @@
 <?php return array (
-  'barryvdh/laravel-dompdf' => 
+  'alexusmai/laravel-file-manager' => 
   array (
     'providers' => 
     array (
-      0 => 'Barryvdh\\DomPDF\\ServiceProvider',
+      0 => 'Alexusmai\\LaravelFileManager\\FileManagerServiceProvider',
     ),
+  ),
+  'anhskohbo/no-captcha' => 
+  array (
     'aliases' => 
     array (
-      'Pdf' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
+      'NoCaptcha' => 'Anhskohbo\\NoCaptcha\\Facades\\NoCaptcha',
+    ),
+    'providers' => 
+    array (
+      0 => 'Anhskohbo\\NoCaptcha\\NoCaptchaServiceProvider',
+    ),
+  ),
+  'barryvdh/laravel-dompdf' => 
+  array (
+    'aliases' => 
+    array (
       'PDF' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
+      'Pdf' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
+    ),
+    'providers' => 
+    array (
+      0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
   'dedoc/scramble' => 
@@ -95,13 +113,13 @@
   ),
   'munafio/chatify' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Chatify\\ChatifyServiceProvider',
-    ),
     'aliases' => 
     array (
       'Chatify' => 'Chatify\\Facades\\ChatifyMessenger',
+    ),
+    'providers' => 
+    array (
+      0 => 'Chatify\\ChatifyServiceProvider',
     ),
   ),
   'nesbot/carbon' => 
@@ -143,15 +161,22 @@
       'Comments' => 'RyanChandler\\Comments\\Facades\\Comments',
     ),
   ),
-  'spatie/laravel-ignition' => 
+  'silviolleite/laravelpwa' => 
   array (
     'providers' => 
     array (
-      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
+      0 => 'LaravelPWA\\Providers\\LaravelPWAServiceProvider',
     ),
+  ),
+  'spatie/laravel-ignition' => 
+  array (
     'aliases' => 
     array (
       'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
+    ),
+    'providers' => 
+    array (
+      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
   'spatie/laravel-medialibrary' => 

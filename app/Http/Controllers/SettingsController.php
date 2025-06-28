@@ -152,6 +152,10 @@ class SettingsController extends Controller
         // Extract relevant request data
         $form_val = $request->except('_token', '_method', 'dnr');
 
+        $form_val['recaptcha_enabled'] = $request->has('recaptcha_enabled') && $request->input('recaptcha_enabled') == 'on' ? 1 : 0;
+        $form_val['recaptcha_site_key'] = $request->input('recaptcha_site_key', '');
+        $form_val['recaptcha_secret_key'] = $request->input('recaptcha_secret_key', '');
+
         // Retrieve existing general settings
         $generalSettingsArray = get_settings('general_settings');
 

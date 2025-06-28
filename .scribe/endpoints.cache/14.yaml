@@ -18,9 +18,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: multipart/form-data
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: multipart/form-data
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -30,10 +30,11 @@ endpoints:
         name: id
         description: 'The ID of the task where the media will be uploaded.'
         required: true
-        example: 13
+        example: 10
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       'media_files[]':
         name: 'media_files[]'
@@ -43,9 +44,10 @@ endpoints:
         type: file
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      id: 13
+      id: 10
     fileParameters:
       'media_files[]': null
     responses:
@@ -91,7 +93,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer gkDaZ6cfd4e6V83a1Ehv5bP'
+      - 'Bearer VeaEa53kgc8hPdDf6b416vZ'
     controller: null
     method: null
     route: null
@@ -111,53 +113,56 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose media files are to be retrieved.'
         required: true
-        example: 7
+        example: 4
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 7
+      id: 4
     queryParameters:
       search:
         name: search
         description: 'optional A search query to filter media files by name, ID, or upload date.'
         required: false
-        example: rem
+        example: quisquam
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       sort:
         name: sort
         description: 'optional The column to sort by (default: "id").'
         required: false
-        example: voluptatem
+        example: ducimus
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       order:
         name: order
         description: 'optional The sorting order: "ASC" or "DESC" (default: "DESC").'
         required: false
-        example: sed
+        example: quo
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanQueryParameters:
-      search: rem
-      sort: voluptatem
-      order: sed
+      search: quisquam
+      sort: ducimus
+      order: quo
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -208,7 +213,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer g3P5Vcka6EDhZe8db6v1fa4'
+      - 'Bearer V1dbefh4E5cv83PDaag6kZ6'
     controller: null
     method: null
     route: null
@@ -228,31 +233,32 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the delete medium.'
         required: true
-        example: aut
+        example: nobis
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       mediaId:
         name: mediaId
         description: 'The ID of the media file to delete.'
         required: true
-        example: 3
+        example: 18
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: aut
-      mediaId: 3
+      id: nobis
+      mediaId: 18
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -298,7 +304,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer vf135baacd84Z6DPE6ehkgV'
+      - 'Bearer dZ6DaagP53fh6Ekc8bVe1v4'
     controller: null
     method: null
     route: null

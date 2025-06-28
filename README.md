@@ -1,90 +1,66 @@
-# Taskify: The Ultimate Project Management & Productivity Tool
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Introducing **Taskify**, the cutting-edge project and task management tool built on the latest **Laravel 10 framework**. Taskify is an all-in-one solution designed to streamline project management, enhance productivity, and improve collaboration for businesses and organizations of all sizes. From real-time chat to customizable workflows, Taskify empowers you to manage your projects and tasks efficiently.
+<p align="center">
+<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
----
+## About Laravel
 
-## Key Features of Taskify
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-### Elegant and Informative Dashboard
-- Gain a comprehensive overview of your projects, tasks, and productivity metrics.
-- Get unique insights, such as team member birthdays, work anniversaries, and leave information—all in one place.
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-### Projects Management
-- **Tags, Deadlines, and Budgets:** Manage your projects from start to finish with ease.
-- Stay organized and ensure project deadlines and budgets are always on track.
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-### Tasks Management
-- **Workflow Optimization:** Break down projects into manageable tasks with deadlines and progress tracking.
-- Enhance task visibility and accountability.
+## Learning Laravel
 
-### Custom Statuses for Projects and Tasks
-- **Tailored Workflows:** Define custom statuses to align with your unique business processes.
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-### Real-Time Chat
-- **Seamless Collaboration:** Communicate with team members using built-in chat functionality powered by **Pusher notifications**.
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-### Meetings
-- **Virtual Meetings:** Schedule and conduct meetings directly within the platform for streamlined communication.
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-### Workspaces
-- **Team Organization:** Create dedicated workspaces for teams or departments, fostering better organization and collaboration.
+## Laravel Sponsors
 
-### User Management
-- **Access Control:** Manage user access and permissions efficiently.
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
 
-### Client Management
-- Maintain a database of clients and their project-related information for smooth client management.
+### Premium Partners
 
-### Custom Roles and Permissions
-- Define custom roles and permissions to ensure secure and appropriate access for all users.
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Cubet Techno Labs](https://cubettech.com)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[Many](https://www.many.co.uk)**
+- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
+- **[DevSquad](https://devsquad.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[OP.GG](https://op.gg)**
+- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
+- **[Lendio](https://lendio.com)**
 
-### Duplicate Posts with Ease
-- Save time by replicating projects, tasks, meetings, contracts, and payslips in just a few clicks.
+## Contributing
 
-### Contracts
-- Store and manage all project contracts in one secure location.
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-### Payslips
-- **Payroll Automation:** Simplify the creation and distribution of payslips.
+## Code of Conduct
 
-### Multi-Language Support
-- **Global Accessibility:** Taskify supports multiple languages, making it accessible to users worldwide.
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-### Notes
-- Keep project-related notes within the platform for effective documentation.
+## Security Vulnerabilities
 
-### Todos
-- Create and track to-do lists for yourself and your team to ensure nothing is overlooked.
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-### Leave Requests
-- **Integrated System:** Streamline time-off management with an intuitive leave request system.
+## License
 
-### Customizable Settings
-- **Tailored System:** Customize the platform to suit your specific workflow and needs.
-
-### Auto-Update System
-- **Stay Up-to-Date:** Effortlessly keep your system updated with automatic updates for new features and security patches.
-
----
-
-## Why Choose Taskify?
-
-Taskify stands out by combining an intuitive user experience with powerful features designed to boost your team's productivity and efficiency. Whether you're managing a small team or running a large organization, Taskify equips you with the tools you need to succeed.
-
----
-
-For detailed installation instructions, refer to the [official documentation](https://taskify.taskhub.company/public/documentation/).
-
----
-
-### Support & Contact
-For issues or inquiries, please contact **Infinitie Technologies**:
-
-- Website: [https://infinitietech.com](https://infinitietech.com)
-- Support Portal: [https://infinitietech.com/support](https://infinitietech.com/support)
-- Email: [support@infinitietech.com](mailto:support@infinitietech.com)
-
----
-
-**Taskify** – Your all-in-one solution for seamless project management and productivity enhancement.
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

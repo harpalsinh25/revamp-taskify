@@ -106,6 +106,8 @@ class ItemsController extends Controller
             $formFields['price'] = str_replace(',', '', $request->input('price'));
             $formFields['workspace_id'] = $this->workspace->id;
             $res = Item::create($formFields);
+            $res->load('unit');
+            
             if ($isApi) {
                 return formatApiResponse(
                     false,
@@ -117,7 +119,7 @@ class ItemsController extends Controller
                             'title' => $res->title,
                             'price' => format_currency($res->price, false, false),
                             'unit_id' => (string) $res->unit_id,
-                            'unit_name' => $res->unit->title,
+                            'unit_name' => $res->unit ?  $res->unit->title :'-',
                             'description' => $res->description,
                             'created_at' => format_date($res->created_at, true, to_format: 'Y-m-d'),
                             'updated_at' => format_date($res->updated_at, true, to_format: 'Y-m-d')
@@ -130,6 +132,7 @@ class ItemsController extends Controller
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
+            
             if ($isApi) {
                 return formatApiResponse(
                     true,

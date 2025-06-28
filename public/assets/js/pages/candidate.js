@@ -5,51 +5,92 @@ $(document).on('click', '#createCandidateBtn', function () {
 })
 
 function queryParams(params) {
-    return {
+    const query = {
         limit: params.limit,
         offset: params.offset,
         search: params.search,
         sort: $('#sort').val(),
         order: params.order,
         candidate_status: $('#select_candidate_statuses').val(),
+        start_date: $('#candidate_date_between_from').val(),
+        end_date: $('#candidate_date_between_to').val(),
     };
+    return query;
 }
 
+
 $(document).ready(function () {
-    $('#candidate_date_between').on('apply.daterangepicker', function (ev, picker) {
-        var startDate = picker.startDate.format('YYYY-MM-DD');
-        var endDate = picker.endDate.format('YYYY-MM-DD');
-        console.log(startDate, endDate);
-        $('#candidate_date_between_from').val(startDate);
-        $('#candidate_date_between_to').val(endDate);
-
+    $("#sort").on("change", function () {
         $('#table').bootstrapTable('refresh');
-    });
-
-    // Cancel event to clear values
-    $('#candidate_date_between').on('cancel.daterangepicker', function (ev, picker) {
-        $('#candidate_date_between_from').val('');
-        $('#candidate_date_between_to').val('');
-        $(this).val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $('#table').bootstrapTable('refresh');
-
     });
 
     $('#select_candidate_statuses').on('change', function () {
         $('#table').bootstrapTable('refresh');
     })
 
-    $('#sort').on('change', function () {
-        $('#table').bootstrapTable('refresh');
-    })
-
-
-
+    $("#candidate_date_between").on(
+        "apply.daterangepicker",
+        function (ev, picker) {
+            var startDate = picker.startDate.format("YYYY-MM-DD");
+            var endDate = picker.endDate.format("YYYY-MM-DD");
+            $('#candidate_date_between_to').val(endDate);
+            $('#candidate_date_between_from').val(startDate);
+            $("#table").bootstrapTable('refresh');
+        }
+    );
+    $("#candidate_date_between").on(
+        "cancel.daterangepicker",
+        function (ev, picker) {
+            $('#candidate_date_between_to').val('');
+            $('#candidate_date_between_from').val('');
+            $('#candidate_date_between').val('');
+            picker.setStartDate(moment());
+            picker.setEndDate(moment());
+            picker.updateElement();
+            $("#table").bootstrapTable('refresh');
+        }
+    );
 
 });
+
+// $(document).ready(function () {
+//     $('#candidate_date_between').on('apply.daterangepicker', function (ev, picker) {
+//         var startDate = picker.startDate.format('YYYY-MM-DD');
+//         var endDate = picker.endDate.format('YYYY-MM-DD');
+//         console.log(startDate, endDate);
+//         $('#candidate_date_between_from').val(startDate);
+//         $('#candidate_date_between_to').val(endDate);
+
+//         $('#table').bootstrapTable('refresh');
+//     });
+
+//     // Cancel event to clear values
+//     $('#candidate_date_between').on('cancel.daterangepicker', function (ev, picker) {
+//         $('#candidate_date_between_from').val('');
+//         $('#candidate_date_between_to').val('');
+//         $(this).val('');
+//         picker.setStartDate(moment());
+//         picker.setEndDate(moment());
+//         picker.updateElement();
+//         $('#table').bootstrapTable('refresh');
+
+//     });
+
+//     $('#select_candidate_statuses').on('change', function () {
+//         $('#table').bootstrapTable('refresh');
+//     })
+
+//     $('#sort').on('change', function () {
+//         $('#table').bootstrapTable('refresh');
+//     })
+
+// });
+
+
+
+
+
+
 
 // Open Edit Template Modal with data
 $(document).on('click', '.edit-candidate-btn', function () {
@@ -80,7 +121,6 @@ $(document).ready(function () {
     $(document).on('click', '.view-interviews-btn', function () {
 
         const candidateId = $(this).data('id');
-        console.log(candidateId);
         const modal = $('#interviewDetailsModal');
 
         if (!candidateId) {
@@ -106,7 +146,6 @@ $(document).ready(function () {
             method: 'GET',
             success: function (response) {
                 if (response && !response.error) {
-                    console.log(response);
                     // Insert response HTML into modal
                     modal.find('#interviewDetailsContent').html(response.html);
 

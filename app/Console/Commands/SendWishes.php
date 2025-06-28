@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Client;
 use App\Models\Notification as ModelNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Notifications\BirthdayWishNotification;
 use App\Notifications\WorkAnniversaryWishNotification;
@@ -19,53 +20,60 @@ class SendWishes extends Command
     public function handle()
     {
         $today = Carbon::now()->format('m-d');
+        $this->info("Running send:wishes for date: $today");
+        Log::info("SendWishes command started for date: $today");
 
-        // Retrieve global notification settings
         $globalSettings = ['email', 'sms', 'push', 'whatsapp', 'system', 'slack'];
         $notificationTypes = ['birthday_wish', 'work_anniversary_wish'];
 
         $globalNotifications = [];
         foreach ($notificationTypes as $type) {
             foreach ($globalSettings as $channel) {
-                $globalNotifications[$type][$channel] = !getNotificationTemplate($type, $channel) ||
-                    getNotificationTemplate($type, $channel)->status === 1;
+                $template = getNotificationTemplate($type, $channel);
+                $globalNotifications[$type][$channel] = !$template || $template->status === 1;
+                Log::debug("Template check: {$type} / {$channel} => " . json_encode($globalNotifications[$type][$channel]));
             }
         }
 
         $currentYear = today()->year;
 
-        // Handle Birthday Wishes for Users
+        // === USERS ===
         $birthdayUsers = User::where('status', 1)
             ->whereRaw("DATE_FORMAT(dob, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(dob) < ?", [$currentYear])
+            ->whereRaw("YEAR(dob) <= ?", [$currentYear]) // FIXED
             ->get();
-        $this->sendNotifications($birthdayUsers, 'birthday_wish', $globalNotifications);
+        $this->info("Found {$birthdayUsers->count()} birthday users.");
+        Log::info("Birthday Users: " . $birthdayUsers->pluck('id')->join(', '));
 
-        // Handle Work Anniversary Wishes for Users
         $workAnniversaryUsers = User::where('status', 1)
             ->whereRaw("DATE_FORMAT(doj, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(doj) < ?", [$currentYear])
+            ->whereRaw("YEAR(doj) <= ?", [$currentYear]) // FIXED
             ->get();
+        $this->info("Found {$workAnniversaryUsers->count()} work anniversary users.");
+        Log::info("Work Anniversary Users: " . $workAnniversaryUsers->pluck('id')->join(', '));
 
-        $this->sendNotifications($workAnniversaryUsers, 'work_anniversary_wish', $globalNotifications);
-
-        // Handle Birthday Wishes for Clients
+        // === CLIENTS ===
         $birthdayClients = Client::where('status', 1)
             ->whereRaw("DATE_FORMAT(dob, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(dob) < ?", [$currentYear])
+            ->whereRaw("YEAR(dob) <= ?", [$currentYear]) // FIXED
             ->get();
+        $this->info("Found {$birthdayClients->count()} birthday clients.");
+        Log::info("Birthday Clients: " . $birthdayClients->pluck('id')->join(', '));
 
-        $this->sendNotifications($birthdayClients, 'birthday_wish', $globalNotifications);
-
-        // Handle Work Anniversary Wishes for Clients
         $workAnniversaryClients = Client::where('status', 1)
             ->whereRaw("DATE_FORMAT(doj, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(doj) < ?", [$currentYear])
+            ->whereRaw("YEAR(doj) <= ?", [$currentYear]) // FIXED
             ->get();
+        $this->info("Found {$workAnniversaryClients->count()} work anniversary clients.");
+        Log::info("Work Anniversary Clients: " . $workAnniversaryClients->pluck('id')->join(', '));
 
+        $this->sendNotifications($birthdayUsers, 'birthday_wish', $globalNotifications);
+        $this->sendNotifications($workAnniversaryUsers, 'work_anniversary_wish', $globalNotifications);
+        $this->sendNotifications($birthdayClients, 'birthday_wish', $globalNotifications);
         $this->sendNotifications($workAnniversaryClients, 'work_anniversary_wish', $globalNotifications);
 
-        $this->info('Birthday and work anniversary wishes sent successfully.');
+        $this->info('✅ Birthday and work anniversary wishes sent successfully.');
+        Log::info("SendWishes command completed.");
     }
 
     private function sendNotifications($recipients, $type, $globalNotifications)
@@ -73,72 +81,71 @@ class SendWishes extends Command
         $currentYear = today()->year;
         foreach ($recipients as $recipient) {
             $recipientId = ($recipient instanceof User) ? 'u_' . $recipient->id : 'c_' . $recipient->id;
+            $this->info("Sending {$type} for recipient ID: {$recipientId}");
+            Log::debug("Sending {$type} to {$recipient->first_name} [{$recipientId}]");
+
             $enabledNotifications = getUserPreferences('notification_preference', 'enabled_notifications', $recipientId);
+            Log::debug("Enabled notifications for {$recipientId}: " . json_encode($enabledNotifications));
 
             $notificationData = [
                 'first_name' => $recipient->first_name,
                 'last_name' => $recipient->last_name,
             ];
+
             if ($type === 'birthday_wish') {
-                $birthdayDateYear = \Carbon\Carbon::parse($recipient->dob)->year;
-                $yearDifference = $currentYear - $birthdayDateYear;
-                $notificationData['birthday_count'] = $yearDifference;
-                $notificationData['ordinal_suffix'] = getOrdinalSuffix($yearDifference);
+                $years = $currentYear - Carbon::parse($recipient->dob)->year;
+                $notificationData['birthday_count'] = $years;
+                $notificationData['ordinal_suffix'] = getOrdinalSuffix($years);
                 $notificationData['type'] = 'birthday_wish';
-            } elseif ($type === 'work_anniversary_wish') {
-                $joiningYear = \Carbon\Carbon::parse($recipient->doj)->year;
-                $yearDifference = $currentYear - $joiningYear;
-                $notificationData['work_anniversary_count'] = $yearDifference;
-                $notificationData['ordinal_suffix'] = getOrdinalSuffix($yearDifference);
+            } else {
+                $years = $currentYear - Carbon::parse($recipient->doj)->year;
+                $notificationData['work_anniversary_count'] = $years;
+                $notificationData['ordinal_suffix'] = getOrdinalSuffix($years);
                 $notificationData['type'] = 'work_anniversary_wish';
             }
 
-            // Check if either system or push is enabled globally for the recipient
             $isSystemEnabled = $this->isNotificationEnabled($enabledNotifications, $type, 'system');
             $isPushEnabled = $this->isNotificationEnabled($enabledNotifications, $type, 'push');
 
-            // Proceed only if either system or push is enabled globally for the recipient
             if ($globalNotifications[$type]['system'] || $globalNotifications[$type]['push']) {
-                // Initialize title and message as empty
-                $title = '';
-                $message = '';
+                $title = $message = '';
 
-                // If system is enabled, get the title and message for the system notification
                 if ($globalNotifications[$type]['system'] && $isSystemEnabled) {
-                    $title = getTitle($notificationData, $recipient, 'system');  // Get title for system channel
-                    $message = get_message($notificationData, $recipient, 'system');  // Get message for system channel
+                    $title = getTitle($notificationData, $recipient, 'system');
+                    $message = get_message($notificationData, $recipient, 'system');
                 }
 
-                // If push is enabled, get the title and message for the push notification
                 if ($globalNotifications[$type]['push'] && $isPushEnabled) {
-                    // Only update title and message for push if they are different from system (if system is also enabled)
                     $pushTitle = getTitle($notificationData, $recipient, 'push');
                     $pushMessage = get_message($notificationData, $recipient, 'push');
 
-                    // If system was set, avoid overriding title and message with empty data for push
                     if (empty($title) && empty($message)) {
                         $title = $pushTitle;
                         $message = $pushMessage;
                     }
                 }
+                $workspace = $recipient->workspaces->where('is_primary', '1')->first()
+                    ?? $recipient->workspaces->first();
 
-                // Only create and attach the notification if title and message are not empty
                 if (!empty($title) && !empty($message)) {
-                    // Create the notification once with the calculated title and message
                     $notification = ModelNotification::create([
-                        'workspace_id' => getWorkspaceId(),
-                        'type' => $notificationData['type'],  // Notification type
+                        'workspace_id' => $workspace->id,
+                        'type' => $notificationData['type'],
                         'title' => $title,
                         'message' => $message,
                     ]);
 
-                    // Attach the notification to the recipient with the appropriate flags
                     $recipient->notifications()->attach($notification->id, [
                         'is_system' => $isSystemEnabled ? 1 : 0,
                         'is_push' => $isPushEnabled ? 1 : 0,
                     ]);
+
+                    Log::info("System/push notification created for {$recipientId}: {$title}");
+                } else {
+                    Log::warning("Skipped system/push for {$recipientId} due to empty title/message");
                 }
             }
+
             foreach (['email', 'sms', 'push', 'whatsapp', 'slack'] as $channel) {
                 if ($globalNotifications[$type][$channel] && $this->isNotificationEnabled($enabledNotifications, $type, $channel)) {
                     try {
@@ -148,24 +155,24 @@ class SendWishes extends Command
 
                         Notification::send($recipient, new $notificationClass([
                             'channel' => match ($channel) {
-                                'email' => 'mail',       // Map 'email' to 'mail'
+                                'email' => 'mail',
                                 'sms' => \App\Channels\SmsChannel::class,
                                 'whatsapp' => \App\Channels\WhatsappChannel::class,
                                 'push' => \App\Channels\PushChannel::class,
                                 'slack' => \App\Channels\SlackChannel::class,
-                                default => $channel,     // Use the channel as-is for others
+                                default => $channel,
                             },
                             'notification_data' => $notificationData,
                         ]));
+
+                        Log::info("Notification sent to {$recipientId} via {$channel}");
                     } catch (\Exception $e) {
-                        // dd($e);
-                        // Log exception or handle as necessary
+                        Log::error("Error sending {$channel} notification to {$recipientId}: " . $e->getMessage());
                     }
                 }
             }
         }
     }
-
 
     private function isNotificationEnabled($enabledNotifications, $type, $channel)
     {

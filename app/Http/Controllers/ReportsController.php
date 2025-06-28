@@ -61,6 +61,7 @@ class ReportsController extends Controller
 
         // Handle date filters
         $dateFilterFrom = $request->filled('date_between_from') ? $request->date_between_from : null;
+        // dd($dateFilterFrom);
         $dateFilterTo = $request->filled('date_between_to') ? $request->date_between_to : null;
         $startDateFilter = $request->filled('start_date_from') && $request->filled('start_date_to')
             ? [$request->start_date_from, $request->start_date_to]

@@ -20,21 +20,22 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: multipart/form-data
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: multipart/form-data
     urlParameters:
       id:
         name: id
         description: 'The ID of the information.'
         required: true
-        example: eos
+        example: dolorem
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: eos
+      id: dolorem
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -42,37 +43,41 @@ endpoints:
         name: model_type
         description: 'The type of model being commented on (e.g., "Task", "Project").'
         required: true
-        example: iure
+        example: eius
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       model_id:
         name: model_id
         description: 'The ID of the model being commented on.'
         required: true
-        example: 16
+        example: 13
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       content:
         name: content
         description: 'The comment text.'
         required: true
-        example: ducimus
+        example: recusandae
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       parent_id:
         name: parent_id
         description: 'optional The ID of the parent comment (for replies).'
         required: false
-        example: 17
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       'attachments[]':
         name: 'attachments[]'
@@ -82,12 +87,13 @@ endpoints:
         type: file
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      model_type: iure
-      model_id: 16
-      content: ducimus
-      parent_id: 17
+      model_type: eius
+      model_id: 13
+      content: recusandae
+      parent_id: 1
     fileParameters:
       'attachments[]': null
     responses:
@@ -149,7 +155,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 4eZfEvPVdDgha1b68ac36k5'
+      - 'Bearer b5Zak68gfVDvEdcha3416Pe'
     controller: null
     method: null
     route: null
@@ -169,21 +175,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the comment to retrieve.'
         required: true
-        example: 12
+        example: 2
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 12
+      id: 2
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -242,7 +248,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer abP4k3f5dh6E8eDcgv6VaZ1'
+      - 'Bearer D4ePdV8bcvZ56kg1f6a3haE'
     controller: null
     method: null
     route: null
@@ -262,9 +268,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -274,23 +280,25 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment to be updated.'
         required: true
-        example: 4
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       content:
         name: content
         description: 'The updated content of the comment.'
         required: true
-        example: eligendi
+        example: excepturi
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      comment_id: 4
-      content: eligendi
+      comment_id: 16
+      content: excepturi
     fileParameters: []
     responses:
       -
@@ -342,7 +350,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer bEadhfak8cZeP1VD66g345v'
+      - 'Bearer 6D3av5fbgh1EVPdkecaZ684'
     controller: null
     method: null
     route: null
@@ -364,9 +372,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
@@ -374,13 +381,14 @@ endpoints:
         name: comment_id
         description: 'The ID of the comment to delete.'
         required: true
-        example: 4
+        example: 19
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanQueryParameters:
-      comment_id: 4
+      comment_id: 19
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -434,7 +442,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer gce6vb1h5dD6aEkaPfZ483V'
+      - 'Bearer 5dckZ4ab368E6DgeVfh1vaP'
     controller: null
     method: null
     route: null

@@ -795,9 +795,17 @@ class UserController extends Controller
         try {
             $formFields = $request->validate([
                 'email' => ['required', 'email'],
-                'password' => 'required'
+                'password' => 'required',
             ]);
+
+            $settings = get_settings('general_settings');
+            if (!empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'] && !$isApi) {
+                $request->validate([
+                    'g-recaptcha-response' => 'required|captcha',
+                ], ['g-recaptcha-response.required' => 'google captcha required.']);
+            }
         } catch (ValidationException $e) {
+            // dd($e);
             return formatApiValidationError($isApi, $e->errors());
         }
 

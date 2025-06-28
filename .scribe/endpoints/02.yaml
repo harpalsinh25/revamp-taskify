@@ -16,9 +16,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       variable:
         name: variable
@@ -28,6 +27,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       variable: general_settings
@@ -91,7 +91,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 3Zhvk85gdcePfEaa61DVb46'
+      - 'Bearer chEDkf1aZved48536VgbaP6'
     controller: null
     method: null
     route: null
@@ -111,9 +111,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       variable:
         name: variable
@@ -123,6 +123,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       variable: general_settings
@@ -137,6 +138,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       company_title:
         name: company_title
@@ -146,6 +148,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       site_url:
         name: site_url
@@ -155,6 +158,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       timezone:
         name: timezone
@@ -164,6 +168,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       currency_full_form:
         name: currency_full_form
@@ -173,6 +178,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       currency_symbol:
         name: currency_symbol
@@ -182,6 +188,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       currency_code:
         name: currency_code
@@ -191,6 +198,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       date_format:
         name: date_format
@@ -200,6 +208,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       toast_time_out:
         name: toast_time_out
@@ -209,6 +218,7 @@ endpoints:
         type: numeric
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       allowed_max_upload_size:
         name: allowed_max_upload_size
@@ -218,6 +228,7 @@ endpoints:
         type: numeric
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       variable: general_settings
@@ -256,7 +267,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer evk8Zf5D4g6V61baPhcda3E'
+      - 'Bearer V5a6fZk4Eg3ea1bhd8cDv6P'
     controller: null
     method: null
     route: null

@@ -9,6 +9,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "alexusmai/laravel-file-manager": "^3.1",
+        "anhskohbo/no-captcha": "^3.7",
         "aws/aws-sdk-php": "^3.296",
         "barryvdh/laravel-dompdf": "^2.0",
         "dedoc/scramble": "*",
@@ -27,6 +29,7 @@
         "protonemedia/laravel-cross-eloquent-search": "^3.1",
         "psr/container": "^2.0",
         "ryangjchandler/laravel-comments": "^0.2.0",
+        "silviolleite/laravelpwa": "^2.0",
         "spatie/laravel-medialibrary": "^10.15",
         "spatie/laravel-permission": "^5.9",
         "twilio/sdk": "^8.1"

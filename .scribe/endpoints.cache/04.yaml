@@ -18,9 +18,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -68,7 +67,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer faea3Egb1VcZ4hDv65d6Pk8'
+      - 'Bearer Vhgv5ZEDcb83ad46a6kefP1'
     controller: null
     method: null
     route: null
@@ -91,9 +90,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: multipart/form-data
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: multipart/form-data
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -107,6 +106,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       type:
         name: type
@@ -116,6 +116,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       upload:
         name: upload
@@ -125,6 +126,7 @@ endpoints:
         type: file
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
       id: 1
@@ -200,7 +202,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ePZb61hgkvd5faD836E4cVa'
+      - 'Bearer 6V8cekahf36PEgvd5Zb1Da4'
     controller: null
     method: null
     route: null
@@ -220,21 +222,22 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
         description: 'The ID of the user whose profile is being updated.'
         required: true
-        example: 4
+        example: 6
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 4
+      id: 6
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -246,6 +249,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       last_name:
         name: last_name
@@ -255,6 +259,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       email:
         name: email
@@ -264,6 +269,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       role:
         name: role
@@ -273,6 +279,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       phone:
         name: phone
@@ -282,6 +289,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country_code:
         name: country_code
@@ -291,6 +299,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country_iso_code:
         name: country_iso_code
@@ -300,6 +309,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       dob:
         name: dob
@@ -309,6 +319,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       doj:
         name: doj
@@ -318,6 +329,7 @@ endpoints:
         type: date
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       address:
         name: address
@@ -327,6 +339,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       city:
         name: city
@@ -336,6 +349,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       state:
         name: state
@@ -345,6 +359,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       country:
         name: country
@@ -354,6 +369,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       zip:
         name: zip
@@ -363,6 +379,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       password:
         name: password
@@ -372,6 +389,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       password_confirmation:
         name: password_confirmation
@@ -381,6 +399,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       first_name: Madhavan
@@ -469,7 +488,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer ZvEgahkdafcV8eP663541Db'
+      - 'Bearer ka315Dhe4cPv6db8EZ6Vagf'
     controller: null
     method: null
     route: null
@@ -489,9 +508,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -536,7 +554,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Ed5Dbkfv3eV6hgcaZ86aP41'
+      - 'Bearer gbVPk4Z8cEhaa36f6e1D5dv'
     controller: null
     method: null
     route: null

@@ -39,7 +39,7 @@ class SignUpController extends Controller
 
     /**
      * Register a new user.
-     * 
+     *
      * This endpoint allows a new user to sign up by providing necessary details.
      *
      * @group User Authentication
@@ -101,7 +101,7 @@ class SignUpController extends Controller
      */
 
     public function create_account(Request $request)
-    {        
+    {
         ini_set('max_execution_time', 300);
         $isApi = request()->get('isApi', false);
         $isTeamMember = $request->input('type') === 'member';
@@ -111,7 +111,15 @@ class SignUpController extends Controller
             'password' => ['required', 'min:6'],
             'password_confirmation' => ['required', 'same:password'],
             'company' => 'nullable',
+
         ];
+
+        $settings = get_settings('general_settings');
+
+        if (!empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'] && !$isApi) {
+            $rules['g-recaptcha-response'] = 'required|captcha';
+        }
+
         if ($isTeamMember) {
             // $rules['role'] = 'required';
             $rules['email'] = ['required', 'email', 'unique:users,email'];

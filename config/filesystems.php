@@ -43,6 +43,13 @@ return [
             'visibility' => 'public',
             'throw' => false,
         ],
+         'file-manager' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/file-manager'),
+            'throw' => false,
+            'visibility' => 'public',
+            'url' => env('APP_URL').'/storage/file-manager',
+        ],
 
         's3' => [
             'driver' => 's3',

@@ -48,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
             'max_files_allowed' => '10',
             'allowed_max_upload_size' => '512',
             'timezone' => 'UTC',
+            'recaptcha_site_key' => '',
+            'recaptcha_secret_key' => '',
         ],
         'pusher' => [
             'pusher_app_id' => '',
@@ -141,6 +143,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Register PHP date format singleton
         $this->registerDateFormatSingleton();
+
+        $settings = get_settings('general_settings');
+        // Load general settings from DB
+        $this->configureRecaptcha($settings);
     }
 
     /**
@@ -247,11 +253,31 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Get settings with defaults applied.
      */
+    // private function getSettingsWithDefaults(string $key, array $defaults): array
+    // {
+    //     $settings = get_settings($key) ?? [];
+    //     return array_merge($defaults, $settings);
+    // }
+
     private function getSettingsWithDefaults(string $key, array $defaults): array
     {
-        $settings = get_settings($key) ?? [];
-        return array_merge($defaults, $settings);
+        $settings = get_settings($key);
+
+        if ($settings instanceof \Illuminate\Support\Collection) {
+            $settings = $settings->toArray();
     }
+
+        // In case it's stored as a JSON string (common with one-row settings table)
+        if (is_string($settings)) {
+            $decoded = json_decode($settings, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $settings = $decoded;
+            }
+        }
+
+        return array_merge($defaults, is_array($settings) ? $settings : []);
+    }
+
 
     /**
      * Process logo paths by adding storage prefix if needed.
@@ -491,5 +517,14 @@ class AppServiceProvider extends ServiceProvider
         }
 
         return $manifest;
+    }
+
+    // reCAPATCHA
+    private function configureRecaptcha(array $generalSettings): void
+    {
+        if (!empty($generalSettings['recaptcha_site_key']) && !empty($generalSettings['recaptcha_secret_key'])) {
+            Config::set('captcha.sitekey', $generalSettings['recaptcha_site_key']);
+            Config::set('captcha.secret', $generalSettings['recaptcha_secret_key']);
+        }
     }
 }

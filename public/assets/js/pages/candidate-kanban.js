@@ -1,19 +1,68 @@
 'use strict';
 
+$('#filter').on('click', function () {
+    console.log('filter working');
+    let baseUrl = "/candidate/kanban";
+
+    let params = [];
+
+    let statuses = $('#select_candidate_statuses').val();
+    if (statuses && statuses.length > 0) {
+        params.push("statuses[]=" + statuses.join("&statuses[]="));
+    }
+
+    let sort = $('#sort').val();
+    if (sort) {
+        params.push("sort=" + sort);
+    }
+
+    if ($('#candidate_date_between_from').val() && $('#candidate_date_between_to').val()) {
+        params.push("candidate_date_between_from=" + $('#candidate_date_between_from').val());
+        params.push("candidate_date_between_to=" + $('#candidate_date_between_to').val());
+    }
+
+    if (params.length > 0) {
+        baseUrl += "?" + params.join("&");
+    }
+
+    window.location.href = baseUrl;
+});
+
+
+$("#candidate_date_between").on(
+    "apply.daterangepicker",
+    function (ev, picker) {
+        var startDate = picker.startDate.format("YYYY-MM-DD");
+        var endDate = picker.endDate.format("YYYY-MM-DD");
+        $('#candidate_date_between_to').val(endDate);
+        $('#candidate_date_between_from').val(startDate);
+
+    }
+);
+$("#candidate_date_between").on(
+    "cancel.daterangepicker",
+    function (ev, picker) {
+        $('#candidate_date_between_to').val('');
+        $('#candidate_date_between_from').val('');
+        $('#candidate_date_between').val('');
+    }
+);
+
 document.addEventListener('DOMContentLoaded', function () {
     const columns = Array.from(document.querySelectorAll('.kanban-column-body'));
     const drake = dragula(columns, {
         direction: 'vertical',
         moves: function (el, container, handle) {
-            return !el.classList.contains('create-project-btn');
+            return !el.classList.contains('create-project-btn') && !el.classList.contains('create-candidate-btn');
         },
         accepts: function (el, target) {
-            return !el.classList.contains('create-project-btn');
+            return !el.classList.contains('create-project-btn') && !el.classList.contains('create-candidate-btn');
         },
         invalid: function (el, handle) {
-            return el.classList.contains('create-project-btn');
+            return el.classList.contains('create-project-btn') || el.classList.contains('create-candidate-btn');
         }
     });
+
 
     // Add class on drag start
     drake.on('drag', function (el) {
@@ -97,6 +146,7 @@ $(document).ready(function () {
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 success: function (data) {
+                    console.log(data);
                     if (!data?.candidate) {
                         alert('Candidate data is missing.');
                         return;
@@ -230,3 +280,5 @@ $(document).ready(function () {
 function get_label(key, defaultValue) {
     return window.labels?.[key] ?? defaultValue;
 }
+
+

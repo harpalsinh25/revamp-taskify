@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
 use Twilio\Rest\Client as TwilioClient;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\RequestException;
@@ -2828,8 +2829,8 @@ if (!function_exists('formatCandidate')) {
                     'status' => $interview->status,
                     'location' => $interview->location,
                     'mode' => $interview->mode,
-                    'created_at' => format_date($interview->created_at),
-                    'updated_at' => format_date($interview->updated_at),
+                    'created_at' => format_date($interview->created_at, to_format: 'Y-m-d'),
+                    'updated_at' => format_date($interview->updated_at, to_format: 'Y-m-d'),
                 ];
             }),
             'created_at' => format_date($candidate->created_at, to_format: 'Y-m-d'),
@@ -2846,8 +2847,8 @@ if (!function_exists('formatCandidateStuses')) {
             'name' => $status->name,
             'order' => $status->order,
             'color' => $status->color,
-            'created_at' => format_date($status->created_at),
-            'updated_at' => format_date($status->updated_at),
+            'created_at' => format_date($status->created_at, to_format: 'Y-m-d'),
+            'updated_at' => format_date($status->updated_at, to_format: 'Y-m-d'),
             'can_edit' => checkPermission('edit_candidate_status'),
             'can_delete' => checkPermission('delete_candidate_status'),
         ];
@@ -3613,8 +3614,14 @@ if (!function_exists('getMenus')) {
                         'id' => 'lead_bulk_upload',
                         'label' => get_label('bulk_upload', 'Bulk Upload'),
                         'url' => route('leads.upload'),
-
                         'class' => 'menu-item' . (Request::is('leads/bulk-upload') ? ' active' : ''),
+                        'show' => ($user->can('manage_leads') && $user->can('create_leads')) ? 1 : 0
+                    ],
+                    [
+                        'id' => 'lead_forms',
+                        'label' => get_label('lead_forms', 'Lead Forms'),
+                        'url' => route('lead-forms.index'),
+                        'class' => 'menu-item' . (Request::is('/lead-forms') ? ' active' : ''),
                         'show' => ($user->can('manage_leads') && $user->can('create_leads')) ? 1 : 0
                     ],
                 ],
@@ -3932,6 +3939,15 @@ if (!function_exists('getMenus')) {
                     ],
 
                 ]
+            ],
+            [
+                'id' => 'general_file_manager',
+                'label' => get_label('general_file_manager', 'General File Manager'),
+                'url' => route('file-manager.index'),
+                'icon' => 'bx bx-folder-open',
+                'class' => 'menu-item' . (Request::is('file-manager') || Request::is('file-manager/*') ? ' active' : ''),
+                'show' => isAdminOrHasAllDataAccess() ? 1 : 0,
+                'category' => 'utilities',
             ],
             [
                 'id' => 'settings',
@@ -4923,6 +4939,7 @@ if (!function_exists('formatLead')) {
             'lead_source' => $lead->source ? $lead->source->name : '-',
             'lead_stage_id' => $lead->stage_id,
             'lead_stage' => $lead->stage ? $lead->stage->name : '-',
+            'lead_stage_color' => $lead->stage->color ? $lead->stage->color : '-',
             'assigned_to' => $lead->assigned_to,
             'assigned_user' => ucfirst($lead->assigned_user->first_name) . ' ' . ucfirst($lead->assigned_user->last_name),
             'job_title' => $lead->job_title,
@@ -4938,6 +4955,32 @@ if (!function_exists('formatLead')) {
             'zip' => $lead->zip,
             'country' => $lead->country,
             'isConverted' => $lead->is_converted == 1 ? true : false,
+            'assigned_user' => [
+                'id' => $lead->assigned_user->id,
+                'name' => $lead->assigned_user->first_name . "" . $lead->assigned_user->last_name,
+                'email' => $lead->assigned_user->email,
+                'profile_picture' => $lead->assigned_user ? asset('storage/' . $lead->assigned_user->photo) : asset('/photos/1.png'),
+            ],
+
+            'follow_ups' => $lead->follow_ups->map(function ($followUp) {
+                return [
+                    'id' => $followUp->id,
+                    // 'follow_up_at' => format_date($followUp->follow_up_at, false, 'Y-m-d H:', 'Y-m-d'),
+                    'follow_up_at' => $followUp->follow_up_at,
+                    'type' => $followUp->type,
+                    'status' => $followUp->status,
+                    'note' => $followUp->note, // Strip HTML
+                    // 'note' => $followUp->note ? strip_tags($followUp->note) : null, // Strip HTML
+                    'assigned_to' => [
+                        'id' => $followUp->assignedTo->id,
+                        'name' => $followUp->assignedTo->first_name . " " . $followUp->assignedTo->last_name
+                    ],
+                    'created_at' => format_date($followUp->created_at, to_format: 'Y-m-d'),
+                    'updated_at' => format_date($followUp->updated_at, to_format: 'Y-m-d'),
+                ];
+            })->toArray(),
+
+            // 'assignedTo' => $lead->assigned_user,
             'created_at' => format_date($lead->created_at, to_format: 'Y-m-d'),
             'updated_at' => format_date($lead->updated_at, to_format: 'Y-m-d'),
         ];
@@ -5017,11 +5060,18 @@ if (!function_exists('formatLeadUserHtml')) {
     if (!function_exists('formatPayslip')) {
         function formatPayslip($payslip)
         {
+
+
+            // dd(format_date($payslip->payment_date, true, to_format: 'Y-m-d'));
             return [
                 'id' => $payslip->id,
-                'user_id' => $payslip->user_id,
-                'user_name' => $payslip->user ? ($payslip->user->full_name ?? ($payslip->user->first_name . ' ' . $payslip->user->last_name)) : '-',
-                'month' => Carbon::parse($payslip->month),
+                'user' => [
+                    'id' => $payslip->user_id,
+                    'name' => $payslip->user ? ($payslip->user->full_name ?? ($payslip->user->first_name . ' ' . $payslip->user->last_name)) : '-',
+                    'email' => $payslip->user->email,
+                    'profile_picture' =>  $payslip->user ? asset('storage/' .$payslip->user->photo) : asset('/photos/1.png'),
+                ],
+                'month' => $payslip->month,
                 'basic_salary' => $payslip->basic_salary,
                 'working_days' => $payslip->working_days,
                 'lop_days' => $payslip->lop_days,
@@ -5032,7 +5082,22 @@ if (!function_exists('formatLeadUserHtml')) {
                 'ot_hours' => $payslip->ot_hours,
                 'ot_rate' => $payslip->ot_rate,
                 'ot_payment' => $payslip->ot_payment,
+                'allowances' => $payslip->allowances->map(function ($allowance) {
+                    return [
+                        'id' => $allowance->id,
+                        'title' => $allowance->title,
+                        'amount' => $allowance->amount ?? 0, // assuming `amount` is on pivot
+                    ];
+                }),
                 'total_allowance' => $payslip->total_allowance,
+
+                'deductions' => $payslip->deductions->map(function ($deduction) {
+                    return [
+                        'id' => $deduction->id,
+                        'title' => $deduction->title,
+                        'amount' => $deduction->amount ?? 0, // assuming `amount` is on pivot
+                    ];
+                }),
                 'total_deductions' => $payslip->total_deductions,
                 'total_earnings' => $payslip->total_earnings,
                 'net_pay' => $payslip->net_pay,
@@ -5043,11 +5108,19 @@ if (!function_exists('formatLeadUserHtml')) {
                     default => 'Unknown',
                 },
                 'payment_method_id' => $payslip->payment_method_id,
-                'payment_method' => $payslip->paymentMethod->name ?? '-',
-                'payment_date' =>  $payslip->payment_date !== null ? Carbon::parse($payslip->payment_date) : '',
+                'payment_method' => $payslip->paymentMethod->title ?? '-',
+                'payment_date' =>  $payslip->payment_date !== null ? format_date($payslip->payment_date, true, to_format: 'Y-m-d') : '',
                 'note' => $payslip->note,
-                'created_at' => format_date($payslip->created_at, to_format: 'Y-m-d'),
-                'updated_at' => format_date($payslip->updated_at, to_format: 'Y-m-d'),
+                'created_at_date' => format_date($payslip->created_at, false, to_format: 'Y-m-d'),
+                'created_at_time' => format_date($payslip->created_at, false, to_format: 'H:i:s'),
+
+                'updated_at_date' => format_date($payslip->updated_at, false, to_format: 'Y-m-d'),
+                'updated_at_time' => format_date($payslip->updated_at, false, to_format: 'H:i:s'),
+
+
+                'current_date' => format_date(Carbon::now(), false, to_format: 'Y-m-d'),
+                'current_time' => format_date(Carbon::now(), false, to_format: 'H:i:s'),
+
             ];
         }
     }
@@ -5058,9 +5131,9 @@ if (!function_exists('formatLeadUserHtml')) {
             return [
                 'id' => $allowance->id,
                 'title' => $allowance->title,
-                'amount' => format_currency($allowance->amount),
-                'created_at' => format_date($allowance->created_at, true),
-                'updated_at' => format_date($allowance->updated_at, 'H:i:s'),
+                'amount' => format_currency($allowance->amount, false),
+                'created_at' => format_date($allowance->created_at, to_format: 'Y-m-d'),
+                'updated_at' => format_date($allowance->updated_at, to_format: 'Y-m-d'),
             ];
         }
     }
@@ -5074,34 +5147,96 @@ if (!function_exists('formatLeadUserHtml')) {
                 'title' => $deduction->title,
                 'type' => ucfirst($deduction->type),
                 'percentage' => $deduction->percentage,
-                'amount' => format_currency($deduction->amount),
-                'created_at' => format_date($deduction->created_at),
-                'updated_at' => format_date($deduction->updated_at)
+                'amount' => format_currency($deduction->amount, false),
+                'created_at' => format_date($deduction->created_at, to_format: 'Y-m-d'),
+                'updated_at' => format_date($deduction->updated_at, to_format: 'Y-m-d')
 
             ];
         }
     }
 
 
-    if (!function_exists('formatContract')) {
-        function formatContract($contract)
-        {
-            return [
-                'id' => $contract->id,
-                'title' => $contract->title,
-                'value' => format_currency($contract->value),
-                'start_date' => format_date($contract->start_date),
-                'end_date' => format_date($contract->end_date),
-                'client_id' => $contract->client_id,
-                'project_id' => $contract->project_id,
-                'contract_type_id' => $contract->contract_type_id,
-                'description' => $contract->description,
-                'workspace_id' => $contract->workspace_id,
-                'created_by' => $contract->created_by,
-                'created_at' => format_date($contract->created_at, true),
-                'updated_at' => format_date($contract->updated_at, true)
-            ];
+    function formatContract($contract)
+    {
+        // Determine sign statuses
+        $promisorSign = $contract->promisor_sign;
+
+        $promiseeSign = $contract->promisee_sign;
+
+        $promisor_sign_status = !is_null($promisorSign) ? 'signed' : 'not_signed';
+        $promisee_sign_status = !is_null($promiseeSign) ? 'signed' : 'not_signed';
+
+        if (!is_null($promisorSign) && !is_null($promiseeSign)) {
+            $status = 'signed';
+        } elseif (!is_null($promisorSign) || !is_null($promiseeSign)) {
+            $status = 'partially_signed';
+        } else {
+            $status = 'not_signed';
         }
+
+        if (strpos($contract->created_by, 'u_') === 0) {
+            $userId = substr($contract->created_by, 2);
+            $user = \App\Models\User::find($userId);
+
+            $createdBy = $user ? [
+                'type' => 'user',
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'email' => $user->email,
+                'profile_picture' => $user->photo ? asset('storage/' . $user->photo) : asset('/photos/1.png'),
+            ] : null;
+        } else {
+            $clientId = substr($contract->created_by, 2);
+            $client = \App\Models\Client::find($clientId);
+
+            $createdBy = $client ? [
+                'type' => 'client',
+                'id' => $client->id,
+                'name' => $client->name,
+                'email' => $client->email,
+                'profile_picture' => $client->photo ? asset('storage/' . $client->photo) : asset('/photos/1.png'),
+            ] : null;
+        }
+
+        return [
+            'id' => $contract->id,
+            'title' => $contract->title,
+            'value' => format_currency($contract->value),
+            'start_date' => format_date($contract->start_date, to_format: 'Y-m-d'),
+            'end_date' => format_date($contract->end_date, to_format: 'Y-m-d'),
+            'client' => [
+                'id' => $contract->client->id,
+                'name' => $contract->client->first_name . " " . $contract->client->last_name,
+                'email' => $contract->client->email,
+                'profile_picture' => $contract->client->photo ? asset('storage/' . $contract->client->photo) : asset('storage/photos/no-image.jpg')
+            ],
+            'created_by' => $createdBy,
+            'project' => [
+                'id' => $contract->project_id,
+                'title' => $contract->project_title
+            ],
+            'contract_type' => [
+                'id' => $contract->contract_type_id,
+                'name' => $contract->contract_type
+            ],
+            'description' => $contract->description,
+            'workspace_id' => $contract->workspace_id,
+            'created_at' => format_date($contract->created_at, to_format: 'Y-m-d'),
+            'updated_at' => format_date($contract->updated_at, to_format: 'Y-m-d'),
+            'status' => $status,
+            'signatures' => [
+                'promisor' => [
+                    'status' => $promisor_sign_status,
+                    'url' => $promisorSign && Storage::disk('public')->exists('signatures/' . $promisorSign) ? asset('storage/signatures/' . $promisorSign) : null, // CHANGED: Use asset() for consistency with profile_picture and added exists() check
+                ],
+                'promisee' => [
+                    'status' => $promisee_sign_status,
+                    'url' => $promiseeSign && Storage::disk('public')->exists('signatures/' . $promiseeSign) ? asset('storage/signatures/' . $promiseeSign) : null, // CHANGED: Use asset() for consistency with profile_picture and added exists() check
+                ],
+            ],
+
+            'signed_pdf_url' => $contract->signed_pdf ? asset('storage/contracts/' . $contract->signed_pdf) : null,
+        ];
     }
 
     if (!function_exists('formatContractType')) {
@@ -5110,8 +5245,8 @@ if (!function_exists('formatLeadUserHtml')) {
             return [
                 'id' => $contract_type->id,
                 'type' => $contract_type->type,
-                'created_at' => format_date($contract_type->created_at, true),
-                'updated_at' => format_date($contract_type->updated_at, true),
+                'created_at' => format_date($contract_type->created_at, to_format: 'Y-m-d'),
+                'updated_at' => format_date($contract_type->updated_at, to_format: 'Y-m-d'),
             ];
         }
     }

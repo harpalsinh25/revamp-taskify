@@ -16,9 +16,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
@@ -28,6 +28,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -40,6 +41,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       sort:
         name: sort
@@ -49,6 +51,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       order:
         name: order
@@ -58,6 +61,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status_ids:
         name: status_ids
@@ -69,6 +73,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_ids:
         name: user_ids
@@ -81,6 +86,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_ids:
         name: client_ids
@@ -92,6 +98,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       priority_ids:
         name: priority_ids
@@ -103,6 +110,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       tag_ids:
         name: tag_ids
@@ -114,6 +122,7 @@ endpoints:
         type: 'string[]'
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       project_start_date_from:
         name: project_start_date_from
@@ -123,6 +132,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       project_start_date_to:
         name: project_start_date_to
@@ -132,6 +142,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       project_end_date_from:
         name: project_end_date_from
@@ -141,6 +152,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       project_end_date_to:
         name: project_end_date_to
@@ -150,6 +162,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       is_favorites:
         name: is_favorites
@@ -159,6 +172,7 @@ endpoints:
         type: boolean
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       limit:
         name: limit
@@ -168,6 +182,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       offset:
         name: offset
@@ -177,6 +192,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanQueryParameters:
       search: Project
@@ -208,65 +224,70 @@ endpoints:
     bodyParameters:
       user_ids:
         name: user_ids
-        description: ''
+        description: 'The <code>id</code> of an existing record in the users table.'
+        required: false
+        example:
+          - 15
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      client_ids:
+        name: client_ids
+        description: 'The <code>id</code> of an existing record in the clients table.'
         required: false
         example:
           - 18
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
-        custom: []
-      client_ids:
-        name: client_ids
-        description: ''
-        required: false
-        example:
-          - 13
-        type: 'integer[]'
-        enumValues: []
-        exampleWasSpecified: false
+        nullable: false
         custom: []
       priority_ids:
         name: priority_ids
-        description: ''
+        description: 'The <code>id</code> of an existing record in the priorities table.'
         required: false
         example:
           - 7
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       tag_ids:
         name: tag_ids
-        description: ''
+        description: 'The <code>id</code> of an existing record in the tags table.'
         required: false
         example:
-          - 19
+          - 14
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       status_ids:
         name: status_ids
-        description: ''
+        description: 'The <code>id</code> of an existing record in the statuses table.'
         required: false
         example:
-          - 13
+          - 5
         type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
       user_ids:
-        - 18
+        - 15
       client_ids:
-        - 13
+        - 18
       priority_ids:
         - 7
       tag_ids:
-        - 19
+        - 14
       status_ids:
-        - 13
+        - 5
     fileParameters: []
     responses:
       -
@@ -337,7 +358,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer v5abcDgVPhfa68kE6ed31Z4'
+      - 'Bearer egk61a6cEvDb8Vh435PZafd'
     controller: null
     method: null
     route: null
@@ -357,9 +378,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -373,6 +394,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status_id:
         name: status_id
@@ -382,6 +404,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       priority_id:
         name: priority_id
@@ -391,6 +414,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       start_date:
         name: start_date
@@ -400,6 +424,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       end_date:
         name: end_date
@@ -409,6 +434,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       budget:
         name: budget
@@ -418,6 +444,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       task_accessibility:
         name: task_accessibility
@@ -427,6 +454,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       description:
         name: description
@@ -436,6 +464,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       note:
         name: note
@@ -445,6 +474,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_id:
         name: user_id
@@ -454,6 +484,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_id:
         name: client_id
@@ -463,6 +494,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       tag_ids:
         name: tag_ids
@@ -472,6 +504,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       clientCanDiscuss:
         name: clientCanDiscuss
@@ -481,6 +514,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       title: 'New Website Launch'
@@ -603,7 +637,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer V58vabgDfEPkZcd36h4e1a6'
+      - 'Bearer D1fh3ev6bVdk4aZEcaP86g5'
     controller: null
     method: null
     route: null
@@ -623,9 +657,9 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -639,6 +673,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       title:
         name: title
@@ -648,6 +683,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       status_id:
         name: status_id
@@ -657,6 +693,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       priority_id:
         name: priority_id
@@ -666,6 +703,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       budget:
         name: budget
@@ -675,6 +713,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       task_accessibility:
         name: task_accessibility
@@ -684,6 +723,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       start_date:
         name: start_date
@@ -693,6 +733,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       end_date:
         name: end_date
@@ -702,6 +743,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       description:
         name: description
@@ -711,6 +753,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       note:
         name: note
@@ -720,6 +763,7 @@ endpoints:
         type: string|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       user_id:
         name: user_id
@@ -729,6 +773,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       client_id:
         name: client_id
@@ -738,6 +783,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       tag_ids:
         name: tag_ids
@@ -747,6 +793,7 @@ endpoints:
         type: array|null
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
       clientCanDiscuss:
         name: clientCanDiscuss
@@ -756,6 +803,7 @@ endpoints:
         type: string
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanBodyParameters:
       id: 1
@@ -880,7 +928,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer fg5a41e638b6DPvEkVcahdZ'
+      - 'Bearer ga6dDbZP83Vafvhk5c46E1e'
     controller: null
     method: null
     route: null
@@ -900,21 +948,22 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
         description: 'The ID of the project to update.'
         required: true
-        example: 13
+        example: 4
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 13
+      id: 4
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -922,13 +971,14 @@ endpoints:
         name: is_favorite
         description: 'Indicates whether the project is a favorite. Use 1 for true and 0 for false.'
         required: true
-        example: 5
+        example: 18
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      is_favorite: 5
+      is_favorite: 18
     fileParameters: []
     responses:
       -
@@ -1018,7 +1068,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer bfE5dv1geDaP68Zchk4a36V'
+      - 'Bearer deE8Z6c1a53h4kP6gavfVDb'
     controller: null
     method: null
     route: null
@@ -1038,21 +1088,22 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
         description: 'The ID of the project to update.'
         required: true
-        example: 18
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 18
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1060,13 +1111,14 @@ endpoints:
         name: is_pinned
         description: 'Indicates whether the project is pinned. Use 1 for true and 0 for false.'
         required: true
-        example: 5
+        example: 3
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      is_pinned: 5
+      is_pinned: 3
     fileParameters: []
     responses:
       -
@@ -1124,7 +1176,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 66hZa1k5cDv8a3fedVE4Pbg'
+      - 'Bearer daD3fPa6h6c15gbe48EZkvV'
     controller: null
     method: null
     route: null
@@ -1144,21 +1196,22 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose status is to be updated.'
         required: true
-        example: 8
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 8
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1166,23 +1219,25 @@ endpoints:
         name: statusId
         description: 'The ID of the new status to set for the project.'
         required: true
-        example: 19
+        example: 15
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
       note:
         name: note
         description: 'optional An optional note to attach to the project update.'
         required: false
-        example: vitae
+        example: laborum
         type: string
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
-      statusId: 19
-      note: vitae
+      statusId: 15
+      note: laborum
     fileParameters: []
     responses:
       -
@@ -1277,7 +1332,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer Pe8dh4EDafkZV56ag63bcv1'
+      - 'Bearer f4Z1d3hPk5V6bDEg8cvea6a'
     controller: null
     method: null
     route: null
@@ -1297,21 +1352,22 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
+      Content-Type: application/json
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose priority is to be updated.'
         required: true
-        example: 18
+        example: 10
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 18
+      id: 10
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1323,6 +1379,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanBodyParameters:
       priorityId: 14
@@ -1410,7 +1467,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer a5Zv8d3bkPhDe1c646gVfaE'
+      - 'Bearer a1b3d85aV6P6DcefkvEhg4Z'
     controller: null
     method: null
     route: null
@@ -1430,9 +1487,8 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
@@ -1442,6 +1498,7 @@ endpoints:
         type: integer
         enumValues: []
         exampleWasSpecified: true
+        nullable: false
         custom: []
     cleanUrlParameters:
       id: 1
@@ -1489,7 +1546,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 4PeD1h3c85baaf6gdV6EkZv'
+      - 'Bearer dDbh8Ev6fPkc1aaeg5364ZV'
     controller: null
     method: null
     route: null
@@ -1509,21 +1566,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the project whose status timeline is to be retrieved.'
         required: true
-        example: 3
+        example: 17
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 3
+      id: 17
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1582,7 +1639,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 4Zdcg63P1kabhEVa86Dve5f'
+      - 'Bearer P8fv6D4a1e3cbk6gda5ZhEV'
     controller: null
     method: null
     route: null
@@ -1602,21 +1659,21 @@ endpoints:
       custom: []
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
       Accept: application/json
-      workspace-id: 1
+      workspace_id: 1
     urlParameters:
       id:
         name: id
         description: 'The ID of the data to retrieve.'
         required: true
-        example: 3
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
+        nullable: false
         custom: []
     cleanUrlParameters:
-      id: 3
+      id: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1756,7 +1813,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 83fbgc6Eehv4aPZda56V1kD'
+      - 'Bearer vED8Zcf6Vb31Pha4kd56ega'
     controller: null
     method: null
     route: null

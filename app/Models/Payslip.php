@@ -49,4 +49,7 @@ class Payslip extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-}
+    public function paymentMethod(){
+        return $this->belongsTo(PaymentMethod::class,'payment_method_id');
+    }
+    }
