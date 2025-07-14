@@ -22,7 +22,7 @@ class OpenAPISpecWriter
 
     private DocumentationConfig $config;
 
-    public function __construct(DocumentationConfig $config = null)
+    public function __construct(?DocumentationConfig $config = null)
     {
         $this->config = $config ?: new DocumentationConfig(config('scribe', []));
     }
@@ -197,7 +197,7 @@ class OpenAPISpecWriter
         return $parameters;
     }
 
-    protected function generateEndpointRequestBodySpec(OutputEndpointData $endpoint)
+    protected function generateEndpointRequestBodySpec(OutputEndpointData $endpoint): array|\stdClass
     {
         $body = [];
 
@@ -405,10 +405,11 @@ class OpenAPISpecWriter
 
             case 'object':
                 $properties = collect($decoded)->mapWithKeys(function ($value, $key) use ($endpoint) {
-                    return [$key => $this->generateSchemaForValue($value, $endpoint, $key)];
+                    return [$key => $this->generateSchemaForResponseValue($value, $endpoint, $key)];
                 })->toArray();
+                $required = $this->filterRequiredResponseFields($endpoint, array_keys($properties));
 
-                return [
+                $data = [
                     'application/json' => [
                         'schema' => [
                             'type' => 'object',
@@ -417,6 +418,11 @@ class OpenAPISpecWriter
                         ],
                     ],
                 ];
+                if ($required) {
+                    $data['application/json']['schema']['required'] = $required;
+                }
+
+                return $data;
         }
     }
 
@@ -488,6 +494,7 @@ class OpenAPISpecWriter
                 'type' => 'string',
                 'format' => 'binary',
                 'description' => $field->description ?: '',
+                'nullable' => $field->nullable,
             ];
         } else if (Utils::isArrayType($field->type)) {
             $baseType = Utils::getBaseTypeFromArrayType($field->type);
@@ -500,6 +507,10 @@ class OpenAPISpecWriter
                 $baseItem['enum'] = $field->enumValues;
             }
 
+            if ($field->nullable) {
+                $baseItem['nullable'] = true;
+            }
+
             $fieldData = [
                 'type' => 'array',
                 'description' => $field->description ?: '',
@@ -509,6 +520,7 @@ class OpenAPISpecWriter
                         'name' => '',
                         'type' => $baseType,
                         'example' => ($field->example ?: [null])[0],
+                        'nullable' => $field->nullable,
                     ])
                     : $baseItem,
             ];
@@ -531,19 +543,27 @@ class OpenAPISpecWriter
 
             return $fieldData;
         } else if ($field->type === 'object') {
-            return [
+            $data = [
                 'type' => 'object',
                 'description' => $field->description ?: '',
                 'example' => $field->example,
+                'nullable'=> $field->nullable,
                 'properties' => $this->objectIfEmpty(collect($field->__fields)->mapWithKeys(function ($subfield, $subfieldName) {
                     return [$subfieldName => $this->generateFieldData($subfield)];
                 })->all()),
+                'required' => collect($field->__fields)->filter(fn ($f) => $f['required'])->keys()->toArray(),
             ];
+            // The spec doesn't allow for an empty `required` array. Must have something there.
+            if (empty($data['required'])) {
+                unset($data['required']);
+            }
+            return $data;
         } else {
             $schema = [
                 'type' => static::normalizeTypeName($field->type),
                 'description' => $field->description ?: '',
                 'example' => $field->example,
+                'nullable' => $field->nullable,
             ];
             if (!empty($field->enumValues)) {
                 $schema['enum'] = $field->enumValues;
@@ -575,29 +595,40 @@ class OpenAPISpecWriter
      * object)}, and possibly a description for each property. The $endpoint and $path are used for looking up response
      * field descriptions.
      */
-    public function generateSchemaForValue(mixed $value, OutputEndpointData $endpoint, string $path): array
+    public function generateSchemaForResponseValue(mixed $value, OutputEndpointData $endpoint, string $path): array
     {
+        // If $value is a JSON object
         if ($value instanceof \stdClass) {
             $value = (array)$value;
             $properties = [];
             // Recurse into the object
             foreach ($value as $subField => $subValue) {
                 $subFieldPath = sprintf('%s.%s', $path, $subField);
-                $properties[$subField] = $this->generateSchemaForValue($subValue, $endpoint, $subFieldPath);
+                $properties[$subField] = $this->generateSchemaForResponseValue($subValue, $endpoint, $subFieldPath);
             }
+            $required = $this->filterRequiredResponseFields($endpoint, array_keys($properties), $path);
 
-            return [
+            $schema = [
                 'type' => 'object',
                 'properties' => $this->objectIfEmpty($properties),
             ];
+            if ($required) {
+                $schema['required'] = $required;
+            }
+            $this->setDescription($schema, $endpoint, $path);
+
+            return $schema;
         }
 
         $schema = [
             'type' => $this->convertScribeOrPHPTypeToOpenAPIType(gettype($value)),
             'example' => $value,
         ];
-        if (isset($endpoint->responseFields[$path]->description)) {
-            $schema['description'] = $endpoint->responseFields[$path]->description;
+        $this->setDescription($schema, $endpoint, $path);
+
+        // Set enum values for the property if they exist
+        if (isset($endpoint->responseFields[$path]->enumValues)) {
+            $schema['enum'] = $endpoint->responseFields[$path]->enumValues;
         }
 
         if ($schema['type'] === 'array' && !empty($value)) {
@@ -609,11 +640,42 @@ class OpenAPISpecWriter
 
             if ($typeOfEachItem === 'object') {
                 $schema['items']['properties'] = collect($sample)->mapWithKeys(function ($v, $k) use ($endpoint, $path) {
-                    return [$k => $this->generateSchemaForValue($v, $endpoint, "$path.$k")];
+                    return [$k => $this->generateSchemaForResponseValue($v, $endpoint, "$path.$k")];
                 })->toArray();
+
+                $required = $this->filterRequiredResponseFields($endpoint, array_keys($schema['items']['properties']), $path);
+                if ($required) {
+                    $schema['required'] = $required;
+                }
             }
         }
 
         return $schema;
+    }
+
+    /**
+     * Given an enpoint and a set of object keys at a path, return the properties that are specified as required.
+     */
+    public function filterRequiredResponseFields(OutputEndpointData $endpoint, array $properties, string $path = ''): array
+    {
+        $required = [];
+        foreach ($properties as $property) {
+            $responseField = $endpoint->responseFields["$path.$property"] ?? $endpoint->responseFields[$property] ?? null;
+            if ($responseField && $responseField->required) {
+                $required[] = $property;
+            }
+        }
+
+        return $required;
+    }
+
+    /*
+     * Set the description for the schema. If the field has a description, it is set in the schema.
+     */
+    private function setDescription(array &$schema, OutputEndpointData $endpoint, string $path): void
+    {
+        if (isset($endpoint->responseFields[$path]->description)) {
+            $schema['description'] = $endpoint->responseFields[$path]->description;
+        }
     }
 }

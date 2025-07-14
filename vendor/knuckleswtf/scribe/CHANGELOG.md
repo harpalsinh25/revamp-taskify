@@ -12,6 +12,55 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
+# 4.40.0 (3 February 2024)
+## Added
+- Correctly list required fields for nested objects in OpenAPI spec (request bodies) [99b71ebf0](https://github.com/knuckleswtf/scribe/commit/99b71ebf058e679c3020779583be4de6b576ba3b)
+- Add support for defining Groups and Subgroups as enums [#932](https://github.com/knuckleswtf/scribe/pull/932)
+
+# 4.39.0 (31 December 2024)
+## Added
+- Correctly list required fields for nested objects in OpenAPI spec (responses) [#905](https://github.com/knuckleswtf/scribe/pull/905)
+- Cursor pagination support in API responses (`cursorPaginate`/`paginate=cursor`) [#917](https://github.com/knuckleswtf/scribe/pull/917)
+
+## Fixed
+- Fixed type error when attempting to parse Request::validate [#925](https://github.com/knuckleswtf/scribe/pull/925)
+- Don't render empty responses as string "null" in OpenAPI spec [#911](https://github.com/knuckleswtf/scribe/pull/911)
+- Correctly replace `apiDescriptionUrl`for `external_laravel` (Eelements theme) [#906](https://github.com/knuckleswtf/scribe/pull/906)
+- Cast form data values to strings in Postman collection [#926](https://github.com/knuckleswtf/scribe/pull/926)
+
+## Modified
+- Resolve PHP 8.4 deprecations [#929](https://github.com/knuckleswtf/scribe/pull/929)
+
+# 4.38.0 (18 October 2024)
+## Fixed
+- Elements theme: Fix display of boolean examples [#887](https://github.com/knuckleswtf/scribe/pull/887)
+- Elements theme: Fix html responses not showing in received response [#890](https://github.com/knuckleswtf/scribe/pull/890)
+- Postman collection export: convert query parameters to strings to prevent validation errors [#888](https://github.com/knuckleswtf/scribe/pull/888)
+- Fix issue with example model relations being lost after refresh [#901](https://github.com/knuckleswtf/scribe/pull/901)
+
+## Modified
+- Improve Laravel dd() Output Rendering in Scribe Documentation [#893](https://github.com/knuckleswtf/scribe/pull/893)
+
+## Added
+- [Experimental] Support for nullable values for OpenAPI specs [#834](https://github.com/knuckleswtf/scribe/pull/834)
+
+  You can now specify a `nullable` property on a field, via either the PHP attributes (`#[BodyParam]`, ...), or the validation rules. Annotations (`@bodyParam`, ...) are not currently supported, and the `nullable` property will affect only the OpenAPI output.
+- Add required to responseField tag and append the required fields in the OpenAPI spec [#814](https://github.com/knuckleswtf/scribe/pull/814)
+
+  The `@responseField` annotation now supports "required", similarly to `@bodyParam`.
+- Add parsing support for `exists` rule [#886](https://github.com/knuckleswtf/scribe/pull/886)
+- Add `description` to object fields when generating OpenAPI file [#896](https://github.com/knuckleswtf/scribe/pull/896)
+- Support `Request::validate` facade expressions for parsing validation rules [#895](https://github.com/knuckleswtf/scribe/pull/895)
+- Add enum list to Open API spec response properties [#902](https://github.com/knuckleswtf/scribe/pull/902)
+
+
+# 4.37.2 (30 August 2024)
+## Fixed
+- Stop response fields from overflowing to the dark box zone [#868](https://github.com/knuckleswtf/scribe/pull/868)
+- Don't ignore comments for validator parameters with non string/array (e.g. conditional) rule lists [#880](https://github.com/knuckleswtf/scribe/pull/880)
+- Allow custom output path for static and external_static instead of only static [#884](https://github.com/knuckleswtf/scribe/pull/884)
+
+
 # 4.37.1 (11 July 2024)
 ## Fixed
 - Multipart file upload in `elements` theme [#864](https://github.com/knuckleswtf/scribe/pull/864)

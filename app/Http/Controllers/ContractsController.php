@@ -124,9 +124,9 @@ class ContractsController extends Controller
                 ],
                 'start_date' => ['required', 'date'],
                 'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-                'client_id' => ['required'],
-                'project_id' => ['required'],
-                'contract_type_id' => ['required'],
+                'client_id' => ['required', 'exists:clients,id'],
+                'project_id' => ['required', 'exists:projects,id'],
+                'contract_type_id' => ['required', 'exists:contract_types,id'],
                 'description' => ['nullable']
             ], [
                 'client_id.required' => 'The client field is required.',
@@ -169,9 +169,14 @@ class ContractsController extends Controller
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
-                config('app.debug') ? $e->getMessage() : 'An error occured',
-                [],
-                500
+                'Contract couldn\'t created.',
+                [
+                    'data' => [
+                        'error' => $e->getMessage(),
+                        // 'trace' => $e->getTraceAsString(),
+                        'file' => $e->getFile(),
+                    ]
+                ],
             );
         }
     }

@@ -1,3 +1,4 @@
 {
-    "thunder-client.saveToWorkspace": false
+    "thunder-client.saveToWorkspace": false,
+    "git.ignoreLimitWarning": true
 }

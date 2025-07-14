@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Spatie\Permission\Middlewares\PermissionMiddleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class Authorize extends PermissionMiddleware
 {

@@ -18,6 +18,7 @@ namespace Twilio\Rest\Numbers\V2;
 
 use Twilio\Exceptions\TwilioException;
 use Twilio\ListResource;
+use Twilio\Values;
 use Twilio\Version;
 
 
@@ -49,8 +50,8 @@ class BulkHostedNumberOrderList extends ListResource
     public function create(): BulkHostedNumberOrderInstance
     {
 
+        $headers = Values::of(['Content-Type' => 'application/json', 'Accept' => 'application/json' ]);
         $data = $body->toArray();
-        $headers['Content-Type'] = 'application/json';
         $payload = $this->version->create('POST', $this->uri, [], $data, $headers);
 
         return new BulkHostedNumberOrderInstance(

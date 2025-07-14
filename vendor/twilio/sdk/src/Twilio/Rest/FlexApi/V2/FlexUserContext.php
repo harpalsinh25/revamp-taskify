@@ -18,6 +18,8 @@
 namespace Twilio\Rest\FlexApi\V2;
 
 use Twilio\Exceptions\TwilioException;
+use Twilio\Options;
+use Twilio\Values;
 use Twilio\Version;
 use Twilio\InstanceContext;
 
@@ -60,7 +62,41 @@ class FlexUserContext extends InstanceContext
     public function fetch(): FlexUserInstance
     {
 
-        $payload = $this->version->fetch('GET', $this->uri, [], []);
+        $headers = Values::of(['Content-Type' => 'application/x-www-form-urlencoded', 'Accept' => 'application/json' ]);
+        $payload = $this->version->fetch('GET', $this->uri, [], [], $headers);
+
+        return new FlexUserInstance(
+            $this->version,
+            $payload,
+            $this->solution['instanceSid'],
+            $this->solution['flexUserSid']
+        );
+    }
+
+
+    /**
+     * Update the FlexUserInstance
+     *
+     * @param array|Options $options Optional Arguments
+     * @return FlexUserInstance Updated FlexUserInstance
+     * @throws TwilioException When an HTTP error occurs.
+     */
+    public function update(array $options = []): FlexUserInstance
+    {
+
+        $options = new Values($options);
+
+        $data = Values::of([
+            'Email' =>
+                $options['email'],
+            'UserSid' =>
+                $options['userSid'],
+            'Locale' =>
+                $options['locale'],
+        ]);
+
+        $headers = Values::of(['Content-Type' => 'application/x-www-form-urlencoded', 'Accept' => 'application/json' ]);
+        $payload = $this->version->update('POST', $this->uri, [], $data, $headers);
 
         return new FlexUserInstance(
             $this->version,

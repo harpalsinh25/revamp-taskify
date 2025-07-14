@@ -12,7 +12,9 @@ use App\Models\Language;
 use App\Models\Priority;
 use App\Models\CustomField;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use App\Services\CustomPathGenerator;
 use Illuminate\Support\Facades\Config;
@@ -37,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
             'half_logo' => 'storage/logos/default_half_logo.png',
             'favicon' => 'storage/logos/default_favicon.png',
             'footer_logo' => 'storage/logos/footer_logo.png',
-            'company_title' => 'Taskify - SaaS',
+            'company_title' => 'Taskify',
             'currency_symbol' => '₹',
             'currency_full_form' => 'Indian Rupee',
             'currency_code' => 'INR',
@@ -107,8 +109,8 @@ class AppServiceProvider extends ServiceProvider
             "max_prompt_length" => "1000",
             "enable_fallback" => "1",
             "fallback_provider" => "openrouter",
-            "openrouter_api_key" => "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",
-            "gemini_api_key" => "AIzaSyDkFbg7NJIRGw66VGLI6ZHupFSNOOrc9xc",
+            "openrouter_api_key" => "",
+            "gemini_api_key" => "",
             "is_active" => "gemini",
             "openrouter_model" => "nousresearch/deephermes-3-mistral-24b-preview:free",
             "openrouter_frequency_penalty" => "0",
@@ -144,9 +146,9 @@ class AppServiceProvider extends ServiceProvider
         // Register PHP date format singleton
         $this->registerDateFormatSingleton();
 
-        $settings = get_settings('general_settings');
-        // Load general settings from DB
-        $this->configureRecaptcha($settings);
+
+
+        $this->loadPlugins();
     }
 
     /**
@@ -199,6 +201,9 @@ class AppServiceProvider extends ServiceProvider
                 'taskCustomFields' => $customFields['task'],
                 'projectCustomFields' => $customFields['project'],
             ];
+
+            // Load general settings from DB
+            $this->configureRecaptcha($allSettings['general']);
 
             // Share data globally with all views
             view()->share($sharedData);
@@ -525,6 +530,42 @@ class AppServiceProvider extends ServiceProvider
         if (!empty($generalSettings['recaptcha_site_key']) && !empty($generalSettings['recaptcha_secret_key'])) {
             Config::set('captcha.sitekey', $generalSettings['recaptcha_site_key']);
             Config::set('captcha.secret', $generalSettings['recaptcha_secret_key']);
+        }
+    }
+    private function loadPlugins()
+    {
+        $pluginsPath = base_path('plugins');
+
+        if (File::exists($pluginsPath)) {
+            $pluginDirs = File::directories($pluginsPath);
+
+            foreach ($pluginDirs as $pluginDir) {
+                $pluginJson = $pluginDir . '/plugin.json';
+
+                if (File::exists($pluginJson)) {
+                    $pluginConfig = json_decode(File::get($pluginJson), true);
+
+                    if (
+                        !empty($pluginConfig['enabled']) &&
+                        !empty($pluginConfig['provider'])
+                    ) {
+                        $providerClass = $pluginConfig['provider'];
+
+                        // Manually require the provider if not autoloaded
+                        $providerFile = $pluginDir . '/Providers/' . class_basename(str_replace('\\', '/', $providerClass)) . '.php';
+                        if (File::exists($providerFile) && !class_exists($providerClass)) {
+                            require_once $providerFile;
+                        }
+
+                        if (class_exists($providerClass)) {
+                            app()->register($providerClass);
+                            Log::info("✅ Loaded plugin: " . basename($pluginDir) . " with provider {$providerClass}");
+                        } else {
+                            Log::warning("⚠️ Provider class {$providerClass} not found for plugin: " . basename($pluginDir));
+                        }
+                    }
+                }
+            }
         }
     }
 }

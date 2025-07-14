@@ -236,7 +236,9 @@ class UserController extends Controller
             try {
                 // Create the user
                 $user = User::create($formFields);
-                $user->assignRole($request->input('role'));
+                $roleName = Role::findById($request->input('role'))->name;
+
+                $user->assignRole($roleName);
 
                 // Notify the user if email verification is required
                 if ($require_ev == 1) {
@@ -273,6 +275,7 @@ class UserController extends Controller
             } catch (Throwable $e) {
                 // Rollback user creation on other errors
                 $user->delete();
+                dd($e);
                 return response()->json(['error' => true, 'message' => 'User couldn\'t be created, please try again later.'], 500);
             }
         } catch (ValidationException $e) {
@@ -594,7 +597,8 @@ class UserController extends Controller
             $formFields['status'] = $status;
             // Update the user
             $user->update($formFields);
-            $user->syncRoles($request->input('role'));
+            $roleName = Role::findById($request->input('role'))->name;
+            $user->syncRoles($roleName);
             // Return success response
             return formatApiResponse(false, 'User updated successfully.', ['id' => $user->id, 'data' => formatUser($user)]);
         } catch (ValidationException $e) {

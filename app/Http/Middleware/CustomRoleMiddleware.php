@@ -6,7 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Spatie\Permission\Middlewares\RoleMiddleware as SpatieRoleMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware as SpatieRoleMiddleware;
+
 
 class CustomRoleMiddleware extends SpatieRoleMiddleware
 {

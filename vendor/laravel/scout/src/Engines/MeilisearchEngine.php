@@ -2,6 +2,8 @@
 
 namespace Laravel\Scout\Engines;
 
+use BackedEnum;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\LazyCollection;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Jobs\RemoveableScoutCollection;
@@ -53,7 +55,7 @@ class MeilisearchEngine extends Engine
             return;
         }
 
-        $index = $this->meilisearch->index($models->first()->searchableAs());
+        $index = $this->meilisearch->index($models->first()->indexableAs());
 
         if ($this->usesSoftDelete($models->first()) && $this->softDelete) {
             $models->each->pushSoftDeleteMetadata();
@@ -88,7 +90,7 @@ class MeilisearchEngine extends Engine
             return;
         }
 
-        $index = $this->meilisearch->index($models->first()->searchableAs());
+        $index = $this->meilisearch->index($models->first()->indexableAs());
 
         $keys = $models instanceof RemoveableScoutCollection
             ? $models->pluck($models->first()->getScoutKeyName())
@@ -179,6 +181,10 @@ class MeilisearchEngine extends Engine
         $filters = collect($builder->wheres)->map(function ($value, $key) {
             if (is_bool($value)) {
                 return sprintf('%s=%s', $key, $value ? 'true' : 'false');
+            }
+
+            if ($value instanceof BackedEnum) {
+                return sprintf('%s=%s', $key, $value->value);
             }
 
             return is_numeric($value)
@@ -363,7 +369,7 @@ class MeilisearchEngine extends Engine
      */
     public function flush($model)
     {
-        $index = $this->meilisearch->index($model->searchableAs());
+        $index = $this->meilisearch->index($model->indexableAs());
 
         $index->deleteAllDocuments();
     }
@@ -425,7 +431,9 @@ class MeilisearchEngine extends Engine
         $indexes = $this->meilisearch->getIndexes($query);
 
         foreach ($indexes->getResults() as $index) {
-            $tasks[] = $index->delete();
+            if (str($index->getUid())->startsWith(Config::get('scout.prefix'))) {
+                $tasks[] = $index->delete();
+            }
         }
 
         return $tasks;

@@ -7366,3 +7366,99 @@ $(document).ready(function () {
 });
 
 
+if (document.getElementById("install-plugin-dropzone")) {
+    // Initialize Dropzone for plugin installation
+    if (!$("#install-plugin").hasClass("dropzone")) {
+        var systemDropzone = new Dropzone("#install-plugin-dropzone", {
+            url: $("#install-plugin").attr("action"),
+            paramName: "plugin_zip",
+            autoProcessQueue: false,
+            parallelUploads: 1,
+            maxFiles: 1,
+            acceptedFiles: ".zip",
+            timeout: 360000,
+            autoDiscover: false,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"), // Pass the CSRF token as a header
+            },
+            addRemoveLinks: true,
+            dictRemoveFile: "x",
+            dictMaxFilesExceeded: label_only_one_file_can_be_uploaded_at_a_time,
+            dictResponseError: "Error",
+            uploadMultiple: true,
+            dictDefaultMessage:
+                '<p><input type="button" value="' +
+                label_select +
+                '" class="btn btn-primary" /><br> ' +
+                label_or +
+                " <br> " +
+                "Drag and drop the ZIP file here" +
+                "</p>",
+        });
+        systemDropzone.on("addedfile", function (file) {
+            var i = 0;
+            if (this.files.length) {
+                var _i, _len;
+                for (_i = 0, _len = this.files.length; _i < _len - 1; _i++) {
+                    if (
+                        this.files[_i].name === file.name &&
+                        this.files[_i].size === file.size &&
+                        this.files[_i].lastModifiedDate.toString() ===
+                        file.lastModifiedDate.toString()
+                    ) {
+                        this.removeFile(file);
+                        i++;
+                    }
+                }
+            }
+        });
+        systemDropzone.on("error", function (file, response) {
+            // Remove the file
+            systemDropzone.removeFile(file);
+            // Re-enable the submit button and reset its text
+            $("#install_plugin_btn")
+                .attr("disabled", false)
+                .text(label_update_the_system);
+            var errorMessage = label_err_try_again;
+            if (typeof response === "string") {
+                errorMessage = response; // Use the response text if it's a string
+            } else if (response.message) {
+                errorMessage = response.message; // Use response.message if it exists
+            }
+            toastr.error(errorMessage);
+        });
+        systemDropzone.on("success", function (file, response) {
+            console.log(response);
+
+            $("#install_plugin_btn")
+                .attr("disabled", false)
+                .text(label_update_the_system);
+            if (response.error) {
+                // Remove the file
+                systemDropzone.removeFile(file);
+                // Re-enable the submit button and reset its text
+                // Show the error message
+                toastr.error(response.message);
+            } else {
+                // Show success message
+                toastr.success(response.message);
+                setTimeout(function () {
+                    location.reload();
+                }, parseFloat(toastTimeOut) * 1000);
+            }
+        });
+        $("#install_plugin_btn").on("click", function (e) {
+            e.preventDefault();
+            var queuedFiles = systemDropzone.getQueuedFiles();
+            if (queuedFiles.length > 0) {
+                $("#install_plugin_btn")
+                    .attr("disabled", true)
+                    .text(label_please_wait);
+                systemDropzone.processQueue();
+            } else {
+                toastr.error(label_no_files_chosen);
+            }
+        });
+    }
+}
+

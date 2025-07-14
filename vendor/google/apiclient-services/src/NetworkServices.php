@@ -103,6 +103,11 @@ class NetworkServices extends \Google\Service
                   'type' => 'string',
                   'required' => true,
                 ],
+                'extraLocationTypes' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                  'repeated' => true,
+                ],
                 'filter' => [
                   'location' => 'query',
                   'type' => 'string',
@@ -405,6 +410,10 @@ class NetworkServices extends \Google\Service
                   'location' => 'query',
                   'type' => 'string',
                 ],
+                'returnPartialSuccess' => [
+                  'location' => 'query',
+                  'type' => 'boolean',
+                ],
               ],
             ],'patch' => [
               'path' => 'v1/{+name}',
@@ -567,10 +576,6 @@ class NetworkServices extends \Google\Service
                   'type' => 'string',
                   'required' => true,
                 ],
-                'etag' => [
-                  'location' => 'query',
-                  'type' => 'string',
-                ],
               ],
             ],'get' => [
               'path' => 'v1/{+name}',
@@ -598,6 +603,10 @@ class NetworkServices extends \Google\Service
                 'pageToken' => [
                   'location' => 'query',
                   'type' => 'string',
+                ],
+                'returnPartialSuccess' => [
+                  'location' => 'query',
+                  'type' => 'boolean',
                 ],
               ],
             ],'patch' => [
@@ -647,10 +656,6 @@ class NetworkServices extends \Google\Service
                   'type' => 'string',
                   'required' => true,
                 ],
-                'etag' => [
-                  'location' => 'query',
-                  'type' => 'string',
-                ],
               ],
             ],'get' => [
               'path' => 'v1/{+name}',
@@ -678,6 +683,10 @@ class NetworkServices extends \Google\Service
                 'pageToken' => [
                   'location' => 'query',
                   'type' => 'string',
+                ],
+                'returnPartialSuccess' => [
+                  'location' => 'query',
+                  'type' => 'boolean',
                 ],
               ],
             ],'patch' => [
@@ -947,6 +956,10 @@ class NetworkServices extends \Google\Service
                   'location' => 'query',
                   'type' => 'string',
                 ],
+                'returnPartialSuccess' => [
+                  'location' => 'query',
+                  'type' => 'boolean',
+                ],
               ],
             ],'patch' => [
               'path' => 'v1/{+name}',
@@ -1124,6 +1137,20 @@ class NetworkServices extends \Google\Service
                   'type' => 'string',
                 ],
               ],
+            ],'patch' => [
+              'path' => 'v1/{+name}',
+              'httpMethod' => 'PATCH',
+              'parameters' => [
+                'name' => [
+                  'location' => 'path',
+                  'type' => 'string',
+                  'required' => true,
+                ],
+                'updateMask' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+              ],
             ],
           ]
         ]
@@ -1233,10 +1260,6 @@ class NetworkServices extends \Google\Service
                   'type' => 'string',
                   'required' => true,
                 ],
-                'etag' => [
-                  'location' => 'query',
-                  'type' => 'string',
-                ],
               ],
             ],'get' => [
               'path' => 'v1/{+name}',
@@ -1264,6 +1287,10 @@ class NetworkServices extends \Google\Service
                 'pageToken' => [
                   'location' => 'query',
                   'type' => 'string',
+                ],
+                'returnPartialSuccess' => [
+                  'location' => 'query',
+                  'type' => 'boolean',
                 ],
               ],
             ],'patch' => [
@@ -1313,10 +1340,6 @@ class NetworkServices extends \Google\Service
                   'type' => 'string',
                   'required' => true,
                 ],
-                'etag' => [
-                  'location' => 'query',
-                  'type' => 'string',
-                ],
               ],
             ],'get' => [
               'path' => 'v1/{+name}',
@@ -1344,6 +1367,10 @@ class NetworkServices extends \Google\Service
                 'pageToken' => [
                   'location' => 'query',
                   'type' => 'string',
+                ],
+                'returnPartialSuccess' => [
+                  'location' => 'query',
+                  'type' => 'boolean',
                 ],
               ],
             ],'patch' => [

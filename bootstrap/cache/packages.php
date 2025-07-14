@@ -29,22 +29,15 @@
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
-  'dedoc/scramble' => 
+  'intervention/image-laravel' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Dedoc\\Scramble\\ScrambleServiceProvider',
-    ),
-  ),
-  'intervention/image' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Intervention\\Image\\ImageServiceProvider',
-    ),
     'aliases' => 
     array (
-      'Image' => 'Intervention\\Image\\Facades\\Image',
+      'Image' => 'Intervention\\Image\\Laravel\\Facades\\Image',
+    ),
+    'providers' => 
+    array (
+      0 => 'Intervention\\Image\\Laravel\\ServiceProvider',
     ),
   ),
   'knuckleswtf/scribe' => 
@@ -91,13 +84,13 @@
   ),
   'laraveldaily/laravel-invoices' => 
   array (
-    'providers' => 
-    array (
-      0 => 'LaravelDaily\\Invoices\\InvoiceServiceProvider',
-    ),
     'aliases' => 
     array (
       'Invoice' => 'LaravelDaily\\Invoices\\Facades\\Invoice',
+    ),
+    'providers' => 
+    array (
+      0 => 'LaravelDaily\\Invoices\\InvoiceServiceProvider',
     ),
   ),
   'maatwebsite/excel' => 
@@ -152,13 +145,13 @@
   ),
   'ryangjchandler/laravel-comments' => 
   array (
-    'providers' => 
-    array (
-      0 => 'RyanChandler\\Comments\\CommentsServiceProvider',
-    ),
     'aliases' => 
     array (
       'Comments' => 'RyanChandler\\Comments\\Facades\\Comments',
+    ),
+    'providers' => 
+    array (
+      0 => 'RyanChandler\\Comments\\CommentsServiceProvider',
     ),
   ),
   'silviolleite/laravelpwa' => 

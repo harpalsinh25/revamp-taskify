@@ -5,18 +5,23 @@ namespace Laravel\Scout;
 use Illuminate\Container\Container;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Macroable;
+use Illuminate\Support\Traits\Tappable;
 use Laravel\Scout\Contracts\PaginatesEloquentModels;
 use Laravel\Scout\Contracts\PaginatesEloquentModelsUsingDatabase;
 
+/**
+ * @template TModel of \Illuminate\Database\Eloquent\Model
+ */
 class Builder
 {
-    use Macroable;
+    use Conditionable, Macroable, Tappable;
 
     /**
      * The model instance.
      *
-     * @var \Illuminate\Database\Eloquent\Model
+     * @var TModel
      */
     public $model;
 
@@ -93,7 +98,7 @@ class Builder
     /**
      * Create a new search builder instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  TModel  $model
      * @param  string  $query
      * @param  \Closure|null  $callback
      * @param  bool  $softDelete
@@ -263,36 +268,6 @@ class Builder
     }
 
     /**
-     * Apply the callback's query changes if the given "value" is true.
-     *
-     * @param  mixed  $value
-     * @param  callable  $callback
-     * @param  callable  $default
-     * @return mixed
-     */
-    public function when($value, $callback, $default = null)
-    {
-        if ($value) {
-            return $callback($this, $value) ?: $this;
-        } elseif ($default) {
-            return $default($this, $value) ?: $this;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Pass the query to a given callback.
-     *
-     * @param  \Closure  $callback
-     * @return $this
-     */
-    public function tap($callback)
-    {
-        return $this->when(true, $callback);
-    }
-
-    /**
      * Set the callback that should have an opportunity to modify the database query.
      *
      * @param  callable  $callback
@@ -328,7 +303,7 @@ class Builder
     /**
      * Get the first result from the search.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return TModel
      */
     public function first()
     {
@@ -338,7 +313,7 @@ class Builder
     /**
      * Get the results of the search.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, TModel>
      */
     public function get()
     {
@@ -348,7 +323,7 @@ class Builder
     /**
      * Get the results of the search as a "lazy collection" instance.
      *
-     * @return \Illuminate\Support\LazyCollection
+     * @return \Illuminate\Support\LazyCollection<int, TModel>
      */
     public function cursor()
     {

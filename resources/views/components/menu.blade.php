@@ -131,109 +131,139 @@ $pendingLeaveRequestsCount = $query->count();
         </div>
     </div>
 
-   <ul class="menu-inner pb-1">
-    <hr class="dropdown-divider" />
+    <ul class="menu-inner pb-1">
+        <hr class="dropdown-divider" />
 
-    @php
-        $menuOrder = json_decode(
-            DB::table('menu_orders')
-                ->where(getGuardName() == 'web' ? 'user_id' : 'client_id', getAuthenticatedUser()->id)
-                ->value('menu_order'),
-            true,
-        );
+        @php
+            $menuOrder = json_decode(
+                DB::table('menu_orders')
+                    ->where(getGuardName() == 'web' ? 'user_id' : 'client_id', getAuthenticatedUser()->id)
+                    ->value('menu_order'),
+                true,
+            );
 
-        $menus = getMenus();
-        // dd($menuOrder, $menus);
+            $menus = getMenus();
+            // dd($menuOrder, $menus);
+            $pluginMenus = []; // Initialize safely
 
-        // Sort menus based on saved order
-        $sortedMenus = [];
+            $pluginPath = base_path('plugins');
 
-        if ($menuOrder) {
-            foreach ($menuOrder as $categoryData) {
-                // Ensure 'menus' key exists in categoryData
-                if (!isset($categoryData['menus']) || !is_array($categoryData['menus'])) {
-                    continue;
-                }
+            if (File::exists($pluginPath)) {
+                $pluginDirs = glob($pluginPath . '/*', GLOB_ONLYDIR);
 
-                foreach ($categoryData['menus'] as $order) {
-                    if (!isset($order['id'])) {
-                        continue; // Skip if id is missing
-                    }
+                foreach ($pluginDirs as $pluginDir) {
+                    $pluginJsonFile = $pluginDir . '/plugin.json';
 
-                    // Find menu by ID from $menus
-                    $menu = collect($menus)->firstWhere('id', $order['id']);
-                    if ($menu) {
-                        // Sort submenus if present
-                        if (!empty($order['submenus'])) {
-                            $submenuIds = collect($order['submenus'])->pluck('id')->toArray();
-                            $menu['submenus'] = collect($menu['submenus'] ?? [])
-                                ->whereNotNull('id')
-                                ->sortBy(function ($submenu) use ($submenuIds) {
-                                    return array_search($submenu['id'], $submenuIds) ?? PHP_INT_MAX;
-                                })
-                                ->toArray();
+                    if (File::exists($pluginJsonFile)) {
+                        $pluginData = json_decode(File::get($pluginJsonFile), true);
+
+                        // Check if plugin is enabled
+                        if (!empty($pluginData['enabled'])) {
+                            $menuFile = $pluginDir . '/menus.php';
+
+                            if (File::exists($menuFile)) {
+                                $pluginMenuItems = include $menuFile;
+
+                                if (is_array($pluginMenuItems)) {
+                                    $pluginMenus = array_merge($pluginMenus, $pluginMenuItems);
+                                }
+                            }
                         }
-
-                        $sortedMenus[] = $menu;
                     }
                 }
             }
-        } else {
-            // Use default order if no saved menu order
-            $sortedMenus = $menus;
-        }
 
-        // Group menus by category
-        $groupedMenus = collect($sortedMenus)->groupBy('category');
-    @endphp
+            // Merge your core menus with plugin menus
+            $menus = array_merge($menus, $pluginMenus);
+            // Sort menus based on saved order
+            $sortedMenus = [];
 
-    @foreach ($groupedMenus as $category => $menus)
-        @php
-            // Filter out empty categories
-            $filteredMenus = collect($menus)->filter(function ($menu) {
-                return !isset($menu['show']) || $menu['show'] === 1;
-            });
+            if ($menuOrder) {
+                foreach ($menuOrder as $categoryData) {
+                    // Ensure 'menus' key exists in categoryData
+                    if (!isset($categoryData['menus']) || !is_array($categoryData['menus'])) {
+                        continue;
+                    }
+
+                    foreach ($categoryData['menus'] as $order) {
+                        if (!isset($order['id'])) {
+                            continue; // Skip if id is missing
+                        }
+
+                        // Find menu by ID from $menus
+                        $menu = collect($menus)->firstWhere('id', $order['id']);
+                        if ($menu) {
+                            // Sort submenus if present
+                            if (!empty($order['submenus'])) {
+                                $submenuIds = collect($order['submenus'])->pluck('id')->toArray();
+                                $menu['submenus'] = collect($menu['submenus'] ?? [])
+                                    ->whereNotNull('id')
+                                    ->sortBy(function ($submenu) use ($submenuIds) {
+                                        return array_search($submenu['id'], $submenuIds) ?? PHP_INT_MAX;
+                                    })
+                                    ->toArray();
+                            }
+
+                            $sortedMenus[] = $menu;
+                        }
+                    }
+                }
+            } else {
+                // Use default order if no saved menu order
+                $sortedMenus = $menus;
+            }
+
+            // Group menus by category
+            $groupedMenus = collect($sortedMenus)->groupBy('category');
         @endphp
 
-        @if ($filteredMenus->isNotEmpty())
-            <!-- Category Header -->
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">
-                    {{ get_label($category, ucfirst(str_replace('_', ' ', $category))) }}
-                </span>
-            </li>
+        @foreach ($groupedMenus as $category => $menus)
+            @php
+                // Filter out empty categories
+                $filteredMenus = collect($menus)->filter(function ($menu) {
+                    return !isset($menu['show']) || $menu['show'] === 1;
+                });
+            @endphp
 
-            @foreach ($filteredMenus as $menu)
-                <li class="{{ $menu['class'] }}">
-                    <a href="{{ $menu['url'] ?? 'javascript:void(0)' }}"
-                        class="menu-link {{ isset($menu['submenus']) ? 'menu-toggle' : '' }}">
-                        <i class="menu-icon tf-icons {{ $menu['icon'] }}"></i>
-                        <div>
-                            {{ $menu['label'] }}
-                            @if (isset($menu['badge']) && $menu['badge'])
-                                {!! $menu['badge'] !!}
-                            @endif
-                        </div>
-                    </a>
-
-                    @if (isset($menu['submenus']))
-                        <ul class="menu-sub">
-                            @foreach ($menu['submenus'] as $submenu)
-                                @if (!isset($submenu['show']) || $submenu['show'] === 1)
-                                    <li class="{{ $submenu['class'] }}">
-                                        <a href="{{ $submenu['url'] }}" class="menu-link">
-                                            <div>{{ $submenu['label'] }}</div>
-                                        </a>
-                                    </li>
-                                @endif
-                            @endforeach
-                        </ul>
-                    @endif
+            @if ($filteredMenus->isNotEmpty())
+                <!-- Category Header -->
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">
+                        {{ get_label($category, ucfirst(str_replace('_', ' ', $category))) }}
+                    </span>
                 </li>
-            @endforeach
-        @endif
-    @endforeach
-</ul>
+
+                @foreach ($filteredMenus as $menu)
+                    <li class="{{ $menu['class'] }}">
+                        <a href="{{ $menu['url'] ?? 'javascript:void(0)' }}"
+                            class="menu-link {{ isset($menu['submenus']) ? 'menu-toggle' : '' }}">
+                            <i class="menu-icon tf-icons {{ $menu['icon'] }}"></i>
+                            <div>
+                                {{ $menu['label'] }}
+                                @if (isset($menu['badge']) && $menu['badge'])
+                                    {!! $menu['badge'] !!}
+                                @endif
+                            </div>
+                        </a>
+
+                        @if (isset($menu['submenus']))
+                            <ul class="menu-sub">
+                                @foreach ($menu['submenus'] as $submenu)
+                                    @if (!isset($submenu['show']) || $submenu['show'] === 1)
+                                        <li class="{{ $submenu['class'] }}">
+                                            <a href="{{ $submenu['url'] }}" class="menu-link">
+                                                <div>{{ $submenu['label'] }}</div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        @endif
+                    </li>
+                @endforeach
+            @endif
+        @endforeach
+    </ul>
 
 
 

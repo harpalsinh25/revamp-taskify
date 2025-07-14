@@ -247,11 +247,12 @@ class DeductionsController extends Controller
 
     public function apiList()
     {
+
         $search = request('search');
         $sort = (request('sort')) ? request('sort') : "id";
         $order = (request('order')) ? request('order') : "DESC";
         $limit = (request('order')) ? request('limit') : 10;
-        $types = request('types');
+        $types = array_filter(request('types', []), fn($v) => filled($v));
         $deductions = $this->workspace->deductions();
         if ($search) {
             $deductions = $deductions->where(function ($query) use ($search) {
@@ -409,58 +410,63 @@ class DeductionsController extends Controller
 
     public function update(Request $request)
     {
-
         try {
-
             $isApi = request()->get('isApi', false);
 
-            // Validate the request data
             $validatedData = $request->validate([
                 'title' => 'required|unique:deductions,title,' . $request->id,
-                'type' => [
-                    'required',
-                    Rule::in(['amount', 'percentage']),
-                ],
+                'type' => ['required', Rule::in(['amount', 'percentage'])],
+
                 'amount' => [
-                    Rule::requiredIf(function () use ($request) {
-                        return $request->type === 'amount';
-                    }),
+                    Rule::requiredIf(fn() => $request->type === 'amount'),
                     'nullable',
                     function ($attribute, $value, $fail) {
-                        $error = validate_currency_format($value, 'amount');
-                        if ($error) {
-                            $fail($error);
+                        if ($value !== null && $value !== '') {
+                            $cleaned = str_replace(',', '', $value);
+                            if (!is_numeric($cleaned)) {
+                                $fail('The amount must be a valid numeric value.');
+                            }
+                            if ($cleaned < 0) {
+                                $fail('The amount cannot be negative.');
+                            }
                         }
-                    }
+                    },
                 ],
+
                 'percentage' => [
-                    Rule::requiredIf(function () use ($request) {
-                        return $request->type === 'percentage';
-                    }),
+                    Rule::requiredIf(fn() => $request->type === 'percentage'),
                     'nullable',
                     'numeric',
+                    'between:0,100',
                 ],
             ], [
-                'percentage.numeric' => 'Percentage must be a numeric value.'
+                'percentage.numeric' => 'Percentage must be a numeric value.',
+                'percentage.between' => 'Percentage must be between 0 and 100.',
+                'title.required' => 'Title is required.',
+                'title.unique' => 'This deduction title is already taken.',
+                'type.required' => 'Type is required.',
+                'type.in' => 'Type must be either amount or percentage.',
             ]);
 
-            $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
-            // Set workspace_id
+            // Ensure only one type is set, nullify the other
+            if ($request->type === 'amount') {
+                $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
+                $validatedData['percentage'] = null;
+            } elseif ($request->type === 'percentage') {
+                $validatedData['percentage'] = $request->input('percentage');
+                $validatedData['amount'] = null;
+            }
+
             $validatedData['workspace_id'] = $this->workspace->id;
 
-            // Ensure deduction exists
             $deduction = Deduction::findOrFail($request->id);
 
-            // Update deduction
             if ($deduction->update($validatedData)) {
-
                 if ($isApi) {
                     return formatApiResponse(
                         false,
                         'Deduction updated successfully.',
-                        [
-                            'data' => formatDeduction($deduction)
-                        ]
+                        ['data' => formatDeduction($deduction)]
                     );
                 }
 
@@ -470,29 +476,26 @@ class DeductionsController extends Controller
                     'id' => $deduction->id,
                 ]);
             } else {
-
                 if ($isApi) {
-                    return formatApiResponse(
-                        true,
-                        'Deduction couldn\'t be updated.',
-                        []
-                    );
+                    return formatApiResponse(true, 'Deduction could not be updated.', []);
                 }
 
                 return response()->json([
                     'error' => true,
-                    'message' => 'Deduction couldn\'t be updated.',
+                    'message' => 'Deduction could not be updated.',
                 ]);
             }
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
-                config('app.debug') ? $e->getMessage() : 'An error occurred ',
+                config('app.debug') ? $e->getMessage() : 'An error occurred.',
                 [],
                 500
             );
         }
     }
+
+
 
     /**
      * Delete a deduction.

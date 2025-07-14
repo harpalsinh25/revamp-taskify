@@ -33,12 +33,16 @@ use Twilio\Deserialize;
  * @property \DateTime|null $dateCreated
  * @property string|null $country
  * @property bool|null $missingRequiredFields
- * @property \DateTime|null $statusLastTimeUpdatedTimestamp
+ * @property \DateTime|null $lastUpdated
  * @property string|null $phoneNumber
  * @property bool|null $portable
  * @property string|null $notPortabilityReason
- * @property string|null $notPortabilityReasonCode
+ * @property int|null $notPortabilityReasonCode
  * @property string|null $portInPhoneNumberStatus
+ * @property int|null $portOutPin
+ * @property string|null $rejectionReason
+ * @property int|null $rejectionReasonCode
+ * @property \DateTime|null $portDate
  */
 class PortingPortInPhoneNumberInstance extends InstanceResource
 {
@@ -50,7 +54,7 @@ class PortingPortInPhoneNumberInstance extends InstanceResource
      * @param string $portInRequestSid The SID of the Port In request. This is a unique identifier of the port in request.
      * @param string $phoneNumberSid The SID of the Port In request phone number. This is a unique identifier of the phone number.
      */
-    public function __construct(Version $version, array $payload, string $portInRequestSid = null, string $phoneNumberSid = null)
+    public function __construct(Version $version, array $payload, ?string $portInRequestSid = null, ?string $phoneNumberSid = null)
     {
         parent::__construct($version);
 
@@ -64,12 +68,16 @@ class PortingPortInPhoneNumberInstance extends InstanceResource
             'dateCreated' => Deserialize::dateTime(Values::array_get($payload, 'date_created')),
             'country' => Values::array_get($payload, 'country'),
             'missingRequiredFields' => Values::array_get($payload, 'missing_required_fields'),
-            'statusLastTimeUpdatedTimestamp' => Deserialize::dateTime(Values::array_get($payload, 'status_last_time_updated_timestamp')),
+            'lastUpdated' => Deserialize::dateTime(Values::array_get($payload, 'last_updated')),
             'phoneNumber' => Values::array_get($payload, 'phone_number'),
             'portable' => Values::array_get($payload, 'portable'),
             'notPortabilityReason' => Values::array_get($payload, 'not_portability_reason'),
             'notPortabilityReasonCode' => Values::array_get($payload, 'not_portability_reason_code'),
             'portInPhoneNumberStatus' => Values::array_get($payload, 'port_in_phone_number_status'),
+            'portOutPin' => Values::array_get($payload, 'port_out_pin'),
+            'rejectionReason' => Values::array_get($payload, 'rejection_reason'),
+            'rejectionReasonCode' => Values::array_get($payload, 'rejection_reason_code'),
+            'portDate' => Deserialize::dateTime(Values::array_get($payload, 'port_date')),
         ];
 
         $this->solution = ['portInRequestSid' => $portInRequestSid ?: $this->properties['portInRequestSid'], 'phoneNumberSid' => $phoneNumberSid ?: $this->properties['phoneNumberSid'], ];

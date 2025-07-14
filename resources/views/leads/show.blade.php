@@ -354,7 +354,73 @@
 
                         </div>
                     </div>
+
                 </div>
+                     @if(!empty($lead->custom_fields))
+    @php
+        $customFields = json_decode($lead->custom_fields, true);
+    @endphp
+
+    <div class="card my-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Additional Info</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @foreach($customFields as $label => $field)
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-semibold d-block">
+                            {{ $label }}
+                            @if(!empty($field['required']))
+                                <span class="text-danger">*</span>
+                            @endif
+                        </label>
+
+                        @switch($field['type'])
+                            @case('textarea')
+                                <div class="border rounded p-2 bg-light">{{ $field['value'] }}</div>
+                                @break
+
+                            @case('url')
+                                <a href="{{ $field['value'] }}" target="_blank">{{ $field['value'] }}</a>
+                                @break
+
+                            @case('date')
+                                <div>{{ \Carbon\Carbon::parse($field['value'])->format('d M Y') }}</div>
+                                @break
+
+                            @case('checkbox')
+    @php
+        $selected = is_array($field['value']) ? $field['value'] : [$field['value']];
+        $options = $field['options'] ?? $selected;
+    @endphp
+
+    @foreach($options as $option)
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" disabled {{ in_array($option, $selected) ? 'checked' : '' }}>
+            <label class="form-check-label">{{ $option }}</label>
+        </div>
+    @endforeach
+    @break
+
+
+                            @case('select')
+                                <div class="badge bg-primary">{{ $field['value'] }}</div>
+                                @break
+
+                            @case('number')
+                                <div>{{ number_format($field['value'], 0, '.', ',') }}</div>
+                                @break
+
+                            @default
+                                <div>{{ $field['value'] }}</div>
+                        @endswitch
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+@endif
             </div>
         </div>
     </div>

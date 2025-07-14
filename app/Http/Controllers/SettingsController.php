@@ -1069,7 +1069,16 @@ class SettingsController extends Controller
                 ],
                 'company_information' => [
                     'companyEmail' => ['nullable', 'email'],
-                ]
+                ],
+                'privacy_policy' => [
+                    'value' => 'required|string',
+                ],
+                'about_us' => [
+                    'value' => 'required|string',
+                ],
+                'terms_conditions' => [
+                    'value' => 'required|string',
+                ],
             ];
 
             // Validate based on selected variable
@@ -1208,8 +1217,14 @@ class SettingsController extends Controller
                 'value' => json_encode($merged_settings),
             ];
             // return response()->json(['storing_data' => $data, 'formData' => $form_val]);
-
+            if ($variable == 'privacy_policy' || $variable == 'about_us' || $variable == 'terms_conditions') {
+                $data = [
+                    'variable' => $request->variable,
+                    'value' => json_encode([$request->variable => $request->value]), // Store as {"variable": "value"}
+                ];
+            }
             // Update or create the setting in the database
+
             if ($fetched_data) {
                 $fetched_data->update($data);
             } else {

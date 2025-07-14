@@ -46,5 +46,7 @@
 
 </div>
 
+
+
 <script src="{{ asset('assets/js/pages/candidate.js') }}"></script>
 @endsection

@@ -141,6 +141,7 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
         Route::get('/comments/get/{id}', [ProjectsController::class, 'get_comment']);
         Route::post('/comments/update', [ProjectsController::class, 'update_comment'])->middleware(['isApi']);
         Route::delete('/comments/destroy', [ProjectsController::class, 'destroy_comment'])->middleware(['demo_restriction', 'log.activity']);
+        Route::get('/{id}/comments/list', [ProjectsController::class, 'get_project_comments_api']);
     });
 
     //Project Media
@@ -443,12 +444,12 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
     Route::put('/save-leads-view-preference', [LeadController::class, 'saveViewPreference'])->name('leads.save_view_preference');
 
 
-    Route::post('/custom-fields', [CustomFieldController::class, 'store'])->name('custom_fields.store');
-    Route::get('/custom-fields/list', [CustomFieldController::class, 'apiList'])->name('custom_fields.list');
+    Route::post('/custom-fields', [CustomFieldController::class, 'store']);
+    Route::get('/custom-fields/list', [CustomFieldController::class, 'apiList']);
 
-    Route::get('/custom-fields/{id}/edit', [CustomFieldController::class, 'edit'])->name('custom_fields.edit');
-    Route::put('/custom-fields/update/{id}', [CustomFieldController::class, 'update'])->name('custom_fields.update');
-    Route::delete('/custom-fields/destroy/{id}', [CustomFieldController::class, 'destroy'])->name('custom_fields.destroy');
+    Route::get('/custom-fields/{id}/edit', [CustomFieldController::class, 'edit']);
+    Route::post('/custom-fields/update/{id}', [CustomFieldController::class, 'update']);
+    Route::delete('/custom-fields/destroy/{id}', [CustomFieldController::class, 'destroy']);
 
     // Payslip
     Route::middleware(['customcan:manage_payslips', 'isApi'])->group(function () {
@@ -513,11 +514,11 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
 
     // TaskiList
     Route::prefix('/task-lists')->middleware('isApi')->group(function () {
-        Route::post('/store', [TaskListController::class, 'store'])->name('task_lists.store');
-        Route::post('/update', [TaskListController::class, 'update'])->name('task_lists.update');
-        Route::get('/get/{id}', [TaskListController::class, 'get'])->name('task_lists.get');
-        Route::delete('/destroy/{id}', [TaskListController::class, 'destroy'])->name('task_lists.destroy');
-        Route::get('/list', [TaskListController::class, 'apiList'])->name('task_lists.list');
+        Route::post('/store', [TaskListController::class, 'store']);
+        Route::post('/update', [TaskListController::class, 'update']);
+        Route::get('/get/{id}', [TaskListController::class, 'get']);
+        Route::delete('/destroy/{id}', [TaskListController::class, 'destroy']);
+        Route::get('/list', [TaskListController::class, 'apiList']);
         // Route::get('/search', [TaskListController::class, 'searchTaskLists'])->name('task-lists.search');
     });
 });

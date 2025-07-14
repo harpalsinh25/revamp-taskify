@@ -72,7 +72,8 @@ class ConferenceParticipantContext extends InstanceContext
                 $options['metrics'],
         ]);
 
-        $payload = $this->version->fetch('GET', $this->uri, $params, []);
+        $headers = Values::of(['Content-Type' => 'application/x-www-form-urlencoded', 'Accept' => 'application/json' ]);
+        $payload = $this->version->fetch('GET', $this->uri, $params, [], $headers);
 
         return new ConferenceParticipantInstance(
             $this->version,

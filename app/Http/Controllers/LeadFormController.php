@@ -2,20 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use App\Models\Lead;
 use App\Models\User;
 use App\Models\LeadForm;
 use App\Models\LeadStage;
+use App\Models\Workspace;
 use App\Models\LeadSource;
 use Illuminate\Http\Request;
 use App\Models\LeadFormField;
 use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class LeadFormController extends Controller
 {
+    protected $workspace;
+    protected $user;
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            // fetch session and use it in entire class with constructor
+            $this->workspace = Workspace::find(getWorkspaceId());
+            $this->user = getAuthenticatedUser();
+            return $next($request);
+        });
+    }
     public function index()
     {
         $forms = LeadForm::with(['creator', 'leadSource', 'leadStage', 'assignedUser'])
@@ -30,8 +42,8 @@ class LeadFormController extends Controller
     {
         $sources = LeadSource::where('workspace_id', auth()->user()->workspace_id)->get();
         $stages = LeadStage::where('workspace_id', auth()->user()->workspace_id)->get();
-        $users = User::all();
-        // $users = User::where('workspace_id', auth()->user()->workspace_id)->get();
+        // $users = User::all();
+        $users = $this->workspace->users;
 
         return view('lead_form.create', compact('sources', 'stages', 'users'));
     }
@@ -341,7 +353,7 @@ class LeadFormController extends Controller
         }
 
         $total = $query->count();
-        $canEdit = isAdminOrHasAllDataAccess();
+        $canEdit = isAdminOrHasAllDataAccess() || checkPermission('manage_leads');
         $canDelete = isAdminOrHasAllDataAccess();
 
         $leadForms = $query->orderBy($sort, $order)

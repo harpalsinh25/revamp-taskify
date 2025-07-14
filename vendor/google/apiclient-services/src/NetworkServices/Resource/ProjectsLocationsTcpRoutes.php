@@ -56,10 +56,6 @@ class ProjectsLocationsTcpRoutes extends \Google\Service\Resource
    * @param string $name Required. A name of the TcpRoute to delete. Must be in
    * the format `projects/locations/global/tcpRoutes`.
    * @param array $optParams Optional parameters.
-   *
-   * @opt_param string etag Optional. Etag of the resource. If this is provided,
-   * it must match the server's etag. If the provided etag does not match the
-   * server's etag, the request will fail with a 409 ABORTED error.
    * @return Operation
    * @throws \Google\Service\Exception
    */
@@ -98,6 +94,9 @@ class ProjectsLocationsTcpRoutes extends \Google\Service\Resource
    * `ListTcpRoutesResponse` Indicates that this is a continuation of a prior
    * `ListTcpRoutes` call, and that the system should return the next page of
    * data.
+   * @opt_param bool returnPartialSuccess Optional. If true, allow partial
+   * responses for multi-regional Aggregated List requests. Otherwise if one of
+   * the locations is down or unreachable, the Aggregated List request will fail.
    * @return ListTcpRoutesResponse
    * @throws \Google\Service\Exception
    */

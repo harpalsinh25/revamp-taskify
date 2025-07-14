@@ -40,7 +40,7 @@
                     </div>
                     @if(filled($project->description))
                     <div class="text-light">
-                        <p class="small mb-2">{{ Str::limit($project->description, 60) }}</p>
+                        <p class="small mb-2">{!! Str::limit($project->description, 60) !!}</p>
                     </div>
                     @endif
                     <div class="card-actions d-flex align-items-center">

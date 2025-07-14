@@ -27,7 +27,7 @@ use PhpParser\NodeVisitorAbstract;
 /**
  * @internal This class is not covered by the backward compatibility promise for phpunit/php-code-coverage
  *
- * @psalm-import-type LinesType from \SebastianBergmann\CodeCoverage\StaticAnalysis\FileAnalyser
+ * @phpstan-import-type LinesType from \SebastianBergmann\CodeCoverage\StaticAnalysis\FileAnalyser
  */
 final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
 {
@@ -35,17 +35,17 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
     private readonly string $source;
 
     /**
-     * @psalm-var LinesType
+     * @var LinesType
      */
     private array $executableLinesGroupedByBranch = [];
 
     /**
-     * @psalm-var array<int, bool>
+     * @var array<int, bool>
      */
     private array $unsets = [];
 
     /**
-     * @psalm-var array<int, string>
+     * @var array<int, string>
      */
     private array $commentsToCheckForUnset = [];
 
@@ -105,7 +105,6 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
             $node instanceof Node\Stmt\Use_ ||
             $node instanceof Node\Stmt\UseUse ||
             $node instanceof Node\Expr\ConstFetch ||
-            $node instanceof Node\Expr\Match_ ||
             $node instanceof Node\Expr\Variable ||
             $node instanceof Node\Expr\Throw_ ||
             $node instanceof Node\ComplexType ||
@@ -117,21 +116,18 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
             return;
         }
 
-        /*
-         * nikic/php-parser ^4.18 represents <code>throw</code> statements
-         * as <code>Stmt\Throw_</code> objects
-         */
-        if ($node instanceof Node\Stmt\Throw_) {
-            $this->setLineBranch($node->expr->getEndLine(), $node->expr->getEndLine(), ++$this->nextBranch);
+        if ($node instanceof Node\Expr\Match_) {
+            foreach ($node->arms as $arm) {
+                $this->setLineBranch(
+                    $arm->body->getStartLine(),
+                    $arm->body->getEndLine(),
+                    ++$this->nextBranch,
+                );
+            }
 
             return;
         }
 
-        /*
-         * nikic/php-parser ^5 represents <code>throw</code> statements
-         * as <code>Stmt\Expression</code> objects that contain an
-         * <code>Expr\Throw_</code> object
-         */
         if ($node instanceof Node\Stmt\Expression && $node->expr instanceof Node\Expr\Throw_) {
             $this->setLineBranch($node->expr->expr->getEndLine(), $node->expr->expr->getEndLine(), ++$this->nextBranch);
 
@@ -206,7 +202,7 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
         if ($node instanceof Node\Expr\ArrowFunction) {
             $startLine = max(
                 $node->getStartLine() + 1,
-                $node->expr->getStartLine()
+                $node->expr->getStartLine(),
             );
 
             $endLine = $node->expr->getEndLine();
@@ -251,7 +247,7 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
             $this->setLineBranch(
                 $node->cond->getStartLine(),
                 $node->cond->getStartLine(),
-                ++$this->nextBranch
+                ++$this->nextBranch,
             );
 
             return;
@@ -302,7 +298,7 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
             $this->setLineBranch(
                 $startLine,
                 $endLine,
-                ++$this->nextBranch
+                ++$this->nextBranch,
             );
 
             return;
@@ -312,7 +308,7 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
             $this->setLineBranch(
                 $node->expr->getStartLine(),
                 $node->valueVar->getEndLine(),
-                ++$this->nextBranch
+                ++$this->nextBranch,
             );
 
             return;
@@ -323,7 +319,7 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
             $this->setLineBranch(
                 $node->cond->getStartLine(),
                 $node->cond->getEndLine(),
-                ++$this->nextBranch
+                ++$this->nextBranch,
             );
 
             return;
@@ -338,7 +334,7 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
             $this->setLineBranch(
                 $startLine,
                 $endLine,
-                ++$this->nextBranch
+                ++$this->nextBranch,
             );
 
             return;
@@ -381,12 +377,12 @@ final class ExecutableLinesFindingVisitor extends NodeVisitorAbstract
 
         $this->executableLinesGroupedByBranch = array_diff_key(
             $this->executableLinesGroupedByBranch,
-            $this->unsets
+            $this->unsets,
         );
     }
 
     /**
-     * @psalm-return LinesType
+     * @return LinesType
      */
     public function executableLinesGroupedByBranch(): array
     {

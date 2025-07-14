@@ -89,9 +89,12 @@ class PhoneNumberContext extends InstanceContext
                 $options['lastVerifiedDate'],
             'VerificationSid' =>
                 $options['verificationSid'],
+            'PartnerSubId' =>
+                $options['partnerSubId'],
         ]);
 
-        $payload = $this->version->fetch('GET', $this->uri, $params, []);
+        $headers = Values::of(['Content-Type' => 'application/x-www-form-urlencoded', 'Accept' => 'application/json' ]);
+        $payload = $this->version->fetch('GET', $this->uri, $params, [], $headers);
 
         return new PhoneNumberInstance(
             $this->version,

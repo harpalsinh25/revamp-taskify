@@ -39,7 +39,7 @@ use Twilio\Rest\Intelligence\V2\Transcript\MediaList;
  * @property string|null $languageCode
  * @property string|null $customerKey
  * @property \DateTime|null $mediaStartTime
- * @property int|null $duration
+ * @property int $duration
  * @property string|null $url
  * @property bool|null $redaction
  * @property array|null $links
@@ -57,7 +57,7 @@ class TranscriptInstance extends InstanceResource
      * @param mixed[] $payload The response payload
      * @param string $sid A 34 character string that uniquely identifies this Transcript.
      */
-    public function __construct(Version $version, array $payload, string $sid = null)
+    public function __construct(Version $version, array $payload, ?string $sid = null)
     {
         parent::__construct($version);
 

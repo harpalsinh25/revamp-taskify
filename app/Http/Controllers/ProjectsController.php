@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Exception;
 use Carbon\Carbon;
 use App\Models\Task;
@@ -1690,7 +1692,7 @@ class ProjectsController extends Controller
     public function upload_media(Request $request)
     {
 
-         $isApi = request()->get('isApi', false);
+        $isApi = request()->get('isApi', false);
         try {
             $maxFileSizeBytes = config('media-library.max_file_size');
             $maxFileSizeKb = (int) ($maxFileSizeBytes / 1024);
@@ -1729,7 +1731,7 @@ class ProjectsController extends Controller
                 ]);
             }
         } catch (ValidationException $e) {
-             return formatApiValidationError($isApi, $e->errors());
+            return formatApiValidationError($isApi, $e->errors());
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "error" => true,
@@ -2203,8 +2205,7 @@ class ProjectsController extends Controller
                 false,
                 'Milestones Retrieved Successfully',
                 ['rows' => $milestones->items(), 'total' => $total]
-            )
-            ;
+            );
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "error" => true,
@@ -2332,8 +2333,7 @@ class ProjectsController extends Controller
                 false,
                 'Milestones Retrieved Successfully',
                 ['data' => $milestones->items(), 'total' => $total]
-            )
-            ;
+            );
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "error" => true,
@@ -3251,6 +3251,88 @@ class ProjectsController extends Controller
         $attachment->delete();
         return response()->json(['error' => false, 'message' => 'Attachment deleted successfully.']);
     }
+
+    /**
+     * Get all comments for a project with attachments and children.
+     *
+     * @authenticated
+     * @group Project Comments
+     * @urlParam id int required The ID of the project.
+     * @response 200 {
+     *   "error": false,
+     *   "comments": [
+     *     {
+     *       "id": 1,
+     *       "content": "Parent comment",
+     *       "attachments": [...],
+     *       "children": [
+     *         {
+     *           "id": 2,
+     *           "content": "Reply",
+     *           "attachments": [...],
+     *           "children": [...]
+     *         }
+     *       ]
+     *     }
+     *   ]
+     * }
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Project not found."
+     * }
+     */
+    public function get_project_comments_api($id)
+    {
+        try {
+            $project = Project::findOrFail($id);
+
+            // Recursive function to get children
+            $getChildren = function ($comment) use (&$getChildren) {
+                return [
+                    'id' => $comment->id,
+                    'content' => $comment->content,
+                    'commenter' => $comment->commenter,
+                    'created_at' => $comment->created_at,
+                    'attachments' => $comment->attachments->map(function ($a) {
+                        return [
+                            'id' => $a->id,
+                            'file_name' => $a->file_name,
+                            'file_path' => $a->file_path,
+                            'file_type' => $a->file_type,
+                            'url' => asset('storage/' . $a->file_path),
+                        ];
+                    }),
+                    'children' => $comment->children->map($getChildren)->values(),
+                ];
+            };
+
+            // Get top-level comments (parent_id is null)
+            $comments = Comment::with(['attachments', 'children.attachments', 'children.children.attachments', 'commenter'])
+                ->where('commentable_type', Project::class)
+                ->where('commentable_id', $project->id)
+                ->whereNull('parent_id')
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $result = $comments->map($getChildren);
+
+            return response()->json([
+                'error' => false,
+                'comments' => $result,
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Project not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Could not retrieve comments.'
+            ], 500);
+        }
+    }
+
     public function saveViewPreference(Request $request)
     {
         $view = $request->input('view');

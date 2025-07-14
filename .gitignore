@@ -38,3 +38,4 @@ vite.config.ts
 /public/assets/demo_data/public.zip
 /.scribe/
 public/docs/
+vendor/

@@ -1,19 +1,6 @@
 @php
-    $auth_user = auth()->user();
-    function getStatusCounts($statuses, $auth_user, $type = 'projects')
-    {
-        $statusCounts = [];
-        $totalCount = 0;
-        foreach ($statuses as $status) {
-            $count = isAdminOrHasAllDataAccess()
-                ? count($status->$type)
-                : $auth_user->{"status_{$type}"}($status->id)->count();
-            $statusCounts[$status->id] = $count;
-            $totalCount += $count;
-        }
-        arsort($statusCounts); // Sort by count descending
-        return [$statusCounts, $totalCount];
-    }
+    $auth_user = getAuthenticatedUser();
+
 @endphp
 <div id="dashboard-items" class="row">
     @if ($auth_user->can('manage_projects'))
@@ -50,6 +37,9 @@
             <x-dashboard.card :title="get_label('income_vs_expense', 'Income vs Expense')">
                 <input type="text" id="filter_date_range_income_expense" class="form-control mb-3"
                     placeholder="{{ get_label('date_between', 'Date Between') }}" autocomplete="off">
+                <input type="hidden" id="filter_date_range_from" name="start_date">
+<input type="hidden" id="filter_date_range_to" name="end_date">
+
                 <div id="income-expense-chart"></div>
             </x-dashboard.card>
         </div>

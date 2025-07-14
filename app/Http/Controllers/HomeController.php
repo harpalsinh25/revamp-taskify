@@ -278,44 +278,39 @@ class HomeController extends Controller
      * }
      */
 
-     public function upcomingBirthdaysApi(Request $request)
+    public function upcomingBirthdaysApi(Request $request)
     {
         $search = $request->input('search');
         $order = $request->input('order', 'ASC');
-        $upcoming_days = (int)$request->input('upcoming_days', 30); // Cast to integer, default to 30 if not provided
-        $user_ids = request('user_ids', []);
-        $limit = $request->input('limit', 15); // Default limit to 15 if not provided
-        $offset = $request->input('offset', 0); // Default offset to 0 if not provided
+        $upcoming_days = (int)$request->input('upcoming_days', 30);
+        $user_ids = (array)$request->input('user_ids', []);
+        $client_ids = (array)$request->input('client_ids', []);
+        $limit = (int)$request->input('limit', 15);
+        $offset = (int)$request->input('offset', 0);
 
         $users = $this->workspace->users();
+        $clients = $this->workspace->clients();
 
-        // Calculate the current date
         $currentDate = today();
-        $currentYear = $currentDate->format('Y');
-
-        // Calculate the range for upcoming birthdays (e.g., 365 days from today)
+        $currentYear = $currentDate->year;
         $upcomingDate = $currentDate->copy()->addDays($upcoming_days);
 
         $currentDateString = $currentDate->format('Y-m-d');
         $upcomingDateString = $upcomingDate->format('Y-m-d');
 
-        $users = $users->whereRaw("
-    DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
-    + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR)
-    BETWEEN ? AND ?
-    AND DATEDIFF(DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
-    + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) <= ?
-    AND (
-        (YEAR(CURRENT_DATE()) - YEAR(dob) >= 0)
-        OR
-        (YEAR(CURRENT_DATE()) - YEAR(dob) = 1 AND DATE_FORMAT(CURRENT_DATE(), '%m-%d') <= DATE_FORMAT(dob, '%m-%d'))
-    )
-", [$currentDateString, $upcomingDateString, $upcoming_days])
-            ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
-    + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
+        $birthdayWhereRaw = "
+             DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
+             + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR)
+             BETWEEN ? AND ?
+             AND DATEDIFF(DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
+             + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) <= ?
+         ";
 
+        $bindings = [$currentDateString, $upcomingDateString, $upcoming_days];
 
-        // Search by full name (first name + last name)
+        $users->whereRaw($birthdayWhereRaw, $bindings);
+        $clients->whereRaw($birthdayWhereRaw, $bindings);
+
         if ($search) {
             $users->where(function ($query) use ($search) {
                 $query->where('first_name', 'LIKE', "%$search%")
@@ -324,14 +319,41 @@ class HomeController extends Controller
                     ->orWhere('dob', 'LIKE', "%$search%")
                     ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
-        }
-        if (!empty($user_ids)) {
-            $users->whereIn('users.id', (array)$user_ids);
+
+            $clients->where(function ($query) use ($search) {
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('clients.id', 'LIKE', "%$search%")
+                    ->orWhere('dob', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+            });
         }
 
-        $total = $users->count();
+        // Filters based on user_ids and client_ids
+        if (!empty($user_ids) && !empty($client_ids)) {
+            $users->whereIn('users.id', $user_ids);
+            $clients->whereIn('clients.id', $client_ids);
+        } elseif (!empty($user_ids)) {
+            $users->whereIn('users.id', $user_ids);
+            $clients->whereIn('clients.id', []); // Clear clients
+        } elseif (!empty($client_ids)) {
+            $clients->whereIn('clients.id', $client_ids);
+            $users->whereIn('users.id', []); // Clear users
+        }
 
-        if ($total == 0) {
+        $usersCollection = $users->get()->map(function ($user) {
+            $user->type = 'user';
+            return $user;
+        });
+
+        $clientsCollection = $clients->get()->map(function ($client) {
+            $client->type = 'client';
+            return $client;
+        });
+
+        $merged = $usersCollection->merge($clientsCollection);
+
+        if ($merged->isEmpty()) {
             return formatApiResponse(
                 false,
                 'Upcoming birthdays not found.',
@@ -339,42 +361,64 @@ class HomeController extends Controller
             );
         }
 
-        $users = $users->limit($limit)->offset($offset)->get()
-            ->map(function ($user) use ($currentDate, $currentYear) {
-                // Convert the 'dob' field to a DateTime object
-                $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $user->dob);
-                $birthdayDateYear = $birthdayDate->year;
-                $yearDifference = $currentYear - $birthdayDateYear;
-                // Set the year to the current year
-                $birthdayDate->year = $currentDate->year;
+        $sorted = $merged->sortBy(function ($item) use ($currentDate, $order) {
+            $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item->dob);
+            $birthdayDate->year = $currentDate->year;
+            if ($birthdayDate->lt($currentDate)) {
+                $birthdayDate->year++;
+            }
+            return $currentDate->diffInDays($birthdayDate);
+        }, SORT_REGULAR, $order === 'DESC');
 
-                if ($birthdayDate->lt($currentDate)) {
-                    // If the birthday has already passed this year, calculate for next year
-                    $birthdayDate->year = $currentDate->year + 1;
-                }
+        $paginated = $sorted->slice($offset, $limit)->values();
 
-                // Calculate days left until the user's birthday
-                $daysLeft = $currentDate->diffInDays($birthdayDate);
-                $dayOfWeek = $birthdayDate->format('D');
-                return [
-                    'id' => $user->id,
-                    'member' => $user->first_name . ' ' . $user->last_name,
-                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg'),
-                    'birthday_count' => $yearDifference,
-                    'days_left' => $daysLeft,
-                    'dob' => format_date($birthdayDate, to_format: 'Y-m-d'),
-                ];
-            });
+        $formatted = $paginated->map(function ($item) use ($currentDate, $currentYear) {
+            $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item->dob);
+            $yearDifference = $currentYear - $birthdayDate->year;
+            $ordinalSuffix = getOrdinalSuffix($yearDifference);
+
+            $birthdayDate->year = $currentDate->year;
+            if ($birthdayDate->lt($currentDate)) {
+                $birthdayDate->year++;
+            }
+
+            $daysLeft = $currentDate->diffInDays($birthdayDate);
+            $emoji = '';
+            $label = '';
+
+            if ($daysLeft === 0) {
+                $emoji = ' 🥳';
+                $label = "{$yearDifference}{$ordinalSuffix} Birthday Today{$emoji}";
+            } elseif ($daysLeft === 1) {
+                $label = "{$yearDifference}{$ordinalSuffix} Birthday Tomorrow";
+            } elseif ($daysLeft === 2) {
+                $label = "{$yearDifference}{$ordinalSuffix} Birthday Day After Tomorrow";
+            } else {
+                $label = "{$yearDifference}{$ordinalSuffix} Birthday in {$daysLeft} days";
+            }
+
+            return [
+                'id' => $item->id,
+                'member' => $item->first_name . ' ' . $item->last_name,
+                'photo' => $item->photo ? asset('storage/' . $item->photo) : asset('storage/photos/no-image.jpg'),
+                'birthday_count' => $yearDifference,
+                'days_left' => $daysLeft,
+                'dob' => $birthdayDate->format('D, M d, Y'),
+                'type' => $item->type,
+                'label' => $label,
+            ];
+        });
 
         return formatApiResponse(
             false,
             'Upcoming birthdays retrieved successfully',
             [
-                'total' => $total,
-                'data' => $users
+                'total' => $merged->count(),
+                'data' => $formatted,
             ]
         );
     }
+
 
     public function upcoming_work_anniversaries()
     {
@@ -569,40 +613,35 @@ class HomeController extends Controller
     {
         $search = $request->input('search');
         $order = $request->input('order', 'ASC');
-        $upcoming_days = (int)$request->input('upcoming_days', 30); // Cast to integer, default to 30 if not provided
-        $user_ids = request('user_ids', []);
-        $limit = $request->input('limit', 15); // Default limit to 15 if not provided
-        $offset = $request->input('offset', 0); // Default offset to 0 if not provided
+        $upcoming_days = (int)$request->input('upcoming_days', 30);
+        $user_ids = (array)$request->input('user_ids', []);
+        $client_ids = (array)$request->input('client_ids', []);
+        $limit = (int)$request->input('limit', 15);
+        $offset = (int)$request->input('offset', 0);
 
         $users = $this->workspace->users();
+        $clients = $this->workspace->clients();
 
-        // Calculate the current date
         $currentDate = today();
-        $currentYear = $currentDate->format('Y');
-
-        // Calculate the range for upcoming work anniversaries
+        $currentYear = $currentDate->year;
         $upcomingDate = $currentDate->copy()->addDays($upcoming_days);
 
         $currentDateString = $currentDate->format('Y-m-d');
         $upcomingDateString = $upcomingDate->format('Y-m-d');
 
-        $users = $users->whereRaw("
-    DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj)
-    + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR)
-    BETWEEN ? AND ?
-    AND DATEDIFF(DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj)
-    + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) <= ?
-    AND (
-        (YEAR(CURRENT_DATE()) - YEAR(doj) >= 0)
-        OR
-        (YEAR(CURRENT_DATE()) - YEAR(doj) = 1 AND DATE_FORMAT(CURRENT_DATE(), '%m-%d') <= DATE_FORMAT(doj, '%m-%d'))
-    )
-", [$currentDateString, $upcomingDateString, $upcoming_days])
-            ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj)
-    + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
+        $whereRaw = "
+             DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj)
+             + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR)
+             BETWEEN ? AND ?
+             AND DATEDIFF(DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj)
+             + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) <= ?
+         ";
 
+        $bindings = [$currentDateString, $upcomingDateString, $upcoming_days];
 
-        // Search by full name (first name + last name)
+        $users->whereRaw($whereRaw, $bindings);
+        $clients->whereRaw($whereRaw, $bindings);
+
         if ($search) {
             $users->where(function ($query) use ($search) {
                 $query->where('first_name', 'LIKE', "%$search%")
@@ -611,59 +650,105 @@ class HomeController extends Controller
                     ->orWhere('doj', 'LIKE', "%$search%")
                     ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
+
+            $clients->where(function ($query) use ($search) {
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('clients.id', 'LIKE', "%$search%")
+                    ->orWhere('doj', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+            });
         }
 
-        if (!empty($user_ids)) {
-            $users->whereIn('users.id', (array)$user_ids);
+        if (!empty($user_ids) && !empty($client_ids)) {
+            $users->whereIn('users.id', $user_ids);
+            $clients->whereIn('clients.id', $client_ids);
+        } elseif (!empty($user_ids)) {
+            $users->whereIn('users.id', $user_ids);
+            $clients->whereIn('clients.id', []); // Clear clients
+        } elseif (!empty($client_ids)) {
+            $clients->whereIn('clients.id', $client_ids);
+            $users->whereIn('users.id', []); // Clear users
         }
 
-        $total = $users->count();
+        $usersCollection = $users->get()->map(function ($user) {
+            $user->type = 'user';
+            return $user;
+        });
 
-        if ($total == 0) {
+        $clientsCollection = $clients->get()->map(function ($client) {
+            $client->type = 'client';
+            return $client;
+        });
+
+        $merged = $usersCollection->merge($clientsCollection);
+
+        if ($merged->isEmpty()) {
             return formatApiResponse(
                 false,
                 'Upcoming work anniversaries not found.',
-                []
+                ['data' => []]
             );
         }
 
-        $users = $users->limit($limit)->offset($offset)->get()
-            ->map(function ($user) use ($currentDate, $currentYear) {
-                // Convert the 'doj' field to a DateTime object
-                $anniversaryDate = \Carbon\Carbon::createFromFormat('Y-m-d', $user->doj);
-                $anniversaryDateYear = $anniversaryDate->year;
-                $yearDifference = $currentYear - $anniversaryDateYear;
+        $sorted = $merged->sortBy(function ($item) use ($currentDate) {
+            $anniversaryDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item->doj);
+            $anniversaryDate->year = $currentDate->year;
+            if ($anniversaryDate->lt($currentDate)) {
+                $anniversaryDate->year++;
+            }
+            return $currentDate->diffInDays($anniversaryDate);
+        }, SORT_REGULAR, $order === 'DESC');
 
-                // Set the year to the current year
-                $anniversaryDate->year = $currentDate->year;
+        $paginated = $sorted->slice($offset, $limit)->values();
 
-                if ($anniversaryDate->lt($currentDate)) {
-                    // If the anniversary has already passed this year, calculate for next year
-                    $anniversaryDate->year = $currentDate->year + 1;
-                }
+        $formatted = $paginated->map(function ($item) use ($currentDate, $currentYear) {
+            $anniversaryDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item->doj);
+            $yearDifference = $currentYear - $anniversaryDate->year;
+            $ordinalSuffix = getOrdinalSuffix($yearDifference);
 
-                // Calculate days left until the user's work anniversary
-                $daysLeft = $currentDate->diffInDays($anniversaryDate);
-                $dayOfWeek = $anniversaryDate->format('D');
-                return [
-                    'id' => $user->id,
-                    'member' => $user->first_name . ' ' . $user->last_name,
-                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg'),
-                    'anniversary_count' => $yearDifference,
-                    'days_left' => $daysLeft,
-                    'doj' => format_date($anniversaryDate, to_format: 'Y-m-d')
-                ];
-            });
+            $anniversaryDate->year = $currentDate->year;
+            if ($anniversaryDate->lt($currentDate)) {
+                $anniversaryDate->year++;
+            }
+
+            $daysLeft = $currentDate->diffInDays($anniversaryDate);
+            $emoji = '';
+            $label = '';
+
+            if ($daysLeft === 0) {
+                $emoji = ' 🎉';
+                $label = "{$yearDifference}{$ordinalSuffix} Work Anniversary Today{$emoji}";
+            } elseif ($daysLeft === 1) {
+                $label = "{$yearDifference}{$ordinalSuffix} Work Anniversary Tomorrow";
+            } elseif ($daysLeft === 2) {
+                $label = "{$yearDifference}{$ordinalSuffix} Work Anniversary Day After Tomorrow";
+            } else {
+                $label = "{$yearDifference}{$ordinalSuffix} Work Anniversary in {$daysLeft} days";
+            }
+
+            return [
+                'id' => $item->id,
+                'member' => $item->first_name . ' ' . $item->last_name,
+                'photo' => $item->photo ? asset('storage/' . $item->photo) : asset('storage/photos/no-image.jpg'),
+                'anniversary_count' => $yearDifference,
+                'days_left' => $daysLeft,
+                'doj' => $anniversaryDate->format('D, M d, Y'),
+                'label' => $label,
+                'type' => $item->type,
+            ];
+        });
 
         return formatApiResponse(
             false,
             'Upcoming work anniversaries retrieved successfully',
             [
-                'total' => $total,
-                'data' => $users,
+                'total' => $merged->count(),
+                'data' => $formatted,
             ]
         );
     }
+
 
 
     public function members_on_leave()

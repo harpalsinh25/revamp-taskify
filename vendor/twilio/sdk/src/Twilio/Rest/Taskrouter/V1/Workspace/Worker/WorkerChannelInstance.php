@@ -27,10 +27,10 @@ use Twilio\Deserialize;
 
 /**
  * @property string|null $accountSid
- * @property int|null $assignedTasks
+ * @property int $assignedTasks
  * @property bool|null $available
- * @property int|null $availableCapacityPercentage
- * @property int|null $configuredCapacity
+ * @property int $availableCapacityPercentage
+ * @property int $configuredCapacity
  * @property \DateTime|null $dateCreated
  * @property \DateTime|null $dateUpdated
  * @property string|null $sid
@@ -51,7 +51,7 @@ class WorkerChannelInstance extends InstanceResource
      * @param string $workerSid The SID of the Worker with the WorkerChannel to fetch.
      * @param string $sid The SID of the WorkerChannel to fetch.
      */
-    public function __construct(Version $version, array $payload, string $workspaceSid, string $workerSid, string $sid = null)
+    public function __construct(Version $version, array $payload, string $workspaceSid, string $workerSid, ?string $sid = null)
     {
         parent::__construct($version);
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,7 +19,37 @@ class PreferenceController extends Controller
             ->where(getGuardName() == 'web' ? 'user_id' : 'client_id', getAuthenticatedUser()->id)
             ->value('menu_order'), true);
         $menus = getMenus();
+        $pluginMenus = []; // Initialize safely
 
+        $pluginPath = base_path('plugins');
+
+        if (File::exists($pluginPath)) {
+            $pluginDirs = glob($pluginPath . '/*', GLOB_ONLYDIR);
+
+            foreach ($pluginDirs as $pluginDir) {
+                $pluginJsonFile = $pluginDir . '/plugin.json';
+
+                if (File::exists($pluginJsonFile)) {
+                    $pluginData = json_decode(File::get($pluginJsonFile), true);
+
+                    // Check if plugin is enabled
+                    if (!empty($pluginData['enabled'])) {
+                        $menuFile = $pluginDir . '/menus.php';
+
+                        if (File::exists($menuFile)) {
+                            $pluginMenuItems = include $menuFile;
+
+                            if (is_array($pluginMenuItems)) {
+                                $pluginMenus = array_merge($pluginMenus, $pluginMenuItems);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Merge your core menus with plugin menus
+        $menus = array_merge($menus, $pluginMenus);
         // Initialize grouped menus
         $groupedMenus = [];
 

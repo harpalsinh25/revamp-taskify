@@ -37,6 +37,8 @@ class ConnectionProfile extends \Google\Model
    * @var string[]
    */
   public $labels;
+  protected $mongodbProfileType = MongodbProfile::class;
+  protected $mongodbProfileDataType = '';
   protected $mysqlProfileType = MysqlProfile::class;
   protected $mysqlProfileDataType = '';
   /**
@@ -49,6 +51,8 @@ class ConnectionProfile extends \Google\Model
   protected $postgresqlProfileDataType = '';
   protected $privateConnectivityType = PrivateConnectivity::class;
   protected $privateConnectivityDataType = '';
+  protected $salesforceProfileType = SalesforceProfile::class;
+  protected $salesforceProfileDataType = '';
   /**
    * @var bool
    */
@@ -151,6 +155,20 @@ class ConnectionProfile extends \Google\Model
     return $this->labels;
   }
   /**
+   * @param MongodbProfile
+   */
+  public function setMongodbProfile(MongodbProfile $mongodbProfile)
+  {
+    $this->mongodbProfile = $mongodbProfile;
+  }
+  /**
+   * @return MongodbProfile
+   */
+  public function getMongodbProfile()
+  {
+    return $this->mongodbProfile;
+  }
+  /**
    * @param MysqlProfile
    */
   public function setMysqlProfile(MysqlProfile $mysqlProfile)
@@ -219,6 +237,20 @@ class ConnectionProfile extends \Google\Model
   public function getPrivateConnectivity()
   {
     return $this->privateConnectivity;
+  }
+  /**
+   * @param SalesforceProfile
+   */
+  public function setSalesforceProfile(SalesforceProfile $salesforceProfile)
+  {
+    $this->salesforceProfile = $salesforceProfile;
+  }
+  /**
+   * @return SalesforceProfile
+   */
+  public function getSalesforceProfile()
+  {
+    return $this->salesforceProfile;
   }
   /**
    * @param bool

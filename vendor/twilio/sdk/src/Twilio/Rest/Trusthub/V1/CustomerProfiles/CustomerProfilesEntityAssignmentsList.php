@@ -64,7 +64,8 @@ class CustomerProfilesEntityAssignmentsList extends ListResource
                 $objectSid,
         ]);
 
-        $payload = $this->version->create('POST', $this->uri, [], $data);
+        $headers = Values::of(['Content-Type' => 'application/x-www-form-urlencoded', 'Accept' => 'application/json' ]);
+        $payload = $this->version->create('POST', $this->uri, [], $data, $headers);
 
         return new CustomerProfilesEntityAssignmentsInstance(
             $this->version,
@@ -90,7 +91,7 @@ class CustomerProfilesEntityAssignmentsList extends ListResource
      *                        efficient page size, i.e. min(limit, 1000)
      * @return CustomerProfilesEntityAssignmentsInstance[] Array of results
      */
-    public function read(array $options = [], int $limit = null, $pageSize = null): array
+    public function read(array $options = [], ?int $limit = null, $pageSize = null): array
     {
         return \iterator_to_array($this->stream($options, $limit, $pageSize), false);
     }
@@ -114,7 +115,7 @@ class CustomerProfilesEntityAssignmentsList extends ListResource
      *                        efficient page size, i.e. min(limit, 1000)
      * @return Stream stream of results
      */
-    public function stream(array $options = [], int $limit = null, $pageSize = null): Stream
+    public function stream(array $options = [], ?int $limit = null, $pageSize = null): Stream
     {
         $limits = $this->version->readLimits($limit, $pageSize);
 
@@ -149,7 +150,8 @@ class CustomerProfilesEntityAssignmentsList extends ListResource
             'PageSize' => $pageSize,
         ]);
 
-        $response = $this->version->page('GET', $this->uri, $params);
+        $headers = Values::of(['Content-Type' => 'application/x-www-form-urlencoded', 'Accept' => 'application/json']);
+        $response = $this->version->page('GET', $this->uri, $params, [], $headers);
 
         return new CustomerProfilesEntityAssignmentsPage($this->version, $response, $this->solution);
     }

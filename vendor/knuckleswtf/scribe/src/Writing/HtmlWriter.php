@@ -22,7 +22,7 @@ class HtmlWriter
     protected string $assetPathPrefix;
     protected MarkdownParser $markdownParser;
 
-    public function __construct(DocumentationConfig $config = null)
+    public function __construct(?DocumentationConfig $config = null)
     {
         $this->config = $config ?: new DocumentationConfig(config('scribe', []));
         $this->markdownParser = new MarkdownParser();
@@ -30,7 +30,7 @@ class HtmlWriter
         // If they're using the default static path,
         // then use '../docs/{asset}', so assets can work via Laravel app or via index.html
         $this->assetPathPrefix = '../docs/';
-        if ($this->config->get('type') == 'static'
+        if (in_array($this->config->get('type'), ['static', 'external_static'])
             && rtrim($this->config->get('static.output_path', ''), '/') != 'public/docs'
         ) {
             $this->assetPathPrefix = './';

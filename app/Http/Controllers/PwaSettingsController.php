@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -36,7 +36,7 @@ class PwaSettingsController extends Controller
                 $logo = $request->file('logo');
                 $logoPath = $logo->storeAs('public/images/icons', 'logo-512x512.png');
                 // Crop/resize to 512x512
-                Image::make($logo)->fit(512, 512)->save(storage_path('app/' . $logoPath));
+                Image::read($logo)->cover(512, 512)->save(storage_path('app/' . $logoPath));
                 $validated['logo'] = Storage::url($logoPath);
             } else {
                 $existing = Setting::where('variable', 'pwa_settings')->first();

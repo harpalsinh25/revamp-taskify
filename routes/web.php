@@ -32,6 +32,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\UpdaterController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\LeadFormController;
 use App\Http\Controllers\MeetingsController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\PayslipsController;
@@ -51,6 +52,7 @@ use App\Http\Controllers\DeductionsController;
 use App\Http\Controllers\LeadImportController;
 use App\Http\Controllers\LeadSourceController;
 use App\Http\Controllers\PreferenceController;
+use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\WorkspacesController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\SignUpController;
@@ -62,10 +64,12 @@ use App\Http\Controllers\LeadFollowUpController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\PluginManagerController;
 use App\Http\Controllers\TaskTimeEntryController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
 use App\Http\Controllers\PaymentMethodsController;
 use App\Http\Controllers\CandidateStatusController;
+use App\Http\Controllers\PluginInstallerController;
 use App\Http\Controllers\EstimatesInvoicesController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use Spatie\Permission\Middlewares\PermissionMiddleware;
@@ -105,7 +109,7 @@ Route::get('/generate-api-doc', function () {
     return response()->json(['message' => 'API Documentation generated successfully!']);
 });
 Route::get('/migrate', function () {
-    Artisan::call('migrate', ['--path' => 'database/migrations/2025_04_17_125219_create_lead_stages_table.php']);
+    Artisan::call('migrate', ['--path' => 'database/migrations/2025_06_13_102308_add_custom_fields_to_leads_table.php']);
     return redirect('/home')->with('message', 'Database Migrated Successfully.');
 });
 
@@ -114,7 +118,9 @@ Route::get('/clear-cache', function () {
     Artisan::call('optimize:clear');
     return redirect('/home')->with('message', 'System Cache Cleared Successfully.');
 });
-
+Route::get('/privacy-policy', function () {
+    return view('settings.privacy_policy_open');
+});
 
 Route::get('/create-symlink', function () {
     if (config('constants.ALLOW_MODIFICATION') === 1) {
@@ -172,6 +178,15 @@ Route::middleware(['CheckInstallation'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])->middleware(['multiguard']);
 
     Route::get("settings/languages/switch/{code}", [LanguageController::class, 'switch'])->middleware(['multiguard']);
+
+    Route::prefix('forms')->group(function () {
+        Route::get('{slug}', [PublicFormController::class, 'show'])->name('public.form');
+        Route::post('{slug}', [PublicFormController::class, 'submit'])->name('public.form.submit');
+        Route::get('{slug}/json', [PublicFormController::class, 'json'])->name('public.form.json');
+        Route::get('/form/submitted', function () {
+            return view('lead_form.submitted');
+        })->name('lead_form.submitted');
+    });
 
     // ,'custom-verified'
     Route::middleware(['multiguard', 'custom-verified'])->group(function () {
@@ -336,7 +351,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::delete('/destroy/{id}', [TaskListController::class, 'destroy'])->name('task_lists.destroy');
                 Route::delete('/destroy_multiple', [TaskListController::class, 'destroy_multiple'])->name('task_lists.destroy_multiple');
                 Route::get('/search', [TaskListController::class, 'searchTaskLists'])->name('task-lists.search');
-
             });
             //Tasks-------------------------------------------------------------
 
@@ -451,9 +465,9 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/meetings/duplicate/{id}', [MeetingsController::class, 'duplicate'])
                     ->middleware(['customcan:create_meetings', 'checkAccess:App\Models\Meeting,meetings,id,meetings', 'log.activity']);
 
-                Route::get('/meetings/calendar-view' ,[MeetingsController::class,'calendar_view'])->name('meetings.calendar-view');
+                Route::get('/meetings/calendar-view', [MeetingsController::class, 'calendar_view'])->name('meetings.calendar-view');
 
-                Route::get('/meetings/get-calendar-data' ,[MeetingsController::class,'get_calendar_data'])->name('meetings.get_calendar_data');
+                Route::get('/meetings/get-calendar-data', [MeetingsController::class, 'get_calendar_data'])->name('meetings.get_calendar_data');
                 Route::put('/save-meetings-view-preference', [MeetingsController::class, 'saveViewPreference']);
             });
 
@@ -635,9 +649,8 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
             Route::put('/settings/store_email', [SettingsController::class, 'store_email_settings'])->middleware(['demo_restriction']);
 
-            Route::get('/settings/ai-models', [SettingsController::class, 'ai_model_settings'])->middleware(['demo_restriction'])->name('settings.ai_models_setting');
+            Route::get('/settings/ai-model-settings', [SettingsController::class, 'ai_model_settings'])->middleware(['demo_restriction'])->name('settings.ai_models_setting');
             Route::put('/settings/store-ai-models-settings', [SettingsController::class, 'store_ai_model_settings'])->middleware(['demo_restriction'])->name('settings.store_ai_models');
-
             Route::get('/settings/sms-gateway', [SettingsController::class, 'sms_gateway']);
 
             Route::put('/settings/store_sms_gateway', [SettingsController::class, 'store_sms_gateway_settings'])->middleware(['demo_restriction']);
@@ -691,6 +704,15 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/pwa-settings', [PwaSettingsController::class, 'index'])->name('pwa-settings.index');
                 Route::post('/pwa-settings/update', [PwaSettingsController::class, 'update'])->middleware('auth')->name('pwa-settings.update');
             });
+        });
+
+        Route::prefix('/plugins')->group(function () {
+            Route::get('/', [PluginManagerController::class, 'index'])->name('plugins.index');
+            Route::get('/install', [PluginInstallerController::class, 'showForm'])->name('plugin.upload');
+            Route::post('/install', [PluginInstallerController::class, 'install'])->name('plugin.install');
+            Route::post('/enable/{slug}', [PluginManagerController::class, 'enable'])->name('plugins.enable');
+            Route::post('/disable/{slug}', [PluginManagerController::class, 'disable'])->name('plugins.disable');
+            Route::post('/uninstall/{slug}', [PluginManagerController::class, 'uninstall'])->name('plugins.uninstall');
         });
 
         Route::middleware(['customRole:admin'])->group(function () {
@@ -784,8 +806,8 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::delete('/activity-log/destroy/{id}', [ActivityLogController::class, 'destroy'])->middleware(['demo_restriction', 'customcan:delete_activity_log']);
                 Route::post('/activity-log/destroy_multiple', [ActivityLogController::class, 'destroy_multiple'])->middleware(['demo_restriction', 'customcan:delete_activity_log']);
                 Route::get('/activity-log/calendar-view', [ActivityLogController::class, 'calendar_view'])->name('activity_log.calendar_view');
-                Route::get('/activity-log/get-calendar-data' ,[ActivityLogController::class,'get_calendar_data'])->name('activity_log.get_calendar_data');
-                Route::put('/save-activity-log-view-preference',[ActivityLogController::class,'saveViewPreference'])->name('activity_log.save_view_preference');
+                Route::get('/activity-log/get-calendar-data', [ActivityLogController::class, 'get_calendar_data'])->name('activity_log.get_calendar_data');
+                Route::put('/save-activity-log-view-preference', [ActivityLogController::class, 'saveViewPreference'])->name('activity_log.save_view_preference');
             });
 
             Route::middleware(['customcan:manage_estimates_invoices'])->group(function () {
@@ -1024,5 +1046,45 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
         Route::post('/ai/generate-description', [AIController::class, 'generateDescription'])
             ->name('generate.description');
+
+        // Route::get('lead-forms', [LeadFormController::class, 'index'])->name('lead-forms.index');
+
+
+
+
+        // List all lead forms
+        Route::get('lead-forms', [LeadFormController::class, 'index'])->name('lead-forms.index');
+
+        // Show create form
+        Route::get('lead-forms/create', [LeadFormController::class, 'create'])->name('lead-forms.create');
+
+        // Store new form
+        Route::post('lead-forms/store', [LeadFormController::class, 'store'])->name('lead-forms.store');
+
+        // Show a specific form
+        Route::get('lead-forms/show/{id}', [LeadFormController::class, 'show'])->name('lead-forms.show');
+
+        // Show edit form
+        Route::get('lead-forms/edit/{id}', [LeadFormController::class, 'edit'])->name('lead-forms.edit');
+
+        // Update a form
+        Route::post('lead-forms/update/{id}', [LeadFormController::class, 'update'])->name('lead-forms.update');
+
+        // Delete a form
+        Route::delete('lead-forms/destroy/{id}', [LeadFormController::class, 'destroy'])->name('lead-forms.destroy');
+        Route::post('lead-forms/destroy_multiple', [LeadFormController::class, 'destroy_multiple'])->name('lead-forms.destroy_multiple');
+        Route::get('lead-forms/list', [LeadFormController::class, 'list'])->name('lead-forms.list');
+        Route::post('lead-forms/{leadForm}/toggle', [LeadFormController::class, 'toggleStatus'])->name('lead-forms.toggle');
+        // In your routes/web.php
+        Route::get('lead-forms/{leadForm}/embed', [LeadFormController::class, 'embed'])->name('lead-forms.embed');
+        Route::get('lead-forms/{id}/responses', [LeadFormController::class, 'responses'])->name('lead-forms.responses');
+        Route::get('lead-forms/responses/list/{id}', [LeadFormController::class, 'responseList'])->name('lead-forms.responses.list');
+
+        Route::post('/ai/generate-description', [AIController::class, 'generateDescription'])
+            ->name('generate.description');
+
+        Route::get('/file-manager', function () {
+            return view('file-manager.index');
+        })->name('file-manager.index')->middleware(['customRole:admin']);
     });
 });

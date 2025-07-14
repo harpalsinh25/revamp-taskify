@@ -63,6 +63,7 @@ class GenerateDocumentation extends Command
             $this->writeExampleCustomEndpoint();
         }
 
+        /** @var Writer $writer */
         $writer = app(Writer::class, ['config' => $this->docConfig, 'paths' => $this->paths]);
         $writer->writeDocs($groupedEndpoints);
 

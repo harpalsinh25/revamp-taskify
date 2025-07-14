@@ -32,7 +32,7 @@ use Twilio\Deserialize;
  * @property string|null $description
  * @property string|null $author
  * @property string|null $operatorType
- * @property int|null $version
+ * @property int $version
  * @property string $availability
  * @property array|null $config
  * @property \DateTime|null $dateCreated
@@ -48,7 +48,7 @@ class CustomOperatorInstance extends InstanceResource
      * @param mixed[] $payload The response payload
      * @param string $sid A 34 character string that uniquely identifies this Custom Operator.
      */
-    public function __construct(Version $version, array $payload, string $sid = null)
+    public function __construct(Version $version, array $payload, ?string $sid = null)
     {
         parent::__construct($version);
 

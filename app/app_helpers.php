@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Request;
@@ -473,6 +474,7 @@ if (!function_exists('duplicateRecord')) {
 
             return $duplicateRecord;
         } catch (\Exception $e) {
+
             // Handle any exceptions and rollback the transaction on failure
             DB::rollback();
             return false;
@@ -4043,6 +4045,12 @@ if (!function_exists('getMenus')) {
                         'class' => 'menu-item' . (Request::is('settings/terms-privacy-about') ? ' active' : ''),
                     ],
                     [
+                        'id' => 'plugins',
+                        'label' => get_label('plugins', 'Plugins'),
+                        'url' => route('plugins.index'),
+                        'class' => 'menu-item' . (Request::is('settings/plugins') ? ' active' : ''),
+                    ],
+                    [
                         'id' => 'system_updater',
                         'label' => get_label('system_updater', 'System updater'),
                         'url' => url('settings/system-updater'),
@@ -5201,7 +5209,7 @@ if (!function_exists('formatLeadUserHtml')) {
         return [
             'id' => $contract->id,
             'title' => $contract->title,
-            'value' => format_currency($contract->value),
+            'value' => format_currency($contract->value, 0),
             'start_date' => format_date($contract->start_date, to_format: 'Y-m-d'),
             'end_date' => format_date($contract->end_date, to_format: 'Y-m-d'),
             'client' => [
@@ -5556,7 +5564,7 @@ if (!function_exists('generate_description_gemini')) {
             Log::critical('Unexpected Error in generate_description_gemini', [
                 'error' => $e->getMessage(),
             ]);
-            dd($e);
+
             return [
                 'error' => true,
                 'message' => 'An unexpected error occurred. Please try again later.',
@@ -5665,5 +5673,21 @@ if (!function_exists('get_ai_settings')) {
         }
 
         return $settings;
+    }
+}
+if (!function_exists('getStatusCounts')) {
+    function getStatusCounts($statuses, $auth_user, $type = 'projects')
+    {
+        $statusCounts = [];
+        $totalCount = 0;
+        foreach ($statuses as $status) {
+            $count = isAdminOrHasAllDataAccess()
+                ? count($status->$type)
+                : $auth_user->{"status_{$type}"}($status->id)->count();
+            $statusCounts[$status->id] = $count;
+            $totalCount += $count;
+        }
+        arsort($statusCounts); // Sort by count descending
+        return [$statusCounts, $totalCount];
     }
 }

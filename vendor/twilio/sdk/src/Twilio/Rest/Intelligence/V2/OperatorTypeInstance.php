@@ -47,9 +47,9 @@ class OperatorTypeInstance extends InstanceResource
      *
      * @param Version $version Version that contains the resource
      * @param mixed[] $payload The response payload
-     * @param string $sid A 34 character string that uniquely identifies this Operator Type.
+     * @param string $sid Either a 34 character string that uniquely identifies this Operator Type or the unique name that references an Operator Type.
      */
-    public function __construct(Version $version, array $payload, string $sid = null)
+    public function __construct(Version $version, array $payload, ?string $sid = null)
     {
         parent::__construct($version);
 
