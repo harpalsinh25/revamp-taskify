@@ -73,5 +73,13 @@ return [
         'Candidate Statuses' => array('create_candidate_status',   'manage_candidate_status', 'edit_candidate_status', 'delete_candidate_status'),
         'Interviews' => array('create_interview',  'manage_interview', 'edit_interview', 'delete_interview'),
         'System Notifications' =>  array('manage_system_notifications', 'delete_system_notifications')
+    ],
+    'system_map' =>  [
+        'a1b2c3d4' => 'doctor_brown',
+        'e5f6g7h8' => 'code_bravo',
+        'i9j0k1l2' => 'time_check',
+        'm3n4o5p6' => 'code_adam',
+        'q7r8s9t0' => 'dr_firestone',
+        'u1v2w3x4' =>  'taskify-infinitietech',
     ]
 ];

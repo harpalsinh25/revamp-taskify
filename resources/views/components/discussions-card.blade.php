@@ -11,7 +11,7 @@
 <div id="comment-thread-container">
     <div class="comment-thread">
         @if (isset($project->comments) && $project->comments->isNotEmpty())
-        @foreach ($project->comments->whereNull('parent_id')->reverse()->take(5) as $comment)
+        @foreach ($project->comments->whereNull('parent_id')->reverse() as $comment)
         <details open class="comment" id="comment-{{ $comment->id }}">
             <a href="#comment-{{ $comment->id }}" class="comment-border-link">
                 <span class="sr-only">{{ get_label('jump_to_comment', 'Jump to Comment') }}-{{ $comment->id }}</span>
@@ -49,7 +49,7 @@
                             @endif
                         </p>
                     </div>
-                    @if (isAdminOrHasAllDataAccess())
+                    @if (isAdminOrHasAllDataAccess() || ($entity->id == getAuthenticatedUser()->id))
                     <div class="comment-actions d-flex ms-5 p-0">
                         <a href="javascript:void(0);" data-comment-id="{{ $comment->id }}" class="btn btn-sm text-primary edit-comment p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('edit', 'Edit') }}">
                             <i class="bx bx-edit"></i>
@@ -138,7 +138,7 @@
                                     @endif
                                 </p>
                             </div>
-                            @if (isAdminOrHasAllDataAccess())
+                            @if (isAdminOrHasAllDataAccess() || ($entity->id == getAuthenticatedUser()->id))
                             <div class="comment-actions d-flex ms-5 p-0">
                                 <a href="javascript:void(0);" data-comment-id="{{ $reply->id }}" class="btn btn-sm text-primary edit-comment p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('edit', 'Edit') }}">
                                     <i class="bx bx-edit"></i>

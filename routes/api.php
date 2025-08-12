@@ -19,6 +19,7 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\LeadFormController;
 use App\Http\Controllers\MeetingsController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\PayslipsController;
@@ -65,6 +66,7 @@ Route::post('/users/signup', [SignUpController::class, 'create_account'])->middl
 Route::post('/users/login', [UserController::class, 'authenticate'])->middleware(['customThrottle', 'isApi']);
 Route::post('/password/reset-request', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware(['isApi']);
 Route::post('/password/reset', [ForgotPasswordController::class, 'ResetPassword'])->middleware(['isApi']);
+Route::get('/estimates-invoices/pdf/{id}', [EstimatesInvoicesController::class, 'pdf']);
 // Route::post('/users/logout', [UserController::class, 'logout'])->middleware('auth:sanctum');
 
 // Roles
@@ -76,7 +78,7 @@ Route::get('/settings/{variable}', [SettingsController::class, 'show'])->middlew
 Route::post('/settings/update', [SettingsController::class, 'store_settings_api'])->middleware(['multiguard', 'custom-verified', 'isApi','customRole:admin']);
 
 // Protected Routes
-Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(function () {
+Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api.')->group(function () {
 
     Route::patch('/user/fcm-token', [UserController::class, 'updateFcmToken']);
 
@@ -142,6 +144,7 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
         Route::post('/comments/update', [ProjectsController::class, 'update_comment'])->middleware(['isApi']);
         Route::delete('/comments/destroy', [ProjectsController::class, 'destroy_comment'])->middleware(['demo_restriction', 'log.activity']);
         Route::get('/{id}/comments/list', [ProjectsController::class, 'get_project_comments_api']);
+        Route::delete('/comments/destroy-attachment/{id}', [ProjectsController::class, 'destroy_comment_attachment']);
     });
 
     //Project Media
@@ -174,10 +177,12 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
 
     //Task Comments
     Route::prefix('tasks')->group(function () {
-        Route::post('/information/{id}/comments', [TasksController::class, 'comments'])->middleware(['isApi']);
+        Route::post('/{id}/comments', [TasksController::class, 'comments'])->middleware(['isApi']);
         Route::get('/comments/get/{id}', [TasksController::class, 'get_comment']);
         Route::post('/comments/update', [TasksController::class, 'update_comment'])->middleware(['isApi']);
         Route::delete('/comments/destroy', [TasksController::class, 'destroy_comment']);
+        Route::get('/{id}/comments/list', [TasksController::class, 'get_project_comments_api']);
+        Route::delete('/comments/destroy-attachment/{id}', [TasksController::class, 'destroy_comment_attachment']);
     });
 
     //Task Media
@@ -346,7 +351,7 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
 
         Route::get('/estimates-invoices', [EstimatesInvoicesController::class, 'apiList']);
         Route::post('/estimates-invoices/store', [EstimatesInvoicesController::class, 'store'])->middleware(['customcan:create_estimates_invoices', 'log.activity']);
-        Route::get('/estimates-invoices/pdf/{id}', [EstimatesInvoicesController::class, 'pdf'])->middleware(['checkAccess:App\Models\EstimatesInvoice,estimates_invoices,id,estimates_invoices']);
+
         Route::post('/estimates-invoices/update', [EstimatesInvoicesController::class, 'update'])->middleware(['customcan:edit_estimates_invoices', 'log.activity']);
         Route::delete('/estimates-invoices/destroy/{id}', [EstimatesInvoicesController::class, 'destroy'])->middleware(['demo_restriction', 'customcan:delete_estimates_invoices', 'checkAccess:App\Models\EstimatesInvoice,estimates_invoices,id,estimates_invoices', 'log.activity']);
     });
@@ -442,6 +447,17 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->group(fun
         Route::post('/{lead}/convert-to-client', [LeadController::class, 'convertToClient'])->name('leads.convert_to_client');
     });
     Route::put('/save-leads-view-preference', [LeadController::class, 'saveViewPreference'])->name('leads.save_view_preference');
+
+    // Lead Forms
+    Route::prefix('lead-forms')->middleware(['customcan:manage_leads', 'isApi'])->group(function () {
+        Route::post('/store', [LeadFormController::class, 'store']);
+        Route::post('/update/{id}', [LeadFormController::class, 'update']);
+        Route::delete('/destroy/{id}', [LeadFormController::class, 'destroy']);
+        Route::get('/api-list', [LeadFormController::class, 'apiList']);
+        Route::post('/{leadForm}/toggle', [LeadFormController::class, 'toggleStatus']);
+        Route::get('/responses/api-list/{id}', [LeadFormController::class, 'apiResponseList']);
+    });
+
 
 
     Route::post('/custom-fields', [CustomFieldController::class, 'store']);

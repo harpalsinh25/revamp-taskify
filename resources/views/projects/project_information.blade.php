@@ -66,10 +66,10 @@
                                                     <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" alt="{{$user->first_name}} {{$user->last_name}}">
                                                 </a></li>
                                             @endforeach
-                                            <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
+                                            <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
                                         </ul>
                                     <?php } else { ?>
-                                        <p><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a></p>
+                                        <p><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a></p>
                                     <?php } ?>
                                 </div>
                                 <div class="col-md-6  mt-3 mb-3">
@@ -83,10 +83,10 @@
                                                     <img src="{{$client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" alt="{{$client->first_name}} {{$client->last_name}}">
                                                 </a></li>
                                             @endforeach
-                                            <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
+                                            <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
                                         </ul>
                                     <?php } else { ?>
-                                        <p><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a></p>
+                                        <p><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a></p>
                                     <?php } ?>
                                 </div>
                                 <div class="col-md-{{$project->note ? '7' : '6'}} mb-3">

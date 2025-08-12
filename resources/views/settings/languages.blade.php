@@ -3789,7 +3789,16 @@
                                 {!! create_label('create_task_list', 'Create Task List', Session::get('locale')) !!}
                                 {!! create_label('HRMS', 'HRMS', Session::get('locale')) !!}
                             </div>
-
+                             {{-- Plugin Labels --}}
+                            @php
+                                use App\Helpers\PluginHelper;
+                                $pluginLabels = PluginHelper::getPluginLabels();
+                            @endphp
+                            <div class="row">
+                                @foreach ($pluginLabels as $key => $value)
+                                    {!! create_label($key, $value, Session::get('locale')) !!}
+                                @endforeach
+                            </div>
                             <div class="row">
 
                                 <!-- </div> -->

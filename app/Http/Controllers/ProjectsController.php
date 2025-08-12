@@ -21,6 +21,7 @@ use App\Imports\ProjectsImport;
 use App\Models\CommentAttachment;
 use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\UserClientPreference;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -1082,7 +1083,7 @@ class ProjectsController extends Controller
                     }
                     $actions = '';
                     if ($canEdit) {
-                        $actions .= '<a href="javascript:void(0);" class="edit-project" data-id="' . $project->id . '" title="' . get_label('update', 'Update') . '">' .
+                    $actions .= '<a href="javascript:void(0);" class="edit-project" data-offcanvas="true" data-id="' . $project->id . '" title="' . get_label('update', 'Update') . '">' .
                             '<i class="bx bx-edit mx-1"></i>' .
                             '</a>';
                     }
@@ -1110,13 +1111,13 @@ class ProjectsController extends Controller
                             $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
                         if ($canEdit) {
-                            $userHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a></li>';
+                        $userHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a></li>';
                         }
                         $userHtml .= '</ul>';
                     } else {
                         $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                         if ($canEdit) {
-                            $userHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="' . $project->id . '">' .
+                        $userHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '">' .
                                 '<span class="bx bx-edit"></span>' .
                                 '</a>';
                         }
@@ -1128,13 +1129,13 @@ class ProjectsController extends Controller
                             $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
                         if ($canEdit) {
-                            $clientHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a></li>';
+                        $clientHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a></li>';
                         }
                         $clientHtml .= '</ul>';
                     } else {
                         $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                         if ($canEdit) {
-                            $clientHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="' . $project->id . '">' .
+                        $clientHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '">' .
                                 '<span class="bx bx-edit"></span>' .
                                 '</a>';
                         }
@@ -3244,12 +3245,58 @@ class ProjectsController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Delete a comment attachment.
+     *
+     * This endpoint deletes a specific attachment belonging to a comment and removes its file from storage.
+     * The user must be authenticated and have permission to delete comment attachments.
+     *
+     * @authenticated
+     *
+     * @group Project Comments
+     *
+     * @urlParam id int required The ID of the comment attachment to delete.
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Attachment deleted successfully."
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Attachment not found."
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "Attachment couldn't be deleted."
+     * }
+     */
     public function destroy_comment_attachment($id)
     {
-        $attachment = CommentAttachment::findOrFail($id);
-        Storage::disk('public')->delete($attachment->file_path);
-        $attachment->delete();
-        return response()->json(['error' => false, 'message' => 'Attachment deleted successfully.']);
+
+        try {
+            $attachment = CommentAttachment::findOrFail($id);
+
+            Storage::disk('public')->delete($attachment->file_path);
+            $attachment->delete();
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Attachment deleted successfully.',
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Attachment not found.',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Something went wrong.',
+            ], 500);
+        }
     }
 
     /**
@@ -3283,42 +3330,35 @@ class ProjectsController extends Controller
      */
     public function get_project_comments_api($id)
     {
+        $limit = request('limit', 10);
+        $offset = request('offset', 0);
+        $search = request('search');
+
         try {
             $project = Project::findOrFail($id);
 
-            // Recursive function to get children
-            $getChildren = function ($comment) use (&$getChildren) {
-                return [
-                    'id' => $comment->id,
-                    'content' => $comment->content,
-                    'commenter' => $comment->commenter,
-                    'created_at' => $comment->created_at,
-                    'attachments' => $comment->attachments->map(function ($a) {
-                        return [
-                            'id' => $a->id,
-                            'file_name' => $a->file_name,
-                            'file_path' => $a->file_path,
-                            'file_type' => $a->file_type,
-                            'url' => asset('storage/' . $a->file_path),
-                        ];
-                    }),
-                    'children' => $comment->children->map($getChildren)->values(),
-                ];
-            };
+            $commentsQuery = $project->comments()
+                ->whereNull('parent_id') // Only get parent comments, not child comments
+                ->when($search, function ($query, $search) {
+                    $query->where('content', 'LIKE', '%' . $search . '%');
+                })
+                ->orderBy('created_at', 'desc');
+            $total = $commentsQuery->count();
 
-            // Get top-level comments (parent_id is null)
-            $comments = Comment::with(['attachments', 'children.attachments', 'children.children.attachments', 'commenter'])
-                ->where('commentable_type', Project::class)
-                ->where('commentable_id', $project->id)
-                ->whereNull('parent_id')
-                ->orderBy('created_at', 'asc')
+
+            $comments = $commentsQuery
+                ->skip($offset)
+                ->take($limit)
                 ->get();
 
-            $result = $comments->map($getChildren);
+            $result = $comments->map(function ($comment) {
+                return formatComment($comment);
+            });
 
             return response()->json([
                 'error' => false,
-                'comments' => $result,
+                'data' => $result,
+                'total' => $total,
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -3326,12 +3366,14 @@ class ProjectsController extends Controller
                 'message' => 'Project not found.'
             ], 404);
         } catch (\Exception $e) {
+
             return response()->json([
                 'error' => true,
                 'message' => 'Could not retrieve comments.'
             ], 500);
         }
     }
+
 
     public function saveViewPreference(Request $request)
     {
@@ -3883,6 +3925,8 @@ class ProjectsController extends Controller
                 'title' => $title,
                 'start' => $project->start_date,
                 'end' => $project->end_date,
+                'status_id' => $project->status_id,
+                'priority_id' => $project->priority_id,
                 'backgroundColor' => $backgroundColor,
                 'borderColor' => '#ffffff',
                 'textColor' => '#000000',
@@ -3948,6 +3992,54 @@ class ProjectsController extends Controller
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while updating task dates.',
+            ], 500);
+        }
+    }
+
+    public function getStatuses()
+    {
+        try {
+            $statuses = Status::select('id', 'title', 'color')->get()->map(function ($status) {
+                return [
+                    'id' => $status->id,
+                    'title' => $status->title ?? $status->name ?? 'Untitled',
+                    'color' => $status->color ?? '#6c757d',
+                ];
+            });
+            return response()->json([
+                'error' => false,
+                'statuses' => $statuses,
+                'message' => 'Statuses retrieved successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error in getStatuses: ' . $e->getMessage());
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while fetching statuses'
+            ], 500);
+        }
+    }
+
+    public function getPriorities()
+    {
+        try {
+            $priorities = Priority::select('id', 'title', 'color')->get()->map(function ($priority) {
+                return [
+                    'id' => $priority->id,
+                    'title' => $priority->title ?? $priority->name ?? 'Untitled',
+                    'color' => $priority->color ?? '#6c757d',
+                ];
+            });
+            return response()->json([
+                'error' => false,
+                'priorities' => $priorities,
+                'message' => 'Priorities retrieved successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error in getPriorities: ' . $e->getMessage());
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while fetching priorities'
             ], 500);
         }
     }

@@ -47,9 +47,165 @@ class LeadFormController extends Controller
 
         return view('lead_form.create', compact('sources', 'stages', 'users'));
     }
+    /**
+     * Create a new lead form.
+     *
+     * This endpoint creates a new lead form with dynamic, mappable fields for capturing leads, mapping them to lead sources, stages, and assigned users within the current workspace.
+     * The user must be authenticated and authorized to manage lead forms.
+     *
+     * @authenticated
+     *
+     * @group Lead Form Management
+     *
+     * @bodyParam title string required The title of the lead form. Max 255 characters. Example: Website Leads
+     * @bodyParam description string optional The description of the lead form. Example: Capture leads from website visitors
+     * @bodyParam source_id integer required The ID of the lead source. Must exist in lead_sources. Example: 2
+     * @bodyParam stage_id integer required The ID of the lead stage. Must exist in lead_stages. Example: 2
+     * @bodyParam assigned_to integer required The ID of the user to assign leads to. Must exist in users. Example: 11
+     * @bodyParam fields array required An array of field definitions for the form.
+     *
+     * @bodyParam fields[].label string required The label for the field. Example: First Name
+     * @bodyParam fields[].type string required The type of the field. Allowed: text, textarea, select, radio, checkbox, number, email, tel. Example: text
+     * @bodyParam fields[].is_required boolean optional Whether the field is required. Example: true
+     * @bodyParam fields[].is_mapped boolean optional Whether the field should be mapped to a CRM field. Example: true
+     * @bodyParam fields[].name string required_if:fields[].is_mapped,true The CRM field name to map to if mapped. Example: first_name
+     * @bodyParam fields[].options array optional Required if the type is select, radio, or checkbox. An array of options for the field. Example: ["Web Development", "SEO", "UI/UX Design"]
+     * @bodyParam fields[].placeholder string optional Placeholder text for the field. Example: Enter your first name
+     *
+     * @bodyParam fields[0][label] string required Default required field in all forms. Example: First Name
+     * @bodyParam fields[0][type] string required Example: text
+     * @bodyParam fields[0][is_required] boolean required Example: true
+     * @bodyParam fields[0][is_mapped] boolean required Example: true
+     * @bodyParam fields[0][name] string required Example: first_name
+     * @bodyParam fields[0][placeholder] string optional Example: Enter your first name
+     *
+     * @bodyParam fields[1][label] string required Default required field in all forms. Example: Last Name
+     * @bodyParam fields[1][type] string required Example: text
+     * @bodyParam fields[1][is_required] boolean required Example: true
+     * @bodyParam fields[1][is_mapped] boolean required Example: true
+     * @bodyParam fields[1][name] string required Example: last_name
+     * @bodyParam fields[1][placeholder] string optional Example: Enter your last name
+     *
+     * @bodyParam fields[2][label] string required Default required field in all forms. Example: Email
+     * @bodyParam fields[2][type] string required Example: text
+     * @bodyParam fields[2][is_required] boolean required Example: true
+     * @bodyParam fields[2][is_mapped] boolean required Example: true
+     * @bodyParam fields[2][name] string required Example: email
+     * @bodyParam fields[2][placeholder] string optional Example: Enter your email
+     *
+     * @bodyParam fields[3][label] string required Default required field in all forms. Example: Phone
+     * @bodyParam fields[3][type] string required Example: number
+     * @bodyParam fields[3][is_required] boolean required Example: true
+     * @bodyParam fields[3][is_mapped] boolean required Example: true
+     * @bodyParam fields[3][name] string required Example: phone
+     * @bodyParam fields[3][placeholder] string optional Example: Enter your phone number
+     *
+     * @bodyParam fields[4][label] string required Default required field in all forms. Example: Company
+     * @bodyParam fields[4][type] string required Example: text
+     * @bodyParam fields[4][is_required] boolean required Example: true
+     * @bodyParam fields[4][is_mapped] boolean required Example: true
+     * @bodyParam fields[4][name] string required Example: company
+     * @bodyParam fields[4][placeholder] string optional Example: Enter your company name
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead form created successfully!",
+     *   "form": {
+     *     "id": 12,
+     *     "title": "Website Leads",
+     *     "description": "Capture leads from website visitors",
+     *     "created_by": 1,
+     *     "workspace_id": 1,
+     *     "source_id": 2,
+     *     "stage_id": 2,
+     *     "assigned_to": 11,
+     *     "lead_form_fields": [
+     *       {
+     *         "id": 45,
+     *         "label": "First Name",
+     *         "name": "first_name",
+     *         "type": "text",
+     *         "is_required": true,
+     *         "is_mapped": true,
+     *         "options": null,
+     *         "order": 1
+     *       },
+     *       {
+     *         "id": 46,
+     *         "label": "Last Name",
+     *         "name": "last_name",
+     *         "type": "text",
+     *         "is_required": true,
+     *         "is_mapped": true,
+     *         "options": null,
+     *         "order": 2
+     *       },
+     *       {
+     *         "id": 47,
+     *         "label": "Email",
+     *         "name": "email",
+     *         "type": "text",
+     *         "is_required": true,
+     *         "is_mapped": true,
+     *         "options": null,
+     *         "order": 3
+     *       },
+     *       {
+     *         "id": 48,
+     *         "label": "Phone",
+     *         "name": "phone",
+     *         "type": "number",
+     *         "is_required": true,
+     *         "is_mapped": true,
+     *         "options": null,
+     *         "order": 4
+     *       },
+     *       {
+     *         "id": 49,
+     *         "label": "Company",
+     *         "name": "company",
+     *         "type": "text",
+     *         "is_required": true,
+     *         "is_mapped": true,
+     *         "options": null,
+     *         "order": 5
+     *       },
+     *       {
+     *         "id": 50,
+     *         "label": "Interested Service",
+     *         "name": null,
+     *         "type": "select",
+     *         "is_required": true,
+     *         "is_mapped": false,
+     *         "options": ["Web Development", "SEO", "UI/UX Design"],
+     *         "order": 6
+     *       }
+     *     ]
+     *   },
+     *   "public_url": "https://yourapp.com/forms/website-leads",
+     *   "embed_code": "<iframe src='https://yourapp.com/forms/embed/website-leads'></iframe>"
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "title": ["Form title is required."],
+     *     "fields.0.label": ["Field label is required."],
+     *     "fields.0.type": ["Field type is required."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "Failed to create form: An unexpected error occurred."
+     * }
+     */
 
     public function store(Request $request)
     {
+        $isApi = $request->get('isApi', false);
+
         // Clean up empty fields before validation
         $cleanedFields = [];
         if ($request->has('fields')) {
@@ -70,7 +226,6 @@ class LeadFormController extends Controller
             'source_id' => 'required|exists:lead_sources,id',
             'stage_id' => 'required|exists:lead_stages,id',
             'assigned_to' => 'required|exists:users,id',
-            'success_message' => 'nullable|string',
             'redirect_url' => 'nullable|url',
             'fields' => 'required|array|min:1',
             'fields.*.label' => 'required|string|max:255',
@@ -102,7 +257,7 @@ class LeadFormController extends Controller
             'stage_id.exists' => 'Selected lead stage does not exist.',
             'assigned_to.required' => 'Assigned user is required.',
             'assigned_to.exists' => 'Selected user does not exist.',
-            'success_message.max' => 'Success message cannot exceed 500 characters.',
+
             'redirect_url.url' => 'Redirect URL must be a valid URL.',
             'redirect_url.max' => 'Redirect URL cannot exceed 2048 characters.',
         ]);
@@ -124,11 +279,15 @@ class LeadFormController extends Controller
         });
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            if ($isApi) {
+                return formatApiValidationError($isApi, $validator->errors());
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
         }
 
         DB::beginTransaction();
@@ -136,7 +295,7 @@ class LeadFormController extends Controller
             $form = LeadForm::create([
                 'title' => $request->title,
                 'description' => $request->description,
-                'created_by' => auth()->id(),
+                'created_by' => getAuthenticatedUser()->id,
                 'workspace_id' => 1,
                 'source_id' => $request->source_id,
                 'stage_id' => $request->stage_id,
@@ -179,25 +338,53 @@ class LeadFormController extends Controller
             }
 
             DB::commit();
+            if ($isApi) {
+                return formatApiResponse(
+                    false,
+                    'Lead form created successfully',
+                    [
+                        'data' => [
+                            'id' => $form->id,
+                            'form' => formatLeadForm($form),
 
-            return response()->json([
-                'error' => false,
-                'message' => 'Lead form created successfully!',
-                'form' => $form->load('leadFormFields'),
-                'public_url' => $form->public_url ?? null,
-                'embed_code' => $form->embed_code ?? null
-            ]);
+                        ]
+                    ]
+                );
+            } else {
+
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Lead form created successfully!',
+                    'form' => $form->load('leadFormFields'),
+                    'public_url' => $form->public_url ?? null,
+                    'embed_code' => $form->embed_code ?? null
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Lead form creation failed: ' . $e->getMessage(), [
                 'request_data' => $request->all(),
                 'exception' => $e
             ]);
+            if ($isApi) {
+                return formatApiResponse(
+                    true,
+                    'Failed to create form.',
+                    [
+                        'data' => [
+                            'error' => $e->getMessage(),
+                            'line' => $e->getLine(),
+                            'file' => $e->getFile()
+                        ]
+                    ]
+                );
+            } else {
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create form: ' . $e->getMessage()
-            ], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create form: ' . $e->getMessage()
+                ], 500);
+            }
         }
     }
 
@@ -225,9 +412,134 @@ class LeadFormController extends Controller
 
         return view('lead_form.edit', compact('leadForm', 'sources', 'stages', 'users'));
     }
+    /**
+     * Update an existing lead form.
+     *
+     * This endpoint updates an existing lead form, including its title, description, source, stage, assigned user, and associated fields.
+     * The user must be authenticated and authorized to manage lead forms.
+     *
+     * @authenticated
+     *
+     * @group Lead Form Management
+     *
+     * @urlParam id integer required The ID of the lead form to update. Example: 5
+     *
+     * @bodyParam title string required The title of the lead form. Max 255 characters. Example: Website Leads
+     * @bodyParam description string optional The description of the lead form. Example: Capture leads from website visitors
+     * @bodyParam source_id integer required The ID of the lead source. Must exist in lead_sources. Example: 2
+     * @bodyParam stage_id integer required The ID of the lead stage. Must exist in lead_stages. Example: 2
+     * @bodyParam assigned_to integer required The ID of the user to assign leads to. Must exist in users. Example: 11
+     * @bodyParam fields array required An array of at least 5 field objects for the form.
+     *
+     * @bodyParam fields[].label string required The label of the field. Max 255 characters. Example: First Name
+     * @bodyParam fields[].type string required The type of the field. Allowed values: text, textarea, select, checkbox, radio, email, number, date, etc. Example: text
+     * @bodyParam fields[].is_required boolean optional Whether the field is required. Example: true
+     * @bodyParam fields[].is_mapped boolean optional Whether the field is mapped to a lead attribute. Example: true
+     * @bodyParam fields[].name string required_if:fields[].is_mapped,true The mapped lead attribute if is_mapped is true. Allowed values: first_name, last_name, email, phone, company, etc. Example: first_name
+     * @bodyParam fields[].options array nullable Options for select, checkbox, or radio fields. Example: ["Web Development", "SEO", "UI/UX Design"]
+     * @bodyParam fields[].placeholder string optional Placeholder text for the field. Example: Enter your first name
+     *
+     * @bodyParam fields[0][label] string required Default required field in all forms. Example: First Name
+     * @bodyParam fields[0][type] string required Example: text
+     * @bodyParam fields[0][is_required] boolean required Example: true
+     * @bodyParam fields[0][is_mapped] boolean required Example: true
+     * @bodyParam fields[0][name] string required Example: first_name
+     * @bodyParam fields[0][placeholder] string optional Example: Enter your first name
+     *
+     * @bodyParam fields[1][label] string required Default required field in all forms. Example: Last Name
+     * @bodyParam fields[1][type] string required Example: text
+     * @bodyParam fields[1][is_required] boolean required Example: true
+     * @bodyParam fields[1][is_mapped] boolean required Example: true
+     * @bodyParam fields[1][name] string required Example: last_name
+     * @bodyParam fields[1][placeholder] string optional Example: Enter your last name
+     *
+     * @bodyParam fields[2][label] string required Default required field in all forms. Example: Email
+     * @bodyParam fields[2][type] string required Example: text
+     * @bodyParam fields[2][is_required] boolean required Example: true
+     * @bodyParam fields[2][is_mapped] boolean required Example: true
+     * @bodyParam fields[2][name] string required Example: email
+     * @bodyParam fields[2][placeholder] string optional Example: Enter your email
+     *
+     * @bodyParam fields[3][label] string required Default required field in all forms. Example: Phone
+     * @bodyParam fields[3][type] string required Example: number
+     * @bodyParam fields[3][is_required] boolean required Example: true
+     * @bodyParam fields[3][is_mapped] boolean required Example: true
+     * @bodyParam fields[3][name] string required Example: phone
+     * @bodyParam fields[3][placeholder] string optional Example: Enter your phone number
+     *
+     * @bodyParam fields[4][label] string required Default required field in all forms. Example: Company
+     * @bodyParam fields[4][type] string required Example: text
+     * @bodyParam fields[4][is_required] boolean required Example: true
+     * @bodyParam fields[4][is_mapped] boolean required Example: true
+     * @bodyParam fields[4][name] string required Example: company
+     * @bodyParam fields[4][placeholder] string optional Example: Enter your company name
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead form updated successfully",
+     *   "data": {
+     *     "id": 5,
+     *     "form": {
+     *       "id": 5,
+     *       "title": "Website Leads",
+     *       "description": "Capture leads from website visitors",
+     *       "source": "Website",
+     *       "stage": "New",
+     *       "assigned_to": {
+     *         "id": 11,
+     *         "first_name": "Dimpal",
+     *         "last_name": "Shah",
+     *         "email": "dimpal@example.com"
+     *       },
+     *       "is_active": true,
+     *       "fields": [
+     *         {
+     *           "label": "First Name",
+     *           "type": "text",
+     *           "is_required": true,
+     *           "is_mapped": true,
+     *           "name": "first_name",
+     *           "options": null,
+     *           "placeholder": "Enter your first name"
+     *         },
+     *         {
+     *           "label": "Interested Service",
+     *           "type": "select",
+     *           "is_required": true,
+     *           "is_mapped": false,
+     *           "options": ["Web Development", "SEO", "UI/UX Design"],
+     *           "placeholder": null
+     *         }
+     *       ],
+     *       "created_at": "2025-07-21T12:00:00.000000Z",
+     *       "updated_at": "2025-07-21T13:00:00.000000Z"
+     *     }
+     *   }
+     * }
+     *
+     * @response 422 {
+     *   "error": true,
+     *   "message": "Validation failed",
+     *   "errors": {
+     *     "title": ["The title field is required."],
+     *     "fields.0.label": ["The field label is required."],
+     *     "fields.0.type": ["The field type is required."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "Failed to update form",
+     *   "data": {
+     *     "error": "SQLSTATE[HY000]: General error: ...",
+     *     "line": 120
+     *   }
+     * }
+     */
 
     public function update(Request $request, $id)
     {
+        $isApi = $request->get('isApi', false);
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -285,19 +597,75 @@ class LeadFormController extends Controller
             }
 
             DB::commit();
+            if ($isApi) {
+                return formatApiResponse(
+                    false,
+                    'Lead Form updated successfully',
+                    [
+                        'data' => [
+                            'id' => $leadForm->id,
+                            'form' => formatLeadForm($leadForm)
+                        ]
+                    ]
+                );
+            } else {
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Lead form updated successfully!'
-            ]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lead form updated successfully!'
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update form: ' . $e->getMessage()
-            ], 500);
+            if ($isApi) {
+                return formatApiResponse(
+                    true,
+                    'Failed to update form',
+                    [
+                        'data' => [
+                            'error' => $e->getMessage(),
+                            'line' => $e->getLine(),
+                        ]
+                    ]
+                );
+            } else {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update form: ' . $e->getMessage()
+                ], 500);
+            }
         }
     }
+    /**
+     * Delete a Lead Form.
+     *
+     * This endpoint allows authenticated users to delete a specific status. Before deletion,
+     * all associated projects and tasks will be updated to have a default status ID of `0`.
+     *
+     * @authenticated
+     *
+     * @group Lead Form Management
+     *
+     * @urlParam id int required The ID of the status to delete.
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead Form deleted successfully.",
+     *   "id": 101,
+     *
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Lead Form not found."
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "Lead Form couldn't be deleted."
+     * }
+     */
 
     public function destroy($id)
     {
@@ -467,6 +835,34 @@ class LeadFormController extends Controller
 
         return implode('|', $rules);
     }
+    /**
+     * Toggle lead form active/inactive status.
+     *
+     * This endpoint toggles the `is_active` status of a lead form between active (1) and inactive (0).
+     * The user must be authenticated and authorized to manage lead forms.
+     *
+     * @authenticated
+     *
+     * @group Lead Form Management
+     *
+     * @urlParam lead_form integer required The ID of the lead form to toggle status for. Example: 12
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Form status updated successfully!",
+     *   "status": true
+     * }
+     *
+     * @response 404 {
+     *   "error": false,
+     *   "message": "Lead form not found."
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while updating the lead form status."
+     * }
+     */
 
     public function toggleStatus(LeadForm $leadForm)
     {
@@ -534,5 +930,267 @@ class LeadFormController extends Controller
             'total' => $total,
             'rows' => $leads,
         ]);
+    }
+
+    /**
+     * List lead forms with optional filters, sorting, and pagination.
+     *
+     * This endpoint retrieves a paginated list of lead forms or a specific lead form by ID, with optional search, sorting, and pagination parameters. The response includes permission details for editing and deletion. The user must be authenticated and authorized to manage lead forms.
+     *
+     * @authenticated
+     *
+     * @group Lead Form Management
+     *
+     * @queryParam id integer optional The ID of a specific lead form to retrieve. Example: 1
+     * @queryParam search string optional Filters lead forms by title or description. Example: Website
+     * @queryParam sort string optional The column to sort by (id, title, created_at, updated_at). Defaults to id. Example: created_at
+     * @queryParam order string optional The sort order (ASC, DESC). Defaults to DESC. Example: ASC
+     * @queryParam limit integer optional Number of lead forms per page (1-100). Defaults to 10. Example: 20
+     * @queryParam offset integer optional Number of lead forms to skip. Defaults to 0. Example: 10
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead forms retrieved successfully.",
+     *   "total": 5,
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "title": "Website Lead Form",
+     *       "description": "Lead form for website captures.",
+     *       "source": { "id": 2, "name": "Website" },
+     *       "stage": { "id": 3, "name": "New", "color": "primary" },
+     *       "assigned_to": { "id": 5, "first_name": "John", "last_name": "Doe", "email": "john@example.com", "photo": "..." },
+     *       "fields": [...],
+     *       "public_url": "https://...",
+     *       "embed_code": "<iframe ...>",
+     *       "leads_count": 15,
+     *       "created_at": "2025-07-21 10:15:00",
+     *       "updated_at": "2025-07-21 10:15:00",
+     *       "sent_time": "2 hours ago"
+     *     }
+     *   ],
+     *   "permissions": {
+     *     "can_edit": true,
+     *     "can_delete": true
+     *   }
+     * }
+     *
+     * @response 404 {
+     *   "error": false,
+     *   "message": "Lead form(s) not found.",
+     *   "total": 0,
+     *   "data": []
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while retrieving the lead forms."
+     * }
+     */
+    public function apiList(Request $request)
+    {
+        try {
+            $limit = $request->input('limit', 10);
+            $offset = $request->input('offset', 0);
+            $id = $request->input('id', null);
+            $search = $request->input('search');
+            $sort = $request->input('sort', 'id');
+            $order = $request->input('order', 'DESC');
+
+            $leadFormsQuery = LeadForm::with(['leadSource', 'leadStage', 'assignedUser', 'leadFormFields']);
+
+            if ($search) {
+                $leadFormsQuery->where(function ($query) use ($search) {
+                    $query->where('title', 'like', '%' . $search . '%')
+                        ->orWhere('description', 'like', '%' . $search . '%');
+                });
+            }
+
+            $total = $leadFormsQuery->count();
+
+            if ($id) {
+                $leadForm = $leadFormsQuery->find($id);
+
+                if (!$leadForm) {
+                    return formatApiResponse(
+                        false,
+                        'Lead form not found.',
+                        [
+                            'total' => 0,
+                            'data' => []
+                        ],
+                        404
+                    );
+                }
+
+                return formatApiResponse(
+                    false,
+                    'Lead form retrieved successfully.',
+                    [
+                        'total' => 1,
+                        'data' => formatLeadForm($leadForm)
+                    ],
+                    200
+                );
+            } else {
+                $leadForms = $leadFormsQuery->orderBy($sort, $order)
+                    ->skip($offset)
+                    ->take($limit)
+                    ->get();
+
+                if ($leadForms->isEmpty()) {
+                    return formatApiResponse(
+                        false,
+                        'Lead forms not found.',
+                        [
+                            'total' => 0,
+                            'data' => []
+                        ],
+                        404
+                    );
+                }
+
+                $data = $leadForms->map(fn($leadForm) => formatLeadForm($leadForm));
+
+                return formatApiResponse(
+                    false,
+                    'Lead forms retrieved successfully.',
+                    [
+                        'total' => $total,
+                        'data' => $data,
+                        'permissions' => [
+                            'can_edit' => checkPermission('manage_leads'),
+                            'can_delete' => checkPermission('manage_leads'),
+                        ],
+                    ],
+                    200
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Lead Forms API List Error: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return formatApiResponse(
+                true,
+                'An error occurred while retrieving the lead forms.',
+                [],
+                500
+            );
+        }
+    }
+
+    /**
+     * List lead form responses with optional filters, sorting, and pagination.
+     *
+     * This endpoint retrieves a paginated list of responses (leads) for a specific lead form, with optional search, sorting, and pagination parameters.
+     * The user must be authenticated and authorized to view lead form responses.
+     *
+     * @authenticated
+     *
+     * @group Lead Form Management
+     *
+     * @urlParam id integer required The ID of the lead form for which to retrieve responses. Example: 1
+     * @queryParam search string optional Filters responses by first name, last name, email, or company. Example: John
+     * @queryParam sort string optional The column to sort by (id, first_name, last_name, email, created_at). Defaults to id. Example: created_at
+     * @queryParam order string optional The sort order (ASC, DESC). Defaults to DESC. Example: ASC
+     * @queryParam limit integer optional Number of responses per page (1-100). Defaults to 10. Example: 20
+     * @queryParam offset integer optional Number of responses to skip. Defaults to 0. Example: 10
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Lead form responses retrieved successfully.",
+     *   "total": 2,
+     *   "data": [
+     *     {
+     *       "id": 5,
+     *       "name": "John Doe",
+     *       "email": "john@example.com",
+     *       "phone": "9876543210",
+     *       "company": "Example Corp",
+     *       "submitted_at": "2025-07-21",
+     *       "sent_time": "2 hours ago"
+     *     }
+     *   ]
+     * }
+     *
+     * @response 404 {
+     *   "error": false,
+     *   "message": "Lead form responses not found.",
+     *   "total": 0,
+     *   "data": []
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while retrieving the lead form responses."
+     * }
+     */
+    public function apiResponseList(Request $request, $id)
+    {
+        try {
+            $leadForm = LeadForm::findOrFail($id);
+
+            $search = $request->input('search');
+            $limit = $request->input('limit', 10);
+            $offset = $request->input('offset', 0);
+            $sort = $request->input('sort', 'id');
+            $order = $request->input('order', 'DESC');
+
+            $query = $leadForm->leads();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%$search%")
+                        ->orWhere('last_name', 'like', "%$search%")
+                        ->orWhere('email', 'like', "%$search%")
+                        ->orWhere('company', 'like', "%$search%");
+                });
+            }
+
+            $total = $query->count();
+
+            $leads = $query->orderBy($sort, $order)
+                ->skip($offset)
+                ->take($limit)
+                ->get();
+
+            if ($leads->isEmpty()) {
+                return formatApiResponse(
+                    false,
+                    'Lead form responses not found.',
+                    [
+                        'total' => 0,
+                        'data' => []
+                    ],
+                    404
+                );
+            }
+
+            $data = $leads->map(function ($lead) {
+                return formatLeadFormResponse($lead);
+            });
+
+            return formatApiResponse(
+                false,
+                'Lead form responses retrieved successfully.',
+                [
+                    'total' => $total,
+                    'data' => $data
+                ],
+                200
+            );
+        } catch (\Exception $e) {
+            Log::error('Lead Form API Response List Error: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return formatApiResponse(
+                true,
+                'An error occurred while retrieving the lead form responses.',
+                [],
+                500
+            );
+        }
     }
 }

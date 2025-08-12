@@ -67,7 +67,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             @if ($canEditProjects)
-                            <a href="javascript:void(0);" class="edit-project" data-id="{{$project->id}}">
+                            <a href="javascript:void(0);" class="edit-project" data-offcanvas="true" data-id="{{$project->id}}">
                                 <li class="dropdown-item">
                                     <i class='menu-icon tf-icons bx bx-edit text-primary'></i>{{ get_label('update', 'Update') }}
                                 </li>
@@ -126,7 +126,7 @@
                                     @else
                                     <span class="badge bg-primary">{{ get_label('not_assigned', 'Not assigned') }}</span>
                                     @endif
-                                    <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="{{ $project->id }}">
+                                    <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{ $project->id }}">
                                         <span class="bx bx-edit"></span>
                                     </a>
                                 </ul>
@@ -167,7 +167,7 @@
                                     @else
                                     <span class="badge bg-primary">{{ get_label('not_assigned', 'Not assigned') }}</span>
                                     @endif
-                                    <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="{{ $project->id }}">
+                                    <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{ $project->id }}">
                                         <span class="bx bx-edit"></span>
                                     </a>
                                 </ul>

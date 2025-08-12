@@ -1,0 +1,345 @@
+<?php
+
+namespace Plugins\TimeTracker\Controllers;
+
+use Carbon\Carbon;
+use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Plugins\TimeTracker\Models\TimeTrackerConfig;
+use Plugins\TimeTracker\Models\TimeTrackerActivityLog;
+
+class ManualTimeController extends Controller
+{
+    public function index()
+    {
+        $employees = User::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        if (!isAdminOrHasAllDataAccess() || !$this->isManualTimeApprover()) {
+            $employees = $employees->filter(function ($employee) {
+                return $employee->id === getAuthenticatedUser()->id;
+            });
+        }
+        $canApprove = $this->isManualTimeApprover() || isAdminOrHasAllDataAccess();
+        return view('timetracker::manual_time.index', compact('employees', 'canApprove'));
+    }
+
+    public function data(Request $request)
+    {
+        $query = TimeTrackerActivityLog::with('user')
+            ->whereIn('action', [
+                'manual-start',
+                'manual-stop',
+                'manual-processing-start',
+                'manual-processing-stop'
+            ]);
+
+        if (!isAdminOrHasAllDataAccess() || !$this->isManualTimeApprover()) {
+            $query->where('user_id', getAuthenticatedUser()->id);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->whereIn('user_id', (array) $request->user_id);
+        }
+
+        if ($request->filled(['start_date', 'end_date'])) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $query->whereBetween('timestamp', [$startDate, $endDate]);
+        }
+
+        // Handle search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Handle sorting
+        $sort = $request->input('sort', 'timestamp');
+        $order = $request->input('order', 'asc');
+
+        // Only allow safe columns
+        $allowedSorts = [
+            'employee_name',
+            'date',
+            'start_time',
+            'end_time',
+            'duration',
+            'reason',
+            'status',
+            'approved_at',
+            'approver',
+            'timestamp'
+        ];
+
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'timestamp';
+        }
+
+        // Since most sort fields are virtual, we sort by timestamp for consistency
+        // $query->orderBy('timestamp', $order);
+
+        // Fetch all for pairing logic
+        $logs = $query->get();
+        $grouped = $logs->groupBy(function ($item) {
+            return $item->user_id . '-' . Carbon::parse($item->timestamp)->toDateString();
+        });
+
+        $data = [];
+
+        foreach ($grouped as $items) {
+            $user = $items->first()->user;
+            $date = Carbon::parse($items->first()->timestamp)->toDateString();
+
+            $pendingStart = null;
+
+            foreach ($items as $item) {
+
+
+                if (in_array($item->action, ['manual-start', 'manual-processing-start'])) {
+                    $pendingStart = $item;
+                } elseif (in_array($item->action, ['manual-stop', 'manual-processing-stop']) && $pendingStart) {
+                    $startTime = Carbon::parse($pendingStart->timestamp);
+                    $endTime = Carbon::parse($item->timestamp);
+
+                    if ($endTime->lessThan($startTime)) {
+                        [$startTime, $endTime] = [$endTime, $startTime];
+                    }
+
+                    $durationInMinutes = $startTime->diffInMinutes($endTime);
+                    $durationFormatted = sprintf('%02d:%02d', intdiv($durationInMinutes, 60), $durationInMinutes % 60);
+
+                    $metadata = is_array($item->metadata) ? $item->metadata : json_decode($item->metadata ?? '{}', true);
+
+                    $approvalStatus = $metadata['approval_status'] ?? 'Pending';
+                    $approvedAt = $metadata['approved_at'] ?? ($metadata['rejected_at'] ?? null);
+                    $approverId = $metadata['approved_by'] ?? ($metadata['rejected_by'] ?? null);
+
+                    $approverName = 'N/A';
+                    if ($approverId) {
+                        $approverUser = \App\Models\User::find($approverId);
+                        if ($approverUser) {
+                            $approverName = ucwords($approverUser->first_name . ' ' . $approverUser->last_name);
+                        }
+                    }
+
+                    $actionsHtml = '-';
+                    if ($approvalStatus === 'Pending' && $this->isManualTimeApprover()) {
+                        $actionsHtml = '<button class="btn btn-sm btn-primary approve-manual-time" data-id="' . $pendingStart->id . '">
+                        <i class="bx bx-check-double"></i> Approve
+                        </button>';
+                    }
+
+                    $data[] = [
+                        'id' => $pendingStart->id,
+                        'employee_name' => ucwords($user->first_name . ' ' . $user->last_name),
+                        'date' => format_date($date),
+                        'start_time' => $startTime->format('h:i A'),
+                        'end_time' => $endTime->format('h:i A'),
+                        'duration' => $durationFormatted,
+                        'status' => ucfirst($approvalStatus),
+                        'approved_at' => $approvedAt ? Carbon::parse($approvedAt)->format('d M Y h:i A') : 'N/A',
+                        'approver' => $approverName,
+                        'reason' => $metadata['reason'] ?? 'N/A',
+                        'remarks' => $metadata['remarks'] ?? 'N/A',
+                        'actions' => $actionsHtml,
+                    ];
+
+
+                    $pendingStart = null;
+                }
+            }
+        }
+
+
+        // Apply frontend sorting if sorting on virtual fields
+        if ($sort !== 'timestamp') {
+            usort($data, function ($a, $b) use ($sort, $order) {
+                return $order === 'asc'
+                    ? strcmp($a[$sort], $b[$sort])
+                    : strcmp($b[$sort], $a[$sort]);
+            });
+        }
+
+        // Pagination
+        $limit = (int) $request->input('limit', 10);
+        $offset = (int) $request->input('offset', 0);
+        $pagedData = array_slice($data, $offset, $limit);
+
+        return response()->json([
+            'total' => count($data),
+            'rows' => $pagedData,
+        ]);
+    }
+
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
+            'reason' => 'required|string|max:255 ',
+        ]);
+        if (isAdminOrHasAllDataAccess() || $this->isManualTimeApprover()) {
+            $user_id = $request->user_id;
+        } else {
+            $user_id = getAuthenticatedUser()->id;
+        }
+        $startDateTime = Carbon::parse($request->date . ' ' . $request->start_time);
+        $endDateTime = Carbon::parse($request->date . ' ' . $request->end_time);
+
+        // Insert manual_processing_start
+        TimeTrackerActivityLog::create([
+            'user_id' => $user_id,
+            'action' => 'manual-processing-start',
+            'timestamp' => $startDateTime,
+            'metadata' => json_encode(['reason' => $request->reason]),
+        ]);
+
+        // Insert manual_processing_stop
+        TimeTrackerActivityLog::create([
+            'user_id' => $user_id,
+            'action' => 'manual-processing-stop',
+            'timestamp' => $endDateTime,
+            'metadata' => json_encode(['reason' => $request->reason]),
+        ]);
+
+        return response()->json(['message' => 'Manual time added successfully.']);
+    }
+
+    private function isManualTimeApprover()
+    {
+        // Check if the user has the role or permission to approve manual time entries
+        $configData = TimeTrackerConfig::where('name', 'time_tracker_config')->value('value');
+
+        $manualApprovers = $configData['manualTimeApprover'];
+        if (is_array($manualApprovers) && in_array(getAuthenticatedUser()->id, $manualApprovers)) {
+            return true;
+        }
+        return false;
+    }
+    public function approve(Request $request)
+    {
+        if (!isAdminOrHasAllDataAccess() && !$this->isManualTimeApprover()) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Unauthorized Action. You are not authorized to perform this action. '
+            ], 403);
+        }
+
+        $request->validate([
+            'manual_time_id' => 'required|exists:time_tracker_activity_logs,id',
+            'status' => 'required|in:approved,rejected',
+            'remarks' => 'nullable|string|max:250 ',
+        ]);
+
+        $manualStart = TimeTrackerActivityLog::findOrFail($request->manual_time_id);
+
+        $manualStop = TimeTrackerActivityLog::where('user_id', $manualStart->user_id)
+            ->where('action', 'manual-processing-stop')
+            ->where('timestamp', '>', $manualStart->timestamp)
+            ->orderBy('timestamp')
+            ->first();
+
+        if (!$manualStop) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Matching stop entry not found. '
+            ], 404);
+        }
+
+        DB::transaction(function () use ($manualStart, $manualStop, $request) {
+            $userId = getAuthenticatedUser()->id;
+            $now = now();
+
+            if ($request->status === 'approved') {
+                $approvedMetadata = [
+                    'approval_status' => 'approved',
+                    'approved_by' => $userId,
+                    'approved_at' => $now,
+                ];
+
+                $manualStart->update([
+                    'action' => 'manual-start',
+                    'metadata' => array_merge(
+                        json_decode($manualStart->metadata ?? '[]', true) ?: [],
+                        $approvedMetadata
+                    ),
+                ]);
+
+                $manualStop->update([
+                    'action' => 'manual-stop',
+                    'metadata' => array_merge(
+                        json_decode($manualStop->metadata ?? '[] ', true) ?: [],
+                        $approvedMetadata
+                    ),
+                ]);
+            } else {
+                $remarks = $request->remarks ?? null;
+                $rejectedMetadata = [
+                    'approval_status' => 'rejected',
+                    'remarks' => $remarks,
+                    'rejected_by' => $userId,
+                    'rejected_at' => $now,
+                ];
+
+                $manualStart->update([
+                    'metadata' => array_merge(
+                        json_decode($manualStart->metadata ?? '[]', true) ?: [],
+                        $rejectedMetadata
+                    ),
+                ]);
+
+                $manualStop->update([
+                    'metadata' => array_merge(
+                        json_decode($manualStop->metadata ?? '[]', true) ?: [],
+                        $rejectedMetadata
+                    ),
+                ]);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => $request->status === 'approved'
+                ? 'Manual time approved successfully.'
+                : 'Manual time rejected successfully. ',
+        ]);
+    }
+
+    public function fetch(Request $request)
+    {
+        // Find the pending manual-processing-start and manual-processing-stop logs for the given ID
+        $startLog = TimeTrackerActivityLog::where('id', $request->id)
+            ->where('action', 'manual-processing-start')
+            ->first();
+
+        if (!$startLog) {
+            return response()->json(['error' => 'Manual time entry not found.'], 404);
+        }
+
+        $stopLog = TimeTrackerActivityLog::where('user_id', $startLog->user_id)
+            ->where('action', 'manual-processing-stop')
+            ->whereDate('timestamp', Carbon::parse($startLog->timestamp)->toDateString())
+            ->orderBy('timestamp', 'desc')
+            ->first();
+
+        $user = $startLog->user;
+        $reason = json_decode($startLog->metadata, true)['reason'] ?? '';
+
+        return response()->json([
+            'id' => $startLog->id,
+            'employee_name' => ucwords($user->first_name . ' ' . $user->last_name),
+            'date' => Carbon::parse($startLog->timestamp)->toDateString(),
+            'start_time' => Carbon::parse($startLog->timestamp)->format('H:i'),
+            'end_time' => $stopLog ? Carbon::parse($stopLog->timestamp)->format('H:i') : '',
+            'reason' => $reason,
+        ]);
+    }
+}

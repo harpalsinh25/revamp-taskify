@@ -49,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
             'allowed_file_types' => '.png,.jpg,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.txt',
             'max_files_allowed' => '10',
             'allowed_max_upload_size' => '512',
-            'timezone' => 'UTC',
+            'timezone' => '',
             'recaptcha_site_key' => '',
             'recaptcha_secret_key' => '',
         ],
@@ -559,7 +559,7 @@ class AppServiceProvider extends ServiceProvider
 
                         if (class_exists($providerClass)) {
                             app()->register($providerClass);
-                            Log::info("✅ Loaded plugin: " . basename($pluginDir) . " with provider {$providerClass}");
+                            // Log::info("✅ Loaded plugin: " . basename($pluginDir) . " with provider {$providerClass}");
                         } else {
                             Log::warning("⚠️ Provider class {$providerClass} not found for plugin: " . basename($pluginDir));
                         }

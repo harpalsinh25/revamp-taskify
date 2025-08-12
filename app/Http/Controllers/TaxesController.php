@@ -296,6 +296,7 @@ class TaxesController extends Controller
 
             $tax = Tax::findOrFail($request->id);
             $tax->update($formFields);
+            // dd($tax, $request);
             if ($isApi) {
                 return formatApiResponse(
                     false,

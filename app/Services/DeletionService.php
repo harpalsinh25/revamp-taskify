@@ -32,6 +32,7 @@ class DeletionService
                 return self::errorResponse('Default ' . $type . ' cannot be deleted.');
             }
         } catch (\Exception $e) {
+
             // Log the exception and return a 500 error response
             return response()->json(['error' => true, 'message' => 'An internal server error occurred.'], 500);
         }

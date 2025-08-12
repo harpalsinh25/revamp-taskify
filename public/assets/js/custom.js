@@ -839,7 +839,18 @@ $(document).on("click", ".edit-payment", function () {
         },
     });
 });
+/**
+ * Initializes DateRangePicker for specified input elements, supporting both modal and offcanvas contexts.
+ * Configures single-date pickers with custom formatting, dynamic parent anchoring, and conditional start dates.
+ *
+ * @param {string} inputSelector - jQuery selector for the date input elements to initialize.
+ * @returns {void}
+ */
 function initializeDateRangePicker(inputSelector) {
+    /**
+     * List of modal and offcanvas IDs to check for parent context.
+     * @type {string[]}
+     */
     var modalsToCheck = [
         "#create_project_modal",
         "#edit_project_modal",
@@ -847,45 +858,77 @@ function initializeDateRangePicker(inputSelector) {
         "#edit_task_modal",
         "#create_milestone_modal",
         "#edit_milestone_modal",
+        "#create_project_offcanvas",
+        "#edit_project_offcanvas",
+        "#create_task_offcanvas",
+        "#edit_task_offcanvas",
+        "#create_milestone_offcanvas",
+        "#edit_milestone_offcanvas",
     ];
+
     $(inputSelector).each(function () {
         var $input = $(this);
         var isEmpty = $input.val() === ""; // Check if the input is empty
-        var parentElModalId = "";
-        var isInsideModal = modalsToCheck.some(function (modalId) {
-            return $input.closest(modalId).length > 0;
+
+        // Check for closest modal or offcanvas
+        var parentOverlay = $input.closest(".modal, .offcanvas");
+        var parentOverlayId = parentOverlay.length ? parentOverlay.attr("id") : "";
+
+        // Debug: Log parent overlay detection
+        console.log(`Input ${$input.attr("id")} parent overlay:`, parentOverlayId || "None");
+
+        // Check if input is inside any of the specified modals or offcanvas
+        var isInsideOverlay = modalsToCheck.some(function (overlayId) {
+            var isInOverlay = $input.closest(overlayId).length > 0;
+            if (isInOverlay) {
+                console.log(`${$input.attr("id")} is inside ${overlayId}`);
+            }
+            return isInOverlay;
         });
-        if ($(inputSelector).closest(".modal").length) {
-            // Get the ID of the closest modal
-            var $modal = $input.closest(".modal"); // Define $modal
-            parentElModalId = $modal.attr("id"); // Use $modal to get ID
+
+        // Debug: Check if offcanvas exists
+        if ($("#create_project_offcanvas").length) {
+            console.log("Found #create_project_offcanvas in DOM");
+        } else {
+            console.warn("#create_project_offcanvas not found in DOM");
         }
+
+        /**
+         * Configuration for DateRangePicker.
+         * @type {Object}
+         */
         var daterangepickerOptions = {
             alwaysShowCalendars: true,
             showCustomRangeLabel: true,
             singleDatePicker: true,
             showDropdowns: true,
-            autoUpdateInput: !isInsideModal,
+            autoUpdateInput: !isInsideOverlay,
             locale: {
                 cancelLabel: "Clear",
                 format: js_date_format,
             },
         };
-        if (parentElModalId != "") {
-            daterangepickerOptions.parentEl = "#" + parentElModalId;
+
+        // Set parentEl to the closest modal or offcanvas, or body if none found
+        if (parentOverlayId) {
+            daterangepickerOptions.parentEl = `#${parentOverlayId}`;
+        } else {
+            daterangepickerOptions.parentEl = $(document.body);
         }
-        // Conditionally add startDate
+
+        // Conditionally add startDate if input is not empty
         if (!isEmpty) {
-            daterangepickerOptions.startDate = moment(
-                $input.val(),
-                js_date_format
-            );
+            daterangepickerOptions.startDate = moment($input.val(), js_date_format);
         }
+
+        // Initialize DateRangePicker
         $input.daterangepicker(daterangepickerOptions);
+
         // Handle autoUpdateInput behavior
         if (isEmpty) {
-            $input.val(""); // Clear the input if it's initially empty
+            $input.val(""); // Ensure input remains empty if initially empty
         }
+
         // Manually update input value on date selection
         $input.on("apply.daterangepicker", function (ev, picker) {
             $(this).val(picker.startDate.format(js_date_format));
@@ -997,8 +1040,18 @@ $(document).on("click", "#remove-participant", function (e) {
         });
     });
 });
+/**
+ * Resets and reinitializes DateRangePicker fields within a form, supporting both modal and offcanvas contexts.
+ * Clears or sets default dates based on whether the form is inside an overlay, and reinitializes DateRangePicker instances.
+ *
+ * @param {jQuery} $form - The jQuery object representing the form containing date inputs.
+ * @returns {void}
+ */
 function resetDateFields($form) {
-    var currentDate = moment(new Date()).format(js_date_format); // Get current date
+    /**
+     * List of modal and offcanvas IDs to check for parent context.
+     * @type {string[]}
+     */
     var modalsToCheck = [
         "#create_project_modal",
         "#edit_project_modal",
@@ -1006,45 +1059,82 @@ function resetDateFields($form) {
         "#edit_task_modal",
         "#create_milestone_modal",
         "#edit_milestone_modal",
+        "#create_project_offcanvas",
+        "#edit_project_offcanvas",
+        "#create_task_offcanvas",
+        "#edit_task_offcanvas",
+        "#create_milestone_offcanvas",
+        "#edit_milestone_offcanvas",
     ];
+
+    var currentDate = moment().format(js_date_format); // Get current date
+
     $form.find("input").each(function () {
         var $this = $(this);
         if ($this.data("daterangepicker")) {
+            // Debug: Log input being processed
+            console.log(`Resetting DateRangePicker for input: ${$this.attr("id")}`);
+
             // Destroy old instance
             $this.data("daterangepicker").remove();
-            var isInsideModal = modalsToCheck.some(function (modalId) {
-                return $form.closest(modalId).length > 0;
+
+            // Check for closest modal or offcanvas
+            var parentOverlay = $form.closest(".modal, .offcanvas");
+            var parentOverlayId = parentOverlay.length ? parentOverlay.attr("id") : "";
+
+            // Debug: Log parent overlay detection
+            console.log(`Parent overlay for ${$this.attr("id")}:`, parentOverlayId || "None");
+
+            // Check if form is inside any of the specified modals or offcanvas
+            var isInsideOverlay = modalsToCheck.some(function (overlayId) {
+                var isInOverlay = $form.closest(overlayId).length > 0;
+                if (isInOverlay) {
+                    console.log(`${$this.attr("id")} is inside ${overlayId}`);
+                }
+                return isInOverlay;
             });
-            // Get the ID of the closest modal
-            var $modal = $this.closest(".modal"); // Define $modal
-            var parentElModalId = $modal.attr("id"); // Use $modal to get ID
-            // Reinitialize with new value
-            if (!isInsideModal) {
-                $this.val(currentDate);
+
+            // Debug: Check if offcanvas exists
+            if ($("#create_project_offcanvas").length) {
+                console.log("Found #create_project_offcanvas in DOM");
+            } else {
+                console.warn("#create_project_offcanvas not found in DOM");
             }
+
+            /**
+             * Configuration for DateRangePicker.
+             * @type {Object}
+             */
             var daterangepickerOptions = {
                 alwaysShowCalendars: true,
                 showCustomRangeLabel: true,
                 singleDatePicker: true,
                 showDropdowns: true,
-                autoUpdateInput: !isInsideModal,
+                autoUpdateInput: !isInsideOverlay,
                 locale: {
                     cancelLabel: "Clear",
                     format: js_date_format,
                 },
-                parentEl: "#" + parentElModalId,
             };
-            if (!isInsideModal) {
-                daterangepickerOptions.startDate = moment(
-                    currentDate,
-                    js_date_format
-                );
+
+            // Set parentEl to the closest modal or offcanvas, or body if none found
+            if (parentOverlayId) {
+                daterangepickerOptions.parentEl = `#${parentOverlayId}`;
+            } else {
+                daterangepickerOptions.parentEl = $(document.body);
             }
+
+            // Set startDate if not in an overlay
+            if (!isInsideOverlay) {
+                daterangepickerOptions.startDate = moment(currentDate, js_date_format);
+            }
+
+            // Reinitialize DateRangePicker
             $this.daterangepicker(daterangepickerOptions);
-            // Clear the input if inside modal
-            if (isInsideModal) {
-                $this.val("");
-            }
+
+            // Set or clear input value based on overlay context
+            $this.val(isInsideOverlay ? "" : currentDate);
+
             // Manually update input value on date selection
             $this.on("apply.daterangepicker", function (ev, picker) {
                 $(this).val(picker.startDate.format(js_date_format));
@@ -1052,7 +1142,19 @@ function resetDateFields($form) {
         }
     });
 }
+/**
+ * Initializes DateRangePicker for specified date input fields, supporting both modal and offcanvas contexts.
+ * Configures single-date pickers with custom formatting, default values, and dynamic parent anchoring.
+ * Handles specific date fields (#dob, #doj) with restricted date ranges.
+ *
+ * @listens document.ready - Executes when the DOM is fully loaded.
+ * @returns {void}
+ */
 $(document).ready(function () {
+    /**
+     * List of input IDs to initialize with DateRangePicker.
+     * @type {string[]}
+     */
     var idsToProcess = [
         "#start_date",
         "#end_date",
@@ -1069,6 +1171,11 @@ $(document).ready(function () {
         "#task_start_date",
         "#task_end_date",
     ];
+
+    /**
+     * List of modal and offcanvas IDs to check for parent context.
+     * @type {string[]}
+     */
     var modalsToCheck = [
         "#create_project_modal",
         "#edit_project_modal",
@@ -1076,7 +1183,18 @@ $(document).ready(function () {
         "#edit_task_modal",
         "#create_milestone_modal",
         "#edit_milestone_modal",
+        "#create_project_offcanvas",
+        "#edit_project_offcanvas",
+        "#create_task_offcanvas",
+        "#edit_task_offcanvas",
+        "#create_milestone_offcanvas",
+        "#edit_milestone_offcanvas",
     ];
+
+    /**
+     * Base configuration for DateRangePicker.
+     * @type {Object}
+     */
     var daterangepickerOptions = {
         alwaysShowCalendars: true,
         showCustomRangeLabel: true,
@@ -1088,73 +1206,101 @@ $(document).ready(function () {
             format: js_date_format,
         },
     };
+
+    /**
+     * Initializes DateRangePicker for general date inputs with dynamic parent detection.
+     */
     idsToProcess.forEach(function (id) {
-        if ($(id).length) {
-            var isInsideModal = false;
-            var parentElModalId = "";
-            if ($(id).closest(".modal").length) {
-                // Get the ID of the closest modal
-                var $modal = $(id).closest(".modal"); // Define $modal
-                parentElModalId = $modal.attr("id"); // Use $modal to get ID
-            }
-            modalsToCheck.forEach(function (modalId) {
-                if ($(id).closest(modalId).length > 0) {
-                    isInsideModal = true;
+        var $input = $(id);
+        if ($input.length) {
+
+            // Check for closest modal or offcanvas
+            var parentOverlay = $input.closest(".modal, .offcanvas");
+
+            var isInsideOverlay = modalsToCheck.some(function (modalId) {
+                var isInModal = $input.closest(modalId).length > 0;
+                if (isInModal) {
+                    // console.log(`${id} is inside ${modalId}`);
                 }
+                return isInModal;
             });
-            // Append parentEl to daterangepickerOptions if inside a modal
-            if (parentElModalId != "") {
-                daterangepickerOptions.parentEl = "#" + parentElModalId;
-            }
+
+            // Set parentEl to the closest modal or offcanvas, or body if none found
+            daterangepickerOptions.parentEl = parentOverlay.length
+                ? parentOverlay
+                : $(document.body);
+
+            // Debug: Log the selected parentEl
+            // console.log(`ParentEl for ${id}`, daterangepickerOptions.parentEl);
+
+            // Disable autoUpdateInput for overlays or if data-defaultDate is false
             if (
-                isInsideModal ||
-                ($(id).attr("data-defaultDate") !== undefined &&
-                    $(id).attr("data-defaultDate") === "false")
+                isInsideOverlay ||
+                $input.attr("data-defaultDate") === "false"
             ) {
                 daterangepickerOptions.autoUpdateInput = false;
             }
-            // Set default value if empty and not inside a modal and either the data-defaultDate attribute is not specified or it is set to 'true'
+
+            // Set default date if empty, not in an overlay, and data-defaultDate is undefined or true
             if (
-                $(id).val() == "" &&
-                !isInsideModal &&
-                ($(id).attr("data-defaultDate") == undefined ||
-                    $(id).attr("data-defaultDate") == "true")
+                $input.val() === "" &&
+                !isInsideOverlay &&
+                ($input.attr("data-defaultDate") === undefined ||
+                    $input.attr("data-defaultDate") === "true")
             ) {
-                $(id).val(moment().format(js_date_format));
+                $input.val(moment().format(js_date_format));
             }
-            $(id).daterangepicker(daterangepickerOptions);
-            $(id).on("apply.daterangepicker", function (ev, picker) {
+
+            // Initialize DateRangePicker
+            $input.daterangepicker(daterangepickerOptions);
+
+            // Handle apply event
+            $input.on("apply.daterangepicker", function (ev, picker) {
                 $(this).val(picker.startDate.format(js_date_format));
             });
-            $(id).on("cancel.daterangepicker", function () {
+
+            // Handle cancel event
+            $input.on("cancel.daterangepicker", function () {
                 $(this).val("");
             });
+        } else {
+            // console.warn(`Input ${id} not found in DOM`);
         }
     });
-    // Define the IDs you want to process
-    var idsToProcess = ["#dob", "#doj"];
-    var minDateStr = "01/01/1950";
-    var minDate = moment(minDateStr, "DD/MM/YYYY");
-    var maxDate = moment(); // Current date
-    // Loop through the IDs
-    idsToProcess.forEach(function (id) {
-        if ($(id).length) {
-            $(id).daterangepicker({
+
+    /**
+     * Initializes DateRangePicker for #dob and #doj with restricted date ranges.
+     */
+    var restrictedIds = ["#dob", "#doj"];
+    var minDate = moment("01/01/1950", "DD/MM/YYYY");
+    var maxDate = moment();
+
+    restrictedIds.forEach(function (id) {
+        var $input = $(id);
+        if ($input.length) {
+            var parentOverlay = $input.closest(".modal, .offcanvas");
+            // console.log(`Parent overlay for ${id}`, parentOverlay);
+
+            $input.daterangepicker({
                 alwaysShowCalendars: true,
                 showCustomRangeLabel: true,
                 singleDatePicker: true,
                 showDropdowns: true,
                 autoUpdateInput: false,
                 minDate: minDate,
-                maxDate: maxDate, // Set max date to the current date
+                maxDate: maxDate,
+                parentEl: parentOverlay.length ? parentOverlay : $(document.body),
                 locale: {
                     cancelLabel: "Clear",
                     format: js_date_format,
                 },
             });
-            $(id).on("apply.daterangepicker", function (ev, picker) {
+
+            $input.on("apply.daterangepicker", function (ev, picker) {
                 $(this).val(picker.startDate.format(js_date_format));
             });
+        } else {
+            // console.warn(`Input ${id} not found in DOM`);
         }
     });
 });
@@ -3105,11 +3251,7 @@ $(document).on("click", ".sms-restore-default", function (e) {
 });
 $(document).ready(function () {
     // Shared function to calculate total days
-    function calculateTotalDays(
-        startDateSelector,
-        endDateSelector,
-        totalDaysSelector
-    ) {
+    function calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector) {
         var start_date = moment($(startDateSelector).val(), js_date_format);
         var end_date = moment($(endDateSelector).val(), js_date_format);
         if (start_date.isValid() && end_date.isValid()) {
@@ -3117,149 +3259,121 @@ $(document).ready(function () {
             $(totalDaysSelector).val(total_days);
         }
     }
+
     // Function to bind event listeners for date inputs
-    function bindDateChangeListeners(
-        startDateSelector,
-        endDateSelector,
-        totalDaysSelector
-    ) {
+    function bindDateChangeListeners(startDateSelector, endDateSelector, totalDaysSelector) {
         $(startDateSelector + ", " + endDateSelector)
             .off("change")
             .on("change", function () {
-                calculateTotalDays(
-                    startDateSelector,
-                    endDateSelector,
-                    totalDaysSelector
-                );
+                calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
             });
+
         $(startDateSelector).on("apply.daterangepicker", function () {
-            calculateTotalDays(
-                startDateSelector,
-                endDateSelector,
-                totalDaysSelector
-            );
+            calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
         });
         $(endDateSelector).on("apply.daterangepicker", function () {
-            calculateTotalDays(
-                startDateSelector,
-                endDateSelector,
-                totalDaysSelector
-            );
+            calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
         });
     }
+
     // Initial binding for create modal
     if ($("#total_days").length) {
         bindDateChangeListeners("#start_date", "#lr_end_date", "#total_days");
     }
+
     // Initial binding for update modal
     if ($("#update_total_days").length) {
-        bindDateChangeListeners(
-            "#update_start_date",
-            "#update_end_date",
-            "#update_total_days"
-        );
+        bindDateChangeListeners("#update_start_date", "#update_end_date", "#update_total_days");
     }
-    // Function to reset form and rebind event listeners when modal is hidden
-    function resetModalForm(modal) {
-        var modalId = $(modal).attr("id");
-        var $form = $(modal).find("form"); // Find the form inside the modal
-        $form.trigger("reset"); // Reset the form
-        if ($(modal).find("#total_days").length) {
-            bindDateChangeListeners(
-                "#start_date",
-                "#lr_end_date",
-                "#total_days"
-            );
+
+    // Reset form logic for both modal and offcanvas
+    function resetModalForm(container) {
+        var containerId = $(container).attr("id");
+        var $form = $(container).find("form");
+        $form.trigger("reset");
+
+        if ($form.find("#total_days").length) {
+            bindDateChangeListeners("#start_date", "#lr_end_date", "#total_days");
         }
-        if ($(modal).find("#update_total_days").length) {
-            bindDateChangeListeners(
-                "#update_start_date",
-                "#update_end_date",
-                "#update_total_days"
-            );
+        if ($form.find("#update_total_days").length) {
+            bindDateChangeListeners("#update_start_date", "#update_end_date", "#update_total_days");
         }
+
         $form.find(".error-message").html("");
+
         var partialLeaveCheckbox = $("#partialLeave");
         if (partialLeaveCheckbox.length) {
             partialLeaveCheckbox.trigger("change");
         }
+
         var leaveVisibleToAllCheckbox = $form.find(".leaveVisibleToAll");
         if (leaveVisibleToAllCheckbox.length) {
             leaveVisibleToAllCheckbox.trigger("change");
         }
-        var defaultColor =
-            modalId == "create_note_modal" || modalId == "edit_note_modal"
-                ? "success"
-                : "primary";
+
+        var defaultColor = (containerId == "create_note_modal" || containerId == "edit_note_modal") ? "success" : "primary";
         var colorSelect = $form.find('select[name="color"]');
         if (colorSelect.length) {
             var classes = colorSelect.attr("class").split(" ");
-            var currentColorClass = classes.filter(function (className) {
-                return className.startsWith("select-");
-            })[0];
-            colorSelect
-                .removeClass(currentColorClass)
-                .addClass("select-bg-label-" + defaultColor);
+            var currentColorClass = classes.find(c => c.startsWith("select-"));
+            colorSelect.removeClass(currentColorClass).addClass("select-bg-label-" + defaultColor);
         }
+
         var selectPriority = $form.find('select[name="priority_id"]');
         if (selectPriority.length) {
             var classes = selectPriority.attr("class").split(" ");
-            var currentClass = classes.filter(function (className) {
-                return className.startsWith("bg-label");
-            })[0];
-            selectPriority
-                .removeClass(currentClass)
-                .addClass("bg-label-secondary");
-        }
-        $form
-            .find(
-                ".js-example-basic-multiple, .users_select, .clients_select, .projects_select, .contract_types_select, .invoices_select"
-            )
-            .val(null) // Set value to null
-            .trigger("change"); // Trigger change event to update Select2
-        $("#create_task_modal, #edit_task_modal")
-            .find('select[name="user_id[]"]')
-            .val(null) // Set value to null
-            .trigger("change"); // Trigger change event to update Select2
-        if ($('.selectTaskProject[name="project"]').length) {
-            $form
-                .find($('.selectTaskProject[name="project"]'))
-                .trigger("change");
-        }
-        if ($('.statusDropdown[name="status_id"]').length) {
-            $form
-                .find($('.statusDropdown[name="status_id"]'))
-                .trigger("change");
-        }
-        if ($('.priorityDropdown[name="priority_id"]').length) {
-            $form
-                .find($('.priorityDropdown[name="priority_id"]'))
-                .trigger("change");
-        }
-        if ($("#users_associated_with_project").length) {
-            $("#users_associated_with_project").text("");
-        }
-        if ($("#task_update_users_associated_with_project").length) {
-            $("#task_update_users_associated_with_project").text("");
+            var currentClass = classes.find(c => c.startsWith("bg-label"));
+            selectPriority.removeClass(currentClass).addClass("bg-label-secondary");
         }
 
-        $(modal)
+        $form
+            .find(".js-example-basic-multiple, .users_select, .clients_select, .projects_select, .contract_types_select, .invoices_select")
+            .val(null)
+            .trigger("change");
+
+        $("#create_task_modal, #edit_task_modal")
+            .find('select[name="user_id[]"]')
+            .val(null)
+            .trigger("change");
+
+        if ($('.selectTaskProject[name="project"]').length) {
+            $form.find($('.selectTaskProject[name="project"]')).trigger("change");
+        }
+        if ($('.statusDropdown[name="status_id"]').length) {
+            $form.find($('.statusDropdown[name="status_id"]')).trigger("change");
+        }
+        if ($('.priorityDropdown[name="priority_id"]').length) {
+            $form.find($('.priorityDropdown[name="priority_id"]')).trigger("change");
+        }
+
+        $("#users_associated_with_project, #task_update_users_associated_with_project").text("");
+
+        $(container)
             .find('input[type="checkbox"]')
             .each(function () {
-                $(this).prop("checked", false).trigger("change"); // Reset checkbox and trigger change event
+                $(this).prop("checked", false).trigger("change");
             });
+
         if (Dropzone.instances.length > 0) {
             Dropzone.instances.forEach(function (dz) {
-                dz.removeAllFiles(true); // Clear all files
+                dz.removeAllFiles(true);
             });
         }
-        resetDateFields($form); // Pass the form as an argument to resetDateFields()
+
+        resetDateFields($form);
     }
-    // Reset form and rebind event listeners when modal is hidden
+
+    // Reset when modal is closed
     $(".modal").on("hidden.bs.modal", function () {
         resetModalForm(this);
     });
+
+    // ✅ Reset when offcanvas is closed
+    $(".offcanvas").on("hidden.bs.offcanvas", function () {
+        resetModalForm(this);
+    });
 });
+
 $(document).ready(function () {
     // Listen for changes on the project select element within the modal
     $('.selectTaskProject[name="project"]').on("change", function (e) {
@@ -3649,62 +3763,73 @@ $(document).on("click", ".edit-task", function () {
         },
     });
 });
-$(document).on("click", ".edit-project", function () {
-    var id = $(this).data("id");
-    $("#edit_project_modal").modal("show");
+/**
+ * Handles the click event on elements with class 'edit-project' to open and populate an edit project form
+ * in either a modal or offcanvas, fetching project data via AJAX and initializing form fields.
+ *
+ * @param {Event} e - The click event.
+ * @listens click - Binds to the 'click' event of elements with class 'edit-project'.
+ * @returns {void}
+ */
+function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
+    const overlayId = isOffcanvas ? "#edit_project_offcanvas" : "#edit_project_modal";
+    const overlayType = isOffcanvas ? "offcanvas" : "modal";
+
+    console.log(`Opening ${overlayType}: ${overlayId}`);
+
+    // Open the overlay
+    const $overlay = $(overlayId);
+    if (isOffcanvas) {
+        $overlay.offcanvas("show");
+    } else {
+        $overlay.modal("show");
+    }
+
     $.ajax({
-        url: baseUrl + "/projects/get/" + id,
-        type: "get",
+        url: `${baseUrl}/projects/get/${projectId}`,
+        type: "GET",
         headers: {
-            "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"),
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
         },
         dataType: "json",
         success: function (response) {
-            console.log(response);
-            console.log(response);
-            var formattedStartDate = response.project.start_date
+            console.log("AJAX response:", response);
+
+            if (!$overlay.length) {
+                console.warn(`${overlayId} not found in DOM`);
+                return;
+            }
+
+            // Format dates
+            const formattedStartDate = response.project.start_date
                 ? moment(response.project.start_date).format(js_date_format)
                 : "";
-            var formattedEndDate = response.project.end_date
+            const formattedEndDate = response.project.end_date
                 ? moment(response.project.end_date).format(js_date_format)
                 : "";
-            var $modal = $("#edit_project_modal"); // Cache the modal element for better performance
-            $modal.find("#project_id").val(response.project.id);
-            $modal.find("#project_title").val(response.project.title);
-            $modal
-                .find("#project_status_id")
-                .val(response.project.status_id)
-                .trigger("change");
-            $modal
-                .find("#project_priority_id")
-                .val(response.project.priority_id)
-                .trigger("change");
-            $modal.find("#project_budget").val(response.project.budget);
-            $modal.find("#update_start_date").val(formattedStartDate);
-            $modal.find("#update_end_date").val(formattedEndDate);
-            initializeDateRangePicker(
-                $modal.find("#update_start_date, #update_end_date")
-            ); // Initialize date range picker
-            $modal
-                .find("#task_accessibility")
-                .val(response.project.task_accessibility);
-            $modal.find("#projectNote").val(response.project.note);
-            var description =
-                response.project.description !== null
-                    ? response.project.description
-                    : "";
-            $modal.find("#project_description").val(description);
-            var usersSelect = $modal.find(".users_select");
-            var clientsSelect = $modal.find(".clients_select");
-            // Clear existing options
+
+            // Populate form fields
+            $overlay.find("#project_id").val(response.project.id);
+            $overlay.find("#project_title").val(response.project.title);
+            $overlay.find("#project_status_id").val(response.project.status_id).trigger("change");
+            $overlay.find("#project_priority_id").val(response.project.priority_id).trigger("change");
+            $overlay.find("#project_budget").val(response.project.budget);
+            $overlay.find("#update_start_date").val(formattedStartDate);
+            $overlay.find("#update_end_date").val(formattedEndDate);
+            $overlay.find("#task_accessibility").val(response.project.task_accessibility);
+            $overlay.find("#projectNote").val(response.project.note);
+            $overlay.find("#project_description").val(response.project.description || "");
+
+            // Initialize DateRangePicker
+            initializeDateRangePicker($overlay.find("#update_start_date, #update_end_date"));
+
+            // Populate users multi-select
+            const usersSelect = $overlay.find(".users_select");
             usersSelect.empty();
-            clientsSelect.empty();
-            // console.log(response);
-            // Handle multi-select for users
             if (response.users && response.users.length > 0) {
-                response.users.forEach(function (user) {
-                    var userOption = new Option(
-                        user.first_name + " " + user.last_name,
+                response.users.forEach(user => {
+                    const userOption = new Option(
+                        `${user.first_name} ${user.last_name}`,
                         user.id,
                         true,
                         true
@@ -3713,13 +3838,16 @@ $(document).on("click", ".edit-project", function () {
                 });
                 usersSelect.trigger("change");
             } else {
-                usersSelect.val(null).trigger("change"); // Handle case when no users are present
+                usersSelect.val(null).trigger("change");
             }
-            // Handle multi-select for clients
+
+            // Populate clients multi-select
+            const clientsSelect = $overlay.find(".clients_select");
+            clientsSelect.empty();
             if (response.clients && response.clients.length > 0) {
-                response.clients.forEach(function (client) {
-                    var clientOption = new Option(
-                        client.first_name + " " + client.last_name,
+                response.clients.forEach(client => {
+                    const clientOption = new Option(
+                        `${client.first_name} ${client.last_name}`,
                         client.id,
                         true,
                         true
@@ -3728,98 +3856,71 @@ $(document).on("click", ".edit-project", function () {
                 });
                 clientsSelect.trigger("change");
             } else {
-                clientsSelect.val(null).trigger("change"); // Handle case when no clients are present
+                clientsSelect.val(null).trigger("change");
             }
-            var tagsSelect = $modal.find('[name="tag_ids[]"]');
+
+            // Populate tags multi-select
+            const tagsSelect = $overlay.find('[name="tag_ids[]"]');
+            tagsSelect.empty();
             if (response.tags && response.tags.length > 0) {
-                // Clear existing tags in the dropdown
-                tagsSelect.empty();
-                response.tags.forEach(function (tag) {
-                    // Create a new option element
-                    var tagOption = new Option(tag.title, tag.id, true, true);
-                    // Add data-color attribute
-                    // $(tagOption).attr('data-color', tag.color || 'default-color');
-                    // Append the option to the select element
+                response.tags.forEach(tag => {
+                    const tagOption = new Option(tag.title, tag.id, true, true);
                     tagsSelect.append(tagOption);
                 });
-                tagsSelect.trigger("change"); // Update Select2
+                tagsSelect.trigger("change");
             } else {
-                tagsSelect.val(null).trigger("change"); // Handle case when no tags are present
-            }
-            if (response.project.client_can_discuss == 1) {
-                $("#edit_project_modal")
-                    .find("#updateClientCanDiscussProject")
-                    .prop("checked", true);
-            } else {
-                $("#edit_project_modal")
-                    .find("#updateClientCanDiscussProject")
-                    .prop("checked", false);
-            }
-            if (response.project.enable_tasks_time_entries == 1) {
-                $("#edit_project_modal")
-                    .find("#tasks_time_entries")
-                    .prop("checked", true);
-            } else {
-                $("#edit_project_modal")
-                    .find("#tasks_time_entries")
-                    .prop("checked", false);
+                tagsSelect.val(null).trigger("change");
             }
 
+            // Handle checkboxes
+            $overlay.find("#updateClientCanDiscussProject")
+                .prop("checked", response.project.client_can_discuss === 1);
+            $overlay.find("#tasks_time_entries")
+                .prop("checked", response.project.enable_tasks_time_entries === 1);
 
-            // For custome
+            // Handle custom fields
             if (response.customFieldValues) {
-                console.log('res:', response.customFieldValues);
-                // Loop through each custom field value
+                console.log("Custom field values:", response.customFieldValues);
                 $.each(response.customFieldValues, function (fieldId, value) {
-                    // For regular input fields (text, number, etc.)
-                    var inputField = $modal.find('#edit_cf_' + fieldId);
-
-                    // Handle different field types
+                    const inputField = $overlay.find(`#edit_cf_${fieldId}`);
                     if (inputField.length) {
-                        // For select, text inputs, textarea, etc.
-                        if (inputField.is('select')) {
-                            inputField.val(value).trigger('change');
-                        } else if (inputField.hasClass('custom-datepicker')) {
-                            // Format date if necessary
-                            inputField.val(moment(value).format(js_date_format));
+                        if (inputField.is("select")) {
+                            inputField.val(value).trigger("change");
+                        } else if (inputField.hasClass("custom-datepicker")) {
+                            inputField.val(value ? moment(value).format(js_date_format) : "");
                         } else {
-                            // For regular inputs and textareas
                             inputField.val(value);
                         }
-                    }
-                    // For radio buttons
-                    else if ($modal.find('input[type="radio"][name="custom_fields[' + fieldId + ']"]').length) {
-                        $modal.find('input[type="radio"][name="custom_fields[' + fieldId + ']"][value="' + value + '"]').prop('checked', true);
-                    }
-                    // For checkboxes
-                    else if ($modal.find('input[type="checkbox"][name="custom_fields[' + fieldId + '][]"]').length) {
+                    } else if ($overlay.find(`input[type="radio"][name="custom_fields[${fieldId}]"]`).length) {
+                        $overlay.find(`input[type="radio"][name="custom_fields[${fieldId}]"][value="${value}"]`)
+                            .prop("checked", true);
+                    } else if ($overlay.find(`input[type="checkbox"][name="custom_fields[${fieldId}][]"]`).length) {
                         try {
-                            // Parse JSON if it's a JSON string
-                            var checkboxValues = typeof value === 'string' && value.includes('[') ? JSON.parse(value) : [value];
-
-                            // Make sure it's an array
-                            if (!Array.isArray(checkboxValues)) {
-                                checkboxValues = [checkboxValues];
-                            }
-
-                            // Reset all checkboxes first
-                            $modal.find('input[type="checkbox"][name="custom_fields[' + fieldId + '][]"]').prop('checked', false);
-
-                            // Set the selected ones
-                            checkboxValues.forEach(function (val) {
-                                $modal.find('input[type="checkbox"][name="custom_fields[' + fieldId + '][]"][value="' + val + '"]').prop('checked', true);
+                            const checkboxValues = typeof value === "string" && value.includes("[")
+                                ? JSON.parse(value)
+                                : [value];
+                            $overlay.find(`input[type="checkbox"][name="custom_fields[${fieldId}][]"]`)
+                                .prop("checked", false);
+                            checkboxValues.forEach(val => {
+                                $overlay.find(`input[type="checkbox"][name="custom_fields[${fieldId}][]"][value="${val}"]`)
+                                    .prop("checked", true);
                             });
                         } catch (e) {
-                            console.error("Error parsing checkbox values for field " + fieldId + ":", e);
+                            console.error(`Error parsing checkbox values for field ${fieldId}:`, e);
                         }
                     }
                 });
             }
         },
         error: function (xhr, status, error) {
-            console.error(error);
+            console.error("AJAX error:", error);
+            toastr.error("Failed to load project data");
         },
     });
+}
+
+$(document).on("click", ".edit-project", function () {
+    editProject($(this).data("id"), $(this).data("offcanvas") === true, baseUrl, js_date_format);
 });
 $(document).on("click", ".edit-priority", function () {
     var id = $(this).data("id");
@@ -4324,30 +4425,26 @@ $(document).ready(function () {
     var upcomingBDCalendarInitialized = false;
     var upcomingWACalendarInitialized = false;
     var membersOnLeaveCalendarInitialized = false;
-    // Add event listener for tab shown event
-    $(".nav-tabs .nav-item").on("shown.bs.tab", function (event) {
+
+    // Listen for the inner calendar tab click
+    $(document).on("shown.bs.tab", ".calendar-button", function (event) {
         var tabId = $(event.target).attr("data-bs-target");
-        if (
-            tabId == "#navs-top-upcoming-birthdays-calendar" &&
-            !upcomingBDCalendarInitialized
-        ) {
+
+        if (tabId === "#upcomingBirthdaysCalendar-calendar" && !upcomingBDCalendarInitialized) {
             initializeUpcomingBDCalendar();
             upcomingBDCalendarInitialized = true;
-        } else if (
-            tabId == "#navs-top-upcoming-work-anniversaries-calendar" &&
-            !upcomingWACalendarInitialized
-        ) {
+        }
+        else if (tabId === "#upcomingWorkAnniversariesCalendar-calendar" && !upcomingWACalendarInitialized) {
             initializeUpcomingWACalendar();
             upcomingWACalendarInitialized = true;
-        } else if (
-            tabId == "#navs-top-members-on-leave-calendar" &&
-            !membersOnLeaveCalendarInitialized
-        ) {
+        }
+        else if (tabId === "#membersOnLeaveCalendar-calendar" && !membersOnLeaveCalendarInitialized) {
             initializeMembersOnLeaveCalendar();
             membersOnLeaveCalendarInitialized = true;
         }
     });
 });
+
 function initializeUpcomingBDCalendar() {
     var upcomingBDCalendar = document.getElementById(
         "upcomingBirthdaysCalendar"
@@ -4783,39 +4880,53 @@ function formatTag(tag) {
         '<span class="badge bg-label-' + color + '">' + tag.text + "</span>"
     );
 }
+/**
+ * Initializes Select2 dropdowns for status and priority fields with dynamic parent detection for modals and offcanvas.
+ * Formats dropdown options with colored badges and handles clearing behavior for priority dropdowns.
+ *
+ * @listens document.ready - Executes when the DOM is fully loaded.
+ * @returns {void}
+ */
 $(document).ready(function () {
+    /**
+     * Formats status dropdown options with a colored badge.
+     *
+     * @param {Object} status - The Select2 option object containing id, text, and data attributes.
+     * @returns {jQuery|string} - A jQuery element with a colored badge or the plain text if no id is present.
+     */
     function formatStatus(status) {
         if (!status.id) {
             return status.text;
         }
-        var color = $(status.element).data("color");
-        var $status = $(
-            '<span class="badge bg-label-' +
-            color +
-            '">' +
-            status.text +
-            "</span>"
-        );
-        return $status;
+        var color = $(status.element).data("color") || "primary"; // Fallback to 'primary' if no color
+        return $('<span class="badge bg-label-' + color + '">' + status.text + "</span>");
     }
+
+    /**
+     * Formats priority dropdown options with a colored badge.
+     *
+     * @param {Object} priority - The Select2 option object containing id, text, and data attributes.
+     * @returns {jQuery|string} - A jQuery element with a colored badge or the plain text if no id is present.
+     */
     function formatPriority(priority) {
         if (!priority.id) {
             return priority.text;
         }
-        var color = $(priority.element).data("color");
-        var $priority = $(
-            '<span class="badge bg-label-' +
-            color +
-            '">' +
-            priority.text +
-            "</span>"
-        );
-        return $priority;
+        var color = $(priority.element).data("color") || "primary"; // Fallback to 'primary' if no color
+        return $('<span class="badge bg-label-' + color + '">' + priority.text + "</span>");
     }
+
+    /**
+     * Initializes Select2 for elements with class 'statusDropdown'.
+     */
     $(".statusDropdown").each(function () {
         var $this = $(this);
+        var dropdownParent = $this.closest(".modal, .offcanvas").length
+            ? $this.closest(".modal, .offcanvas")
+            : $(document.body); // Fallback to body if no modal/offcanvas
+
         $this.select2({
-            dropdownParent: $this.closest(".modal"),
+            dropdownParent: dropdownParent,
             templateResult: formatStatus,
             templateSelection: formatStatus,
             escapeMarkup: function (markup) {
@@ -4831,10 +4942,18 @@ $(document).ready(function () {
             },
         });
     });
+
+    /**
+     * Initializes Select2 for elements with class 'priorityDropdown', with clearable options.
+     */
     $(".priorityDropdown").each(function () {
         var $this = $(this);
+        var dropdownParent = $this.closest(".modal, .offcanvas").length
+            ? $this.closest(".modal, .offcanvas")
+            : $(document.body); // Fallback to body if no modal/offcanvas
+
         $this.select2({
-            dropdownParent: $this.closest(".modal"),
+            dropdownParent: dropdownParent,
             templateResult: formatPriority,
             templateSelection: formatPriority,
             allowClear: true,
@@ -4850,6 +4969,7 @@ $(document).ready(function () {
                 },
             },
         });
+
         // Prevent dropdown from opening when clear button is clicked
         $this
             .on("select2:unselecting", function (e) {
@@ -4858,7 +4978,7 @@ $(document).ready(function () {
             .on("select2:open", function (e) {
                 if ($(this).data("state") === "unselecting") {
                     $(this).removeData("state");
-                    $this.select2("close"); // Close the dropdown immediately
+                    $this.select2("close");
                 }
             });
     });
@@ -5291,19 +5411,32 @@ function initSelect2WithAjax(selector, type) {
                     $this.data("single-select") === false
                     ? false
                     : true;
+
+            // New: Check if initial values should be loaded
+            var loadInitialValues = $this.data("load-initial") !== false; // Default to true unless explicitly set to false
+            var initialLimit = $this.data("initial-limit") || 10; // Default to 10 initial items
+
             var ajaxOptions = {
                 ajax: {
                     url: "/search", // API endpoint to fetch data dynamically
                     dataType: "json",
                     delay: 250,
                     data: function (params) {
-                        return {
+                        var requestData = {
                             q: params.term, // search term
                             type: type, // dynamic type: 'tags', 'statuses', 'priorities'
                             considerWorkspace: considerWorkspace,
                             leaveVisibleToUsers: leaveVisibleToUsers,
                             ignoreAdmins: ignoreAdmins,
                         };
+
+                        // If no search term and initial values should be loaded
+                        if (!params.term && loadInitialValues) {
+                            requestData.initial = true;
+                            requestData.limit = initialLimit;
+                        }
+
+                        return requestData;
                     },
                     processResults: function (data) {
                         return {
@@ -5326,7 +5459,7 @@ function initSelect2WithAjax(selector, type) {
                     },
                     cache: true,
                 },
-                minimumInputLength: 1,
+                minimumInputLength: loadInitialValues ? 0 : 1, // Allow opening without typing if initial values are enabled
                 allowClear: allowClear,
                 closeOnSelect: singleSelect,
                 language: {
@@ -5341,6 +5474,7 @@ function initSelect2WithAjax(selector, type) {
                     },
                 },
             };
+
             // Apply specific templates if type is 'tags'
             // if (type === 'tags') {
             //     ajaxOptions.templateResult = formatTag;
@@ -5349,6 +5483,7 @@ function initSelect2WithAjax(selector, type) {
             //         return markup; // Prevent escaping of markup
             //     };
             // }
+
             // Check if the element is inside a modal
             if (
                 $this.closest(".modal").length &&
@@ -5359,7 +5494,9 @@ function initSelect2WithAjax(selector, type) {
                     ajaxOptions.dropdownParent = $("#" + modalId); // Use the ID to reference the modal
                 }
             }
+
             $this.select2(ajaxOptions);
+
             $(".cancel-button").on("click", function () {
                 $this.select2("close"); // Close the dropdown
             });
@@ -6611,403 +6748,605 @@ $(document).ready(function () {
     }
 });
 
-// Calendar View For the Projects
-function proejectCalenderView(projectCalenderDiv) {
-    // Check if the calendar element exists
-    var projectcalendar = new FullCalendar.Calendar(projectCalenderDiv, {
-        plugins: ["interaction", "dayGrid", "list"],
-        headerToolbar: {
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,listYear",
-        },
-        editable: true,
-        selectable: true,
-        selectHelper: true,
-        height: "auto",
-        eventLimit: 4, // Show max 4 events per day
-        events: function (fetchInfo, successCallback, failureCallback) {
-            // Fetch tasks for the current month
-            fetchProjects(
-                fetchInfo.start,
-                fetchInfo.end,
-                successCallback,
-                failureCallback
-            );
-        },
-        datesSet: function (info) {
-            // Fetch tasks when the month changes
-            projectcalendar.removeAllEvents();
-            projectcalendar.refetchEvents();
-        },
-        eventClick: function (info) {
-            // Show the edit modal
-            $("#edit_project_modal").modal("show");
-            // AJAX call to fetch the event details (similar to fetching task details)
-            $.ajax({
-                url: baseUrl + "/projects/get/" + info.event.id, // Fetch event by ID
+class ProjectCalendarManager {
+    constructor(config = {}) {
+        this.config = {
+            calendarContainerId: 'projectCalenderDiv',
+            dateRangePickerId: 'daterange-picker',
+            statusFiltersId: 'status-filters-container',
+            priorityFiltersId: 'priority-filters-container',
+            baseUrl: config.baseUrl || window.baseUrl || '',
+            dateFormat: config.dateFormat || window.js_date_format || 'DD/MM/YYYY',
+            csrfToken: config.csrfToken || $('input[name="_token"]').attr("value"),
+            ...config
+        };
+
+        this.state = {
+            calendar: null,
+            allProjects: [],
+            projectStatuses: [],
+            projectPriorities: [],
+            activeFilters: {
+                status: [],
+                priority: []
+            },
+            isInitialized: false
+        };
+
+        this.cache = new Map();
+        this.debounceTimers = new Map();
+    }
+
+    async init() {
+        if (this.state.isInitialized) {
+            console.warn('ProjectCalendarManager already initialized');
+            return this;
+        }
+
+        try {
+            await this.initializeDateRangePicker();
+            await this.loadFilterOptions();
+            await this.initializeCalendar();
+            this.initializeQuickActions();
+            this.state.isInitialized = true;
+            return this;
+        } catch (error) {
+            console.error('Failed to initialize ProjectCalendarManager:', error);
+            throw error;
+        }
+    }
+
+    initializeDateRangePicker() {
+        return new Promise((resolve) => {
+            const today = moment();
+            const picker = $(`#${this.config.dateRangePickerId}`);
+
+            if (!picker.length) {
+                console.warn(`Date range picker element #${this.config.dateRangePickerId} not found`);
+                resolve();
+                return;
+            }
+
+            picker.daterangepicker({
+                startDate: today.clone().startOf('month'),
+                endDate: today.clone().endOf('month'),
+                locale: { format: this.config.dateFormat },
+                ranges: this.getDateRanges()
+            }, (start, end) => {
+                this.handleDateRangeChange(start, end);
+            });
+
+            resolve();
+        });
+    }
+
+    getDateRanges() {
+        const m = moment;
+        return {
+            'Today': [m(), m()],
+            'Yesterday': [m().subtract(1, 'days'), m().subtract(1, 'days')],
+            'Last 7 Days': [m().subtract(6, 'days'), m()],
+            'Last 30 Days': [m().subtract(29, 'days'), m()],
+            'This Month': [m().startOf('month'), m().endOf('month')],
+            'Last Month': [m().subtract(1, 'month').startOf('month'), m().subtract(1, 'month').endOf('month')],
+            'Next Month': [m().add(1, 'month').startOf('month'), m().add(1, 'month').endOf('month')],
+            'This Year': [m().startOf('year'), m().endOf('year')]
+        };
+    }
+
+    handleDateRangeChange(start, end) {
+        this.debounce('dateRangeChange', () => {
+            if (this.state.calendar) {
+                this.state.calendar.gotoDate(start.toDate());
+                this.state.calendar.setOption('visibleRange', {
+                    start: start.toDate(),
+                    end: end.toDate()
+                });
+                this.state.calendar.refetchEvents();
+            }
+        }, 300);
+    }
+
+    async loadFilterOptions() {
+        const filterSection = $('.filter-section');
+        filterSection.addClass('loading-filters');
+
+        try {
+            const [statusResponse, priorityResponse] = await Promise.all([
+                this.apiRequest('/projects/get-statuses'),
+                this.apiRequest('/projects/get-priorities')
+            ]);
+
+            this.state.projectStatuses = statusResponse.statuses || statusResponse;
+            this.state.projectPriorities = priorityResponse.priorities || priorityResponse;
+
+            this.state.activeFilters.status = this.state.projectStatuses.map(s => s.id.toString());
+            this.state.activeFilters.priority = this.state.projectPriorities.map(p => p.id.toString());
+
+            this.renderFilters();
+        } catch (error) {
+            console.error('Error loading filter options:', error);
+            this.handleFilterLoadError();
+        } finally {
+            filterSection.removeClass('loading-filters');
+        }
+    }
+
+    async apiRequest(endpoint, options = {}) {
+        const cacheKey = `${endpoint}-${JSON.stringify(options)}`;
+
+        if (this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+
+        const response = await $.ajax({
+            url: this.config.baseUrl + endpoint,
+            type: options.method || "GET",
+            headers: {
+                "X-CSRF-TOKEN": this.config.csrfToken,
+                ...options.headers
+            },
+            dataType: "json",
+            ...options
+        });
+
+        this.cache.set(cacheKey, response);
+        return response;
+    }
+
+    renderFilters() {
+        this.renderStatusFilters();
+        this.renderPriorityFilters();
+    }
+
+    renderStatusFilters() {
+        const container = $(`#${this.config.statusFiltersId}`);
+        if (!container.length) return;
+
+        const filtersHtml = this.state.projectStatuses.map(status =>
+            this.createFilterHtml('status', status)
+        ).join('');
+
+        container.html(filtersHtml);
+        this.bindFilterEvents('status');
+    }
+
+    renderPriorityFilters() {
+        const container = $(`#${this.config.priorityFiltersId}`);
+        if (!container.length) return;
+
+        const filtersHtml = this.state.projectPriorities.map(priority =>
+            this.createFilterHtml('priority', priority)
+        ).join('');
+
+        container.html(filtersHtml);
+        this.bindFilterEvents('priority');
+    }
+
+    createFilterHtml(type, item) {
+        return `
+            <div class="form-check">
+                <input class="form-check-input ${type}-filter" type="checkbox" checked
+                       data-${type}="${item.id}" id="filter${type.charAt(0).toUpperCase() + type.slice(1)}${item.id}">
+                <label class="form-check-label" for="filter${type.charAt(0).toUpperCase() + type.slice(1)}${item.id}">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-label-${item.color || 'secondary'}">${item.title || item.name}</span>
+                    </div>
+                    <span class="filter-counter" id="count-${type}-${item.id}">0</span>
+                </label>
+            </div>
+        `;
+    }
+
+    bindFilterEvents(type) {
+        $(`.${type}-filter`).off('change.pcm').on('change.pcm', (e) => {
+            const itemId = $(e.target).data(type).toString();
+            const isChecked = $(e.target).is(':checked');
+
+            this.updateActiveFilters(type, itemId, isChecked);
+            this.debounce('applyFilters', () => this.applyFilters(), 150);
+        });
+    }
+
+    updateActiveFilters(type, itemId, isChecked) {
+        if (isChecked) {
+            if (!this.state.activeFilters[type].includes(itemId)) {
+                this.state.activeFilters[type].push(itemId);
+            }
+        } else {
+            this.state.activeFilters[type] = this.state.activeFilters[type].filter(id => id !== itemId);
+        }
+    }
+
+    initializeQuickActions() {
+        $('#selectAllFilters').off('click.pcm').on('click.pcm', () => this.selectAllFilters());
+        $('#clearAllFilters').off('click.pcm').on('click.pcm', () => this.clearAllFilters());
+        $('#refreshCalendar').off('click.pcm').on('click.pcm', () => this.refreshCalendar());
+    }
+
+    selectAllFilters() {
+        $('.status-filter, .priority-filter').prop('checked', true);
+        this.state.activeFilters.status = this.state.projectStatuses.map(s => s.id.toString());
+        this.state.activeFilters.priority = this.state.projectPriorities.map(p => p.id.toString());
+        this.applyFilters();
+    }
+
+    clearAllFilters() {
+        $('.status-filter, .priority-filter').prop('checked', false);
+        this.state.activeFilters.status = [];
+        this.state.activeFilters.priority = [];
+        this.applyFilters();
+    }
+
+    refreshCalendar() {
+        if (this.state.calendar) {
+            this.state.calendar.refetchEvents();
+        }
+    }
+
+    applyFilters() {
+        if (!this.state.calendar) return;
+
+        this.state.calendar.refetchEvents();
+        this.updateFilterCounters();
+        this.updateStatistics();
+    }
+
+    updateFilterCounters() {
+        const counts = this.calculateCounts();
+
+        this.state.projectStatuses.forEach(status => {
+            $(`#count-status-${status.id}`).text(counts.status[status.id.toString()] || 0);
+        });
+
+        this.state.projectPriorities.forEach(priority => {
+            $(`#count-priority-${priority.id}`).text(counts.priority[priority.id.toString()] || 0);
+        });
+    }
+
+    calculateCounts() {
+        return this.state.allProjects.reduce((acc, project) => {
+            const statusId = project.status_id?.toString();
+            const priorityId = project.priority_id?.toString();
+
+            if (statusId) {
+                acc.status[statusId] = (acc.status[statusId] || 0) + 1;
+            }
+            if (priorityId) {
+                acc.priority[priorityId] = (acc.priority[priorityId] || 0) + 1;
+            }
+
+            return acc;
+        }, { status: {}, priority: {} });
+    }
+
+    updateStatistics() {
+        const totalProjects = this.state.allProjects.length;
+        const visibleProjects = this.getVisibleProjectsCount();
+
+        $('#total-projects').text(totalProjects);
+        $('#visible-projects').text(visibleProjects);
+        $('#filtered-projects').text(totalProjects - visibleProjects);
+    }
+
+    getVisibleProjectsCount() {
+        return this.state.allProjects.filter(project => {
+            const statusMatch = this.state.activeFilters.status.length === 0 ||
+                this.state.activeFilters.status.includes(project.status_id?.toString());
+            const priorityMatch = this.state.activeFilters.priority.length === 0 ||
+                this.state.activeFilters.priority.includes(project.priority_id?.toString());
+            return statusMatch && priorityMatch;
+        }).length;
+    }
+
+    initializeCalendar() {
+        const calendarEl = document.getElementById(this.config.calendarContainerId);
+        if (!calendarEl) {
+            throw new Error(`Calendar container #${this.config.calendarContainerId} not found`);
+        }
+
+        this.state.calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: ["interaction", "dayGrid", "list"],
+            headerToolbar: {
+                left: "prev,next today",
+                center: "title",
+                right: "dayGridMonth,listYear,",
+            },
+            initialView: "dayGridMonth",
+            editable: true,
+            selectable: true,
+            selectHelper: true,
+            height: "auto",
+            eventLimit: 4,
+            events: (fetchInfo, successCallback, failureCallback) => {
+                this.fetchProjects(fetchInfo, successCallback, failureCallback);
+            },
+            datesSet: (info) => this.handleDatesSet(info),
+            eventDidMount: (info) => this.handleEventDidMount(info),
+            eventClick: (info) => this.handleEventClick(info),
+            dateClick: (info) => this.handleDateClick(info),
+            select: (info) => this.handleSelect(info),
+            eventDrop: (info) => this.handleEventDrop(info),
+            eventResize: (info) => this.handleEventResize(info),
+            eventMouseEnter: (info) => this.handleEventMouseEnter(info)
+        });
+
+        this.state.calendar.render();
+    }
+
+    async fetchProjects(fetchInfo, successCallback, failureCallback) {
+        try {
+            const response = await $.ajax({
+                url: this.config.baseUrl + "/projects/get-calendar-data",
                 type: "GET",
-                headers: {
-                    "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"), // CSRF token for security
-                },
-                dataType: "json",
-                success: function (response) {
-                    var formattedStartDate = response.project.start_date
-                        ? moment(response.project.start_date).format(js_date_format)
-                        : "";
-                    var formattedEndDate = response.project.end_date
-                        ? moment(response.project.end_date).format(js_date_format)
-                        : "";
-                    var $modal = $("#edit_project_modal"); // Cache the modal element for better performance
-                    $modal.find("#project_id").val(response.project.id);
-                    $modal.find("#project_title").val(response.project.title);
-                    $modal
-                        .find("#project_status_id")
-                        .val(response.project.status_id)
-                        .trigger("change");
-                    $modal
-                        .find("#project_priority_id")
-                        .val(response.project.priority_id)
-                        .trigger("change");
-                    $modal.find("#project_budget").val(response.project.budget);
-                    $modal.find("#update_start_date").val(formattedStartDate);
-                    $modal.find("#update_end_date").val(formattedEndDate);
-                    initializeDateRangePicker(
-                        $modal.find("#update_start_date, #update_end_date")
-                    ); // Initialize date range picker
-                    $modal
-                        .find("#task_accessibility")
-                        .val(response.project.task_accessibility);
-                    $modal.find("#projectNote").val(response.project.note);
-                    var description =
-                        response.project.description !== null
-                            ? response.project.description
-                            : "";
-                    $modal.find("#project_description").val(description);
-                    var usersSelect = $modal.find(".users_select");
-                    var clientsSelect = $modal.find(".clients_select");
-                    // Clear existing options
-                    usersSelect.empty();
-                    clientsSelect.empty();
-                    // console.log(response);
-                    // Handle multi-select for users
-                    if (response.users && response.users.length > 0) {
-                        response.users.forEach(function (user) {
-                            var userOption = new Option(
-                                user.first_name + " " + user.last_name,
-                                user.id,
-                                true,
-                                true
-                            );
-                            usersSelect.append(userOption);
-                        });
-                        usersSelect.trigger("change");
-                    } else {
-                        usersSelect.val(null).trigger("change"); // Handle case when no users are present
-                    }
-                    // Handle multi-select for clients
-                    if (response.clients && response.clients.length > 0) {
-                        response.clients.forEach(function (client) {
-                            var clientOption = new Option(
-                                client.first_name + " " + client.last_name,
-                                client.id,
-                                true,
-                                true
-                            );
-                            clientsSelect.append(clientOption);
-                        });
-                        clientsSelect.trigger("change");
-                    } else {
-                        clientsSelect.val(null).trigger("change"); // Handle case when no clients are present
-                    }
-                    var tagsSelect = $modal.find('[name="tag_ids[]"]');
-                    if (response.tags && response.tags.length > 0) {
-                        // Clear existing tags in the dropdown
-                        tagsSelect.empty();
-                        response.tags.forEach(function (tag) {
-                            // Create a new option element
-                            var tagOption = new Option(tag.title, tag.id, true, true);
-                            // Add data-color attribute
-                            // $(tagOption).attr('data-color', tag.color || 'default-color');
-                            // Append the option to the select element
-                            tagsSelect.append(tagOption);
-                        });
-                        tagsSelect.trigger("change"); // Update Select2
-                    } else {
-                        tagsSelect.val(null).trigger("change"); // Handle case when no tags are present
-                    }
-                    if (response.project.client_can_discuss == 1) {
-                        $("#edit_project_modal")
-                            .find("#updateClientCanDiscussProject")
-                            .prop("checked", true);
-                    } else {
-                        $("#edit_project_modal")
-                            .find("#updateClientCanDiscussProject")
-                            .prop("checked", false);
-                    }
-                    if (response.project.enable_tasks_time_entries == 1) {
-                        $("#edit_project_modal")
-                            .find("#tasks_time_entries")
-                            .prop("checked", true);
-                    } else {
-                        $("#edit_project_modal")
-                            .find("#tasks_time_entries")
-                            .prop("checked", false);
-                    }
-
-                    // For custome
-                    if (response.customFieldValues) {
-
-                        console.log('res:', response.customFieldValues);
-                        // Loop through each custom field value
-                        $.each(response.customFieldValues, function (fieldId, value) {
-                            // For regular input fields (text, number, etc.)
-                            var inputField = $modal.find('#edit_cf_' + fieldId);
-
-                            // Handle different field types
-                            if (inputField.length) {
-                                // For select, text inputs, textarea, etc.
-                                if (inputField.is('select')) {
-                                    inputField.val(value).trigger('change');
-                                } else if (inputField.hasClass('custom-datepicker')) {
-                                    // Format date if necessary
-                                    inputField.val(moment(value).format(js_date_format));
-                                } else {
-                                    // For regular inputs and textareas
-                                    inputField.val(value);
-                                }
-                            }
-                            // For radio buttons
-                            else if ($modal.find('input[type="radio"][name="custom_fields[' + fieldId + ']"]').length) {
-                                $modal.find('input[type="radio"][name="custom_fields[' + fieldId + ']"][value="' + value + '"]').prop('checked', true);
-                            }
-                            // For checkboxes
-                            else if ($modal.find('input[type="checkbox"][name="custom_fields[' + fieldId + '][]"]').length) {
-                                try {
-                                    // Parse JSON if it's a JSON string
-                                    var checkboxValues = typeof value === 'string' && value.includes('[') ? JSON.parse(value) : [value];
-
-                                    // Make sure it's an array
-                                    if (!Array.isArray(checkboxValues)) {
-                                        checkboxValues = [checkboxValues];
-                                    }
-
-                                    // Reset all checkboxes first
-                                    $modal.find('input[type="checkbox"][name="custom_fields[' + fieldId + '][]"]').prop('checked', false);
-
-                                    // Set the selected ones
-                                    checkboxValues.forEach(function (val) {
-                                        $modal.find('input[type="checkbox"][name="custom_fields[' + fieldId + '][]"][value="' + val + '"]').prop('checked', true);
-                                    });
-                                } catch (e) {
-                                    console.error("Error parsing checkbox values for field " + fieldId + ":", e);
-                                }
-                            }
-                        });
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error:", error);
-                },
-            });
-        },
-        dateClick: function (info) {
-            var start = moment(info.dateStr).format(js_date_format);
-            $("#start_date").val(start);
-            $("#end_date").val(start);
-            $("#create_project_modal").modal("show");
-        },
-        select: function (info) {
-            var startDate = moment(info.startStr).format(js_date_format);
-            var endDate = moment(info.endStr)
-                .subtract(1, "days")
-                .format(js_date_format);
-            $("#start_date").val(startDate);
-            $("#end_date").val(endDate);
-            $("#create_project_modal").modal("show");
-        },
-        eventDrop: function (info) {
-            var id = info.event.id;
-            // Show the confirmation modal
-            $("#confirmDragProjectModal").modal("show");
-            // Remove previous click event to avoid duplication
-            $("#confirmDragProjectModal").off("click", "#confirm");
-            // When the confirmation button is clicked
-            $("#confirmDragProjectModal").on("click", "#confirm", function () {
-                $("#confirmDragProjectModal")
-                    .find("#confirm")
-                    .html(label_please_wait)
-                    .attr("disabled", true);
-                // Format the start and end dates
-                var start = moment(info.event.start).format(js_date_format);
-                var end = moment(info.event.end)
-                    .subtract(1, "days")
-                    .format(js_date_format); // Subtracting one day
-                // Handle case where the end date is invalid
-                if (end === "Invalid date") {
-                    end = start;
+                data: {
+                    start: fetchInfo.start.toISOString(),
+                    end: fetchInfo.end.toISOString(),
                 }
-                $.ajax({
-                    url: baseUrl + "/projects/update-dates",
-                    type: "patch",
-                    headers: {
-                        "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"),
-                    },
-                    data: {
-                        id: id,
-                        start_date: start,
-                        end_date: end,
-                    },
-                    success: function (response) {
-                        $("#confirmDragProjectModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        if (response.error == false) {
-                            $("#confirmDragProjectModal").modal("hide");
-                            toastr.success(response.message);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        // Handle error
-                        $("#confirmDragProjectModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        $("#confirmDragProjectModal").modal("hide");
-                        toastr.error(label_something_went_wrong);
-                    },
-                });
             });
-            // Handle cancel event
-            $("#confirmDragProjectModal").on("click", "#cancel", function () {
-                info.revert(); // Revert the event to its original position
-                $("#confirmDragProjectModal").modal("hide");
-            });
-        },
-        eventResize: function (info) {
-            var id = info.event.id;
-            // Show confirmation modal for resizing
-            $("#confirmResizeProjectModal").modal("show");
-            $("#confirmResizeProjectModal").off("click", "#confirm");
-            $("#confirmResizeProjectModal").on("click", "#confirm", function () {
-                $("#confirmResizeProjectModal")
-                    .find("#confirm")
-                    .html(label_please_wait)
-                    .attr("disabled", true);
-                // Format the new start and end dates
-                var start = moment(info.event.start).format(js_date_format);
-                var end = moment(info.event.end)
-                    .subtract(1, "days")
-                    .format(js_date_format); // Subtracting one day
-                $.ajax({
-                    url: baseUrl + "/projects/update-dates",
-                    type: "PATCH",
-                    headers: {
-                        "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"),
-                    },
-                    data: {
-                        id: id,
-                        start_date: start,
-                        end_date: end,
-                    },
-                    success: function (response) {
-                        $("#confirmResizeProjectModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        if (response.error == false) {
-                            $("#confirmResizeProjectModal").modal("hide");
-                            toastr.success(response.message);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        $("#confirmResizeProjectModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        $("#confirmResizeProjectModal").modal("hide");
-                        toastr.error(label_something_went_wrong);
-                    },
-                });
-            });
-            // Handle cancellation
-            $("#confirmResizeProjectModal").on("click", "#cancel", function () {
-                info.revert(); // Revert the event to its original position
-                $("#confirmResizeProjectModal").modal("hide");
-            });
-        },
-        eventMouseEnter: function (info) {
-            // Create a tooltip element
-            var tooltip = document.createElement("div");
-            tooltip.innerHTML = info.event.title;
-            tooltip.style.position = "absolute";
-            tooltip.style.background = "rgba(0, 0, 0, 0.8)";
-            tooltip.style.color = "#fff";
-            tooltip.style.padding = "5px";
-            tooltip.style.borderRadius = "5px";
-            tooltip.style.zIndex = "1000";
-            tooltip.style.pointerEvents = "none"; // Prevent mouse events
-            // Append the tooltip to the body
-            document.body.appendChild(tooltip);
-            // Position the tooltip
-            var rect = info.el.getBoundingClientRect();
-            tooltip.style.left = rect.left + window.scrollX + "px";
-            tooltip.style.top = rect.bottom + window.scrollY + "px";
-            // Remove tooltip on mouse leave
-            info.el.addEventListener(
-                "mouseleave",
-                function () {
-                    document.body.removeChild(tooltip);
-                },
-                { once: true }
-            );
-        },
-    });
-    projectcalendar.render();
-}
-function fetchProjects(startDate, endDate, successCallback, failureCallback) {
 
-    $.ajax({
-        url: baseUrl + "/projects/get-calendar-data",
-        type: "GET",
-        data: {
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
+            console.log('API Response:', response);
+            const events = this.transformEvents(response);
+            console.log('Transformed Events:', events);
+            this.state.allProjects = events;
 
-        },
-        success: function (response) {
-            // Parse and format dynamic data for FullCalendar
-            var events = response.map(function (event) {
-                return {
-                    id: event.id,
-                    tasks_info_url: event.project_info_url,
-                    title: event.title,
-                    start: event.start,
-                    end: moment(event.end).add(1, "days").format("YYYY-MM-DD"),
-                    backgroundColor: event.backgroundColor,
-                    borderColor: event.borderColor,
-                    textColor: event.textColor,
-                };
-            });
-            // Invoke success callback with dynamic data
-            successCallback(events);
-        },
-        error: function (xhr, status, error) {
-            console.error(xhr.responseText);
-            // Invoke failure callback if there's an error
+            const filteredEvents = this.filterEvents(events);
+            console.log('Filtered Events:', filteredEvents);
+            console.log('Active Filters:', this.state.activeFilters);
+
+            this.updateFilterCounters();
+            this.updateStatistics();
+
+            successCallback(filteredEvents);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
             failureCallback(error);
-        },
+        }
+    }
+
+    transformEvents(response) {
+        return response.map(event => ({
+            id: event.id,
+            tasks_info_url: event.project_info_url,
+            title: event.title,
+            start: event.start,
+            end: moment(event.end).add(1, "days").format("YYYY-MM-DD"),
+            backgroundColor: event.backgroundColor,
+            borderColor: event.borderColor,
+            textColor: event.textColor,
+            extendedProps: {
+                status_id: event.status_id,
+                priority_id: event.priority_id
+            },
+            status_id: event.status_id,
+            priority_id: event.priority_id
+        }));
+    }
+
+    filterEvents(events) {
+        return events.filter(event => {
+            const statusMatch = this.state.activeFilters.status.length === 0 ||
+                this.state.activeFilters.status.includes(event.status_id?.toString());
+            const priorityMatch = this.state.activeFilters.priority.length === 0 ||
+                this.state.activeFilters.priority.includes(event.priority_id?.toString());
+            return statusMatch && priorityMatch;
+        });
+    }
+
+    handleDatesSet(info) {
+        const start = moment(info.start);
+        const end = moment(info.end).subtract(1, 'day');
+        const picker = $(`#${this.config.dateRangePickerId}`).data('daterangepicker');
+
+        if (picker) {
+            picker.setStartDate(start);
+            picker.setEndDate(end);
+        }
+    }
+
+    handleEventDidMount(info) {
+        const event = info.event;
+        const element = info.el;
+
+        const status = this.state.projectStatuses.find(s =>
+            s.id.toString() === event.extendedProps.status_id?.toString()
+        );
+        const priority = this.state.projectPriorities.find(p =>
+            p.id.toString() === event.extendedProps.priority_id?.toString()
+        );
+
+        if (status?.color) {
+            element.style.backgroundColor = status.color;
+            element.style.borderColor = status.color;
+            element.classList.add('status-color');
+        }
+
+        if (priority?.color) {
+            element.style.borderLeft = `4px solid ${priority.color}`;
+        }
+    }
+
+    handleEventClick(info) {
+        editProject(info.event.id, true, this.config.baseUrl, this.config.dateFormat);
+    }
+
+    handleDateClick(info) {
+        const date = moment(info.dateStr).format(this.config.dateFormat);
+        this.openCreateProjectOffcanvas(date, date);
+    }
+
+    handleSelect(info) {
+        const startDate = moment(info.startStr).format(this.config.dateFormat);
+        const endDate = moment(info.endStr).subtract(1, "days").format(this.config.dateFormat);
+        this.openCreateProjectOffcanvas(startDate, endDate);
+    }
+
+    openCreateProjectOffcanvas(startDate, endDate) {
+        const $offcanvas = $("#create_project_offcanvas");
+        if (!$offcanvas.length) {
+            console.warn("#create_project_offcanvas not found in DOM");
+            toastr.error("Create project form not found");
+            return;
+        }
+
+        // Open offcanvas
+        $offcanvas.offcanvas("show");
+
+        // Populate start and end date fields
+        $offcanvas.find("#start_date").val(startDate);
+        $offcanvas.find("#end_date").val(endDate);
+
+        // Initialize DateRangePicker for date fields
+        initializeDateRangePicker($offcanvas.find("#start_date, #end_date"));
+    }
+
+    handleEventDrop(info) {
+        this.showUpdateConfirmation(info, 'drag');
+    }
+
+    handleEventResize(info) {
+        this.showUpdateConfirmation(info, 'resize');
+    }
+
+    handleEventMouseEnter(info) {
+        this.showTooltip(info);
+    }
+
+    showUpdateConfirmation(info, type) {
+        const modalId = type === 'drag' ? '#confirmDragProjectModal' : '#confirmResizeProjectModal';
+        $(modalId).modal("show");
+
+        $(modalId).off("click.pcm", "#confirm").on("click.pcm", "#confirm", () => {
+            this.updateProjectDates(info, modalId);
+        });
+
+        $(modalId).off("click.pcm", "#cancel").on("click.pcm", "#cancel", () => {
+            info.revert();
+            $(modalId).modal("hide");
+        });
+    }
+
+    async updateProjectDates(info, modalId) {
+        const confirmBtn = $(modalId).find("#confirm");
+        confirmBtn.html(window.label_please_wait || 'Please wait...').attr("disabled", true);
+
+        try {
+            const start = moment(info.event.start).format(this.config.dateFormat);
+            const end = moment(info.event.end).subtract(1, "days").format(this.config.dateFormat);
+
+            const response = await $.ajax({
+                url: this.config.baseUrl + "/projects/update-dates",
+                type: "PATCH",
+                headers: { "X-CSRF-TOKEN": this.config.csrfToken },
+                data: {
+                    id: info.event.id,
+                    start_date: start,
+                    end_date: end === "Invalid date" ? start : end,
+                }
+            });
+
+            if (response.error === false) {
+                $(modalId).modal("hide");
+                toastr.success(response.message);
+                this.state.calendar.refetchEvents();
+            } else {
+                toastr.error(response.message);
+                info.revert();
+            }
+        } catch (error) {
+            console.error('Error updating project dates:', error);
+            toastr.error(window.label_something_went_wrong || 'Something went wrong');
+            info.revert();
+        } finally {
+            confirmBtn.html(window.label_yes || 'Yes').attr("disabled", false);
+            $(modalId).modal("hide");
+        }
+    }
+
+    showTooltip(info) {
+        const tooltip = $(`<div class="calendar-tooltip">${info.event.title}</div>`);
+        tooltip.css({
+            position: "absolute",
+            background: "rgba(0, 0, 0, 0.8)",
+            color: "#fff",
+            padding: "5px",
+            borderRadius: "5px",
+            zIndex: "1000",
+            pointerEvents: "none"
+        });
+
+        $('body').append(tooltip);
+
+        const rect = info.el.getBoundingClientRect();
+        tooltip.css({
+            left: rect.left + window.scrollX,
+            top: rect.bottom + window.scrollY
     });
+
+        $(info.el).one('mouseleave', () => tooltip.remove());
+    }
+
+    handleFilterLoadError() {
+        $(`#${this.config.statusFiltersId}`).html('<p class="text-danger small">Error loading statuses</p>');
+        $(`#${this.config.priorityFiltersId}`).html('<p class="text-danger small">Error loading priorities</p>');
+    }
+
+    destroy() {
+        if (this.state.calendar) {
+            this.state.calendar.destroy();
+        }
+
+        this.debounceTimers.forEach(timer => clearTimeout(timer));
+        this.debounceTimers.clear();
+        this.cache.clear();
+
+        $('.status-filter, .priority-filter').off('.pcm');
+        $('#selectAllFilters, #clearAllFilters, #refreshCalendar').off('.pcm');
+
+        this.state.isInitialized = false;
+    }
+
+    /**
+    * Utility methods
+    */
+    debounce(key, func, delay) {
+        if (this.debounceTimers.has(key)) {
+            clearTimeout(this.debounceTimers.get(key));
+        }
+
+        const timeoutId = setTimeout(() => {
+            func();
+            this.debounceTimers.delete(key);
+        }, delay);
+
+        this.debounceTimers.set(key, timeoutId);
+    }
 }
+
+// Usage function that wraps initialization
+async function initializeProjectCalendar(config = {}) {
+    try {
+        const calendarManager = new ProjectCalendarManager(config);
+        await calendarManager.init();
+
+        // Store instance globally for external access if needed
+        if (!window.projectCalendarInstances) {
+            window.projectCalendarInstances = new Map();
+        }
+        window.projectCalendarInstances.set(config.calendarContainerId || 'projectCalenderDiv', calendarManager);
+
+        return calendarManager;
+    } catch (error) {
+        console.error('Failed to initialize project calendar:', error);
+        throw error;
+    }
+}
+
+// Auto-initialize when document is ready (maintains backward compatibility)
 $(document).ready(function () {
-    var projectCalenderDiv = document.getElementById("projectCalenderDiv");
-    if (projectCalenderDiv) {
-        proejectCalenderView(projectCalenderDiv);
+    const calendarEl = document.getElementById('projectCalenderDiv');
+    if (calendarEl) {
+        initializeProjectCalendar().catch(console.error);
     }
 });
 function googleCalendarView(googleCalendarDiv) {
@@ -7462,3 +7801,567 @@ if (document.getElementById("install-plugin-dropzone")) {
     }
 }
 
+/**
+ * Enhanced Form Submission Handler with Smart Modal/Offcanvas Management
+ *
+ * This handler manages form submissions across the application with intelligent overlay closing,
+ * error handling, and dependent property management. Designed for systems transitioning from
+ * modals to offcanvas for better UX while maintaining backward compatibility.
+ *
+ *
+ * FEATURES:
+ * ========
+ * • Smart Context Detection: Automatically detects modal vs offcanvas forms
+ * • Nested Overlay Support: Handles Project (offcanvas) + Dependencies (modal) scenarios
+ * • Intelligent Closing: Only closes relevant overlays based on form context
+ * • Enhanced Error Handling: Context-aware error display and robust server error parsing
+ * • Dependent Property Management: Seamless dropdown refresh for related entities
+ * • Accessibility Compliant: Proper ARIA attributes and focus management
+ * • Multi-Entity Support: Handles various entity types (projects, status, priority, tags, etc.)
+ *
+ * SUPPORTED SCENARIOS:
+ * ==================
+ * 1. Main Entity Forms (Projects, Users, etc.):
+ *    - Opens in offcanvas
+ *    - Closes offcanvas + any modals on success
+ *    - Redirects or reloads page
+ *
+ * 2. Dependent Property Forms (Status, Priority, Tags):
+ *    - Opens in modal (even when parent is offcanvas)
+ *    - Only closes the modal on success
+ *    - Keeps parent offcanvas open
+ *    - Auto-refreshes parent form dropdowns
+ *
+ * 3. Independent Entity Forms:
+ *    - Can be in modal or offcanvas
+ *    - Closes only its container
+ *
+ * FORM MARKUP REQUIREMENTS:
+ * ========================
+ * 1. All forms must have class: "new-form-submit-event"
+ * 2. Submit button must have id: "submit_btn"
+ * 3. CSRF token via meta tag: <meta name="csrf-token" content="...">
+ *
+ * DEPENDENT PROPERTY DETECTION:
+ * ============================
+ * Mark dependent properties using ANY of these methods:
+ * • Form class: <form class="new-form-submit-event dependent-property-form">
+ * • Hidden input: <input type="hidden" name="is_dependent_property" value="1">
+ * • Modal class: <div class="modal dependent-property-modal">
+ * • Offcanvas class: <div class="offcanvas dependent-property-offcanvas">
+ *
+ * SERVER RESPONSE FORMAT:
+ * ======================
+ * Success Response:
+ * {
+ *   "error": false,
+ *   "message": "Success message",
+ *   "type": "status|priority|tag|etc", // For dropdown refresh
+ *   "data": {
+ *     "id": 123,
+ *     "name": "New Item Name"
+ *   }
+ * }
+ *
+ * Validation Error Response (422):
+ * {
+ *   "errors": {
+ *     "field_name": ["Error message 1", "Error message 2"]
+ *   },
+ *   "showInModal": true // Optional: show errors in modal/offcanvas container
+ * }
+ *
+ * SPECIAL FORM INPUTS:
+ * ===================
+ * • redirect_url: Custom redirect after success
+ * • table: Table ID for bootstrap-table refresh (default: "table")
+ * • dnr: "Do Not Redirect" - refreshes table instead of redirecting
+ * • is_dependent_property: Marks form as dependent property
+ * • is_encoded: Indicates content field is base64 encoded
+ *
+ * SUPPORTED OVERLAYS:
+ * ==================
+ * • Bootstrap 5 Modals (.modal)
+ * • Bootstrap 5 Offcanvas (.offcanvas)
+ * • Backward compatibility with Bootstrap 4 modals
+ *
+ * SUPPORTED PLUGINS:
+ * =================
+ * • Select2 dropdowns
+ * • Tinymce editors
+ * • Dropzone file uploads
+ * • Bootstrap Table
+ * • Toastr notifications
+ *
+ * ERROR HANDLING:
+ * ==============
+ * • Field-level validation errors with visual indicators
+ * • Database connection and SQL error parsing
+ * • Graceful fallbacks for plugin failures
+ * • Automatic focus on first error field
+ * • Enhanced error messages for common database issues
+ *
+ * DROPDOWN REFRESH:
+ * ================
+ * Automatically refreshes parent form dropdowns when dependent properties are created.
+ * Supports: status, priority, tags, categories, departments, clients, etc.
+ *
+ * ACCESSIBILITY:
+ * =============
+ * • Proper ARIA attributes management
+ * • Keyboard navigation support
+ * • Screen reader friendly error messages
+ * • Focus management for error fields
+ *
+ * BROWSER SUPPORT:
+ * ===============
+ * • Modern browsers with ES6+ support
+ * • jQuery 3.x required
+ * • Bootstrap 5.x recommended (Bootstrap 4.x compatible)
+ *
+ * TROUBLESHOOTING:
+ * ===============
+ * • Check browser console for detailed error logs
+ * • Ensure CSRF token is properly set
+ * • Verify form has required classes and IDs
+ * • Check server response format matches expected structure
+ *
+ * @example
+ * // Basic form setup
+ * <form class="new-form-submit-event" action="/projects/store" method="POST">
+ *   <input type="hidden" name="_token" value="...">
+ *   <input type="hidden" name="table" value="projects-table">
+ *   <!-- form fields -->
+ *   <button type="submit" id="submit_btn">Save Project</button>
+ * </form>
+ *
+ * @example
+ * // Dependent property form
+ * <form class="new-form-submit-event dependent-property-form" action="/status/store" method="POST">
+ *   <input type="hidden" name="_token" value="...">
+ *   <input type="hidden" name="dnr" value="1">
+ *   <!-- form fields -->
+ *   <button type="submit" id="submit_btn">Save Status</button>
+ * </form>
+ */
+$(document).on("submit", ".new-form-submit-event", function (e) {
+    e.preventDefault();
+
+    if ($("#net_payable").length > 0) {
+        $("#net_pay").val($("#net_payable").text());
+    }
+
+    var formData = new FormData(this);
+
+    // Encode HTML content for template saving
+    if (
+        $(this).attr("action").includes("store_template") ||
+        $(this).attr("action").includes("/email-templates/store") ||
+        $(this).attr("action").includes("email-templates/update") ||
+        $(this).attr("action").includes("/emails/store") ||
+        $(this).attr("action").includes("/emails/preview")
+    ) {
+        var contentField = $(this).find('textarea[name="content"], input[name="content"]');
+        if (contentField.length > 0) {
+            formData.delete("content");
+            formData.append("content", btoa(contentField.val()));
+            formData.append("is_encoded", "1");
+        }
+    }
+
+    var currentForm = $(this);
+    var submit_btn = currentForm.find("#submit_btn");
+    var button_text = submit_btn.html() || submit_btn.val();
+    var redirect_url = currentForm.find('input[name="redirect_url"]').val() || "";
+    var tableID = currentForm.find('input[name="table"]').val() || "table";
+
+    // Enhanced overlay type detection
+    var isInModal = currentForm.closest('.modal').length > 0;
+    var isInOffcanvas = currentForm.closest('.offcanvas').length > 0;
+    var parentModal = isInModal ? currentForm.closest('.modal') : null;
+    var parentOffcanvas = isInOffcanvas ? currentForm.closest('.offcanvas') : null;
+
+    // Enhanced dependent property detection
+    var isDependentProperty = currentForm.hasClass('dependent-property-form') ||
+        currentForm.find('input[name="is_dependent_property"]').length > 0 ||
+        currentForm.closest('.modal').hasClass('dependent-property-modal') ||
+        currentForm.closest('.offcanvas').hasClass('dependent-property-offcanvas');
+
+    // Enhanced contract dropzone handling for both modal and offcanvas
+    if (currentForm.closest("#edit_contract_offcanvas, #edit_contract_modal").length > 0 &&
+        typeof Dropzone !== 'undefined' && Dropzone.instances.length > 0) {
+        try {
+            var dropzoneInstance = Dropzone.forElement("#contract-dropzone");
+            if (dropzoneInstance) {
+                dropzoneInstance.getAcceptedFiles().forEach(function (file) {
+                    formData.append("signed_pdf", file);
+                });
+            }
+        } catch (error) {
+            console.warn('Dropzone error:', error);
+        }
+    }
+
+    $.ajax({
+        type: "POST",
+        url: currentForm.attr("action"),
+        data: formData,
+        headers: {
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content') || $('input[name="_token"]').val(),
+        },
+        beforeSend: function () {
+            submit_btn.html(label_please_wait).prop("disabled", true);
+        },
+        cache: false,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function (result) {
+            submit_btn.html(button_text).prop("disabled", false);
+
+            if (result.error) {
+                toastr.error(result.message);
+                return;
+            }
+
+            // Smart overlay closing
+            handleOverlayClosing(isDependentProperty, parentModal, parentOffcanvas);
+
+            // Handle success scenarios
+            if ($(".empty-state").length > 0) {
+                toastr.success(result.message || "Success");
+                setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
+            } else if (currentForm.find('input[name="dnr"]').length > 0) {
+                // DNR scenario - refresh table and reset form
+                if ($("#" + tableID).length) {
+                    $("#" + tableID).bootstrapTable("refresh");
+                }
+
+                resetForm(currentForm);
+                toastr.success(result.message || "Success");
+
+                // Refresh parent dropdowns for dependent properties
+                if (isDependentProperty) {
+                    refreshParentFormDropdowns(result);
+                }
+            } else {
+                toastr.success(result.message || "Success");
+                setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
+            }
+
+            // Clear all error messages
+            currentForm.find(".error-message").remove();
+        },
+        error: function (xhr) {
+            submit_btn.html(button_text).prop("disabled", false);
+
+            if (xhr.status === 422) {
+                handleValidationErrors(xhr, currentForm, isInOffcanvas);
+            } else {
+                handleServerErrors(xhr);
+            }
+        }
+    });
+
+    // ✅ ENHANCED OVERLAY CLOSING LOGIC
+    function handleOverlayClosing(isDependentProperty, parentModal, parentOffcanvas) {
+        try {
+            if (isDependentProperty) {
+                // For dependent properties: only close the immediate modal
+                if (parentModal) {
+                    closeSpecificModal(parentModal);
+                }
+                // Keep offcanvas open for dependent properties
+            } else if (parentOffcanvas) {
+                // For main entities in offcanvas: close offcanvas and any modals
+                closeSpecificOffcanvas(parentOffcanvas);
+                closeAllModals();
+            } else if (parentModal) {
+                // For independent entities in modals: close only the modal
+                closeSpecificModal(parentModal);
+            } else {
+                // Fallback: close everything
+                closeAllOverlays();
+            }
+        } catch (error) {
+            console.warn('Error in smart overlay closing:', error);
+            closeAllOverlays();
+        }
+    }
+
+    // ✅ ENHANCED MODAL CLOSING
+    function closeSpecificModal(modalElement) {
+        try {
+            let modalInstance = bootstrap.Modal.getInstance(modalElement[0]);
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                modalElement.modal("hide");
+            }
+        } catch (error) {
+            console.warn('Error closing specific modal:', error);
+            modalElement.removeClass('show').css('display', 'none');
+            modalElement.attr('aria-hidden', 'true').removeAttr('aria-modal');
+        }
+    }
+
+    // ✅ ENHANCED OFFCANVAS CLOSING
+    function closeSpecificOffcanvas(offcanvasElement) {
+        try {
+            let offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement[0]);
+            if (offcanvasInstance) {
+                offcanvasInstance.hide();
+            } else {
+                offcanvasElement.removeClass('show').css('visibility', 'hidden');
+                $('body').removeClass('offcanvas-open');
+            }
+        } catch (error) {
+            console.warn('Error closing specific offcanvas:', error);
+            offcanvasElement.removeClass('show').css('visibility', 'hidden');
+            offcanvasElement.attr('aria-hidden', 'true');
+            $('body').removeClass('offcanvas-open');
+        }
+    }
+
+    // ✅ CLOSE ALL MODALS
+    function closeAllModals() {
+        try {
+            $(".modal.show").each(function () {
+                let modalInstance = bootstrap.Modal.getInstance(this);
+                if (modalInstance) {
+                    modalInstance.hide();
+                } else {
+                    $(this).modal("hide");
+                }
+            });
+        } catch (error) {
+            console.warn('Error closing all modals:', error);
+            $(".modal").removeClass('show').css('display', 'none');
+        }
+    }
+
+    // ✅ ENHANCED CLOSE ALL OVERLAYS
+    function closeAllOverlays() {
+        try {
+            // Close modals
+            $(".modal.show").each(function () {
+                let modalInstance = bootstrap.Modal.getInstance(this);
+                if (modalInstance) {
+                    modalInstance.hide();
+                } else {
+                    $(this).modal("hide");
+                }
+            });
+
+            // Close offcanvas
+            $(".offcanvas.show").each(function () {
+                let offcanvasInstance = bootstrap.Offcanvas.getInstance(this);
+                if (offcanvasInstance) {
+                    offcanvasInstance.hide();
+                } else {
+                    $(this).removeClass('show').css('visibility', 'hidden');
+                }
+            });
+
+            // Cleanup backdrops and body classes after animation
+            setTimeout(function () {
+                $('.modal-backdrop, .offcanvas-backdrop').remove();
+                $('body').removeClass('modal-open offcanvas-open');
+            }, 300);
+
+        } catch (error) {
+            console.warn('Error in closeAllOverlays:', error);
+            // Force cleanup
+            $('.modal, .offcanvas').removeClass('show');
+            $('.modal-backdrop, .offcanvas-backdrop').remove();
+            $('body').removeClass('modal-open offcanvas-open');
+        }
+    }
+
+    // ✅ ENHANCED FORM RESET
+    function resetForm(form) {
+        try {
+            form[0].reset();
+            form.find("select").val(null).trigger("change");
+
+            // Handle Select2 dropdowns
+            form.find(".select2").each(function () {
+                $(this).val(null).trigger('change');
+            });
+
+            // Handle specific elements
+            if ($("#partialLeave").length) {
+                $("#partialLeave").trigger("change");
+            }
+
+            if (typeof resetDateFields === 'function') {
+                resetDateFields(form);
+            }
+
+            // Clear any summernote editors
+            form.find('.summernote').each(function () {
+                if ($(this).summernote) {
+                    $(this).summernote('code', '');
+                }
+            });
+
+        } catch (error) {
+            console.warn('Error resetting form:', error);
+        }
+    }
+
+    // ✅ ENHANCED VALIDATION ERROR HANDLING
+    function handleValidationErrors(xhr, currentForm, isInOffcanvas) {
+        toastr.error(label_please_correct_errors);
+        var errors = xhr.responseJSON.errors || {};
+
+        // Show errors in overlay-specific container
+        if (xhr.responseJSON.showInModal) {
+            var errorContainerId = isInOffcanvas ? '#errorOffcanvasContent' : '#errorModalContent';
+            var errorBodyId = isInOffcanvas ? '#errorOffcanvasBody' : '#errorModalBody';
+            let errorHtmlBody = "";
+
+            $.each(errors, function (field, messages) {
+                errorHtmlBody += `<div class="mb-2"><strong class="text-capitalize">${field.replace(/_/g, ' ')}</strong><ul class="mb-0 mt-1">`;
+                $.each(messages, function (_, msg) {
+                    errorHtmlBody += `<li>${msg}</li>`;
+                });
+                errorHtmlBody += `</ul></div>`;
+            });
+
+            $(errorContainerId).html(errorHtmlBody);
+            $(errorBodyId).removeClass('d-none');
+        }
+
+        // Render field-specific errors with enhanced targeting
+        var inputFields = $(currentForm.find("input[name], select[name], textarea[name]").get().reverse());
+        var firstErrorField = null;
+
+        inputFields.each(function () {
+            var input = $(this);
+            var fieldName = input.attr("name");
+            var errorMessage = errors[fieldName];
+            var parent = input.closest(".form-group, .input-group, .form-control, .form-select, .mb-3, .mb-2");
+
+            // Remove existing error messages
+            parent.find(".text-danger.error-message").remove();
+
+            if (errorMessage) {
+                if (!firstErrorField) firstErrorField = input;
+
+                var msg = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+                var errorEl = $('<span class="text-danger error-message d-block mt-1 small"></span>').text(msg);
+
+                // Enhanced error placement logic
+                if (input.hasClass("select2-hidden-accessible")) {
+                    input.siblings(".select2").after(errorEl);
+                } else if (input.is("textarea#privacy_policy")) {
+                    input.parent().find(".mt-2").first().before(errorEl);
+                } else if (input.closest('.input-group').length) {
+                    input.closest('.input-group').after(errorEl);
+                } else {
+                    input.after(errorEl);
+                }
+            }
+        });
+
+        // Scroll to first error field
+        if (firstErrorField) {
+            setTimeout(function () {
+                firstErrorField[0].scrollIntoView({ behavior: "smooth", block: "center" });
+                firstErrorField.focus();
+            }, 100);
+        }
+    }
+
+    // ✅ ENHANCED SERVER ERROR HANDLING
+    function handleServerErrors(xhr) {
+        let msg = xhr.responseJSON?.message || "An unexpected error occurred.";
+
+        // Enhanced error message parsing
+        if (xhr.responseJSON?.exception) {
+            // Database connection errors
+            let match = msg.match(/Access denied for user '([^']+)'@/);
+            if (match) {
+                msg = `Database access denied for user '${match[1]}'. Please check your database credentials.`;
+            }
+            // SQL State errors
+            else if (/SQLSTATE\[(\w+)\]/.test(msg)) {
+                let sqlMatch = msg.match(/SQLSTATE\[(\w+)\]: (.+?)(?:\s\(SQL:|$)/);
+                if (sqlMatch) {
+                    msg = `Database Error [${sqlMatch[1]}]: ${sqlMatch[2]}`;
+                }
+            }
+            // Connection timeout errors
+            else if (msg.includes('Connection timed out')) {
+                msg = "Database connection timed out. Please try again.";
+            }
+            // General SQL errors
+            else if (msg.includes('Query Exception')) {
+                msg = "Database query error. Please contact support if this persists.";
+            }
+        }
+
+        toastr.error(msg);
+    }
+
+    // ✅ ENHANCED DROPDOWN REFRESH WITH MORE ENTITY TYPES
+    function refreshParentFormDropdowns(result) {
+        if (!result.data || !result.data.id || !result.data.name || !result.type) return;
+
+        // Enhanced mapping for more entity types
+        let selectMap = {
+            status: ['status_id', 'project_status_id', 'task_status_id'],
+            priority: ['priority_id', 'project_priority_id', 'task_priority_id'],
+            tag: ['tag_ids[]', 'tags[]', 'tag_id'],
+            contract_type: ['contract_type_id'],
+            payment_method: ['payment_method_id'],
+            allowance: ['allowance_id', 'allowance_ids[]'],
+            deduction: ['deduction_id', 'deduction_ids[]'],
+            item: ['item_id', 'product_id'],
+            category: ['category_id'],
+            department: ['department_id'],
+            designation: ['designation_id'],
+            client: ['client_id', 'customer_id'],
+            project: ['project_id'],
+            workspace: ['workspace_id']
+        };
+
+        let targetSelects = selectMap[result.type] || [];
+        if (!targetSelects.length) return;
+
+        // Look for selects in the active offcanvas
+        let activeOffcanvas = $(".offcanvas.show");
+        if (activeOffcanvas.length) {
+            targetSelects.forEach(function (selectName) {
+                let selector = activeOffcanvas.find(`select[name="${selectName}"]`);
+                if (selector.length) {
+                    let newOption = new Option(result.data.name, result.data.id, true, true);
+                    selector.append(newOption);
+
+                    // Trigger change event for Select2 and other plugins
+                    selector.trigger('change');
+
+                    // Handle Select2 specifically
+                    if (selector.hasClass('select2-hidden-accessible')) {
+                        selector.select2('trigger', 'select', { data: { id: result.data.id, text: result.data.name } });
+                    }
+                }
+            });
+        }
+    }
+
+    // ✅ ENHANCED REDIRECTION
+    function handleRedirection() {
+        try {
+            if (redirect_url) {
+                window.location.href = redirect_url;
+            } else {
+                window.location.reload();
+            }
+        } catch (error) {
+            console.warn('Redirection error:', error);
+            window.location.reload();
+        }
+    }
+});

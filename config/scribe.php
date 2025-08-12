@@ -204,6 +204,7 @@ INTRO,
                 'GET /projects/comments/get/{id}',
                 'POST /projects/comments/update',
                 'DELETE /projects/comments/destroy',
+                'DELETE /projects/comments/attachments/destroy/{id}',
             ],
             'Project Media' => [
                 'POST /projects/upload-media',
@@ -416,6 +417,7 @@ INTRO,
 
                 // View Preference
                 'PUT /save-leads-view-preference',
+
             ],
             'Leads Source Management' => [
                 // Lead Sources
@@ -433,6 +435,16 @@ INTRO,
                 'POST /lead-stages/update',
                 'DELETE /lead-stages/destroy/{id}',
                 'POST /lead-stages/reorder',
+            ],
+            'Lead Forms Management' => [
+
+                //Lead Forms
+                'POST /lead-forms/store',
+                'GET /lead-forms/show/{id}',
+                'POST /lead-forms/update{id}',
+                'DELETE /lead-forms/destroy/id',
+                'GET /lead-forms/api-list',
+                'POST /lead-forms/{leadForm}/toggle'
             ],
             'Custom Field Management' => [
                 // Custome Fields

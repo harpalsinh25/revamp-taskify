@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use PDO;
 use Exception;
 use Carbon\Carbon;
@@ -195,7 +197,7 @@ class TasksController extends Controller
             'day_of_week' => 'nullable|integer|between:1,7',
             'day_of_month' => 'nullable|integer|between:1,31',
             'time_of_day' => 'nullable|date_format:H:i',
-             // Validation for recurring task
+            // Validation for recurring task
             'enable_recurring_task' => 'nullable|in:on',
             'recurrence_frequency' => 'nullable|in:daily,weekly,monthly,yearly',
             'recurrence_day_of_week' => 'nullable|integer|min:1|max:7',
@@ -203,7 +205,7 @@ class TasksController extends Controller
             'recurrence_month_of_year' => 'nullable|integer|min:1|max:12',
             'recurrence_starts_from' => 'nullable|date|after_or_equal:today',
             'recurrence_occurrences' => 'nullable|integer|min:1',
-            'parent_id'=>'nullable',
+            'parent_id' => 'nullable',
             'billing_type' => 'nullable|in:none,billable,non-billable',
             'completion_percentage' => ['nullable', 'integer', 'min:0', 'max:100', 'in:0,10,20,30,40,50,60,70,80,90,100'],
             'task_list_id' => 'nullable|exists:task_lists,id',
@@ -235,11 +237,11 @@ class TasksController extends Controller
                 $task_id = $new_task->id;
                 $task = Task::find($task_id);
                 $task->statusTimelines()->create([
-                'status' => $status->title,
-                'new_color' => $status->color,
-                'previous_status' => '-',
-                'changed_at' => now(),
-                 ]);
+                    'status' => $status->title,
+                    'new_color' => $status->color,
+                    'previous_status' => '-',
+                    'changed_at' => now(),
+                ]);
                 // Set creator as a participant automatically if !isAdminOrHasAllDataAccess
                 if (!isAdminOrHasAllDataAccess()) {
                     if ($this->guard == 'web' && !in_array($this->user->id, $userIds)) {
@@ -253,7 +255,7 @@ class TasksController extends Controller
                         'favoritable_id' => $task_id,
                     ]);
                 }
-                 // Check Task Reminder is On than add the reminder
+                // Check Task Reminder is On than add the reminder
                 if (isset($formFields['enable_reminder']) && $formFields['enable_reminder'] == 'on') {
                     $task->reminders()->create([
                         'frequency_type' => $formFields['frequency_type'],
@@ -356,7 +358,7 @@ class TasksController extends Controller
             Excel::import($import, $request->file('bulk_file'));
             // Check if there are any validation errors
             $validationErrors = $import->getValidationErrors();
-            $validationErrors = array_filter($validationErrors, function($value) {
+            $validationErrors = array_filter($validationErrors, function ($value) {
                 return $value !== null && $value !== '';
             });
             if (!empty($validationErrors)) {
@@ -387,8 +389,8 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-        $task = Task::with('reminders','recurringTask','subtasks','project')->findOrFail($id);
-        $project =$task->project;
+        $task = Task::with('reminders', 'recurringTask', 'subtasks', 'project')->findOrFail($id);
+        $project = $task->project;
         $customFields = CustomField::where('module', 'task')->get();
         return view('tasks.task_information', ['task' => $task, 'auth_user' => $this->user, 'project' => $project, 'customFields' => $customFields]);
     }
@@ -530,7 +532,8 @@ class TasksController extends Controller
             // Remider Tasks
             'enable_reminder' => 'nullable|in:on', // Validation for reminder toggle
             'frequency_type' => 'nullable|in:daily,weekly,monthly',
-            'day_of_week' => 'nullable|integer|between:1,7','day_of_month' => 'nullable|integer|between:1,31',
+            'day_of_week' => 'nullable|integer|between:1,7',
+            'day_of_month' => 'nullable|integer|between:1,31',
             'time_of_day' => 'nullable|date_format:H:i',
             // Recurring task validation rules
             'enable_recurring_task' => 'nullable|in:on,off',
@@ -574,8 +577,8 @@ class TasksController extends Controller
                 'priority_id' => $request->input('priority_id'),
                 'description' => $request->input('description'),
                 'note' => $request->input('note'),
-                'billing_type'=>$request->input('billing_type','non-billable'),
-                'completion_percentage'=>$request->input('completion_percentage',0),
+                'billing_type' => $request->input('billing_type', 'non-billable'),
+                'completion_percentage' => $request->input('completion_percentage', 0),
                 'task_list_id' => $request->input('task_list_id'),
             ];
             // Handle start_date
@@ -608,7 +611,7 @@ class TasksController extends Controller
                         'day_of_month' => $request->input('frequency_type') === 'monthly' ? $request->input('day_of_month') : null,
                         'time_of_day' => $request->input('time_of_day'),
                         'is_active' => 1,
-                        "last_sent_at"=>null,
+                        "last_sent_at" => null,
                     ]);
                 } else {
                     // Create new reminder
@@ -931,7 +934,7 @@ class TasksController extends Controller
         $end_date_from = (request('task_end_date_from')) ? trim(request('task_end_date_from')) : "";
         $end_date_to = (request('task_end_date_to')) ? trim(request('task_end_date_to')) : "";
         $is_favorites = (request('is_favorites')) ? request('is_favorites') : "";
-        $task_parent_id= (request('task_parent_id')) ? request('task_parent_id') : "";
+        $task_parent_id = (request('task_parent_id')) ? request('task_parent_id') : "";
         $where = [];
         if ($id) {
             $id = explode('_', $id);
@@ -992,10 +995,10 @@ class TasksController extends Controller
         }
         // Apply where clause to $tasks
         $tasks = $tasks->where($where);
-        if($task_parent_id===""){
+        if ($task_parent_id === "") {
             // Add whereNull condition for parent_id to get only parent tasks
             $tasks->whereNull('parent_id');
-        }else{
+        } else {
             $tasks->where('parent_id', $task_parent_id);
         }
         // Count total tasks before pagination
@@ -1321,12 +1324,12 @@ class TasksController extends Controller
                 $join->on('pinned.pinnable_id', '=', 'tasks.id')
                     ->where('pinned.pinnable_type', '=', Task::class);
             })
-            ->select('tasks.*', 'pinned.id as pinned_id')  // Select tasks and alias pinned.id as pinned_id
-            ->orderByDesc('pinned.id')  // Tasks that are pinned will appear first
-            ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
-            ->skip($offset)  // Apply the offset
-            ->take($limit)  // Apply the limit
-            ->get();
+                ->select('tasks.*', 'pinned.id as pinned_id')  // Select tasks and alias pinned.id as pinned_id
+                ->orderByDesc('pinned.id')  // Tasks that are pinned will appear first
+                ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
+                ->skip($offset)  // Apply the offset
+                ->take($limit)  // Apply the limit
+                ->get();
             if ($tasks->isEmpty()) {
                 return formatApiResponse(
                     false,
@@ -1354,41 +1357,65 @@ class TasksController extends Controller
     {
         $project = (object)[];
         $isFavorites = request()->get('favorite', false);
-        // Determine whether we are using a project or workspace context
+
         if ($id) {
             $project = Project::findOrFail($id);
-            $tasksQuery = isAdminOrHasAllDataAccess() ? $project->tasks() : $this->user->project_tasks($id);
+            if (isAdminOrHasAllDataAccess()) {
+                $tasksQuery = $project->tasks();
+            } else {
+                $taskIds = $this->user->project_tasks($id)->pluck('id')->toArray();
+                $tasksQuery = \App\Models\Task::whereIn('tasks.id', $taskIds);
+            }
         } else {
-            $tasksQuery = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
+            if (isAdminOrHasAllDataAccess()) {
+                $tasksQuery = $this->workspace->tasks();
+            } else {
+                $taskIds = $this->user->tasks()->pluck('tasks.id')->toArray();
+                $tasksQuery = \App\Models\Task::whereIn('tasks.id', $taskIds);
+            }
         }
+
         // Apply status filter if present
         if (request()->has('status')) {
-            $tasksQuery->where('status_id', request()->status);
+            $tasksQuery->where('tasks.status_id', request()->status);
         }
+
         // Apply project filter if present
         if (request()->has('project')) {
             $project = Project::findOrFail(request()->project);
-            $tasksQuery->where('project_id', request()->project);
+            $tasksQuery->where('tasks.project_id', request()->project);
         }
+
+        // Filter favorite tasks if required
         if ($isFavorites) {
-            $favoriteTaskIds = $this->user->favoriteTasks() // Use the favoriteTasks method in the User model
-                ->pluck('favoritable_id') // Get the list of favorite task IDs
+            $favoriteTaskIds = $this->user->favoriteTasks()
+                ->pluck('favoritable_id')
                 ->toArray();
-            $tasksQuery->whereIn('tasks.id', $favoriteTaskIds); // Filter tasks to include only the favorite ones
+            $tasksQuery->whereIn('tasks.id', $favoriteTaskIds);
         }
+
         // Join with the pinned table and order by pinned status
         $tasksQuery->leftJoin('pinned', function ($join) {
             $join->on('pinned.pinnable_id', '=', 'tasks.id')
                 ->where('pinned.pinnable_type', '=', Task::class);
         })
-            ->select('tasks.*', 'pinned.id as pinned_id') // Select tasks and alias pinned.id as pinned_id
-            ->orderByDesc('pinned.id'); // Pinned tasks will appear first
+            ->selectRaw('tasks.*, tasks.id as task_id, pinned.id as pinned_id') //
+            ->orderByDesc('pinned.id');
+
         // Get the total count and the tasks
         $total_tasks = $tasksQuery->count();
         $customFields = CustomField::where('module', 'task')->get();
-        $tasks = $tasksQuery->get(); // Retrieve tasks after applying all the query logic
-        return view('tasks.board_view', ['project' => $project, 'tasks' => $tasks, 'total_tasks' => $total_tasks, 'is_favorites' => $isFavorites, 'customFields' => $customFields]);
+        $tasks = $tasksQuery->get();
+
+        return view('tasks.board_view', [
+            'project' => $project,
+            'tasks' => $tasks,
+            'total_tasks' => $total_tasks,
+            'is_favorites' => $isFavorites,
+            'customFields' => $customFields
+        ]);
     }
+
     public function updateStatus($id, $newStatus)
     {
         $status = Status::findOrFail($newStatus);
@@ -2181,7 +2208,7 @@ class TasksController extends Controller
         });
         return response()->json($events);
     }
-     /**
+    /**
      * Add a comment with attachments.
      *
      * This endpoint allows authenticated users to add comments to a specific model (e.g., tasks, projects).
@@ -2292,6 +2319,7 @@ class TasksController extends Controller
             $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Comment could not be added.'
@@ -2432,7 +2460,7 @@ class TasksController extends Controller
                 "message" => "Comment not found."
             ], 404);
         } catch (ValidationException $e) {
-             $isApi = request()->get('isApi', false);
+            $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             return response()->json([
@@ -2523,6 +2551,135 @@ class TasksController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Delete a comment attachment.
+     *
+     * This endpoint deletes a specific attachment belonging to a comment and removes its file from storage.
+     * The user must be authenticated and have permission to delete comment attachments.
+     *
+     * @authenticated
+     *
+     * @group Task Comments
+     *
+     * @urlParam id int required The ID of the comment attachment to delete.
+     *
+     * @response 200 {
+     *   "error": false,
+     *   "message": "Attachment deleted successfully."
+     * }
+     *
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Attachment not found."
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "Attachment couldn't be deleted."
+     * }
+     */
+    public function destroy_comment_attachment($id)
+    {
+
+        try {
+            $attachment = CommentAttachment::findOrFail($id);
+
+            Storage::disk('public')->delete($attachment->file_path);
+            $attachment->delete();
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Attachment deleted successfully.',
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Attachment not found.',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Something went wrong.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all comments for a task with attachments and children.
+     *
+     * @authenticated
+     * @group Task Comments
+     * @urlParam id int required The ID of the project.
+     * @response 200 {
+     *   "error": false,
+     *   "comments": [
+     *     {
+     *       "id": 1,
+     *       "content": "Parent comment",
+     *       "attachments": [...],
+     *       "children": [
+     *         {
+     *           "id": 2,
+     *           "content": "Reply",
+     *           "attachments": [...],
+     *           "children": [...]
+     *         }
+     *       ]
+     *     }
+     *   ]
+     * }
+     * @response 404 {
+     *   "error": true,
+     *   "message": "Project not found."
+     * }
+     */
+    public function get_project_comments_api($id)
+    {
+        $limit = request('limit', 10);
+        $offset = request('offset', 0);
+        $search = request('search');
+
+        try {
+            $project = Task::findOrFail($id);
+
+            $commentsQuery = $project->comments()
+                ->whereNull('parent_id') // Only get parent comments, not child comments
+                ->when($search, function ($query, $search) {
+                    $query->where('content', 'LIKE', '%' . $search . '%');
+                })
+                ->orderBy('created_at', 'desc');
+            $total = $commentsQuery->count();
+
+
+            $comments = $commentsQuery
+                ->skip($offset)
+                ->take($limit)
+                ->get();
+
+            $result = $comments->map(function ($comment) {
+                return formatComment($comment);
+            });
+
+            return response()->json([
+                'error' => false,
+                'data' => $result,
+                'total' => $total,
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Project not found.'
+            ], 404);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Could not retrieve comments.'
+            ], 500);
+        }
+    }
+
     /**
      * Update the favorite status of a task.
      *
@@ -2725,7 +2882,7 @@ class TasksController extends Controller
             ], 500);
         }
     }
-     public function group_by_task_list(Request $request)
+    public function group_by_task_list(Request $request)
     {
         try {
             $page = $request->get('page', 1);

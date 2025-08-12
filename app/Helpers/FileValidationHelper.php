@@ -45,7 +45,7 @@ class FileValidationHelper
                     return response()->json([
                         'error' => true,
                         'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName()
-                    ], 400);
+                    ], 422);
                 }
 
                 // Validate the MIME type
@@ -53,7 +53,7 @@ class FileValidationHelper
                     return response()->json([
                         'error' => true,
                         'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName()
-                    ], 400);
+                    ], 422);
                 }
             }
         }

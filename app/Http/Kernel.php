@@ -46,7 +46,7 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class
-            
+
         ],
     ];
 
@@ -82,6 +82,7 @@ class Kernel extends HttpKernel
         'checkSignupEnabled' => \App\Http\Middleware\CheckSignupEnabled::class,
         'customThrottle' => \App\Http\Middleware\CustomThrottleRequests::class,
         'isApi' => \App\Http\Middleware\IsApi::class,
-        'validate.upload.media' => \App\Http\Middleware\ValidateUploadMedia::class
+        'validate.upload.media' => \App\Http\Middleware\ValidateUploadMedia::class,
+        'system.check' => \App\Http\Middleware\SystemIntegrity::class,
     ];
 }

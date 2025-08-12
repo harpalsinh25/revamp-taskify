@@ -24,7 +24,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body ">
+                <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
@@ -2888,8 +2888,8 @@
                     <div class="row">
                         <?php $project_id = 0;
 
-                                                                                                                                                                                                                                            if (!isset($project->id)) {
-                                                                                                                                                                                                                                            ?>
+                                                                                                                                                                                                                                                                                                                    if (!isset($project->id)) {
+                                                                                                                                                                                                                                                                                                                    ?>
                         <div class="mb-3">
                             <label class="form-label"
                                 for="user_id"><?= get_label('select_project', 'Select project') ?> <span
@@ -2901,7 +2901,7 @@
                         </div>
                         <?php } else {
 
-                                                                                                                                                                                                                                                $project_id = $project->id ?>
+                                                                                                                                                                                                                                                                                                                        $project_id = $project->id ?>
                         <input type="hidden" name="project" value="{{ $project_id }}">
                         <div class="mb-3">
                             <label for="project_title" class="form-label"><?= get_label('project', 'Project') ?>
@@ -2996,7 +2996,8 @@
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
 
-                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
+                                    role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
@@ -3004,7 +3005,7 @@
                     </div>
 
                     <!-- Custom Prompt Input (initially hidden) -->
-                    <div class="customPromptContainer mb-2 mt-2 d-none">
+                    <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
@@ -3406,7 +3407,8 @@
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
 
-                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
+                                    role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
@@ -3414,7 +3416,7 @@
                     </div>
 
                     <!-- Custom Prompt Input (initially hidden) -->
-                    <div class="customPromptContainer mb-2 mt-2 d-none">
+                    <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
@@ -3730,7 +3732,7 @@
         Request::is('home') ||
         Request::is('users/profile/*') ||
         Request::is('clients/profile/*'))
-    <div class="modal fade" id="create_project_modal" tabindex="-1" aria-hidden="true">
+    {{-- <div class="modal fade" id="create_project_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form action="{{ url('projects/store') }}" class="form-submit-event modal-content" method="POST">
                 @if (
@@ -3968,7 +3970,8 @@
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
 
-                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
+                                    role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
@@ -3976,7 +3979,7 @@
                     </div>
 
                     <!-- Custom Prompt Input (initially hidden) -->
-                    <div class="customPromptContainer mb-2 mt-2 d-none" >
+                    <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
@@ -4014,7 +4017,9 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> --}}
+
+
 @endif
 @if (Request::is('projects*') ||
         Request::is('home') ||
@@ -4022,7 +4027,7 @@
         Request::is('clients/profile/*') ||
         Request::is('users') ||
         Request::is('clients'))
-    <div class="modal fade" id="edit_project_modal" tabindex="-1" aria-hidden="true">
+    {{-- <div class="modal fade" id="edit_project_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form action="{{ url('projects/update') }}" class="form-submit-event modal-content" method="POST">
                 <input type="hidden" name="id" id="project_id">
@@ -4051,7 +4056,8 @@
                         <div class="col-md-6 mb-3">
                             <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input class="form-control ai-title" type="text" name="title" id="project_title"
+                            <input class="form-control ai-title" type="text" name="title"
+                                id="project_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
@@ -4250,7 +4256,8 @@
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
 
-                                <div class="spinner-border text-primary ai-loader ms-2 d-none w-px-20 h-px-20" role="status">
+                                <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
+                                    role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
@@ -4258,7 +4265,7 @@
                     </div>
 
                     <!-- Custom Prompt Input (initially hidden) -->
-                    <div class="customPromptContainer mb-2 mt-2 d-none">
+                    <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
@@ -4290,7 +4297,7 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> --}}
 @endif
 @if (Request::is('projects') ||
         Request::is('projects/list') ||

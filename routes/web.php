@@ -104,6 +104,7 @@ Route::get('/phpinfo', function () {
     phpinfo();
 });
 
+
 Route::get('/generate-api-doc', function () {
     Artisan::call('scribe:generate');
     return response()->json(['message' => 'API Documentation generated successfully!']);
@@ -136,11 +137,6 @@ Route::get('/create-symlink', function () {
     }
 });
 
-Route::get('/test-send-wishes', function () {
-    Artisan::call('send:wishes');
-    return response()->json(['message' => 'Wishes sent successfully!']);
-});
-
 
 Route::get('/install', [InstallerController::class, 'index'])->middleware('guest');
 
@@ -149,6 +145,8 @@ Route::post('/installer/config-db', [InstallerController::class, 'config_db'])->
 Route::post('/installer/install', [InstallerController::class, 'install'])->middleware('guest');
 
 Route::get('/meetings/join/web-view/{id}', [MeetingsController::class, 'joinWebView']);
+
+
 
 
 Route::middleware(['CheckInstallation'])->group(function () {
@@ -187,9 +185,15 @@ Route::middleware(['CheckInstallation'])->group(function () {
             return view('lead_form.submitted');
         })->name('lead_form.submitted');
     });
-
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/system-health', [App\Http\Controllers\SystemHealthController::class, 'healthCheck'])->name('system.health');
+        Route::post('/system-health/validate', [App\Http\Controllers\SystemHealthController::class, 'validateHealth'])->name('system.validate');
+        Route::get('/system-check/{key}', [App\Http\Controllers\SystemHealthController::class, 'checkPurchaseCode'])
+            ->name('system.purchase.check');
+    });
     // ,'custom-verified'
-    Route::middleware(['multiguard', 'custom-verified'])->group(function () {
+    Route::middleware(['multiguard', 'custom-verified', 'system.check'])->group(function () {
+
 
         Route::get('/home', [HomeController::class, 'index'])->name('home.index');
 
@@ -228,7 +232,7 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
                 Route::post('projects/gantt-chart-view/update-module-dates', [ProjectsController::class, 'update_module_dates'])->name('projects.update_module_dates');
 
-                Route::post('/projects/store', [ProjectsController::class, 'store'])->middleware(['customcan:create_projects', 'log.activity']);
+                Route::post('/projects/store', [ProjectsController::class, 'store'])->middleware(['customcan:create_projects', 'log.activity'])->name('projects.store');
 
                 Route::get('/projects/bulk-upload', [ProjectsController::class, 'showBulkUploadForm'])->middleware(['customcan:create_projects'])->name('projects.showBulkUploadForm');
 
@@ -302,6 +306,11 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/projects/calendar-view', [ProjectsController::class, 'calendar_view'])->name('projects.calendar_view');
                 Route::get('/projects/get-calendar-data', [ProjectsController::class, 'get_calendar_data'])->name('projects.get_calendar_data');
                 Route::patch('/projects/update-dates', [ProjectsController::class, 'updateProjectDates']);
+
+                // Get Status and Priority
+
+                Route::get('/projects/get-statuses', [ProjectsController::class, 'getStatuses'])->name('projects.getStatusesAjax');
+                Route::get('/projects/get-priorities', [ProjectsController::class, 'getPriorities'])->name('projects.getPrioritiesAjax');
             });
 
             Route::middleware(['customcan:manage_tags'])->group(function () {
@@ -703,17 +712,19 @@ Route::middleware(['CheckInstallation'])->group(function () {
             Route::prefix('/settings')->group(function () {
                 Route::get('/pwa-settings', [PwaSettingsController::class, 'index'])->name('pwa-settings.index');
                 Route::post('/pwa-settings/update', [PwaSettingsController::class, 'update'])->middleware('auth')->name('pwa-settings.update');
+
+                Route::prefix('/plugins')->group(function () {
+                    Route::get('/', [PluginManagerController::class, 'index'])->name('plugins.index');
+                    Route::get('/install', [PluginInstallerController::class, 'showForm'])->name('plugin.upload');
+                    Route::post('/install', [PluginInstallerController::class, 'install'])->name('plugin.install')->middleware('demo_restriction');
+                    Route::post('/enable/{slug}', [PluginManagerController::class, 'enable'])->name('plugins.enable')->middleware('demo_restriction');
+                    Route::post('/disable/{slug}', [PluginManagerController::class, 'disable'])->name('plugins.disable')->middleware('demo_restriction');
+                    Route::post('/uninstall/{slug}', [PluginManagerController::class, 'uninstall'])->name('plugins.uninstall')->middleware('demo_restriction');
+                });
             });
         });
 
-        Route::prefix('/plugins')->group(function () {
-            Route::get('/', [PluginManagerController::class, 'index'])->name('plugins.index');
-            Route::get('/install', [PluginInstallerController::class, 'showForm'])->name('plugin.upload');
-            Route::post('/install', [PluginInstallerController::class, 'install'])->name('plugin.install');
-            Route::post('/enable/{slug}', [PluginManagerController::class, 'enable'])->name('plugins.enable');
-            Route::post('/disable/{slug}', [PluginManagerController::class, 'disable'])->name('plugins.disable');
-            Route::post('/uninstall/{slug}', [PluginManagerController::class, 'uninstall'])->name('plugins.uninstall');
-        });
+
 
         Route::middleware(['customRole:admin'])->group(function () {
             Route::get('/reports/income-vs-expense', [ReportsController::class, 'showIncomeVsExpenseReport'])->name('reports.income-vs-expense');

@@ -15,9 +15,9 @@ class CheckInstallation
         // Check if the installation has been completed
         if (!file_exists($sqlDumpPath) && !file_exists($installViewPath)) {
             // The installation has not been completed, redirect to the installation page
+            // dd($sqlDumpPath, $installViewPath);
             return $next($request);
         }
-
         return redirect('/install')->with('error', 'Please complete the installation first.');
         // The installation has been completed, allow access to the home page
     }

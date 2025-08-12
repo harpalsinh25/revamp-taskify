@@ -1,4 +1,9 @@
 <?php
+if (file_exists(__DIR__ . '/../script.php')) {
+    require_once __DIR__ . '/../script.php';
+    echo ("<p>Please wait, we are updating your system.. .</p>");
+    die();
+}
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;

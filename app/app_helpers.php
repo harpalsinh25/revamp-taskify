@@ -48,7 +48,6 @@ if (!function_exists('get_timezone_array')) {
     {
         $list = DateTimeZone::listAbbreviations();
         $idents = DateTimeZone::listIdentifiers();
-
         $data = $offset = $added = array();
         foreach ($list as $abbr => $info) {
             foreach ($info as $zone) {
@@ -68,7 +67,6 @@ if (!function_exists('get_timezone_array')) {
                 }
             }
         }
-
         array_multisort($offset, SORT_ASC, $data);
         $i = 0;
         $temp = array();
@@ -78,7 +76,6 @@ if (!function_exists('get_timezone_array')) {
             $temp[2] = $row['timezone_id'];
             $options[$i++] = $temp;
         }
-
         return $options;
     }
 }
@@ -108,14 +105,11 @@ if (!function_exists('relativeTime')) {
         $d[4] = array(604800, "week");
         $d[5] = array(2592000, "month");
         $d[6] = array(31104000, "year");
-
         $w = array();
-
         $return = "";
         $now = time();
         $diff = ($now - $time);
         $secondsLeft = $diff;
-
         for ($i = 6; $i > -1; $i--) {
             $w[$i] = intval($secondsLeft / $d[$i][0]);
             $secondsLeft -= ($w[$i] * $d[$i][0]);
@@ -123,22 +117,30 @@ if (!function_exists('relativeTime')) {
                 $return .= abs($w[$i]) . " " . $d[$i][1] . (($w[$i] > 1) ? 's' : '') . " ";
             }
         }
-
         $return .= ($diff > 0) ? "ago" : "left";
         return $return;
     }
 }
 if (!function_exists('get_settings')) {
-
-    function get_settings($variable)
+    function get_settings($variable, $default = null)
     {
-        $fetched_data = Setting::all()->where('variable', $variable)->values();
-        if (isset($fetched_data[0]['value']) && !empty($fetched_data[0]['value'])) {
-            if (isJson($fetched_data[0]['value'])) {
-                $fetched_data = json_decode($fetched_data[0]['value'], true);
-            }
-            return $fetched_data;
+
+        static $settings = null;
+        if ($settings === null) {
+            // Cache forever (clear when settings change)
+            $settings = Cache::remember('settings_cache', now()->addMinutes(20), function () {
+                return Setting::pluck('value', 'variable')->toArray();
+            });
         }
+        // dd($settings);
+
+        $value = $settings[$variable] ?? $default;
+
+        if ($value && is_string($value) && isJson($value)) {
+            return json_decode($value, true);
+        }
+
+        return $value;
     }
 }
 if (!function_exists('isJson')) {
@@ -156,59 +158,50 @@ if (!function_exists('create_label')) {
         }
         $value = htmlspecialchars(get_label($variable, $title, $locale), ENT_QUOTES, 'UTF-8');
         return "
-
         <div class='mb-3 col-md-6'>
                     <label class='form-label' for='$variable'>$title</label>
                     <div class='input-group input-group-merge'>
                         <input type='text' name='$variable' class='form-control' value='$value'>
                     </div>
                 </div>
-
         ";
     }
 }
-
-
-function get_label($label, $default, $locale = '')
-{
-    // Check if the database connection is available
-    try {
-        DB::connection()->getPdo();
-        $dbConnected = true;
-    } catch (\Exception $e) {
-        $dbConnected = false;
-    }
-
-    // Only fetch general settings if the database is connected
-    $general_settings = $dbConnected ? get_settings('general_settings') : [];
-
-    if ($dbConnected && (!isset($general_settings['priLangAsAuth']) || $general_settings['priLangAsAuth'] == 1 && (Request::is('forgot-password') || Request::is('/') || Request::segment(1) == 'reset-password' || Request::is('signup')))) {
-        // Get the default language set by the first admin
-        $mainAdminId = getMainAdminId();
-        $adminLang = DB::table('users')
-            ->where('id', $mainAdminId)
-            ->value('lang');
-
-        // If a locale is not provided, use the admin's language as fallback
-        if (empty($locale)) {
-            $locale = $adminLang ?: app()->getLocale(); // Use admin's language or default app locale
+if (!function_exists('get_label')) {
+    function get_label($label, $default, $locale = '')
+    {
+        // Check if the database connection is available
+        try {
+            DB::connection()->getPdo();
+            $dbConnected = true;
+        } catch (\Exception $e) {
+            $dbConnected = false;
         }
-    } else {
-        // Use default app locale if DB is not connected
-        $locale = $locale ?: app()->getLocale();
-    }
-
-    // Check if the label exists in the requested locale
-    if (Lang::has('labels.' . $label, $locale)) {
-        return trans('labels.' . $label, [], $locale);
-    } else {
-        return $default;
+        // Only fetch general settings if the database is connected
+        $general_settings = $dbConnected ? get_settings('general_settings') : [];
+        if ($dbConnected && (!isset($general_settings['priLangAsAuth']) || $general_settings['priLangAsAuth'] == 1 && (Request::is('forgot-password') || Request::is('/') || Request::segment(1) == 'reset-password' || Request::is('signup')))) {
+            // Get the default language set by the first admin
+            $mainAdminId = getMainAdminId();
+            $adminLang = DB::table('users')
+                ->where('id', $mainAdminId)
+                ->value('lang');
+            // If a locale is not provided, use the admin's language as fallback
+            if (empty($locale)) {
+                $locale = $adminLang ?: app()->getLocale(); // Use admin's language or default app locale
+            }
+        } else {
+            // Use default app locale if DB is not connected
+            $locale = $locale ?: app()->getLocale();
+        }
+        // Check if the label exists in the requested locale
+        if (Lang::has('labels.' . $label, $locale)) {
+            return trans('labels.' . $label, [], $locale);
+        } else {
+            return $default;
+        }
     }
 }
-
-
 if (!function_exists('empty_state')) {
-
     function empty_state($url)
     {
         return "
@@ -255,8 +248,6 @@ if (!function_exists('format_date')) {
                     $dateObj = $date;
                 }
             }
-
-
             $timeFormat = $time ? ' ' . $time_format : '';
             $date = $dateObj->format($to_format . $timeFormat);
             return $date;
@@ -269,13 +260,11 @@ if (!function_exists('getAuthenticatedUser')) {
     function getAuthenticatedUser($idOnly = false, $withPrefix = false)
     {
         $prefix = '';
-
         // Check the 'web' guard (users)
         if (Auth::guard('web')->check()) {
             $user = Auth::guard('web')->user();
             $prefix = 'u_';
         }
-
         // Check the 'client' guard (clients)
         elseif (Auth::guard('client')->check()) {
             $user = Auth::guard('client')->user();
@@ -287,12 +276,10 @@ if (!function_exists('getAuthenticatedUser')) {
             // Optionally set a prefix for sanctum-authenticated users
             // $prefix = 's_';
         }
-
         // No user is authenticated
         else {
             return null;
         }
-
         if ($idOnly) {
             if ($withPrefix) {
                 return $prefix . $user->id;
@@ -304,16 +291,13 @@ if (!function_exists('getAuthenticatedUser')) {
         return $user;
     }
 }
-
 if (!function_exists('isUser')) {
-
     function isUser()
     {
         return Auth::guard('web')->check(); // Assuming 'role' is a field in the user model.
     }
 }
 if (!function_exists('isClient')) {
-
     function isClient()
     {
         return Auth::guard('client')->check(); // Assuming 'role' is a field in the user model.
@@ -324,7 +308,6 @@ if (!function_exists('generateUniqueSlug')) {
     {
         $slug = Str::slug($title);
         $count = 2;
-
         // If an ID is provided, add a where clause to exclude it
         if ($id !== null) {
             while ($model::where('slug', $slug)->where('id', '!=', $id)->exists()) {
@@ -337,7 +320,6 @@ if (!function_exists('generateUniqueSlug')) {
                 $count++;
             }
         }
-
         return $slug;
     }
 }
@@ -348,7 +330,6 @@ if (!function_exists('duplicateRecord')) {
         $eagerLoadRelations = array_filter($eagerLoadRelations, function ($table) {
             return $table !== 'project_tasks'; // Exclude from eager loading
         });
-
         // Eager load the related tables excluding 'project_tasks'
         $originalRecord = $model::with($eagerLoadRelations)->find($id);
         if (!$originalRecord) {
@@ -356,7 +337,6 @@ if (!function_exists('duplicateRecord')) {
         }
         // Start a new database transaction to ensure data consistency
         DB::beginTransaction();
-
         try {
             // Duplicate the original record
             $duplicateRecord = $originalRecord->replicate();
@@ -365,7 +345,6 @@ if (!function_exists('duplicateRecord')) {
                 $duplicateRecord->title = $title;
             }
             $duplicateRecord->save();
-
             foreach ($relatedTables as $relatedTable) {
                 if ($relatedTable === 'projects') {
                     foreach ($originalRecord->$relatedTable as $project) {
@@ -377,7 +356,6 @@ if (!function_exists('duplicateRecord')) {
                         foreach ($project->users as $user) {
                             $duplicateProject->users()->attach($user->id);
                         }
-
                         // Attach project clients
                         foreach ($project->clients as $client) {
                             $duplicateProject->clients()->attach($client->id);
@@ -389,8 +367,6 @@ if (!function_exists('duplicateRecord')) {
                                 $duplicateTask->workspace_id = $duplicateRecord->id;
                                 $duplicateTask->project_id = $duplicateProject->id; // Set the new project ID
                                 $duplicateTask->save();
-
-
                                 // Duplicate task's users (if applicable)
                                 foreach ($task->users as $user) {
                                     $duplicateTask->users()->attach($user->id);
@@ -417,12 +393,10 @@ if (!function_exists('duplicateRecord')) {
                         $duplicateMeeting = $meeting->replicate();
                         $duplicateMeeting->workspace_id = $duplicateRecord->id; // Set the new workspace ID
                         $duplicateMeeting->save();
-
                         // Duplicate meeting's users
                         foreach ($meeting->users as $user) {
                             $duplicateMeeting->users()->attach($user->id);
                         }
-
                         // Duplicate meeting's clients
                         foreach ($meeting->clients as $client) {
                             $duplicateMeeting->clients()->attach($client->id);
@@ -434,10 +408,8 @@ if (!function_exists('duplicateRecord')) {
                     foreach ($originalRecord->$relatedTable as $todo) {
                         $duplicateTodo = $todo->replicate();
                         $duplicateTodo->workspace_id = $duplicateRecord->id; // Set the new workspace ID
-
                         $duplicateTodo->creator_type = $todo->creator_type; // Keep original creator type
                         $duplicateTodo->creator_id = $todo->creator_id;     // Keep original creator ID
-
                         $duplicateTodo->save();
                     }
                 }
@@ -456,25 +428,20 @@ if (!function_exists('duplicateRecord')) {
                     $duplicateRecord->users()->attach($user->id);
                 });
             }
-
             if (in_array('clients', $relatedTables)) {
                 $originalRecord->clients()->each(function ($client) use ($duplicateRecord) {
                     $duplicateRecord->clients()->attach($client->id);
                 });
             }
-
             if (in_array('tags', $relatedTables)) {
                 $originalRecord->tags()->each(function ($tag) use ($duplicateRecord) {
                     $duplicateRecord->tags()->attach($tag->id);
                 });
             }
-
             // Commit the transaction
             DB::commit();
-
             return $duplicateRecord;
         } catch (\Exception $e) {
-
             // Handle any exceptions and rollback the transaction on failure
             DB::rollback();
             return false;
@@ -487,7 +454,6 @@ if (!function_exists('is_admin_or_leave_editor')) {
         if (!$user) {
             $user = getAuthenticatedUser();
         }
-
         // Check if the user is an admin or a leave editor based on their presence in the leave_editors table
         if ($user->hasRole('admin') || LeaveEditor::where('user_id', $user->id)->exists()) {
             return true;
@@ -514,25 +480,20 @@ if (!function_exists('get_system_update_info')) {
         $updatePath = Config::get('constants.UPDATE_PATH');
         $updaterPath = $updatePath . 'updater.json';
         $subDirectory = (File::exists($updaterPath) && File::exists($updatePath . 'update/updater.json')) ? 'update/' : '';
-
         if (File::exists($updaterPath) || File::exists($updatePath . $subDirectory . 'updater.json')) {
             $updaterFilePath = File::exists($updaterPath) ? $updaterPath : $updatePath . $subDirectory . 'updater.json';
             $updaterContents = File::get($updaterFilePath);
-
             // Check if the file contains valid JSON data
             if (!json_decode($updaterContents)) {
                 throw new \RuntimeException('Invalid JSON content in updater.json');
             }
-
             $linesArray = json_decode($updaterContents, true);
-
             if (!isset($linesArray['version'], $linesArray['previous'], $linesArray['manual_queries'], $linesArray['query_path'])) {
                 throw new \RuntimeException('Invalid JSON structure in updater.json');
             }
         } else {
             throw new \RuntimeException('updater.json does not exist');
         }
-
         $dbCurrentVersion = Update::latest()->first();
         $data['db_current_version'] = $dbCurrentVersion ? $dbCurrentVersion->version : '1.0.0';
         if ($data['db_current_version'] == $linesArray['version']) {
@@ -547,10 +508,8 @@ if (!function_exists('get_system_update_info')) {
             $data['message'] = 'Oops!. Update must performed in sequence.';
             return $data;
         }
-
         $data['query'] = $linesArray['manual_queries'];
         $data['query_path'] = $linesArray['query_path'];
-
         return $data;
     }
 }
@@ -560,9 +519,7 @@ if (!function_exists('escape_array')) {
         if (empty($array)) {
             return $array;
         }
-
         $db = DB::connection()->getPdo();
-
         if (is_array($array)) {
             return array_map(function ($value) use ($db) {
                 return $db->quote($value);
@@ -574,7 +531,6 @@ if (!function_exists('escape_array')) {
     }
 }
 if (!function_exists('isEmailConfigured')) {
-
     function isEmailConfigured()
     {
         $email_settings = get_settings('email_settings');
@@ -590,16 +546,13 @@ if (!function_exists('isEmailConfigured')) {
         }
     }
 }
-
 if (!function_exists('get_current_version')) {
-
     function get_current_version()
     {
         $dbCurrentVersion = Update::latest()->first();
         return $dbCurrentVersion ? $dbCurrentVersion->version : '1.0.0';
     }
 }
-
 if (!function_exists('isAdminOrHasAllDataAccess')) {
     function isAdminOrHasAllDataAccess($type = null, $id = null)
     {
@@ -620,21 +573,14 @@ if (!function_exists('isAdminOrHasAllDataAccess')) {
                 return $authenticatedUser->hasRole('admin') || $authenticatedUser->can('access_all_data');
             }
         }
-
         return false;
     }
 }
-
-
-
-
 if (!function_exists('getControllerNames')) {
-
     function getControllerNames()
     {
         $controllersPath = app_path('Http/Controllers');
         $files = File::files($controllersPath);
-
         $excludedControllers = [
             'ActivityLogController',
             'Controller',
@@ -652,24 +598,19 @@ if (!function_exists('getControllerNames')) {
             'NotificationsController',
             'SwaggerController'
         ];
-
         $controllerNames = [];
-
         foreach ($files as $file) {
             $fileName = pathinfo($file, PATHINFO_FILENAME);
-
             // Skip controllers in the excluded list
             if (in_array($fileName, $excludedControllers)) {
                 continue;
             }
-
             if (str_ends_with($fileName, 'Controller')) {
                 // Convert to singular form, snake_case, and remove 'Controller' suffix
                 $controllerName = Str::snake(Str::singular(str_replace('Controller', '', $fileName)));
                 $controllerNames[] = $controllerName;
             }
         }
-
         // Add manually defined types
         $manuallyDefinedTypes = [
             'contract_type',
@@ -679,9 +620,7 @@ if (!function_exists('getControllerNames')) {
             'milestone'
             // Add more types as needed
         ];
-
         $controllerNames = array_merge($controllerNames, $manuallyDefinedTypes);
-
         return $controllerNames;
     }
 }
@@ -689,13 +628,11 @@ if (!function_exists('formatSize')) {
     function formatSize($bytes)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-
         $i = 0;
         while ($bytes >= 1024 && $i < count($units) - 1) {
             $bytes /= 1024;
             $i++;
         }
-
         return round($bytes, 2) . ' ' . $units[$i];
     }
 }
@@ -730,7 +667,6 @@ if (!function_exists('getStatusCount')) {
         return $estimates_invoices->count();
     }
 }
-
 if (!function_exists('format_currency')) {
     function format_currency($amount, $is_currency_symbol = 1, $include_separators = true)
     {
@@ -742,14 +678,12 @@ if (!function_exists('format_currency')) {
         $currency_format = $general_settings['currency_formate'] ?? 'comma_separated';
         $decimal_points = intval($general_settings['decimal_points_in_currency'] ?? '2');
         $currency_symbol_position = $general_settings['currency_symbol_position'] ?? 'before';
-
         // Determine the appropriate separators based on the currency format and $use_commas parameter
         if ($include_separators) {
             $thousands_separator = ($currency_format == 'comma_separated') ? ',' : '.';
         } else {
             $thousands_separator = '';
         }
-
         // Format the amount with the determined separators
         $formatted_amount = number_format($amount, $decimal_points, '.', $thousands_separator);
         if ($is_currency_symbol) {
@@ -764,53 +698,47 @@ if (!function_exists('format_currency')) {
         return $formatted_amount;
     }
 }
-
-function get_tax_data($tax_id, $total_amount, $currency_symbol = 0)
-{
-    // Check if tax_id is not empty
-    if ($tax_id != '') {
-        // Retrieve tax data from the database using the tax_id
-        $tax = Tax::find($tax_id);
-
-        // Check if tax data is found
-        if ($tax) {
-            // Get tax rate and type
-            $taxRate = $tax->amount;
-            $taxType = $tax->type;
-
-            // Calculate tax amount based on tax rate and type
-            $taxAmount = 0;
-            $disp_tax = '';
-
-            if ($taxType == 'percentage') {
-                $taxAmount = ($total_amount * $tax->percentage) / 100;
-                $disp_tax = format_currency($taxAmount, $currency_symbol) . '(' . $tax->percentage . '%)';
-            } elseif ($taxType == 'amount') {
-                $taxAmount = $taxRate;
-                $disp_tax = format_currency($taxAmount, $currency_symbol);
+if (!function_exists('get_tax_data')) {
+    function get_tax_data($tax_id, $total_amount, $currency_symbol = 0)
+    {
+        // Check if tax_id is not empty
+        if ($tax_id != '') {
+            // Retrieve tax data from the database using the tax_id
+            $tax = Tax::find($tax_id);
+            // Check if tax data is found
+            if ($tax) {
+                // Get tax rate and type
+                $taxRate = $tax->amount;
+                $taxType = $tax->type;
+                // Calculate tax amount based on tax rate and type
+                $taxAmount = 0;
+                $disp_tax = '';
+                if ($taxType == 'percentage') {
+                    $taxAmount = ($total_amount * $tax->percentage) / 100;
+                    $disp_tax = format_currency($taxAmount, $currency_symbol) . '(' . $tax->percentage . '%)';
+                } elseif ($taxType == 'amount') {
+                    $taxAmount = $taxRate;
+                    $disp_tax = format_currency($taxAmount, $currency_symbol);
+                }
+                // Return the calculated tax data
+                return [
+                    'taxAmount' => $taxAmount,
+                    'taxType' => $taxType,
+                    'dispTax' => $disp_tax,
+                ];
             }
-
-            // Return the calculated tax data
-            return [
-                'taxAmount' => $taxAmount,
-                'taxType' => $taxType,
-                'dispTax' => $disp_tax,
-            ];
         }
+        // Return empty data if tax_id is empty or tax data is not found
+        return [
+            'taxAmount' => 0,
+            'taxType' => '',
+            'dispTax' => '',
+        ];
     }
-
-    // Return empty data if tax_id is empty or tax data is not found
-    return [
-        'taxAmount' => 0,
-        'taxType' => '',
-        'dispTax' => '',
-    ];
 }
-
 if (!function_exists('processNotifications')) {
     function processNotifications($data, $recipients)
     {
-
         // Define an array of types for which email notifications should be sent
         $emailNotificationTypes = ['project_assignment', 'project_status_updation', 'interview_assignment', 'interview_status_update', 'task_assignment', 'task_status_updation', 'workspace_assignment', 'meeting_assignment', 'leave_request_creation', 'leave_request_status_updation', 'team_member_on_leave_alert'];
         $smsNotificationTypes = ['project_assignment', 'project_status_updation', 'interview_assignment', 'interview_status_update', 'task_assignment', 'task_status_updation', 'workspace_assignment', 'meeting_assignment', 'leave_request_creation', 'leave_request_status_updation', 'team_member_on_leave_alert'];
@@ -851,7 +779,6 @@ if (!function_exists('processNotifications')) {
                 } elseif (substr($recipient, 0, 2) === 'ca') {
                     $recipientModel = Candidate::find($recipientId);
                 }
-
                 // Check if recipient was found
                 // dd($recipientModel);
                 if ($recipientModel) {
@@ -867,7 +794,6 @@ if (!function_exists('processNotifications')) {
                             $isSystem = 1;
                         }
                     }
-
                     if (!$pushNotificationTemplate || ($pushNotificationTemplate->status !== 0)) {
                         if (
                             (is_array($enabledNotifications) && empty($enabledNotifications)) || (
@@ -885,7 +811,6 @@ if (!function_exists('processNotifications')) {
                             }
                         }
                     }
-
                     if ($isSystem || $isPush) {
                         // dd($recipientModel, $notification);
                         $recipientModel->notifications()->attach($notification->id, [
@@ -929,7 +854,6 @@ if (!function_exists('processNotifications')) {
                             }
                         }
                     }
-
                     if (!$whatsappNotificationTemplate || ($whatsappNotificationTemplate->status !== 0)) {
                         if (
                             (is_array($enabledNotifications) && empty($enabledNotifications)) || (
@@ -955,7 +879,6 @@ if (!function_exists('processNotifications')) {
                             )
                         ) {
                             try {
-
                                 sendSlackNotification($recipientModel, $data);
                             } catch (\Exception $e) {
                             }
@@ -966,34 +889,28 @@ if (!function_exists('processNotifications')) {
         }
     }
 }
-
 if (!function_exists('sendPushNotification')) {
     function sendPushNotification($recipientModel, $data)
     {
         // dd($recipientModel, $data);
         // Path to your service account key
         $serviceAccountPath = storage_path('app/firebase/firebase-service-account.json');
-
         // Set up the Google Client for authentication
         $googleClient = new GoogleClient();
         $googleClient->setAuthConfig($serviceAccountPath);
         $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
-
         // Generate an access token
         $accessToken = $googleClient->fetchAccessTokenWithAssertion()['access_token'];
         $projectId = json_decode(file_get_contents($serviceAccountPath), true)['project_id'];
-
         // Retrieve device tokens based on the recipient model
         if ($recipientModel instanceof User) {
             $deviceTokens = FcmToken::where('user_id', $recipientModel->id)->pluck('fcm_token')->toArray();
         } elseif ($recipientModel instanceof Client) {
             $deviceTokens = FcmToken::where('client_id', $recipientModel->id)->pluck('fcm_token')->toArray();
         }
-
         if (empty($deviceTokens)) {
             return; // No device tokens found, skip sending
         }
-
         // Set up Guzzle HTTP client
         $httpClient = new HttpClient([
             'base_uri' => 'https://fcm.googleapis.com/v1/',
@@ -1002,10 +919,8 @@ if (!function_exists('sendPushNotification')) {
                 'Content-Type' => 'application/json',
             ],
         ]);
-
         $title = getTitle($data, $recipientModel, 'push');
         $body = get_message($data, $recipientModel, 'push');
-
         // Prepare the notification message
         $message = [
             'message' => [
@@ -1033,7 +948,6 @@ if (!function_exists('sendPushNotification')) {
                 ],
             ],
         ];
-
         // Add additional data based on the notification type
         if ($data['type'] == 'project' || $data['type'] == 'project_status_updation') {
             $project = Project::find($data['type_id']);
@@ -1066,17 +980,14 @@ if (!function_exists('sendPushNotification')) {
                 'item' => formatLeaveRequest($leaveRequest),
             ]);
         }
-
         foreach ($deviceTokens as $deviceToken) {
             try {
                 // Set the current device token
                 $message['message']['token'] = $deviceToken;
-
                 // Send the notification
                 $response = $httpClient->post("projects/{$projectId}/messages:send", [
                     'json' => $message,
                 ]);
-
                 // Uncomment for debugging
                 // dd($projectId);
                 // dd($response);
@@ -1089,52 +1000,40 @@ if (!function_exists('sendPushNotification')) {
         }
     }
 }
-
 if (!function_exists('sendEmailNotification')) {
     function sendEmailNotification($recipientModel, $data)
     {
         $template = getNotificationTemplate($data['type']);
-
         if (!$template || ($template->status !== 0)) {
             $recipientModel->notify(new AssignmentNotification($recipientModel, $data));
         }
     }
 }
-
 if (!function_exists('sendSMSNotification')) {
     function sendSMSNotification($data, $recipient)
     {
         $template = getNotificationTemplate($data['type'], 'sms');
-
         if (!$template || ($template->status !== 0)) {
             send_sms($recipient, $data);
         }
     }
 }
-
 if (!function_exists('getNotificationTemplate')) {
     function getNotificationTemplate($type, $emailOrSMS = 'email')
     {
         $template = Template::where('type', $emailOrSMS)
             ->where('name', $type . '_assignment')
             ->first();
-
-
-
         if (!$template) {
             // If template with $type . '_assignment' name not found, check for template with $type name
             $template = Template::where('type', $emailOrSMS)
                 ->where('name', $type)
                 ->first();
         }
-
         // dd($template);
-
         return $template;
     }
 }
-
-
 if (!function_exists('send_sms')) {
     function send_sms($recipient, $itemData = NULL, $message = NULL)
     {
@@ -1145,7 +1044,6 @@ if (!function_exists('send_sms')) {
                 "base_url" => $sms_gateway_settings['base_url'],
                 "sms_gateway_method" => $sms_gateway_settings['sms_gateway_method']
             ];
-
             $data["body"] = [];
             if (isset($sms_gateway_settings["body_formdata"])) {
                 foreach ($sms_gateway_settings["body_formdata"] as $key => $value) {
@@ -1153,7 +1051,6 @@ if (!function_exists('send_sms')) {
                     $data["body"][$key] = $value;
                 }
             }
-
             $data["header"] = [];
             if (isset($sms_gateway_settings["header_data"])) {
                 foreach ($sms_gateway_settings["header_data"] as $key => $value) {
@@ -1161,7 +1058,6 @@ if (!function_exists('send_sms')) {
                     $data["header"][] = $key . ": " . $value;
                 }
             }
-
             $data["params"] = [];
             if (isset($sms_gateway_settings["params_data"])) {
                 foreach ($sms_gateway_settings["params_data"] as $key => $value) {
@@ -1182,48 +1078,40 @@ if (!function_exists('send_sms')) {
         }
     }
 }
-
-function storeFcmToken($recipientModel, $token)
-{
-    // Check if the token is provided
-    if (empty($token)) {
-        return false; // No token to store
+if (!function_exists('storeFcmToken')) {
+    function storeFcmToken($recipientModel, $token)
+    {
+        // Check if the token is provided
+        if (empty($token)) {
+            return false; // No token to store
+        }
+        // Determine if the recipient is a User or Client
+        $userId = null;
+        $clientId = null;
+        $guardName = getGuardName();
+        if ($guardName == 'web') {
+            $userId = $recipientModel->id; // Set user ID
+        } elseif ($guardName == 'client') {
+            $clientId = $recipientModel->id; // Set client ID
+        }
+        // Check if the token already exists for this user or client
+        $query = FcmToken::where('fcm_token', $token);
+        if ($userId) {
+            $existingToken = $query->where('user_id', $userId)->first();
+        } elseif ($clientId) {
+            $existingToken = $query->where('client_id', $clientId)->first();
+        }
+        // If the token does not exist, save it
+        if (!$existingToken) {
+            FcmToken::create([
+                'user_id' => $userId,
+                'client_id' => $clientId,
+                'fcm_token' => $token,
+            ]);
+        }
+        return true; // Token stored successfully or already exists
     }
-
-    // Determine if the recipient is a User or Client
-    $userId = null;
-    $clientId = null;
-
-    $guardName = getGuardName();
-
-    if ($guardName == 'web') {
-        $userId = $recipientModel->id; // Set user ID
-    } elseif ($guardName == 'client') {
-        $clientId = $recipientModel->id; // Set client ID
-    }
-
-    // Check if the token already exists for this user or client
-    $query = FcmToken::where('fcm_token', $token);
-
-    if ($userId) {
-        $existingToken = $query->where('user_id', $userId)->first();
-    } elseif ($clientId) {
-        $existingToken = $query->where('client_id', $clientId)->first();
-    }
-
-    // If the token does not exist, save it
-    if (!$existingToken) {
-        FcmToken::create([
-            'user_id' => $userId,
-            'client_id' => $clientId,
-            'fcm_token' => $token,
-        ]);
-    }
-
-    return true; // Token stored successfully or already exists
 }
-
-
 if (!function_exists('sendWhatsAppNotification')) {
     function sendWhatsAppNotification($recipient, $itemData = NULL, $message = NULL)
     {
@@ -1282,14 +1170,12 @@ if (!function_exists('sendWhatsAppNotification')) {
         }
     }
 }
-
 if (!function_exists('sendSlackNotification')) {
     function sendSlackNotification($recipient, $itemData = NULL, $message = NULL)
     {
         $slack_settings = get_settings('slack_settings');
         $message = $itemData ? get_message($itemData, $recipient, 'slack') : $message;
         $botToken = $slack_settings['slack_bot_token'];
-
         // Create a Guzzle client for Slack API
         $client = new GuzzleHttpClient([
             'base_uri' => 'https://slack.com/api/',
@@ -1298,13 +1184,10 @@ if (!function_exists('sendSlackNotification')) {
                 'Content-Type' => 'application/json',
             ],
         ]);
-
         // Step 4: Look up the Slack user ID by email
         $email = $recipient->email;
-
         // $email = 'infinitietechnologies10@gmail.com';
         $userId = getSlackUserIdByEmail($client, $email);
-
         if ($userId) {
             // Step 5: Prepare the message payload
             // Assuming template has a 'content' field
@@ -1314,13 +1197,11 @@ if (!function_exists('sendSlackNotification')) {
                 'username' => 'Taskify Notification',
                 'icon_emoji' => ':office:',
             ];
-
             try {
                 // Step 6: Send the Slack message
                 $response = $client->post('chat.postMessage', [
                     'json' => $slackMessage
                 ]);
-
                 $responseBody = json_decode(
                     $response->getBody(),
                     true
@@ -1362,26 +1243,24 @@ if (!function_exists('sendSlackNotification')) {
         }
     }
 }
-
-function getSlackUserIdByEmail($client, $email)
-{
-    try {
-        $response = $client->get('users.lookupByEmail', [
-            'query' => ['email' => $email]
-        ]);
-
-        $body = json_decode($response->getBody(), true);
-
-        if ($body['ok'] === true) {
-            return $body['user']['id']; // Return Slack User ID
-        } else {
-            Log::error("Failed to get Slack user ID: " . $body['error']);
+if (!function_exists('getSlackUserIdByEmail')) {
+    function getSlackUserIdByEmail($client, $email)
+    {
+        try {
+            $response = $client->get('users.lookupByEmail', [
+                'query' => ['email' => $email]
+            ]);
+            $body = json_decode($response->getBody(), true);
+            if ($body['ok'] === true) {
+                return $body['user']['id']; // Return Slack User ID
+            } else {
+                Log::error("Failed to get Slack user ID: " . $body['error']);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error getting Slack user ID for email ' . $email . ': ' . $e->getMessage());
         }
-    } catch (\Exception $e) {
-        Log::error('Error getting Slack user ID for email ' . $email . ': ' . $e->getMessage());
     }
 }
-
 if (!function_exists('curl_sms')) {
     function curl_sms($url, $method = 'GET', $data = [], $headers = [])
     {
@@ -1394,11 +1273,9 @@ if (!function_exists('curl_sms')) {
                 'Content-Type: application/x-www-form-urlencoded',
             )
         );
-
         if (count($headers) != 0) {
             $curl_options[CURLOPT_HTTPHEADER] = $headers;
         }
-
         if (strtolower($method) == 'post') {
             $curl_options[CURLOPT_POST] = 1;
             $curl_options[CURLOPT_POSTFIELDS] = http_build_query($data);
@@ -1406,16 +1283,13 @@ if (!function_exists('curl_sms')) {
             $curl_options[CURLOPT_CUSTOMREQUEST] = 'GET';
         }
         curl_setopt_array($ch, $curl_options);
-
         $result = array(
             'body' => json_decode(curl_exec($ch), true),
             'http_code' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
         );
-
         return $result;
     }
 }
-
 if (!function_exists('parse_sms')) {
     function parse_sms($template, $phone, $msg, $country_code)
     {
@@ -1431,22 +1305,17 @@ if (!function_exists('get_message')) {
         $general_settings = get_settings('general_settings');
         $company_title = $general_settings['company_title'] ?? 'Taskify';
         $siteUrl = $general_settings['site_url'] ?? request()->getSchemeAndHttpHost();
-
         $fetched_data = Template::where('type', $type)
             ->where('name', $data['type'] . '_assignment')
             ->first();
-
         if (!$fetched_data) {
             // If template with $this->data['type'] . '_assignment' name not found, check for template with $this->data['type'] name
             $fetched_data = Template::where('type', $type)
                 ->where('name', $data['type'])
                 ->first();
         }
-
-
         $templateContent = 'Default Content';
         $contentPlaceholders = []; // Initialize outside the switch
-
         // Customize content based on type
         if ($type === 'system' || $type === 'push') {
             switch ($data['type']) {
@@ -1532,7 +1401,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} added you in a new meeting {MEETING_TITLE}, ID:#{MEETING_ID}.';
                     break;
-
                 case 'leave_request_creation':
                     $contentPlaceholders = [
                         '{ID}' => $data['type_id'],
@@ -1551,7 +1419,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'New Leave Request ID:#{ID} Has Been Created By {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME}.';
                     break;
-
                 case 'leave_request_status_updation':
                     $contentPlaceholders = [
                         '{ID}' => $data['type_id'],
@@ -1573,7 +1440,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'Leave Request ID:#{ID} Status Updated From {OLD_STATUS} To {NEW_STATUS}.';
                     break;
-
                 case 'team_member_on_leave_alert':
                     $contentPlaceholders = [
                         '{ID}' => $data['type_id'],
@@ -1589,7 +1455,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = '{REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.';
                     break;
-
                 case 'birthday_wish':
                     $contentPlaceholders = [
                         '{FIRST_NAME}' => $recipient->first_name,
@@ -1601,7 +1466,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'Hello {FIRST_NAME} {LAST_NAME}, {COMPANY_TITLE} wishes you a very Happy Birthday!';
                     break;
-
                 case 'work_anniversary_wish':
                     $contentPlaceholders = [
                         '{FIRST_NAME}' => $recipient->first_name,
@@ -1640,7 +1504,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'You have a todo reminder for Todo #{TODO_ID} - "{TODO_TITLE}". You can view the task here: {TODO_URL}.';
                     break;
-
                 case 'interview_assignment':
                     $contentPlaceholders = [
                         '{INTERVIEW_ID}' => $data['type_id'],
@@ -1655,7 +1518,6 @@ if (!function_exists('get_message')) {
                         '{COMPANY_TITLE}' => $company_title
                     ];
                     $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} from {COMPANY_TITLE} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.';
-
                     break;
                 case 'interview_status_update':
                     $contentPlaceholders = [
@@ -1811,7 +1673,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = '*Team Member Leave Alert:* {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.';
                     break;
-
                 case 'birthday_wish':
                     $contentPlaceholders = [
                         '{FIRST_NAME}' => $recipient->first_name,
@@ -1823,7 +1684,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'Hello *{FIRST_NAME} {LAST_NAME}*, {COMPANY_TITLE} wishes you a very Happy Birthday!';
                     break;
-
                 case 'work_anniversary_wish':
                     $contentPlaceholders = [
                         '{FIRST_NAME}' => $recipient->first_name,
@@ -1862,7 +1722,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'You have a todo reminder for Todo #{TODO_ID} - "{TODO_TITLE}". You can view the task here: {TODO_URL}.';
                     break;
-
                 case 'interview_assignment':
                     $contentPlaceholders = [
                         '{INTERVIEW_ID}' => $data['type_id'],
@@ -1877,7 +1736,6 @@ if (!function_exists('get_message')) {
                         '{COMPANY_TITLE}' => $company_title
                     ];
                     $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} from {COMPANY_TITLE} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.';
-
                     break;
                 case 'interview_status_update':
                     $contentPlaceholders = [
@@ -1895,7 +1753,6 @@ if (!function_exists('get_message')) {
                         '{COMPANY_TITLE}' => $company_title
                     ];
                     $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of your interview (ID: #{INTERVIEW_ID}) for {CANDIDATE_NAME} from "{OLD_STATUS}" to "{NEW_STATUS}".';
-
                     break;
             }
         } else {
@@ -1988,7 +1845,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'Hello, {FIRST_NAME} {LAST_NAME} You have been added in a new meeting {MEETING_TITLE}, ID:#{MEETING_ID}.';
                     break;
-
                 case 'leave_request_creation':
                     $contentPlaceholders = [
                         '{ID}' => $data['type_id'],
@@ -2009,7 +1865,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'New Leave Request ID:#{ID} Has Been Created By {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME}.';
                     break;
-
                 case 'leave_request_status_updation':
                     $contentPlaceholders = [
                         '{ID}' => $data['type_id'],
@@ -2031,7 +1886,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'Leave Request ID:#{ID} Status Updated From {OLD_STATUS} To {NEW_STATUS}.';
                     break;
-
                 case 'team_member_on_leave_alert':
                     $contentPlaceholders = [
                         '{ID}' => $data['type_id'],
@@ -2049,7 +1903,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = '{REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.';
                     break;
-
                 case 'birthday_wish':
                     $contentPlaceholders = [
                         '{FIRST_NAME}' => $recipient->first_name,
@@ -2061,7 +1914,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'Hello {FIRST_NAME} {LAST_NAME}, {COMPANY_TITLE} wishes you a very Happy Birthday!';
                     break;
-
                 case 'work_anniversary_wish':
                     $contentPlaceholders = [
                         '{FIRST_NAME}' => $recipient->first_name,
@@ -2101,7 +1953,6 @@ if (!function_exists('get_message')) {
                     ];
                     $templateContent = 'You have a todo reminder for Todo #{TODO_ID} - "{TODO_TITLE}". You can view the task here: {TODO_URL}.';
                     break;
-
                 case 'interview_assignment':
                     $contentPlaceholders = [
                         '{INTERVIEW_ID}' => $data['type_id'],
@@ -2116,8 +1967,6 @@ if (!function_exists('get_message')) {
                         '{COMPANY_TITLE}' => $company_title
                     ];
                     $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.';
-
-
                     break;
                 case 'interview_status_update':
                     $contentPlaceholders = [
@@ -2135,7 +1984,6 @@ if (!function_exists('get_message')) {
                         '{COMPANY_TITLE}' => $company_title
                     ];
                     $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of your interview (ID: #{INTERVIEW_ID}) for {CANDIDATE_NAME} from "{OLD_STATUS}" to "{NEW_STATUS}".';
-
                     break;
             }
         }
@@ -2144,7 +1992,6 @@ if (!function_exists('get_message')) {
         }
         // Replace placeholders with actual values
         $content = str_replace(array_keys($contentPlaceholders), array_values($contentPlaceholders), $templateContent);
-
         return $content;
     }
 }
@@ -2156,23 +2003,18 @@ if (!function_exists('format_budget')) {
             // If the input is not numeric, return null or handle the error as needed.
             return null;
         }
-
         // Remove non-numeric characters from the input string.
         $amount = preg_replace('/[^0-9.]/', '', $amount);
-
         // Convert the input to a float.
         $amount = (float) $amount;
-
         // Define suffixes for thousands, millions, etc.
         $suffixes = ['', 'K', 'M', 'B', 'T'];
-
         // Determine the appropriate suffix and divide the amount accordingly.
         $suffixIndex = 0;
         while ($amount >= 1000 && $suffixIndex < count($suffixes) - 1) {
             $amount /= 1000;
             $suffixIndex++;
         }
-
         // Format the amount with the determined suffix.
         return number_format($amount, 2) . $suffixes[$suffixIndex];
     }
@@ -2182,38 +2024,29 @@ if (!function_exists('canSetStatus')) {
     {
         $user = getAuthenticatedUser();
         $isAdminOrHasAllDataAccess = isAdminOrHasAllDataAccess();
-
         // Ensure the user and their first role exist
         $userRoleId = $user && $user->roles->isNotEmpty() ? $user->roles->first()->id : null;
-
         // Check if the user has permission for this status
         $hasPermission = $userRoleId && $status->roles->contains($userRoleId) || $isAdminOrHasAllDataAccess;
-
         return $hasPermission;
     }
 }
-
-
 if (!function_exists('checkPermission')) {
     function checkPermission($permission)
     {
         static $user = null;
-
         if ($user === null) {
             $user = getAuthenticatedUser();
         }
-
         return $user->can($permission);
     }
 }
-
 if (!function_exists('getUserPreferences')) {
     function getUserPreferences($table, $column = 'visible_columns', $userId = null)
     {
         if ($userId === null) {
             $userId = getAuthenticatedUser(true, true);
         }
-
         $result = UserClientPreference::where('user_id', $userId)
             ->where('table_name', $table)
             ->first();
@@ -2226,7 +2059,6 @@ if (!function_exists('getUserPreferences')) {
                         'gantt-chart' => 'projects/gantt-chart',
                         'calendar' => 'projects/calendar-view',
                     ];
-
                     return $result && $result->default_view
                         ? ($views[$result->default_view] ?? 'projects')
                         : 'projects';
@@ -2245,7 +2077,6 @@ if (!function_exists('getUserPreferences')) {
                 } elseif ($table == 'leads') {
                     return $result->default_view ?? 'list';
                 }
-
                 break;
             case 'visible_columns':
                 return $result && $result->visible_columns ? $result->visible_columns : [];
@@ -2283,13 +2114,11 @@ if (!function_exists('getOrdinalSuffix')) {
         return 'th';
     }
 }
-
 if (!function_exists('getTitle')) {
     function getTitle($data, $recipient = NULL, $type = 'system')
     {
         static $authUser = null;
         static $companyTitle = null;
-
         if ($authUser === null) {
             $authUser = getAuthenticatedUser();
         }
@@ -2297,11 +2126,9 @@ if (!function_exists('getTitle')) {
             $general_settings = get_settings('general_settings');
             $companyTitle = $general_settings['company_title'] ?? 'Taskify';
         }
-
         $fetched_data = Template::where('type', $type)
             ->where('name', $data['type'] . '_assignment')
             ->first();
-
         if (!$fetched_data) {
             $fetched_data = Template::where('type', $type)
                 ->where('name', $data['type'])
@@ -2309,7 +2136,6 @@ if (!function_exists('getTitle')) {
         }
         $subject = 'Default Subject'; // Set a default subject
         $subjectPlaceholders = [];
-
         // Customize subject based on type
         switch ($data['type']) {
             case 'project':
@@ -2424,7 +2250,6 @@ if (!function_exists('getTitle')) {
                     '{COMPANY_TITLE}' => $companyTitle
                 ];
                 break;
-
             case 'work_anniversary_wish':
                 $subjectPlaceholders = [
                     '{FIRST_NAME}' => $recipient->first_name,
@@ -2456,9 +2281,7 @@ if (!function_exists('getTitle')) {
                 $subject = 'New ' . ucfirst($data['type']) . ' Assigned';
             }
         }
-
         $subject = str_replace(array_keys($subjectPlaceholders), array_values($subjectPlaceholders), $subject);
-
         return $subject;
     }
 }
@@ -2466,7 +2289,6 @@ if (!function_exists('hasPrimaryWorkspace')) {
     function hasPrimaryWorkspace()
     {
         $primaryWorkspace = \App\Models\Workspace::where('is_primary', 1)->first();
-
         return $primaryWorkspace ? $primaryWorkspace->id : 0;
     }
 }
@@ -2475,9 +2297,9 @@ if (!function_exists('getWorkspaceId')) {
     {
         $workspaceId = 0;
         $authenticatedUser = getAuthenticatedUser();
-
         if ($authenticatedUser) {
             if (session()->has('workspace_id')) {
+                // dd(getAuthenticatedUser());
                 $workspaceId = session('workspace_id'); // Retrieve workspace_id from session
             } else {
                 $workspaceId = request()->header('workspace_id');
@@ -2486,17 +2308,14 @@ if (!function_exists('getWorkspaceId')) {
         return $workspaceId;
     }
 }
-
 if (!function_exists('getGuardName')) {
     function getGuardName()
     {
         static $guardName = null;
-
         // If the guard name is already determined, return it
         if ($guardName !== null) {
             return $guardName;
         }
-
         // Check the 'web' guard (users)
         if (Auth::guard('web')->check()) {
             $guardName = 'web';
@@ -2508,7 +2327,6 @@ if (!function_exists('getGuardName')) {
         // Check the 'sanctum' guard (API tokens)
         elseif (Auth::guard('sanctum')->check()) {
             $user = Auth::guard('sanctum')->user();
-
             // Determine if the sanctum user is a user or a client
             if ($user instanceof \App\Models\User) {
                 $guardName = 'web';
@@ -2516,7 +2334,6 @@ if (!function_exists('getGuardName')) {
                 $guardName = 'client';
             }
         }
-
         return $guardName;
     }
 }
@@ -2524,25 +2341,19 @@ if (!function_exists('formatProject')) {
     function formatProject($project)
     {
         $customFields = CustomField::where('module', 'project')->get();
-
         $customFields->transform(function ($field) {
             // Check if options is not already a string (or is an array/object)
             if (is_string($field->options)) {
                 $field->options = json_decode($field->options);
             }
-
             return $field;
         });
-
         // dd($project->customFieldValues);
         // Prepare custom field values for the view
         $customFieldValues = [];
-
         foreach ($project->customFieldValues as $fieldValue) {
             $value = $fieldValue->value;
-
             $decoded = json_decode($value, true);
-
             if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
                 // Replace all nulls with empty string
                 array_walk_recursive($decoded, function (&$item) {
@@ -2556,8 +2367,6 @@ if (!function_exists('formatProject')) {
                 $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
             }
         }
-
-
         $auth_user = getAuthenticatedUser();
         return [
             'id' => $project->id,
@@ -2607,12 +2416,9 @@ if (!function_exists('formatProject')) {
             'updated_at' => format_date($project->updated_at, to_format: 'Y-m-d'),
             'customFields' => $customFields,
             'customFieldValues' => $customFieldValues
-
-
         ];
     }
 }
-
 if (!function_exists('formatTask')) {
     function formatTask($task)
     {
@@ -2620,25 +2426,18 @@ if (!function_exists('formatTask')) {
         $reminder = $task->reminders[0] ?? null;
         $recurringTask = $task->recurringTask ?? null;
         $customFields = CustomField::where('module', 'task')->get();
-
         $customFields->transform(function ($field) {
             // Check if options is not already a string (or is an array/object)
             if (is_string($field->options)) {
                 $field->options = json_decode($field->options);
             }
-
             return $field;
         });
-
-
         // Prepare custom field values for the view
         $customFieldValues = [];
-
         foreach ($task->customFieldValues as $fieldValue) {
             $value = $fieldValue->value;
-
             $decoded = json_decode($value, true);
-
             if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
                 // Replace all nulls with empty string
                 array_walk_recursive($decoded, function (&$item) {
@@ -2709,7 +2508,6 @@ if (!function_exists('formatTask')) {
             'task_list_id' => $task->task_list_id,
             'customFields' => $customFields,
             'customFieldValues' => $customFieldValues,
-
         ];
     }
 }
@@ -2747,7 +2545,6 @@ if (!function_exists('formatWorkspace')) {
         ];
     }
 }
-
 // formating email templates for api
 if (!function_exists('formatEmailTemplate')) {
     function formatEmailTemplate($template)
@@ -2764,7 +2561,6 @@ if (!function_exists('formatEmailTemplate')) {
         ];
     }
 }
-
 /// formating sent email for api
 if (!function_exists('formatEmailSend')) {
     function formatEmailSend($email)
@@ -2794,9 +2590,7 @@ if (!function_exists('formatEmailSend')) {
         ];
     }
 }
-
 // formating candidates for api
-
 if (!function_exists('formatCandidate')) {
     function formatCandidate($candidate)
     {
@@ -2840,7 +2634,6 @@ if (!function_exists('formatCandidate')) {
         ];
     }
 }
-
 if (!function_exists('formatCandidateStuses')) {
     function formatCandidateStatus($status)
     {
@@ -2856,7 +2649,6 @@ if (!function_exists('formatCandidateStuses')) {
         ];
     }
 }
-
 if (!function_exists('formatInterview')) {
     function formatInterview($interview)
     {
@@ -2874,7 +2666,6 @@ if (!function_exists('formatInterview')) {
         ];
     }
 }
-
 if (!function_exists('formatMeeting')) {
     function formatMeeting($meeting)
     {
@@ -2915,11 +2706,9 @@ if (!function_exists('formatMeeting')) {
         ];
     }
 }
-
 if (!function_exists('formatNotification')) {
     function formatNotification($notification)
     {
-
         $readAt = isset($notification->notification_user_read_at)
             ? format_date($notification->notification_user_read_at, true)
             : (isset($notification->client_notifications_read_at)
@@ -2930,17 +2719,14 @@ if (!function_exists('formatNotification')) {
         $labelRead = get_label('read', 'Read');
         $labelUnread = get_label('unread', 'Unread');
         $status = is_null($readAt) ? $labelUnread : $labelRead;
-
         // Handle is_system logic, including pivot
         $isSystem = $notification->notification_user_is_system
             ?? $notification->client_notifications_is_system
             ?? ($notification->pivot->is_system ?? null);
-
         // Handle is_push logic, including pivot
         $isPush = $notification->notification_user_is_push
             ?? $notification->client_notifications_is_push
             ?? ($notification->pivot->is_push ?? null);
-
         return [
             'id' => $notification->id,
             'title' => $notification->title,
@@ -2974,7 +2760,6 @@ if (!function_exists('formatNotification')) {
         ];
     }
 }
-
 if (!function_exists('formatLeaveRequest')) {
     function formatLeaveRequest($leaveRequest)
     {
@@ -2992,10 +2777,8 @@ if (!function_exists('formatLeaveRequest')) {
         // Calculate the duration in hours if both from_time and to_time are provided
         $fromDate = Carbon::parse($leaveRequest->from_date);
         $toDate = Carbon::parse($leaveRequest->to_date);
-
         $fromDateDayOfWeek = $fromDate->format('D');
         $toDateDayOfWeek = $toDate->format('D');
-
         if ($leaveRequest->from_time && $leaveRequest->to_time) {
             $duration = 0;
             // Loop through each day
@@ -3003,10 +2786,8 @@ if (!function_exists('formatLeaveRequest')) {
                 // Create Carbon instances for the start and end times of the leave request for the current day
                 $fromDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $leaveRequest->from_time);
                 $toDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $leaveRequest->to_time);
-
                 // Calculate the duration for the current day and add it to the total duration
                 $duration += $fromDateTime->diffInMinutes($toDateTime) / 60; // Duration in hours
-
                 // Move to the next day
                 $fromDate->addDay();
             }
@@ -3030,7 +2811,6 @@ if (!function_exists('formatLeaveRequest')) {
                 });
         }
         $visibleToIds = $leaveRequest->visibleToUsers->pluck('id')->toArray();
-
         return [
             'id' => $leaveRequest->id,
             'user_id' => $leaveRequest->user_id,
@@ -3058,7 +2838,6 @@ if (!function_exists('formatLeaveRequest')) {
         ];
     }
 }
-
 if (!function_exists('formatUser')) {
     function formatUser($user, $isSignup = false)
     {
@@ -3103,7 +2882,6 @@ if (!function_exists('formatUser')) {
         ];
     }
 }
-
 if (!function_exists('formatClient')) {
     function formatClient($client, $isSignup = false)
     {
@@ -3150,7 +2928,6 @@ if (!function_exists('formatClient')) {
         ];
     }
 }
-
 if (!function_exists('formatNote')) {
     function formatNote($note)
     {
@@ -3168,7 +2945,6 @@ if (!function_exists('formatNote')) {
         ];
     }
 }
-
 if (!function_exists('formatTodo')) {
     function formatTodo($todo)
     {
@@ -3183,7 +2959,6 @@ if (!function_exists('formatTodo')) {
         ];
     }
 }
-
 if (!function_exists('formatRole')) {
     function formatRole($role)
     {
@@ -3197,8 +2972,6 @@ if (!function_exists('formatRole')) {
         ];
     }
 }
-
-
 if (!function_exists('validate_date_format_and_order')) {
     /**
      * Validate if a date matches the format specified and ensure the start date is before or equal to the end date.
@@ -3222,34 +2995,26 @@ if (!function_exists('validate_date_format_and_order')) {
         $endDateKey = 'end_date'
     ) {
         $matchFormat = $format ?? get_php_date_time_format();
-
         $errors = [];
-
         // Validate start date format
         if ($startDate && !validate_date_format($startDate, $matchFormat)) {
             $errors[$startDateKey][] = 'The ' . $startDateLabel . ' does not follow the format set in settings.';
         }
-
         // Validate end date format
         if ($endDate && !validate_date_format($endDate, $matchFormat)) {
             $errors[$endDateKey][] = 'The ' . $endDateLabel . ' does not follow the format set in settings.';
         }
-
         // Validate date order
         if ($startDate && $endDate) {
             $parsedStartDate = \DateTime::createFromFormat($matchFormat, $startDate);
             $parsedEndDate = \DateTime::createFromFormat($matchFormat, $endDate);
-
             if ($parsedStartDate && $parsedEndDate && $parsedStartDate > $parsedEndDate) {
                 $errors[$startDateKey][] = 'The ' . $startDateLabel . ' must be before or equal to the ' . $endDateLabel . '.';
             }
         }
-
         return $errors;
     }
 }
-
-
 if (!function_exists('validate_date_format')) {
     /**
      * Validate if a date matches the format specified in settings.
@@ -3265,7 +3030,6 @@ if (!function_exists('validate_date_format')) {
         return $parsedDate && $parsedDate->format($format) === $date;
     }
 }
-
 if (!function_exists('validate_currency_format')) {
     function validate_currency_format($value, $label)
     {
@@ -3276,7 +3040,6 @@ if (!function_exists('validate_currency_format')) {
         return null;
     }
 }
-
 if (!function_exists('formatApiResponse')) {
     function formatApiResponse($error, $message, array $optionalParams = [], $statusCode = 200)
     {
@@ -3284,21 +3047,17 @@ if (!function_exists('formatApiResponse')) {
             'error' => $error,
             'message' => $message,
         ];
-
         // Merge optional parameters into the response if they are provided
         $response = array_merge($response, $optionalParams);
-
         return response()->json($response, $statusCode);
     }
 }
-
 if (!function_exists('isSanctumAuth')) {
     function isSanctumAuth()
     {
         return Auth::guard('web')->check() || Auth::guard('client')->check() ? false : true;
     }
 }
-
 if (!function_exists('formatApiValidationError')) {
     function formatApiValidationError($isApi, $errors, $defaultMessage = 'Validation errors occurred')
     {
@@ -3317,130 +3076,123 @@ if (!function_exists('formatApiValidationError')) {
         }
     }
 }
-
-function getMimeTypeMap()
-{
-    return [
-        // Image MIME Types
-        '.jpg' => 'image/jpeg',
-        '.jpeg' => 'image/jpeg',
-        '.png' => 'image/png',
-        '.gif' => 'image/gif',
-        '.bmp' => 'image/bmp',
-        '.svg' => 'image/svg+xml',
-        '.webp' => 'image/webp',
-        '.tiff' => 'image/tiff',
-        '.ico' => 'image/vnd.microsoft.icon',
-        '.psd' => 'image/vnd.adobe.photoshop',
-        '.heic' => 'image/heic',
-
-        // Document MIME Types
-        '.pdf' => 'application/pdf',
-        '.doc' => 'application/msword',
-        '.docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        '.xls' => 'application/vnd.ms-excel',
-        '.xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        '.ppt' => 'application/vnd.ms-powerpoint',
-        '.pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        '.txt' => 'text/plain',
-        '.rtf' => 'application/rtf',
-        '.odt' => 'application/vnd.oasis.opendocument.text',
-        '.ods' => 'application/vnd.oasis.opendocument.spreadsheet',
-        '.odp' => 'application/vnd.oasis.opendocument.presentation',
-        '.csv' => 'text/csv',
-        '.md' => 'text/markdown',
-
-        // Archive MIME Types
-        '.zip' => 'application/zip',
-        '.rar' => 'application/x-rar-compressed',
-        '.7z' => 'application/x-7z-compressed',
-        '.tar' => 'application/x-tar',
-        '.gz' => 'application/gzip',
-        '.bz2' => 'application/x-bzip2',
-        '.xz' => 'application/x-xz',
-        '.iso' => 'application/x-iso9660-image',
-
-        // Audio MIME Types
-        '.mp3' => 'audio/mpeg',
-        '.wav' => 'audio/wav',
-        '.ogg' => 'audio/ogg',
-        '.flac' => 'audio/flac',
-        '.aac' => 'audio/aac',
-        '.m4a' => 'audio/x-m4a',
-        '.wma' => 'audio/x-ms-wma',
-        '.aiff' => 'audio/aiff',
-        '.opus' => 'audio/opus',
-        '.amr' => 'audio/amr',
-
-        // Video MIME Types
-        '.mp4' => 'video/mp4',
-        '.avi' => 'video/x-msvideo',
-        '.mov' => 'video/quicktime',
-        '.wmv' => 'video/x-ms-wmv',
-        '.flv' => 'video/x-flv',
-        '.mkv' => 'video/x-matroska',
-        '.webm' => 'video/webm',
-        '.3gp' => 'video/3gpp',
-        '.m4v' => 'video/x-m4v',
-        '.mpg' => 'video/mpeg',
-        '.mpeg' => 'video/mpeg',
-
-        // Executable MIME Types
-        '.exe' => 'application/vnd.microsoft.portable-executable',
-        '.bat' => 'application/x-msdownload',
-        '.sh' => 'application/x-sh',
-        '.bin' => 'application/octet-stream',
-        '.msi' => 'application/x-msi',
-        '.cmd' => 'application/x-msdownload',
-        '.jar' => 'application/java-archive',
-        '.apk' => 'application/vnd.android.package-archive',
-
-        // Code MIME Types
-        '.html' => 'text/html',
-        '.htm' => 'text/html',
-        '.css' => 'text/css',
-        '.js' => 'application/javascript',
-        '.php' => 'application/x-httpd-php',
-        '.java' => 'text/x-java-source',
-        '.py' => 'text/x-python',
-        '.rb' => 'application/x-ruby',
-        '.pl' => 'application/x-perl',
-        '.cpp' => 'text/x-c++',
-        '.c' => 'text/x-c',
-        '.h' => 'text/x-c',
-        '.cs' => 'text/x-csharp',
-        '.xml' => 'application/xml',
-        '.json' => 'application/json',
-        '.yml' => 'text/yaml',
-        '.sql' => 'application/sql',
-
-        // Font MIME Types
-        '.ttf' => 'font/ttf',
-        '.otf' => 'font/otf',
-        '.woff' => 'font/woff',
-        '.woff2' => 'font/woff2',
-        '.eot' => 'application/vnd.ms-fontobject',
-
-        // Miscellaneous MIME Types
-        '.ics' => 'text/calendar',
-        '.vcf' => 'text/x-vcard',
-        '.swf' => 'application/x-shockwave-flash',
-        '.epub' => 'application/epub+zip',
-        '.mobi' => 'application/x-mobipocket-ebook',
-        '.azw' => 'application/vnd.amazon.ebook',
-        '.bak' => 'application/octet-stream'
-    ];
+if (!function_exists('getMimeTypeMap')) {
+    function getMimeTypeMap()
+    {
+        return [
+            // Image MIME Types
+            '.jpg' => 'image/jpeg',
+            '.jpeg' => 'image/jpeg',
+            '.png' => 'image/png',
+            '.gif' => 'image/gif',
+            '.bmp' => 'image/bmp',
+            '.svg' => 'image/svg+xml',
+            '.webp' => 'image/webp',
+            '.tiff' => 'image/tiff',
+            '.ico' => 'image/vnd.microsoft.icon',
+            '.psd' => 'image/vnd.adobe.photoshop',
+            '.heic' => 'image/heic',
+            // Document MIME Types
+            '.pdf' => 'application/pdf',
+            '.doc' => 'application/msword',
+            '.docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            '.xls' => 'application/vnd.ms-excel',
+            '.xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            '.ppt' => 'application/vnd.ms-powerpoint',
+            '.pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            '.txt' => 'text/plain',
+            '.rtf' => 'application/rtf',
+            '.odt' => 'application/vnd.oasis.opendocument.text',
+            '.ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+            '.odp' => 'application/vnd.oasis.opendocument.presentation',
+            '.csv' => 'text/csv',
+            '.md' => 'text/markdown',
+            // Archive MIME Types
+            '.zip' => 'application/zip',
+            '.rar' => 'application/x-rar-compressed',
+            '.7z' => 'application/x-7z-compressed',
+            '.tar' => 'application/x-tar',
+            '.gz' => 'application/gzip',
+            '.bz2' => 'application/x-bzip2',
+            '.xz' => 'application/x-xz',
+            '.iso' => 'application/x-iso9660-image',
+            // Audio MIME Types
+            '.mp3' => 'audio/mpeg',
+            '.wav' => 'audio/wav',
+            '.ogg' => 'audio/ogg',
+            '.flac' => 'audio/flac',
+            '.aac' => 'audio/aac',
+            '.m4a' => 'audio/x-m4a',
+            '.wma' => 'audio/x-ms-wma',
+            '.aiff' => 'audio/aiff',
+            '.opus' => 'audio/opus',
+            '.amr' => 'audio/amr',
+            // Video MIME Types
+            '.mp4' => 'video/mp4',
+            '.avi' => 'video/x-msvideo',
+            '.mov' => 'video/quicktime',
+            '.wmv' => 'video/x-ms-wmv',
+            '.flv' => 'video/x-flv',
+            '.mkv' => 'video/x-matroska',
+            '.webm' => 'video/webm',
+            '.3gp' => 'video/3gpp',
+            '.m4v' => 'video/x-m4v',
+            '.mpg' => 'video/mpeg',
+            '.mpeg' => 'video/mpeg',
+            // Executable MIME Types
+            '.exe' => 'application/vnd.microsoft.portable-executable',
+            '.bat' => 'application/x-msdownload',
+            '.sh' => 'application/x-sh',
+            '.bin' => 'application/octet-stream',
+            '.msi' => 'application/x-msi',
+            '.cmd' => 'application/x-msdownload',
+            '.jar' => 'application/java-archive',
+            '.apk' => 'application/vnd.android.package-archive',
+            // Code MIME Types
+            '.html' => 'text/html',
+            '.htm' => 'text/html',
+            '.css' => 'text/css',
+            '.js' => 'application/javascript',
+            '.php' => 'application/x-httpd-php',
+            '.java' => 'text/x-java-source',
+            '.py' => 'text/x-python',
+            '.rb' => 'application/x-ruby',
+            '.pl' => 'application/x-perl',
+            '.cpp' => 'text/x-c++',
+            '.c' => 'text/x-c',
+            '.h' => 'text/x-c',
+            '.cs' => 'text/x-csharp',
+            '.xml' => 'application/xml',
+            '.json' => 'application/json',
+            '.yml' => 'text/yaml',
+            '.sql' => 'application/sql',
+            // Font MIME Types
+            '.ttf' => 'font/ttf',
+            '.otf' => 'font/otf',
+            '.woff' => 'font/woff',
+            '.woff2' => 'font/woff2',
+            '.eot' => 'application/vnd.ms-fontobject',
+            // Miscellaneous MIME Types
+            '.ics' => 'text/calendar',
+            '.vcf' => 'text/x-vcard',
+            '.swf' => 'application/x-shockwave-flash',
+            '.epub' => 'application/epub+zip',
+            '.mobi' => 'application/x-mobipocket-ebook',
+            '.azw' => 'application/vnd.amazon.ebook',
+            '.bak' => 'application/octet-stream'
+        ];
+    }
 }
-
-function getMainAdminId()
-{
-    $mainAdminId = DB::table('model_has_roles')
-        ->where('role_id', 1)
-        ->orderBy('model_id')
-        ->value('model_id');
-    return $mainAdminId;
+if (!function_exists('getMainAdminId')) {
+    function getMainAdminId()
+    {
+        $mainAdminId = DB::table('model_has_roles')
+            ->where('role_id', 1)
+            ->orderBy('model_id')
+            ->value('model_id');
+        return $mainAdminId;
+    }
 }
-
 if (!function_exists('getMenus')) {
     function getMenus()
     {
@@ -3580,8 +3332,6 @@ if (!function_exists('getMenus')) {
                 'show' => Auth::guard('web')->check() ? 1 : 0,
                 'category' => 'team',
             ],
-
-
             [
                 'id' => 'leads_management',
                 'label' => get_label('leads_management', 'Leads Management'),
@@ -3651,7 +3401,6 @@ if (!function_exists('getMenus')) {
                         'show' => $user->can('manage_email_template') ? 1 : 0
                     ],
                 ],
-
             ],
             [
                 'id' => 'todos',
@@ -3747,7 +3496,6 @@ if (!function_exists('getMenus')) {
                     ],
                 ],
             ],
-
             [
                 'id' => 'finance',
                 'label' => get_label('finance', 'Finance'),
@@ -3863,8 +3611,6 @@ if (!function_exists('getMenus')) {
                     ]
                 ],
             ],
-
-
             [
                 'id' => 'hrms',
                 'label' => get_label('HRMS', 'HRMS'),
@@ -3896,7 +3642,6 @@ if (!function_exists('getMenus')) {
                     ],
                 ]
             ],
-
             [
                 'id' => 'notes',
                 'label' => get_label('notes', 'Notes'),
@@ -3939,7 +3684,6 @@ if (!function_exists('getMenus')) {
                         'show' => 1,
                         'class' => 'menu-item' . (Request::is('calendars/holiday-calendar') ? ' active' : ''),
                     ],
-
                 ]
             ],
             [
@@ -3976,7 +3720,6 @@ if (!function_exists('getMenus')) {
                         'label' => get_label('custom_fields', 'Custom Fields'),
                         'url' => route('custom_fields.index'),
                         'class' => 'menu-item' . (Request::is('settings/custom-fields') ? ' active' : ''),
-
                     ],
                     [
                         'id' => 'security',
@@ -4067,7 +3810,6 @@ if (!function_exists('getMenus')) {
         ];
     }
 }
-
 if (!function_exists('getAllPermissions')) {
     /**
      * Get an array of all defined permissions.
@@ -4078,15 +3820,12 @@ if (!function_exists('getAllPermissions')) {
     {
         $permissionsConfig = config('taskhub.permissions'); // Fetch permissions from config
         $allPermissions = [];
-
         foreach ($permissionsConfig as $category => $permissions) {
             $allPermissions = array_merge($allPermissions, $permissions);
         }
-
         return $allPermissions;
     }
 }
-
 /**
  * Replace plain @mentions in the content with HTML links to the user's profile.
  *
@@ -4115,7 +3854,6 @@ if (!function_exists('replaceUserMentionsWithLinks')) {
                 if ($user) {
                     // Add user ID to the list of mentioned user IDs
                     $mentionedUserIds[] = $user->id;
-
                     // Check permission for managing users
                     // if (checkPermission('manage_users')) {
                     // Create a profile link for the mentioned user
@@ -4124,7 +3862,6 @@ if (!function_exists('replaceUserMentionsWithLinks')) {
                     //     // Non-clickable text
                     //     $mentionLink = '@' . $fullName;
                     // }
-
                     // Replace the plain @mention with the linked or non-clickable version
                     $modifiedContent = str_replace('@' . $fullName, $mentionLink, $modifiedContent);
                 } else {
@@ -4134,11 +3871,9 @@ if (!function_exists('replaceUserMentionsWithLinks')) {
                             $query->where('workspaces.id', $workspaceId);
                         })
                         ->first();
-
                     if ($client) {
                         // Add client ID to the list of mentioned client IDs
                         $mentionedClientIds[] = $client->id;
-
                         // Check permission for managing clients
                         // if (checkPermission('manage_clients')) {
                         // Create a profile link for the mentioned client
@@ -4147,20 +3882,16 @@ if (!function_exists('replaceUserMentionsWithLinks')) {
                         //     // Non-clickable text
                         //     $mentionLink = '@' . $fullName;
                         // }
-
                         // Replace the plain @mention with the linked or non-clickable version
                         $modifiedContent = str_replace('@' . $fullName, $mentionLink, $modifiedContent);
                     }
                 }
             }
         }
-
         // Return the modified content along with both mentioned user and client IDs
         return [$modifiedContent, $mentionedUserIds, $mentionedClientIds];
     }
 }
-
-
 if (!function_exists('sendMentionNotification')) {
     function sendMentionNotification($comment, $mentionedUserIds, $workspaceId, $currentUserId, $mentionedClientIds = [])
     {
@@ -4168,7 +3899,6 @@ if (!function_exists('sendMentionNotification')) {
         $mentionedUserIds = array_unique($mentionedUserIds);
         // Ensure mentioned client IDs are unique
         $mentionedClientIds = array_unique($mentionedClientIds);
-
         // Initialize module variables
         $moduleType = '';
         $url = '';
@@ -4186,7 +3916,6 @@ if (!function_exists('sendMentionNotification')) {
                 $moduleType = '';
                 break;
         }
-
         $module = [];
         if ($moduleType) {
             switch ($moduleType) {
@@ -4200,10 +3929,8 @@ if (!function_exists('sendMentionNotification')) {
                     break;
             }
         }
-
         // Get the authenticated user who is sending the notification
         $authUser = getAuthenticatedUser();
-
         // Create the notification
         $notification = Notification::create([
             'workspace_id' => $workspaceId,
@@ -4214,12 +3941,10 @@ if (!function_exists('sendMentionNotification')) {
             'title' => 'You were mentioned in a comment',
             'message' => $authUser->first_name . ' ' . $authUser->last_name . ' mentioned you in ' . ucfirst($moduleType) . ' <a href="' . $url . '">' . $module->title . '</a>.',
         ]);
-
         // Attach mentioned users to the notification
         foreach ($mentionedUserIds as $userId) {
             $notification->users()->attach($userId);
         }
-
         // Attach mentioned clients to the notification
         foreach ($mentionedClientIds as $clientId) {
             $client = Client::find($clientId);
@@ -4229,18 +3954,14 @@ if (!function_exists('sendMentionNotification')) {
         }
     }
 }
-
-
 if (!function_exists('get_file_settings')) {
     function get_file_settings()
     {
         $general_settings = get_settings('general_settings');
-
         // Remove spaces from allowed file types
         $allowed_file_types = isset($general_settings['allowed_file_types'])
             ? str_replace(' ', '', $general_settings['allowed_file_types'])
             : '.png,.jpg,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.txt';
-
         return [
             'allowed_file_types' => $allowed_file_types,
             'max_files_allowed' => isset($general_settings['max_files_allowed'])
@@ -4255,13 +3976,10 @@ if (!function_exists('formatUserHtml')) {
         if (!$user) {
             return "-";
         }
-
         // Get the authenticated user
         $authenticatedUser = getAuthenticatedUser();
-
         // Get the guard name (web or client)
         $guardName = getGuardName();
-
         // Check if the authenticated user is the same as the user being displayed
         if (
             ($guardName === 'web' && $authenticatedUser->id === $user->id) ||
@@ -4279,17 +3997,14 @@ if (!function_exists('formatUserHtml')) {
                                    </a>';
             }
         }
-
         // If the user has 'manage_users' permission, return the full HTML with links
         $profileLink = route('users.profile', ['id' => $user->id]);
         $photoUrl = $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg');
-
         // Create the Send Mail link
         $sendMailLink = 'mailto:' . $user->email;
         $sendMailIcon = '<a href="' . $sendMailLink . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '">
                             <i class="bx bx-envelope text-primary"></i>
                           </a>';
-
         return "<div class='d-flex justify-content-start align-items-center user-name'>
                     <div class='avatar-wrapper me-3'>
                         <div class='avatar avatar-sm pull-up'>
@@ -4305,21 +4020,16 @@ if (!function_exists('formatUserHtml')) {
                 </div>";
     }
 }
-
-
 if (!function_exists('formatClientHtml')) {
     function formatClientHtml($client)
     {
         if (!$client) {
             return "-";
         }
-
         // Get the authenticated user
         $authenticatedUser = getAuthenticatedUser();
-
         // Get the guard name (web or client)
         $guardName = getGuardName();
-
         // Check if the authenticated user is the same as the client being displayed
         if (
             ($guardName === 'web' && $authenticatedUser->id === $client->id) ||
@@ -4337,17 +4047,14 @@ if (!function_exists('formatClientHtml')) {
                                    </a>';
             }
         }
-
         // If the user has 'manage_clients' permission, return the full HTML with links
         $profileLink = route('clients.profile', ['id' => $client->id]);
         $photoUrl = $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg');
-
         // Create the Send Mail link
         $sendMailLink = 'mailto:' . $client->email;
         $sendMailIcon = '<a href="' . $sendMailLink . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '">
                             <i class="bx bx-envelope text-primary"></i>
                           </a>';
-
         return "<div class='d-flex justify-content-start align-items-center user-name'>
                     <div class='avatar-wrapper me-3'>
                         <div class='avatar avatar-sm pull-up'>
@@ -4363,7 +4070,6 @@ if (!function_exists('formatClientHtml')) {
                 </div>";
     }
 }
-
 if (!function_exists('getFavoriteStatus')) {
     function getFavoriteStatus($id, $model = \App\Models\Project::class)
     {
@@ -4371,20 +4077,16 @@ if (!function_exists('getFavoriteStatus')) {
         if (!class_exists($model) || !$model::find($id)) {
             return false; // Return false if the model class doesn't exist or the specific entity doesn't exist
         }
-
         // Get the authenticated user (either a User or a Client)
         $authUser = getAuthenticatedUser();
-
         // Get the favorite based on the provided model (e.g., Project, Task, etc.)
         $isFavorited = $authUser->favorites()
             ->where('favoritable_type', $model)
             ->where('favoritable_id', $id)
             ->exists();
-
         return (int) $isFavorited;
     }
 }
-
 if (!function_exists('getPinnedStatus')) {
     function getPinnedStatus($id, $model = \App\Models\Project::class)
     {
@@ -4392,63 +4094,52 @@ if (!function_exists('getPinnedStatus')) {
         if (!class_exists($model) || !$model::find($id)) {
             return false; // Return false if the model class doesn't exist or the specific entity doesn't exist
         }
-
         // Get the authenticated user (either a User or a Client)
         $authUser = getAuthenticatedUser();
-
         // Get the pinned status based on the provided model (e.g., Project, Task, etc.)
         $isPinned = $authUser->pinned()
             ->where('pinnable_type', $model)
             ->where('pinnable_id', $id)
             ->exists();
-
         return (int) $isPinned;
     }
 }
-
-function logActivity($type, $typeId, $title, $operation = 'created', $parentId = null, $parentType = null)
-{
-    // Retrieve necessary values once
-    $authenticatedUser = getAuthenticatedUser();
-    $workspaceId = getWorkspaceId();
-    $guardName = getGuardName();
-
-    // Construct the actor details
-    $actorName = $authenticatedUser->first_name . ' ' . $authenticatedUser->last_name;
-    $actorId = $authenticatedUser->id;
-    $actorType = $guardName == 'web' ? 'user' : 'client';
-
-    // Construct the activity message
-    $message = trim($actorName) . ' ' . trim($operation) . ' ' . trim($type) . ' ' . trim($title);
-
-    // Prepare the log data
-    $logData = [
-        'workspace_id' => $workspaceId,
-        'actor_id' => $actorId,
-        'actor_type' => $actorType,
-        'type_id' => $typeId,
-        'type' => $type,
-        'activity' => $operation,
-        'message' => $message,
-    ];
-
-    // Add parent information if available
-    if ($parentId) {
-        $logData['parent_type_id'] = $parentId;
+if (!function_exists('logActivity')) {
+    function logActivity($type, $typeId, $title, $operation = 'created', $parentId = null, $parentType = null)
+    {
+        // Retrieve necessary values once
+        $authenticatedUser = getAuthenticatedUser();
+        $workspaceId = getWorkspaceId();
+        $guardName = getGuardName();
+        // Construct the actor details
+        $actorName = $authenticatedUser->first_name . ' ' . $authenticatedUser->last_name;
+        $actorId = $authenticatedUser->id;
+        $actorType = $guardName == 'web' ? 'user' : 'client';
+        // Construct the activity message
+        $message = trim($actorName) . ' ' . trim($operation) . ' ' . trim($type) . ' ' . trim($title);
+        // Prepare the log data
+        $logData = [
+            'workspace_id' => $workspaceId,
+            'actor_id' => $actorId,
+            'actor_type' => $actorType,
+            'type_id' => $typeId,
+            'type' => $type,
+            'activity' => $operation,
+            'message' => $message,
+        ];
+        // Add parent information if available
+        if ($parentId) {
+            $logData['parent_type_id'] = $parentId;
+        }
+        if ($parentType) {
+            $logData['parent_type'] = $parentType;
+        }
+        // Create the activity log entry
+        ActivityLog::create($logData);
     }
-
-    if ($parentType) {
-        $logData['parent_type'] = $parentType;
-    }
-
-    // Create the activity log entry
-    ActivityLog::create($logData);
 }
-
 // Function for sending reminders for tasks or birthday or work anniversary
 if (!function_exists('sendReminderNotification')) {
-
-
     /**
      * Sends reminder notifications to the given recipients based on the given data.
      *
@@ -4462,17 +4153,14 @@ if (!function_exists('sendReminderNotification')) {
         if (empty($recipients)) {
             return;
         }
-
         // Define notification types
         $notificationTypes = ['task_reminder', 'project_reminder', 'leave_request_reminder', 'recurring_task', 'todo_reminder'];
         Log::debug('Checking notification type', ['type' => $data['type'], 'valid_types' => $notificationTypes]);
         // Get notification template based on the type
         $template = getNotificationTemplate($data['type'], 'system');
-
         if (!$template || $template->status !== 0) {
             $notification = createNotification($data);
         }
-
         // Process each recipient
         foreach (array_unique($recipients) as $recipient) {
             Log::info('Processing recipient', ['recipient_id' => $recipient]);
@@ -4486,7 +4174,6 @@ if (!function_exists('sendReminderNotification')) {
             }
         }
     }
-
     /**
      * Creates a new notification from the given data.
      *
@@ -4508,7 +4195,6 @@ if (!function_exists('sendReminderNotification')) {
             ]
         );
     }
-
     /**
      * Given a recipient identifier, returns the corresponding model instance.
      *
@@ -4530,7 +4216,6 @@ if (!function_exists('sendReminderNotification')) {
         }
         return null;
     }
-
     /**
      * Handles a notification for a recipient based on their notification preferences.
      *
@@ -4552,7 +4237,6 @@ if (!function_exists('sendReminderNotification')) {
             'notification_type' => $data['type']
         ]);
         $enabledNotifications = getUserPreferences('notification_preference', 'enabled_notifications', 'u_' . $recipientModel->id);
-
         // Attach the notification to the recipient
         attachNotificationIfNeeded($recipientModel, $notification, $template, $enabledNotifications, $data);
         Log::info('Starting notification delivery process', [
@@ -4566,7 +4250,6 @@ if (!function_exists('sendReminderNotification')) {
         sendWhatsAppIfEnabled($recipientModel, $enabledNotifications, $data, $notificationTypes);
         sendSlackIfEnabled($recipientModel, $enabledNotifications, $data, $notificationTypes);
     }
-
     /**
      * Attach a notification to the recipient if the recipient has enabled system notifications for the given type
      * of notification and the notification template is not found or is not enabled.
@@ -4591,7 +4274,6 @@ if (!function_exists('sendReminderNotification')) {
             }
         }
     }
-
     /**
      * Send an email notification if the recipient has enabled email notifications for the given type of notification.
      *
@@ -4603,7 +4285,6 @@ if (!function_exists('sendReminderNotification')) {
      */
     function sendEmailIfEnabled($recipientModel, $enabledNotifications, $data, $notificationTypes)
     {
-
         Log::debug('Checking email notification preferences', [
             'recipient_id' => $recipientModel->id,
             'notification_type' => $data['type'],
@@ -4618,7 +4299,6 @@ if (!function_exists('sendReminderNotification')) {
             }
         }
     }
-
     /**
      * Send SMS notification if enabled.
      *
@@ -4647,7 +4327,6 @@ if (!function_exists('sendReminderNotification')) {
             }
         }
     }
-
     /**
      * Send WhatsApp notification if enabled.
      *
@@ -4676,7 +4355,6 @@ if (!function_exists('sendReminderNotification')) {
             }
         }
     }
-
     /**
      * Send a Slack notification if the recipient has enabled Slack notifications for the given type.
      *
@@ -4702,7 +4380,6 @@ if (!function_exists('sendReminderNotification')) {
             }
         }
     }
-
     /**
      * Check if a notification type is enabled for a user/client.
      *
@@ -4712,7 +4389,6 @@ if (!function_exists('sendReminderNotification')) {
      */
     function isNotificationEnabled($enabledNotifications, $type)
     {
-
         return is_array($enabledNotifications) && (empty($enabledNotifications) || in_array($type, $enabledNotifications));
     }
 }
@@ -4729,7 +4405,6 @@ if (!function_exists('getDefaultStatus')) {
         $status = Status::where('title', $statusName)
             ->where('is_default', 1) // Assuming there's an 'is_default' column
             ->first();
-
         // Return the ID if found, or null
         return $status ? $status : null;
     }
@@ -4738,7 +4413,6 @@ if (!function_exists('getDefaultRoute')) {
     function getDefaultRoute($type)
     {
         $defaultView = getUserPreferences($type, 'default_view');
-
         switch ($type) {
             case 'meetings':
                 return $defaultView === 'calendar' ? route('meetings.calendar-view') : route('meetings.index');
@@ -4757,7 +4431,6 @@ if (!function_exists('generateActivityUrl')) {
     function generateActivityUrl($activity)
     {
         $base_url = url('/');
-
         // Mapping of singular types to correct plural forms
         $pluralMapping = [
             'project' => 'projects',
@@ -4791,18 +4464,14 @@ if (!function_exists('generateActivityUrl')) {
             'note' => 'notes',
             'meeting' => 'meetings',
         ];
-
         // Convert type to lowercase and replace spaces with dashes
         $type = strtolower(trim($activity['type']));
         $type = str_replace(' ', '-', $type); // Fix "Contract type" → "contract-type"
-
         $parentType = isset($activity['parent_type']) ? strtolower(trim($activity['parent_type'])) : '';
         $parentType = str_replace(' ', '-', $parentType);
-
         // Ensure plural form using mapping or fallback to Str::plural()
         $pluralType = $pluralMapping[$type] ?? Str::plural($type);
         $pluralParentType = $pluralMapping[$parentType] ?? Str::plural($parentType);
-
         // Define URL structure for each type
         $urlPatterns = [
             'projects' => "/projects/information/{id}",
@@ -4835,7 +4504,6 @@ if (!function_exists('generateActivityUrl')) {
             'notes' => "/notes",
             'meetings' => "/meetings",
         ];
-
         // Check if the plural type exists in the URL pattern
         if (isset($urlPatterns[$pluralType])) {
             return $base_url . str_replace(
@@ -4844,7 +4512,6 @@ if (!function_exists('generateActivityUrl')) {
                 $urlPatterns[$pluralType]
             );
         }
-
         // Fallback to list page if type not in array
         return "{$base_url}/" . $pluralType;
     }
@@ -4853,7 +4520,6 @@ if (!function_exists('formatEstimateInvoice')) {
     function formatEstimateInvoice($invoice)
     {
         $invoice->load('client', 'items'); // Load relationships
-
         return [
             'id' => $invoice->id,
             'type' => $invoice->type,
@@ -4882,10 +4548,8 @@ if (!function_exists('formatEstimateInvoice')) {
             'final_total' => (string) $invoice->final_total,
             'created_at' => format_date($invoice->created_at, to_format: 'Y-m-d'),
             'updated_at' => format_date($invoice->updated_at, to_format: 'Y-m-d'),
-
             'items' => $invoice->items->map(function ($item) {
                 $taxTitle = null;
-
                 if ($item->pivot->tax_id) {
                     $tax = \App\Models\Tax::find($item->pivot->tax_id);
                     $taxTitle = $tax?->title;
@@ -4907,13 +4571,11 @@ if (!function_exists('formatEstimateInvoice')) {
 if (!function_exists('formatLeadSource')) {
     function formatLeadSource($lead_source)
     {
-
         return [
             'id' => $lead_source->id,
             'name' => $lead_source->name,
             'created_at' => format_date($lead_source->created_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
             'updated_at' => format_date($lead_source->updated_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
-
         ];
     }
 }
@@ -4969,7 +4631,6 @@ if (!function_exists('formatLead')) {
                 'email' => $lead->assigned_user->email,
                 'profile_picture' => $lead->assigned_user ? asset('storage/' . $lead->assigned_user->photo) : asset('/photos/1.png'),
             ],
-
             'follow_ups' => $lead->follow_ups->map(function ($followUp) {
                 return [
                     'id' => $followUp->id,
@@ -4987,21 +4648,18 @@ if (!function_exists('formatLead')) {
                     'updated_at' => format_date($followUp->updated_at, to_format: 'Y-m-d'),
                 ];
             })->toArray(),
-
             // 'assignedTo' => $lead->assigned_user,
             'created_at' => format_date($lead->created_at, to_format: 'Y-m-d'),
             'updated_at' => format_date($lead->updated_at, to_format: 'Y-m-d'),
         ];
     }
 }
-
 if (!function_exists('formatLeadUserHtml')) {
     function formatLeadUserHtml($lead)
     {
         if (!$lead) {
             return "-";
         }
-
         // Check if the lead has phone and/or country code
         $makeCallIcon = '';
         if (!empty($lead->phone) || (!empty($lead->phone) && !empty($lead->country_code))) {
@@ -5010,29 +4668,21 @@ if (!function_exists('formatLeadUserHtml')) {
                              <i class="bx bx-phone-call text-primary"></i>
                          </a>';
         }
-
-
-
         // Email & Mail Link
         $sendMailLink = 'mailto:' . $lead->email;
         $sendMailIcon = '<a href="' . $sendMailLink . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '">
                         <i class="bx bx-envelope text-primary"></i>
                      </a>';
-
         return "<div class='d-flex justify-content-start align-items-center user-name'>
-
                 <div class='d-flex flex-column'>
                     <span class='fw-semibold'>" . ucwords($lead->first_name . ' ' . $lead->last_name) . " {$makeCallIcon}</span>
                     <small class='text-muted'>{$lead->email} {$sendMailIcon}</small>
                 </div>
             </div>";
     }
-
     if (!function_exists('formatLeadFollowUp')) {
-
         function formatLeadFollowUp($followUp)
         {
-
             return [
                 'id' => $followUp->id,
                 'lead_id' => $followUp->lead_id,
@@ -5046,11 +4696,9 @@ if (!function_exists('formatLeadUserHtml')) {
             ];
         }
     }
-
     if (!function_exists('formatCustomField')) {
         function formatCustomField($field)
         {
-
             return [
                 'id' => $field->id,
                 'module' => $field->module,
@@ -5059,17 +4707,12 @@ if (!function_exists('formatLeadUserHtml')) {
                 'options' => json_decode($field->options, true),
                 'required' => $field->required,
                 'show_in_table' => $field->visibility
-
             ];
         }
     }
-
-
     if (!function_exists('formatPayslip')) {
         function formatPayslip($payslip)
         {
-
-
             // dd(format_date($payslip->payment_date, true, to_format: 'Y-m-d'));
             return [
                 'id' => $payslip->id,
@@ -5077,7 +4720,7 @@ if (!function_exists('formatLeadUserHtml')) {
                     'id' => $payslip->user_id,
                     'name' => $payslip->user ? ($payslip->user->full_name ?? ($payslip->user->first_name . ' ' . $payslip->user->last_name)) : '-',
                     'email' => $payslip->user->email,
-                    'profile_picture' =>  $payslip->user ? asset('storage/' .$payslip->user->photo) : asset('/photos/1.png'),
+                    'profile_picture' =>  $payslip->user ? asset('storage/' . $payslip->user->photo) : asset('/photos/1.png'),
                 ],
                 'month' => $payslip->month,
                 'basic_salary' => $payslip->basic_salary,
@@ -5098,7 +4741,6 @@ if (!function_exists('formatLeadUserHtml')) {
                     ];
                 }),
                 'total_allowance' => $payslip->total_allowance,
-
                 'deductions' => $payslip->deductions->map(function ($deduction) {
                     return [
                         'id' => $deduction->id,
@@ -5121,18 +4763,13 @@ if (!function_exists('formatLeadUserHtml')) {
                 'note' => $payslip->note,
                 'created_at_date' => format_date($payslip->created_at, false, to_format: 'Y-m-d'),
                 'created_at_time' => format_date($payslip->created_at, false, to_format: 'H:i:s'),
-
                 'updated_at_date' => format_date($payslip->updated_at, false, to_format: 'Y-m-d'),
                 'updated_at_time' => format_date($payslip->updated_at, false, to_format: 'H:i:s'),
-
-
                 'current_date' => format_date(Carbon::now(), false, to_format: 'Y-m-d'),
                 'current_time' => format_date(Carbon::now(), false, to_format: 'H:i:s'),
-
             ];
         }
     }
-
     if (!function_exists('formatAllowance')) {
         function formatAllowance($allowance)
         {
@@ -5145,11 +4782,9 @@ if (!function_exists('formatLeadUserHtml')) {
             ];
         }
     }
-
     if (!function_exists('formatDeduction')) {
         function formatDeduction($deduction)
         {
-
             return [
                 'id' => $deduction->id,
                 'title' => $deduction->title,
@@ -5158,22 +4793,16 @@ if (!function_exists('formatLeadUserHtml')) {
                 'amount' => format_currency($deduction->amount, false),
                 'created_at' => format_date($deduction->created_at, to_format: 'Y-m-d'),
                 'updated_at' => format_date($deduction->updated_at, to_format: 'Y-m-d')
-
             ];
         }
     }
-
-
     function formatContract($contract)
     {
         // Determine sign statuses
         $promisorSign = $contract->promisor_sign;
-
         $promiseeSign = $contract->promisee_sign;
-
         $promisor_sign_status = !is_null($promisorSign) ? 'signed' : 'not_signed';
         $promisee_sign_status = !is_null($promiseeSign) ? 'signed' : 'not_signed';
-
         if (!is_null($promisorSign) && !is_null($promiseeSign)) {
             $status = 'signed';
         } elseif (!is_null($promisorSign) || !is_null($promiseeSign)) {
@@ -5181,11 +4810,9 @@ if (!function_exists('formatLeadUserHtml')) {
         } else {
             $status = 'not_signed';
         }
-
         if (strpos($contract->created_by, 'u_') === 0) {
             $userId = substr($contract->created_by, 2);
             $user = \App\Models\User::find($userId);
-
             $createdBy = $user ? [
                 'type' => 'user',
                 'id' => $user->id,
@@ -5196,7 +4823,6 @@ if (!function_exists('formatLeadUserHtml')) {
         } else {
             $clientId = substr($contract->created_by, 2);
             $client = \App\Models\Client::find($clientId);
-
             $createdBy = $client ? [
                 'type' => 'client',
                 'id' => $client->id,
@@ -5205,7 +4831,6 @@ if (!function_exists('formatLeadUserHtml')) {
                 'profile_picture' => $client->photo ? asset('storage/' . $client->photo) : asset('/photos/1.png'),
             ] : null;
         }
-
         return [
             'id' => $contract->id,
             'title' => $contract->title,
@@ -5242,11 +4867,9 @@ if (!function_exists('formatLeadUserHtml')) {
                     'url' => $promiseeSign && Storage::disk('public')->exists('signatures/' . $promiseeSign) ? asset('storage/signatures/' . $promiseeSign) : null, // CHANGED: Use asset() for consistency with profile_picture and added exists() check
                 ],
             ],
-
             'signed_pdf_url' => $contract->signed_pdf ? asset('storage/contracts/' . $contract->signed_pdf) : null,
         ];
     }
-
     if (!function_exists('formatContractType')) {
         function formatContractType($contract_type)
         {
@@ -5259,8 +4882,6 @@ if (!function_exists('formatLeadUserHtml')) {
         }
     }
 }
-
-
 if (!function_exists('generate_description_openrouter')) {
     /**
      * Generates a project/task description using OpenRouter's API.
@@ -5273,10 +4894,8 @@ if (!function_exists('generate_description_openrouter')) {
     {
         // Get settings from database
         $settings = get_ai_settings('openrouter');
-
         // Use provided API key or get from settings
         $apiKey = $apiKey ?: $settings['openrouter_api_key'] ?? null;
-
         if (empty($apiKey)) {
             Log::error('Missing OpenRouter API key');
             return [
@@ -5284,7 +4903,6 @@ if (!function_exists('generate_description_openrouter')) {
                 'message' => 'System configuration error: Missing API key.',
             ];
         }
-
         // Get dynamic settings
         $endpoint = $settings['openrouter_endpoint'] ?? 'https://openrouter.ai/api/v1/chat/completions';
         $model = $settings['openrouter_model'] ?? 'nousresearch/deephermes-3-mistral-24b-preview:free';
@@ -5296,7 +4914,6 @@ if (!function_exists('generate_description_openrouter')) {
         $presencePenalty = $settings['openrouter_presence_penalty'] ?? 0;
         $timeout = $settings['request_timeout'] ?? 15;
         $maxRetries = $settings['max_retries'] ?? 2;
-
         // Apply prompt formatting if configured
         $formattedPrompt = $prompt;
         if (!empty($settings['default_prompt_prefix'])) {
@@ -5305,7 +4922,6 @@ if (!function_exists('generate_description_openrouter')) {
         if (!empty($settings['default_prompt_suffix'])) {
             $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
         }
-
         // Check prompt length
         $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
         if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
@@ -5314,10 +4930,8 @@ if (!function_exists('generate_description_openrouter')) {
                 'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
             ];
         }
-
         $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
         $attempt = 0;
-
         while ($attempt < $maxRetries) {
             try {
                 $response = $client->post($endpoint, [
@@ -5340,16 +4954,13 @@ if (!function_exists('generate_description_openrouter')) {
                         'presence_penalty' => (float)$presencePenalty,
                     ],
                 ]);
-
                 $body = json_decode($response->getBody(), true);
-
                 if (isset($body['choices'][0]['message']['content'])) {
                     return [
                         'error' => false,
                         'data' => $body['choices'][0]['message']['content'],
                     ];
                 }
-
                 return [
                     'error' => true,
                     'message' => $body['error']['message'],
@@ -5360,7 +4971,6 @@ if (!function_exists('generate_description_openrouter')) {
                     Log::error('OpenRouter API Error', [
                         'message' => $e->getMessage(),
                     ]);
-
                     // Try fallback if enabled
                     if (
                         !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
@@ -5373,19 +4983,16 @@ if (!function_exists('generate_description_openrouter')) {
                         }
                         return $fallbackResult;
                     }
-
                     return [
                         'error' => true,
                         'message' => 'An error occurred while generating the description using OpenRouter API.',
                     ];
                 }
-
                 // Wait before retrying
                 $retryDelay = $settings['retry_delay'] ?? 1;
                 sleep($retryDelay);
             }
         }
-
         // Should not reach here, but just in case
         return [
             'error' => true,
@@ -5393,7 +5000,6 @@ if (!function_exists('generate_description_openrouter')) {
         ];
     }
 }
-
 if (!function_exists('generate_description_gemini')) {
     /**
      * Generates a project/task description using Gemini API.
@@ -5407,10 +5013,8 @@ if (!function_exists('generate_description_gemini')) {
         try {
             // Get settings from database
             $settings = get_ai_settings('gemini');
-
             // Use provided API key or get from settings
             $apiKey = $apiKey ?: $settings['gemini_api_key'] ?? null;
-
             if (empty($apiKey)) {
                 Log::error('Missing Gemini API key');
                 return [
@@ -5418,32 +5022,26 @@ if (!function_exists('generate_description_gemini')) {
                     'message' => 'System configuration error: Missing API key.',
                 ];
             }
-
             // Get dynamic settings
             $model = $settings['gemini_model'] ?? 'gemini-2.0-flash';
             $endpointTemplate = $settings['gemini_endpoint'] ?? 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
             $endpoint = sprintf($endpointTemplate, $model);
-
             if (strpos($endpoint, '?key=') === false) {
                 $endpoint .= '?key=' . $apiKey;
             }
-
             $temperature = $settings['gemini_temperature'] ?? 0.7;
             $topK = $settings['gemini_top_k'] ?? 40;
             $topP = $settings['gemini_top_p'] ?? 0.95;
             $maxOutputTokens = $settings['gemini_max_output_tokens'] ?? 1024;
             $timeout = $settings['request_timeout'] ?? 15;
             $maxRetries = $settings['max_retries'] ?? 2;
-
             // Rate limiting settings
             $MAX_REQUESTS_PER_MINUTE = $settings['rate_limit_per_minute'] ?? 15;
             $MAX_REQUESTS_PER_DAY = $settings['rate_limit_per_day'] ?? 1500;
-
             $userId = auth()->user()?->id ?? request()->ip();
             $minuteKey = "gemini_rate_minute_{$userId}";
             $dayKey = "gemini_rate_day_{$userId}";
             $currentTime = now();
-
             $minuteRequests = Cache::get($minuteKey, 0);
             if ($minuteRequests >= $MAX_REQUESTS_PER_MINUTE) {
                 $retryAfter = 60 - $currentTime->second;
@@ -5452,7 +5050,6 @@ if (!function_exists('generate_description_gemini')) {
                     'message' => "Rate limit exceeded. Please try again in {$retryAfter} seconds.",
                 ];
             }
-
             $dayRequests = Cache::get($dayKey, 0);
             if ($dayRequests >= $MAX_REQUESTS_PER_DAY) {
                 $tomorrow = $currentTime->addDay()->startOfDay();
@@ -5462,7 +5059,6 @@ if (!function_exists('generate_description_gemini')) {
                     'message' => "Daily limit exceeded. Please try again in {$hoursRemaining} hours.",
                 ];
             }
-
             // Apply prompt formatting if configured
             $formattedPrompt = $prompt;
             if (!empty($settings['default_prompt_prefix'])) {
@@ -5471,12 +5067,10 @@ if (!function_exists('generate_description_gemini')) {
             if (!empty($settings['default_prompt_suffix'])) {
                 $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
             }
-
             // Set default prompt prefix for Gemini if not specified
             if (strpos($formattedPrompt, "Generate a concise") === false) {
                 $formattedPrompt = "Generate a concise, professional description for the following: {$formattedPrompt}";
             }
-
             $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
             if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
                 return [
@@ -5484,10 +5078,8 @@ if (!function_exists('generate_description_gemini')) {
                     'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
                 ];
             }
-
             $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
             $attempt = 0;
-
             while ($attempt < $maxRetries) {
                 try {
                     $response = $client->post($endpoint, [
@@ -5512,19 +5104,15 @@ if (!function_exists('generate_description_gemini')) {
                             ]
                         ]
                     ]);
-
                     $result = json_decode($response->getBody(), true);
-
                     if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
                         return [
                             'error' => true,
                             'message' => 'Invalid API response. Please Contact Support'
                         ];
                     }
-
                     Cache::put($minuteKey, $minuteRequests + 1, now()->addMinutes(1));
                     Cache::put($dayKey, $dayRequests + 1, now()->addDays(1));
-
                     return [
                         'error' => false,
                         'data' => $result['candidates'][0]['content']['parts'][0]['text'],
@@ -5535,7 +5123,6 @@ if (!function_exists('generate_description_gemini')) {
                         Log::error('Gemini API Error', [
                             'message' => $e->getMessage(),
                         ]);
-
                         // Try fallback if enabled
                         if (
                             !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
@@ -5548,13 +5135,11 @@ if (!function_exists('generate_description_gemini')) {
                             }
                             return $fallbackResult;
                         }
-
                         return [
                             'error' => true,
                             'message' => 'Failed to generate description. Please try again later.',
                         ];
                     }
-
                     // Wait before retrying
                     $retryDelay = $settings['retry_delay'] ?? 1;
                     sleep($retryDelay);
@@ -5564,7 +5149,6 @@ if (!function_exists('generate_description_gemini')) {
             Log::critical('Unexpected Error in generate_description_gemini', [
                 'error' => $e->getMessage(),
             ]);
-
             return [
                 'error' => true,
                 'message' => 'An unexpected error occurred. Please try again later.',
@@ -5582,9 +5166,7 @@ if (!function_exists('generate_description')) {
     function generate_description(string $prompt)
     {
         $ai_model_settings = get_settings('ai_model_settings');
-
         $selectedModel = $ai_model_settings['is_active']; // Assume this is stored in app settings
-
         if ($selectedModel === 'openrouter') {
             Log::info('Creating Description Using Openrouter AI Model/API');
             return generate_description_openrouter($prompt, $ai_model_settings['openrouter_api_key']);
@@ -5592,7 +5174,6 @@ if (!function_exists('generate_description')) {
             Log::info('Creating Description Using Google Gemini AI Model/API');
             return generate_description_gemini($prompt, $ai_model_settings['gemini_api_key']);
         } else {
-
             return [
                 'error' => true,
                 'message' => 'Invalid AI model selected. Please update your settings.'
@@ -5600,7 +5181,6 @@ if (!function_exists('generate_description')) {
         }
     }
 }
-
 if (!function_exists('get_ai_settings')) {
     /**
      * Retrieve AI model settings from the database
@@ -5611,7 +5191,6 @@ if (!function_exists('get_ai_settings')) {
     function get_ai_settings(?string $provider = null): array
     {
         $settings = Setting::where('variable', 'ai_model_settings')->first();
-
         if (!$settings) {
             // Return default settings if none found
             return [
@@ -5621,13 +5200,11 @@ if (!function_exists('get_ai_settings')) {
                 'openrouter_temperature' => 0.7,
                 'openrouter_max_tokens' => 1024,
                 'openrouter_top_p' => 0.95,
-
                 'gemini_endpoint' => 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent',
                 'gemini_temperature' => 0.7,
                 'gemini_top_k' => 40,
                 'gemini_top_p' => 0.95,
                 'gemini_max_output_tokens' => 1024,
-
                 'rate_limit_per_minute' => 15,
                 'rate_limit_per_day' => 1500,
                 'max_retries' => 2,
@@ -5636,20 +5213,16 @@ if (!function_exists('get_ai_settings')) {
                 'max_prompt_length' => 1000,
             ];
         }
-
         $settings = json_decode($settings->value, true);
-
         // If a specific provider is requested, only return those settings
         if ($provider) {
             $providerSettings = [];
-
             // Get all settings that belong to the requested provider
             foreach ($settings as $key => $value) {
                 if (strpos($key, $provider) === 0 || !str_contains($key, 'openrouter_') && !str_contains($key, 'gemini_')) {
                     $providerSettings[$key] = $value;
                 }
             }
-
             // Add global settings that aren't provider-specific
             $globalKeys = [
                 'is_active',
@@ -5662,16 +5235,13 @@ if (!function_exists('get_ai_settings')) {
                 'enable_fallback',
                 'fallback_provider'
             ];
-
             foreach ($globalKeys as $key) {
                 if (isset($settings[$key])) {
                     $providerSettings[$key] = $settings[$key];
                 }
             }
-
             return $providerSettings;
         }
-
         return $settings;
     }
 }
@@ -5689,5 +5259,123 @@ if (!function_exists('getStatusCounts')) {
         }
         arsort($statusCounts); // Sort by count descending
         return [$statusCounts, $totalCount];
+    }
+}
+if (!function_exists('formatComment')) {
+    function formatComment($comment)
+    {
+        return [
+            'id' => $comment->id,
+            'content' => $comment->content,
+            'commenter' => $comment->commenter ? [
+                'id' => $comment->commenter->id,
+                'first_name' => $comment->commenter->first_name,
+                'last_name' => $comment->commenter->last_name,
+                'email' => $comment->commenter->email,
+                'photo' => $comment->commenter->photo ? asset('storage/' . $comment->commenter->photo) : asset('storage/photos/no-image.jpg'),
+            ] : null,
+            'created_at' => format_date($comment->created_at, to_format: 'Y-m-d H:i:s'),
+            'sent_time' => $comment->created_at->diffForHumans(), // <-- Added for "5 seconds ago"
+            'attachments' => $comment->attachments->map(function ($a) {
+                return [
+                    'id' => $a->id,
+                    'file_name' => $a->file_name,
+                    'file_path' => $a->file_path,
+                    'file_type' => $a->file_type,
+                    'url' => asset('storage/' . $a->file_path),
+                ];
+            }),
+            'children' => $comment->children->map(function ($child) {
+                return formatComment($child);
+            })->values(),
+        ];
+    }
+}
+if (!function_exists('formatLeadForm')) {
+    function formatLeadForm($leadForm)
+    {
+        return [
+            'id' => $leadForm->id,
+            'title' => $leadForm->title,
+            'description' => $leadForm->description,
+            'source' => $leadForm->leadSource ? [
+                'id' => $leadForm->leadSource->id,
+                'name' => $leadForm->leadSource->name,
+            ] : null,
+            'stage' => $leadForm->leadStage ? [
+                'id' => $leadForm->leadStage->id,
+                'name' => $leadForm->leadStage->name,
+                'color' => $leadForm->leadStage->color,
+            ] : null,
+            'assigned_to' => $leadForm->assignedUser ? [
+                'id' => $leadForm->assignedUser->id,
+                'first_name' => $leadForm->assignedUser->first_name,
+                'last_name' => $leadForm->assignedUser->last_name,
+                'email' => $leadForm->assignedUser->email,
+                'photo' => $leadForm->assignedUser->photo ? asset('storage/' . $leadForm->assignedUser->photo) : asset('storage/photos/no-image.jpg'),
+            ] : null,
+            'fields' => $leadForm->leadFormFields->map(function ($field) {
+
+                return [
+                    'id' => $field->id,
+                    'label' => $field->label,
+                    'name' => $field->name,
+                    'type' => $field->type,
+                    'is_required' => (bool) $field->is_required,
+                    'is_mapped' => (bool) $field->is_mapped,
+                    'options' => is_array($decoded = json_decode($field->options ?? '[]', true)) && !(count($decoded) === 1 && is_null($decoded[0])) ? $decoded : [],
+
+                    'placeholder' => $field->placeholder,
+                    'order' => $field->order,
+                    'validation_rules' => $field->validation_rules,
+                ];
+            })->values(),
+            'public_url' => $leadForm->public_url,
+            'embed_code' => $leadForm->embed_code,
+            'leads_count' => $leadForm->leads_count ?? 0,
+            'created_at' => format_date($leadForm->created_at, to_format: 'Y-m-d'),
+            'updated_at' => format_date($leadForm->updated_at, to_format: 'Y-m-d'),
+
+        ];
+    }
+}
+
+if (!function_exists('formatLeadFormResponse')) {
+    /**
+     * Format a Lead model for clean API response when returned from lead form responses.
+     *
+     * @param \App\Models\Lead $lead
+     * @return array
+     */
+    function formatLeadFormResponse($lead)
+    {
+        return [
+            'id' => $lead->id,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'full_name' => trim($lead->first_name . ' ' . $lead->last_name),
+            'email' => $lead->email,
+            'phone' => $lead->phone,
+            'company' => $lead->company ?? null,
+            'source' => $lead->leadSource ? [
+                'id' => $lead->leadSource->id,
+                'name' => $lead->leadSource->name,
+            ] : null,
+            'stage' => $lead->leadStage ? [
+                'id' => $lead->leadStage->id,
+                'name' => $lead->leadStage->name,
+                'color' => $lead->leadStage->color,
+            ] : null,
+            'assigned_to' => $lead->assignedUser ? [
+                'id' => $lead->assignedUser->id,
+                'first_name' => $lead->assignedUser->first_name,
+                'last_name' => $lead->assignedUser->last_name,
+                'email' => $lead->assignedUser->email,
+                'photo' => $lead->assignedUser->photo ? asset('storage/' . $lead->assignedUser->photo) : asset('storage/photos/no-image.jpg'),
+            ] : null,
+            'submitted_at' => format_date($lead->created_at, to_format: "Y-m-d"),
+            'sent_time' => $lead->created_at->diffForHumans(),
+            'custom_fields' => $lead->custom_fields ?? [], // if you store custom fields for each lead form response
+        ];
     }
 }

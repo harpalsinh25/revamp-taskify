@@ -6,13 +6,11 @@ use ZipArchive;
 use App\Models\Update;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Database\Migrations\Migrator;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 
 class UpdaterController extends Controller
 {
@@ -26,217 +24,190 @@ class UpdaterController extends Controller
         if (!is_readable($dir)) {
             return null;
         }
-
         return (count(scandir($dir)) == 2);
     }
 
-    function update(Request $request)
+    public function update(Request $request)
     {
         ini_set('max_execution_time', 900);
+        Log::channel('update')->info("🟢 System update process started.");
+
         $zip = new ZipArchive();
         $updatePath = Config::get('constants.UPDATE_PATH');
         $fullUpdatePath = public_path($updatePath);
 
         if (!empty($_FILES['update_file']['name'][0])) {
-            if (!File::exists(public_path($updatePath))) {
-                File::makeDirectory(public_path($updatePath), 0777, true);
+
+            Log::channel('update')->info("🟢 Update file detected, starting upload process.");
+
+            if (!File::exists($fullUpdatePath)) {
+                File::makeDirectory($fullUpdatePath, 0777, true);
+                Log::channel('update')->info("✅ Update directory created at: $fullUpdatePath");
             }
 
             $uploadData = $request->file('update_file.0');
-            $ext = trim(strtolower($uploadData->getClientOriginalExtension()));
+            $ext = strtolower($uploadData->getClientOriginalExtension());
 
-            // Check if the extension is zip
-            if ($ext != "zip") {
-                $response = [
-                    "error" => true,
-                    "message" => "Please insert a valid Zip File.",
-                ];
-                return response()->json($response);
+            if ($ext !== "zip") {
+                Log::channel('update')->error("❌ Invalid file extension: .$ext. Only zip files are allowed.");
+                return response()->json(["error" => true, "message" => "Please insert a valid Zip File."]);
             }
 
-
-            if ($uploadData->move(public_path($updatePath))) {
-
+            if ($uploadData->move($fullUpdatePath)) {
                 $filename = $uploadData->getFilename();
-                ## Extract the zip file ---- start
-                $zip = new ZipArchive();
-                $res = $zip->open(public_path($updatePath) . $filename);
+                Log::channel('update')->info("✅ File uploaded successfully: $filename");
 
+                $res = $zip->open($fullUpdatePath . $filename);
                 if ($res === true) {
-                    $extractPath = public_path($updatePath);
-                    // Extract file
+                    $extractPath = $fullUpdatePath;
                     $zip->extractTo($extractPath);
                     $zip->close();
+                    Log::channel('update')->info("✅ Zip file extracted to: $extractPath");
+
                     if (file_exists($updatePath . "package.json") || file_exists($updatePath . "plugin/package.json")) {
 
                         $system_info = get_system_update_info();
                         if (isset($system_info['updated_error']) || isset($system_info['sequence_error'])) {
-                            $response = [
-                                'error' => true,
-                                'message' => $system_info['message']
-                            ];
-                            File::deleteDirectory($updatePath);
-                            return response()->json($response);
+                            Log::channel('update')->error("❌ System update info error: " . $system_info['message']);
+                            File::deleteDirectory($fullUpdatePath);
+                            return response()->json(['error' => true, 'message' => $system_info['message']]);
                         }
 
+                        $sub_directory = file_exists($updatePath . "plugin/package.json") ? "plugin/" : "";
+                        $packagePath = $updatePath . $sub_directory . "package.json";
 
-                        /* Plugin / Module installer script */
-                        $sub_directory = (file_exists($updatePath . "plugin/package.json")) ? "plugin/" : "";
+                        if (file_exists($packagePath)) {
+                            $package_data = json_decode(file_get_contents($packagePath), true);
 
-                        if (file_exists($updatePath . $sub_directory . "package.json")) {
-                            $package_data = file_get_contents($updatePath . $sub_directory . "package.json");
-                            $package_data = json_decode($package_data, true);
                             if (!empty($package_data)) {
-                                /* Folders Creation - check if folders.json is set if yes then create folders listed in that file */
-                                if (isset($package_data['folders']) && !empty($package_data['folders'])) {
-                                    $jsonFilePath = $updatePath . $sub_directory . $package_data['folders'];
+                                Log::channel('update')->info("✅ Package data loaded: " . json_encode($package_data));
 
-                                    if (file_exists($jsonFilePath)) {
-                                        $lines_array = file_get_contents($jsonFilePath);
-
-                                        if ($lines_array !== false && !empty($lines_array)) {
-                                            $lines_array = json_decode($lines_array, true);
-
-                                            if ($lines_array !== null) {
-                                                foreach ($lines_array as $key => $line) {
-                                                    $sourcePath = public_path($key);
-                                                    $destination = base_path($line);
-
-                                                    // Ensure directory existence
-                                                    if (!is_dir($destination) && !file_exists($destination)) {
-                                                        mkdir($destination, 0777, true);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                /* Files Copy - check if files.json is set if yes then copy the files listed in that file */
-                                if (isset($package_data['files']) && !empty($package_data['files'])) {
-                                    /* copy files from source to destination as set in the file */
-                                    if (file_exists($updatePath . $sub_directory . $package_data['files'])) {
-                                        $lines_array = file_get_contents($updatePath . $sub_directory . $package_data['files']);
-                                        if (!empty($lines_array)) {
-                                            $lines_array = json_decode($lines_array);
-                                            foreach ($lines_array as $key => $line) {
-
-                                                $sourcePath = public_path($updatePath) . $sub_directory . $key;
-                                                $sourcePath = str_replace('/', DIRECTORY_SEPARATOR, $sourcePath);
-
-                                                $destination = base_path($line);
-                                                $destination = str_replace('/', DIRECTORY_SEPARATOR, $destination);
-                                                $destinationDirectory = dirname($destination);
-
-                                                if (!is_dir($destinationDirectory)) {
-                                                    mkdir($destinationDirectory, 0755, true);
-                                                }
-
-                                                if (file_exists($sourcePath)) {
-                                                    copy($sourcePath, $destination);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                /* ZIP Extraction - check if archives.json is set if yes then extract the files on destination as mentioned */
-                                if (isset($package_data['archives']) && !empty($package_data['archives'])) {
-                                    /* extract the archives in the destination folder as set in the file */
-                                    if (file_exists($updatePath . $sub_directory . $package_data['archives'])) {
-                                        $lines_array = file_get_contents($updatePath . $sub_directory . $package_data['archives']);
-                                        if (!empty($lines_array)) {
-                                            $lines_array = json_decode($lines_array);
-                                            $zip = new ZipArchive;
-                                            foreach ($lines_array as $source => $destination) {
-                                                // $source = $updatePath . $sub_directory . $source; // Full path to source file
-                                                $destination = base_path($destination);
-                                                $destination = str_replace('/', DIRECTORY_SEPARATOR, $destination); // Replace forward slashes with the correct directory separator
-                                                $res = $zip->open(public_path($updatePath) . $sub_directory . $source);
-                                                if ($res === TRUE) {
-                                                    $zip->extractTo($destination);
-                                                    $zip->close();
-                                                }
+                                // Folders Creation
+                                if (isset($package_data['folders'])) {
+                                    $foldersJsonPath = $updatePath . $sub_directory . $package_data['folders'];
+                                    if (file_exists($foldersJsonPath)) {
+                                        $folders = json_decode(file_get_contents($foldersJsonPath), true);
+                                        foreach ($folders as $key => $line) {
+                                            $destination = base_path($line);
+                                            if (!is_dir($destination)) {
+                                                mkdir($destination, 0777, true);
+                                                Log::channel('update')->info("✅ Created folder: $destination");
                                             }
                                         }
                                     }
                                 }
 
+                                // Files Copy
+                                if (isset($package_data['files'])) {
+                                    $filesJsonPath = $updatePath . $sub_directory . $package_data['files'];
+                                    if (file_exists($filesJsonPath)) {
+                                        $files = json_decode(file_get_contents($filesJsonPath), true);
+                                        foreach ($files as $source => $destinationRelative) {
+                                            $sourcePath = $fullUpdatePath . $sub_directory . $source;
+                                            $destination = base_path($destinationRelative);
+                                            $destinationDir = dirname($destination);
 
-                                /* run the migration if there is any */
-                                $pathToMigrationDir = public_path($updatePath) . $sub_directory . 'update-files/database/migrations';
-                                $pathToMigrationDir = str_replace('/', DIRECTORY_SEPARATOR, $pathToMigrationDir);
-                                $pathToMigrations = 'public/' . $updatePath . $sub_directory . 'update-files/database/migrations';
-                                $pathToMigrations = str_replace('/', DIRECTORY_SEPARATOR, $pathToMigrations);
+                                            if (!is_dir($destinationDir)) {
+                                                mkdir($destinationDir, 0755, true);
+                                            }
+                                            if (file_exists($sourcePath)) {
+                                                copy($sourcePath, $destination);
+                                                Log::channel('update')->info("✅ Copied file: $sourcePath to $destination");
+                                            }
+                                        }
+                                    }
+                                }
 
-                                if (is_dir($pathToMigrationDir)) {
+                                // Archives Extraction
+                                if (isset($package_data['archives'])) {
+                                    $archivesJsonPath = $updatePath . $sub_directory . $package_data['archives'];
+                                    if (file_exists($archivesJsonPath)) {
+                                        $archives = json_decode(file_get_contents($archivesJsonPath), true);
+                                        foreach ($archives as $source => $destinationRelative) {
+                                            $sourcePath = $fullUpdatePath . $sub_directory . $source;
+                                            $destination = base_path($destinationRelative);
+                                            $archiveZip = new ZipArchive;
+                                            if ($archiveZip->open($sourcePath) === TRUE) {
+                                                $archiveZip->extractTo($destination);
+                                                $archiveZip->close();
+                                                Log::channel('update')->info("✅ Extracted archive: $sourcePath to $destination");
+                                            } else {
+                                                Log::channel('update')->error("❌ Failed to open archive: $sourcePath");
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Run migrations
+                                $migrationDir = $fullUpdatePath . $sub_directory . 'update-files/database/migrations';
+                                $migrationPath = 'public/' . $updatePath . $sub_directory . 'update-files/database/migrations';
+                                if (is_dir($migrationDir)) {
                                     try {
-                                        Artisan::call('migrate', ['--path' => $pathToMigrations]);
+                                        Artisan::call('migrate', ['--path' => $migrationPath]);
+                                        Log::channel('update')->info("✅ Migrations run from path: $migrationPath");
                                     } catch (\Throwable $e) {
-                                        // Handle any exceptions or errors
+                                        Log::channel('update')->error("❌ Migration error: " . $e->getMessage());
                                     }
                                 }
-                                if (isset($package_data['manual_queries']) && $package_data['manual_queries']) {
-                                    if (isset($package_data['query_path']) && $package_data['query_path'] != "") {
+
+                                // Run manual queries
+                                if (!empty($package_data['manual_queries']) && !empty($package_data['query_path'])) {
+                                    try {
                                         $sqlContent = File::get($fullUpdatePath . $package_data['query_path']);
                                         $queries = explode(';', $sqlContent);
-
                                         foreach ($queries as $query) {
                                             $query = trim($query);
                                             if (!empty($query)) {
-                                                try {
-                                                    DB::statement($query);
-                                                } catch (\Throwable $e) {
-                                                    // Handle any exceptions or errors
-                                                }
+                                                DB::statement($query);
                                             }
                                         }
+                                        Log::channel('update')->info("✅ Manual SQL queries executed from: " . $package_data['query_path']);
+                                    } catch (\Throwable $e) {
+                                        Log::channel('update')->error("❌ Manual SQL query error: " . $e->getMessage());
                                     }
                                 }
 
-                                $data = array('version' => $system_info['file_current_version']);
-                                Update::create($data);
+                                // Save update version
+                                Update::create(['version' => $system_info['file_current_version']]);
+                                Log::channel('update')->info("✅ Update version saved: " . $system_info['file_current_version']);
 
-                                File::deleteDirectory(public_path($updatePath));
+                                File::deleteDirectory($fullUpdatePath);
+                                Log::channel('update')->info("✅ Update directory cleaned up.");
 
-                                // Clear application caches
                                 Artisan::call('cache:clear');
                                 Artisan::call('config:clear');
                                 Artisan::call('route:clear');
                                 Artisan::call('view:clear');
-                                $response = [
-                                    'error' => false,
-                                    'message' => 'Congratulations! Version ' . $package_data['version'] . ' is successfully installed.',
-                                ];
+                                Log::channel('update')->info("✅ Application caches cleared.");
 
-                                return response()->json($response);
+                                Log::channel('update')->info("🟩 System updated successfully to version " . $package_data['version']);
+
+                                return response()->json([
+                                    'error' => false,
+                                    'message' => 'Congratulations! Version ' . $package_data['version'] . ' is successfully installed.'
+                                ]);
                             } else {
-                                $response = [
-                                    'error' => true,
-                                    'message' => 'Invalid plugin installer file!. No package data found / missing package data.',
-                                ];
-                                File::deleteDirectory(public_path($updatePath));
-                                return response()->json($response);
+                                Log::channel('update')->error("❌ Invalid package installer file, missing package data.");
+                                File::deleteDirectory($fullUpdatePath);
+                                return response()->json(['error' => true, 'message' => 'Invalid plugin installer file!. No package data found / missing package data.']);
                             }
                         }
                     } else {
-                        $response = [
-                            'error' => true,
-                            'message' => 'Invalid update file! It seems like you are trying to update the system using the wrong file.',
-                        ];
-
-                        File::deleteDirectory(public_path($updatePath));
+                        Log::channel('update')->error("❌ Invalid update file, missing package.json.");
+                        File::deleteDirectory($fullUpdatePath);
+                        return response()->json(['error' => true, 'message' => 'Invalid update file! It seems like you are trying to update the system using the wrong file.']);
                     }
                 } else {
-                    $response['error'] = true;
-                    $response['message'] = "Extraction failed.";
+                    Log::channel('update')->error("❌ Extraction failed for uploaded file.");
+                    return response()->json(['error' => true, 'message' => "Extraction failed."]);
                 }
             } else {
-                $response['error'] = true;
-                $response['message'] = $uploadData->getErrorString();
+                Log::channel('update')->error("❌ File upload failed: " . $uploadData->getErrorString());
+                return response()->json(['error' => true, 'message' => $uploadData->getErrorString()]);
             }
         } else {
-            $response['error'] = true;
-            $response['message'] = 'You did not select a file to upload.';
+            Log::channel('update')->error("❌ No file selected for update upload.");
+            return response()->json(['error' => true, 'message' => 'You did not select a file to upload.']);
         }
-        return response()->json($response);
     }
 }

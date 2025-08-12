@@ -154,7 +154,7 @@
     right: 11.625rem;
     padding: 10px;
     background-color: #ffffff;
-    z-index: 999999;
+    z-index: 1086;
     transition: transform 0.3s ease;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
 }

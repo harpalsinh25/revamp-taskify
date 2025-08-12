@@ -48,8 +48,7 @@ class PluginInstallerController extends Controller
         $destination = base_path('plugins/' . $pluginNamespace);
 
         try {
-            DB::beginTransaction();
-
+            // Don't use a global transaction since migrations will handle their own
             File::ensureDirectoryExists(base_path('plugins'));
 
             if (File::exists($destination)) {
@@ -73,59 +72,135 @@ class PluginInstallerController extends Controller
             }
             Log::info("✅ Plugin moved to: {$destination}");
 
+            // Register the service provider first
             $provider = $pluginData['provider'] ?? "Plugins\\{$pluginNamespace}\\Providers\\{$pluginNamespace}ServiceProvider";
-
             $providerPath = $destination . '/Providers/' . class_basename(str_replace('\\', '/', $provider)) . '.php';
+
             if (File::exists($providerPath)) {
                 require_once $providerPath;
-            }
 
-            if (class_exists($provider)) {
-                app()->register($provider);
-                Log::info("✅ Service provider registered: {$provider}");
+                if (class_exists($provider)) {
+                    app()->register($provider);
+                    Log::info("✅ Service provider registered: {$provider}");
+                } else {
+                    throw new Exception("Provider class '{$provider}' not found.");
+                }
             } else {
-                throw new Exception("Provider class '{$provider}' not found.");
+                Log::warning("⚠️ Service provider file not found: {$providerPath}");
             }
 
+            // Run migrations with proper path handling
             $migrationPath = "plugins/{$pluginNamespace}/Database/Migrations";
-            if (File::exists(base_path($migrationPath))) {
-                Artisan::call('migrate', [
-                    '--path' => $migrationPath,
-                    '--force' => true,
-                ]);
-                Log::info("✅ Migrations executed for plugin: {$pluginNamespace}");
+            $fullMigrationPath = base_path($migrationPath);
+
+            if (File::exists($fullMigrationPath)) {
+                // Check if there are any migration files
+                $migrationFiles = File::files($fullMigrationPath);
+
+                if (!empty($migrationFiles)) {
+                    Log::info("🔄 Running migrations for plugin: {$pluginNamespace}");
+                    Log::info("Migration files found: " . count($migrationFiles));
+
+                    try {
+                        // Run migrations with --realpath flag to ensure proper path resolution
+                        Artisan::call('migrate', [
+                            '--path' => $migrationPath,
+                            '--force' => true,
+                            '--realpath' => false, // Use relative path
+                        ]);
+
+                        $migrationOutput = Artisan::output();
+                        Log::info("Migration output: " . $migrationOutput);
+                        Log::info("✅ Migrations executed for plugin: {$pluginNamespace}");
+                    } catch (Exception $migrationException) {
+                        Log::error("❌ Migration failed: " . $migrationException->getMessage());
+                        throw new Exception("Migration failed: " . $migrationException->getMessage());
+                    }
+                } else {
+                    Log::info("ℹ️ No migration files found in: {$fullMigrationPath}");
+                }
+            } else {
+                Log::info("ℹ️ No migration directory found: {$fullMigrationPath}");
             }
 
+            // Execute update script if exists
             $updateScript = base_path("plugins/{$pluginNamespace}/update.php");
             if (File::exists($updateScript)) {
                 include_once $updateScript;
                 Log::info("✅ update.php executed for plugin: {$pluginNamespace}");
             }
 
-            DB::commit();
-
-            File::deleteDirectory($tmpDir);
-
+            // Publish assets if publish_tag is defined
             if (!empty($pluginData['publish_tag'])) {
-                Artisan::call('vendor:publish', [
-                    '--tag' => $pluginData['publish_tag'],
-                    '--force' => true,
-                ]);
-                Log::info("✅ Published plugin assets with tag: {$pluginData['publish_tag']}");
+                Log::info("🔄 Publishing plugin assets with tag: {$pluginData['publish_tag']}");
+
+                try {
+                    Artisan::call('vendor:publish', [
+                        '--tag' => $pluginData['publish_tag'],
+                        '--force' => true,
+                    ]);
+
+                    $publishOutput = Artisan::output();
+                    Log::info("Publish output: " . $publishOutput);
+                    Log::info("✅ Published plugin assets with tag: {$pluginData['publish_tag']}");
+                } catch (Exception $publishException) {
+                    Log::error("❌ Asset publishing failed: " . $publishException->getMessage());
+                    // Don't throw here as this might not be critical
+                    Log::warning("⚠️ Continuing installation despite asset publishing failure");
+                }
             } else {
                 Log::info("ℹ️ No publish_tag defined in plugin.json, skipping vendor:publish.");
             }
 
+            // No need to commit since we're not using a global transaction
+            File::deleteDirectory($tmpDir);
+
             Log::info("✅ Plugin '{$pluginNamespace}' installed/updated successfully.");
 
-            return response()->json(['error' => false, 'message' => 'Plugin installed/updated successfully.']);
+            return response()->json([
+                'error' => false,
+                'message' => 'Plugin installed/updated successfully.',
+                'plugin_name' => $pluginData['name'] ?? $pluginNamespace,
+                'plugin_version' => $pluginData['version'] ?? 'unknown'
+            ]);
         } catch (Exception $e) {
-            if (DB::transactionLevel() > 0) {
-                DB::rollBack();
-            }
-            Log::error("❌ Plugin installation failed: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+            Log::error("❌ Plugin installation failed: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString(),
+                'plugin' => $pluginNamespace ?? 'unknown'
+            ]);
+
+            // No need to rollback since we're not using a global transaction
             File::deleteDirectory($tmpDir);
-            return response()->json(['error' => true, 'message' => 'Plugin installation failed: ' . $e->getMessage()]);
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Plugin installation failed: ' . $e->getMessage()
+            ]);
         }
+    }
+
+    public static function generateUninstallScript(string $pluginPath)
+    {
+        $migrationPath = $pluginPath . '/Database/Migrations';
+        $uninstallScript = $pluginPath . '/uninstall.php';
+        $dropStatements = [];
+
+        if (File::exists($migrationPath)) {
+            $migrationFiles = File::files($migrationPath);
+            foreach ($migrationFiles as $file) {
+                $content = File::get($file);
+                preg_match_all("/Schema::create\\(['\"](.*?)['\"]", $content, $matches);
+                foreach ($matches[1] as $table) {
+                    $dropStatements[] = "Schema::dropIfExists('{$table}');";
+                }
+            }
+        }
+
+        $phpContent = "<?php\\n\\nuse Illuminate\\\\Support\\\\Facades\\\\Schema;\\n\\n";
+        foreach ($dropStatements as $drop) {
+            $phpContent .= "$drop\\n";
+        }
+
+        File::put($uninstallScript, $phpContent);
     }
 }

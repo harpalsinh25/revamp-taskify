@@ -5,24 +5,20 @@
 loadDashboardOrder();
 (function () {
     let cardColor, headingColor, axisColor, borderColor;
-
     // Define colors from configuration
     cardColor = config.colors.white;
     headingColor = config.colors.headingColor;
     axisColor = config.colors.axisColor;
     borderColor = config.colors.borderColor;
-
     // Custom pastel colors for the charts
     const pastelColors = ["#64C7CC", "#A0D995", "#FFB677", "#D4A5FF"]; // Light cool colors
     const pastelSuccess = "#63ED7A"; // Light green for success
     const pastelDanger = "#FC544B"; // Light red for danger
-
     // Function to calculate percentage
     function calculatePercentage(data) {
         const total = data.reduce((a, b) => a + b, 0);
         return data.map((value) => ((value / total) * 100).toFixed(2) + "%");
     }
-
     // Projects Statistics Chart
     var projectOptions = {
         series: project_data, // Dynamic project data
@@ -85,13 +81,11 @@ loadDashboardOrder();
             },
         },
     };
-
     var projectChart = new ApexCharts(
         document.querySelector("#projectStatisticsChart"),
         projectOptions
     );
     projectChart.render();
-
     // Tasks Statistics Chart
     var taskOptions = {
         series: task_data, // Dynamic task data
@@ -143,13 +137,11 @@ loadDashboardOrder();
             },
         },
     };
-
     var taskChart = new ApexCharts(
         document.querySelector("#taskStatisticsChart"),
         taskOptions
     );
     taskChart.render();
-
     // Todos Statistics Chart
     var todoOptions = {
         series: todo_data, // Dynamic todo data
@@ -201,24 +193,20 @@ loadDashboardOrder();
             },
         },
     };
-
     var todoChart = new ApexCharts(
         document.querySelector("#todoStatisticsChart"),
         todoOptions
     );
     todoChart.render();
 })();
-
 window.icons = {
     refresh: "bx-refresh",
     toggleOn: "bx-toggle-right",
     toggleOff: "bx-toggle-left",
 };
-
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>';
 }
-
 function queryParamsUpcomingBirthdays(p) {
     return {
         upcoming_days: $("#upcoming_days_bd").val(),
@@ -232,12 +220,10 @@ function queryParamsUpcomingBirthdays(p) {
         search: p.search,
     };
 }
-
 $("#upcoming_days_birthday_filter").on("click", function (e) {
     e.preventDefault();
     $("#birthdays_table").bootstrapTable("refresh");
 });
-
 addDebouncedEventListener(
     "#birthday_user_filter, #birthday_client_filter",
     "change",
@@ -248,7 +234,6 @@ addDebouncedEventListener(
         }
     }
 );
-
 $(document).on("click", ".clear-upcoming-bd-filters", function (e) {
     e.preventDefault();
     $("#upcoming_days_bd").val("");
@@ -256,7 +241,6 @@ $(document).on("click", ".clear-upcoming-bd-filters", function (e) {
     $("#birthday_client_filter").val("").trigger("change", [0]);
     $("#birthdays_table").bootstrapTable("refresh");
 });
-
 function queryParamsUpcomingWa(p) {
     return {
         upcoming_days: $("#upcoming_days_wa").val(),
@@ -270,12 +254,10 @@ function queryParamsUpcomingWa(p) {
         search: p.search,
     };
 }
-
 $("#upcoming_days_wa_filter").on("click", function (e) {
     e.preventDefault();
     $("#wa_table").bootstrapTable("refresh");
 });
-
 addDebouncedEventListener(
     "#wa_user_filter, #wa_client_filter",
     "change",
@@ -286,14 +268,12 @@ addDebouncedEventListener(
         }
     }
 );
-
 $(document).on("click", ".clear-upcoming-wa-filters", function (e) {
     e.preventDefault();
     $("#upcoming_days_wa").val("");
     $("#wa_user_filter, #wa_client_filter").val("").trigger("change", [0]);
     $("#wa_table").bootstrapTable("refresh");
 });
-
 function queryParamsMol(p) {
     return {
         upcoming_days: $("#upcoming_days_mol").val(),
@@ -306,12 +286,10 @@ function queryParamsMol(p) {
         search: p.search,
     };
 }
-
 $("#upcoming_days_mol_filter").on("click", function (e) {
     e.preventDefault();
     $("#mol_table").bootstrapTable("refresh");
 });
-
 addDebouncedEventListener(
     "#mol_user_filter",
     "change",
@@ -322,16 +300,13 @@ addDebouncedEventListener(
         }
     }
 );
-
 $(document).on("click", ".clear-upcoming-mol-filters", function (e) {
     e.preventDefault();
     $("#upcoming_days_mol").val("");
     $("#mol_user_filter").val("").trigger("change", [0]);
     $("#mol_table").bootstrapTable("refresh");
 });
-
 // alert('here');
-
 $(function () {
     let incomeExpenseChart = null; // Initialize the chart variable
     function getFilters() {
@@ -357,6 +332,9 @@ $(function () {
     }
     function groupByDate(data, type) {
         const grouped = {};
+        if (!Array.isArray(data) || data.length === 0) {
+            return grouped; // return empty if no data
+        }
         data.forEach((item) => {
             const date =
                 type === "invoice" ? item.from_date : item.expense_date;
@@ -495,14 +473,16 @@ $(function () {
                         },
                     },
                 };
-                if (incomeExpenseChart) {
-                    incomeExpenseChart.updateOptions(options);
-                } else {
-                    incomeExpenseChart = new ApexCharts(
-                        document.querySelector("#income-expense-chart"),
-                        options
-                    );
-                    incomeExpenseChart.render();
+                if ($('#income-expense-chart').length) {
+                    if (incomeExpenseChart) {
+                        incomeExpenseChart.updateOptions(options);
+                    } else {
+                        incomeExpenseChart = new ApexCharts(
+                            document.querySelector("#income-expense-chart"),
+                            options
+                        );
+                        incomeExpenseChart.render();
+                    }
                 }
             },
             error: function (xhr, status, error) {
@@ -530,23 +510,11 @@ $(function () {
     // Initial chart update
     updateIEChart();
 });
-
-
-
-
-
-
-
-
-
-
-
 $(document).ready(function () {
     if (typeof moment === 'undefined') {
         console.error("Moment.js is NOT loaded!");
         return;
     }
-
     $('#filter_date_range_income_expense').daterangepicker({
         width: '100%',
         "alwaysShowCalendars": true,
@@ -568,10 +536,7 @@ $(document).ready(function () {
 });
 $(document).ready(function () {
     const $dashboardContainer = $('#dashboard-items');
-
     // Load the saved layout from localStorage on page load
-
-
     // Initialize Sortable.js
     Sortable.create($dashboardContainer[0], {
         animation: 150,
@@ -589,20 +554,16 @@ $(document).ready(function () {
         onEnd: function (evt) {
             const oldIndex = evt.oldIndex;
             const newIndex = evt.newIndex;
-
             console.log(`Item moved from position ${oldIndex} to ${newIndex}`);
-
             // Save the new order and dimensions to localStorage
             saveDashboardOrder();
         }
     });
-
     /**
      * Save the new order and dimensions to localStorage
      */
     function saveDashboardOrder() {
         const order = [];
-
         // Iterate through each draggable item
         $('#dashboard-items .draggable-item').each(function (index) {
             const $this = $(this);
@@ -610,7 +571,6 @@ $(document).ready(function () {
             const height = $this.outerHeight(); // Get height of the item
             const width = $this.outerWidth(); // Get width of the item
             const position = index + 1; // Current position in the order
-
             order.push({
                 id: id,
                 height: height,
@@ -618,14 +578,10 @@ $(document).ready(function () {
                 position: position
             });
         });
-
         // Save the order in localStorage
         localStorage.setItem('dashboardOrder', JSON.stringify(order));
-
         console.log('Dashboard order saved to localStorage:', order);
     }
-
-
 });
 /**
  * Load the saved layout from localStorage
@@ -635,42 +591,34 @@ function loadDashboardOrder() {
     const $dashboardContainer = $('#dashboard-items');
     if (savedOrder) {
         const order = JSON.parse(savedOrder);
-
         console.log('Loaded dashboard order from localStorage:', order);
-
         // Reorder the items based on the saved order
         order.forEach(function (item) {
             const $item = $(`#dashboard-items .draggable-item[data-id="${item.id}"]`);
-
             // Set the height and width of the item
             $item.css({
                 height: item.height + 'px',
                 width: item.width + 'px'
             });
-
             // Append the item in the correct position
             $dashboardContainer.append($item);
         });
     }
 }
-
 $(document).ready(function () {
     // Loop through all draggable items
     $('.draggable-item').each(function () {
         // Make sure parent is relatively positioned for absolute icon
         $(this).addClass('position-relative');
-
         // Create the tooltip icon element
         const tooltipIcon = `
             <span class="drag-tooltip-icon end-0 fs-4 me-4 mt-2 position-absolute top-0" data-bs-toggle="tooltip" title="Drag to reorder">
                 <i class="bx bx-move text-muted small"></i>
             </span>
         `;
-
         // Append it to the item
         $(this).append(tooltipIcon);
     });
-
     // Initialize Bootstrap tooltip
     $('[data-bs-toggle="tooltip"]').tooltip();
 });

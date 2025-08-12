@@ -83,6 +83,7 @@
     Request::is('/') ||
     Request::segment(1) == 'reset-password' ||
     Request::is('install') ||
+     Request::is('system-health') ||
     Request::is('signup') ||
     Request::is('privacy-policy')
 )
@@ -103,6 +104,7 @@
                         @yield('content')
                         @if (!isset($unauthorized))
                             @include('modals')
+                            @include('offcanvas')
                         @endif
                     </div>
                     <!-- Content wrapper -->
@@ -164,28 +166,8 @@
 
 @if(config('constants.ALLOW_MODIFICATION') == '0')
 <!-- Floating Buy Now Button -->
-<div class="floating-buy-plan">
-    <div class="attention-ring"></div>
-    <a href="https://codecanyon.net/item/taskify-project-management-task-management-productivity-tool/48903161"
-       class="buy-button"
-       target="_blank"
-       rel="noopener noreferrer"
-       title="Get Your Copy Now!"
-       aria-label="Buy Now">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
-             viewBox="0 0 16 16">
-            <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1
-                     .485.379L2.89 5H14.5a.5.5 0 0 1
-                     .49.598l-1.5 7A.5.5 0 0 1 13
-                     13H4a.5.5 0 0 1-.49-.402L1.61
-                     2H.5a.5.5 0 0 1-.5-.5zM5
-                     12a1 1 0 1 0 0 2 1 1 0 0 0
-                     0-2zm7 1a1 1 0 1 1-2 0 1 1
-                     0 0 1 2 0z" />
-        </svg>
-        <span>Buy Now</span>
-    </a>
-</div>
+   @include('components.taskify-ecosystem-drawer')
+
 @endif
 
 

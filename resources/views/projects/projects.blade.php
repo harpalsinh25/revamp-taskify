@@ -66,7 +66,7 @@
                     $finalKanbanUrl = $kanbanUrl . $queryParams;
                 @endphp
 
-                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_project_modal">
+                <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_project_offcanvas">
                     <button type="button" class="btn btn-sm btn-primary action_create_projects" data-bs-toggle="tooltip"
                         data-bs-placement="left"
                         data-bs-original-title="<?= get_label('create_project', 'Create project') ?>">

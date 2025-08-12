@@ -37,11 +37,13 @@
             $gridUrl = $is_favorite == 1 ? url('projects/favorite') : url('projects');
             $kanbanUrl = $is_favorite == 1 ? route('projects.kanban_view', ['type' => 'favorite']) : route('projects.kanban_view');
             @endphp
-            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_project_modal">
-                <button type="button" class="btn btn-sm btn-primary action_create_projects" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_project', 'Create project') ?>">
-                    <i class='bx bx-plus'></i>
-                </button>
-            </a>
+            <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_project_offcanvas">
+                        <button type="button" class="btn btn-sm btn-primary action_create_projects" data-bs-toggle="tooltip"
+                            data-bs-placement="left"
+                            data-bs-original-title="<?= get_label('create_project', 'Create project') ?>">
+                            <i class='bx bx-plus'></i>
+                        </button>
+                    </a>
             <a href="{{ $listUrl }}">
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('list_view', 'List view') ?>">
                     <i class='bx bx-list-ul'></i>
