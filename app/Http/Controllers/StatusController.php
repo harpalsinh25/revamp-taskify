@@ -72,6 +72,7 @@ class StatusController extends Controller
      * }
      */
 
+
     public function store(Request $request)
     {
         try {
@@ -94,6 +95,12 @@ class StatusController extends Controller
                 return response()->json([
                     'error' => false,
                     'message' => 'Status created successfully.',
+                    'type' => 'status', // ✅ Required for refreshParentFormDropdowns
+                    'data' => [         // ✅ Required structure
+                        'id' => $status->id,
+                        'name' => $status->title, // ✅ Using 'title' field as 'name'
+                    ],
+                    // Keep your existing response structure for backward compatibility
                     'id' => $status->id,
                     'status' => $status
                 ]);
@@ -113,7 +120,6 @@ class StatusController extends Controller
             ], 500);
         }
     }
-
 
     public function list()
     {

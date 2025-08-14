@@ -9,6 +9,7 @@ use App\Models\Template;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -259,6 +260,8 @@ class SettingsController extends Controller
 
     public function store_email_settings(Request $request)
     {
+        Cache::forget('smtp_config_check');
+
         $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],

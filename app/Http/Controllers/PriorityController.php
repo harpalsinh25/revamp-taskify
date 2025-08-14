@@ -78,9 +78,12 @@ class PriorityController extends Controller
                 return response()->json([
                     'error' => false,
                     'message' => 'Priority created successfully.',
-                    'id' => $priority->id,
-                    'title' => $priority->title,
                     'type' => 'priority',
+                    'data' => [
+                        'id' => $priority->id,
+                        'name' => $priority->title,
+                    ],
+                    'id' => $priority->id,
                     'priority' => $priority
                 ]);
             }

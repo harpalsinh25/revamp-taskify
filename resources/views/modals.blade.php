@@ -14,87 +14,87 @@
         Request::is('status/manage') ||
         Request::is('users') ||
         Request::is('clients'))
-    <div class="modal fade" id="create_status_modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <form class="modal-content form-submit-event" action="{{ url('status/store') }}" method="POST">
-                <input type="hidden" name="dnr">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_status', 'Create status') ?>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
-                                    class="asterisk">*</span></label>
-                            <input type="text" id="nameBasic" class="form-control" name="title"
-                                placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
-                        </div>
+   <div class="modal fade" id="create_status_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content new-form-submit-event" action="{{ url('status/store') }}" method="POST">
+            <input type="hidden" name="dnr">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_status', 'Create status') ?>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @csrf
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                class="asterisk">*</span></label>
+                        <input type="text" id="nameBasic" class="form-control" name="title"
+                            placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                     </div>
+                </div>
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                class="asterisk">*</span></label>
+                        <select class="form-select select-bg-label-primary" id="color" name="color">
+                            <option class="badge bg-label-primary" value="primary"
+                                {{ old('color') == 'primary' ? 'selected' : '' }}>
+                                <?= get_label('primary', 'Primary') ?>
+                            </option>
+                            <option class="badge bg-label-secondary" value="secondary"
+                                {{ old('color') == 'secondary' ? 'selected' : '' }}>
+                                <?= get_label('secondary', 'Secondary') ?></option>
+                            <option class="badge bg-label-success" value="success"
+                                {{ old('color') == 'success' ? 'selected' : '' }}>
+                                <?= get_label('success', 'Success') ?></option>
+                            <option class="badge bg-label-danger" value="danger"
+                                {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                <?= get_label('danger', 'Danger') ?></option>
+                            <option class="badge bg-label-warning" value="warning"
+                                {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                <?= get_label('warning', 'Warning') ?></option>
+                            <option class="badge bg-label-info" value="info"
+                                {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                            </option>
+                            <option class="badge bg-label-dark" value="dark"
+                                {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                @if ($isAdminOrHasAllDataAccess)
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
-                                    class="asterisk">*</span></label>
-                            <select class="form-select select-bg-label-primary" id="color" name="color">
-                                <option class="badge bg-label-primary" value="primary"
-                                    {{ old('color') == 'primary' ? 'selected' : '' }}>
-                                    <?= get_label('primary', 'Primary') ?>
-                                </option>
-                                <option class="badge bg-label-secondary" value="secondary"
-                                    {{ old('color') == 'secondary' ? 'selected' : '' }}>
-                                    <?= get_label('secondary', 'Secondary') ?></option>
-                                <option class="badge bg-label-success" value="success"
-                                    {{ old('color') == 'success' ? 'selected' : '' }}>
-                                    <?= get_label('success', 'Success') ?></option>
-                                <option class="badge bg-label-danger" value="danger"
-                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
-                                    <?= get_label('danger', 'Danger') ?></option>
-                                <option class="badge bg-label-warning" value="warning"
-                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
-                                    <?= get_label('warning', 'Warning') ?></option>
-                                <option class="badge bg-label-info" value="info"
-                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
-                                </option>
-                                <option class="badge bg-label-dark" value="dark"
-                                    {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
-                                </option>
+                        <div class="col-12 mb-3">
+                            <label
+                                class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
+                                <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
+                                    data-bs-offset="0,4" data-bs-placement="top" title=""
+                                    data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
+                            <select class="form-control js-example-basic-multiple" name="role_ids[]"
+                                multiple="multiple"
+                                data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
+                                data-allow-clear="true">
+                                @isset($roles)
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role->id }}">{{ ucfirst($role->name) }}</option>
+                                    @endforeach
+                                @endisset
                             </select>
                         </div>
                     </div>
-                    @if ($isAdminOrHasAllDataAccess)
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <label
-                                    class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
-                                    <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
-                                        data-bs-offset="0,4" data-bs-placement="top" title=""
-                                        data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
-                                <select class="form-control js-example-basic-multiple" name="role_ids[]"
-                                    multiple="multiple"
-                                    data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
-                                    data-allow-clear="true">
-                                    @isset($roles)
-                                        @foreach ($roles as $role)
-                                            <option value="{{ $role->id }}">{{ ucfirst($role->name) }}</option>
-                                        @endforeach
-                                    @endisset
-                                </select>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <?= get_label('close', 'Close') ?></label>
-                    </button>
-                    <button type="submit" class="btn btn-primary"
-                        id="submit_btn"><?= get_label('create', 'Create') ?></label></button>
-                </div>
-            </form>
-        </div>
+                @endif
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <?= get_label('close', 'Close') ?>
+                </button>
+                <button type="submit" class="btn btn-primary"
+                    id="submit_btn"><?= get_label('create', 'Create') ?></button>
+            </div>
+        </form>
     </div>
+</div>
 @endif
 @if (Request::is('status/manage'))
     <div class="modal fade" id="edit_status_modal" tabindex="-1" aria-hidden="true">
@@ -183,7 +183,7 @@
         Request::is('clients'))
     <div class="modal fade" id="create_priority_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
-            <form class="modal-content form-submit-event" action="{{ url('priority/store') }}" method="POST">
+            <form class="modal-content new-form-submit-event" action="{{ url('priority/store') }}" method="POST">
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
@@ -1030,7 +1030,7 @@
 @endif
 <div class="modal fade" id="create_contract_type_modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
-        <form class="modal-content form-submit-event" action="{{ url('contracts/store-contract-type') }}"
+        <form class="modal-content new-form-submit-event" action="{{ url('contracts/store-contract-type') }}"
             method="POST">
             <input type="hidden" name="dnr">
             <div class="modal-header">
