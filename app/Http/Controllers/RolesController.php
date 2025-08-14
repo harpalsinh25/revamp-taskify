@@ -149,6 +149,37 @@ class RolesController extends Controller
 
     public function destroy($id)
     {
+        // Find the role first
+        $role = Role::find($id);
+
+        // Check if role exists
+        if (!$role) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Role not found.'
+            ], 404);
+        }
+
+        // Define protected/default roles that cannot be deleted
+        $protectedRoles = ['admin', 'client', 'member'];
+
+        // Check if the role is protected
+        if (in_array(strtolower($role->name), $protectedRoles)) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Cannot delete default system roles (admin, client, member).'
+            ], 403);
+        }
+
+        // Optional: Check if role has users assigned to it
+        if ($role->users()->count() > 0) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Cannot delete role that has users assigned to it. Please reassign users first.'
+            ], 400);
+        }
+
+        // Proceed with deletion if all checks pass
         $response = DeletionService::delete(Role::class, $id, 'Role');
         return $response;
     }

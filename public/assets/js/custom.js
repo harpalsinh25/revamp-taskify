@@ -5994,8 +5994,12 @@ function fetchTasks(startDate, endDate, successCallback, failureCallback) {
 }
 $(document).ready(function () {
     $("#menu-search").on("input", function () {
+
+
         var searchQuery = $(this).val().toLowerCase();
+        console.log("searchQuery:", searchQuery)
         var menuItems = $(".menu-item");
+        console.log("menu items", menuItems);
         if (searchQuery === "") {
             // If search is empty, reset everything
             menuItems.show(); // Show all menu items
@@ -8307,11 +8311,12 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
 
     // ✅ ENHANCED DROPDOWN REFRESH WITH MORE ENTITY TYPES
     function refreshParentFormDropdowns(result) {
+        alert('in refreshParentFormDropdowns ');
         if (!result.data || !result.data.id || !result.data.name || !result.type) return;
 
         // Enhanced mapping for more entity types
         let selectMap = {
-            status: ['status_id', 'project_status_id', 'task_status_id'],
+            status: ['status_id', 'project_status_id', 'task_status_id', 'status'],
             priority: ['priority_id', 'project_priority_id', 'task_priority_id'],
             tag: ['tag_ids[]', 'tags[]', 'tag_id'],
             contract_type: ['contract_type_id'],
@@ -8326,15 +8331,17 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             project: ['project_id'],
             workspace: ['workspace_id']
         };
-
+        console.log('selected map', selectMap);
         let targetSelects = selectMap[result.type] || [];
         if (!targetSelects.length) return;
 
         // Look for selects in the active offcanvas
         let activeOffcanvas = $(".offcanvas.show");
         if (activeOffcanvas.length) {
+
             targetSelects.forEach(function (selectName) {
                 let selector = activeOffcanvas.find(`select[name="${selectName}"]`);
+                console.log("Selector", selector)
                 if (selector.length) {
                     let newOption = new Option(result.data.name, result.data.id, true, true);
                     selector.append(newOption);

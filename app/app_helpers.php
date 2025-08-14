@@ -126,14 +126,14 @@ if (!function_exists('get_settings')) {
     {
 
         static $settings = null;
-        if ($settings === null) {
-            // Cache forever (clear when settings change)
-            $settings = Cache::remember('settings_cache', now()->addMinutes(20), function () {
-                return Setting::pluck('value', 'variable')->toArray();
-            });
-        }
+        // if ($settings === null) {
+        //     // Cache forever (clear when settings change)
+        //     // $settings = Cache::remember('settings_cache', now()->addMinutes(20), function () {
+        //     return Setting::pluck('value', 'variable')->toArray();
+        //     // });
+        // }
         // dd($settings);
-
+        $settings =  Setting::pluck('value', 'variable')->toArray();
         $value = $settings[$variable] ?? $default;
 
         if ($value && is_string($value) && isJson($value)) {
@@ -534,14 +534,13 @@ if (!function_exists('isEmailConfigured')) {
     function isEmailConfigured()
     {
         $email_settings = get_settings('email_settings');
+        // Check if required fields are non-empty
         if (
-            isset($email_settings['email']) && !empty($email_settings['email']) &&
-            isset($email_settings['password']) && !empty($email_settings['password']) &&
-            isset($email_settings['smtp_host']) && !empty($email_settings['smtp_host']) &&
-            isset($email_settings['smtp_port']) && !empty($email_settings['smtp_port'])
+            !isset($email_settings['email']) || empty($email_settings['email']) ||
+            !isset($email_settings['password']) || empty($email_settings['password']) ||
+            !isset($email_settings['smtp_host']) || empty($email_settings['smtp_host']) ||
+            !isset($email_settings['smtp_port']) || empty($email_settings['smtp_port'])
         ) {
-            return true;
-        } else {
             return false;
         }
     }

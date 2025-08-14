@@ -129,9 +129,10 @@ class ProjectsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             'priority_id' => 'nullable|exists:priorities,id',
             'start_date' => [
                 'nullable',
-                'date_format:Y-m-d'
+                'date_format:Y-m-d',
+                'after_or_equal:today'
             ],
-            'end_date' => 'nullable|date_format:Y-m-d',
+            'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:today',
             'budget' => [
                 'nullable',
                 function ($attribute, $value, $fail) {
@@ -292,6 +293,14 @@ class ProjectsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 if (str_contains($error, 'match')) {
                     return "Invalid date format for " . str_replace('_', ' ', $field) . " at Row {$rowNumber}. Expected format: YYYY-MM-DD (e.g., 2024-01-01).";
                 }
+                if (
+                    str_contains($error, 'must be today or a future date') ||
+                    str_contains($error, 'after_or_equal') ||
+                    str_contains($error, 'after')
+                ) {
+                    return ucfirst(str_replace('_', ' ', $field)) . " can not be in past at Row {$rowNumber}.";
+                }
+
                 break;
 
             case 'budget':

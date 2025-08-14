@@ -251,6 +251,16 @@ class EmailSendController extends Controller
     public function store(Request $request)
     {
         // $isApi = request()->get('isApi', false);
+
+        if (!isEmailConfigured()) {
+            return response()->json(
+                [
+                    'error' => true,
+                    'message' => 'Email settings are not configured. Please configure email settings to send emails.'
+                ]
+            );
+        }
+
         try {
             $general_settings = get_settings('general_settings');
             $maxFileSizeBytes = config('media-library.max_file_size');

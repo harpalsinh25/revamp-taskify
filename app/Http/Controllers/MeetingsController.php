@@ -291,7 +291,25 @@ class MeetingsController extends Controller
             ->paginate(request("limit"))
             ->through(function ($meeting) use ($canEdit, $canDelete, $canCreate, $currentDateTime) {
 
-                $status = (($currentDateTime < \Carbon\Carbon::parse($meeting->start_date_time, config('app.timezone'))) ? 'Will start in ' . $currentDateTime->diff(\Carbon\Carbon::parse($meeting->start_date_time, config('app.timezone')))->format('%a days %H hours %I minutes %S seconds') : (($currentDateTime > \Carbon\Carbon::parse($meeting->end_date_time, config('app.timezone')) ? 'Ended before ' . \Carbon\Carbon::parse($meeting->end_date_time, config('app.timezone'))->diff($currentDateTime)->format('%a days %H hours %I minutes %S seconds') : 'Ongoing')));
+            $currentDateTime = Carbon::now(config('app.timezone'));
+            $meetingStartTime = \Carbon\Carbon::parse($meeting->start_date_time, config('app.timezone'));
+
+            // Correct approach: Convert stored UTC times to local timezone for comparison
+            $currentDateTime = Carbon::now(config('app.timezone')); // Current time in your timezone
+
+            // Parse stored UTC times and convert to your timezone
+            $meetingStart = Carbon::parse($meeting->start_date_time, config('app.timezone'));
+            $meetingEnd = Carbon::parse($meeting->end_date_time, config('app.timezone'));
+
+            if ($currentDateTime < $meetingStart) {
+                $diff = $currentDateTime->diff($meetingStart);
+                $status = 'Will start in ' . $diff->format('%a days %H hours %I minutes %S seconds');
+            } elseif ($currentDateTime > $meetingEnd) {
+                $diff = $meetingEnd->diff($currentDateTime);
+                $status = 'Ended before ' . $diff->format('%a days %H hours %I minutes %S seconds');
+            } else {
+                $status = 'Ongoing';
+            }
 
                 $actions = '';
 

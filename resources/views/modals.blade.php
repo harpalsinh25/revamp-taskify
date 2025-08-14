@@ -4300,6 +4300,7 @@
     </div> --}}
 @endif
 @if (Request::is('projects') ||
+        Request::is('projects/*') ||
         Request::is('projects/list') ||
         Request::is('projects/kanban') ||
         Request::is('home') ||

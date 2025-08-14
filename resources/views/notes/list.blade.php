@@ -154,5 +154,19 @@
         .pipetteButton {
             display: none !important;
         }
+
+        .sticky-content svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .sticky-content {
+            overflow: hidden;
+            /* Prevents drawing overflow */
+            padding: 10px;
+            /* Optional: adds spacing around drawing */
+        }
     </style>
 @endsection
