@@ -310,6 +310,7 @@ class ProjectsController extends Controller
             'priority_id' => 'nullable|exists:priorities,id',
             'start_date' => [
                 'nullable',
+                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
@@ -322,6 +323,7 @@ class ProjectsController extends Controller
             ],
             'end_date' => [
                 'nullable',
+                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
@@ -362,7 +364,9 @@ class ProjectsController extends Controller
         ];
         // Custom validation messages
         $messages = [
-            'status_id.required' => 'The status field is required.'
+            'status_id.required' => 'The status field is required.',
+            'start_date.after_or_equal' => 'The start date must be today or a future date.',
+            'end_date.after_or_equal'   => 'The end date must be today or a future date.',
         ];
         // Validate the request
         try {
@@ -699,6 +703,7 @@ class ProjectsController extends Controller
             ],
             'start_date' => [
                 'nullable',
+                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
@@ -711,6 +716,7 @@ class ProjectsController extends Controller
             ],
             'end_date' => [
                 'nullable',
+                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
@@ -730,7 +736,9 @@ class ProjectsController extends Controller
             'enable_tasks_time_entries' => 'boolean',
         ];
         $messages = [
-            'status_id.required' => 'The status field is required.'
+            'status_id.required' => 'The status field is required.',
+            'start_date.after_or_equal' => 'The start date must be today or a future date.',
+            'end_date.after_or_equal'   => 'The end date must be today or a future date.',
         ];
         // Validate the request
         try {

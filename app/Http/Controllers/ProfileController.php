@@ -26,11 +26,11 @@ class ProfileController extends Controller
 
     /**
      * Retrieve the authenticated user's profile.
-     * 
+     *
      * This endpoint returns the profile information of the currently authenticated user. The user must be authenticated to access their profile details.
-     * 
+     *
      * @group Profile Management
-     * 
+     *
      * @authenticated
      *
      * @response {
@@ -87,11 +87,11 @@ class ProfileController extends Controller
      * This endpoint allows the authenticated user to update their profile details such as name, email, address, and other relevant information.
      *
      * @authenticated
-     * 
+     *
      * @group Profile Management
-     * 
+     *
      * @urlParam id int required The ID of the user whose profile is being updated.
-     * 
+     *
      * @bodyParam first_name string required The user's first name. Example: Madhavan
      * @bodyParam last_name string required The user's last name. Example: Vaidya
      * @bodyParam email string required The user's email address. Can only be edited if `is_admin_or_has_all_data_access` is true for the logged-in user. Example: admin@gmail.com
@@ -147,7 +147,7 @@ class ProfileController extends Controller
      *   "message": "User not found",
      *   "data": []
      * }
-     * 
+     *
      * @response 500 {
      *   "error": true,
      *   "message": "Profile details couldn\'t be updated."
@@ -163,6 +163,8 @@ class ProfileController extends Controller
             $role = getAuthenticatedUser()->roles->pluck('id')[0];
             $request->merge(['role' => $role]);
         }
+
+
         $request->merge([
             'phone' => str_replace(' ', '', $request->input('phone')),
             'country_code' => str_replace(' ', '', $request->input('country_code')),
@@ -202,7 +204,7 @@ class ProfileController extends Controller
                 'country_code.required_with' => 'The country code must be provided when the phone number is present.',
                 'phone.unique' => 'The combination of this phone number and country code is already in use.',
             ]);
-            
+
             if (request()->filled('password')) {
                 $uniqueEmailPasswordRule = new UniqueEmailPassword($isUser ? 'user' : 'client');
                 if (!$uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
@@ -223,7 +225,26 @@ class ProfileController extends Controller
                 unset($formFields['password']);
             }
             $user->update($formFields);
-            $user->syncRoles($request->input('role'));
+
+            // Convert role ID to role name before syncing
+            $roleInput = $request->input('role');
+
+            if (is_numeric($roleInput)) {
+                // If role is numeric (ID), find the role name
+                $role = \Spatie\Permission\Models\Role::find($roleInput);
+                if ($role) {
+                    $user->syncRoles($role->name); // Use role name instead of ID
+                } else {
+                    return formatApiResponse(
+                        true,
+                        'Invalid role specified',
+                        []
+                    );
+                }
+            } else {
+                // If role is already a name, use it directly
+                $user->syncRoles($roleInput);
+            }
 
             // Session::flash('message', 'Profile details updated successfully.');
             return formatApiResponse(
@@ -252,13 +273,13 @@ class ProfileController extends Controller
      * If not, the profile picture of the logged-in user will be updated.
      *
      * @authenticated
-     * 
+     *
      * @group Profile Management
-     * 
+     *
      * @bodyParam id int required The ID of the user or client whose profile picture is being updated. Required if `type` is provided. Example:1
      * @bodyParam type string required The type of the entity whose profile picture is being updated. Must be either 'user' or 'client'. Example:user
      * @bodyParam upload file required The file of the new profile picture to be uploaded.
-     * 
+     *
      * @response 200 {
      *   "error": false,
      *   "message": "Profile picture updated successfully.",
@@ -297,7 +318,7 @@ class ProfileController extends Controller
      *   "message": "User not found",
      *   "data": []
      * }
-     * 
+     *
      * @response 500 {
      *   "error": true,
      *   "message": "Profile picture couldn't be updated."
@@ -385,21 +406,21 @@ class ProfileController extends Controller
      * This endpoint allows the authenticated user to delete their account.
      *
      * @authenticated
-     * 
+     *
      * @group Profile Management
-     * 
+     *
      * @response 200 {
      *   "error": false,
      *   "message": "Account deleted successfully."
      *   "data": []
      * }
-     * 
+     *
      * @response 404 {
      *   "error": true,
      *   "message": "User not found",
      *   "data": []
      * }
-     * 
+     *
      * @response 500 {
      *   "error": true,
      *   "message": "Account couldn't be deleted."

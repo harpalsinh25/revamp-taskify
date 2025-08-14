@@ -619,7 +619,7 @@
                                                     break;
                                                 }
                                             }
-                                        @endphps
+                                        @endphp
 
                                         @if ($customFields->isNotEmpty())
                                             @if ($hasValues)

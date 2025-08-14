@@ -23,11 +23,13 @@ class SystemIntegrity
         $key = $this->getKey('a1b2c3d4'); // maps to doctor_brown
         $data = get_settings($key);
 
+        // dd($data);
         if (!$data) {
             return false;
         }
 
         $field = $this->getKey('e5f6g7h8'); // maps to code_bravo
+        // dd($field);
         return isset($data[$field]);
     }
 

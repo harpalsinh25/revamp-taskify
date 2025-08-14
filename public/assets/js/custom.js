@@ -1595,6 +1595,8 @@ document.addEventListener("focusin", function (e) {
         e.stopImmediatePropagation();
     }
 });
+
+
 $(document).on("submit", ".form-submit-event", function (e) {
     e.preventDefault();
     if ($("#net_payable").length > 0) {
@@ -1873,35 +1875,51 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                 }
                             }
                             if (idOfModal === "create_contract_type_modal") {
-                                var dropdownSelector = modalWithClass.find(
-                                    'select[name="contract_type_id"]'
-                                );
-                                if (dropdownSelector.length) {
-                                    var newItem = result.ct;
-                                    var newOption = $("<option></option>")
-                                        .attr("value", newItem.id)
-                                        .attr("selected", true)
-                                        .text(newItem.type);
-                                    // Append and select the new option in the current modal
-                                    dropdownSelector.append(newOption);
-                                    var openModalId = dropdownSelector
-                                        .closest(".modal.fade.show")
-                                        .attr("id");
-                                    var otherModalId =
-                                        openModalId === "create_contract_modal"
-                                            ? "#edit_contract_modal"
-                                            : "#create_contract_modal";
-                                    var otherModalSelector = $(
-                                        otherModalId
-                                    ).find('select[name="contract_type_id"]');
-                                    // Create a new option for the other modal without 'selected' attribute
+                                var newItem = result.ct;
+
+                                // Find the currently open contract modal
+                                var contractModal = $("#create_contract_modal.show, #edit_contract_modal.show");
+
+                                if (contractModal.length) {
+                                    var dropdownSelector = contractModal.find('select[name="contract_type_id"]');
+
+                                    if (dropdownSelector.length) {
+                                        // Append and select the new option
+                                        var newOption = $("<option></option>")
+                                            .attr("value", newItem.id)
+                                            .text(newItem.type)
+                                            .attr("selected", true);
+
+                                        dropdownSelector.append(newOption).val(newItem.id).trigger("change");
+                                    }
+                                }
+
+                                // Append to the *other* contract modal (to keep both in sync)
+                                var otherContractModal = $("#create_contract_modal, #edit_contract_modal")
+                                    .not(contractModal)
+                                    .find('select[name="contract_type_id"]');
+
+                                if (otherContractModal.length) {
                                     var otherOption = $("<option></option>")
                                         .attr("value", newItem.id)
                                         .text(newItem.type);
-                                    // Append the option to the other modal
-                                    otherModalSelector.append(otherOption);
+                                    otherContractModal.append(otherOption);
                                 }
+
+                                // Close only the contract type modal
+                                $("#create_contract_type_modal").modal("hide");
+
+                                // Show success message
+                                toastr.success(result["message"]);
+                                currentForm.find(".error-message").html("");
+
+                                // Stop further processing to prevent handleRedirection
+                                return false;
                             }
+
+
+
+
                             if (idOfModal == "create_pm_modal") {
                                 var dropdownSelector = $(
                                     'select[name="payment_method_id"]'
@@ -2151,6 +2169,9 @@ $(document).on("submit", ".form-submit-event", function (e) {
         }
     }
 });
+
+
+
 // Click event handler for the favorite icon
 $(document).on("click", ".favorite-icon", function () {
     var icon = $(this);
@@ -5994,8 +6015,12 @@ function fetchTasks(startDate, endDate, successCallback, failureCallback) {
 }
 $(document).ready(function () {
     $("#menu-search").on("input", function () {
+
+
         var searchQuery = $(this).val().toLowerCase();
+        console.log("searchQuery:", searchQuery)
         var menuItems = $(".menu-item");
+        console.log("menu items", menuItems);
         if (searchQuery === "") {
             // If search is empty, reset everything
             menuItems.show(); // Show all menu items
@@ -8002,6 +8027,9 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         }
     }
 
+
+
+
     $.ajax({
         type: "POST",
         url: currentForm.attr("action"),
@@ -8019,6 +8047,8 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         success: function (result) {
             submit_btn.html(button_text).prop("disabled", false);
 
+
+
             if (result.error) {
                 toastr.error(result.message);
                 return;
@@ -8027,11 +8057,12 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             // Smart overlay closing
             handleOverlayClosing(isDependentProperty, parentModal, parentOffcanvas);
 
-            // Handle success scenarios
-            if ($(".empty-state").length > 0) {
-                toastr.success(result.message || "Success");
-                setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
-            } else if (currentForm.find('input[name="dnr"]').length > 0) {
+
+
+
+            // Handle success scenarios - REORDERED to check DNR first
+            if (currentForm.find('input[name="dnr"]').length > 0) {
+
                 // DNR scenario - refresh table and reset form
                 if ($("#" + tableID).length) {
                     $("#" + tableID).bootstrapTable("refresh");
@@ -8040,14 +8071,30 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 resetForm(currentForm);
                 toastr.success(result.message || "Success");
 
-                // Refresh parent dropdowns for dependent properties
+                // Always try to refresh parent dropdowns for DNR forms in modal/offcanvas
+                if ((isInModal || isInOffcanvas) && result.type && result.data) {
+
+                    refreshParentFormDropdowns(result);
+                }
+
+                // Also refresh for dependent properties
                 if (isDependentProperty) {
                     refreshParentFormDropdowns(result);
                 }
-            } else {
+            } else if ($(".empty-state").length > 0) {
                 toastr.success(result.message || "Success");
                 setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
+            } else {
+                toastr.success(result.message || "Success");
+
+                // Always try to refresh parent dropdowns if we're in a modal/offcanvas
+                if ((isInModal || isInOffcanvas) && result.type && result.data) {
+                    refreshParentFormDropdowns(result);
+                }
+
+                setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
             }
+
 
             // Clear all error messages
             currentForm.find(".error-message").remove();
@@ -8305,16 +8352,26 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         toastr.error(msg);
     }
 
-    // ✅ ENHANCED DROPDOWN REFRESH WITH MORE ENTITY TYPES
+    // ✅ ENHANCED DROPDOWN REFRESH WITH MORE ENTITY TYPES AND COMPREHENSIVE DEBUG
     function refreshParentFormDropdowns(result) {
-        if (!result.data || !result.data.id || !result.data.name || !result.type) return;
+        console.log('=== DEBUG REFRESH FUNCTION ===');
+        console.log('Result received:', result);
+        console.log('isInModal:', isInModal);
+        console.log('isInOffcanvas:', isInOffcanvas);
+
+        if (!result.data || !result.data.id || !result.data.name || !result.type) {
+            console.log('Missing required data - exiting function');
+            console.log('result.data:', result.data);
+            console.log('result.type:', result.type);
+            return;
+        }
 
         // Enhanced mapping for more entity types
         let selectMap = {
-            status: ['status_id', 'project_status_id', 'task_status_id'],
-            priority: ['priority_id', 'project_priority_id', 'task_priority_id'],
+            status: ['status_id', 'project_status_id', 'task_status_id', 'status'],
+            priority: ['priority_id', 'project_priority_id', 'task_priority_id', 'priority'],
             tag: ['tag_ids[]', 'tags[]', 'tag_id'],
-            contract_type: ['contract_type_id'],
+            contract_type: ['contract_type_id', 'contract_type'],
             payment_method: ['payment_method_id'],
             allowance: ['allowance_id', 'allowance_ids[]'],
             deduction: ['deduction_id', 'deduction_ids[]'],
@@ -8327,28 +8384,94 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             workspace: ['workspace_id']
         };
 
+        console.log('Looking for type:', result.type);
         let targetSelects = selectMap[result.type] || [];
-        if (!targetSelects.length) return;
+        console.log('Target selects:', targetSelects);
 
-        // Look for selects in the active offcanvas
-        let activeOffcanvas = $(".offcanvas.show");
-        if (activeOffcanvas.length) {
+        if (!targetSelects.length) {
+            console.log('No target selects found for type:', result.type);
+            return;
+        }
+
+        // Look for selects in the active offcanvas first, then modal
+        let activeContainer = $(".offcanvas.show");
+        if (!activeContainer.length) {
+            activeContainer = $(".modal.show").not('#create_status_modal'); // Exclude the status creation modal itself
+        }
+
+        console.log('Active container found:', activeContainer.length);
+        console.log('Container selector:', activeContainer.selector || 'Direct jQuery object');
+
+        if (activeContainer.length) {
+            console.log('All selects in container:', activeContainer.find('select').map(function () {
+                return {
+                    name: this.name || 'NO_NAME',
+                    id: this.id || 'NO_ID',
+                    classes: this.className
+                };
+            }).get());
+
+            let foundAndUpdated = false;
+
             targetSelects.forEach(function (selectName) {
-                let selector = activeOffcanvas.find(`select[name="${selectName}"]`);
+                console.log('Looking for selector with name:', selectName);
+                let selector = activeContainer.find(`select[name="${selectName}"]`);
+                console.log("Found selector:", selector.length, selector);
+
                 if (selector.length) {
-                    let newOption = new Option(result.data.name, result.data.id, true, true);
-                    selector.append(newOption);
+                    console.log('Found matching selector - adding option');
+                    foundAndUpdated = true;
+
+                    // Check if option already exists
+                    if (selector.find(`option[value="${result.data.id}"]`).length === 0) {
+                        let newOption = new Option(result.data.name, result.data.id, true, true);
+                        selector.append(newOption);
+                        console.log('Added new option:', result.data.name);
+                    } else {
+                        selector.val(result.data.id);
+                        console.log('Selected existing option:', result.data.name);
+                    }
 
                     // Trigger change event for Select2 and other plugins
                     selector.trigger('change');
 
                     // Handle Select2 specifically
                     if (selector.hasClass('select2-hidden-accessible')) {
-                        selector.select2('trigger', 'select', { data: { id: result.data.id, text: result.data.name } });
+                        console.log('Triggering Select2 events');
+                        selector.trigger('change.select2');
+
+                        // Force Select2 to recognize the new option
+                        setTimeout(function () {
+                            selector.val(result.data.id).trigger('change.select2');
+                        }, 100);
                     }
+
+                    // Handle Ajax Select2 dropdowns differently
+                    if (selector.data('select2') && selector.data('select2').options && selector.data('select2').options.ajax) {
+                        console.log('Handling Ajax Select2');
+                        // For Ajax Select2, we need to trigger a manual selection
+                        selector.trigger({
+                            type: 'select2:select',
+                            params: {
+                                data: {
+                                    id: result.data.id,
+                                    text: result.data.name
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    console.log('No selector found for:', selectName);
                 }
             });
+
+            if (!foundAndUpdated) {
+                console.warn('No matching selector found for type:', result.type, 'in container');
+            }
+        } else {
+            console.log('No active container found');
         }
+        console.log('=== END DEBUG ===');
     }
 
     // ✅ ENHANCED REDIRECTION

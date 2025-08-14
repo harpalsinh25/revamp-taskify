@@ -1232,7 +1232,19 @@ class ContractsController extends Controller
                     );
                 }
 
-                return response()->json(['error' => false, 'message' => 'Contract type created successfully.', 'id' => $ct->id, 'title' => $ct->type, 'type' => 'contract_type', 'ct' => $ct]);
+                return response()->json(
+                    [
+                        'error' => false,
+                        'message' => 'Contract type created     successfully.',
+                        'type' => 'contract_type',
+                        'data' => [
+                            'id' => $ct->id,
+                            'name' => $ct->type,
+                        ],
+                        'id' => $ct->id,
+                        'ct' => $ct
+                    ]
+                );
             } else {
 
                 if ($isApi) {

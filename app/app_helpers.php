@@ -1,5 +1,6 @@
 <?php
 
+use Swift_Mailer;
 use Carbon\Carbon;
 use App\Models\Tax;
 use App\Models\Task;
@@ -12,6 +13,7 @@ use App\Models\Project;
 use App\Models\Setting;
 use App\Models\FcmToken;
 use App\Models\Template;
+use Swift_SmtpTransport;
 use App\Models\Candidate;
 use App\Models\Workspace;
 use App\Models\ActivityLog;
@@ -40,7 +42,10 @@ use Twilio\Rest\Client as TwilioClient;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\RequestException;
 use App\Notifications\AssignmentNotification;
+use Symfony\Component\Mailer\Transport\Smtp\SmtpTransport;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+
 
 if (!function_exists('get_timezone_array')) {
     // 1.Get Time Zone
@@ -126,14 +131,14 @@ if (!function_exists('get_settings')) {
     {
 
         static $settings = null;
-        if ($settings === null) {
-            // Cache forever (clear when settings change)
-            $settings = Cache::remember('settings_cache', now()->addMinutes(20), function () {
-                return Setting::pluck('value', 'variable')->toArray();
-            });
-        }
+        // if ($settings === null) {
+        //     // Cache forever (clear when settings change)
+        //     // $settings = Cache::remember('settings_cache', now()->addMinutes(20), function () {
+        //     return Setting::pluck('value', 'variable')->toArray();
+        //     // });
+        // }
         // dd($settings);
-
+        $settings =  Setting::pluck('value', 'variable')->toArray();
         $value = $settings[$variable] ?? $default;
 
         if ($value && is_string($value) && isJson($value)) {
@@ -530,22 +535,52 @@ if (!function_exists('escape_array')) {
         }
     }
 }
+
+
 if (!function_exists('isEmailConfigured')) {
     function isEmailConfigured()
     {
         $email_settings = get_settings('email_settings');
+
+        // Step 1: Ensure all required SMTP fields are present
         if (
-            isset($email_settings['email']) && !empty($email_settings['email']) &&
-            isset($email_settings['password']) && !empty($email_settings['password']) &&
-            isset($email_settings['smtp_host']) && !empty($email_settings['smtp_host']) &&
-            isset($email_settings['smtp_port']) && !empty($email_settings['smtp_port'])
+            empty($email_settings['email']) ||
+            empty($email_settings['password']) ||
+            empty($email_settings['smtp_host']) ||
+            empty($email_settings['smtp_port'])
         ) {
+            return false;
+        }
+
+        // Step 2: Try SMTP connection
+        try {
+            $transport = new EsmtpTransport(
+                $email_settings['smtp_host'],
+                (int) $email_settings['smtp_port'],
+                ($email_settings['encryption'] ?? null) === 'ssl'
+            );
+
+            $transport->setUsername($email_settings['email']);
+            $transport->setPassword($email_settings['password']);
+
+            // This actually opens the connection to verify SMTP
+            $transport->start();
+
             return true;
-        } else {
+        } catch (TransportExceptionInterface $e) {
+            Log::error('SMTP connection failed: ' . $e->getMessage());
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Unexpected SMTP error: ' . $e->getMessage());
             return false;
         }
     }
 }
+
+
+
+
+
 if (!function_exists('get_current_version')) {
     function get_current_version()
     {

@@ -32,7 +32,7 @@
                             <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')}}" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
                             <div class="button-wrapper">
                                 <div class="input-group d-flex">
-                                    <input type="file" class="form-control" id="inputGroupFile02" name="upload">
+                                    <input type="file" class="form-control" id="inputGroupFile02" name="upload" accept="image/*">
                                     <button class="btn btn-outline-primary" type="submit" id="submit_btn"><?= get_label('update_profile_photo', 'Update profile photo') ?></button>
                                 </div>
                             </div>

@@ -179,6 +179,7 @@ $(document).ready(function () {
 
         // Generate field mappings UI
         generateFieldMappings: function (headers, dbFields) {
+            console.log('Excel headers found:', headers); // Debug: see your actual headers
             let options = headers.map(h => `<option value="${h}">${h}</option>`).join('');
             let html = '';
 
@@ -199,7 +200,7 @@ $(document).ready(function () {
 
             $(SELECTORS.CONTENTS.MAPPING_BODY).html(html);
 
-            // In the generateFieldMappings function, update the Select2 initialization:
+            // Initialize Select2 with proper configuration
             $('.mapping-select').select2({
                 width: '100%',
                 dropdownAutoWidth: true,
@@ -218,18 +219,84 @@ $(document).ready(function () {
 
         // Auto-match fields based on name similarity
         autoMatchFields: function (headers, dbFields) {
+            // Create a mapping of common field variations
+            const fieldMappings = {
+                'first_name': ['first name', 'firstname', 'first_name', 'fname', 'given name', 'givenname'],
+                'last_name': ['last name', 'lastname', 'last_name', 'lname', 'surname', 'family name', 'familyname'],
+                'email': ['email', 'email address', 'e-mail', 'mail'],
+                'phone': ['phone', 'phone number', 'mobile', 'cell', 'telephone', 'tel'],
+                'company': ['company', 'organization', 'org', 'business', 'employer'],
+                'job_title': ['job title', 'jobtitle', 'job_title', 'title', 'position', 'role', 'designation'],
+                'country_code': ['country code', 'countrycode', 'country_code', 'cc', 'dial code'],
+                'country_iso_code': ['country iso', 'iso code', 'country_iso_code', 'iso', 'country iso code'],
+                'source': ['source', 'lead source', 'source id'],
+                'stage': ['stage', 'lead stage', 'stage id', 'status'],
+                'industry': ['industry', 'sector', 'business type'],
+                'website': ['website', 'web', 'url', 'site'],
+                'linkedin': ['linkedin', 'linkedin url', 'linkedin profile'],
+                'instagram': ['instagram', 'instagram url', 'instagram profile'],
+                'facebook': ['facebook', 'facebook url', 'facebook profile'],
+                'pinterest': ['pinterest', 'pinterest url', 'pinterest profile'],
+                'city': ['city', 'town', 'locality'],
+                'state': ['state', 'province', 'region'],
+                'zip': ['zip', 'postal code', 'zipcode', 'postcode', 'zip code'],
+                'country': ['country', 'nation']
+            };
+
+            // First, try exact matches
             headers.forEach(header => {
-                const lowerHeader = header.toLowerCase();
+                const cleanHeader = header.toLowerCase().trim();
                 dbFields.forEach(field => {
                     const fieldName = field.name.toLowerCase();
-                    if (lowerHeader === fieldName || lowerHeader.includes(fieldName) || fieldName.includes(lowerHeader)) {
+                    if (cleanHeader === fieldName) {
                         const select = $(`select[name="mapping[${field.name}]"]`);
-                        select.val(header);
-                        select.trigger('change'); // Trigger change for Select2,
-
+                        if (select.val() === '') { // Only set if not already matched
+                            select.val(header);
+                            select.trigger('change');
+                        }
                     }
                 });
             });
+
+            // Then try fuzzy matching using the field mappings
+            headers.forEach(header => {
+                const cleanHeader = header.toLowerCase().trim();
+
+                for (const [dbField, variations] of Object.entries(fieldMappings)) {
+                    const select = $(`select[name="mapping[${dbField}]"]`);
+
+                    // Skip if already matched
+                    if (select.val() !== '') continue;
+
+                    // Check if header matches any variation
+                    const isMatch = variations.some(variation => {
+                        return cleanHeader === variation ||
+                            cleanHeader.includes(variation) ||
+                            variation.includes(cleanHeader) ||
+                            this.isSimilarString(cleanHeader, variation);
+                    });
+
+                    if (isMatch) {
+                        select.val(header);
+                        select.trigger('change');
+                        break; // Move to next header once matched
+                    }
+                }
+            });
+        },
+
+        // Helper function to check string similarity
+        isSimilarString: function (str1, str2) {
+            // Remove spaces and special characters for comparison
+            const clean1 = str1.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            const clean2 = str2.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+            // Check if one string contains the other (with at least 3 characters)
+            if (clean1.length >= 3 && clean2.length >= 3) {
+                return clean1.includes(clean2) || clean2.includes(clean1);
+            }
+
+            return false;
         },
 
         // Show raw data preview
@@ -480,11 +547,11 @@ $(document).ready(function () {
     };
 
     /**
-     * Event Handlers
+     * Event Handlers - Using more specific event delegation
      */
 
     // Handle file upload form submission
-    $(SELECTORS.FORMS.UPLOAD).on('submit', function (e) {
+    $(document).on('submit', SELECTORS.FORMS.UPLOAD, function (e) {
         e.preventDefault();
         let formData = new FormData(this);
 
@@ -523,8 +590,11 @@ $(document).ready(function () {
         });
     });
 
-    // Preview mapped leads
-    $(SELECTORS.BUTTONS.PREVIEW).on('click', function () {
+    // Preview mapped leads - Using event delegation to ensure it works with dynamically added elements
+    $(document).on('click', SELECTORS.BUTTONS.PREVIEW, function (e) {
+        e.preventDefault();
+        console.log('Preview button clicked'); // Debug log
+
         $(this).html(`<i class="bx bx-loader bx-spin me-1"></i>${label_processing}`).prop('disabled', true);
         $(SELECTORS.ALERTS.MAPPING_ERROR + ', ' + SELECTORS.ALERTS.MAPPING_SUCCESS).addClass('d-none');
 
@@ -534,15 +604,20 @@ $(document).ready(function () {
             mappings[dbField] = $(this).val();
         });
 
+        const tempPath = $('#temp_path').val();
+        console.log('Mappings:', mappings); // Debug log
+        console.log('Temp path:', tempPath); // Debug log
+
         $.ajax({
             type: 'POST',
             url: routes.previewMappedLeads,
             data: {
                 mapping: mappings,
-                temp_path: $('#temp_path').val(),
-                _token: $('meta[name="csrf-token"]').attr('content')
+                temp_path: tempPath,
+                _token: $('meta[name="csrf-token"]').attr('content') || $('input[name="_token"]').val()
             },
             success: function (response) {
+                console.log('Preview response:', response); // Debug log
                 if (response.success) {
                     ajaxHandlers.handlePreviewSuccess(response);
                 } else {
@@ -554,6 +629,7 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr) {
+                console.log('Preview error:', xhr); // Debug log
                 const response = xhr.responseJSON || {};
                 notifications.showSectionError(
                     'mapping-error-alert',
@@ -569,17 +645,27 @@ $(document).ready(function () {
         });
     });
 
-    // Handle import form submission
-    $(SELECTORS.FORMS.MAPPING).on('submit', function (e) {
+    // Handle import form submission - FIXED: Changed from form selector to document delegation
+    $(document).on('submit', SELECTORS.FORMS.MAPPING, function (e) {
         e.preventDefault();
-        $(SELECTORS.BUTTONS.SUBMIT).html(`<i class="bx bx-loader bx-spin me-1"></i>${label_importing}`).prop('disabled', true);
+        e.stopPropagation(); // Prevent event bubbling
+
+        console.log('Import form submitted'); // Debug log
+
+        const $submitBtn = $(SELECTORS.BUTTONS.SUBMIT);
+        $submitBtn.html(`<i class="bx bx-loader bx-spin me-1"></i>${label_importing}`).prop('disabled', true);
         $(SELECTORS.ALERTS.MAPPING_ERROR + ', ' + SELECTORS.ALERTS.MAPPING_SUCCESS).addClass('d-none');
+
+        // Get form data
+        const formData = $(this).serialize();
+        console.log('Form data:', formData); // Debug log
 
         $.ajax({
             type: 'POST',
             url: routes.import,
-            data: $(this).serialize(),
+            data: formData,
             success: function (response) {
+                console.log('Import response:', response); // Debug log
                 if (response.success) {
                     ajaxHandlers.handleImportSuccess(response);
                 } else {
@@ -587,19 +673,44 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr) {
+                console.log('Import error:', xhr); // Debug log
                 ajaxHandlers.handleImportError(xhr.responseJSON || {});
             },
             complete: function () {
-                $(SELECTORS.BUTTONS.SUBMIT)
-                    .html(`<i class="bx bx-check me-1"></i>${label_import_leads}`)
+                // Fixed: Use correct label variable
+                $submitBtn
+                    .html(`<i class="bx bx-import me-1"></i>Import Data`)
                     .prop('disabled', false);
             }
         });
     });
 
-    // Event handlers for navigation
-    $(SELECTORS.BUTTONS.BACK).click(() => navigation.goToStep(1));
-    $(SELECTORS.BUTTONS.NEW_IMPORT).click(() => navigation.resetImport());
+    // Event handlers for navigation - Using event delegation
+    $(document).on('click', SELECTORS.BUTTONS.BACK, function (e) {
+        e.preventDefault();
+        navigation.goToStep(1);
+    });
+
+    $(document).on('click', SELECTORS.BUTTONS.NEW_IMPORT, function (e) {
+        e.preventDefault();
+        navigation.resetImport();
+    });
+
+    // Add form validation to prevent empty submissions
+    $(document).on('click', SELECTORS.BUTTONS.SUBMIT, function (e) {
+        const form = $(SELECTORS.FORMS.MAPPING)[0];
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+            form.classList.add('was-validated');
+            notifications.showSectionError(
+                'mapping-error-alert',
+                'mapping-error-content',
+                'Please fill in all required fields before importing.'
+            );
+            return false;
+        }
+    });
 
     // Initialize
     navigation.goToStep(1);

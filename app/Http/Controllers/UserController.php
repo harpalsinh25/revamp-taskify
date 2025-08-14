@@ -145,7 +145,20 @@ class UserController extends Controller
     {
         ini_set('max_execution_time', 300);
         $isApi = request()->get('isApi', false);
+
+
+        $require_ev = $request->has('require_ev') ? $request->input('require_ev') : 1;
+        if ($require_ev == 1 && !isEmailConfigured()) {
+            return response()->json(
+                [
+                    'error' => true,
+                    'message' => 'Email settings are not configured. Please configure email settings to enable email verification.'
+                ]
+            );
+        }
+
         // Validate the request
+
         try {
             $request->merge([
                 'phone' => str_replace(' ', '', $request->input('phone')),
