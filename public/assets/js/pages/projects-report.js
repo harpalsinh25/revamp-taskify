@@ -15,7 +15,7 @@ $(function () {
         );
         $('#due-projects-percentage').text(
             `${data.summary.due_projects || 0} (${(data.summary.due_projects_percentage || 0).toFixed(2)}%)`
-        );        
+        );
         $('#average-budget-utilization').text((data.summary.average_budget_utilization || 0).toFixed(2) + '%');
         $('#total-team-members').text(data.summary.total_team_members);
     });
@@ -138,3 +138,66 @@ $(document).on('click', '.clear-report-filters', function (e) {
     $('#priority_filter').val('').trigger('change', [0]);
     $('#projects_report_table').bootstrapTable('refresh');
 })
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const projectReportFilterSync = new TableFilterSync({
+        tableId: 'projects_report_table',
+        dataType: 'report',
+        filters: [
+            {
+                selector: '#filter_date_range',
+                type: 'daterangepicker',
+                name: 'filter_date_range',
+                hiddenFrom: '#filter_date_range_from',
+                hiddenTo: '#filter_date_range_to'
+            },
+            {
+                selector: '#report_start_date_between',
+                type: 'daterangepicker',
+                name: 'report_start_date_between',
+                hiddenFrom: '#filter_start_date_from',
+                hiddenTo: '#filter_start_date_to'
+            },
+            {
+                selector: '#report_end_date_between',
+                type: 'daterangepicker',
+                name: 'report_end_date_between',
+                hiddenFrom: '#filter_end_date_from',
+                hiddenTo: '#filter_end_date_to'
+            },
+            {
+                selector: '#project_filter',
+                type: 'select2',
+                name: 'project_ids',
+                ajaxType: 'projects'
+            },
+            {
+                selector: '#user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#status_filter',
+                type: 'select2',
+                name: 'statuses',
+                ajaxType: 'statuses'
+            },
+            {
+                selector: '#priority_filter',
+                type: 'select2',
+                name: 'priority_ids',
+                ajaxType: 'priorities'
+            }
+
+        ],
+        preserveParams: [''],
+        queryParamsFn: project_report_query_params // Reuse existing function
+    });
+});

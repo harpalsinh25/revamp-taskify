@@ -4,14 +4,14 @@ $(function () {
         $('#total-tasks').text(data.summary.total_tasks);
         $('#due-tasks').text(
             `${data.summary.due_tasks || 0} (${(data.summary.due_tasks_percentage || 0).toFixed(2)}%)`
-        );        
+        );
         $('#overdue-tasks').text(
             `${data.summary.overdue_tasks || 0} (${(data.summary.overdue_tasks_percentage || 0).toFixed(2)}%)`
-        );        
+        );
         $('#average-task-completion-time').text(data.summary.average_task_duration);
         $('#urgent-tasks').text(
             `${data.summary.urgent_tasks || 0} (${(data.summary.urgent_tasks_percentage || 0).toFixed(2)}%)`
-        );             
+        );
         $('#total-tasks').text(data.summary.total_tasks);
     });
 
@@ -132,3 +132,67 @@ $(document).on('click', '.clear-report-filters', function (e) {
     $('#priority_filter').val('').trigger('change', [0]);
     $('#tasks_report_table').bootstrapTable('refresh');
 })
+
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const taskReportFilterSync = new TableFilterSync({
+        tableId: 'tasks_report_table',
+        dataType: 'report',
+        filters: [
+            {
+                selector: '#filter_date_range',
+                type: 'daterangepicker',
+                name: 'filter_date_range',
+                hiddenFrom: '#filter_date_range_from',
+                hiddenTo: '#filter_date_range_to'
+            },
+            {
+                selector: '#report_start_date_between',
+                type: 'daterangepicker',
+                name: 'report_start_date_between',
+                hiddenFrom: '#filter_start_date_from',
+                hiddenTo: '#filter_start_date_to'
+            },
+            {
+                selector: '#report_end_date_between',
+                type: 'daterangepicker',
+                name: 'report_end_date_between',
+                hiddenFrom: '#filter_end_date_from',
+                hiddenTo: '#filter_end_date_to'
+            },
+            {
+                selector: '#project_filter',
+                type: 'select2',
+                name: 'project_ids',
+                ajaxType: 'projects'
+            },
+            {
+                selector: '#user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#status_filter',
+                type: 'select2',
+                name: 'statuses',
+                ajaxType: 'statuses'
+            },
+            {
+                selector: '#priority_filter',
+                type: 'select2',
+                name: 'priority_ids',
+                ajaxType: 'priorities'
+            }
+
+        ],
+        preserveParams: [''],
+        queryParamsFn: tasks_report_query_params // Reuse existing function
+    });
+});

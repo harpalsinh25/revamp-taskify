@@ -140,9 +140,9 @@ Route::get('/create-symlink', function () {
 
 Route::get('/install', [InstallerController::class, 'index'])->middleware('guest');
 
-Route::post('/installer/config-db', [InstallerController::class, 'config_db'])->middleware('guest');
+Route::post('/installer/config-db', [InstallerController::class, 'config_db'])->middleware('guest')->name('installer.config-db');
 
-Route::post('/installer/install', [InstallerController::class, 'install'])->middleware('guest');
+Route::post('/installer/install', [InstallerController::class, 'install'])->middleware('guest')->name('installer.install');
 
 Route::get('/meetings/join/web-view/{id}', [MeetingsController::class, 'joinWebView']);
 

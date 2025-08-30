@@ -288,7 +288,7 @@ class UserController extends Controller
             } catch (Throwable $e) {
                 // Rollback user creation on other errors
                 $user->delete();
-                dd($e);
+
                 return response()->json(['error' => true, 'message' => 'User couldn\'t be created, please try again later.'], 500);
             }
         } catch (ValidationException $e) {
@@ -1033,7 +1033,7 @@ class UserController extends Controller
                     }
 
                     if ($canDelete && $user->id != $mainAdminId) {
-                        $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $user->id . '" data-type="users">' .
+                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $user->id . '" data-type="users" data-table="user_table">' .
                             '<i class="bx bx-trash text-danger mx-1"></i>' .
                             '</button>';
                     }

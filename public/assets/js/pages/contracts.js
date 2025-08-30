@@ -1,4 +1,3 @@
-
 'use strict';
 function queryParams(p) {
     return {
@@ -20,18 +19,14 @@ function queryParams(p) {
         search: p.search
     };
 }
-
-
 window.icons = {
     refresh: 'bx-refresh',
     toggleOn: 'bx-toggle-right',
     toggleOff: 'bx-toggle-left'
 }
-
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>'
 }
-
 function idFormatter(value, row, index) {
     return [
         '<a href="' + baseUrl + '/contracts/sign/' + row.id + '">' + label_contract_id_prefix + row.id + '</a>'
@@ -55,7 +50,6 @@ if ($('#promisor_sign').length) {
         }
     });
 }
-
 $('#contract_sign_form').on("submit", function (e) {
     e.preventDefault();
     var formData = new FormData(this);
@@ -86,25 +80,19 @@ $('#contract_sign_form').on("submit", function (e) {
             }
         }
     });
-
 });
-
 $(document).on('click', '#reset_promisor_sign', function (e) {
     e.preventDefault();
     signaturePad.clear();
 });
-
 function isSignatureEmpty() {
     // Get the data URL of the canvas
     var dataURL = signaturePad.toDataURL();
-
     // Define an initial state or known empty state
     var initialStateDataURL = 'data:image/png;base64,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'; // Replace with your empty state data URL
-
     // Check if the data URL matches the initial state data URL
     return dataURL === initialStateDataURL;
 }
-
 $(document).on('click', '.delete_contract_sign', function (e) {
     e.preventDefault();
     var id = $(this).data('id');
@@ -126,21 +114,16 @@ $(document).on('click', '.delete_contract_sign', function (e) {
             error: function (data) {
                 location.reload();
             }
-
         });
     });
 });
-
 $('#contract_start_date_between').on('apply.daterangepicker', function (ev, picker) {
     var startDate = picker.startDate.format('YYYY-MM-DD');
     var endDate = picker.endDate.format('YYYY-MM-DD');
-
     $('#contract_start_date_from').val(startDate);
     $('#contract_start_date_to').val(endDate);
-
     $('#contracts_table').bootstrapTable('refresh');
 });
-
 $('#contract_start_date_between').on('cancel.daterangepicker', function (ev, picker) {
     $('#contract_start_date_from').val('');
     $('#contract_start_date_to').val('');
@@ -150,14 +133,11 @@ $('#contract_start_date_between').on('cancel.daterangepicker', function (ev, pic
     picker.updateElement();
     $('#contracts_table').bootstrapTable('refresh');
 });
-
 $('#contract_end_date_between').on('apply.daterangepicker', function (ev, picker) {
     var startDate = picker.startDate.format('YYYY-MM-DD');
     var endDate = picker.endDate.format('YYYY-MM-DD');
-
     $('#contract_end_date_from').val(startDate);
     $('#contract_end_date_to').val(endDate);
-
     $('#contracts_table').bootstrapTable('refresh');
 });
 $('#contract_end_date_between').on('cancel.daterangepicker', function (ev, picker) {
@@ -169,7 +149,6 @@ $('#contract_end_date_between').on('cancel.daterangepicker', function (ev, picke
     picker.updateElement();
     $('#contracts_table').bootstrapTable('refresh');
 });
-
 $(document).ready(function () {
     $('#contract_date_between').on('apply.daterangepicker', function (ev, picker) {
         var startDate = picker.startDate.format('YYYY-MM-DD');
@@ -178,7 +157,6 @@ $(document).ready(function () {
         $('#contract_date_between_to').val(endDate);
         $('#contracts_table').bootstrapTable('refresh');
     });
-
     // Cancel event to clear values
     $('#contract_date_between').on('cancel.daterangepicker', function (ev, picker) {
         $('#contract_date_between_from').val('');
@@ -190,7 +168,6 @@ $(document).ready(function () {
         $('#contracts_table').bootstrapTable('refresh');
     });
 });
-
 addDebouncedEventListener('#status_filter, #client_filter, #project_filter, #type_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {
@@ -214,9 +191,59 @@ $(document).on('click', '.clear-contracts-filters', function (e) {
     $('#type_filter').val('').trigger('change', [0]);
     $('#contracts_table').bootstrapTable('refresh');
 })
-
-
-
-
-
-
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const contractFilterSync = new TableFilterSync({
+        tableId: 'contracts_table',
+        dataType: 'contracts',
+        filters: [
+            {
+                selector: '#contract_date_between',
+                type: 'daterangepicker',
+                name: 'contract_date_between',
+                hiddenFrom: '#contract_date_between_from',
+                hiddenTo: '#contract_date_between_to'
+            },
+            {
+                selector: '#contract_start_date_between',
+                type: 'daterangepicker',
+                name: 'contract_start_date_between',
+                hiddenFrom: '#contract_start_date_from',
+                hiddenTo: '#contract_start_date_to'
+            },
+            {
+                selector: '#contract_end_date_between',
+                type: 'daterangepicker',
+                name: 'contract_end_date_between',
+                hiddenFrom: '#contract_end_date_from',
+                hiddenTo: '#contract_end_date_to'
+            },
+            {
+                selector: '#client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#project_filter',
+                type: 'select2',
+                name: 'project_ids',
+                ajaxType: 'projects'
+            },
+            {
+                selector: '#type_filter',
+                type: 'select2',
+                name: 'types',
+                ajaxType: null
+            },
+            {
+                selector: '#status_filter',
+                type: 'select2',
+                name: 'statuses',
+                ajaxType: null
+            }
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
+    });
+});

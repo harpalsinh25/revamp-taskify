@@ -116,3 +116,66 @@ $(document).ready(function () {
         $("#task_table").bootstrapTable("refresh");
     });
 });
+
+// Include table-filter-sync.js before this
+$(document).ready(function () {
+    const FilterSync = new TableFilterSync({
+        tableId: 'task_table',
+        dataType: 'tasks',
+        filters: [
+            {
+                selector: '#task_status_filter',
+                type: 'select2',
+                name: 'status_ids',
+                ajaxType: 'statuses'
+            },
+            {
+                selector: '#task_project_filter',
+                type: 'select2',
+                name: 'project_ids',
+                ajaxType: 'projects'
+            },
+            {
+                selector: '#task_priority_filter',
+                type: 'select2',
+                name: 'priority_ids',
+                ajaxType: 'priorities'
+            },
+            {
+                selector: '#task_user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#task_client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#task_date_between',
+                type: 'daterangepicker',
+                name: 'task_date_between',
+                hiddenFrom: '#task_date_between_from',
+                hiddenTo: '#task_date_between_to'
+            },
+            {
+                selector: '#task_start_date_between',
+                type: 'daterangepicker',
+                name: 'task_start_date_between',
+                hiddenFrom: '#task_start_date_from',
+                hiddenTo: '#task_start_date_to'
+            },
+            {
+                selector: '#task_end_date_between',
+                type: 'daterangepicker',
+                name: 'task_end_date_between',
+                hiddenFrom: '#task_end_date_from',
+                hiddenTo: '#task_end_date_to'
+            },
+        ],
+        preserveParams: ['from_home'],
+        queryParamsFn: queryParamsTasks // Reuse existing function
+    });
+});

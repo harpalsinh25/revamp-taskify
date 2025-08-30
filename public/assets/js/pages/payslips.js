@@ -1,6 +1,4 @@
-
 'use strict';
-
 function queryParams(p) {
     return {
         "statuses": $('#status_filter').val(),
@@ -16,14 +14,12 @@ function queryParams(p) {
         search: p.search
     };
 }
-
 addDebouncedEventListener('#status_filter, #user_filter, #user_creators_filter, #client_creators_filter, #filter_payslip_month', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {
         $('#payslips_table').bootstrapTable('refresh');
     }
 });
-
 $(document).on('click', '.clear-payslips-filters', function (e) {
     e.preventDefault();
     $('#filter_payslip_month').val('');
@@ -33,54 +29,40 @@ $(document).on('click', '.clear-payslips-filters', function (e) {
     $('#client_creators_filter').val('').trigger('change', [0]);
     $('#payslips_table').bootstrapTable('refresh');
 })
-
-
 window.icons = {
     refresh: 'bx-refresh',
     toggleOn: 'bx-toggle-right',
     toggleOff: 'bx-toggle-left'
 }
-
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>'
 }
-
 function idFormatter(value, row, index) {
     return [
         '<a href="' + baseUrl + '/payslips/view/' + row.id + '">' + label_payslip_id_prefix + row.id + '</a>'
     ];
 }
-
 var currentDate = new Date();
-
 // Get the year and month of the previous month
 var previousMonth = new Date(currentDate);
 previousMonth.setMonth(currentDate.getMonth() - 1);
 var previousYear = previousMonth.getFullYear();
 var previousMonthNumber = previousMonth.getMonth() + 1; // Month is zero-based, so add 1
-
 // Calculate the last day of the previous month
 var lastDayOfPreviousMonth = new Date(previousYear, previousMonthNumber, 0).getDate();
-
 // Format the date as "YYYY-MM"
 var formattedDate = previousYear + '-' + (previousMonthNumber < 10 ? '0' : '') + previousMonthNumber;
-
 // Set the formatted date and last day as input values
 $('#payslip_month').val(formattedDate);
 $('#working_days').val(lastDayOfPreviousMonth);
-
-
 $('#payslip_month').on('change', function () {
     var selectedValue = $(this).val();
-
     if (selectedValue) {
         // Split the selected value into year and month
         var selectedYear = parseInt(selectedValue.split("-")[0]);
         var selectedMonth = parseInt(selectedValue.split("-")[1]);
-
         // Calculate the last day of the selected month
         var lastDay = new Date(selectedYear, selectedMonth, 0).getDate();
-
         // Display the total days in a paragraph
         $('#working_days').val(lastDay);
     } else {
@@ -88,8 +70,6 @@ $('#payslip_month').on('change', function () {
         $('#working_days').val("");
     }
 });
-
-
 // $(document).on('ready', function () {
 // Get references to the input fields
 var basicSalaryInput = $('#basic_salary');
@@ -103,7 +83,6 @@ var overTimePaymentInput = $('#over_time_payment');
 var bonusInput = $('#bonus');
 var incentivesInput = $('#incentives');
 var perDayPayment = 0;
-
 // Function to calculate over time payment
 function calculateOverTimePayment() {
     var overtimeHours = parseFloat(overTimeHoursInput.val()) || 0;
@@ -112,11 +91,9 @@ function calculateOverTimePayment() {
     overTimePaymentInput.val(overTimePayment.toFixed(decimal_points));
     calculateTotalEarning();
 }
-
 // Calculate over time payment on change of hours or rate
 overTimeHoursInput.on('change', calculateOverTimePayment);
 overTimeRateInput.on('change', calculateOverTimePayment);
-
 // Function to calculate per-day payment
 function calculatePerDayPayment() {
     var basicSalary = parseFloat(basicSalaryInput.val()) || 0;
@@ -126,11 +103,9 @@ function calculatePerDayPayment() {
     calculateLeaveDeduction();
     calculatePaidDays();
 }
-
 // Calculate per-day payment on change of basic salary or working days
 basicSalaryInput.on('change', calculatePerDayPayment);
 workingDaysInput.on('change', calculatePerDayPayment);
-
 // Function to calculate leave deduction
 function calculateLeaveDeduction() {
     var lopDays = parseFloat(lopDaysInput.val()) || 0;
@@ -138,7 +113,6 @@ function calculateLeaveDeduction() {
     leaveDeductionInput.val(leaveDeduction.toFixed(decimal_points));
     calculateTotalEarning();
 }
-
 // Function to calculate paid days (working days minus LOP days)
 function calculatePaidDays() {
     var workingDays = parseFloat(workingDaysInput.val()) || 0;
@@ -146,7 +120,6 @@ function calculatePaidDays() {
     var paidDays = workingDays - lopDays;
     paidDaysInput.val(paidDays);
 }
-
 // Function to calculate total earnings based on inputs
 function calculateTotalEarning() {
     var basicSalary = parseFloat(basicSalaryInput.val()) || 0;
@@ -155,36 +128,27 @@ function calculateTotalEarning() {
     var leaveDeduction = parseFloat(leaveDeductionInput.val()) || 0;
     var overTimePayment = parseFloat(overTimePaymentInput.val()) || 0;
     var totalEarning = basicSalary + bonus + incentives - leaveDeduction + overTimePayment;
-
     // Update the Total Earnings field
     $('#total_earning').text(totalEarning.toFixed(decimal_points));
-
     // Calculate Net Payable
     calculateNetPayable(totalEarning);
 }
-
 // Function to calculate net payable based on inputs
 function calculateNetPayable(totalEarning) {
     var netPayable = totalEarning;
     $('#net_payable').text(netPayable.toFixed(decimal_points));
 }
-
 // Attach change event listeners to all related input fields
 $('#basic_salary, #working_days, #lop_days, #bonus, #incentives').on('change', function () {
     calculatePerDayPayment();
 });
-
 // Initially, calculate the values based on the default values
 calculateOverTimePayment();
 calculatePerDayPayment();
 calculateLeaveDeduction();
 calculatePaidDays();
 calculateTotalEarning();
-
-
-
 // });
-
 $('#allowance_id').on('change', function () {
     var id = $(this).val();
     if (id !== null && id !== '') {
@@ -199,20 +163,16 @@ $('#allowance_id').on('change', function () {
                 $('#allowance_0_title').val(response.allowance.title);
                 $('#allowance_0_amount').val(parseFloat(response.allowance.amount).toFixed(decimal_points));
             },
-
         });
     } else {
         $('#allowance_0_title').val('');
         $('#allowance_0_amount').val('');
     }
-
 });
-
 $('#allowance_id').on('select2:clear', function () {
     $('#allowance_0_title').val('');
     $('#allowance_0_amount').val('');
 });
-
 $('.add-allowance').on('click', function (e) {
     e.preventDefault();
     var html = '';
@@ -220,11 +180,8 @@ $('.add-allowance').on('click', function (e) {
     if (title != '') {
         var allowance_id = $("#allowance_id").val();
         var allowance_ids = $("#allowance_ids").val();
-
         allowance_ids = allowance_ids.split(',');
-
         var exists = allowance_ids.includes(allowance_id);
-
         if (!exists) {
             allowance_count++
             allowance_ids = allowance_ids.toString();
@@ -247,45 +204,34 @@ $('.add-allowance').on('click', function (e) {
                 '<button type="button" class="btn btn-sm btn-danger remove-allowance" data-count="' + allowance_count + '"><i class="bx bx-trash"></i></button>' +
                 '</div>' +
                 '</div></div>';
-
             $('#payslip-allowances').append(html);
             $('#allowance_' + allowance_count).val(allowance_id);
             $('#allowance_' + allowance_count + '_title').val(title);
             $('#allowance_' + allowance_count + '_amount').val(parseFloat(amount).toFixed(decimal_points));
-
             // Update Total Earnings and Net Pay when an allowance is added
             var total_allowance = parseFloat($('#total_allowance').text());
             var total_earning = parseFloat($('#total_earning').text());
             var net_pay = parseFloat($('#net_payable').text());
-
             if (!isNaN(total_allowance) && !isNaN(total_earning) && !isNaN(net_pay)) {
                 total_allowance += parseFloat(amount);
                 total_earning += parseFloat(amount);
                 net_pay += parseFloat(amount);
-
                 $('#total_allowance').text(total_allowance.toFixed(decimal_points));
                 $('#hidden_total_allowance').val(total_allowance.toFixed(decimal_points));
                 $('#total_earning').text(total_earning.toFixed(decimal_points));
                 $('#total_earnings').val(total_earning.toFixed(decimal_points));
                 $('#net_payable').text(net_pay.toFixed(decimal_points));
             }
-
             $("#allowance_0_title").val('');
             $("#allowance_0_amount").val('');
             $('#allowance_id').val('');
-
         } else {
             toastr.error('Allowance already added.');
         }
-
     } else {
         toastr.error('Please choose allowance.');
     }
-
 });
-
-
-
 $(document).on('click', '.remove-allowance', function (e) {
     e.preventDefault();
     var count = $(this).data('count');
@@ -299,34 +245,25 @@ $(document).on('click', '.remove-allowance', function (e) {
         // Update the #allowance_ids input value with the modified string
         $("#allowance_ids").val(allowance_ids.join(',')); // Join the array back into a string
     }
-
     var total_allowance = parseFloat($('#total_allowance').text());
     total_allowance = total_allowance - amount;
-
     if (isNaN(total_allowance) || total_allowance < 0) {
         total_allowance = 0;
     }
-
     total_allowance = total_allowance.toFixed(decimal_points);
     $('#total_allowance').text(total_allowance);
     $('#hidden_total_allowance').val(total_allowance);
-
     var total_earning = parseFloat($('#total_earning').text());
     total_earning = total_earning - amount;
     total_earning = total_earning.toFixed(decimal_points);
     $('#total_earning').text(total_earning);
     $('#total_earnings').val(total_earning);
-
     var net_pay = parseFloat($('#net_payable').text());
     net_pay = net_pay - amount;
     net_pay = net_pay.toFixed(decimal_points);
     $('#net_payable').text(net_pay);
-
     $(this).closest('.payslip-allowance').remove();
 });
-
-
-
 $('#deduction_id').on('change', function () {
     var id = $(this).val();
     if (id !== null && id !== '') {
@@ -343,7 +280,6 @@ $('#deduction_id').on('change', function () {
                 $('#deduction_0_amount').val(parseFloat(response.deduction.amount).toFixed(decimal_points));
                 $('#deduction_0_percentage').val(response.deduction.percentage);
             },
-
         });
     } else {
         $('#deduction_0_title').val('');
@@ -351,16 +287,13 @@ $('#deduction_id').on('change', function () {
         $('#deduction_0_percentage').val('');
         $('#deduction_0_type').val('');
     }
-
 });
-
 $('#deduction_id').on('select2:clear', function () {
     $('#deduction_0_title').val('');
     $('#deduction_0_amount').val('');
     $('#deduction_0_percentage').val('');
     $('#deduction_0_type').val('');
 });
-
 $(document).on('click', '.add-deduction', function (e) {
     e.preventDefault();
     var html = '';
@@ -368,11 +301,8 @@ $(document).on('click', '.add-deduction', function (e) {
     if (title != '') {
         var deduction_id = $("#deduction_id").val();
         var deduction_ids = $("#deduction_ids").val();
-
         deduction_ids = deduction_ids.split(',');
-
         var exists = deduction_ids.includes(deduction_id);
-
         if (!exists) {
             deduction_count++;
             deduction_ids = deduction_ids.toString();
@@ -383,11 +313,9 @@ $(document).on('click', '.add-deduction', function (e) {
                 deduction_ids = deduction_id;
             }
             $("#deduction_ids").val(deduction_ids); // Update the hidden input value
-
             var amount = $("#deduction_0_amount").val();
             var percentage = $("#deduction_0_percentage").val();
             var type = $("#deduction_0_type").val();
-
             html = '<div class="payslip-deduction"><div class="d-flex">' +
                 '<input type="hidden" id="deduction_' + deduction_count + '" name="deductions[]">' +
                 '<div class="mb-3 col-md-5 mx-1">' +
@@ -404,12 +332,10 @@ $(document).on('click', '.add-deduction', function (e) {
                 '<button type="button" class="btn btn-sm btn-danger remove-deduction" data-count="' + deduction_count + '" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bx bx-trash"></i></button>' +
                 '</div>' +
                 '</div></div>';
-
             $('#payslip-deductions').append(html);
             $('#deduction_' + deduction_count).val(deduction_id);
             $('#deduction_' + deduction_count + '_title').val(title);
             $('#deduction_' + deduction_count + '_type').val(type);
-
             var total_deduction = parseFloat($('#total_deduction').text());
             var total_earning = parseFloat($('#total_earning').text());
             var net_pay = parseFloat($('#net_payable').text());
@@ -419,7 +345,6 @@ $(document).on('click', '.add-deduction', function (e) {
                 net_pay = net_pay - parseFloat(amount);
                 $('#deduction_' + deduction_count + '_amount').val(parseFloat(amount).toFixed(decimal_points));
                 var deduction_amount = $('#deduction_0_amount').val();
-
             } else {
                 $('#deduction_' + deduction_count + '_percentage').val(percentage);
                 var net_payable = parseFloat($('#net_payable').text()) || 0;
@@ -429,35 +354,27 @@ $(document).on('click', '.add-deduction', function (e) {
             total_deduction = parseFloat(total_deduction).toFixed(decimal_points);
             $('#total_deduction').text(total_deduction);
             $('#hidden_total_deductions').val(total_deduction);
-
             var total_earning = parseFloat($('#total_earning').text());
             total_earning = total_earning - deduction_amount;
             total_earning = total_earning.toFixed(decimal_points);
             $('#total_earning').text(total_earning);
             $('#total_earnings').val(total_earning);
-
             var net_pay = parseFloat($('#net_payable').text());
             net_pay = net_pay - deduction_amount;
             net_pay = net_pay.toFixed(decimal_points);
             $('#net_payable').text(net_pay);
-
             $("#deduction_0_title").val('');
             $("#deduction_0_amount").val('');
             $("#deduction_0_percentage").val('');
             $("#deduction_0_type").val('');
             $('#deduction_id').val('');
-
         } else {
             toastr.error('Deduction already added.');
         }
-
     } else {
         toastr.error('Please choose deduction.');
     }
-
 });
-
-
 $(document).on('click', '.remove-deduction', function (e) {
     e.preventDefault();
     var count = $(this).data('count');
@@ -465,7 +382,6 @@ $(document).on('click', '.remove-deduction', function (e) {
     var deduction_id = $("#deduction_" + count).val();
     var type = $("#deduction_" + count + "_type").val();
     var deduction_amount = 0;
-
     if (type == 'amount') {
         deduction_amount = parseFloat($("#deduction_" + count + "_amount").val()) || 0;
     } else {
@@ -473,27 +389,20 @@ $(document).on('click', '.remove-deduction', function (e) {
         var net_payable = parseFloat($('#net_payable').text()) || 0;
         deduction_amount = (percentage / 100) * net_payable;
     }
-
     var total_deduction = parseFloat($('#total_deduction').text()) || 0;
     total_deduction = total_deduction - deduction_amount;
     total_deduction = total_deduction.toFixed(decimal_points);
-
     $('#total_deduction').text(total_deduction);
     $('#hidden_total_deductions').val(total_deduction);
-
     var total_earning = parseFloat($('#total_earning').text()) || 0;
     total_earning = total_earning + deduction_amount;
     total_earning = total_earning.toFixed(decimal_points);
-
     $('#total_earning').text(total_earning);
     $('#total_earnings').val(total_earning);
-
     var net_pay = parseFloat($('#net_payable').text()) || 0;
     net_pay = net_pay + deduction_amount;
     net_pay = net_pay.toFixed(decimal_points);
-
     $('#net_payable').text(net_pay);
-
     // Remove the deduction from the hidden input
     var deduction_ids = $("#deduction_ids").val().split(','); // Split the string into an array
     var index = $.inArray(deduction_id.toString(), deduction_ids);
@@ -503,16 +412,55 @@ $(document).on('click', '.remove-deduction', function (e) {
         // Update the #allowance_ids input value with the modified string
         $("#deduction_ids").val(deduction_ids.join(',')); // Join the array back into a string
     }
-
     // Remove the deduction element from the DOM
     $(this).closest('.payslip-deduction').remove();
 });
-
 $(document).ready(function () {
     $('input[name="status"]').change(function () {
         if ($(this).val() == '0') { // If "unpaid" is selected
             $('#payment_date').val(''); // Clear the payment date
             $('select[name="payment_method_id"]').val('');
         }
+    });
+});
+
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const payslipFilterSync = new TableFilterSync({
+        tableId: 'payslips_table',
+        dataType: 'payslips',
+        filters: [
+            {
+                selector: '#filter_payslip_month',
+                type: 'month',
+                name: 'month',
+            },
+            {
+                selector: '#user_creators_filter',
+                type: 'select2',
+                name: 'created_by_user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#client_creators_filter',
+                type: 'select2',
+                name: 'created_by_client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#status_filter',
+                type: 'select2',
+                name: 'statuses',
+                ajaxType: null
+            }
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
     });
 });

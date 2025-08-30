@@ -33,8 +33,9 @@
 
         <div class="table-responsive text-nowrap">
             <input type="hidden" id="data_type" value="candidate">
+            <input type="hidden" id="data_table" value="candidates_table">
             {{-- <input type="hidden" id="data_reload" value="0"> --}}
-            <table id="table"
+            <table id="candidates_table"
                 data-toggle="table"
                 data-url="{{ route('candidate.list') }}"
                 data-icons-prefix="bx"

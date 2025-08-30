@@ -21,11 +21,11 @@ function queryParams(params) {
 
 $(document).ready(function () {
     $("#sort").on("change", function () {
-        $('#table').bootstrapTable('refresh');
+        $('#candidates_table').bootstrapTable('refresh');
     });
 
     $('#select_candidate_statuses').on('change', function () {
-        $('#table').bootstrapTable('refresh');
+        $('#candidates_table').bootstrapTable('refresh');
     })
 
     $("#candidate_date_between").on(
@@ -35,7 +35,7 @@ $(document).ready(function () {
             var endDate = picker.endDate.format("YYYY-MM-DD");
             $('#candidate_date_between_to').val(endDate);
             $('#candidate_date_between_from').val(startDate);
-            $("#table").bootstrapTable('refresh');
+            $("#candidates_table").bootstrapTable('refresh');
         }
     );
     $("#candidate_date_between").on(
@@ -47,50 +47,11 @@ $(document).ready(function () {
             picker.setStartDate(moment());
             picker.setEndDate(moment());
             picker.updateElement();
-            $("#table").bootstrapTable('refresh');
+            $("#candidates_table").bootstrapTable('refresh');
         }
     );
 
 });
-
-// $(document).ready(function () {
-//     $('#candidate_date_between').on('apply.daterangepicker', function (ev, picker) {
-//         var startDate = picker.startDate.format('YYYY-MM-DD');
-//         var endDate = picker.endDate.format('YYYY-MM-DD');
-//         console.log(startDate, endDate);
-//         $('#candidate_date_between_from').val(startDate);
-//         $('#candidate_date_between_to').val(endDate);
-
-//         $('#table').bootstrapTable('refresh');
-//     });
-
-//     // Cancel event to clear values
-//     $('#candidate_date_between').on('cancel.daterangepicker', function (ev, picker) {
-//         $('#candidate_date_between_from').val('');
-//         $('#candidate_date_between_to').val('');
-//         $(this).val('');
-//         picker.setStartDate(moment());
-//         picker.setEndDate(moment());
-//         picker.updateElement();
-//         $('#table').bootstrapTable('refresh');
-
-//     });
-
-//     $('#select_candidate_statuses').on('change', function () {
-//         $('#table').bootstrapTable('refresh');
-//     })
-
-//     $('#sort').on('change', function () {
-//         $('#table').bootstrapTable('refresh');
-//     })
-
-// });
-
-
-
-
-
-
 
 // Open Edit Template Modal with data
 $(document).on('click', '.edit-candidate-btn', function () {
@@ -191,3 +152,34 @@ $(document).ready(function () {
     }
 });
 
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const candidateFilterSync = new TableFilterSync({
+        tableId: 'candidates_table',
+        dataType: 'candidate',
+        filters: [
+            {
+                selector: '#candidate_date_between',
+                type: 'daterangepicker',
+                name: 'candidate_date_between',
+                hiddenFrom: '#candidate_date_between_from',
+                hiddenTo: '#candidate_date_between_to'
+            },
+            {
+                selector: '#sort',
+                type: 'select',
+                name: 'sort',
+                ajaxType: null
+            },
+            {
+                selector: '#select_candidate_statuses',
+                type: 'select2',
+                name: 'candidate_status',
+                ajaxType: 'candidate_statuses'
+            },
+
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
+    });
+});

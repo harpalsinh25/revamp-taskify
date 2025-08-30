@@ -31,6 +31,16 @@ $(document).ready(function () {
         }
     );
 
+    $(document).on('click', '.clear-leads-filters', function (e) {
+        $('#sort').val('').trigger('change', [0]);
+        $('#selected_sources').val('').trigger('change', [0]);
+        $('#selected_stages').val('').trigger('change', [0]);
+        $('#lead_date_range').val('');
+        $('#lead_start_date').val('');
+        $('#lead_end_date').val('');
+        $('#leads_table').bootstrapTable('refresh');
+    })
+
 });
 function queryParamsLead(p) {
     return {
@@ -47,3 +57,42 @@ function queryParamsLead(p) {
         stage_ids: $('#selected_stages').val(),
     };
 }
+
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const leadFilterSync = new TableFilterSync({
+        tableId: 'leads_table',
+        dataType: 'leads',
+        filters: [
+            {
+                selector: '#sort',
+                type: 'select',
+                name: 'sort',
+                ajaxType: null
+            },
+            {
+                selector: '#selected_sources',
+                type: 'select2',
+                name: 'source_ids',
+                ajaxType: 'lead_sources'
+            },
+            {
+                selector: '#selected_stages',
+                type: 'select2',
+                name: 'stage_ids',
+                ajaxType: 'lead_stages'
+            },
+            {
+                selector: '#lead_date_range',
+                type: 'daterangepicker',
+                name: 'lead_date_range',
+                hiddenFrom: '#lead_start_date',
+                hiddenTo: '#lead_end_date'
+            }
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParamsLead // Reuse existing function
+    });
+});
+
+

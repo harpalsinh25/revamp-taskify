@@ -1,7 +1,7 @@
 <div class="kanban-board d-flex bg-body gap-3 overflow-auto p-3">
     @foreach ($statuses as $status)
     <div class="kanban-column card" data-status-id="{{ $status->id }}">
-        <div class="kanban-column-header card-header bg-label-{{ $status->color }} d-flex justify-content-between align-items-center p-3">
+        <div class="kanban-column-header card-header  d-flex justify-content-between align-items-center p-3">
             <div class="fw-semibold">
                 {{ $status->title }}
             </div>
@@ -23,7 +23,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="card-title mb-0">
                             <a href="{{ url('projects/information/' . $project->id) }}"
-                                class="text-body text-primary" target="_blank">
+                                class="text-body text-dark" target="_blank">
                                 {{ ucfirst(Str::limit($project->title, 15)) }}
                             </a>
                         </h5>
@@ -91,7 +91,7 @@
                         @endif
                     </div>
 
-                    <div class="row mt-2">
+                    {{-- <div class="row mt-2">
                         <div class="col-md-12">
                             <p class="card-text mb-1">
                                 {{ get_label('users', 'Users') }}
@@ -173,7 +173,7 @@
                                 </ul>
                             </p>
                         </div>
-                    </div>
+                    </div> --}}
 
                     @if($project->start_date)
                     <div class="mt-2">
@@ -189,12 +189,22 @@
             </div>
             @endforeach
             @if (canSetStatus($status))
-            <a href="javascript:void(0);" class="btn btn-outline-secondary btn-sm d-block create-project-btn"
-                data-bs-toggle="modal" data-bs-target="#create_project_modal" data-status-id="{{ $status->id }}">
+            <div class="kanban-footer mt-auto p-2">
+            <a href="javascript:void(0);" class="btn  btn-sm d-block create-project-btn"
+                data-bs-toggle="offcanvas" data-bs-target="#create_project_offcanvas" data-status-id="{{ $status->id }}">
                 <i class='bx bx-plus me-1'></i>{{ get_label('create_project', 'Create project') }}
             </a>
+            </div>
             @endif
         </div>
     </div>
+
     @endforeach
+    <div class="kanban-column card">
+    <div class="kanban-column-header card-header  d-flex justify-content-between align-items-center p-3">
+        <a href="javascript:void(0);" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#create_status_modal">
+            <i class='bx bx-plus me-1'></i>{{ get_label('add_status', 'Add Status') }}
+        </a>
+    </div>
+</div>
 </div>

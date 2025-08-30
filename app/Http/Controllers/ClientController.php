@@ -788,7 +788,7 @@ class ClientController extends Controller
                 }
 
                 if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $client->id . '" data-type="clients">' .
+                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $client->id . '" data-type="clients" data-table="clients_table">' .
                         '<i class="bx bx-trash text-danger mx-1"></i>' .
                         '</button>';
                 }

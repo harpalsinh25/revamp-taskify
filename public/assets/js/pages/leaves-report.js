@@ -180,3 +180,47 @@ function formatLeaveDuration(totalLeaves, days, hours) {
     return formatted;
 }
 
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const leaveReportFilterSync = new TableFilterSync({
+        tableId: 'leaves_report_table',
+        dataType: 'report',
+        filters: [
+            {
+                selector: '#filter_date_range',
+                type: 'daterangepicker',
+                name: 'filter_date_range',
+                hiddenFrom: '#filter_date_range_from',
+                hiddenTo: '#filter_date_range_to'
+            },
+            {
+                selector: '#report_start_date_between',
+                type: 'daterangepicker',
+                name: 'report_start_date_between',
+                hiddenFrom: '#filter_start_date_from',
+                hiddenTo: '#filter_start_date_to'
+            },
+            {
+                selector: '#report_end_date_between',
+                type: 'daterangepicker',
+                name: 'report_end_date_between',
+                hiddenFrom: '#filter_end_date_from',
+                hiddenTo: '#filter_end_date_to'
+            },
+            {
+                selector: '#user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users',
+            },
+            {
+                selector: '#status_filter',
+                type: 'select2',
+                name: 'statuses',
+                ajaxType: null
+            }
+        ],
+        preserveParams: [''],
+        queryParamsFn: leaves_report_query_params // Reuse existing function
+    });
+});

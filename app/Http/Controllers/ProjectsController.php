@@ -490,30 +490,48 @@ class ProjectsController extends Controller
         $request->validate([
             'bulk_file' => 'required|mimes:xlsx,xls,csv'
         ]);
+
         try {
             // Initialize the import class
             $import = new ProjectsImport;
+
             // Use the import class for bulk upload
             Excel::import($import, $request->file('bulk_file'));
-            // Check if there are any validation errors
+
+            // Get validation errors
             $validationErrors = $import->getValidationErrors();
             $validationErrors = array_filter($validationErrors, function ($value) {
                 return $value !== null && $value !== '';
             });
+
+            // Get the count of successful imports (you might want to track this in your import class)
+            $successfulImports = 0; // You can add a counter in your import class to track this
+
             if (!empty($validationErrors)) {
-                // Return validation errors if any
+                // Return partial success with validation errors
                 return response()->json([
-                    'error' => true,
-                    'message' => 'Validation errors occurred.',
-                    'validation_errors' => $validationErrors
-                ], 400);
+                    'error' => false, // Changed to false since some might have succeeded
+                    'message' => count($validationErrors) > 0 ?
+                        "Import completed with some errors. {$successfulImports} projects imported successfully." :
+                        'Some validation errors occurred.',
+                    'validation_errors' => $validationErrors,
+                    'partial_success' => true
+                ], 200); // Changed to 200 since it's partial success
             }
+
             // If no validation errors, return success message
             return response()->json([
                 'error' => false,
-                'message' => 'Projects imported successfully.'
+                'message' => 'All projects imported successfully.'
             ]);
         } catch (\Exception $e) {
+            // Log the full error for debugging
+            \Log::error('Project import error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while importing projects: ' . $e->getMessage()

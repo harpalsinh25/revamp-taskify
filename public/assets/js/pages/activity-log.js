@@ -1,4 +1,3 @@
-
 'use strict';
 function queryParams(p) {
     return {
@@ -16,31 +15,21 @@ function queryParams(p) {
         search: p.search
     };
 }
-
-
 window.icons = {
     refresh: 'bx-refresh',
     toggleOn: 'bx-toggle-right',
     toggleOff: 'bx-toggle-left'
 }
-
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>'
 }
-
-
-
-
 $('#activity_log_between_date').on('apply.daterangepicker', function (ev, picker) {
     var startDate = picker.startDate.format('YYYY-MM-DD');
     var endDate = picker.endDate.format('YYYY-MM-DD');
-
     $('#activity_log_between_date_from').val(startDate);
     $('#activity_log_between_date_to').val(endDate);
-
     $('#table').bootstrapTable('refresh');
 });
-
 $('#activity_log_between_date').on('cancel.daterangepicker', function (ev, picker) {
     $('#activity_log_between_date_from').val('');
     $('#activity_log_between_date_to').val('');
@@ -50,15 +39,12 @@ $('#activity_log_between_date').on('cancel.daterangepicker', function (ev, picke
     picker.updateElement();
     $('#table').bootstrapTable('refresh');
 });
-
-
 addDebouncedEventListener('#user_filter, #client_filter, #activity_filter, #type_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {
         $('#activity_log_table').bootstrapTable('refresh');
     }
 });
-
 $(document).on('click', '.clear-activity-log-filters', function (e) {
     e.preventDefault();
     $('#activity_log_between_date_from').val('');
@@ -70,8 +56,45 @@ $(document).on('click', '.clear-activity-log-filters', function (e) {
     $('#type_filter').val('').trigger('change', [0]);
     $('#activity_log_table').bootstrapTable('refresh');
 })
-
-
-
-
-
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const activityLogFilterSync = new TableFilterSync({
+        tableId: 'activity_log_table',
+        dataType: 'activity-log',
+        filters: [
+            {
+                selector: '#activity_log_between_date',
+                type: 'daterangepicker',
+                name: 'activity_log_between_date',
+                hiddenFrom: '#activity_log_between_date_from',
+                hiddenTo: '#activity_log_between_date_to'
+            },
+            {
+                selector: '#user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#activity_filter',
+                type: 'select2',
+                name: 'activities',
+                ajaxType: null
+            },
+            {
+                selector: '#type_filter',
+                type: 'select2',
+                name: 'types',
+                ajaxType: null
+            }
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
+    });
+});

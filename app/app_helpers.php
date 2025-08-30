@@ -1,6 +1,5 @@
 <?php
 
-use Swift_Mailer;
 use Carbon\Carbon;
 use App\Models\Tax;
 use App\Models\Task;
@@ -13,7 +12,6 @@ use App\Models\Project;
 use App\Models\Setting;
 use App\Models\FcmToken;
 use App\Models\Template;
-use Swift_SmtpTransport;
 use App\Models\Candidate;
 use App\Models\Workspace;
 use App\Models\ActivityLog;
@@ -839,10 +837,10 @@ if (!function_exists('processNotifications')) {
                             )
                         ) {
                             $isPush = 1;
+
                             try {
                                 sendPushNotification($recipientModel, $data);
                             } catch (\Exception $e) {
-                                // dd($e);
                             }
                         }
                     }
@@ -927,7 +925,6 @@ if (!function_exists('processNotifications')) {
 if (!function_exists('sendPushNotification')) {
     function sendPushNotification($recipientModel, $data)
     {
-        // dd($recipientModel, $data);
         // Path to your service account key
         $serviceAccountPath = storage_path('app/firebase/firebase-service-account.json');
         // Set up the Google Client for authentication
@@ -1020,9 +1017,11 @@ if (!function_exists('sendPushNotification')) {
                 // Set the current device token
                 $message['message']['token'] = $deviceToken;
                 // Send the notification
+
                 $response = $httpClient->post("projects/{$projectId}/messages:send", [
                     'json' => $message,
                 ]);
+
                 // Uncomment for debugging
                 // dd($projectId);
                 // dd($response);

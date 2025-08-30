@@ -124,6 +124,7 @@ $auth_user = getAuthenticatedUser();
     </div>
     @endif
 </div>
+@section('page_scripts')
 <script>
     var label_update = '<?= get_label('update', 'Update') ?>';
     var label_delete = '<?= get_label('delete', 'Delete') ?>';
@@ -133,3 +134,4 @@ $auth_user = getAuthenticatedUser();
     var label_duplicate = '<?= get_label('duplicate', 'Duplicate') ?>';
 </script>
 <script src="{{asset('assets/js/pages/project-list.js')}}"></script>
+@endsection

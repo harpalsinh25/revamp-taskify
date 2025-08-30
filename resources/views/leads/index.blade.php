@@ -92,8 +92,10 @@
                     </div>
                     <div class="table-responsive text-nowrap">
                         <input type="hidden" id="data_type" value="leads">
+                        <input type="hidden" id="data-table" value="leads_table">
                         <input type="hidden" id="save_column_visibility">
-                        <table id="table" data-toggle="table" data-loading-template="loadingTemplate"
+                        <input type="hidden" id="multi_select">
+                        <table id="leads_table" data-toggle="table" data-loading-template="loadingTemplate"
                             data-url="{{ route('leads.list') }}" data-icons-prefix="bx" data-icons="icons"
                             data-show-refresh="true" data-total-field="total" data-trim-on-search="false"
                             data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"

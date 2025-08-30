@@ -465,6 +465,7 @@ class CandidateController extends Controller
         $actions .= '<button class="btn delete"
                 data-id="' . $media->id . '"
                 data-type="candidate/candidate-media"
+
                 title="' . get_label('delete', 'Delete') . '">
                 <i class="bx bx-trash text-danger mx-1"></i>
             </button>';
@@ -1397,6 +1398,7 @@ class CandidateController extends Controller
                                         class="btn delete"
                                         data-id="' . $candidate->id . '"
                                         data-type="candidate"
+                                        data-table="candidates_table"
                                         title="' . get_label('delete', 'Delete') . '">
                                         <i class="bx bx-trash text-danger mx-1"></i>
                                     </button>';

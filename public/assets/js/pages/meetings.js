@@ -74,4 +74,54 @@ $(document).on('click', '.clear-meetings-filters', function (e) {
     $('#meetings_table').bootstrapTable('refresh');
 })
 
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const leadFilterSync = new TableFilterSync({
+        tableId: 'meetings_table',
+        dataType: 'meetings',
+        filters: [
+            {
+                selector: '#meeting_date_between',
+                type: 'daterangepicker',
+                name: 'meeting_date_between',
+                hiddenFrom: '#meeting_date_between_from',
+                hiddenTo: '#meeting_date_between_to'
+            },
+            {
+                selector: '#meeting_start_date_between',
+                type: 'daterangepicker',
+                name: 'meeting_start_date_between',
+                hiddenFrom: '#meeting_start_date_from',
+                hiddenTo: '#meeting_start_date_to'
+            },
+            {
+                selector: '#meeting_end_date_between',
+                type: 'daterangepicker',
+                name: 'meeting_end_date_between',
+                hiddenFrom: '#meeting_end_date_from',
+                hiddenTo: '#meeting_end_date_to'
+            },
+            {
+                selector: '#meeting_user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#meeting_client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#status_filter',
+                type: 'select2',
+                name: 'statuses',
+                ajaxType: null
+            }
 
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
+    });
+});

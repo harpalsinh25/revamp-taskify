@@ -42,7 +42,7 @@ class SystemHealthController extends Controller
             return formatApiResponse(false, $result['message']);
         }
 
-        return formatApiResponse(true, $result['message'], [], 422);
+        return formatApiResponse(true, $result['message'], [], 200);
     }
 
     private function getSystemData()

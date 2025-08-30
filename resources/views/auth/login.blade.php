@@ -31,7 +31,9 @@
                         <p>{{ get_label('sign_into_your_account', 'Sign into your account') }}</p>
                         <form id="formAuthentication" class="form-submit-event mb-3"
                             action="{{ url('users/authenticate') }}" method="POST">
-                            <input type="hidden" name="redirect_url" value="{{ url('home') }}">
+
+
+                            <input type="hidden" name="redirect_url" value="{{ redirect()->intended(url('home'))->getTargetUrl() }}">
                             @csrf
                             <div class="mb-3">
                                 <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
@@ -58,24 +60,24 @@
                                 </div>
                             </div>
 
-                        @php
-                            $settings = get_settings('general_settings');
+                            @php
+                                $settings = get_settings('general_settings');
 
-                        @endphp
-                        @if(!empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'])
-                            <div class="mb-4">
-                                <label class="form-label d-block">{{ get_label('captcha', 'Captcha') }} <span
-                                        class="asterisk">*</span></label>
-                                <div class="d-flex justify-content-start">
-                                    {!! NoCaptcha::display() !!}
+                            @endphp
+                            @if (!empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'])
+                                <div class="mb-4">
+                                    <label class="form-label d-block">{{ get_label('captcha', 'Captcha') }} <span
+                                            class="asterisk">*</span></label>
+                                    <div class="d-flex justify-content-start">
+                                        {!! NoCaptcha::display() !!}
+                                    </div>
+                                    @if ($errors->has('g-recaptcha-response'))
+                                        <span class="text-danger small d-block mt-1">
+                                            {{ $errors->first('g-recaptcha-response') }}
+                                        </span>
+                                    @endif
                                 </div>
-                                @if ($errors->has('g-recaptcha-response'))
-                                    <span class="text-danger small d-block mt-1">
-                                        {{ $errors->first('g-recaptcha-response') }}
-                                    </span>
-                                @endif
-                            </div>
-                        @endif
+                            @endif
 
                             <div class="mb-4">
                                 <button class="btn btn-primary d-grid w-100" id="submit_btn"

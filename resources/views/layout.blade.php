@@ -71,6 +71,7 @@
         var currencySymbol = "{{ $general_settings['currency_symbol'] ?? '' }}";
     </script>
 
+
     <!-- PWA Manifest -->
     @laravelPWA
 </head>
@@ -78,15 +79,13 @@
 <body>
 
     <!-- Layout wrapper -->
-    @if (
-    Request::is('forgot-password') ||
-    Request::is('/') ||
-    Request::segment(1) == 'reset-password' ||
-    Request::is('install') ||
-     Request::is('system-health') ||
-    Request::is('signup') ||
-    Request::is('privacy-policy')
-)
+    @if (Request::is('forgot-password') ||
+            Request::is('/') ||
+            Request::segment(1) == 'reset-password' ||
+            Request::is('install') ||
+            //  Request::is('system-health') ||
+            Request::is('signup') ||
+            Request::is('privacy-policy'))
         @yield('content')
         @include('labels')
     @else
@@ -164,10 +163,9 @@
 @endif
 
 
-@if(config('constants.ALLOW_MODIFICATION') == '0')
-<!-- Floating Buy Now Button -->
-   @include('components.taskify-ecosystem-drawer')
-
+@if (config('constants.ALLOW_MODIFICATION') == '0')
+    <!-- Floating Buy Now Button -->
+    @include('components.taskify-ecosystem-drawer')
 @endif
 
 
@@ -342,8 +340,10 @@
     var maxFilesAllowed = <?= $maxFilesAllowed ?>;
     var allowedFileTypes = '<?= $allowedFileTypes ?>';
 </script>
-
 <script src="{{ asset('assets/js/custom.js') }}"></script>
+<script src="{{ asset('assets/js/dynamic_table_filter_manager.js') }}"></script>
+@yield('page_scripts')
+
 @if (session()->has('message'))
 <script>
     toastr.options = {

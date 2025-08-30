@@ -124,3 +124,61 @@ $(document).on('click', '.clear-report-filters', function (e) {
     $('#client_creators_filter').val('').trigger('change', [0]);
     $('#invoices_report_table').bootstrapTable('refresh');
 })
+
+
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const invoiceReportFilterSync = new TableFilterSync({
+        tableId: 'invoices_report_table',
+        dataType: 'report',
+        filters: [
+            {
+                selector: '#filter_date_range',
+                type: 'daterangepicker',
+                name: 'filter_date_range',
+                hiddenFrom: '#filter_date_range_from',
+                hiddenTo: '#filter_date_range_to'
+            },
+            {
+                selector: '#report_start_date_between',
+                type: 'daterangepicker',
+                name: 'report_start_date_between',
+                hiddenFrom: '#filter_start_date_from',
+                hiddenTo: '#filter_start_date_to'
+            },
+            {
+                selector: '#report_end_date_between',
+                type: 'daterangepicker',
+                name: 'report_end_date_between',
+                hiddenFrom: '#filter_end_date_from',
+                hiddenTo: '#filter_end_date_to'
+            },
+            {
+                selector: '#type_filter',
+                type: 'select2',
+                name: 'type_filter',
+                ajaxType: null,
+            },
+            {
+                selector: '#user_creators_filter',
+                type: 'select2',
+                name: 'created_by_user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#client_creators_filter',
+                type: 'select2',
+                name: 'created_by_client_ids',
+                ajaxType: 'clients'
+            },
+        ],
+        preserveParams: [''],
+        queryParamsFn: invoices_report_query_params // Reuse existing function
+    });
+});

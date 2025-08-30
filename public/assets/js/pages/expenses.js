@@ -72,3 +72,35 @@ $(document).on('click', '.clear-expenses-filters', function (e) {
     $('#type_filter').val('').trigger('change', [0]);
     $('#table').bootstrapTable('refresh');
 })
+
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const expenseFilterSync = new TableFilterSync({
+        tableId: 'table',
+        dataType: 'expenses',
+        filters: [
+            {
+                selector: '#expense_from_date_between',
+                type: 'daterangepicker',
+                name: 'expense_from_date_between',
+                hiddenFrom: '#expense_date_from',
+                hiddenTo: '#expense_date_to'
+            },
+            {
+                selector: '#user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+
+            {
+                selector: '#type_filter',
+                type: 'select2',
+                name: 'type_ids',
+                ajaxType: 'expense_types'
+            }
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
+    });
+});

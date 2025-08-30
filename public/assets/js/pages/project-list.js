@@ -1,5 +1,4 @@
 'use strict';
-
 function queryParamsProjects(p) {
     return {
         "status_ids": $('#project_status_filter').val(),
@@ -22,23 +21,18 @@ function queryParamsProjects(p) {
         search: p.search
     };
 }
-
-
 window.icons = {
     refresh: 'bx-refresh',
     toggleOn: 'bx-toggle-right',
     toggleOff: 'bx-toggle-left'
 }
-
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>'
 }
-
 function assignedFormatter(value, row, index) {
     return '<div class="d-flex justify-content-start align-items-center"><div class="text-center mx-4"><span class="badge rounded-pill bg-primary" >' + row.projects + '</span><div>' + label_projects + '</div></div>' +
         '<div class="text-center"><span class="badge rounded-pill bg-primary" >' + row.tasks + '</span><div>' + label_tasks + '</div></div></div>'
 }
-
 function queryParamsUsersClients(p) {
     return {
         type: $('#type').val(),
@@ -51,7 +45,6 @@ function queryParamsUsersClients(p) {
         search: p.search
     };
 }
-
 // New custom field formatter for checkbox values
 function customFieldFormatter(value, row) {
     if (value && typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
@@ -67,14 +60,12 @@ function customFieldFormatter(value, row) {
     }
     return value;
 }
-
 addDebouncedEventListener('#project_status_filter, #project_priority_filter, #project_user_filter, #project_client_filter, #project_tag_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {
         $('#projects_table').bootstrapTable('refresh');
     }
 });
-
 $(document).on('click', '.clear-projects-filters', function (e) {
     e.preventDefault();
     $('#project_date_between').val('');
@@ -92,18 +83,14 @@ $(document).on('click', '.clear-projects-filters', function (e) {
     $('#project_priority_filter').val('').trigger('change', [0]);
     $('#project_tag_filter').val('').trigger('change', [0]);
     $('#projects_table').bootstrapTable('refresh');
-
     // Clear request parameters in the URL
     const urlWithoutFilters = window.location.protocol + "//" + window.location.host + window.location.pathname; // Get the base URL
     window.history.pushState({}, document.title, urlWithoutFilters); // Update the URL without reloading the page
 })
-
 $('#viewAssignedModal').on('hidden.bs.modal', function (e) {
     e.preventDefault();
     $('.clear-projects-filters').trigger('click');
 })
-
-
 $(document).ready(function () {
     $('#project_date_between').on('apply.daterangepicker', function (ev, picker) {
         var startDate = picker.startDate.format('YYYY-MM-DD');
@@ -112,7 +99,6 @@ $(document).ready(function () {
         $('#project_date_between_to').val(endDate);
         $('#projects_table').bootstrapTable('refresh');
     });
-
     // Cancel event to clear values
     $('#project_date_between').on('cancel.daterangepicker', function (ev, picker) {
         $('#project_date_between_from').val('');
@@ -124,4 +110,70 @@ $(document).ready(function () {
         $('#projects_table').bootstrapTable('refresh');
     });
 });
-
+// Include table-filter-sync.js before this
+$(document).ready(function () {
+    const projectFilterSync = new TableFilterSync({
+        tableId: 'projects_table',
+        dataType: 'projects',
+        filters: [
+            {
+                selector: '#project_status_filter',
+                type: 'select2',
+                name: 'status_ids',
+                ajaxType: 'statuses'
+            },
+            {
+                selector: '#project_priority_filter',
+                type: 'select2',
+                name: 'priority_ids',
+                ajaxType: 'priorities'
+            },
+            {
+                selector: '#project_user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#project_client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#project_tag_filter',
+                type: 'select2',
+                name: 'tag_ids',
+                ajaxType: 'tags'
+            },
+            {
+                selector: '#project_date_between',
+                type: 'daterangepicker',
+                name: 'project_date_between',
+                hiddenFrom: '#project_date_between_from',
+                hiddenTo: '#project_date_between_to'
+            },
+            {
+                selector: '#project_start_date_between',
+                type: 'daterangepicker',
+                name: 'project_start_date_between',
+                hiddenFrom: '#project_start_date_from',
+                hiddenTo: '#project_start_date_to'
+            },
+            {
+                selector: '#project_end_date_between',
+                type: 'daterangepicker',
+                name: 'project_end_date_between',
+                hiddenFrom: '#project_end_date_from',
+                hiddenTo: '#project_end_date_to'
+            },
+            {
+                selector: '#is_favorites',
+                type: 'hidden',
+                name: 'is_favorites'
+            }
+        ],
+        preserveParams: ['from_home'],
+        queryParamsFn: queryParamsProjects // Reuse existing function
+    });
+});

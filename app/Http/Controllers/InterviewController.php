@@ -428,6 +428,7 @@ class InterviewController extends Controller
                                         class="btn delete"
                                         data-id="' . $interview->id . '"
                                         data-type="interviews"
+                                        data-table="interviews_table"
                                         title="' . get_label('delete', 'Delete') . '">
                                         <i class="bx bx-trash text-danger mx-1"></i>
                                     </button>';

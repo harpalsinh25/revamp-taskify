@@ -1,7 +1,6 @@
 @php
     use App\Models\Workspace;
     use Spatie\Permission\Models\Role;
-
     $auth_user = getAuthenticatedUser();
     $roles = Role::where('name', '!=', 'admin')->get();
     $isAdminOrHasAllDataAccess = isAdminOrHasAllDataAccess();
@@ -14,87 +13,89 @@
         Request::is('status/manage') ||
         Request::is('users') ||
         Request::is('clients'))
-   <div class="modal fade" id="create_status_modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <form class="modal-content new-form-submit-event" action="{{ url('status/store') }}" method="POST">
-            <input type="hidden" name="dnr">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_status', 'Create status') ?>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            @csrf
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
-                                class="asterisk">*</span></label>
-                        <input type="text" id="nameBasic" class="form-control" name="title"
-                            placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
-                    </div>
+    <div class="modal fade" id="create_status_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form class="modal-content new-form-submit-event" action="{{ url('status/store') }}" method="POST">
+                @if(!Request::is('projects/kanban'))
+                <input type="hidden" name="dnr">
+                @endif
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_status', 'Create status') ?>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="row">
-                    <div class="col mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
-                                class="asterisk">*</span></label>
-                        <select class="form-select select-bg-label-primary" id="color" name="color">
-                            <option class="badge bg-label-primary" value="primary"
-                                {{ old('color') == 'primary' ? 'selected' : '' }}>
-                                <?= get_label('primary', 'Primary') ?>
-                            </option>
-                            <option class="badge bg-label-secondary" value="secondary"
-                                {{ old('color') == 'secondary' ? 'selected' : '' }}>
-                                <?= get_label('secondary', 'Secondary') ?></option>
-                            <option class="badge bg-label-success" value="success"
-                                {{ old('color') == 'success' ? 'selected' : '' }}>
-                                <?= get_label('success', 'Success') ?></option>
-                            <option class="badge bg-label-danger" value="danger"
-                                {{ old('color') == 'danger' ? 'selected' : '' }}>
-                                <?= get_label('danger', 'Danger') ?></option>
-                            <option class="badge bg-label-warning" value="warning"
-                                {{ old('color') == 'warning' ? 'selected' : '' }}>
-                                <?= get_label('warning', 'Warning') ?></option>
-                            <option class="badge bg-label-info" value="info"
-                                {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
-                            </option>
-                            <option class="badge bg-label-dark" value="dark"
-                                {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                @if ($isAdminOrHasAllDataAccess)
+                @csrf
+                <div class="modal-body">
                     <div class="row">
-                        <div class="col-12 mb-3">
-                            <label
-                                class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
-                                <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
-                                    data-bs-offset="0,4" data-bs-placement="top" title=""
-                                    data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
-                            <select class="form-control js-example-basic-multiple" name="role_ids[]"
-                                multiple="multiple"
-                                data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
-                                data-allow-clear="true">
-                                @isset($roles)
-                                    @foreach ($roles as $role)
-                                        <option value="{{ $role->id }}">{{ ucfirst($role->name) }}</option>
-                                    @endforeach
-                                @endisset
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                                    class="asterisk">*</span></label>
+                            <input type="text" id="nameBasic" class="form-control" name="title"
+                                placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="form-select select-bg-label-primary" id="color" name="color">
+                                <option class="badge bg-label-primary" value="primary"
+                                    {{ old('color') == 'primary' ? 'selected' : '' }}>
+                                    <?= get_label('primary', 'Primary') ?>
+                                </option>
+                                <option class="badge bg-label-secondary" value="secondary"
+                                    {{ old('color') == 'secondary' ? 'selected' : '' }}>
+                                    <?= get_label('secondary', 'Secondary') ?></option>
+                                <option class="badge bg-label-success" value="success"
+                                    {{ old('color') == 'success' ? 'selected' : '' }}>
+                                    <?= get_label('success', 'Success') ?></option>
+                                <option class="badge bg-label-danger" value="danger"
+                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
+                                    <?= get_label('danger', 'Danger') ?></option>
+                                <option class="badge bg-label-warning" value="warning"
+                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
+                                    <?= get_label('warning', 'Warning') ?></option>
+                                <option class="badge bg-label-info" value="info"
+                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('info', 'Info') ?>
+                                </option>
+                                <option class="badge bg-label-dark" value="dark"
+                                    {{ old('color') == 'dark' ? 'selected' : '' }}><?= get_label('dark', 'Dark') ?>
+                                </option>
                             </select>
                         </div>
                     </div>
-                @endif
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <?= get_label('close', 'Close') ?>
-                </button>
-                <button type="submit" class="btn btn-primary"
-                    id="submit_btn"><?= get_label('create', 'Create') ?></button>
-            </div>
-        </form>
+                    @if ($isAdminOrHasAllDataAccess)
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label
+                                    class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
+                                    <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
+                                        data-bs-offset="0,4" data-bs-placement="top" title=""
+                                        data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
+                                <select class="form-control js-example-basic-multiple" name="role_ids[]"
+                                    multiple="multiple"
+                                    data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
+                                    data-allow-clear="true">
+                                    @isset($roles)
+                                        @foreach ($roles as $role)
+                                            <option value="{{ $role->id }}">{{ ucfirst($role->name) }}</option>
+                                        @endforeach
+                                    @endisset
+                                </select>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <?= get_label('close', 'Close') ?>
+                    </button>
+                    <button type="submit" class="btn btn-primary"
+                        id="submit_btn"><?= get_label('create', 'Create') ?></button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 @endif
 @if (Request::is('status/manage'))
     <div class="modal fade" id="edit_status_modal" tabindex="-1" aria-hidden="true">
@@ -516,7 +517,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
@@ -561,7 +561,6 @@
                     <label for="description" class="form-label"><?= get_label('description', 'Description') ?></label>
                     <textarea class="form-control" id="todo_description" name="description"
                         placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
-
                     <div class="col-md-12">
                         <div class="mb-3">
                             <label for="reminder-switch"
@@ -577,7 +576,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div id="edit-todo-reminder-settings" class="d-none">
                         <!-- Frequency Type -->
                         <div class="mb-3">
@@ -622,7 +620,6 @@
                             <input type="time" class="form-control" id="edit-todo-time-of-day"
                                 name="time_of_day">
                         </div>
-
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1911,7 +1908,6 @@
                                     class="form-label"><?= get_label('drawing', 'Drawing') ?></label>
                                 <div id="drawing-container" class="drawing-container"></div>
                                 <input type="hidden" id="drawing_data" name="drawing_data" value="">
-
                             </div>
                         </div>
                     </div>
@@ -2793,7 +2789,6 @@
         Request::is('users/profile/*') ||
         Request::is('clients/profile/*') ||
         Request::is('tasks/information/*'))
-
     <div class="modal fade" id="create_task_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form action="{{ url('tasks/store') }}" class="form-submit-event modal-content" method="POST">
@@ -2884,12 +2879,10 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         <?php $project_id = 0;
-
-                                                                                                                                                                                                                                                                                                                    if (!isset($project->id)) {
-                                                                                                                                                                                                                                                                                                                    ?>
+                                                                                                                                                                                                                                                                                                                                                                                            if (!isset($project->id)) {
+                                                                                                                                                                                                                                                                                                                                                                                            ?>
                         <div class="mb-3">
                             <label class="form-label"
                                 for="user_id"><?= get_label('select_project', 'Select project') ?> <span
@@ -2900,8 +2893,7 @@
                             </select>
                         </div>
                         <?php } else {
-
-                                                                                                                                                                                                                                                                                                                        $project_id = $project->id ?>
+                                                                                                                                                                                                                                                                                                                                                                                                $project_id = $project->id ?>
                         <input type="hidden" name="project" value="{{ $project_id }}">
                         <div class="mb-3">
                             <label for="project_title" class="form-label"><?= get_label('project', 'Project') ?>
@@ -2946,9 +2938,7 @@
                             <select class="form-select select2" name="task_list_id" id="task_list"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true" data-allow-clear="false">
-
                             </select>
-
                         </div>
                     </div>
                     @if ($isAdminOrHasAllDataAccess)
@@ -2982,20 +2972,15 @@
                                         <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
                                     </label>
                                 </div>
-
-
-
                                 <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
                                     <i class="fas fa-magic me-1"></i>
                                     <?= get_label('generate_with_ai', 'Generate with AI') ?>
                                 </button>
-
                                 <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
                                     data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
                                     title=""
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
-
                                 <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
                                     role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -3003,19 +2988,16 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Custom Prompt Input (initially hidden) -->
                     <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
-
                     <!-- Description Textarea -->
                     <div class="mb-3">
                         <textarea class="form-control description ai-output" rows="5" name="description"
                             placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label"
@@ -3043,7 +3025,6 @@
                             @enderror
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="mb-3">
                             <label class="form-label"><?= get_label('note', 'Note') ?></label>
@@ -3371,7 +3352,6 @@
                         <label for="edit_task_list" class="form-label">
                             {{ get_label('task_list', 'Task List') }}
                         </label>
-
                         <select class="form-select select2" name="task_list_id" id="edit_task_list"
                             style="width: 100%">
                             <option value="">Select a task list</option>
@@ -3393,20 +3373,15 @@
                                         <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
                                     </label>
                                 </div>
-
-
-
                                 <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
                                     <i class="fas fa-magic me-1"></i>
                                     <?= get_label('generate_with_ai', 'Generate with AI') ?>
                                 </button>
-
                                 <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
                                     data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
                                     title=""
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
-
                                 <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
                                     role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -3414,19 +3389,16 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Custom Prompt Input (initially hidden) -->
                     <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
-
                     <!-- Description Textarea -->
                     <div class="mb-3">
                         <textarea class="form-control description ai-output" rows="5" name="description" id="task_description"
                             placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label"
@@ -3455,7 +3427,6 @@
                             @enderror
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="mb-3">
                             <label class="form-label"><?= get_label('note', 'Note') ?></label>
@@ -3479,7 +3450,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div id="edit-reminder-settings" class="d-none">
                         <!-- Frequency Type -->
                         <div class="mb-3">
@@ -3523,9 +3493,7 @@
                                 class="form-label">{{ get_label('time_of_day', 'Time of Day') }}</label>
                             <input type="time" class="form-control" id="edit-time-of-day" name="time_of_day">
                         </div>
-
                     </div>
-
                     <!--edit Recursion Task -->
                     <div class="col-md-12">
                         <div class="mb-3">
@@ -3537,7 +3505,6 @@
                                 data-bs-original-title="<b>{{ get_label('recurring_tasks', 'Recurring Tasks') }}:</b> {{ get_label('recurring_tasks_info', 'This option enables the creation of recurring tasks. You can set the frequency (daily, weekly, monthly, yearly), specific days, and manage the recurrence schedule efficiently.') }}">
                             </i>
                             <div class="form-check form-switch">
-
                                 <input type="checkbox" class="form-check-input" id="edit-recurring-task-switch"
                                     name="enable_recurring_task"
                                     {{ isset($task) && $task->recurringTask ? 'checked' : '' }}>
@@ -3669,9 +3636,7 @@
                     @php
                         $isEdit = true;
                     @endphp
-
                     <x-custom-fields :isEdit="$isEdit" :fields="$taskCustomFields" />
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
@@ -3735,13 +3700,7 @@
     {{-- <div class="modal fade" id="create_project_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form action="{{ url('projects/store') }}" class="form-submit-event modal-content" method="POST">
-                @if (
-                    !Request::is('projects') &&
-                        !Request::is('projects/kanban') &&
-                        !Request::is('projects/favorite') &&
-                        !Request::is('projects/kanban/favorite') &&
-                        !Request::is('projects/gantt-chart') &&
-                        !Request::is('projects/gantt-chart/favorite'))
+                @if (!Request::is('projects') && !Request::is('projects/kanban') && !Request::is('projects/favorite') && !Request::is('projects/kanban/favorite') && !Request::is('projects/gantt-chart') && !Request::is('projects/gantt-chart/favorite'))
                     <input type="hidden" name="dnr">
                     <input type="hidden" name="table" value="projects_table">
                 @endif
@@ -3870,7 +3829,6 @@
                                         name="clientCanDiscuss">
                                 </div>
                             </div>
-
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="tasksTimeEntriesSwitch">
                                     <?= get_label('tasks_time_entries', 'Tasks Time Entries') ?>
@@ -3946,7 +3904,6 @@
                                 <?= get_label('description', 'Description') ?>
                             </label>
                         </div>
-
                         <!-- Custom Prompt Switch + Generate Button -->
                         <div class="col-md-6 text-md-end mt-md-0 mt-2">
                             <div class="d-inline-flex align-items-center">
@@ -3956,20 +3913,15 @@
                                         <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
                                     </label>
                                 </div>
-
-
-
                                 <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
                                     <i class="fas fa-magic me-1"></i>
                                     <?= get_label('generate_with_ai', 'Generate with AI') ?>
                                 </button>
-
                                 <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
                                     data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
                                     title=""
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
-
                                 <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
                                     role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -3977,13 +3929,11 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Custom Prompt Input (initially hidden) -->
                     <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
-
                     <!-- Description Textarea -->
                     <div class="mb-3">
                         <textarea class="form-control description ai-output" rows="5" name="description"
@@ -4001,7 +3951,6 @@
                     @endphp
                     <!-- Custom Fields Section -->
                     <x-custom-fields :isEdit="$isEdit" :fields="$projectCustomFields" />
-
                     @if (!$isAdminOrHasAllDataAccess)
                         <div class="alert alert-primary" role="alert">
                             <?= get_label('you_will_be_project_participant_automatically', 'You will be project participant automatically.') ?>
@@ -4018,8 +3967,6 @@
             </form>
         </div>
     </div> --}}
-
-
 @endif
 @if (Request::is('projects*') ||
         Request::is('home') ||
@@ -4031,19 +3978,10 @@
         <div class="modal-dialog modal-lg" role="document">
             <form action="{{ url('projects/update') }}" class="form-submit-event modal-content" method="POST">
                 <input type="hidden" name="id" id="project_id">
-                @if (
-                    !Request::is([
-                        'projects',
-                        'projects/information/*',
-                        'projects/kanban',
-                        'projects/favorite',
-                        'projects/kanban/favorite',
-                        'projects/gantt-chart/favorite',
-                    ]))
+                @if (!Request::is(['projects', 'projects/information/*', 'projects/kanban', 'projects/favorite', 'projects/kanban/favorite', 'projects/gantt-chart/favorite']))
                     <input type="hidden" name="dnr">
                     <input type="hidden" name="table" value="projects_table">
                 @endif
-
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_project', 'Update Project') ?></h5>
@@ -4167,7 +4105,6 @@
                                         id="updateClientCanDiscussProject" name="clientCanDiscuss">
                                 </div>
                             </div>
-
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="tasksTimeEntriesSwitch">
                                     <?= get_label('tasks_time_entries', 'Tasks Time Entries') ?>
@@ -4235,7 +4172,6 @@
                                 <?= get_label('description', 'Description') ?>
                             </label>
                         </div>
-
                         <!-- Custom Prompt Switch + Generate Button -->
                         <div class="col-md-6 text-md-end mt-md-0 mt-2">
                             <div class="d-inline-flex align-items-center">
@@ -4249,13 +4185,11 @@
                                     <i class="fas fa-magic me-1"></i>
                                     <?= get_label('generate_with_ai', 'Generate with AI') ?>
                                 </button>
-
                                 <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
                                     data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
                                     title=""
                                     data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
                                 </i>
-
                                 <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2"
                                     role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -4263,13 +4197,11 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Custom Prompt Input (initially hidden) -->
                     <div class="customPromptContainer d-none mb-2 mt-2">
                         <textarea class="form-control ai-custom-prompt" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
-
                     <!-- Description Textarea -->
                     <div class="mb-3">
                         <textarea class="form-control description ai-output" rows="5" name="description" id="project_description"
@@ -4830,7 +4762,6 @@
         </div>
     </div>
 @endif
-
 @if (Request::is('settings/sms-gateway'))
     <div class="modal fade" id="testSmsSettingsModal" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -4882,7 +4813,6 @@
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="testWhatsappSettingsModal" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -4935,7 +4865,6 @@
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="testSlackSettingsModal" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -4995,7 +4924,6 @@
                     <input type="hidden" id="parent_id" name="parent_id" value="">
                     <input type="hidden" name="model_type" value="App\Models\Project">
                     <input type="hidden" name="model_id" value="{{ $project->id }}">
-
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="replyModalLabel">{{ get_label('post_reply', 'Post Reply') }}
@@ -5039,7 +4967,6 @@
                 </form>
             </div>
         </div>
-
         <!-- Modal for Comment Submission -->
         <div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -5049,14 +4976,12 @@
                     <input type="hidden" name="model_type" value="App\Models\Project">
                     <input type="hidden" name="model_id" value="{{ $project->id }}">
                     <input type="hidden" name="parent_id" value="">
-
                     <div class="modal-header">
                         <h5 class="modal-title" id="commentModalLabel"><?= get_label('add_comment', 'Add Comment') ?>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
@@ -5067,7 +4992,6 @@
                                     data-mention-type="project" data-mention-id="{{ $project->id }}"
                                     placeholder="<?= get_label('please_enter_comment', 'Please enter comment') ?>"></textarea>
                             </div>
-
                             <div class="col-md-12 mb-3">
                                 <label for="attachments" class="form-label">
                                     {{ get_label('attachments', 'Attachments') }}
@@ -5077,7 +5001,6 @@
                                         <b>{{ get_label('max_files_allowed', 'Max Files Allowed') }}</b>:
                                         {{ $maxFilesAllowed }})
                                     </small>
-
                                 </label>
                                 <input type="file" multiple name="attachments[]" id="attachments"
                                     class="form-control" accept="{{ $allowedFileTypes }}"
@@ -5085,7 +5008,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
@@ -5095,21 +5017,18 @@
                 </form>
             </div>
         </div>
-
         <div class="modal fade" id="EditCommentModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
                 <form class="modal-content form-submit-event" id="comment-form" method="POST"
                     enctype="multipart/form-data" action="{{ route('comments.update') }}">
                     @csrf
                     <input type="hidden" name="comment_id" id="comment_id" value="">
-
                     <div class="modal-header">
                         <h5 class="modal-title" id="commentModalLabel"><?= get_label('edit_comment', 'Edit Comment') ?>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
@@ -5122,7 +5041,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
@@ -5133,7 +5051,6 @@
                 </form>
             </div>
         </div>
-
         <div class="modal fade" id="DeleteCommentModal" tabindex="-1" aria-labelledby="commentModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-sm" role="document">
@@ -5176,13 +5093,11 @@
                     <input type="hidden" id="parent_id" name="parent_id" value="">
                     <input type="hidden" name="model_type" value="App\Models\Task">
                     <input type="hidden" name="model_id" value="{{ $task->id }}">
-
                     <div class="modal-header">
                         <h5 class="modal-title" id="replyModalLabel"><?= get_label('post_reply', 'Post Reply') ?></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
@@ -5192,7 +5107,6 @@
                                     name="content" rows="4" class="form-control comment"
                                     placeholder="<?= get_label('please_enter_reply', 'Please Enter Reply') ?>"></textarea>
                             </div>
-
                             <div class="col-md-12 mb-3">
                                 <label for="attachments" class="form-label">
                                     {{ get_label('attachments', 'Attachments') }}
@@ -5209,7 +5123,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
@@ -5219,7 +5132,6 @@
                 </form>
             </div>
         </div>
-
         <div class="modal fade" id="task_commentModal" tabindex="-1" aria-labelledby="task_commentModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -5229,14 +5141,12 @@
                     <input type="hidden" name="model_type" value="App\Models\Task">
                     <input type="hidden" name="model_id" value="{{ $task->id }}">
                     <input type="hidden" name="parent_id" value="">
-
                     <div class="modal-header">
                         <h5 class="modal-title" id="task_commentModalLabel">
                             <?= get_label('add_comment', 'Add Comment') ?></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12 mb-3">
@@ -5247,7 +5157,6 @@
                                     name="content" rows="4" class="form-control comment"
                                     placeholder="<?= get_label('please_enter_comment', 'Please enter comment') ?>"></textarea>
                             </div>
-
                             <div class="col-md-12 mb-3">
                                 <label for="attachments" class="form-label">
                                     {{ get_label('attachments', 'Attachments') }}
@@ -5264,7 +5173,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
@@ -5274,7 +5182,6 @@
                 </form>
             </div>
         </div>
-
         <div class="modal fade" id="TaskEditCommentModal" tabindex="-1" aria-labelledby="commentModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -5282,14 +5189,12 @@
                     enctype="multipart/form-data" action="{{ route('tasks.comments.update') }}">
                     @csrf
                     <input type="hidden" name="comment_id" id="comment_id" value="">
-
                     <div class="modal-header">
                         <h5 class="modal-title" id="commentModalLabel"><?= get_label('edit_comment', 'Edit Comment') ?>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="task-comment-edit-content"
@@ -5300,7 +5205,6 @@
                                 placeholder="<?= get_label('please_enter_comment', 'Please Enter Comment') ?>"></textarea>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <?= get_label('close', 'Close') ?>
@@ -5311,8 +5215,6 @@
                 </form>
             </div>
         </div>
-
-
         <div class="modal fade" id="TaskDeleteCommentModal" tabindex="-1" aria-labelledby="commentModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-sm" role="document">
@@ -5345,7 +5247,6 @@
         </div>
     @endisset
 @endif
-
 <div class="modal fade" id="cron_job_instruction_modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -5438,7 +5339,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             @csrf
-
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-12 mb-3">
@@ -5463,11 +5363,7 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-
-
                 </div>
-
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
@@ -5480,71 +5376,146 @@
         </form>
     </div>
 </div>
-
 <!-- Global Search Modal -->
-<div class="modal fade" id="globalSearchModal" tabindex="-1" aria-labelledby="searchModalLabel"
-    aria-hidden="true">
+<!-- Enhanced Global Search Modal -->
+<div class="modal fade" id="globalSearchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header mt-1">
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="{{ get_label('close', 'Close') }}"></button>
+        <div class="modal-content rounded-3 shadow-lg">
+            <!-- Header -->
+            <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <h5 class="modal-title text-body-emphasis fw-semibold mb-0" id="searchModalLabel">
+                    <i class="bx bx-search text-primary me-2"></i>Search Everything
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-header border-0 py-0">
-                <div class="search-wrapper w-100 position-relative">
-                    <input type="text" class="form-control form-control-lg ps-5" id="modalSearchInput"
-                        placeholder="{{ get_label('search_placeholder', 'Search [CTRL + K]') }}"
-                        autocomplete="off">
-                    <i class="bx bx-search position-absolute top-50 translate-middle-y ms-3"></i>
-                    <span class="position-absolute top-50 translate-middle-y text-muted end-0 me-3">
-                        {{ get_label('escape_key', '[esc]') }}
-                    </span>
+            <!-- Search Input -->
+            <div class="px-4 pb-3">
+                <div class="position-relative">
+                    <input type="text" class="form-control form-control-lg rounded-3 ps-5 pe-5" id="modalSearchInput"
+                        placeholder="Search projects, tasks, users, and more..." autocomplete="off" aria-label="Global Search Input">
+                    <i class="bx bx-search position-absolute top-50 translate-middle-y fs-5 text-muted ms-3"></i>
+                    <kbd class="position-absolute top-50 translate-middle-y bg-light text-muted small end-0 me-3 rounded border px-2 py-1">
+                        Esc
+                    </kbd>
                 </div>
             </div>
-            <div class="modal-header border-0 pb-0">
-                <div class="row w-100">
-                    <div class="col-md-12">
-                        <h6 class="text-muted mb-3">{{ get_label('popular_pages', 'POPULAR PAGES') }}</h6>
+            <!-- Search Tabs -->
+            <div class="search-tabs d-none px-4 py-2" id="searchTabs">
+                <div class="border-bottom pb-3">
+                    <ul class="nav nav-pills nav-fill bg-light rounded-3 p-1" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active rounded-2 fw-medium" data-tab="all" role="tab" aria-selected="true">
+                                <span class="d-none d-sm-inline">All Results</span>
+                                <span class="d-sm-none">All</span>
+                                <span class="badge bg-primary ms-2" id="allCount">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-2 fw-medium" data-tab="projects" role="tab" aria-selected="false">
+                                <i class="bx bx-briefcase-alt-2 d-sm-none"></i>
+                                <span class="d-none d-sm-inline">Projects</span>
+                                <span class="badge bg-light text-dark ms-1" id="projectsCount">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-2 fw-medium" data-tab="tasks" role="tab" aria-selected="false">
+                                <i class="bx bx-task d-sm-none"></i>
+                                <span class="d-none d-sm-inline">Tasks</span>
+                                <span class="badge bg-light text-dark ms-1" id="tasksCount">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-2 fw-medium" data-tab="workspaces" role="tab" aria-selected="false">
+                                <i class="bx bx-check-square d-sm-none"></i>
+                                <span class="d-none d-sm-inline">Workspaces</span>
+                                <span class="badge bg-light text-dark ms-1" id="workspacesCount">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-2 fw-medium" data-tab="meetings" role="tab" aria-selected="false">
+                                <i class="bx bx-shape-polygon d-sm-none"></i>
+                                <span class="d-none d-sm-inline">Meetings</span>
+                                <span class="badge bg-light text-dark ms-1" id="meetingsCount">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-2 fw-medium" data-tab="users" role="tab" aria-selected="false">
+                                <i class="bx bx-group d-sm-none"></i>
+                                <span class="d-none d-sm-inline">Users</span>
+                                <span class="badge bg-light text-dark ms-1" id="usersCount">0</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Quick Access Section -->
+            <div class="modal-body popular-section px-4 py-3" id="popularSection">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bx bx-star text-warning me-2"></i>
+                    <h6 class="text-body-secondary fw-semibold small text-uppercase letter-spacing-1 mb-0">Quick Access</h6>
+                </div>
+                <div class="row g-2 justify-content-center">
+                    <div class="col-6 col-md-3">
+                        <a href="{{ url(getUserPreferences('projects', 'default_view')) }}"
+                            class="btn btn-outline-primary w-100 d-flex flex-column align-items-center rounded-3 border-2 px-2 py-2">
+                            <i class="bx bx-briefcase-alt-2 fs-5 mb-1"></i>
+                            <span class="fw-medium small">Projects</span>
+                        </a>
                     </div>
-
-                    <div class="col-md-6">
-                        <div class="list-group">
-                            <a href="{{ url(getUserPreferences('projects', 'default_view')) }}"
-                                class="list-group-item list-group-item-action">
-                                <i class="bx bx-briefcase-alt-2 me-2"></i> {{ get_label('projects', 'Projects') }}
-                            </a>
-                            <a href="{{ route('workspaces.index') }}"
-                                class="list-group-item list-group-item-action">
-                                <i class="bx bx-check-square me-2"></i> {{ get_label('workspaces', 'Workspaces') }}
-                            </a>
-                        </div>
+                    <div class="col-6 col-md-3">
+                        <a href="{{ url(getUserPreferences('tasks', 'default_view')) }}"
+                            class="btn btn-outline-success w-100 d-flex flex-column align-items-center rounded-3 border-2 px-2 py-2">
+                            <i class="bx bx-task fs-5 mb-1"></i>
+                            <span class="fw-medium small">Tasks</span>
+                        </a>
                     </div>
-
-                    <div class="col-md-6">
-                        <div class="list-group">
-                            <a href="{{ url(getUserPreferences('tasks', 'default_view')) }}"
-                                class="list-group-item list-group-item-action">
-                                <i class="bx bx-task me-2"></i> {{ get_label('tasks', 'Tasks') }}
-                            </a>
-                            <a href="{{ route('meetings.index') }}"
-                                class="list-group-item list-group-item-action">
-                                <i class="bx bx-shape-polygon me-2"></i> {{ get_label('meetings', 'Meetings') }}
-                            </a>
-                        </div>
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('workspaces.index') }}"
+                            class="btn btn-outline-info w-100 d-flex flex-column align-items-center rounded-3 border-2 px-2 py-2">
+                            <i class="bx bx-check-square fs-5 mb-1"></i>
+                            <span class="fw-medium small">Workspaces</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('meetings.index') }}"
+                            class="btn btn-outline-warning w-100 d-flex flex-column align-items-center rounded-3 border-2 px-2 py-2">
+                            <i class="bx bx-shape-polygon fs-5 mb-1"></i>
+                            <span class="fw-medium small">Meetings</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Recent Searches -->
+                <div class="mt-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bx bx-time text-muted me-2"></i>
+                        <h6 class="text-body-secondary fw-semibold small text-uppercase mb-0">Recent Searches</h6>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" id="recentSearches">
+                        <!-- Populated dynamically -->
                     </div>
                 </div>
             </div>
             <!-- Search Results Section -->
-            <div class="modal-body">
-                <div class="searchResults d-none">
-                    <h6 class="text-muted mb-2">{{ get_label('search_results', 'SEARCH RESULTS') }}</h6>
-                    <div class="h-px-500 list-group overflow-auto" id="searchResultsList"></div>
+            <div class="modal-body px-4 pb-4 pt-0">
+                <div class="search-results d-none">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bx bx-search-alt text-primary me-2"></i>
+                            <h6 class="text-body-secondary fw-semibold small text-uppercase mb-0">Search Results</h6>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill"
+                            onclick="$('#modalSearchInput').val('').trigger('input')">
+                            <i class="bx bx-x me-1"></i>Clear
+                        </button>
+                    </div>
+                    <div class="h-auto rounded-3 bg-body-tertiary border overflow-auto" id="searchResultsList" tabindex="0" role="listbox">
+                        <!-- Results will be populated here -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 {{-- Lead Sources --}}
 @if (Request::is('lead-sources') || Request::is('lead-sources/*'))
     <div class="modal fade" id="create_lead_source_modal" tabindex="-1" aria-hidden="true">
@@ -5558,7 +5529,6 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -5584,7 +5554,6 @@
             </form>
         </div>
     </div>
-
     <div class="modal fade" id="edit_lead_source_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form class="modal-content form-submit-event" action="{{ route('lead-sources.update') }}"
@@ -5596,7 +5565,6 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -5637,7 +5605,6 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -5692,7 +5659,6 @@
             </form>
         </div>
     </div>
-
     <div class="modal fade" id="edit_lead_stage_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form class="modal-content form-submit-event" action="{{ route('lead-stages.update') }}"
@@ -5704,7 +5670,6 @@
                         aria-label="Close"></button>
                 </div>
                 @csrf
-
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -5778,7 +5743,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                     aria-label="{{ get_label('close', 'Close') }}"></button>
             </div>
-
             <div class="modal-body">
                 <div class="mb-3">
                     <label for="template-name"
@@ -5786,14 +5750,12 @@
                             class="text-danger">*</span></label>
                     <input type="text" name="name" id="template-name" class="form-control" required>
                 </div>
-
                 <div class="mb-3">
                     <label for="template-subject"
                         class="form-label">{{ get_label('email_subject', 'Email Subject') }} <span
                             class="text-danger">*</span></label>
                     <input type="text" name="subject" id="template-subject" class="form-control" required>
                 </div>
-
                 <div class="mb-3">
                     <label for="template-body" class="form-label">
                         {{ get_label('email_body', 'Email Body') }} <span class="text-danger">*</span>
@@ -5808,9 +5770,7 @@
                         @include('partials.default_email_template')
                     </textarea>
                 </div>
-
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary"
                     data-bs-dismiss="modal">{{ get_label('cancel', 'Cancel') }}</button>
@@ -5820,7 +5780,6 @@
         </form>
     </div>
 </div>
-
 {{-- modal for editing emal template --}}
 <!-- Edit Email Template Modal -->
 <!-- Modal -->
@@ -5838,21 +5797,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
-
                 <div class="modal-body">
                     <input type="hidden" id="editTemplateId">
-
                     <div class="mb-3">
                         <label for="editTemplateName" class="form-label">Template Name</label>
                         <input type="text" class="form-control" id="editTemplateName" name="name"
                             required>
                     </div>
-
                     <div class="mb-3">
                         <label for="editSubject" class="form-label">Email Subject</label>
                         <input type="text" class="form-control" id="editSubject" name="subject" required>
                     </div>
-
                     <div class="mb-3">
                         <label for="editBody" class="form-label">Email Body</label>
                         <div class="form-text alert alert-primary text-dark mb-2">
@@ -5862,11 +5817,9 @@
                             <code>{{ '{project_title}' }}</code>
                             {{ get_label('placeholder_hint', 'etc. – these will be dynamically replaced when sending the email.') }}
                         </div>
-
                         <textarea class="form-control" id="editBody" name="content" required>@include('partials.default_email_template')</textarea>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" id="submit_btn" class="btn btn-primary">Update Template</button>
@@ -5875,9 +5828,6 @@
         </div>
     </div>
 </div>
-
-
-
 {{-- modal for showing placeholders in email template table --}}
 <div class="modal fade" id="placeholdersModal" tabindex="-1" aria-labelledby="placeholdersModalLabel"
     aria-hidden="true">
@@ -5893,9 +5843,7 @@
         </div>
     </div>
 </div>
-
 {{-- modal for previewing email before sending --}}
-
 {{-- Preview Modal --}}
 <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -5909,7 +5857,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                     aria-label="{{ get_label('close', 'Close') }}"></button>
             </div>
-
             <!-- Modal Body -->
             <div class="modal-body p-0">
                 <div class="p-4">
@@ -5924,7 +5871,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Modal Footer with single action button -->
             <div class="modal-footer border-top bg-light p-4 pt-3">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
@@ -5942,12 +5888,10 @@
         <form class="modal-content form-submit-event" action="{{ route('custom_fields.store') }}" method="POST">
             @csrf
             <input type="hidden" name="table" value="custom_fields_table">
-
             <div class="modal-header">
                 <h5 class="modal-title">{{ get_label('add_field', 'Add Field') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -5958,13 +5902,11 @@
                             <option value="task">{{ get_label('task', 'Task') }}</option>
                         </select>
                     </div>
-
                     <div class="col-md-6 mb-3">
                         <label for="field_label" class="form-label">{{ get_label('field_label', 'Field Label') }} <span class="asterisk">*</span></label>
                         <input type="text" class="form-control" id="field_label" name="field_label" placeholder="{{ get_label('enter_field_label', 'Enter Field Label') }}" required>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">{{ get_label('is_required', 'Is Required') }}</label>
@@ -5979,7 +5921,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-6 mb-3">
                         <label for="field_type" class="form-label">{{ get_label('field_type', 'Field Type') }}</label>
                         <select class="form-select" id="field_type" name="field_type">
@@ -5994,7 +5935,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-12 mb-3">
                         <div class="form-check form-switch">
@@ -6005,11 +5945,9 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Options (for select, radio, etc) -->
                 <div id="field_options_container" class="d-none"></div>
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     {{ get_label('cancel', 'Cancel') }}
@@ -6021,7 +5959,6 @@
         </form>
     </div>
 </div> --}}
-
 @if (Request::is('custom-fields') || Request::is('settings/custom-fields'))
     <!-- Add Field Modal -->
     <div class="modal fade" id="add_field_modal" tabindex="-1" aria-hidden="true">
@@ -6089,7 +6026,6 @@
                                     <option value="date">Date</option>
                                     <option value="checkbox">Check Box</option>
                                     <option value="select">Select</option>
-
                                 </select>
                             </div>
                         </div>
@@ -6118,7 +6054,6 @@
             </form>
         </div>
     </div>
-
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="delete_field_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -6143,13 +6078,7 @@
         </div>
     </div>
 @endif
-
-
-
-
-
 {{-- Here starts modals for HRMS --}}
-
 <!-- Candidate Create Modal -->
 <div class="modal fade" id="candidateModal" tabindex="-1" aria-labelledby="candidateModalLabel"
     aria-hidden="true">
@@ -6159,7 +6088,6 @@
             @csrf
             <input type="hidden" name="dnr" />
             <input type="hidden" name="table" value="table" />
-
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="candidateModalLabel">
@@ -6167,7 +6095,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="{{ get_label('close', 'Close') }}"></button>
                 </div>
-
                 <div class="modal-body row g-3">
                     <div class="col-md-6">
                         <label for="name" class="form-label">{{ get_label('full_name', 'Full Name') }} <span
@@ -6175,33 +6102,28 @@
                         <input type="text" name="name" class="form-control"
                             placeholder="{{ get_label('full_name', 'Full Name') }}" required>
                     </div>
-
                     <div class="col-md-6">
                         <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
                                 class="text-danger">*</span></label>
                         <input type="email" name="email" class="form-control"
                             placeholder="{{ get_label('email', 'Email') }}" required>
                     </div>
-
                     <div class="col-md-6">
                         <label for="phone"
                             class="form-label">{{ get_label('phone_number', 'Phone Number') }}</label>
                         <input type="text" name="phone" class="form-control"
                             placeholder="{{ get_label('phone_number', 'Phone Number') }}">
                     </div>
-
                     <div class="col-md-6">
                         <label for="position" class="form-label">{{ get_label('position', 'Position') }}</label>
                         <input type="text" name="position" class="form-control"
                             placeholder="{{ get_label('position', 'Position') }}">
                     </div>
-
                     <div class="col-md-6">
                         <label for="source" class="form-label">{{ get_label('source', 'Source') }}</label>
                         <input type="text" name="source" class="form-control"
                             placeholder="{{ get_label('source', 'Source') }}">
                     </div>
-
                     <div class="col-12">
                         <label for="attachments" class="form-label fw-semibold">
                             {{ get_label('attachments', 'Attachments') }}
@@ -6222,10 +6144,8 @@
                                 class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <label for="status" class="form-label">{{ get_label('status', 'Status') }}</label>
-
                         @if (isset($statuses) && $statuses->isNotEmpty())
                             <select name="status_id" class="form-select" required>
                                 <option value="">{{ get_label('select_status', 'Select Status') }}</option>
@@ -6241,7 +6161,6 @@
                         @endif
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button id="submit_btn" class="btn btn-primary">{{ get_label('create', 'Create') }}</button>
                     <button type="button" class="btn btn-secondary"
@@ -6251,7 +6170,6 @@
         </form>
     </div>
 </div>
-
 <!-- Candidate Update Modal -->
 <div class="modal fade" id="candidateUpdateModal" tabindex="-1" aria-labelledby="candidateUpdateModalLabel"
     aria-hidden="true">
@@ -6261,7 +6179,6 @@
             @method('PUT')
             <input type="hidden" name="dnr" />
             <input type="hidden" name="table" value="table" />
-
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="candidateUpdateModalLabel">
@@ -6269,35 +6186,29 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="{{ get_label('close', 'Close') }}"></button>
                 </div>
-
                 <div class="modal-body row g-3">
                     <div class="col-md-6">
                         <label for="name" class="form-label">{{ get_label('full_name', 'Full Name') }} <span
                                 class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control" id="candidateName" required>
                     </div>
-
                     <div class="col-md-6">
                         <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
                                 class="text-danger">*</span></label>
                         <input type="email" name="email" class="form-control" id="candidateEmail" required>
                     </div>
-
                     <div class="col-md-6">
                         <label for="phone" class="form-label">{{ get_label('phone', 'Phone') }}</label>
                         <input type="text" name="phone" class="form-control" id="candidatePhone">
                     </div>
-
                     <div class="col-md-6">
                         <label for="position" class="form-label">{{ get_label('position', 'Position') }}</label>
                         <input type="text" name="position" class="form-control" id="candidatePosition">
                     </div>
-
                     <div class="col-md-6">
                         <label for="source" class="form-label">{{ get_label('source', 'Source') }}</label>
                         <input type="text" name="source" class="form-control" id="candidateSource">
                     </div>
-
                     <div class="col-12">
                         <label for="attachments" class="form-label fw-semibold">
                             {{ get_label('attachments', 'Attachments') }}
@@ -6318,7 +6229,6 @@
                                 class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <label for="status" class="form-label">{{ get_label('status', 'Status') }}</label>
                         @if (isset($statuses) && $statuses->isNotEmpty())
@@ -6336,7 +6246,6 @@
                         @endif
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="submit" id="submit_btn"
                         class="btn btn-primary">{{ get_label('update', 'Update') }}</button>
@@ -6347,9 +6256,6 @@
         </form>
     </div>
 </div>
-
-
-
 <!-- Create Status Modal -->
 <div class="modal fade" id="createStatusModal" tabindex="-1" aria-labelledby="createStatusLabel"
     aria-hidden="true">
@@ -6399,7 +6305,6 @@
                             </option>
                         </select>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="submit" id="submit_btn" class="btn btn-primary">Create</button>
@@ -6409,8 +6314,6 @@
         </form>
     </div>
 </div>
-
-
 <!-- Edit Status Modal -->
 <div class="modal fade" id="editStatusModal" tabindex="-1" aria-labelledby="editStatusLabel"
     aria-hidden="true">
@@ -6464,8 +6367,6 @@
         </form>
     </div>
 </div>
-
-
 <!-- Upload Attachment Modal -->
 @if (isset($candidate))
     <div class="modal fade" id="uploadAttachmentModal" tabindex="-1" aria-hidden="true">
@@ -6505,10 +6406,7 @@
         </div>
     </div>
 @endif
-
-
 <!-- Create Interview Modal -->
-
 @if (isset($candidates) && isset($users))
     <div class="modal fade" id="createInterviewModal" tabindex="-1" role="dialog"
         aria-labelledby="createInterviewModalLabel" aria-hidden="true">
@@ -6517,17 +6415,14 @@
                 <form id="createInterviewForm" action="{{ route('interviews.store') }}" method="POST"
                     class="form-submit-event">
                     @csrf
-
                     <input type="hidden" name="dnr" />
-                    <input type="hidden" name="table" value="table" />
+                    <input type="hidden" name="table" value="interviews_table" />
                     <input type="hidden" id="editStatusId" />
-
                     <div class="modal-header">
                         <h5 class="modal-title" id="createInterviewModalLabel">Schedule Interview</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body row g-3">
                         {{-- Candidate --}}
                         <div class="form-group col-md-6">
@@ -6544,7 +6439,6 @@
                                 </select>
                             @endif
                         </div>
-
                         {{-- Interviewer --}}
                         <div class="form-group col-md-6">
                             <label for="interviewer_id">Interviewer <span class="text-danger">*</span></label>
@@ -6554,20 +6448,17 @@
                                 data-single-select="true">
                             </select>
                         </div>
-
                         {{-- Round --}}
                         <div class="form-group col-md-6">
                             <label for="round">Round <span class="text-danger">*</span></label>
                             <input type="text" name="round" class="form-control"
                                 placeholder="e.g. Technical, HR" required>
                         </div>
-
                         {{-- Scheduled At --}}
                         <div class="form-group col-md-6">
                             <label for="scheduled_at">Scheduled At <span class="text-danger">*</span></label>
                             <input type="datetime-local" name="scheduled_at" class="form-control" required>
                         </div>
-
                         {{-- Mode --}}
                         <div class="form-group col-md-6">
                             <label for="mode">Mode <span class="text-danger">*</span></label>
@@ -6577,15 +6468,12 @@
                                 <option value="offline">Offline</option>
                             </select>
                         </div>
-
                         {{-- Location --}}
                         <div class="form-group col-md-6">
                             <label for="location">Location</label>
                             <input type="text" name="location" class="form-control"
                                 placeholder="e.g. Zoom link or Office Room No.">
                         </div>
-
-
                         {{-- Status --}}
                         <div class="form-group col-md-6">
                             <label for="status">Status <span class="text-danger">*</span></label>
@@ -6597,7 +6485,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                         <button type="submit" id="submit_btn" class="btn btn-primary">Create Interview</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -6607,8 +6494,6 @@
         </div>
     </div>
 @endif
-
-
 @if (isset($candidates) && isset($users))
     <div class="modal fade" id="editInterviewModal" tabindex="-1" role="dialog"
         aria-labelledby="editInterviewModalLabel" aria-hidden="true">
@@ -6618,16 +6503,14 @@
                     @csrf
                     @method('PUT') <!-- This is important for updating -->
                     <input type="hidden" name="dnr" />
-                    <input type="hidden" name="table" value="table" />
+                    <input type="hidden" name="table" value="interviews_table" />
                     <input type="hidden" id="editStatusId" />
-
                     <div class="modal-header">
                         <h5 class="modal-title" id="editInterviewModalLabel">Edit Interview</h5>
                         <!-- Close button placed correctly within the header -->
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
                     <div class="modal-body row">
                         <div class="form-group col-md-6">
                             <label for="candidate_id">Candidate</label>
@@ -6636,7 +6519,6 @@
                                     class="form-control select-interview-candidate" required
                                     data-placeholder="{{ get_label('select_candidate', 'Select Candidate') }}"
                                     data-single-select="true">
-
                                     @foreach ($candidates as $candidate)
                                         <option value="{{ $candidate->id }}">
                                             {{ $candidate->name }}
@@ -6649,14 +6531,12 @@
                                 </select>
                             @endif
                         </div>
-
                         <div class="form-group col-md-6">
                             <label for="interviewer_id">Interviewer</label>
                             <select name="interviewer_id" id="interviewer_id"
                                 class="form-control select-interview-interviewer" required
                                 data-placeholder="{{ get_label('select_interviewer', 'Select Interviewer') }}"
                                 data-single-select="true">
-
                                 @foreach ($users as $user)
                                     <option value="{{ $user->id }}">
                                         {{ $user->first_name . ' ' . $user->last_name }}
@@ -6664,19 +6544,16 @@
                                 @endforeach
                             </select>
                         </div>
-
                         <div class="form-group col-md-6">
                             <label for="round">Round</label>
                             <input type="text" name="round" id="round" class="form-control"
                                 placeholder="e.g. Technical, HR" required>
                         </div>
-
                         <div class="form-group col-md-6">
                             <label for="scheduled_at">Scheduled At</label>
                             <input type="datetime-local" name="scheduled_at" id="scheduled_at"
                                 class="form-control" required>
                         </div>
-
                         <div class="form-group col-md-6">
                             <label for="mode">Mode</label>
                             <select name="mode" id="mode" class="form-control" required>
@@ -6685,13 +6562,11 @@
                                 <option value="offline">Offline</option>
                             </select>
                         </div>
-
                         <div class="form-group col-md-6">
                             <label for="location">Location</label>
                             <input type="text" name="location" id="location" class="form-control"
                                 placeholder="e.g. Zoom link or Office Room No.">
                         </div>
-
                         <!-- New Status Field for Editing -->
                         <div class="form-group col-md-6">
                             <label for="status">Status</label>
@@ -6713,10 +6588,6 @@
         </div>
     </div>
 @endif
-
-
-
-
 <!-- Quick View Modal for candidate kanban-->
 <div class="modal fade" id="candidateQuickViewModal" tabindex="-1"
     aria-labelledby="candidateQuickViewModalLabel" aria-hidden="true">
@@ -6744,7 +6615,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Candidate Details -->
                 <div class="card mb-4">
                     <div class="card-body">
@@ -6776,7 +6646,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Attachments -->
                 <div class="card mb-4">
                     <h5 class="card-header">{{ get_label('attachments', 'Attachments') }}</h5>
@@ -6807,7 +6676,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Interviews -->
                 <div class="card">
                     <h5 class="card-header">{{ get_label('interviews', 'Interviews') }}</h5>
@@ -6844,13 +6712,11 @@
         </div>
     </div>
 </div>
-
 <!-- Interview Details Modal -->
 <div class="modal fade" id="interviewDetailsModal" tabindex="-1" aria-labelledby="interviewDetailsModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content rounded-3 border-0 shadow-sm">
-
             <!-- Modal Header -->
             <div class="modal-header bg-light border-bottom">
                 <h5 class="modal-title" id="interviewDetailsModalLabel">
@@ -6860,7 +6726,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                     aria-label="{{ get_label('close', 'Close') }}"></button>
             </div>
-
             <!-- Modal Body -->
             <div class="modal-body text-capitalize p-4" id="interviewDetailsContent">
                 <!-- Loading Spinner -->
@@ -6869,7 +6734,6 @@
                         <span class="visually-hidden">{{ get_label('loading', 'Loading...') }}</span>
                     </div>
                 </div>
-
                 <!-- Dynamic Content -->
                 <div id="interviewData" class="d-none">
                     <div class="row mb-3">
@@ -6883,7 +6747,6 @@
                             <div class="text-muted" id="interviewPosition">—</div>
                         </div>
                     </div>
-
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label
@@ -6896,7 +6759,6 @@
                             <div class="text-muted" id="interviewTime">—</div>
                         </div>
                     </div>
-
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label
@@ -6908,7 +6770,6 @@
                             <div class="text-muted" id="interviewMode">—</div>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <label
                             class="form-label fw-semibold">{{ get_label('additional_notes', 'Additional Notes') }}</label>
@@ -6916,7 +6777,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Modal Footer -->
             <div class="modal-footer bg-light border-top">
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">

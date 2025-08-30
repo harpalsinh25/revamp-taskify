@@ -27,8 +27,31 @@ addDebouncedEventListener('#workspace_user_filter, #workspace_client_filter', 'c
     }
 });
 $(document).on('click', '.clear-workspaces-filters', function (e) {
-    e.preventDefault();  
+    e.preventDefault();
     $('#workspace_user_filter').val('').trigger('change', [0]);
     $('#workspace_client_filter').val('').trigger('change', [0]);
     $('#table').bootstrapTable('refresh');
 })
+// Include table-filter-sync.js before this
+$(document).ready(function () {
+    const workspaceFilterSync = new TableFilterSync({
+        tableId: 'table',
+        dataType: 'workspaces',
+        filters: [
+            {
+                selector: '#workspace_user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#workspace_client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
+    });
+});

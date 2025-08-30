@@ -1,5 +1,4 @@
 'use strict';
-
 function queryParams(p) {
     return {
         "types": $('#type_filter').val(),
@@ -21,14 +20,12 @@ function queryParams(p) {
         search: p.search
     };
 }
-
 addDebouncedEventListener('#type_filter, #client_filter, #created_by_filter, #filter_starts_at, #filter_ends_at, #user_creators_filter, #client_creators_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {
         $('#table').bootstrapTable('refresh');
     }
 });
-
 $(document).on('click', '.clear-estimates-invoices-filters', function (e) {
     e.preventDefault();
     $('#ie_date_between').val('');
@@ -46,18 +43,13 @@ $(document).on('click', '.clear-estimates-invoices-filters', function (e) {
     $('#type_filter').val('').trigger('change', [0]);
     $('#table').bootstrapTable('refresh');
 })
-
-
 $('#start_date_between').on('apply.daterangepicker', function (ev, picker) {
     var startDate = picker.startDate.format('YYYY-MM-DD');
     var endDate = picker.endDate.format('YYYY-MM-DD');
-
     $('#start_date_from').val(startDate);
     $('#start_date_to').val(endDate);
-
     $('#table').bootstrapTable('refresh');
 });
-
 $('#start_date_between').on('cancel.daterangepicker', function (ev, picker) {
     $('#start_date_from').val('');
     $('#start_date_to').val('');
@@ -67,14 +59,11 @@ $('#start_date_between').on('cancel.daterangepicker', function (ev, picker) {
     picker.updateElement();
     $('#table').bootstrapTable('refresh');
 });
-
 $('#end_date_between').on('apply.daterangepicker', function (ev, picker) {
     var startDate = picker.startDate.format('YYYY-MM-DD');
     var endDate = picker.endDate.format('YYYY-MM-DD');
-
     $('#end_date_from').val(startDate);
     $('#end_date_to').val(endDate);
-
     $('#table').bootstrapTable('refresh');
 });
 $('#end_date_between').on('cancel.daterangepicker', function (ev, picker) {
@@ -86,7 +75,6 @@ $('#end_date_between').on('cancel.daterangepicker', function (ev, picker) {
     picker.updateElement();
     $('#table').bootstrapTable('refresh');
 });
-
 $(document).ready(function () {
     $('#ie_date_between').on('apply.daterangepicker', function (ev, picker) {
         var startDate = picker.startDate.format('YYYY-MM-DD');
@@ -95,7 +83,6 @@ $(document).ready(function () {
         $('#date_between_to').val(endDate);
         $('#table').bootstrapTable('refresh');
     });
-
     // Cancel event to clear values
     $('#ie_date_between').on('cancel.daterangepicker', function (ev, picker) {
         $('#date_between_from').val('');
@@ -107,25 +94,20 @@ $(document).ready(function () {
         $('#table').bootstrapTable('refresh');
     });
 });
-
-
 window.icons = {
     refresh: 'bx-refresh',
     toggleOn: 'bx-toggle-right',
     toggleOff: 'bx-toggle-left'
 }
-
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>'
 }
-
 function idFormatter(value, row, index) {
     var idPrefix = (row.type == 'Estimate') ? label_estimate_id_prefix : (row.type == 'Invoice') ? label_invoice_id_prefix : '';
     return [
         '<a href="' + baseUrl + '/estimates-invoices/view/' + row.id + '">' + idPrefix + row.id + '</a>'
     ];
 }
-
 $(document).on('click', '.status-badge', function (e) {
     var status = $(this).data('status');
     var type = $(this).data('type');
@@ -133,7 +115,6 @@ $(document).on('click', '.status-badge', function (e) {
     $('#type_filter').val(type).trigger('change', [0]);
     $('#table').bootstrapTable('refresh');
 });
-
 // Define status options for each type
 const statusOptions = {
     'estimate': [
@@ -151,36 +132,28 @@ const statusOptions = {
         { value: 'due', text: label_due }
     ]
 };
-
 // Function to update status dropdown options
 function updateStatusOptions(type) {
     const statusSelect = $('#status');
-
     // Clear all options except the empty option if type is empty
     if (!type) {
         statusSelect.empty().append('<option></option>'); // Keep the empty option
         return; // Exit the function
     }
-
     // Clear existing options but retain the empty option
     statusSelect.empty().append('<option></option>');
-
     // Add new options based on selected type
     const options = statusOptions[type] || [];
     options.forEach(function (option) {
         statusSelect.append($('<option></option>').attr('value', option.value).text(option.text));
     });
 }
-
 // Event listener for type selection change
 $('#type').on('change', function (e) {
     const selectedType = $(this).val();
     updateStatusOptions(selectedType);
 });
-
-
 $('#client_id').on('change', function (e) {
-
     var client_id = $('#client_id').val();
     if (client_id != '') {
         $.ajax({
@@ -193,37 +166,31 @@ $('#client_id').on('change', function (e) {
                 $('.billing_name').html(result.client.first_name + ' ' + result.client.last_name);
                 $('#update_name').val(result.client.first_name + ' ' + result.client.last_name);
                 $('#name').val(result.client.first_name + ' ' + result.client.last_name);
-
                 if (result.address) {
                     $('.billing_address').html(result.client.address);
                     $("textarea#update_address").val(result.client.address);
                     $('#address').val(result.client.address);
                 }
-
                 if (result.client.phone) {
                     $('.billing_contact').html(result.client.phone);
                     $('#update_contact').val(result.client.phone);
                     $('#contact').val(result.client.phone);
                 }
-
                 if (result.client.city) {
                     $('.billing_city').html(result.client.city);
                     $('#update_city').val(result.client.city);
                     $('#city').val(result.client.city);
                 }
-
                 if (result.client.state) {
                     $('.billing_state').html(result.client.state);
                     $('#update_state').val(result.client.state);
                     $('#state').val(result.client.state);
                 }
-
                 if (result.client.country) {
                     $('.billing_country').html(result.client.country);
                     $('#update_country').val(result.client.country);
                     $('#country').val(result.client.country);
                 }
-
                 if (result.client.zip) {
                     $('.billing_zip').html(result.client.zip);
                     $('#update_zip_code').val(result.client.zip);
@@ -239,7 +206,6 @@ $('#client_id').on('change', function (e) {
         $('.billing_country').html('--');
         $('.billing_zip').html('--');
         $('.billing_contact').html('--');
-
         $('#update_name').val('');
         $("textarea#update_address").val('');
         $('#update_city').val('');
@@ -247,21 +213,16 @@ $('#client_id').on('change', function (e) {
         $('#update_zip_code').val('');
         $('#update_country').val('');
         $('#update_contact').val('');
-
         $('#name').val('');
         $("textarea#address").val('');
         $('#contact').val('');
     }
-
 });
-
 $(document).on('click', '.edit-billing-details', function () {
     $('#edit-billing-address').modal('show');
 });
-
 $(document).on('click', '#apply_billing_details', function (e) {
     e.preventDefault();
-
     var name = $('#update_name').val();
     var address = $("textarea#update_address").val();
     var city = $('#update_city').val();
@@ -273,7 +234,6 @@ $(document).on('click', '#apply_billing_details', function (e) {
         $('#apply_billing_details').html(label_please_wait).attr('disabled', true);
         $('.billing_name').html(name);
         $('#name').val(name);
-
         if (address) {
             $('.billing_address').html(address);
             $("#address").val(address);
@@ -281,7 +241,6 @@ $(document).on('click', '#apply_billing_details', function (e) {
             $('.billing_address').html('--');
             $('#address').val('');
         }
-
         if (city) {
             $('.billing_city').html(city);
             $('#city').val(city);
@@ -289,7 +248,6 @@ $(document).on('click', '#apply_billing_details', function (e) {
             $('.billing_city').html('--');
             $('#city').val('');
         }
-
         if (state) {
             $('.billing_state').html(state);
             $('#state').val(state);
@@ -297,7 +255,6 @@ $(document).on('click', '#apply_billing_details', function (e) {
             $('.billing_state').html('--');
             $('#state').val('');
         }
-
         if (country) {
             $('.billing_country').html(country);
             $('#country').val(country);
@@ -305,7 +262,6 @@ $(document).on('click', '#apply_billing_details', function (e) {
             $('.billing_country').html('--');
             $('#country').val('');
         }
-
         if (zip_code) {
             $('.billing_zip').html(zip_code);
             $('#zip_code').val(zip_code);
@@ -313,7 +269,6 @@ $(document).on('click', '#apply_billing_details', function (e) {
             $('.billing_zip').html('--');
             $('#zip_code').val('');
         }
-
         if (contact) {
             $('.billing_contact').html(contact);
             $('#contact').val(contact);
@@ -321,7 +276,6 @@ $(document).on('click', '#apply_billing_details', function (e) {
             $('.billing_contact').html('--');
             $('#contact').val('');
         }
-
         $('#apply_billing_details').html(label_apply).attr('disabled', false);
         $('#edit-billing-address').modal('hide');
         toastr.success(label_billing_details_updated_successfully);
@@ -329,10 +283,7 @@ $(document).on('click', '#apply_billing_details', function (e) {
         toastr.error(label_please_enter_name);
     }
 });
-
-
 $('#item_id').on('change', function (e) {
-
     var item_id = $('#item_id').val();
     if (item_id !== null && item_id !== '') {
         $.ajax({
@@ -368,12 +319,9 @@ $('#item_id').on('select2:clear', function () {
     $('#item_0_tax').val('');
     $('#item_0_amount').val('');
 });
-
-
 $('#add-item').on('click', function (e) {
     e.preventDefault();
     var html = '';
-
     var title = $("#item_0_title").val();
     var quantity = $("#item_0_quantity").val();
     var rate = $("#item_0_rate").val();
@@ -386,11 +334,8 @@ $('#add-item').on('click', function (e) {
     if (title != '' && quantity != '' && rate != '' && amount != '') {
         var item_id = $("#item_id").val();
         var item_ids = $("#item_ids").val();
-
         item_ids = item_ids.split(',');
-
         var exists = item_ids.includes(item_id);
-
         if (!exists) {
             $('#item_id').val('').trigger('change');
             items_count++
@@ -439,7 +384,6 @@ $('#add-item').on('click', function (e) {
                 '<button type="button" class="btn btn-sm btn-danger my-1 remove-estimate-invoice-item" data-count=' + items_count + '><i class="bx bx-trash"></i></button>' +
                 '</div>' +
                 '</div></div>';
-
             $('#estimate-invoice-items').append(html);
             $('#item_' + items_count).val(item_id);
             $('#item_' + items_count + '_title').val(title);
@@ -451,7 +395,6 @@ $('#add-item').on('click', function (e) {
             $('#item_' + items_count + '_amount').val(amount);
             $('.item_' + items_count + '_tax_title').text(tax_title);
             updateTotals();
-
             $("#item_0_title").val('');
             $("#item_0_description").val('');
             $("#item_0_quantity").val('');
@@ -460,28 +403,22 @@ $('#add-item').on('click', function (e) {
             $("#item_0_tax").val('');
             $("#item_0_amount").val('');
             $(".item_0_tax_title").text('');
-
         } else {
             toastr.error('Item already added.');
         }
-
     } else {
         toastr.error('Please fill all required fields.');
     }
-
 });
-
 function updateTotals() {
     var subTotalWithTax = 0;
     var totalTaxAmount = 0;
     var finalTotal = 0;
-
     // Loop through items and calculate subTotalWithTax
     $("input[name='amount[]']").each(function () {
         var amount = parseFloat($(this).val()) || 0;
         subTotalWithTax += amount;
     });
-
     // Loop through items and calculate totalTaxAmount
     $("input[name='tax_amount[]']").each(function () {
         var taxAmount;
@@ -492,24 +429,17 @@ function updateTotals() {
         }
         totalTaxAmount += taxAmount;
     });
-
     // Calculate subTotal by deducting totalTaxAmount from subTotalWithTax
     var subTotal = subTotalWithTax - totalTaxAmount;
-
     // Update sub_total
     $("#sub_total").val(subTotal.toFixed(decimal_points));
-
     // Update total_tax
     $("#total_tax").val(totalTaxAmount.toFixed(decimal_points));
-
     // Calculate finalTotal by adding subTotal and totalTaxAmount
     finalTotal = subTotalWithTax;
     $("#final_total").val(finalTotal.toFixed(decimal_points));
 }
-
-
 function update_amount(itemIndex, isUpdateTotals = 1) {
-
     // Get values from input fields
     var quantity = parseFloat($("#item_" + itemIndex + "_quantity").val()) || 0;
     var rate = parseFloat(removeCommas($("#item_" + itemIndex + "_rate").val())) || 0;
@@ -562,50 +492,37 @@ function update_amount(itemIndex, isUpdateTotals = 1) {
         }
     }
 }
-
-
-
-
 function updateFinalTotal() {
     var finalTotal = 0;
-
     var taxAmountField = $("#total_tax");
     var Taxamount = parseFloat(taxAmountField.val()) || 0;
-
     var subTotalField = $("#sub_total");
     var subTotal = parseFloat(subTotalField.val()) || 0;
-
     finalTotal = subTotal += Taxamount;
     $("#final_total").val(finalTotal.toFixed(decimal_points));
 }
-
 // Helper function to remove commas from a string
 function removeCommas(str) {
     return str.replace(/,/g, '');
 }
-
 $(document).on('click', '.remove-estimate-invoice-item', function (e) {
     e.preventDefault();
     var count = $(this).data('count');
     var item_id = $("#item_" + count).val();
     var item_ids = $("#item_ids").val().split(','); // Split the string into an array
     var index = $.inArray(item_id.toString(), item_ids);
-
     if (index !== -1) {
         // Remove the item_id from the array
         item_ids.splice(index, 1);
         // Update the #item_ids input value with the modified string
         $("#item_ids").val(item_ids.join(',')); // Join the array back into a string
     }
-
     $(this).closest('.estimate-invoice-item').remove();
     updateTotals();
     items_count--;
-
     // Reassign indices to the remaining items
     $('.estimate-invoice-item').each(function (index) {
         var displayIndex = index + 1; // Increment the index by 1 for display
-
         // Update IDs and names
         $(this).find('input[name="item[]"]').attr('id', 'item_' + displayIndex);
         $(this).find('input[name="title[]"]').attr('id', 'item_' + displayIndex + '_title');
@@ -616,13 +533,69 @@ $(document).on('click', '.remove-estimate-invoice-item', function (e) {
         $(this).find('select[name="unit[]"]').attr('id', 'item_' + displayIndex + '_unit');
         $(this).find('select[name="tax[]"]').attr('id', 'item_' + displayIndex + '_tax').attr('onchange', 'update_amount(' + displayIndex + ')');
         $(this).find('input[name="tax_amount[]"]').attr('name', 'tax_amount[]');
-
         // Update tax title classes
         $(this).find('.item_' + (displayIndex + 1) + '_tax_title').each(function () {
             $(this).removeClass('item_' + (displayIndex + 1) + '_tax_title').addClass('item_' + displayIndex + '_tax_title');
         });
-
         // Update the data-count attribute for remove buttons
         $(this).find('.remove-estimate-invoice-item').data('count', displayIndex);
+    });
+});
+
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const ieFilterSync = new TableFilterSync({
+        tableId: 'table',
+        dataType: 'estimates-invoices',
+        filters: [
+            {
+                selector: '#ie_date_between',
+                type: 'daterangepicker',
+                name: 'ie_date_between',
+                hiddenFrom: '#date_between_from',
+                hiddenTo: '#date_between_to'
+            },
+            {
+                selector: '#start_date_between',
+                type: 'daterangepicker',
+                name: 'start_date_between',
+                hiddenFrom: '#start_date_from',
+                hiddenTo: '#start_date_to'
+            },
+            {
+                selector: '#end_date_between',
+                type: 'daterangepicker',
+                name: 'end_date_between',
+                hiddenFrom: '#end_date_from',
+                hiddenTo: '#end_date_to'
+            },
+            {
+                selector: '#user_creators_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#client_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+            {
+                selector: '#client_creators_filter',
+                type: 'select2',
+                name: 'client_ids',
+                ajaxType: 'clients'
+            },
+
+            {
+                selector: '#type_filter',
+                type: 'select2',
+                name: 'types',
+                ajaxType: null
+            }
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParams // Reuse existing function
     });
 });

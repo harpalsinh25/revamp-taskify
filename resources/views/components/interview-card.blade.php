@@ -8,7 +8,7 @@
                             placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
                     </div>
                     <input type="hidden" id="interview_date_between_from" name="start_date" />
-                                <input type="hidden" id="interview_date_between_to" name="end_date" />
+                    <input type="hidden" id="interview_date_between_to" name="end_date" />
                 </div>
                 <div class="col-md-3 mb-3">
                     <select class="form-select js-example-basic-multiple" id="sort" name="sort"
@@ -27,28 +27,23 @@
                             <?= get_label('least_recently_updated', 'Least recently updated') ?></option>
                     </select>
                 </div>
-
-           <div class="col-md-4 mb-3">
-            <select class="form-select" id="interview_status" name="status"
-                aria-label="Default select example"
-                data-placeholder="{{ get_label('filter_by_statuses', 'Filter by statuses') }}"
-                data-allow-clear="true">
-                <option value="">-- Select Status --</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
-        </div>
-
-
-
-
+                <div class="col-md-4 mb-3">
+                    <select class="form-select" id="interview_status" name="status" aria-label="Default select example"
+                        data-placeholder="{{ get_label('filter_by_statuses', 'Filter by statuses') }}"
+                        data-allow-clear="true">
+                        <option value="">-- Select Status --</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
             </div>
             {{ $slot }}
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="data_type" value="interviews">
+                <input type="hidden" id="data_table" value="interviews_table">
                 {{-- <input type="hidden" id="data_reload" value="0"> --}}
-                <table id="table" data-toggle="table" data-url="{{ route('interviews.list') }}"
+                <table id="interviews_table" data-toggle="table" data-url="{{ route('interviews.list') }}"
                     data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total"
                     data-data-field="rows" data-page-list="[5, 10, 20, 50, 100]" data-search="true"
                     data-side-pagination="server" data-pagination="true" data-sort-name="id" data-sort-order="desc"
@@ -75,7 +70,6 @@
                     </thead>
                 </table>
             </div>
-
         </div>
     </div>
 @else

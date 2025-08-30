@@ -886,12 +886,7 @@ function initializeDateRangePicker(inputSelector) {
             return isInOverlay;
         });
 
-        // Debug: Check if offcanvas exists
-        if ($("#create_project_offcanvas").length) {
-            console.log("Found #create_project_offcanvas in DOM");
-        } else {
-            console.warn("#create_project_offcanvas not found in DOM");
-        }
+
 
         /**
          * Configuration for DateRangePicker.
@@ -1094,12 +1089,7 @@ function resetDateFields($form) {
                 return isInOverlay;
             });
 
-            // Debug: Check if offcanvas exists
-            if ($("#create_project_offcanvas").length) {
-                console.log("Found #create_project_offcanvas in DOM");
-            } else {
-                console.warn("#create_project_offcanvas not found in DOM");
-            }
+
 
             /**
              * Configuration for DateRangePicker.
@@ -4360,46 +4350,6 @@ $(document).on("change", "#prioritySelect", function (e) {
         }
     );
 });
-$(document).on("click", ".quick-view", function (e) {
-    e.preventDefault();
-    var id = $(this).data("id");
-    var type = $(this).data("type") || "task";
-    $("#type").val(type);
-    $("#typeId").val(id);
-    $.ajax({
-        url: baseUrl + "/" + type + "s/get/" + id,
-        type: "GET",
-        success: function (response) {
-            if (response.error == false) {
-                $("#quickViewModal").modal("show");
-                if (type == "task" && response.task) {
-                    $("#quickViewTitlePlaceholder").text(response.task.title);
-                    $("#quickViewDescPlaceholder").html(
-                        response.task.description
-                    );
-                } else if (type == "project" && response.project) {
-                    $("#quickViewTitlePlaceholder").text(
-                        response.project.title
-                    );
-                    $("#quickViewDescPlaceholder").html(
-                        response.project.description
-                    );
-                }
-                $("#typePlaceholder").text(
-                    type == "task" ? label_task : label_project
-                );
-                $("#usersTable").bootstrapTable("refresh");
-                $("#clientsTable").bootstrapTable("refresh");
-            } else {
-                toastr.error(response.message);
-            }
-        },
-        error: function (xhr, status, error) {
-            // Handle error
-            toastr.error("Something Went Wrong");
-        },
-    });
-});
 $("#partialLeave, #updatePartialLeave").on("change", function () {
     var $form = $(this).closest("form"); // Get the closest form element
     var isChecked = $(this).prop("checked");
@@ -4933,6 +4883,7 @@ $(document).ready(function () {
         if (!priority.id) {
             return priority.text;
         }
+        console.log('priority created', priority);
         var color = $(priority.element).data("color") || "primary"; // Fallback to 'primary' if no color
         return $('<span class="badge bg-label-' + color + '">' + priority.text + "</span>");
     }
@@ -5055,22 +5006,7 @@ $(document).ready(function () {
         }
     }
 });
-// $(window).on('load', function () {
-//     // Select the elements and replace the text
-//     $('.pagination-info').each(function () {
-//         var text = $(this).text();
-//         text = text.replace("Showing", label_showing)
-//             .replace("to", label_to_for_pagination)
-//             .replace("of", label_of)
-//             .replace("rows", label_rows);
-//         $(this).text(text);
-//     });
-//     $('.page-list').each(function () {
-//         var text = $(this).html();
-//         text = text.replace("rows per page", label_rows_per_page);
-//         $(this).html(text);
-//     });
-// });
+
 $("#internal_client").change(function () {
     var isChecked = $(this).prop("checked");
     $("#password, #password_confirmation").val("");
@@ -5657,7 +5593,7 @@ $(document).ready(function () {
         }
     });
 });
-$("#create_project_modal").on("shown.bs.modal", function (event) {
+$("#create_project_modal ").on("shown.bs.modal", function (event) {
     var currentUrl = window.location.pathname;
     // Check if the current URL contains one of the favorite project routes
     if (
@@ -5670,6 +5606,32 @@ $("#create_project_modal").on("shown.bs.modal", function (event) {
         $("#create_project_modal #is_favorite").val(0); // Set is_favorite to 0 if not on a favorite page
     }
     var button = $(event.relatedTarget); // Button that triggered the modal
+    var statusId = button.data("status-id"); // Extract status ID from data attribute
+    // Find the status dropdown
+    var $statusDropdown = $(this).find('select[name="status_id"]');
+    // Check if the status ID is defined
+    if (statusId) {
+        // Check if the dropdown contains the option with the given status ID
+        if ($statusDropdown.find(`option[value="${statusId}"]`).length) {
+            // Set the selected status in the dropdown
+            $statusDropdown.val(statusId).trigger("change");
+        }
+    }
+});
+
+$("#create_project_offcanvas").on("shown.bs.offcanvas", function (event) {
+    var currentUrl = window.location.pathname;
+    // Check if the current URL contains one of the favorite project routes
+    if (
+        currentUrl.includes("/kanban/favorite") ||
+        currentUrl.includes("/list/favorite") ||
+        currentUrl.includes("/favorite")
+    ) {
+        $("#create_project_offcanvas #is_favorite").val(1); // Set is_favorite to 1 if on a favorite page
+    } else {
+        $("#create_project_offcanvas #is_favorite").val(0); // Set is_favorite to 0 if not on a favorite page
+    }
+    var button = $(event.relatedTarget); // Button that triggered the offcanvas
     var statusId = button.data("status-id"); // Extract status ID from data attribute
     // Find the status dropdown
     var $statusDropdown = $(this).find('select[name="status_id"]');
@@ -7306,7 +7268,7 @@ class ProjectCalendarManager {
         tooltip.css({
             left: rect.left + window.scrollX,
             top: rect.bottom + window.scrollY
-    });
+        });
 
         $(info.el).one('mouseleave', () => tooltip.remove());
     }
@@ -8425,8 +8387,15 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                     // Check if option already exists
                     if (selector.find(`option[value="${result.data.id}"]`).length === 0) {
                         let newOption = new Option(result.data.name, result.data.id, true, true);
+                        // Attach color data to the option
+                        if (result.priority.color) {
+                            $(newOption).data('color', result.priority.color);
+                            $(newOption).attr('data-color', result.priority.colorr); // Ensure data attribute is set
+                        }
                         selector.append(newOption);
-                        console.log('Added new option:', result.data.name);
+                        console.log(result.priority.color);
+
+                        console.log('Added new option:', result.data.name, 'with color:', result.priority.color);
                     } else {
                         selector.val(result.data.id);
                         console.log('Selected existing option:', result.data.name);
@@ -8446,16 +8415,17 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                         }, 100);
                     }
 
-                    // Handle Ajax Select2 dropdowns differently
+                    // Handle Ajax Select2 dropdowns
                     if (selector.data('select2') && selector.data('select2').options && selector.data('select2').options.ajax) {
                         console.log('Handling Ajax Select2');
-                        // For Ajax Select2, we need to trigger a manual selection
+
                         selector.trigger({
                             type: 'select2:select',
                             params: {
                                 data: {
                                     id: result.data.id,
-                                    text: result.data.name
+                                    text: result.data.name,
+                                    color: result.priority.color || 'primary' // Ensure color is passed
                                 }
                             }
                         });
@@ -8487,4 +8457,103 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             window.location.reload();
         }
     }
+});
+
+
+// Opening Quick View Modal from URL Also
+
+$(document).ready(function () {
+    // Base URL for AJAX requests (replace with your actual base URL)
+    const baseUrl = window.location.origin;
+
+    // Function to open the quick view modal
+    function openQuickViewModal(type, id, updateUrl = true) {
+        $("#type").val(type);
+        $("#typeId").val(id);
+        $.ajax({
+            url: `${baseUrl}/${type}s/get/${id}`,
+            type: "GET",
+            success: function (response) {
+                if (response.error === false) {
+                    $("#quickViewModal").modal("show");
+                    if (type === "task" && response.task) {
+                        $("#quickViewTitlePlaceholder").text(response.task.title);
+                        $("#quickViewDescPlaceholder").html(response.task.description);
+                    } else if (type === "project" && response.project) {
+                        $("#quickViewTitlePlaceholder").text(response.project.title);
+                        $("#quickViewDescPlaceholder").html(response.project.description);
+                    }
+                    $("#typePlaceholder").text(type === "task" ? "Task" : "Project");
+                    $("#usersTable").bootstrapTable("refresh");
+                    $("#clientsTable").bootstrapTable("refresh");
+
+                    // Update URL with modal parameters
+                    if (updateUrl) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        urlParams.set("modal", "quickview");
+                        urlParams.set("type", type);
+                        urlParams.set("id", id);
+                        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+                        window.history.pushState({ modal: "quickview", type, id }, "", newUrl);
+                    }
+                } else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Something Went Wrong");
+            },
+        });
+    }
+
+    // Handle click on quick-view elements
+    $(document).on("click", ".quick-view", function (e) {
+        e.preventDefault();
+        const id = $(this).data("id");
+        const type = $(this).data("type") || "task";
+        openQuickViewModal(type, id);
+    });
+
+    // Check URL on page load to open modal if parameters exist
+    function checkUrlForModal() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("modal") === "quickview") {
+            const type = urlParams.get("type");
+            const id = urlParams.get("id");
+            if (type && id) {
+                openQuickViewModal(type, id, false); // Don't update URL to avoid redundant pushState
+            }
+        }
+    }
+
+    // Handle modal close to clear URL parameters (optional)
+    $("#quickViewModal").on("hidden.bs.modal", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("modal") === "quickview") {
+            urlParams.delete("modal");
+            urlParams.delete("type");
+            urlParams.delete("id");
+            const newUrl = urlParams.toString()
+                ? `${window.location.pathname}?${urlParams.toString()}`
+                : window.location.pathname;
+            window.history.pushState({}, "", newUrl);
+        }
+    });
+
+    // Handle popstate to restore modal state
+    window.addEventListener("popstate", function (event) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("modal") === "quickview") {
+            const type = urlParams.get("type");
+            const id = urlParams.get("id");
+            if (type && id) {
+                openQuickViewModal(type, id, false);
+            }
+        } else {
+            $("#quickViewModal").modal("hide");
+        }
+    });
+
+    // Initialize by checking URL for modal parameters
+    checkUrlForModal();
 });

@@ -131,3 +131,63 @@ $(document).ready(function () {
     }
 
 });
+
+$(document).ready(function () {
+    // Initialize TableFilterSync for users
+    const lrFilterSync = new TableFilterSync({
+        tableId: 'lr_table',
+        dataType: 'leave-requests',
+        filters: [
+            {
+                selector: '#lr_date_between',
+                type: 'daterangepicker',
+                name: 'lr_date_between',
+                hiddenFrom: '#lr_date_between_from',
+                hiddenTo: '#lr_date_between_to'
+            },
+            {
+                selector: '#lr_start_date_between',
+                type: 'daterangepicker',
+                name: 'lr_start_date_between',
+                hiddenFrom: '#lr_start_date_from',
+                hiddenTo: '#lr_start_date_to'
+            },
+            {
+                selector: '#lr_end_date_between',
+                type: 'daterangepicker',
+                name: 'lr_end_date_between',
+                hiddenFrom: '#lr_end_date_from',
+                hiddenTo: '#lr_end_date_to'
+            },
+
+            {
+                selector: '#lr_user_filter',
+                type: 'select2',
+                name: 'user_ids',
+                ajaxType: 'users'
+            },
+            {
+                selector: '#lr_action_by_filter',
+                type: 'select2',
+                name: 'action_by_ids',
+                ajaxType: 'users'
+            },
+
+            {
+                selector: '#lr_status_filter',
+                type: 'select2',
+                name: 'statuses',
+                ajaxType: null
+            },
+            {
+                selector: '#lr_type_filter',
+                type: 'select2',
+                name: 'types',
+                ajaxType: null
+            }
+
+        ],
+        preserveParams: [''],
+        queryParamsFn: queryParamsLr // Reuse existing function
+    });
+});
