@@ -29,7 +29,7 @@
                     <i class="bx bx-sitemap"></i>
                 </button>
             </a>
-            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_task_modal"><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title=" <?= get_label('create_task', 'Create task') ?>"><i class="bx bx-plus"></i></button></a>
+            <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas"><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title=" <?= get_label('create_task', 'Create task') ?>"><i class="bx bx-plus"></i></button></a>
             <a href="{{url('projects/'.$taskDefaultView.'/' . $project->id)}}"><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('tasks', 'Tasks') ?>"><i class="bx bx-task"></i></button></a>
         </div>
     </div>
@@ -534,7 +534,7 @@
                 <div class="tab-pane fade {{ $activeTab == 'tasks' ? 'active show' : '' }}" id="navs-top-tasks" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div></div>
-                        <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_task_modal">
+                        <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas" aria-controls="create_task_offcanvas">
                             <button type="button" class="btn btn-sm btn-primary action_create_tasks" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_task', 'Create Task') ?>">
                                 <i class="bx bx-plus"></i>
                             </button>

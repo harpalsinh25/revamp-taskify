@@ -1,9 +1,9 @@
 @extends('layout')
 @section('title')
 @section('title')
-@if($is_favorites == 1) 
-    {{ get_label('favorite', 'Favorite') }} 
-@endif 
+@if($is_favorites == 1)
+    {{ get_label('favorite', 'Favorite') }}
+@endif
 <?= get_label('tasks', 'Tasks') ?> - <?= get_label('draggable', 'Draggable') ?>
 @endsection
 
@@ -67,7 +67,7 @@
             }
             @endphp
 
-            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_task_modal">
+            <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas" aria-controls="create_task_offcanvas">
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('create_task', 'Create task') ?>">
                     <i class="bx bx-plus"></i>
                 </button>

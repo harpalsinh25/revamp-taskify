@@ -66,7 +66,7 @@
                     }
                 @endphp
 
-                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_task_modal"><button
+                <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas"><button
                         type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-original-title=" <?= get_label('create_task', 'Create task') ?>"><i
                             class="bx bx-plus"></i></button></a>

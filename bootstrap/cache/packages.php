@@ -104,6 +104,13 @@
       0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
     ),
   ),
+  'mahesh-kerai/update-generator' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Mahesh\\UpdateGenerator\\UpdateGeneratorServiceProvider',
+    ),
+  ),
   'munafio/chatify' => 
   array (
     'aliases' => 
