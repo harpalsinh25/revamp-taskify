@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default"
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr"  data-template="vertical-menu-template" data-bs-theme="light"
     data-assets-path="{{ asset('assets/') }}" data-template="vertical-menu-template-free">
 
 <head>
@@ -19,9 +19,10 @@
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
 
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}"
-        class="template-customizer-theme-css" />
+    {{-- <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}"
+        class="template-customizer-theme-css" /> --}}
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}" />
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
@@ -35,6 +36,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-datetimepicker.min.css') }}" />
     <link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" />
+
+
     <link href="{{ asset('assets/css/bootstrap-table.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/css/dragula.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/css/toastr.min.css') }}" rel="stylesheet" />
@@ -183,6 +186,8 @@
 <script async defer src="{{ asset('assets/js/buttons.js') }}"></script>
 <!-- select 2 js !-->
 <script src="{{ asset('assets/js/select2.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+
 <script>
     $(document).ready(function() {
         // Initialize Select2 on elements with the class 'js-example-basic-multiple'

@@ -28,12 +28,17 @@ $(document).ready(function () {
     }
 
     // Open modal with keyboard shortcut
+    // Open modal with keyboard shortcut and focus input
     $(document).on("keydown", function (e) {
         if ((e.ctrlKey || e.metaKey) && e.key === "k") {
             e.preventDefault();
             $("#globalSearchModal").modal("show");
-            setTimeout(() => $("#modalSearchInput").focus(), 300);
         }
+    });
+
+    // Focus input when modal is shown
+    $("#globalSearchModal").on("shown.bs.modal", function () {
+        $("#modalSearchInput").focus();
     });
 
     // Handle search input with debounce
@@ -126,6 +131,7 @@ $(document).ready(function () {
         });
     }
 
+
     // Switch tab and update state
     function switchTab(tab) {
         currentTab = tab;
@@ -133,6 +139,12 @@ $(document).ready(function () {
         $(`.nav-link[data-tab="${tab}"]`).addClass('active').attr('aria-selected', 'true');
         renderSearchResults(allSearchResults, tab);
         currentHighlightIndex = -1;
+
+        // Ensure tab content is visible and fits
+        $('.tab-pane').removeClass('show active');
+        $(`#${tab}Results`).addClass('show active');
+        $("#searchTabs").removeClass('d-none');
+        $("#popularSection").addClass('hidden');
     }
 
     // Update ARIA selected state

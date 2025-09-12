@@ -96,75 +96,11 @@
         </div>
         <div class="row">
             <div class="col-12">
-                <div class="calendar-wrapper">
-                    <!-- Enhanced Sidebar -->
-                    <div class="calendar-sidebar">
-                        <!-- Date Range Picker for Navigation -->
-                        <div class="mini-calendar">
-                            <h6><i class="bx bx-calendar me-1"></i> Jump to Date</h6>
-                            <input type="text" id="daterange-picker" class="form-control"
-                                placeholder="Select date range..." readonly>
-                        </div>
 
-                        <!-- Status Filters (Dynamic) -->
-                        <div class="filter-section">
-                            <h6><i class="bx bx-flag me-1"></i> Project Status</h6>
-                            <div id="status-filters-container">
-                                <div class="skeleton-loader"></div>
-                                <div class="skeleton-loader"></div>
-                                <div class="skeleton-loader"></div>
-                            </div>
-                        </div>
-
-                        <!-- Priority Filters (Dynamic) -->
-                        <div class="filter-section">
-                            <h6><i class="bx bx-star me-1"></i> Priority</h6>
-                            <div id="priority-filters-container">
-                                <div class="skeleton-loader"></div>
-                                <div class="skeleton-loader"></div>
-                                <div class="skeleton-loader"></div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Actions -->
-                        <div class="filter-section">
-                            <h6><i class="bx bx-cog me-1"></i> Quick Actions</h6>
-                            <button type="button" class="btn btn-outline-primary btn-sm w-100 mb-2" id="selectAllFilters">
-                                <i class='bx bx-checkbox-checked me-1'></i> Select All
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 mb-2" id="clearAllFilters">
-                                <i class='bx bx-checkbox me-1'></i> Clear All
-                            </button>
-                            <button type="button" class="btn btn-outline-info btn-sm w-100" id="refreshCalendar">
-                                <i class="bx bx-refresh me-1"></i> Refresh
-                            </button>
-                        </div>
-
-                        <!-- Calendar Statistics -->
-                        <div class="filter-section">
-                            <h6><i class="bx bx-bar-chart me-1"></i> Statistics</h6>
-                            <div class="small text-muted">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Total Projects:</span>
-                                    <span id="total-projects">0</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Visible:</span>
-                                    <span id="visible-projects">0</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span>Filtered:</span>
-                                    <span id="filtered-projects">0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Calendar -->
-                    <div class="calendar-main card p-3">
-                        <div id="projectCalenderDiv"></div>
-                    </div>
-                </div>
+                <x-ui.calendar-wrapper calendarId="projectCalenderDiv"
+                    createButtonText="{{ get_label('create_project', 'Create project') }}"
+                    createOffcanvasTarget="#create_project_offcanvas" entityType="projects" sidebarTitle="Project"
+                    showStatusFilters="true" showPriorityFilters="true" />
             </div>
         </div>
     </div>
@@ -207,4 +143,7 @@
             </div>
         </div>
     </div>
+@endsection
+@section('page_scripts')
+    <script src="{{ asset('assets/js/pages/project-calendar.js') }}"></script>
 @endsection

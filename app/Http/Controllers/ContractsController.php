@@ -489,7 +489,7 @@ class ContractsController extends Controller
                     'end_date' => format_date($contract->end_date),
                     'duration' => $formattedDates,
                     'client' => formatClientHtml($contract->client),
-                    'project' => "<a href='" . route('projects.info', ['id' => $contract->project_id]) . "'>{$contract->project_title}</a>",
+                'project' => "<a href='" . route('projects.info', ['id' => $contract->project_id]) . "' target='_blank'>{$contract->project_title}</a>",
                     'contract_type' => $contract->contract_type,
                     'description' => $contract->description,
                     'promisor_sign' => $promisor_sign_status,

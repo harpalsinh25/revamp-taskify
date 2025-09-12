@@ -462,7 +462,7 @@ class EstimatesInvoicesController extends Controller
                 $actions = '';
 
                 if ($canEdit) {
-                    $actions .= '<a href="' . url("/estimates-invoices/edit/{$estimates_invoice->id}") . '" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
+                $actions .= '<a href="' . url("/estimates-invoices/edit/{$estimates_invoice->id}") . '" target="_blank" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
                 }
 
                 if ($canDelete) {
@@ -477,7 +477,7 @@ class EstimatesInvoicesController extends Controller
                         '</a>';
                 }
 
-                $actions .= '<a href="' . url("/estimates-invoices/pdf/{$estimates_invoice->id}") . '" title="PDF">' .
+            $actions .= '<a href="' . url("/estimates-invoices/pdf/{$estimates_invoice->id}") . '" target="_blank" title="PDF">' .
                     '<i class="bx bxs-file-pdf text-secondary mx-2"></i>' .
                     '</a>';
 

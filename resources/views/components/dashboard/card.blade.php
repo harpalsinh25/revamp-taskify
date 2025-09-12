@@ -1,6 +1,6 @@
 @props(['title', 'icon' => null, 'cardId' => null, 'chartId' => null, 'header' => null])
 
-<div class="card overflow-hidden mb-4 statisticsDiv" id="{{ $cardId ?? '' }}">
+<div class="card overflow-hidden mb-4 statisticsDiv h-px-600" id="{{ $cardId ?? '' }}">
     <div class="card-header pt-3 pb-1">
         <div class="card-title d-flex justify-content-between align-items-center">
             <h5 class="m-0 me-2">{{ $title }}</h5>

@@ -39,7 +39,7 @@ class AssetServiceProvider extends ServiceProvider
         // Optional: Log plugin version when loaded
         if (file_exists(__DIR__ . '/../plugin.json')) {
             $pluginJson = json_decode(file_get_contents(__DIR__ . '/../plugin.json'), true);
-            Log::info("✅ Asset Plugin Loaded - Version: " . ($pluginJson['version'] ?? 'unknown'));
+            Log::info("Asset Plugin Loaded - Version: " . ($pluginJson['version'] ?? 'unknown'));
         }
 
         // Optional: Add scheduled tasks for Asset plugin
@@ -49,7 +49,7 @@ class AssetServiceProvider extends ServiceProvider
             // $schedule->command('asset:cleanup-unused')->dailyAt('01:00');
         });
 
-        // ✅ Dynamically add the `assets` relationship to User
+        // Dynamically add the `assets` relationship to User
         User::resolveRelationUsing('assets', function ($userModel) {
             return $userModel->hasMany(Asset::class, 'assigned_to');
         });
@@ -65,7 +65,7 @@ class AssetServiceProvider extends ServiceProvider
      */
     private function autoPublishAssets(): void
     {
-        // ✅ Auto-publish JS
+        // Auto-publish JS
         $sourcePathJs = __DIR__ . '/../public/js';
         $destinationPathJs = public_path('assets/js/asset-plugin');
 
@@ -73,11 +73,11 @@ class AssetServiceProvider extends ServiceProvider
             if (!File::exists($destinationPathJs) || $this->assetsNeedUpdate($sourcePathJs, $destinationPathJs)) {
                 File::ensureDirectoryExists($destinationPathJs);
                 File::copyDirectory($sourcePathJs, $destinationPathJs);
-                Log::info("✅ Asset Plugin: JS assets auto-published to {$destinationPathJs}");
+                Log::info(" Asset Plugin: JS assets auto-published to {$destinationPathJs}");
             }
         }
 
-        // ✅ Auto-publish Storage files (sample, instructions, etc.)
+        // Auto-publish Storage files (sample, instructions, etc.)
         $sourcePathStorage = __DIR__ . '/../public/storage/';
         $destinationPathStorage = public_path('storage');
 
@@ -86,7 +86,7 @@ class AssetServiceProvider extends ServiceProvider
                 File::makeDirectory($destinationPathStorage, 0755, true);
             }
             File::copyDirectory($sourcePathStorage, $destinationPathStorage);
-            Log::info("✅ Asset Plugin: Storage files auto-published to {$destinationPathStorage}");
+            Log::info("Asset Plugin: Storage files auto-published to {$destinationPathStorage}");
         }
     }
 

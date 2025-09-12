@@ -73,5 +73,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 wheelPropagation: false
             });
         }
+        const statisticsDivs = document.querySelectorAll('.statisticsDiv');
+        statisticsDivs.forEach(div => {
+            new PerfectScrollbar(div, {
+                wheelPropagation: false
+            });
+        });
+
     })();
 });

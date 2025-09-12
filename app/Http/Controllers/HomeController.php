@@ -12,8 +12,10 @@ use App\Models\CustomField;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\LengthAwarePaginator;
+
 class HomeController extends Controller
 {
     protected $workspace;
@@ -31,24 +33,238 @@ class HomeController extends Controller
     }
     public function index(Request $request)
     {
-        $projects = isAdminOrHasAllDataAccess() ? $this->workspace->projects ?? [] : $this->user->projects ?? [];
-        $tasks = isAdminOrHasAllDataAccess() ? $this->workspace->tasks ?? [] : $this->user->tasks() ?? [];
-        $tasks = $tasks ? $tasks->count() : 0;
-        $users = $this->workspace->users ?? [];
-        $clients = $this->workspace->clients ?? [];
-        $todos = $this->user->todos()
-            ->orderBy('is_completed', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $total_todos = $this->user->todos;
-        $meetings = isAdminOrHasAllDataAccess() ? $this->workspace->meetings ?? [] : $this->user->meetings ?? [];
-        if ($this->workspace) {
-            $activities = $this->workspace->activity_logs()->orderBy('id', 'desc')->limit(10)->get();
-        } else {
-            $activities = collect(); // Return an empty collection to avoid errors
+        $auth_user = getAuthenticatedUser(); // Or auth()->user(), depending on your setup
+        return view('dashboard', compact('auth_user'));
+    }
+    public function getDashboardData(Request $request)
+    {
+        try {
+            // Set default dates and handle null/empty inputs
+            $startDateInput = $request->input('start_date');
+            $endDateInput = $request->input('end_date');
+            $userIds = $request->input('user_ids', []);
+
+            // Use Carbon to set defaults if inputs are null or invalid
+            $startDate = $startDateInput && Carbon::hasFormat($startDateInput, 'Y-m-d')
+                ? $startDateInput
+                : Carbon::now()->subDays(6)->format('Y-m-d');
+            $endDate = $endDateInput && Carbon::hasFormat($endDateInput, 'Y-m-d')
+                ? $endDateInput
+                : Carbon::now()->format('Y-m-d');
+
+            // Validate date range
+            if (Carbon::parse($startDate)->gt(Carbon::parse($endDate))) {
+                throw new \InvalidArgumentException('start_date cannot be after end_date.');
+            }
+
+            $dateRangeWithTime = [$startDate . ' 00:00:00', $endDate . ' 23:59:59'];
+
+            // Define overlap queries for projects and tasks
+            $projectOverlapQuery = function ($query) use ($startDate, $endDate) {
+                $query->where(function ($q) use ($endDate) {
+                    $q->whereNull('start_date')->orWhere('start_date', '<=', $endDate . ' 23:59:59');
+                })->where(function ($q) use ($startDate) {
+                    $q->whereNull('end_date')->orWhere('end_date', '>=', $startDate . ' 00:00:00');
+                });
+            };
+
+            $taskOverlapQuery = function ($query) use ($startDate, $endDate) {
+                $query->where(function ($q) use ($endDate) {
+                    $q->whereNull('start_date')->orWhere('start_date', '<=', $endDate . ' 23:59:59');
+                })->where(function ($q) use ($startDate) {
+                    $q->whereNull('due_date')->orWhere('due_date', '>=', $startDate . ' 00:00:00');
+                });
+            };
+
+            // Initialize counts
+            $projectsCount = 0;
+            $tasksCount = 0;
+            $usersCount = 0;
+            $clientsCount = 0;
+            $meetingsCount = 0;
+            $todosCount = 0;
+
+            // Tile counts with relationship and user filter checks
+            if ($this->workspace) {
+                $projectsQuery = $this->workspace->projects()->where($projectOverlapQuery);
+                $tasksQuery = $this->workspace->tasks()->where($taskOverlapQuery);
+                $meetingsQuery = $this->workspace->meetings()->whereBetween('created_at', $dateRangeWithTime);
+
+                if (!isAdminOrHasAllDataAccess()) {
+                    // For non-admins, filter by user-specific relationships
+                    $projectsQuery = $this->user && method_exists($this->user, 'projects')
+                        ? $this->user->projects()->where($projectOverlapQuery)
+                        : $this->workspace->projects()->whereRaw('1=0');
+                    $tasksQuery = $this->user && method_exists($this->user, 'tasks')
+                        ? $this->user->tasks()->where($taskOverlapQuery)
+                        : $this->workspace->tasks()->whereRaw('1=0');
+                    $meetingsQuery = $this->user && method_exists($this->user, 'meetings')
+                        ? $this->user->meetings()->whereBetween('created_at', $dateRangeWithTime)
+                        : $this->workspace->meetings()->whereRaw('1=0');
+                }
+
+                // Apply user_ids filter if provided
+                if (!empty($userIds)) {
+                    $projectsQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
+                    $tasksQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
+                    $meetingsQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds)); // Adjust field if different
+                }
+
+                $projectsCount = $projectsQuery->count();
+                $tasksCount = $tasksQuery->count();
+                $usersCount = $this->workspace->users()->when($userIds, fn($query) => $query->whereIn('users.id', $userIds))->count();
+                $clientsCount = $this->workspace->clients()->whereBetween('created_at', $dateRangeWithTime)->count();
+                $meetingsCount = $meetingsQuery->count();
+            }
+
+            if ($this->workspace && method_exists($this->workspace, 'todos')) {
+                $todosCount = $this->workspace->todos()
+                    ->whereBetween('created_at', $dateRangeWithTime)
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
+                    ->count();
+            }
+
+            // Todos
+            $todos = collect();
+            if ($this->workspace && method_exists($this->workspace, 'todos')) {
+                $todos = $this->workspace->todos()
+                    ->whereBetween('created_at', $dateRangeWithTime)
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
+                    ->orderBy('is_completed', 'asc')
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                    ->map(function ($todo) {
+                        return [
+                            'id' => $todo->id,
+                            'title' => ucfirst($todo->title),
+                            'is_completed' => $todo->is_completed,
+                            'created_at' => format_date($todo->created_at, true)
+                        ];
+                    });
+            }
+
+            // Activities
+            $activities = collect();
+            if ($this->workspace && method_exists($this->workspace, 'activity_logs')) {
+                $activities = $this->workspace->activity_logs()
+                    ->whereBetween('created_at', $dateRangeWithTime)
+                    ->when($userIds, fn($query) => $query->whereIn('actor_id', $userIds))
+                    ->orderBy('id', 'desc')
+                    ->limit(10)
+                    ->get()
+                    ->map(function ($activity) {
+                        return [
+                            'id' => $activity->id,
+                            'message' => $activity->message,
+                            'activity' => $activity->activity,
+                            'created_at' => $activity->created_at->toIso8601String(),
+                            'created_at_diff' => $activity->created_at->diffForHumans(),
+                            'created_at_formatted' => format_date($activity->created_at, true)
+                        ];
+                    });
+            }
+
+            // Chart data
+            $projectData = [];
+            $taskData = [];
+            $projectStatusCounts = [];
+            $taskStatusCounts = [];
+            $labels = [];
+            $bgColors = [];
+            $colorMap = [
+                'primary' => '#6777ef',
+                'secondary' => '#6c757d',
+                'success' => '#63ed7a',
+                'danger' => '#fc544b',
+                'warning' => '#ffa426',
+                'info' => '#00c4b4',
+            ];
+
+            $statuses = Status::all();
+            foreach ($statuses as $status) {
+                $projectStatusQuery = $this->workspace->projects()->where('status_id', $status->id)->where($projectOverlapQuery);
+                $taskStatusQuery = $this->workspace->tasks()->where('status_id', $status->id)->where($taskOverlapQuery);
+
+                if (!isAdminOrHasAllDataAccess()) {
+                    $projectStatusQuery = $this->user && method_exists($this->user, 'projects')
+                        ? $this->user->projects()->where('status_id', $status->id)->where($projectOverlapQuery)
+                        : $this->workspace->projects()->whereRaw('1=0');
+                    $taskStatusQuery = $this->user && method_exists($this->user, 'tasks')
+                        ? $this->user->tasks()->where('status_id', $status->id)->where($taskOverlapQuery)
+                        : $this->workspace->tasks()->whereRaw('1=0');
+                }
+
+                if (!empty($userIds)) {
+                    $projectStatusQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
+                    $taskStatusQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
+                }
+
+                $projectCount = $projectStatusQuery->count();
+                $taskCount = $taskStatusQuery->count();
+
+                $projectData[] = $projectCount;
+                $taskData[] = $taskCount;
+                $projectStatusCounts[$status->id] = $projectCount;
+                $taskStatusCounts[$status->id] = $taskCount;
+                $labels[] = $status->title;
+                $bgColors[] = $colorMap[$status->color] ?? '#64748B';
+            }
+
+            $todoData = [
+                $this->workspace && method_exists($this->workspace, 'todos')
+                    ? $this->workspace->todos()
+                    ->whereBetween('created_at', $dateRangeWithTime)
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
+                    ->where('is_completed', true)
+                    ->count()
+                    : 0,
+                $this->workspace && method_exists($this->workspace, 'todos')
+                    ? $this->workspace->todos()
+                    ->whereBetween('created_at', $dateRangeWithTime)
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
+                    ->where('is_completed', false)
+                    ->count()
+                    : 0
+            ];
+
+            return response()->json([
+                'projects_count' => $projectsCount,
+                'tasks_count' => $tasksCount,
+                'users_count' => $usersCount,
+                'clients_count' => $clientsCount,
+                'meetings_count' => $meetingsCount,
+                'todos_count' => $todosCount,
+                'project_data' => $projectData,
+                'task_data' => $taskData,
+                'todo_data' => $todoData,
+                'labels' => $labels,
+                'bg_colors' => $bgColors,
+                'todos' => $todos,
+                'activities' => $activities,
+                'statuses' => $statuses->map(fn($status) => ['id' => $status->id, 'title' => $status->title, 'color' => $status->color]),
+                'project_status_counts' => $projectStatusCounts,
+                'task_status_counts' => $taskStatusCounts,
+                'total_projects' => array_sum($projectData),
+                'total_tasks' => array_sum($taskData)
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Dashboard data error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'An error occurred while fetching dashboard data.', 'message' => $e->getMessage()], 500);
         }
-        $customFields = CustomField::all();
-        return view('dashboard', ['users' => $users, 'clients' => $clients, 'projects' => $projects, 'tasks' => $tasks, 'todos' => $todos, 'total_todos' => $total_todos, 'meetings' => $meetings, 'auth_user' => $this->user, 'activities' => $activities, 'customFields' => $customFields]);
+    }
+    public function getUsersList(Request $request)
+    {
+        $search = $request->input('search');
+        $ids = $request->input('ids', []);
+
+        $users = $this->workspace->users()
+            ? ($this->workspace->users()
+                ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+                ->when($ids, fn($query) => $query->whereIn('id', $ids))
+                ->get(['id', 'name']))
+            : collect();
+
+        return response()->json($users);
     }
     public function upcoming_birthdays()
     {

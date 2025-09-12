@@ -39,7 +39,7 @@ function loadingTemplate(message) {
 }
 function idFormatter(value, row, index) {
     return [
-        '<a href="' + baseUrl + '/payslips/view/' + row.id + '">' + label_payslip_id_prefix + row.id + '</a>'
+        '<a href="' + baseUrl + '/payslips/view/' + row.id + '" target="_blank">' + label_payslip_id_prefix + row.id + '</a>'
     ];
 }
 var currentDate = new Date();

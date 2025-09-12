@@ -72,6 +72,7 @@ $auth_user = getAuthenticatedUser();
         <input type="hidden" name="project_start_date_to" id="project_start_date_to">
         <input type="hidden" name="project_end_date_from" id="project_end_date_from">
         <input type="hidden" name="project_end_date_to" id="project_end_date_to">
+
         <input type="hidden" id="is_favorites" value="{{$favorites??''}}">
         <div class="table-responsive text-nowrap">
             <input type="hidden" id="data_type" value="projects">

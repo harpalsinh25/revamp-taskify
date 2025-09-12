@@ -473,7 +473,7 @@ END AS parent_type_title,
                         ($activity_log->actor_type == 'user' && $this->user->can('manage_users') && $user)
                         ? '<div class="d-flex align-items-center">
                 <div class="avatar avatar-sm pull-up" title="' . $activity_log->actor_name . '">
-                    <a href="' . route('users.profile', ['id' => $user->id]) . '">
+                    <a href="' . route('users.profile', ['id' => $user->id]) . '" target="_blank">
                         <img src="' . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . '" alt="Avatar" class="rounded-circle">
                     </a>
                 </div>
@@ -485,7 +485,7 @@ END AS parent_type_title,
                             ($activity_log->actor_type == 'client' && $this->user->can('manage_clients') && $user)
                             ? '<div class="d-flex align-items-center">
                     <div class="avatar avatar-sm pull-up" title="' . $activity_log->actor_name . '">
-                        <a href="' . route('clients.profile', ['id' => $user->id]) . '">
+                        <a href="' . route('clients.profile', ['id' => $user->id]) . '" target="_blank">
                             <img src="' . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . '" alt="Avatar" class="rounded-circle">
                         </a>
                     </div>
@@ -639,6 +639,7 @@ END AS parent_type_title,
                 'backgroundColor' => $colors[$activity['activity']] ?? '#000000',
                 'textColor' => '#000000',
                 'allDay' => false,
+                'activity' => $activity['activity'],
                 'type' => $activity['type'],
             ];
         }

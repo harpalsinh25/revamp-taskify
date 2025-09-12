@@ -919,27 +919,28 @@ class TasksController extends Controller
     }
     public function list(Request $request, $id = '')
     {
+        // Input parameters
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort', 'id');
+        $order = request('order', 'DESC');
         $status_ids = request('status_ids', []);
         $priority_ids = request('priority_ids', []);
         $user_ids = request('user_ids', []);
         $client_ids = request('client_ids', []);
         $project_ids = request('project_ids', []);
-        $date_between_from = request('task_date_between_from') ?: "";
-        $date_between_to = request('task_date_between_to') ?: "";
-        $start_date_from = (request('task_start_date_from')) ? trim(request('task_start_date_from')) : "";
-        $start_date_to = (request('task_start_date_to')) ? trim(request('task_start_date_to')) : "";
-        $end_date_from = (request('task_end_date_from')) ? trim(request('task_end_date_from')) : "";
-        $end_date_to = (request('task_end_date_to')) ? trim(request('task_end_date_to')) : "";
-        $is_favorites = (request('is_favorites')) ? request('is_favorites') : "";
-        $task_parent_id = (request('task_parent_id')) ? request('task_parent_id') : "";
+        $date_between_from = request('task_date_between_from', '');
+        $date_between_to = request('task_date_between_to', '');
+        $start_date_from = request('task_start_date_from', '');
+        $start_date_to = request('task_start_date_to', '');
+        $end_date_from = request('task_end_date_from', '');
+        $end_date_to = request('task_end_date_to', '');
+        $is_favorites = request('is_favorites', '');
+        $task_parent_id = request('task_parent_id', '');
+
+        // Initialize query
         $where = [];
         if ($id) {
-            $id = explode('_', $id);
-            $belongs_to = $id[0];
-            $belongs_to_id = $id[1];
+            [$belongs_to, $belongs_to_id] = explode('_', $id);
             if ($belongs_to == 'project') {
                 $project = Project::find($belongs_to_id);
                 $tasks = $project->tasks();
@@ -950,17 +951,13 @@ class TasksController extends Controller
         } else {
             $tasks = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
         }
+
+        // Apply filters
         if (!empty($user_ids)) {
-            $tasks = $tasks->whereHas('users', function ($query) use ($user_ids) {
-                $query->whereIn('users.id', $user_ids);
-            });
+            $tasks->whereHas('users', fn($query) => $query->whereIn('users.id', $user_ids));
         }
         if (!empty($client_ids)) {
-            $tasks = $tasks->whereHas('project', function ($query) use ($client_ids) {
-                $query->whereHas('clients', function ($query) use ($client_ids) {
-                    $query->whereIn('clients.id', $client_ids);
-                });
-            });
+            $tasks->whereHas('project', fn($query) => $query->whereHas('clients', fn($query) => $query->whereIn('clients.id', $client_ids)));
         }
         if (!empty($project_ids)) {
             $tasks->whereIn('project_id', $project_ids);
@@ -972,8 +969,7 @@ class TasksController extends Controller
             $tasks->whereIn('priority_id', $priority_ids);
         }
         if ($date_between_from && $date_between_to) {
-            $tasks->where('start_date', '>=', $date_between_from)
-                ->where('due_date', '<=', $date_between_to);
+            $tasks->where('start_date', '>=', $date_between_from)->where('due_date', '<=', $date_between_to);
         }
         if ($start_date_from && $start_date_to) {
             $tasks->whereBetween('start_date', [$start_date_from, $start_date_to]);
@@ -982,150 +978,166 @@ class TasksController extends Controller
             $tasks->whereBetween('due_date', [$end_date_from, $end_date_to]);
         }
         if ($is_favorites) {
-            $favoriteTaskIds = $this->user->favoriteTasks() // Use the favoriteTasks method in the User model
-                ->pluck('favoritable_id') // Get the list of favorite task IDs
-                ->toArray();
-            $tasks->whereIn('tasks.id', $favoriteTaskIds); // Filter tasks to include only the favorite ones
+            $favoriteTaskIds = $this->user->favoriteTasks()->pluck('favoritable_id')->toArray();
+            $tasks->whereIn('tasks.id', $favoriteTaskIds);
         }
         if ($search) {
-            $tasks = $tasks->where(function ($query) use ($search) {
-                $query->where('title', 'like', '%' . $search . '%')
-                    ->orWhere('tasks.id', 'like', '%' . $search . '%');
-            });
+            $tasks->where(fn($query) => $query->where('title', 'like', '%' . $search . '%')
+                ->orWhere('tasks.id', 'like', '%' . $search . '%'));
         }
-        // Apply where clause to $tasks
-        $tasks = $tasks->where($where);
-        if ($task_parent_id === "") {
-            // Add whereNull condition for parent_id to get only parent tasks
+        if ($task_parent_id === '') {
             $tasks->whereNull('parent_id');
         } else {
             $tasks->where('parent_id', $task_parent_id);
         }
-        // Count total tasks before pagination
+
+        // Apply where clause
+        $tasks->where($where);
+
+        // Count total tasks
         $totaltasks = $tasks->count();
+
+        // Permissions and data
         $canCreate = checkPermission('create_tasks');
         $canEdit = checkPermission('edit_tasks');
         $canDelete = checkPermission('delete_tasks');
+        $canManageProjects = checkPermission('manage_projects');
         $statuses = Status::all();
         $priorities = Priority::all();
         $isHome = $request->query('from_home');
         $webGuard = Auth::guard('web')->check();
-        $canManageProjects = checkPermission('manage_projects');
-        // Paginate tasks and format them
-        $tasks = $tasks->leftJoin('pinned', function ($join) {
-            $join->on('pinned.pinnable_id', '=', 'tasks.id')
-                ->where('pinned.pinnable_type', '=', Task::class);
-        })
-            ->select('tasks.*', 'pinned.id as pinned_id')  // Select tasks and alias pinned.id as pinned_id
-            ->orderByDesc('pinned.id')  // Tasks that are pinned will appear first
-            ->orderBy($sort, $order)  // Then order by other parameters (e.g., id, title)
+
+        // Fetch custom fields
+        $customFields = CustomField::where('module', 'task')->get()->map(function ($field) {
+            $field->options = is_string($field->options) ? json_decode($field->options, true) : $field->options;
+            return $field;
+        });
+
+        // Paginate and format tasks
+        $tasks = $tasks->leftJoin('pinned', fn($join) => $join->on('pinned.pinnable_id', '=', 'tasks.id')
+            ->where('pinned.pinnable_type', '=', Task::class))
+            ->select('tasks.*', 'pinned.id as pinned_id')
+            ->orderByDesc('pinned.id')
+            ->orderBy($sort, $order)
             ->paginate(request('limit'))
-            ->through(function ($task) use ($statuses, $priorities, $canEdit, $canDelete, $canCreate, $isHome, $webGuard, $canManageProjects) {
+            ->through(function ($task) use ($statuses, $priorities, $canEdit, $canDelete, $canCreate, $isHome, $webGuard, $canManageProjects, $customFields) {
+                // Status options
                 $statusOptions = '';
                 foreach ($statuses as $status) {
-                    $disabled = canSetStatus($status)  ? '' : 'disabled';
+                $disabled = canSetStatus($status) ? '' : 'disabled';
                     $selected = $task->status_id == $status->id ? 'selected' : '';
                     $statusOptions .= "<option value='{$status->id}' class='badge bg-label-{$status->color}' {$selected} {$disabled}>{$status->title}</option>";
                 }
-                $priorityOptions = "<option value='' class='badge bg-label-secondary'>-</option>";
+
+            // Priority options
+            $priorityOptions = "<option value='' class='badge bg-label-secondary'>-</option>";
                 foreach ($priorities as $priority) {
                     $selectedPriority = $task->priority_id == $priority->id ? 'selected' : '';
                     $priorityOptions .= "<option value='{$priority->id}' class='badge bg-label-{$priority->color}' {$selectedPriority}>{$priority->title}</option>";
                 }
-                $actions = '';
+
+            // Actions
+            $actions = '';
                 if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-task" data-id="' . $task->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
+                $actions .= '<a href="javascript:void(0);" class="edit-task" data-id="' . $task->id . '" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
                 }
                 if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
+                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '"><i class="bx bx-trash text-danger mx-1"></i></button>';
                 }
                 if ($canCreate) {
-                    $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                        '<i class="bx bx-copy text-warning mx-2"></i>' .
-                        '</a>';
+                $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '"><i class="bx bx-copy text-warning mx-2"></i></a>';
                 }
-                $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $task->id . '" title="' . get_label('quick_view', 'Quick View') . '">' .
-                    '<i class="bx bx-info-circle mx-3"></i>' .
-                    '</a>';
+            $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $task->id . '" title="' . get_label('quick_view', 'Quick View') . '"><i class="bx bx-info-circle mx-3"></i></a>';
                 $actions = $actions ?: '-';
-                $userHtml = '';
-                if (!empty($task->users) && count($task->users) > 0) {
+
+            // Users HTML
+            $userHtml = '';
+            if (!empty($task->users) && $task->users->count() > 0) {
                     $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($task->users as $user) {
-                        $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                    $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}' target='_blank'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                     }
-                    if ($canEdit) {
-                        $userHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-task update-users-clients" data-id="' . $task->id . '"><span class="bx bx-edit"></span></a></li>';
-                    }
-                    $userHtml .= '</ul>';
+
+                $userHtml .= '</ul>';
                 } else {
-                    $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
-                    if ($canEdit) {
-                        $userHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-task update-users-clients" data-id="' . $task->id . '">' .
-                            '<span class="bx bx-edit"></span>' .
-                            '</a>';
-                    }
-                }
-                $clientHtml = '';
-                if (!empty($task->project->clients) && count($task->project->clients) > 0) {
+                $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+            }
+
+            // Clients HTML
+            $clientHtml = '';
+            if (!empty($task->project->clients) && $task->project->clients->count() > 0) {
                     $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($task->project->clients as $client) {
-                        $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                    $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                     }
                     $clientHtml .= '</ul>';
                 } else {
                     $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                 }
-                $isFavorite = getFavoriteStatus($task->id, \App\Models\Task::class);
+
+            // Favorite and pinned status
+            $isFavorite = getFavoriteStatus($task->id, Task::class);
                 $isFavoriteProject = getFavoriteStatus($task->project->id);
-                $isPinned = getPinnedStatus($task->id, \App\Models\Task::class);
-                return [
+            $isPinned = getPinnedStatus($task->id, Task::class);
+
+            // Custom fields
+            $customFieldValues = [];
+            foreach ($task->customFieldValues as $fieldValue) {
+                $value = $fieldValue->value;
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
+                    array_walk_recursive($decoded, fn(&$item) => $item = is_null($item) ? '' : $item);
+                    $customFieldValues[$fieldValue->custom_field_id] = $decoded;
+                } else {
+                    $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
+                }
+            }
+
+            // Prepare response array
+            $response = [
                     'id' => $task->id,
-                    'title' => "<a href='" . url("/tasks/information/{$task->id}") . "'><strong>{$task->title}</strong></a> <a href='javascript:void(0);' class='ms-2'>
-                            <i class='bx " . ($isFavorite ? 'bxs' : 'bx') . "-star favorite-icon text-warning' data-favorite='{$isFavorite}' data-id='{$task->id}' data-type='tasks' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'></i>
-                        </a><a href='javascript:void(0);' class='ms-2'>
-                <i class='bx " . ($isPinned ? 'bxs' : 'bx') . "-pin pinned-icon text-success' data-pinned='{$isPinned}' data-id='{$task->id}' data-require_reload='0' data-table='task_table' data-type='tasks' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'></i>
-            </a>" . ($webGuard || $task->client_can_discuss ?
-                        "<a href='" . route('tasks.info', ['id' => $task->id]) . "#navs-top-discussions' class='ms-2'>
-                                <i class='bx bx-message-rounded-dots text-danger' data-bs-toggle='tooltip' data-bs-placement='right' title='" . get_label('discussions', 'Discussions') . "'></i>
-                            </a>"
-                        : ""),
+                'title' => "<a href='" . url("/tasks/information/{$task->id}") . "' target='_blank'><strong>{$task->title}</strong></a> <a href='javascript:void(0);' class='ms-2'>
+                                <i class='bx " . ($isFavorite ? 'bxs' : 'bx') . "-star favorite-icon text-warning' data-favorite='{$isFavorite}' data-id='{$task->id}' data-type='tasks' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'></i>
+                            </a><a href='javascript:void(0);' class='ms-2'>
+                                <i class='bx " . ($isPinned ? 'bxs' : 'bx') . "-pin pinned-icon text-success' data-pinned='{$isPinned}' data-id='{$task->id}' data-require_reload='0' data-table='task_table' data-type='tasks' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'></i>
+                            </a>" . ($webGuard || $task->client_can_discuss ?
+                    "<a href='" . route('tasks.info', ['id' => $task->id]) . "#navs-top-discussions' class='ms-2' target='_blank'>
+                                    <i class='bx bx-message-rounded-dots text-danger' data-bs-toggle='tooltip' data-bs-placement='right' title='" . get_label('discussions', 'Discussions') . "'></i>
+                                </a>" : ""),
                     'project_id' => ($canManageProjects
-                        ? "<a href='" . url("/projects/information/{$task->project->id}") . "'>
-        <strong>" . $task->project->title . "</strong>
-       </a>"
+                    ? "<a href='" . url("/projects/information/{$task->project->id}") . "' target='_blank'><strong>" . $task->project->title . "</strong></a>"
                         : "<strong>" . $task->project->title . "</strong>"
-                    ) . "
-    <a href='javascript:void(0);' class='mx-2'>
-        <i class='bx " . ($isFavoriteProject ? 'bxs' : 'bx') . "-star favorite-icon text-warning'
-           data-favorite='{$isFavoriteProject}'
-           data-id='{$task->project->id}'
-           title='" . ($isFavoriteProject
-                        ? get_label('remove_favorite', 'Click to remove from favorite')
-                        : get_label('add_favorite', 'Click to mark as favorite')) . "'>
-        </i>
-    </a>",
+                ) . "<a href='javascript:void(0);' class='mx-2'>
+                                <i class='bx " . ($isFavoriteProject ? 'bxs' : 'bx') . "-star favorite-icon text-warning'
+                                   data-favorite='{$isFavoriteProject}'
+                                   data-id='{$task->project->id}'
+                                   title='" . ($isFavoriteProject ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'>
+                                </i>
+                            </a>",
                     'users' => $userHtml,
                     'clients' => $clientHtml,
                     'start_date' => format_date($task->start_date),
                     'due_date' => format_date($task->due_date),
                     'status_id' => "<div class='d-flex align-items-center'><select class='form-select form-select-sm select-bg-label-{$task->status->color} fixed-width-select' id='statusSelect' data-id='{$task->id}' data-original-status-id='{$task->status->id}' data-original-color-class='select-bg-label-{$task->status->color}' data-type='task'" . ($isHome ? " data-reload='true'" : "") . ">{$statusOptions}</select>" . ($task->note ?
-                        "<i class='bx bx-notepad ms-2 text-primary' title='{$task->note}'></i>"
-                        : "") . "</div>",
+                    "<i class='bx bx-notepad ms-2 text-primary' title='{$task->note}'></i>" : "") . "</div>",
                     'priority_id' => "<select class='form-select form-select-sm select-bg-label-" . ($task->priority ? $task->priority->color : 'secondary') . "' id='prioritySelect' data-id='{$task->id}' data-original-priority-id='" . ($task->priority ? $task->priority->id : '') . "' data-original-color-class='select-bg-label-" . ($task->priority ? $task->priority->color : 'secondary') . "' data-type='task'>{$priorityOptions}</select>",
                     'created_at' => format_date($task->created_at, true),
                     'updated_at' => format_date($task->updated_at, true),
                     'actions' => $actions
                 ];
+
+            // Add dynamic custom fields
+            foreach ($customFields as $customField) {
+                $fieldKey = "custom_field_{$customField->id}";
+                $response[$fieldKey] = $customFieldValues[$customField->id] ?? [''];
+            }
+
+            return $response;
             });
-        // Return JSON response with formatted tasks and total count
+
         return response()->json([
-            "rows" => $tasks->items(),
-            "total" => $totaltasks,
+            'rows' => $tasks->items(),
+            'total' => $totaltasks,
         ]);
     }
     /**
@@ -2200,6 +2212,8 @@ class TasksController extends Controller
                 'tasks_info_url' => route('tasks.info', ['id' => $task->id]),
                 'title' => $title,
                 'start' => $task->start_date,
+                'status_id' => $task->status_id,
+                'priority_id' => $task->priority_id,
                 'end' => $task->due_date,
                 'backgroundColor' => $backgroundColor,
                 'borderColor' => '#ffffff',

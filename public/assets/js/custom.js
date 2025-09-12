@@ -123,11 +123,6 @@ $(document).on("click", ".delete-selected", function (e) {
                 $("#confirmDeleteSelections")
                     .html(label_please_wait)
                     .attr("disabled", true);
-
-                console.log("Selected IDs:", selectedIds); // Debugging line to check selected IDs
-                console.log("Type:", type); // Debugging line to check type
-                console.log("Destroy action:", destroy); // Debugging line to check destroy action
-
                 $.ajax({
                     url: baseUrl + "/" + type + "/" + destroy,
                     data: {
@@ -323,23 +318,15 @@ $(document).on("click", ".edit-todo", function () {
             $("#todo_title").val(response.todo.title);
             $("#todo_priority").val(response.todo.priority);
             $("#todo_description").val(response.todo.description);
-            console.log(response.todo?.reminders?.length);
-
             if (response.todo?.reminders?.length > 0) {
                 const reminder = response.todo.reminders[0];
-
                 $("#edit-todo-reminder-switch").prop(
                     "checked",
                     reminder.is_active === 1
                 ).trigger("change"); // trigger change event
-                console.log(reminder.is_active);
-
-
-
                 $("#edit-todo-frequency-type")
                     .val(reminder.frequency_type)
                     .trigger("change");
-
                 switch (reminder.frequency_type) {
                     case "weekly":
                         $("#edit-todo-day-of-week").val(reminder.day_of_week || "");
@@ -348,21 +335,17 @@ $(document).on("click", ".edit-todo", function () {
                         $("#edit-todo-day-of-month").val(reminder.day_of_month || "");
                         break;
                 }
-
                 if (reminder.time_of_day) {
                     const timeOfDay = reminder.time_of_day.slice(0, 5);
                     $("#edit-todo-time-of-day").val(timeOfDay);
                 }
             }
-
         },
     });
 });
-
 $(document).on("click", ".edit-note", function () {
     var id = $(this).data("id");
     $("#edit_note_modal").modal("show");
-
     // Get the current color class
     var classes = $("#note_color").attr("class").split(" ");
     var currentColorClass = classes.filter(function (className) {
@@ -386,14 +369,10 @@ $(document).on("click", ".edit-note", function () {
                 .val(response.note.color)
                 .removeClass(currentColorClass)
                 .addClass("select-bg-label-" + response.note.color);
-
             let noteType = response.note.note_type;
-            console.log("Note type:", noteType);
-
             // Set the note type select value and trigger change
             $("#editNoteType").val(noteType);
             $("#editNoteTypeDisplay").val(noteTypeLabels[noteType]);
-
             if (noteType === "text") {
                 $("#edit-text-note-section").removeClass('d-none');
                 $("#edit-drawing-note-section").addClass('d-none');
@@ -401,52 +380,38 @@ $(document).on("click", ".edit-note", function () {
             } else if (noteType === "drawing") {
                 $("#edit-text-note-section").addClass('d-none');
                 $("#edit-drawing-note-section").removeClass('d-none');
-
                 // Set the drawing data
                 $("#edit_drawing_data").val(response.note.drawing_data || "");
-
                 // Initialize the drawing editor
                 setTimeout(function () {
                     let drawingContainer = document.getElementById("edit_drawing-container");
                     if (drawingContainer) {
                         try {
-                            console.log("Initializing edit drawing editor...");
                             // Clear any existing content
                             drawingContainer.innerHTML = '';
-
                             let editor = new jsdraw.Editor(drawingContainer);
                             editor.getRootElement().style.height = "260px";
                             const toolbar = editor.addToolbar();
                             $('.toolbar-internalWidgetId--selection-tool-widget, .toolbar-internalWidgetId--text-tool-widget, .toolbar-internalWidgetId--document-properties-widget, .pipetteButton,.toolbar-internalWidgetId--insert-image-widget').hide();
-
                             setTimeout(() => {
                                 $(".toolbar--pen-tool-toggle-buttons").hide();
                             }, 500);
-
                             // Try to load the image using jsdraw's API
                             if (response.note.drawing_data) {
                                 var svgSavedData = response.note.drawing_data;
-                                console.log("Drawing data:", svgSavedData);
                                 try {
                                     editor.loadFromSVG(svgSavedData);
-
                                 } catch (error) {
                                     console.error("Error loading drawing data:", error);
                                 }
                             }
-
-
                             // Update the drawing data when submitting
                             $(document).on('click', '#submit_btn', function (e) {
                                 if (noteType === "drawing") {
                                     e.preventDefault();
-                                    console.log("Saving edited drawing data...");
                                     let drawingData = editor.toSVG().outerHTML;
                                     let encodedDrawingData = btoa(unescape(encodeURIComponent(drawingData)));
-
                                     $("#edit_drawing_data").val(encodedDrawingData);
-
-                                    console.log("Edited drawing data saved, length:", encodedDrawingData);
                                     $(this).off("submit").submit();
                                 }
                             });
@@ -854,8 +819,6 @@ function initializeDateRangePicker(inputSelector) {
     var modalsToCheck = [
         "#create_project_modal",
         "#edit_project_modal",
-        "#create_task_modal",
-        "#edit_task_modal",
         "#create_milestone_modal",
         "#edit_milestone_modal",
         "#create_project_offcanvas",
@@ -865,29 +828,19 @@ function initializeDateRangePicker(inputSelector) {
         "#create_milestone_offcanvas",
         "#edit_milestone_offcanvas",
     ];
-
     $(inputSelector).each(function () {
         var $input = $(this);
         var isEmpty = $input.val() === ""; // Check if the input is empty
-
         // Check for closest modal or offcanvas
         var parentOverlay = $input.closest(".modal, .offcanvas");
         var parentOverlayId = parentOverlay.length ? parentOverlay.attr("id") : "";
-
-        // Debug: Log parent overlay detection
-        console.log(`Input ${$input.attr("id")} parent overlay:`, parentOverlayId || "None");
-
         // Check if input is inside any of the specified modals or offcanvas
         var isInsideOverlay = modalsToCheck.some(function (overlayId) {
             var isInOverlay = $input.closest(overlayId).length > 0;
             if (isInOverlay) {
-                console.log(`${$input.attr("id")} is inside ${overlayId}`);
             }
             return isInOverlay;
         });
-
-
-
         /**
          * Configuration for DateRangePicker.
          * @type {Object}
@@ -903,27 +856,22 @@ function initializeDateRangePicker(inputSelector) {
                 format: js_date_format,
             },
         };
-
         // Set parentEl to the closest modal or offcanvas, or body if none found
         if (parentOverlayId) {
             daterangepickerOptions.parentEl = `#${parentOverlayId}`;
         } else {
             daterangepickerOptions.parentEl = $(document.body);
         }
-
         // Conditionally add startDate if input is not empty
         if (!isEmpty) {
             daterangepickerOptions.startDate = moment($input.val(), js_date_format);
         }
-
         // Initialize DateRangePicker
         $input.daterangepicker(daterangepickerOptions);
-
         // Handle autoUpdateInput behavior
         if (isEmpty) {
             $input.val(""); // Ensure input remains empty if initially empty
         }
-
         // Manually update input value on date selection
         $input.on("apply.daterangepicker", function (ev, picker) {
             $(this).val(picker.startDate.format(js_date_format));
@@ -1050,8 +998,6 @@ function resetDateFields($form) {
     var modalsToCheck = [
         "#create_project_modal",
         "#edit_project_modal",
-        "#create_task_modal",
-        "#edit_task_modal",
         "#create_milestone_modal",
         "#edit_milestone_modal",
         "#create_project_offcanvas",
@@ -1061,36 +1007,22 @@ function resetDateFields($form) {
         "#create_milestone_offcanvas",
         "#edit_milestone_offcanvas",
     ];
-
     var currentDate = moment().format(js_date_format); // Get current date
-
     $form.find("input").each(function () {
         var $this = $(this);
         if ($this.data("daterangepicker")) {
-            // Debug: Log input being processed
-            console.log(`Resetting DateRangePicker for input: ${$this.attr("id")}`);
-
             // Destroy old instance
             $this.data("daterangepicker").remove();
-
             // Check for closest modal or offcanvas
             var parentOverlay = $form.closest(".modal, .offcanvas");
             var parentOverlayId = parentOverlay.length ? parentOverlay.attr("id") : "";
-
-            // Debug: Log parent overlay detection
-            console.log(`Parent overlay for ${$this.attr("id")}:`, parentOverlayId || "None");
-
             // Check if form is inside any of the specified modals or offcanvas
             var isInsideOverlay = modalsToCheck.some(function (overlayId) {
                 var isInOverlay = $form.closest(overlayId).length > 0;
                 if (isInOverlay) {
-                    console.log(`${$this.attr("id")} is inside ${overlayId}`);
                 }
                 return isInOverlay;
             });
-
-
-
             /**
              * Configuration for DateRangePicker.
              * @type {Object}
@@ -1106,25 +1038,20 @@ function resetDateFields($form) {
                     format: js_date_format,
                 },
             };
-
             // Set parentEl to the closest modal or offcanvas, or body if none found
             if (parentOverlayId) {
                 daterangepickerOptions.parentEl = `#${parentOverlayId}`;
             } else {
                 daterangepickerOptions.parentEl = $(document.body);
             }
-
             // Set startDate if not in an overlay
             if (!isInsideOverlay) {
                 daterangepickerOptions.startDate = moment(currentDate, js_date_format);
             }
-
             // Reinitialize DateRangePicker
             $this.daterangepicker(daterangepickerOptions);
-
             // Set or clear input value based on overlay context
             $this.val(isInsideOverlay ? "" : currentDate);
-
             // Manually update input value on date selection
             $this.on("apply.daterangepicker", function (ev, picker) {
                 $(this).val(picker.startDate.format(js_date_format));
@@ -1161,7 +1088,6 @@ $(document).ready(function () {
         "#task_start_date",
         "#task_end_date",
     ];
-
     /**
      * List of modal and offcanvas IDs to check for parent context.
      * @type {string[]}
@@ -1169,8 +1095,6 @@ $(document).ready(function () {
     var modalsToCheck = [
         "#create_project_modal",
         "#edit_project_modal",
-        "#create_task_modal",
-        "#edit_task_modal",
         "#create_milestone_modal",
         "#edit_milestone_modal",
         "#create_project_offcanvas",
@@ -1180,7 +1104,6 @@ $(document).ready(function () {
         "#create_milestone_offcanvas",
         "#edit_milestone_offcanvas",
     ];
-
     /**
      * Base configuration for DateRangePicker.
      * @type {Object}
@@ -1196,17 +1119,14 @@ $(document).ready(function () {
             format: js_date_format,
         },
     };
-
     /**
      * Initializes DateRangePicker for general date inputs with dynamic parent detection.
      */
     idsToProcess.forEach(function (id) {
         var $input = $(id);
         if ($input.length) {
-
             // Check for closest modal or offcanvas
             var parentOverlay = $input.closest(".modal, .offcanvas");
-
             var isInsideOverlay = modalsToCheck.some(function (modalId) {
                 var isInModal = $input.closest(modalId).length > 0;
                 if (isInModal) {
@@ -1214,15 +1134,12 @@ $(document).ready(function () {
                 }
                 return isInModal;
             });
-
             // Set parentEl to the closest modal or offcanvas, or body if none found
             daterangepickerOptions.parentEl = parentOverlay.length
                 ? parentOverlay
                 : $(document.body);
-
             // Debug: Log the selected parentEl
             // console.log(`ParentEl for ${id}`, daterangepickerOptions.parentEl);
-
             // Disable autoUpdateInput for overlays or if data-defaultDate is false
             if (
                 isInsideOverlay ||
@@ -1230,7 +1147,6 @@ $(document).ready(function () {
             ) {
                 daterangepickerOptions.autoUpdateInput = false;
             }
-
             // Set default date if empty, not in an overlay, and data-defaultDate is undefined or true
             if (
                 $input.val() === "" &&
@@ -1240,15 +1156,12 @@ $(document).ready(function () {
             ) {
                 $input.val(moment().format(js_date_format));
             }
-
             // Initialize DateRangePicker
             $input.daterangepicker(daterangepickerOptions);
-
             // Handle apply event
             $input.on("apply.daterangepicker", function (ev, picker) {
                 $(this).val(picker.startDate.format(js_date_format));
             });
-
             // Handle cancel event
             $input.on("cancel.daterangepicker", function () {
                 $(this).val("");
@@ -1257,20 +1170,17 @@ $(document).ready(function () {
             // console.warn(`Input ${id} not found in DOM`);
         }
     });
-
     /**
      * Initializes DateRangePicker for #dob and #doj with restricted date ranges.
      */
     var restrictedIds = ["#dob", "#doj"];
     var minDate = moment("01/01/1950", "DD/MM/YYYY");
     var maxDate = moment();
-
     restrictedIds.forEach(function (id) {
         var $input = $(id);
         if ($input.length) {
             var parentOverlay = $input.closest(".modal, .offcanvas");
             // console.log(`Parent overlay for ${id}`, parentOverlay);
-
             $input.daterangepicker({
                 alwaysShowCalendars: true,
                 showCustomRangeLabel: true,
@@ -1285,7 +1195,6 @@ $(document).ready(function () {
                     format: js_date_format,
                 },
             });
-
             $input.on("apply.daterangepicker", function (ev, picker) {
                 $(this).val(picker.startDate.format(js_date_format));
             });
@@ -1585,15 +1494,12 @@ document.addEventListener("focusin", function (e) {
         e.stopImmediatePropagation();
     }
 });
-
-
 $(document).on("submit", ".form-submit-event", function (e) {
     e.preventDefault();
     if ($("#net_payable").length > 0) {
         var net_payable = $("#net_payable").text();
         $("#net_pay").val(net_payable);
     }
-
     var formData = new FormData(this);
     // NEW CODE: Check if this is an HTML template and encode it if needed
     if ($(this).attr("action").includes("store_template") ||
@@ -1606,7 +1512,6 @@ $(document).on("submit", ".form-submit-event", function (e) {
         if (contentField.length > 0) {
             // Remove the original content from FormData
             formData.delete("content");
-
             // Add the content as base64 encoded to bypass ModSecurity filters
             var encodedContent = btoa(contentField.val());
             formData.append("content", encodedContent);
@@ -1614,9 +1519,6 @@ $(document).on("submit", ".form-submit-event", function (e) {
         }
     }
     // END OF NEW CODE
-
-
-
     var currentForm = $(this);
     var submit_btn = $(this).find("#submit_btn");
     var btn_html = submit_btn.html();
@@ -1707,8 +1609,8 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                     var modalIds = [
                                         "#create_project_modal",
                                         "#edit_project_modal",
-                                        "#create_task_modal",
-                                        "#edit_task_modal",
+                                        "#create_task_offcanvas",
+                                        "#edit_task_offcanvas",
                                     ];
                                     // Iterate through each modal ID
                                     modalIds.forEach(function (modalId) {
@@ -1768,8 +1670,8 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                     var modalIds = [
                                         "#create_project_modal",
                                         "#edit_project_modal",
-                                        "#create_task_modal",
-                                        "#edit_task_modal",
+                                        "#create_task_offcanvas",
+                                        "#edit_task_offcanvas",
                                     ];
                                     // Iterate through each modal ID
                                     modalIds.forEach(function (modalId) {
@@ -1866,50 +1768,37 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             }
                             if (idOfModal === "create_contract_type_modal") {
                                 var newItem = result.ct;
-
                                 // Find the currently open contract modal
                                 var contractModal = $("#create_contract_modal.show, #edit_contract_modal.show");
-
                                 if (contractModal.length) {
                                     var dropdownSelector = contractModal.find('select[name="contract_type_id"]');
-
                                     if (dropdownSelector.length) {
                                         // Append and select the new option
                                         var newOption = $("<option></option>")
                                             .attr("value", newItem.id)
                                             .text(newItem.type)
                                             .attr("selected", true);
-
                                         dropdownSelector.append(newOption).val(newItem.id).trigger("change");
                                     }
                                 }
-
                                 // Append to the *other* contract modal (to keep both in sync)
                                 var otherContractModal = $("#create_contract_modal, #edit_contract_modal")
                                     .not(contractModal)
                                     .find('select[name="contract_type_id"]');
-
                                 if (otherContractModal.length) {
                                     var otherOption = $("<option></option>")
                                         .attr("value", newItem.id)
                                         .text(newItem.type);
                                     otherContractModal.append(otherOption);
                                 }
-
                                 // Close only the contract type modal
                                 $("#create_contract_type_modal").modal("hide");
-
                                 // Show success message
                                 toastr.success(result["message"]);
                                 currentForm.find(".error-message").html("");
-
                                 // Stop further processing to prevent handleRedirection
                                 return false;
                             }
-
-
-
-
                             if (idOfModal == "create_pm_modal") {
                                 var dropdownSelector = $(
                                     'select[name="payment_method_id"]'
@@ -1976,8 +1865,6 @@ $(document).on("submit", ".form-submit-event", function (e) {
             if (xhr.status === 422) {
                 // Handle validation errors here
                 var response = xhr.responseJSON; // Assuming you're returning JSON
-                console.log(response);
-
                 // You can access validation errors from the response object
                 var errors = response.errors;
                 if (errors["country_code"]) {
@@ -1990,7 +1877,6 @@ $(document).on("submit", ".form-submit-event", function (e) {
                 if (showInModal) {
                     // Get validation errors from the response
                     var errorHtmlBody = '';
-
                     // Loop through the validation errors
                     $.each(errors, function (row, fields) {
                         errorHtmlBody += `<div><strong>${row}</strong><ul>`;
@@ -2001,12 +1887,10 @@ $(document).on("submit", ".form-submit-event", function (e) {
                         });
                         errorHtmlBody += `</ul></div>`;
                     });
-
                     // Inject error HTML into the modal
                     $('#errorModalContent').html(errorHtmlBody);
                     $('#errorModalBody').removeClass('d-none');
                 }
-
                 // Assuming you have a list of all input fields with error messages
                 var inputFields = currentForm.find(
                     "input[name], select[name], textarea[name]"
@@ -2159,9 +2043,6 @@ $(document).on("submit", ".form-submit-event", function (e) {
         }
     }
 });
-
-
-
 // Click event handler for the favorite icon
 $(document).on("click", ".favorite-icon", function () {
     var icon = $(this);
@@ -3026,9 +2907,6 @@ function performUpdate(notificationId, needConfirm = "") {
             "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"),
         },
         success: function (response) {
-            console.log(response);
-
-
             if (needConfirm) {
                 $("#confirmNotificationStatus")
                     .html(label_yes)
@@ -3054,7 +2932,6 @@ function performUpdate(notificationId, needConfirm = "") {
 }
 function determineRedirectUrl(type, typeId, action) {
     var redirectUrl = "";
-
     switch (type) {
         case "project":
             redirectUrl = baseUrl + "/projects/information/" + typeId;
@@ -3090,7 +2967,6 @@ function determineRedirectUrl(type, typeId, action) {
             redirectUrl = baseUrl + "/meetings";
             break;
         case "todo_reminder":
-
             redirectUrl = baseUrl + "/todos";
             break;
         default:
@@ -3270,7 +3146,6 @@ $(document).ready(function () {
             $(totalDaysSelector).val(total_days);
         }
     }
-
     // Function to bind event listeners for date inputs
     function bindDateChangeListeners(startDateSelector, endDateSelector, totalDaysSelector) {
         $(startDateSelector + ", " + endDateSelector)
@@ -3278,7 +3153,6 @@ $(document).ready(function () {
             .on("change", function () {
                 calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
             });
-
         $(startDateSelector).on("apply.daterangepicker", function () {
             calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
         });
@@ -3286,42 +3160,34 @@ $(document).ready(function () {
             calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
         });
     }
-
     // Initial binding for create modal
     if ($("#total_days").length) {
         bindDateChangeListeners("#start_date", "#lr_end_date", "#total_days");
     }
-
     // Initial binding for update modal
     if ($("#update_total_days").length) {
         bindDateChangeListeners("#update_start_date", "#update_end_date", "#update_total_days");
     }
-
     // Reset form logic for both modal and offcanvas
     function resetModalForm(container) {
         var containerId = $(container).attr("id");
         var $form = $(container).find("form");
         $form.trigger("reset");
-
         if ($form.find("#total_days").length) {
             bindDateChangeListeners("#start_date", "#lr_end_date", "#total_days");
         }
         if ($form.find("#update_total_days").length) {
             bindDateChangeListeners("#update_start_date", "#update_end_date", "#update_total_days");
         }
-
         $form.find(".error-message").html("");
-
         var partialLeaveCheckbox = $("#partialLeave");
         if (partialLeaveCheckbox.length) {
             partialLeaveCheckbox.trigger("change");
         }
-
         var leaveVisibleToAllCheckbox = $form.find(".leaveVisibleToAll");
         if (leaveVisibleToAllCheckbox.length) {
             leaveVisibleToAllCheckbox.trigger("change");
         }
-
         var defaultColor = (containerId == "create_note_modal" || containerId == "edit_note_modal") ? "success" : "primary";
         var colorSelect = $form.find('select[name="color"]');
         if (colorSelect.length) {
@@ -3329,24 +3195,20 @@ $(document).ready(function () {
             var currentColorClass = classes.find(c => c.startsWith("select-"));
             colorSelect.removeClass(currentColorClass).addClass("select-bg-label-" + defaultColor);
         }
-
         var selectPriority = $form.find('select[name="priority_id"]');
         if (selectPriority.length) {
             var classes = selectPriority.attr("class").split(" ");
             var currentClass = classes.find(c => c.startsWith("bg-label"));
             selectPriority.removeClass(currentClass).addClass("bg-label-secondary");
         }
-
         $form
             .find(".js-example-basic-multiple, .users_select, .clients_select, .projects_select, .contract_types_select, .invoices_select")
             .val(null)
             .trigger("change");
-
-        $("#create_task_modal, #edit_task_modal")
+        $("#create_task_offcanvas, #edit_task_offcanvas")
             .find('select[name="user_id[]"]')
             .val(null)
             .trigger("change");
-
         if ($('.selectTaskProject[name="project"]').length) {
             $form.find($('.selectTaskProject[name="project"]')).trigger("change");
         }
@@ -3356,40 +3218,33 @@ $(document).ready(function () {
         if ($('.priorityDropdown[name="priority_id"]').length) {
             $form.find($('.priorityDropdown[name="priority_id"]')).trigger("change");
         }
-
         $("#users_associated_with_project, #task_update_users_associated_with_project").text("");
-
         $(container)
             .find('input[type="checkbox"]')
             .each(function () {
                 $(this).prop("checked", false).trigger("change");
             });
-
         if (Dropzone.instances.length > 0) {
             Dropzone.instances.forEach(function (dz) {
                 dz.removeAllFiles(true);
             });
         }
-
         resetDateFields($form);
     }
-
     // Reset when modal is closed
     $(".modal").on("hidden.bs.modal", function () {
         resetModalForm(this);
     });
-
     // ✅ Reset when offcanvas is closed
     $(".offcanvas").on("hidden.bs.offcanvas", function () {
         resetModalForm(this);
     });
 });
-
 $(document).ready(function () {
     // Listen for changes on the project select element within the modal
     $('.selectTaskProject[name="project"]').on("change", function (e) {
         var projectId = $(this).val();
-        var currentModal = $(this).closest(".modal"); // Adjust the selector to match your modal structure
+        var currentModal = $(this).closest(".offcanvas"); // Adjust the selector to match your modal structure
         var usersSelect = currentModal.find('select[name="user_id[]"]');
         var modalId = currentModal.attr("id");
         if (projectId) {
@@ -3431,7 +3286,7 @@ $(document).ready(function () {
                         } else {
                             if (
                                 guard != "client" &&
-                                modalId == "create_task_modal"
+                                modalId == "create_task_offcanvas"
                             ) {
                                 usersSelect.val(authUserId);
                             }
@@ -3441,7 +3296,7 @@ $(document).ready(function () {
                         // Handle case when no users are returned
                         if (
                             guard != "client" &&
-                            modalId == "create_task_modal"
+                            modalId == "create_task_offcanvas"
                         ) {
                             usersSelect.val(authUserId);
                         }
@@ -3455,43 +3310,76 @@ $(document).ready(function () {
         }
     });
 });
-$(document).on("click", ".edit-task", function () {
-    console.log('here');
-    var id = $(this).data("id");
-    $("#edit_task_modal").modal("show");
+/**
+ * Handles the click event on elements with class 'edit-task' to open and populate an edit task form
+ * in either a modal or offcanvas, fetching task data via AJAX and initializing form fields.
+ *
+ * @param {number} taskId - The ID of the task to edit.
+ * @param {boolean} isOffcanvas - Whether to use offcanvas (true) or modal (false).
+ * @param {string} baseUrl - The base URL for AJAX requests.
+ * @param {string} js_date_format - The date format for Moment.js.
+ * @returns {void}
+ */
+function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
+    const overlayId = isOffcanvas ? "#edit_task_offcanvas" : "#edit_task_modal";
+    const overlayType = isOffcanvas ? "offcanvas" : "modal";
+    const $overlay = $(overlayId);
+
+    // Open the overlay
+    if (isOffcanvas) {
+        $overlay.offcanvas("show");
+    } else {
+        $overlay.modal("show");
+    }
+
     $.ajax({
-        url: baseUrl + "/tasks/get/" + id,
-        type: "get",
+        url: `${baseUrl}/tasks/get/${taskId}`,
+        type: "GET",
         headers: {
-            "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"),
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
         },
         dataType: "json",
         success: function (response) {
-            console.log(response);
-            var formattedStartDate = response.task.start_date
+            if (!$overlay.length) {
+                console.warn(`${overlayId} not found in DOM`);
+                return;
+            }
+
+            // Format dates
+            const formattedStartDate = response.task.start_date
                 ? moment(response.task.start_date).format(js_date_format)
                 : "";
-            var formattedEndDate = response.task.due_date
+            const formattedEndDate = response.task.due_date
                 ? moment(response.task.due_date).format(js_date_format)
                 : "";
-            $("#task_update_users_associated_with_project").html(
-                "(" +
-                label_users_associated_with_project +
-                " <strong>" +
-                response.project.title +
-                "</strong>)"
+
+            // Populate form fields
+            $overlay.find("#task_update_users_associated_with_project").html(
+                `(${label_users_associated_with_project} <strong>${response.project.title}</strong>)`
             );
-            $("#id").val(response.task.id);
-            $("#title").val(response.task.title);
-            $("#task_status_id").val(response.task.status_id).trigger("change");
-            $("#priority_id").val(response.task.priority_id).trigger("change");
+            $overlay.find("#id").val(response.task.id);
+            $overlay.find("#title").val(response.task.title);
+            $overlay.find("#task_status_id").val(response.task.status_id).trigger("change");
+            $overlay.find("#priority_id").val(response.task.priority_id).trigger("change");
+            $overlay.find("#update_start_date").val(formattedStartDate);
+            $overlay.find("#update_end_date").val(formattedEndDate);
+            $overlay.find("#update_project_title").val(response.project.title);
+            $overlay.find("#task_description").val(response.task.description || "");
+            $overlay.find("#taskNote").val(response.task.note);
+            $overlay.find("#edit_billing_type").val(response.task.billing_type).trigger("change");
+            $overlay.find("#edit_completion_percentage").val(response.task.completion_percentage).trigger("change");
+            $overlay.find("#updateClientCanDiscussTask").prop("checked", response.task.client_can_discuss === 1);
+
+            // Initialize DateRangePicker
+            initializeDateRangePicker($overlay.find("#update_start_date, #update_end_date"));
+
             // Initialize task list select2
-            var editTaskList = $("#edit_task_list");
+            const editTaskList = $overlay.find("#edit_task_list");
             editTaskList.select2({
-                dropdownParent: $("#edit_task_modal"),
+                dropdownParent: $overlay,
                 width: "100%",
                 ajax: {
-                    url: baseUrl + "/task-lists/search",
+                    url: `${baseUrl}/task-lists/search`,
                     dataType: "json",
                     delay: 250,
                     data: function (params) {
@@ -3502,12 +3390,10 @@ $(document).on("click", ".edit-task", function () {
                     },
                     processResults: function (data) {
                         return {
-                            results: data.map(function (item) {
-                                return {
-                                    id: item.id,
-                                    text: item.name,
-                                };
-                            }),
+                            results: data.map(item => ({
+                                id: item.id,
+                                text: item.name,
+                            })),
                         };
                     },
                     cache: true,
@@ -3516,263 +3402,152 @@ $(document).on("click", ".edit-task", function () {
                 minimumInputLength: 0,
                 allowClear: true,
             });
+
             // Prefill task list if it exists
             if (response.task.task_list_id) {
-                // Make an AJAX call to get the task list details
                 $.ajax({
-                    url: baseUrl + "/task-lists/search",
+                    url: `${baseUrl}/task-lists/search`,
                     data: { id: response.task.task_list_id },
                     dataType: "json",
                     success: function (data) {
-                        // Find the matching task list
-                        var taskList = data.find(
-                            (item) => item.id === response.task.task_list_id
-                        );
+                        const taskList = data.find(item => item.id === response.task.task_list_id);
                         if (taskList) {
-                            // Create the option and set it as selected
-                            var option = new Option(
-                                taskList.name,
-                                taskList.id,
-                                true,
-                                true
-                            );
+                            const option = new Option(taskList.name, taskList.id, true, true);
                             editTaskList.append(option).trigger("change");
                         }
                     },
                 });
+            } else {
+                editTaskList.val(null).trigger("change");
             }
-            if (formattedStartDate) {
-                $("#update_start_date").val(formattedStartDate);
-            }
-            if (formattedEndDate) {
-                $("#update_end_date").val(formattedEndDate);
-            }
-            initializeDateRangePicker("#update_start_date, #update_end_date");
-            $("#update_project_title").val(response.project.title);
-            var description =
-                response.task.description !== null
-                    ? response.task.description
-                    : "";
-            $("#edit_task_modal").find("#task_description").val(description);
-            $("#taskNote").val(response.task.note);
-            $("#edit_billing_type")
-                .val(response.task.billing_type)
-                .trigger("change");
-            $("#edit_completion_percentage")
-                .val(response.task.completion_percentage)
-                .trigger("change");
-            var usersSelect = $("#edit_task_modal").find(
-                'select[name="user_id[]"]'
-            );
-            // Clear existing options
+
+            // Populate users multi-select
+            const usersSelect = $overlay.find('select[name="user_id[]"]');
+
             usersSelect.empty();
-            // Check if response.project.users exists and has users
-            if (
-                response.project &&
-                response.project.users &&
-                response.project.users.length > 0
-            ) {
-                // Add users from response.project.users to the select options
-                response.project.users.forEach(function (user) {
-                    var userOption = new Option(
-                        user.first_name + " " + user.last_name,
+            if (response.project?.users?.length > 0) {
+                response.project.users.forEach(user => {
+                    const userOption = new Option(
+                        `${user.first_name} ${user.last_name}`,
                         user.id,
                         false,
                         false
                     );
                     usersSelect.append(userOption);
                 });
-            }
-            // Handle the selection of users based on response.task.users
-            if (
-                response.task &&
-                response.task.users &&
-                response.task.users.length > 0
-            ) {
-                var selectedTaskUsers = response.task.users.map(function (
-                    user
-                ) {
-                    return user.id;
-                });
-                usersSelect.val(selectedTaskUsers);
+                const selectedTaskUsers = response.task?.users?.length > 0
+                    ? response.task.users.map(user => user.id)
+                    : [];
+                usersSelect.val(selectedTaskUsers).trigger("change");
+                console.log("Users associated with the project:", response.project.users);
+
             } else {
-                usersSelect.val(null);
+                console.log("No users associated with the project");
+                usersSelect.val(null).trigger("change");
             }
-            usersSelect.trigger("change");
-            if (response.task.client_can_discuss == 1) {
-                $("#edit_task_modal")
-                    .find("#updateClientCanDiscussTask")
-                    .prop("checked", true);
-            } else {
-                $("#edit_task_modal")
-                    .find("#updateClientCanDiscussTask")
-                    .prop("checked", false);
-            }
+
+            // Handle recurring task settings
             if (response.task.recurring_task) {
-                $("#edit-recurring-task-switch").prop("checked", true);
-                $("#edit-recurring-task-settings").removeClass("d-none");
-                $("#edit-recurrence-frequency")
-                    .val(response.task.recurring_task.frequency)
-                    .trigger("change");
+                $overlay.find("#edit-recurring-task-switch").prop("checked", true);
+                $overlay.find("#edit-recurring-task-settings").removeClass("d-none");
+                $overlay.find("#edit-recurrence-frequency").val(response.task.recurring_task.frequency).trigger("change");
                 switch (response.task.recurring_task.frequency) {
                     case "weekly":
-                        $("#edit-recurrence-day-of-week").val(
-                            response.task.recurring_task.day_of_week || ""
-                        );
+                        $overlay.find("#edit-recurrence-day-of-week").val(response.task.recurring_task.day_of_week || "");
                         break;
                     case "monthly":
                     case "yearly":
-                        $("#edit-recurrence-day-of-month").val(
-                            response.task.recurring_task.day_of_month || ""
-                        );
+                        $overlay.find("#edit-recurrence-day-of-month").val(response.task.recurring_task.day_of_month || "");
                         break;
                     case "yearly":
-                        $("#edit-recurrence-month-of-year").val(
-                            response.task.recurring_task.month_of_year || ""
-                        );
+                        $overlay.find("#edit-recurrence-month-of-year").val(response.task.recurring_task.month_of_year || "");
                         break;
                 }
-                $("#edit-recurrence-starts-from").val(
+                $overlay.find("#edit-recurrence-starts-from").val(
                     response.task.recurring_task.starts_from
-                        ? moment(
-                            response.task.recurring_task.starts_from
-                        ).format("YYYY-MM-DD")
+                        ? moment(response.task.recurring_task.starts_from).format("YYYY-MM-DD")
                         : ""
                 );
-                $("#edit-recurrence-occurrences").val(
-                    response.task.recurring_task.number_of_occurrences || ""
-                );
+                $overlay.find("#edit-recurrence-occurrences").val(response.task.recurring_task.number_of_occurrences || "");
             } else {
-                $("#edit-recurring-task-switch").prop("checked", false);
-                $("#edit-recurring-task-settings").addClass("d-none");
+                $overlay.find("#edit-recurring-task-switch").prop("checked", false);
+                $overlay.find("#edit-recurring-task-settings").addClass("d-none");
             }
+
+            // Handle reminder settings
             if (response.task?.reminders?.length > 0) {
                 const reminder = response.task.reminders[0];
-                $("#edit-reminder-switch").prop(
-                    "checked",
-                    reminder.is_active === 1
-                );
-                if (reminder.is_active === 1) {
-                    $("#edit-reminder-settings").removeClass("d-none");
-                } else {
-                    $("#edit-reminder-settings").addClass("d-none");
-                }
-                $("#edit-frequency-type")
-                    .val(reminder.frequency_type)
-                    .trigger("change");
-                switch (reminder.frequency_type) {
-                    case "weekly":
-                        $("#edit-day-of-week-group").removeClass("d-none");
-                        $("#edit-day-of-month-group").addClass("d-none");
-                        $("#edit-day-of-week").val(reminder.day_of_week || "");
-                        break;
-                    case "monthly":
-                        $("#edit-day-of-month-group").removeClass("d-none");
-                        $("#edit-day-of-week-group").addClass("d-none");
-                        $("#edit-day-of-month").val(
-                            reminder.day_of_month || ""
-                        );
-                        break;
-                    default:
-                        $("#edit-day-of-week-group").addClass("d-none");
-                        $("#edit-day-of-month-group").addClass("d-none");
-                }
-                const timeOfDay = reminder.time_of_day.slice(0, 5);
-                $("#edit-time-of-day").val(timeOfDay);
+                $overlay.find("#edit-reminder-switch").prop("checked", reminder.is_active === 1);
+                $overlay.find("#edit-reminder-settings").toggleClass("d-none", reminder.is_active !== 1);
+                $overlay.find("#edit-frequency-type").val(reminder.frequency_type).trigger("change");
+                $overlay.find("#edit-day-of-week-group").toggleClass("d-none", reminder.frequency_type !== "weekly");
+                $overlay.find("#edit-day-of-month-group").toggleClass("d-none", reminder.frequency_type !== "monthly");
+                $overlay.find("#edit-day-of-week").val(reminder.day_of_week || "");
+                $overlay.find("#edit-day-of-month").val(reminder.day_of_month || "");
+                $overlay.find("#edit-time-of-day").val(reminder.time_of_day?.slice(0, 5) || "");
+            } else {
+                $overlay.find("#edit-reminder-switch").prop("checked", false);
+                $overlay.find("#edit-reminder-settings").addClass("d-none");
             }
 
-            // Populate custom fields
+            // Handle custom fields
             if (response.task.formatted_custom_fields) {
-                console.log('Custom Fields:', response.task.formatted_custom_fields);
-                // Ensure modal is fully loaded
-                setTimeout(function () {
-                    $.each(response.task.formatted_custom_fields, function (fieldId, field) {
-                        var fieldName = `custom_fields[${field.field_id}]`;
-                        var fieldSelector = `#edit_cf_${field.field_id}`;
-                        var fieldType = field.field_type.toLowerCase();
-
-                        console.log(`Processing field: ${field.field_label}, Type: ${fieldType}, Value: ${field.value}, Selector: ${fieldSelector}, Exists: ${$(fieldSelector).length}`);
-
+                setTimeout(() => {
+                    $.each(response.task.formatted_custom_fields, (fieldId, field) => {
+                        const fieldName = `custom_fields[${field.field_id}]`;
+                        const fieldSelector = `#edit_cf_${field.field_id}`;
+                        const fieldType = field.field_type.toLowerCase();
                         switch (fieldType) {
-                            case 'checkbox':
-                                var values = field.value ? JSON.parse(field.value) : [];
+                            case "checkbox":
+                                const values = field.value ? JSON.parse(field.value) : [];
                                 $(`input[name="${fieldName}[]"]`).each(function () {
-                                    $(this).prop('checked', values.includes($(this).val()));
+                                    $(this).prop("checked", values.includes($(this).val()));
                                 });
                                 break;
-                            case 'radio':
+                            case "radio":
                                 $(`input[name="${fieldName}"]`).each(function () {
-                                    $(this).prop('checked', $(this).val() === field.value);
+                                    $(this).prop("checked", $(this).val() === field.value);
                                 });
                                 break;
-                            case 'select':
-                                if ($(fieldSelector).length) {
-                                    $(fieldSelector).val(field.value).trigger('change');
-                                } else {
-                                    console.warn(`Select field not found: ${fieldSelector}`);
-                                }
+                            case "select":
+                                $(fieldSelector).val(field.value).trigger("change");
                                 break;
-                            case 'textarea':
-                                if ($(fieldSelector).length) {
-                                    $(fieldSelector).val(field.value);
-                                } else {
-                                    console.warn(`Textarea field not found: ${fieldSelector}`);
-                                }
+                            case "textarea":
+                            case "text":
+                            case "password":
+                            case "number":
+                                $(fieldSelector).val(field.value);
                                 break;
-                            case 'date':
-                                if ($(fieldSelector).length) {
-                                    var formattedDate = field.value ? moment(field.value).format(js_date_format) : '';
-                                    $(fieldSelector).val(formattedDate);
-
-                                    // Re-initialize this specific datepicker with the correct date
-                                    if ($(fieldSelector).data('daterangepicker')) {
-                                        $(fieldSelector).data('daterangepicker').remove();
-                                    }
-
-                                    $(fieldSelector).daterangepicker({
-                                        singleDatePicker: true,
-                                        showDropdowns: true,
-                                        autoUpdateInput: true,
-                                        locale: {
-                                            cancelLabel: "Clear",
-                                            format: js_date_format
-                                        },
-                                        startDate: formattedDate || moment()
-                                    });
-
-                                    $(fieldSelector).on('cancel.daterangepicker', function (ev, picker) {
-                                        $(this).val('');
-                                    });
-
-                                    console.log(`Date field initialized: ${fieldSelector} with value: ${formattedDate}`);
-                                } else {
-                                    console.warn(`Date field not found: ${fieldSelector}`);
+                            case "date":
+                                const formattedDate = field.value ? moment(field.value).format(js_date_format) : "";
+                                $(fieldSelector).val(formattedDate);
+                                if ($(fieldSelector).data("daterangepicker")) {
+                                    $(fieldSelector).data("daterangepicker").remove();
                                 }
+                                $(fieldSelector).daterangepicker({
+                                    singleDatePicker: true,
+                                    showDropdowns: true,
+                                    autoUpdateInput: true,
+                                    locale: { cancelLabel: "Clear", format: js_date_format },
+                                    startDate: formattedDate || moment(),
+                                }).on("cancel.daterangepicker", function () {
+                                    $(this).val("");
+                                });
                                 break;
-                            case 'text':
-                            case 'password':
-                            case 'number':
-                                if ($(fieldSelector).length) {
-                                    console.log('Trying to set: ', fieldSelector, field.value);
-                                    $(fieldSelector).val(field.value);
-                                    console.log('After set', fieldSelector, '=>', $(fieldSelector).val());
-
-                                } else {
-                                    console.warn(`Input field not found: ${fieldSelector}`);
-                                }
-                                break;
-
-                            default:
-                                console.warn(`Unsupported field type: ${fieldType}`);
                         }
                     });
-                }, 500); // Delay to ensure DOM is ready
+                }, 500);
             }
         },
         error: function (xhr, status, error) {
-            console.error(error);
+            console.error("AJAX error:", error);
+            toastr.error("Failed to load task data");
         },
     });
+}
+
+$(document).on("click", ".edit-task", function () {
+    editTask($(this).data("id"), true, baseUrl, js_date_format);
 });
 /**
  * Handles the click event on elements with class 'edit-project' to open and populate an edit project form
@@ -3785,9 +3560,6 @@ $(document).on("click", ".edit-task", function () {
 function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
     const overlayId = isOffcanvas ? "#edit_project_offcanvas" : "#edit_project_modal";
     const overlayType = isOffcanvas ? "offcanvas" : "modal";
-
-    console.log(`Opening ${overlayType}: ${overlayId}`);
-
     // Open the overlay
     const $overlay = $(overlayId);
     if (isOffcanvas) {
@@ -3795,7 +3567,6 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
     } else {
         $overlay.modal("show");
     }
-
     $.ajax({
         url: `${baseUrl}/projects/get/${projectId}`,
         type: "GET",
@@ -3804,13 +3575,10 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
         },
         dataType: "json",
         success: function (response) {
-            console.log("AJAX response:", response);
-
             if (!$overlay.length) {
-                console.warn(`${overlayId} not found in DOM`);
+                // console.warn(`${overlayId} not found in DOM`);
                 return;
             }
-
             // Format dates
             const formattedStartDate = response.project.start_date
                 ? moment(response.project.start_date).format(js_date_format)
@@ -3818,7 +3586,6 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             const formattedEndDate = response.project.end_date
                 ? moment(response.project.end_date).format(js_date_format)
                 : "";
-
             // Populate form fields
             $overlay.find("#project_id").val(response.project.id);
             $overlay.find("#project_title").val(response.project.title);
@@ -3830,10 +3597,8 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             $overlay.find("#task_accessibility").val(response.project.task_accessibility);
             $overlay.find("#projectNote").val(response.project.note);
             $overlay.find("#project_description").val(response.project.description || "");
-
             // Initialize DateRangePicker
             initializeDateRangePicker($overlay.find("#update_start_date, #update_end_date"));
-
             // Populate users multi-select
             const usersSelect = $overlay.find(".users_select");
             usersSelect.empty();
@@ -3851,7 +3616,6 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             } else {
                 usersSelect.val(null).trigger("change");
             }
-
             // Populate clients multi-select
             const clientsSelect = $overlay.find(".clients_select");
             clientsSelect.empty();
@@ -3869,7 +3633,6 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             } else {
                 clientsSelect.val(null).trigger("change");
             }
-
             // Populate tags multi-select
             const tagsSelect = $overlay.find('[name="tag_ids[]"]');
             tagsSelect.empty();
@@ -3882,16 +3645,13 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             } else {
                 tagsSelect.val(null).trigger("change");
             }
-
             // Handle checkboxes
             $overlay.find("#updateClientCanDiscussProject")
                 .prop("checked", response.project.client_can_discuss === 1);
             $overlay.find("#tasks_time_entries")
                 .prop("checked", response.project.enable_tasks_time_entries === 1);
-
             // Handle custom fields
             if (response.customFieldValues) {
-                console.log("Custom field values:", response.customFieldValues);
                 $.each(response.customFieldValues, function (fieldId, value) {
                     const inputField = $overlay.find(`#edit_cf_${fieldId}`);
                     if (inputField.length) {
@@ -3929,7 +3689,6 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
         },
     });
 }
-
 $(document).on("click", ".edit-project", function () {
     editProject($(this).data("id"), $(this).data("offcanvas") === true, baseUrl, js_date_format);
 });
@@ -4396,11 +4155,9 @@ $(document).ready(function () {
     var upcomingBDCalendarInitialized = false;
     var upcomingWACalendarInitialized = false;
     var membersOnLeaveCalendarInitialized = false;
-
     // Listen for the inner calendar tab click
     $(document).on("shown.bs.tab", ".calendar-button", function (event) {
         var tabId = $(event.target).attr("data-bs-target");
-
         if (tabId === "#upcomingBirthdaysCalendar-calendar" && !upcomingBDCalendarInitialized) {
             initializeUpcomingBDCalendar();
             upcomingBDCalendarInitialized = true;
@@ -4415,7 +4172,6 @@ $(document).ready(function () {
         }
     });
 });
-
 function initializeUpcomingBDCalendar() {
     var upcomingBDCalendar = document.getElementById(
         "upcomingBirthdaysCalendar"
@@ -4872,7 +4628,6 @@ $(document).ready(function () {
         var color = $(status.element).data("color") || "primary"; // Fallback to 'primary' if no color
         return $('<span class="badge bg-label-' + color + '">' + status.text + "</span>");
     }
-
     /**
      * Formats priority dropdown options with a colored badge.
      *
@@ -4883,11 +4638,9 @@ $(document).ready(function () {
         if (!priority.id) {
             return priority.text;
         }
-        console.log('priority created', priority);
         var color = $(priority.element).data("color") || "primary"; // Fallback to 'primary' if no color
         return $('<span class="badge bg-label-' + color + '">' + priority.text + "</span>");
     }
-
     /**
      * Initializes Select2 for elements with class 'statusDropdown'.
      */
@@ -4896,7 +4649,6 @@ $(document).ready(function () {
         var dropdownParent = $this.closest(".modal, .offcanvas").length
             ? $this.closest(".modal, .offcanvas")
             : $(document.body); // Fallback to body if no modal/offcanvas
-
         $this.select2({
             dropdownParent: dropdownParent,
             templateResult: formatStatus,
@@ -4914,7 +4666,6 @@ $(document).ready(function () {
             },
         });
     });
-
     /**
      * Initializes Select2 for elements with class 'priorityDropdown', with clearable options.
      */
@@ -4923,7 +4674,6 @@ $(document).ready(function () {
         var dropdownParent = $this.closest(".modal, .offcanvas").length
             ? $this.closest(".modal, .offcanvas")
             : $(document.body); // Fallback to body if no modal/offcanvas
-
         $this.select2({
             dropdownParent: dropdownParent,
             templateResult: formatPriority,
@@ -4941,7 +4691,6 @@ $(document).ready(function () {
                 },
             },
         });
-
         // Prevent dropdown from opening when clear button is clicked
         $this
             .on("select2:unselecting", function (e) {
@@ -5006,7 +4755,6 @@ $(document).ready(function () {
         }
     }
 });
-
 $("#internal_client").change(function () {
     var isChecked = $(this).prop("checked");
     $("#password, #password_confirmation").val("");
@@ -5368,11 +5116,9 @@ function initSelect2WithAjax(selector, type) {
                     $this.data("single-select") === false
                     ? false
                     : true;
-
             // New: Check if initial values should be loaded
             var loadInitialValues = $this.data("load-initial") !== false; // Default to true unless explicitly set to false
             var initialLimit = $this.data("initial-limit") || 10; // Default to 10 initial items
-
             var ajaxOptions = {
                 ajax: {
                     url: "/search", // API endpoint to fetch data dynamically
@@ -5386,13 +5132,11 @@ function initSelect2WithAjax(selector, type) {
                             leaveVisibleToUsers: leaveVisibleToUsers,
                             ignoreAdmins: ignoreAdmins,
                         };
-
                         // If no search term and initial values should be loaded
                         if (!params.term && loadInitialValues) {
                             requestData.initial = true;
                             requestData.limit = initialLimit;
                         }
-
                         return requestData;
                     },
                     processResults: function (data) {
@@ -5431,7 +5175,6 @@ function initSelect2WithAjax(selector, type) {
                     },
                 },
             };
-
             // Apply specific templates if type is 'tags'
             // if (type === 'tags') {
             //     ajaxOptions.templateResult = formatTag;
@@ -5440,7 +5183,6 @@ function initSelect2WithAjax(selector, type) {
             //         return markup; // Prevent escaping of markup
             //     };
             // }
-
             // Check if the element is inside a modal
             if (
                 $this.closest(".modal").length &&
@@ -5451,18 +5193,104 @@ function initSelect2WithAjax(selector, type) {
                     ajaxOptions.dropdownParent = $("#" + modalId); // Use the ID to reference the modal
                 }
             }
-
             $this.select2(ajaxOptions);
-
             $(".cancel-button").on("click", function () {
                 $this.select2("close"); // Close the dropdown
             });
         }
     });
 }
+function initTagifyFromSelect(selector, type) {
+    document.querySelectorAll(selector).forEach(function (selectEl) {
+        // Hide the original select
+        selectEl.style.display = "none";
+
+        // Create an input for Tagify
+        var input = document.createElement("input");
+        input.setAttribute("placeholder", "Select users...");
+        selectEl.parentNode.insertBefore(input, selectEl.nextSibling);
+
+        // Detect if inside modal
+        var modalEl = selectEl.closest(".modal");
+        var dropdownContainer = modalEl ? modalEl : document.body;
+
+        // Initialize Tagify
+        var tagify = new Tagify(input, {
+            enforceWhitelist: true,
+            whitelist: [],
+            dropdown: {
+                enabled: 0,
+                maxItems: 10,
+                closeOnSelect: true,
+                searchKeys: ["text"],
+                // ✅ Ensure dropdown renders inside modal if present
+                appendTarget: dropdownContainer
+            }
+        });
+
+        // Fix z-index if in modal
+        if (modalEl) {
+            tagify.DOM.dropdown.style.zIndex = "2000"; // higher than Bootstrap modal (1055)
+        }
+
+        // Preload already selected <option> as Tagify values
+        var selected = Array.from(selectEl.options)
+            .filter(o => o.selected)
+            .map(o => ({ value: o.value, text: o.text }));
+        tagify.addTags(selected);
+
+        // Sync Tagify back to <select>
+        tagify.on("change", function () {
+            // Clear all selected options
+            Array.from(selectEl.options).forEach(o => (o.selected = false));
+
+            // Set selected ones from tagify
+            var values = tagify.value.map(v => v.value);
+            values.forEach(val => {
+                var option = Array.from(selectEl.options).find(o => o.value == val);
+                if (option) option.selected = true;
+                else {
+                    // If not exists, create dynamically
+                    var newOpt = new Option(val, val, true, true);
+                    selectEl.add(newOpt);
+                }
+            });
+        });
+
+        // Load suggestions dynamically (AJAX)
+        tagify.on("input", function (e) {
+            var value = e.detail.value;
+
+            if (tagify.loadingXHR) tagify.loadingXHR.abort();
+
+            tagify.loading(true).dropdown.hide.call(tagify);
+
+            tagify.loadingXHR = $.ajax({
+                url: "/search",
+                data: {
+                    q: value,
+                    type: type,
+                    initial: !value,
+                    limit: $(selectEl).data("initial-limit") ?? 10
+                },
+                dataType: "json",
+                success: function (data) {
+                    tagify.settings.whitelist = data.results.map(item => ({
+                        value: item.id,
+                        text: item.text
+                    }));
+                    tagify.loading(false).dropdown.show.call(tagify, value);
+                }
+            });
+        });
+    });
+}
+
 $(document).ready(function () {
     initSelect2WithAjax(".projects_select", "projects");
     initSelect2WithAjax(".users_select", "users");
+    // initTagifyFromSelect(".users_select", "users");
+
     initSelect2WithAjax(".clients_select", "clients");
     initSelect2WithAjax(".tags_select", "tags");
     initSelect2WithAjax(".contract_types_select", "contract_types");
@@ -5483,9 +5311,7 @@ $(document).ready(function () {
     initSelect2WithAjax("#select_candidate_statuses", "candidate_statuses");
     initSelect2WithAjax('.select-interview-candidate', "interview_candidates");
     initSelect2WithAjax('.select-interview-interviewer', "interview_interviewer");
-
-
-    $("#create_task_modal, #edit_task_modal")
+    $("#create_task_offcanvas, #edit_task_offcanvas")
         .find('select[name="user_id[]"]')
         .each(function () {
             if ($(this).length) {
@@ -5510,7 +5336,7 @@ $(document).ready(function () {
 $(document).ready(function () {
     // Function to load users for a specific project
     function loadProjectUsers(projectId) {
-        var usersSelect = $("#create_task_modal").find(
+        var usersSelect = $("#create_task_offcanvas").find(
             'select[name="user_id[]"]'
         );
         usersSelect.empty(); // Clear any previous options
@@ -5618,7 +5444,6 @@ $("#create_project_modal ").on("shown.bs.modal", function (event) {
         }
     }
 });
-
 $("#create_project_offcanvas").on("shown.bs.offcanvas", function (event) {
     var currentUrl = window.location.pathname;
     // Check if the current URL contains one of the favorite project routes
@@ -5644,345 +5469,18 @@ $("#create_project_offcanvas").on("shown.bs.offcanvas", function (event) {
         }
     }
 });
-$("#create_task_modal").on("shown.bs.modal", function (event) {
-    if (window.location.search.includes("favorite=1")) {
-        $("#create_task_modal #is_favorite").val(1); // Set is_favorite to 1 if the query parameter favorite=1 is present
+$("#create_task_offcanvas").on("shown.bs.offcanvas", function (event) {
+    if (window.location.search.includes("favorite=1") || window.location.search.includes("is_favorite=1")) {
+        $("#create_task_offcanvas #is_favorite").val(1); // Set is_favorite to 1 if the query parameter favorite=1 is present
     } else {
-        $("#create_task_modal #is_favorite").val(0); // Set is_favorite to 0 if the query parameter favorite is not present
+        $("#create_task_offcanvas #is_favorite").val(0); // Set is_favorite to 0 if the query parameter favorite is not present
     }
 });
-// Initialize the calendar on page load
-$(document).ready(function () {
-    var taskCalenderDiv = document.getElementById("taskCalenderDiv");
-    if (taskCalenderDiv) {
-        calenderView(taskCalenderDiv);
-    }
-});
-// Calendar View For the Tasks
-function calenderView(taskCalenderDiv) {
-    // Check if the calendar element exists
-    var taskcalendar = new FullCalendar.Calendar(taskCalenderDiv, {
-        plugins: ["interaction", "dayGrid", "list"],
-        headerToolbar: {
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,listYear",
-        },
-        editable: true,
-        selectable: true,
-        selectHelper: true,
-        height: "auto",
-        eventLimit: 4, // Show max 4 events per day
-        events: function (fetchInfo, successCallback, failureCallback) {
-            // Fetch tasks for the current month
-            fetchTasks(
-                fetchInfo.start,
-                fetchInfo.end,
-                successCallback,
-                failureCallback
-            );
-        },
-        datesSet: function (info) {
-            // Fetch tasks when the month changes
-            taskcalendar.removeAllEvents();
-            taskcalendar.refetchEvents();
-        },
-        eventClick: function (info) {
-            // Show the edit modal
-            $("#edit_task_modal").modal("show");
-            // AJAX call to fetch the event details (similar to fetching task details)
-            $.ajax({
-                url: baseUrl + "/tasks/get/" + info.event.id, // Fetch event by ID
-                type: "GET",
-                headers: {
-                    "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"), // CSRF token for security
-                },
-                dataType: "json",
-                success: function (response) {
-                    if (response.error == false) {
-                        // Format the start and end dates
-                        var formattedStartDate = response.task.start_date
-                            ? moment(response.task.start_date).format(
-                                js_date_format
-                            )
-                            : "";
-                        var formattedEndDate = response.task.due_date
-                            ? moment(response.task.due_date).format(
-                                js_date_format
-                            )
-                            : "";
-                        // Update the modal fields with task data
-                        $("#id").val(response.task.id);
-                        $("#title").val(response.task.title);
-                        $("#project_status_id")
-                            .val(response.task.status_id)
-                            .trigger("change");
-                        $("#priority_id")
-                            .val(response.task.priority_id)
-                            .trigger("change");
-                        $("#update_start_date").val(formattedStartDate);
-                        $("#update_end_date").val(formattedEndDate);
-                        // Initialize date pickers for start and end dates
-                        initializeDateRangePicker(
-                            "#update_start_date, #update_end_date"
-                        );
-                        // Update the project title and task note
-                        $("#update_project_title").val(response.project.title);
-                        $("#taskNote").val(response.task.note);
-                        // Set task description (handling null case)
-                        $("#edit_task_modal")
-                            .find("#task_description")
-                            .val(response.task.description || "");
-                        // Populate users associated with the project
-                        var usersSelect = $("#edit_task_modal").find(
-                            'select[name="user_id[]"]'
-                        );
-                        usersSelect.empty(); // Clear existing options
-                        // Populate users from response
-                        if (
-                            response.project &&
-                            response.project.users &&
-                            response.project.users.length > 0
-                        ) {
-                            response.project.users.forEach(function (user) {
-                                var userOption = new Option(
-                                    user.first_name + " " + user.last_name,
-                                    user.id,
-                                    false,
-                                    false
-                                ); // Unselected initially
-                                usersSelect.append(userOption);
-                            });
-                        }
-                        // Set the selected values based on the task's users
-                        if (
-                            response.task &&
-                            response.task.users &&
-                            response.task.users.length > 0
-                        ) {
-                            var selectedTaskUsers = response.task.users.map(
-                                function (user) {
-                                    return user.id; // Get the user IDs from task
-                                }
-                            );
-                            // Set the selected values in the dropdown
-                            usersSelect.val(selectedTaskUsers);
-                        } else {
-                            // Handle case when there are no task users
-                            usersSelect.val(null);
-                        }
-                        usersSelect.trigger("change"); // Trigger change to reflect selection
-                    } else {
-                        console.error("Failed to fetch event details");
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error:", error);
-                },
-            });
-        },
-        dateClick: function (info) {
-            var start = moment(info.dateStr).format(js_date_format);
-            $("#task_start_date").val(start);
-            $("#task_end_date").val(start);
-            $("#create_task_modal").modal("show");
-        },
-        select: function (info) {
-            var startDate = moment(info.startStr).format(js_date_format);
-            var endDate = moment(info.endStr)
-                .subtract(1, "days")
-                .format(js_date_format);
-            $("#task_start_date").val(startDate);
-            $("#task_end_date").val(endDate);
-            $("#create_task_modal").modal("show");
-        },
-        eventDrop: function (info) {
-            var id = info.event.id;
-            // Show the confirmation modal
-            $("#confirmDragTaskModal").modal("show");
-            // Remove previous click event to avoid duplication
-            $("#confirmDragTaskModal").off("click", "#confirm");
-            // When the confirmation button is clicked
-            $("#confirmDragTaskModal").on("click", "#confirm", function () {
-                $("#confirmDragTaskModal")
-                    .find("#confirm")
-                    .html(label_please_wait)
-                    .attr("disabled", true);
-                // Format the start and end dates
-                var start = moment(info.event.start).format(js_date_format);
-                var end = moment(info.event.end)
-                    .subtract(1, "days")
-                    .format(js_date_format); // Subtracting one day
-                // Handle case where the end date is invalid
-                if (end === "Invalid date") {
-                    end = start;
-                }
-                $.ajax({
-                    url: baseUrl + "/tasks/update-dates",
-                    type: "patch",
-                    headers: {
-                        "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"),
-                    },
-                    data: {
-                        id: id,
-                        start_date: start,
-                        due_date: end,
-                    },
-                    success: function (response) {
-                        $("#confirmDragTaskModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        if (response.error == false) {
-                            $("#confirmDragTaskModal").modal("hide");
-                            toastr.success(response.message);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        // Handle error
-                        $("#confirmDragTaskModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        $("#confirmDragTaskModal").modal("hide");
-                        toastr.error(label_something_went_wrong);
-                    },
-                });
-            });
-            // Handle cancel event
-            $("#confirmDragTaskModal").on("click", "#cancel", function () {
-                info.revert(); // Revert the event to its original position
-                $("#confirmDragTaskModal").modal("hide");
-            });
-        },
-        eventResize: function (info) {
-            var id = info.event.id;
-            // Show confirmation modal for resizing
-            $("#confirmResizeTaskModal").modal("show");
-            $("#confirmResizeTaskModal").off("click", "#confirm");
-            $("#confirmResizeTaskModal").on("click", "#confirm", function () {
-                $("#confirmResizeTaskModal")
-                    .find("#confirm")
-                    .html(label_please_wait)
-                    .attr("disabled", true);
-                // Format the new start and end dates
-                var start = moment(info.event.start).format(js_date_format);
-                var end = moment(info.event.end)
-                    .subtract(1, "days")
-                    .format(js_date_format); // Subtracting one day
-                $.ajax({
-                    url: baseUrl + "/tasks/update-dates",
-                    type: "PATCH",
-                    headers: {
-                        "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"),
-                    },
-                    data: {
-                        id: id,
-                        start_date: start,
-                        due_date: end,
-                    },
-                    success: function (response) {
-                        $("#confirmResizeTaskModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        if (response.error == false) {
-                            $("#confirmResizeTaskModal").modal("hide");
-                            toastr.success(response.message);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        $("#confirmResizeTaskModal")
-                            .find("#confirm")
-                            .html(label_yes)
-                            .attr("disabled", false);
-                        $("#confirmResizeTaskModal").modal("hide");
-                        toastr.error(label_something_went_wrong);
-                    },
-                });
-            });
-            // Handle cancellation
-            $("#confirmResizeTaskModal").on("click", "#cancel", function () {
-                info.revert(); // Revert the event to its original position
-                $("#confirmResizeTaskModal").modal("hide");
-            });
-        },
-        eventMouseEnter: function (info) {
-            // Create a tooltip element
-            var tooltip = document.createElement("div");
-            tooltip.innerHTML = info.event.title;
-            tooltip.style.position = "absolute";
-            tooltip.style.background = "rgba(0, 0, 0, 0.8)";
-            tooltip.style.color = "#fff";
-            tooltip.style.padding = "5px";
-            tooltip.style.borderRadius = "5px";
-            tooltip.style.zIndex = "1000";
-            tooltip.style.pointerEvents = "none"; // Prevent mouse events
-            // Append the tooltip to the body
-            document.body.appendChild(tooltip);
-            // Position the tooltip
-            var rect = info.el.getBoundingClientRect();
-            tooltip.style.left = rect.left + window.scrollX + "px";
-            tooltip.style.top = rect.bottom + window.scrollY + "px";
-            // Remove tooltip on mouse leave
-            info.el.addEventListener(
-                "mouseleave",
-                function () {
-                    document.body.removeChild(tooltip);
-                },
-                { once: true }
-            );
-        },
-    });
-    taskcalendar.render();
-}
-function fetchTasks(startDate, endDate, successCallback, failureCallback) {
-    var projectId = $("#projectId").val();
-    $.ajax({
-        url: baseUrl + "/tasks/get-calendar-data",
-        type: "GET",
-        data: {
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
-            projectId: projectId,
-            is_favorites: $("#is_favorites").val(),
-        },
-        success: function (response) {
-            // Parse and format dynamic data for FullCalendar
-            var events = response.map(function (event) {
-                return {
-                    id: event.id,
-                    tasks_info_url: event.tasks_info_url,
-                    title: event.title,
-                    start: event.start,
-                    end: moment(event.end).add(1, "days").format("YYYY-MM-DD"),
-                    backgroundColor: event.backgroundColor,
-                    borderColor: event.borderColor,
-                    textColor: event.textColor,
-                };
-            });
-            // Invoke success callback with dynamic data
-            successCallback(events);
-        },
-        error: function (xhr, status, error) {
-            console.error(xhr.responseText);
-            // Invoke failure callback if there's an error
-            failureCallback(error);
-        },
-    });
-}
+
 $(document).ready(function () {
     $("#menu-search").on("input", function () {
-
-
         var searchQuery = $(this).val().toLowerCase();
-        console.log("searchQuery:", searchQuery)
         var menuItems = $(".menu-item");
-        console.log("menu items", menuItems);
         if (searchQuery === "") {
             // If search is empty, reset everything
             menuItems.show(); // Show all menu items
@@ -6246,8 +5744,6 @@ $(document).ready(function () {
             $("#edit-day-of-month-group").removeClass("d-none");
         }
     });
-
-
     $("#edit-todo-reminder-switch").on("change", function () {
         if ($(this).is(":checked")) {
             $("#edit-todo-reminder-settings").removeClass("d-none");
@@ -6270,7 +5766,7 @@ $(document).ready(function () {
 $(document).ready(function () {
     // Initialize task list select2
     $("#task_list").select2({
-        dropdownParent: $("#create_task_modal"), // Add this line to fix dropdown in modal
+        dropdownParent: $("#create_task_offcanvas"), // Add this line to fix dropdown in modal
         width: "100%", // Ensure full width
         ajax: {
             url: baseUrl + "/task-lists/search",
@@ -6395,1022 +5891,6 @@ document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (button) {
         }
     });
 });
-// Meetings Calendar
-function meetings_calendar_view(meetingsCalenderDiv) {
-    // Check if the calendar element exists
-    var meetingCalendar = new FullCalendar.Calendar(meetingsCalenderDiv, {
-        plugins: ["interaction", "dayGrid", "list"],
-        headerToolbar: {
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,listYear",
-        },
-        editable: false,
-        selectable: true,
-        selectHelper: true,
-        height: "auto",
-        eventLimit: 4, // Show max 4 events per day
-        events: function (fetchInfo, successCallback, failureCallback) {
-            // Fetch tasks for the current month
-            fetchMeetings(
-                fetchInfo.start,
-                fetchInfo.end,
-                successCallback,
-                failureCallback
-            );
-        },
-        datesSet: function (info) {
-            // Fetch tasks when the month changes
-            meetingCalendar.removeAllEvents();
-            meetingCalendar.refetchEvents();
-        },
-        dateClick: function (info) {
-            var start = moment(info.dateStr).format(js_date_format);
-            $("#start_date").val(start);
-            $("#start_time").val()
-            $("#end_date").val(start);
-            $("#end_time").val()
-            $("#createMeetingModal").modal("show");
-        },
-        select: function (info) {
-            var startDate = moment(info.startStr).format(js_date_format);
-            var endDate = moment(info.endStr)
-                .subtract(1, "days")
-                .format(js_date_format);
-            $("#start_date").val(startDate);
-            $("#end_date").val(endDate);
-            $("#createMeetingModal").modal("show");
-        },
-        eventMouseEnter: function (info) {
-            // Create a tooltip element
-            var tooltip = document.createElement("div");
-            tooltip.innerHTML = info.event.extendedProps.description || "No description available";
-            tooltip.style.position = "absolute";
-            tooltip.style.background = "rgba(0, 0, 0, 0.8)";
-            tooltip.style.color = "#fff";
-            tooltip.style.padding = "5px";
-            tooltip.style.borderRadius = "5px";
-            tooltip.style.zIndex = "1000";
-            tooltip.style.pointerEvents = "none"; // Prevent mouse events
-            // Append the tooltip to the body
-            document.body.appendChild(tooltip);
-            // Position the tooltip
-            var rect = info.el.getBoundingClientRect();
-            tooltip.style.left = rect.left + window.scrollX + "px";
-            tooltip.style.top = rect.bottom + window.scrollY + "px";
-            // Remove tooltip on mouse leave
-            info.el.addEventListener(
-                "mouseleave",
-                function () {
-                    document.body.removeChild(tooltip);
-                },
-                { once: true }
-            );
-        },
-        eventClick: function (info) {
-            //Join Meeting
-            var status = info.event.extendedProps.status;
-            console.log(status);
-            if (status == "Ongoing") {
-                window.location.href = "/meetings/join/" + info.event.id;
-            }
-            else {
-                toastr.error("Meeting is not available to join");
-            }
-            // if()
-        },
-    });
-    meetingCalendar.render();
-}
-function fetchMeetings(startDate, endDate, successCallback, failureCallback) {
-    $.ajax({
-        url: "/meetings/get-calendar-data",
-        type: "GET",
-        data: {
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
-        },
-        success: function (response) {
-            console.log(response);
-            // Parse and format dynamic data for FullCalendar
-            var events = response.map(function (event) {
-                return {
-                    id: event.id,
-                    description: event.description,
-                    title: event.title,
-                    start: event.start,
-                    end: moment(event.end).add(1, "days").format("YYYY-MM-DD"),
-                    backgroundColor: event.backgroundColor,
-                    borderColor: event.borderColor,
-                    textColor: event.textColor,
-                    status: event.extendedProps.status,
-                };
-            });
-            // Invoke success callback with dynamic data
-            successCallback(events);
-        },
-        error: function (xhr, status, error) {
-            console.error(xhr.responseText);
-            // Invoke failure callback if there's an error
-            failureCallback(error);
-        },
-    });
-}
-// Activity Log Calendar
-function activity_calendar_view(activityCalenderDiv) {
-    // Check if the calendar element exists
-    var activityCalendar = new FullCalendar.Calendar(activityCalenderDiv, {
-        plugins: ["interaction", "dayGrid", "list"],
-        headerToolbar: {
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,listYear",
-        },
-        editable: false,
-        selectable: true,
-        selectHelper: true,
-        height: "auto",
-        eventLimit: 4, // Show max 4 events per day
-        events: function (fetchInfo, successCallback, failureCallback) {
-            // Fetch tasks for the current month
-            fetchActivities(
-                fetchInfo.start,
-                fetchInfo.end,
-                successCallback,
-                failureCallback
-            );
-        },
-        datesSet: function (info) {
-            // Fetch tasks when the month changes
-            activityCalendar.removeAllEvents();
-            activityCalendar.refetchEvents();
-        },
-
-
-        eventMouseEnter: function (info) {
-            // Create a tooltip element
-            var tooltip = document.createElement("div");
-            tooltip.innerHTML = info.event.title || "No description available";
-            tooltip.style.position = "absolute";
-            tooltip.style.background = "rgba(0, 0, 0, 0.8)";
-            tooltip.style.color = "#fff";
-            tooltip.style.padding = "5px";
-            tooltip.style.borderRadius = "5px";
-            tooltip.style.zIndex = "1000";
-            tooltip.style.pointerEvents = "none"; // Prevent mouse events
-            // Append the tooltip to the body
-            document.body.appendChild(tooltip);
-            // Position the tooltip
-            var rect = info.el.getBoundingClientRect();
-            tooltip.style.left = rect.left + window.scrollX + "px";
-            tooltip.style.top = rect.bottom + window.scrollY + "px";
-            // Remove tooltip on mouse leave
-            info.el.addEventListener(
-                "mouseleave",
-                function () {
-                    document.body.removeChild(tooltip);
-                },
-                { once: true }
-            );
-        },
-        eventClick: function (info) {
-            //Join Meeting
-            console.log(info);
-            // if()
-        },
-    });
-    activityCalendar.render();
-}
-function fetchActivities(startDate, endDate, successCallback, failureCallback) {
-    $.ajax({
-        url: "/activity-log/get-calendar-data",
-        type: "GET",
-        data: {
-            date_from: moment(startDate).format(js_date_format),
-            date_to: moment(endDate).format(js_date_format),
-            limit: 1500,
-        },
-        success: function (response) {
-            console.log(response);
-            // Parse and format dynamic data for FullCalendar
-            var events = response.map(function (event) {
-                return {
-                    id: event.id,
-                    description: event.description,
-                    title: event.title,
-                    start: event.start,
-                    end: moment(event.end).add(1, "days").format("YYYY-MM-DD"),
-                    backgroundColor: event.backgroundColor,
-                    borderColor: event.borderColor,
-                    textColor: event.textColor,
-                    url: event.url,
-                    // status: event.extendedProps.status,
-                };
-            });
-            // Invoke success callback with dynamic data
-            successCallback(events);
-        },
-        error: function (xhr, status, error) {
-            console.error(xhr.responseText);
-            // Invoke failure callback if there's an error
-            failureCallback(error);
-        },
-    });
-}
-// Leave Request Calendar
-
-function leave_request_calendar_view(leaveRequestCalenderDiv) {
-    // Check if the calendar element exists
-    var leaveRequestCalendar = new FullCalendar.Calendar(leaveRequestCalenderDiv, {
-        plugins: ["interaction", "dayGrid", "list"],
-        headerToolbar: {
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,listYear",
-        },
-        editable: false,
-        selectable: true,
-        selectHelper: true,
-        height: "auto",
-        eventLimit: 4, // Show max 4 events per day
-        events: function (fetchInfo, successCallback, failureCallback) {
-            // Fetch tasks for the current month
-            fetchLeaveRequests(
-                fetchInfo.start,
-                fetchInfo.end,
-                successCallback,
-                failureCallback
-            );
-        },
-        datesSet: function (info) {
-            // Fetch tasks when the month changes
-            leaveRequestCalendar.removeAllEvents();
-            leaveRequestCalendar.refetchEvents();
-        },
-
-
-        eventMouseEnter: function (info) {
-            // Create a tooltip element
-
-            var tooltip = document.createElement("div");
-            tooltip.innerHTML = info.event.extendedProps.description || "No description available";
-            tooltip.style.position = "absolute";
-            tooltip.style.background = "rgba(0, 0, 0, 0.8)";
-            tooltip.style.color = "#fff";
-            tooltip.style.padding = "5px";
-            tooltip.style.borderRadius = "5px";
-            tooltip.style.zIndex = "1000";
-            tooltip.style.pointerEvents = "none"; // Prevent mouse events
-            // Append the tooltip to the body
-            document.body.appendChild(tooltip);
-            // Position the tooltip
-            var rect = info.el.getBoundingClientRect();
-            tooltip.style.left = rect.left + window.scrollX + "px";
-            tooltip.style.top = rect.bottom + window.scrollY + "px";
-            // Remove tooltip on mouse leave
-            info.el.addEventListener(
-                "mouseleave",
-                function () {
-                    document.body.removeChild(tooltip);
-                },
-                { once: true }
-            );
-        },
-        eventClick: function (info) {
-            //Join Meeting
-            console.log(info);
-            // if()
-        },
-    });
-    leaveRequestCalendar.render();
-}
-function fetchLeaveRequests(startDate, endDate, successCallback, failureCallback) {
-    $.ajax({
-        url: "/leave-requests/get-calendar-data",
-        type: "GET",
-        data: {
-            date_from: moment(startDate).format(js_date_format),
-            date_to: moment(endDate).format(js_date_format),
-        },
-        success: function (response) {
-            console.log(response);
-            // Parse and format dynamic data for FullCalendar
-            var events = response.map(function (event) {
-                return {
-                    id: event.id,
-                    description: event.description,
-                    title: event.title,
-                    start: event.start,
-                    end: moment(event.end).add(1, "days").format("YYYY-MM-DD"),
-                    backgroundColor: event.backgroundColor,
-                    borderColor: event.borderColor,
-                    textColor: event.textColor,
-                    url: event.url,
-                    status: event.extendedProps.status,
-                    type: 'leave',
-                };
-            });
-            // Invoke success callback with dynamic data
-            successCallback(events);
-        },
-        error: function (xhr, status, error) {
-            console.error(xhr.responseText);
-            // Invoke failure callback if there's an error
-            failureCallback(error);
-        },
-    });
-}
-$(document).ready(function () {
-    var meetingsCalenderDiv = document.getElementById("meetings_calendar_view");
-    if (meetingsCalenderDiv) {
-        meetings_calendar_view(meetingsCalenderDiv);
-    }
-    var activityCalenderDiv = document.getElementById("activity_calendar_view");
-    if (activityCalenderDiv) {
-        activity_calendar_view(activityCalenderDiv);
-    }
-    var leaveRequestCalenderDiv = document.getElementById("leave_request_calendar_view");
-    if (leaveRequestCalenderDiv) {
-        leave_request_calendar_view(leaveRequestCalenderDiv);
-    }
-});
-
-class ProjectCalendarManager {
-    constructor(config = {}) {
-        this.config = {
-            calendarContainerId: 'projectCalenderDiv',
-            dateRangePickerId: 'daterange-picker',
-            statusFiltersId: 'status-filters-container',
-            priorityFiltersId: 'priority-filters-container',
-            baseUrl: config.baseUrl || window.baseUrl || '',
-            dateFormat: config.dateFormat || window.js_date_format || 'DD/MM/YYYY',
-            csrfToken: config.csrfToken || $('input[name="_token"]').attr("value"),
-            ...config
-        };
-
-        this.state = {
-            calendar: null,
-            allProjects: [],
-            projectStatuses: [],
-            projectPriorities: [],
-            activeFilters: {
-                status: [],
-                priority: []
-            },
-            isInitialized: false
-        };
-
-        this.cache = new Map();
-        this.debounceTimers = new Map();
-    }
-
-    async init() {
-        if (this.state.isInitialized) {
-            console.warn('ProjectCalendarManager already initialized');
-            return this;
-        }
-
-        try {
-            await this.initializeDateRangePicker();
-            await this.loadFilterOptions();
-            await this.initializeCalendar();
-            this.initializeQuickActions();
-            this.state.isInitialized = true;
-            return this;
-        } catch (error) {
-            console.error('Failed to initialize ProjectCalendarManager:', error);
-            throw error;
-        }
-    }
-
-    initializeDateRangePicker() {
-        return new Promise((resolve) => {
-            const today = moment();
-            const picker = $(`#${this.config.dateRangePickerId}`);
-
-            if (!picker.length) {
-                console.warn(`Date range picker element #${this.config.dateRangePickerId} not found`);
-                resolve();
-                return;
-            }
-
-            picker.daterangepicker({
-                startDate: today.clone().startOf('month'),
-                endDate: today.clone().endOf('month'),
-                locale: { format: this.config.dateFormat },
-                ranges: this.getDateRanges()
-            }, (start, end) => {
-                this.handleDateRangeChange(start, end);
-            });
-
-            resolve();
-        });
-    }
-
-    getDateRanges() {
-        const m = moment;
-        return {
-            'Today': [m(), m()],
-            'Yesterday': [m().subtract(1, 'days'), m().subtract(1, 'days')],
-            'Last 7 Days': [m().subtract(6, 'days'), m()],
-            'Last 30 Days': [m().subtract(29, 'days'), m()],
-            'This Month': [m().startOf('month'), m().endOf('month')],
-            'Last Month': [m().subtract(1, 'month').startOf('month'), m().subtract(1, 'month').endOf('month')],
-            'Next Month': [m().add(1, 'month').startOf('month'), m().add(1, 'month').endOf('month')],
-            'This Year': [m().startOf('year'), m().endOf('year')]
-        };
-    }
-
-    handleDateRangeChange(start, end) {
-        this.debounce('dateRangeChange', () => {
-            if (this.state.calendar) {
-                this.state.calendar.gotoDate(start.toDate());
-                this.state.calendar.setOption('visibleRange', {
-                    start: start.toDate(),
-                    end: end.toDate()
-                });
-                this.state.calendar.refetchEvents();
-            }
-        }, 300);
-    }
-
-    async loadFilterOptions() {
-        const filterSection = $('.filter-section');
-        filterSection.addClass('loading-filters');
-
-        try {
-            const [statusResponse, priorityResponse] = await Promise.all([
-                this.apiRequest('/projects/get-statuses'),
-                this.apiRequest('/projects/get-priorities')
-            ]);
-
-            this.state.projectStatuses = statusResponse.statuses || statusResponse;
-            this.state.projectPriorities = priorityResponse.priorities || priorityResponse;
-
-            this.state.activeFilters.status = this.state.projectStatuses.map(s => s.id.toString());
-            this.state.activeFilters.priority = this.state.projectPriorities.map(p => p.id.toString());
-
-            this.renderFilters();
-        } catch (error) {
-            console.error('Error loading filter options:', error);
-            this.handleFilterLoadError();
-        } finally {
-            filterSection.removeClass('loading-filters');
-        }
-    }
-
-    async apiRequest(endpoint, options = {}) {
-        const cacheKey = `${endpoint}-${JSON.stringify(options)}`;
-
-        if (this.cache.has(cacheKey)) {
-            return this.cache.get(cacheKey);
-        }
-
-        const response = await $.ajax({
-            url: this.config.baseUrl + endpoint,
-            type: options.method || "GET",
-            headers: {
-                "X-CSRF-TOKEN": this.config.csrfToken,
-                ...options.headers
-            },
-            dataType: "json",
-            ...options
-        });
-
-        this.cache.set(cacheKey, response);
-        return response;
-    }
-
-    renderFilters() {
-        this.renderStatusFilters();
-        this.renderPriorityFilters();
-    }
-
-    renderStatusFilters() {
-        const container = $(`#${this.config.statusFiltersId}`);
-        if (!container.length) return;
-
-        const filtersHtml = this.state.projectStatuses.map(status =>
-            this.createFilterHtml('status', status)
-        ).join('');
-
-        container.html(filtersHtml);
-        this.bindFilterEvents('status');
-    }
-
-    renderPriorityFilters() {
-        const container = $(`#${this.config.priorityFiltersId}`);
-        if (!container.length) return;
-
-        const filtersHtml = this.state.projectPriorities.map(priority =>
-            this.createFilterHtml('priority', priority)
-        ).join('');
-
-        container.html(filtersHtml);
-        this.bindFilterEvents('priority');
-    }
-
-    createFilterHtml(type, item) {
-        return `
-            <div class="form-check">
-                <input class="form-check-input ${type}-filter" type="checkbox" checked
-                       data-${type}="${item.id}" id="filter${type.charAt(0).toUpperCase() + type.slice(1)}${item.id}">
-                <label class="form-check-label" for="filter${type.charAt(0).toUpperCase() + type.slice(1)}${item.id}">
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-label-${item.color || 'secondary'}">${item.title || item.name}</span>
-                    </div>
-                    <span class="filter-counter" id="count-${type}-${item.id}">0</span>
-                </label>
-            </div>
-        `;
-    }
-
-    bindFilterEvents(type) {
-        $(`.${type}-filter`).off('change.pcm').on('change.pcm', (e) => {
-            const itemId = $(e.target).data(type).toString();
-            const isChecked = $(e.target).is(':checked');
-
-            this.updateActiveFilters(type, itemId, isChecked);
-            this.debounce('applyFilters', () => this.applyFilters(), 150);
-        });
-    }
-
-    updateActiveFilters(type, itemId, isChecked) {
-        if (isChecked) {
-            if (!this.state.activeFilters[type].includes(itemId)) {
-                this.state.activeFilters[type].push(itemId);
-            }
-        } else {
-            this.state.activeFilters[type] = this.state.activeFilters[type].filter(id => id !== itemId);
-        }
-    }
-
-    initializeQuickActions() {
-        $('#selectAllFilters').off('click.pcm').on('click.pcm', () => this.selectAllFilters());
-        $('#clearAllFilters').off('click.pcm').on('click.pcm', () => this.clearAllFilters());
-        $('#refreshCalendar').off('click.pcm').on('click.pcm', () => this.refreshCalendar());
-    }
-
-    selectAllFilters() {
-        $('.status-filter, .priority-filter').prop('checked', true);
-        this.state.activeFilters.status = this.state.projectStatuses.map(s => s.id.toString());
-        this.state.activeFilters.priority = this.state.projectPriorities.map(p => p.id.toString());
-        this.applyFilters();
-    }
-
-    clearAllFilters() {
-        $('.status-filter, .priority-filter').prop('checked', false);
-        this.state.activeFilters.status = [];
-        this.state.activeFilters.priority = [];
-        this.applyFilters();
-    }
-
-    refreshCalendar() {
-        if (this.state.calendar) {
-            this.state.calendar.refetchEvents();
-        }
-    }
-
-    applyFilters() {
-        if (!this.state.calendar) return;
-
-        this.state.calendar.refetchEvents();
-        this.updateFilterCounters();
-        this.updateStatistics();
-    }
-
-    updateFilterCounters() {
-        const counts = this.calculateCounts();
-
-        this.state.projectStatuses.forEach(status => {
-            $(`#count-status-${status.id}`).text(counts.status[status.id.toString()] || 0);
-        });
-
-        this.state.projectPriorities.forEach(priority => {
-            $(`#count-priority-${priority.id}`).text(counts.priority[priority.id.toString()] || 0);
-        });
-    }
-
-    calculateCounts() {
-        return this.state.allProjects.reduce((acc, project) => {
-            const statusId = project.status_id?.toString();
-            const priorityId = project.priority_id?.toString();
-
-            if (statusId) {
-                acc.status[statusId] = (acc.status[statusId] || 0) + 1;
-            }
-            if (priorityId) {
-                acc.priority[priorityId] = (acc.priority[priorityId] || 0) + 1;
-            }
-
-            return acc;
-        }, { status: {}, priority: {} });
-    }
-
-    updateStatistics() {
-        const totalProjects = this.state.allProjects.length;
-        const visibleProjects = this.getVisibleProjectsCount();
-
-        $('#total-projects').text(totalProjects);
-        $('#visible-projects').text(visibleProjects);
-        $('#filtered-projects').text(totalProjects - visibleProjects);
-    }
-
-    getVisibleProjectsCount() {
-        return this.state.allProjects.filter(project => {
-            const statusMatch = this.state.activeFilters.status.length === 0 ||
-                this.state.activeFilters.status.includes(project.status_id?.toString());
-            const priorityMatch = this.state.activeFilters.priority.length === 0 ||
-                this.state.activeFilters.priority.includes(project.priority_id?.toString());
-            return statusMatch && priorityMatch;
-        }).length;
-    }
-
-    initializeCalendar() {
-        const calendarEl = document.getElementById(this.config.calendarContainerId);
-        if (!calendarEl) {
-            throw new Error(`Calendar container #${this.config.calendarContainerId} not found`);
-        }
-
-        this.state.calendar = new FullCalendar.Calendar(calendarEl, {
-            plugins: ["interaction", "dayGrid", "list"],
-            headerToolbar: {
-                left: "prev,next today",
-                center: "title",
-                right: "dayGridMonth,listYear,",
-            },
-            initialView: "dayGridMonth",
-            editable: true,
-            selectable: true,
-            selectHelper: true,
-            height: "auto",
-            eventLimit: 4,
-            events: (fetchInfo, successCallback, failureCallback) => {
-                this.fetchProjects(fetchInfo, successCallback, failureCallback);
-            },
-            datesSet: (info) => this.handleDatesSet(info),
-            eventDidMount: (info) => this.handleEventDidMount(info),
-            eventClick: (info) => this.handleEventClick(info),
-            dateClick: (info) => this.handleDateClick(info),
-            select: (info) => this.handleSelect(info),
-            eventDrop: (info) => this.handleEventDrop(info),
-            eventResize: (info) => this.handleEventResize(info),
-            eventMouseEnter: (info) => this.handleEventMouseEnter(info)
-        });
-
-        this.state.calendar.render();
-    }
-
-    async fetchProjects(fetchInfo, successCallback, failureCallback) {
-        try {
-            const response = await $.ajax({
-                url: this.config.baseUrl + "/projects/get-calendar-data",
-                type: "GET",
-                data: {
-                    start: fetchInfo.start.toISOString(),
-                    end: fetchInfo.end.toISOString(),
-                }
-            });
-
-            console.log('API Response:', response);
-            const events = this.transformEvents(response);
-            console.log('Transformed Events:', events);
-            this.state.allProjects = events;
-
-            const filteredEvents = this.filterEvents(events);
-            console.log('Filtered Events:', filteredEvents);
-            console.log('Active Filters:', this.state.activeFilters);
-
-            this.updateFilterCounters();
-            this.updateStatistics();
-
-            successCallback(filteredEvents);
-        } catch (error) {
-            console.error('Error fetching projects:', error);
-            failureCallback(error);
-        }
-    }
-
-    transformEvents(response) {
-        return response.map(event => ({
-            id: event.id,
-            tasks_info_url: event.project_info_url,
-            title: event.title,
-            start: event.start,
-            end: moment(event.end).add(1, "days").format("YYYY-MM-DD"),
-            backgroundColor: event.backgroundColor,
-            borderColor: event.borderColor,
-            textColor: event.textColor,
-            extendedProps: {
-                status_id: event.status_id,
-                priority_id: event.priority_id
-            },
-            status_id: event.status_id,
-            priority_id: event.priority_id
-        }));
-    }
-
-    filterEvents(events) {
-        return events.filter(event => {
-            const statusMatch = this.state.activeFilters.status.length === 0 ||
-                this.state.activeFilters.status.includes(event.status_id?.toString());
-            const priorityMatch = this.state.activeFilters.priority.length === 0 ||
-                this.state.activeFilters.priority.includes(event.priority_id?.toString());
-            return statusMatch && priorityMatch;
-        });
-    }
-
-    handleDatesSet(info) {
-        const start = moment(info.start);
-        const end = moment(info.end).subtract(1, 'day');
-        const picker = $(`#${this.config.dateRangePickerId}`).data('daterangepicker');
-
-        if (picker) {
-            picker.setStartDate(start);
-            picker.setEndDate(end);
-        }
-    }
-
-    handleEventDidMount(info) {
-        const event = info.event;
-        const element = info.el;
-
-        const status = this.state.projectStatuses.find(s =>
-            s.id.toString() === event.extendedProps.status_id?.toString()
-        );
-        const priority = this.state.projectPriorities.find(p =>
-            p.id.toString() === event.extendedProps.priority_id?.toString()
-        );
-
-        if (status?.color) {
-            element.style.backgroundColor = status.color;
-            element.style.borderColor = status.color;
-            element.classList.add('status-color');
-        }
-
-        if (priority?.color) {
-            element.style.borderLeft = `4px solid ${priority.color}`;
-        }
-    }
-
-    handleEventClick(info) {
-        editProject(info.event.id, true, this.config.baseUrl, this.config.dateFormat);
-    }
-
-    handleDateClick(info) {
-        const date = moment(info.dateStr).format(this.config.dateFormat);
-        this.openCreateProjectOffcanvas(date, date);
-    }
-
-    handleSelect(info) {
-        const startDate = moment(info.startStr).format(this.config.dateFormat);
-        const endDate = moment(info.endStr).subtract(1, "days").format(this.config.dateFormat);
-        this.openCreateProjectOffcanvas(startDate, endDate);
-    }
-
-    openCreateProjectOffcanvas(startDate, endDate) {
-        const $offcanvas = $("#create_project_offcanvas");
-        if (!$offcanvas.length) {
-            console.warn("#create_project_offcanvas not found in DOM");
-            toastr.error("Create project form not found");
-            return;
-        }
-
-        // Open offcanvas
-        $offcanvas.offcanvas("show");
-
-        // Populate start and end date fields
-        $offcanvas.find("#start_date").val(startDate);
-        $offcanvas.find("#end_date").val(endDate);
-
-        // Initialize DateRangePicker for date fields
-        initializeDateRangePicker($offcanvas.find("#start_date, #end_date"));
-    }
-
-    handleEventDrop(info) {
-        this.showUpdateConfirmation(info, 'drag');
-    }
-
-    handleEventResize(info) {
-        this.showUpdateConfirmation(info, 'resize');
-    }
-
-    handleEventMouseEnter(info) {
-        this.showTooltip(info);
-    }
-
-    showUpdateConfirmation(info, type) {
-        const modalId = type === 'drag' ? '#confirmDragProjectModal' : '#confirmResizeProjectModal';
-        $(modalId).modal("show");
-
-        $(modalId).off("click.pcm", "#confirm").on("click.pcm", "#confirm", () => {
-            this.updateProjectDates(info, modalId);
-        });
-
-        $(modalId).off("click.pcm", "#cancel").on("click.pcm", "#cancel", () => {
-            info.revert();
-            $(modalId).modal("hide");
-        });
-    }
-
-    async updateProjectDates(info, modalId) {
-        const confirmBtn = $(modalId).find("#confirm");
-        confirmBtn.html(window.label_please_wait || 'Please wait...').attr("disabled", true);
-
-        try {
-            const start = moment(info.event.start).format(this.config.dateFormat);
-            const end = moment(info.event.end).subtract(1, "days").format(this.config.dateFormat);
-
-            const response = await $.ajax({
-                url: this.config.baseUrl + "/projects/update-dates",
-                type: "PATCH",
-                headers: { "X-CSRF-TOKEN": this.config.csrfToken },
-                data: {
-                    id: info.event.id,
-                    start_date: start,
-                    end_date: end === "Invalid date" ? start : end,
-                }
-            });
-
-            if (response.error === false) {
-                $(modalId).modal("hide");
-                toastr.success(response.message);
-                this.state.calendar.refetchEvents();
-            } else {
-                toastr.error(response.message);
-                info.revert();
-            }
-        } catch (error) {
-            console.error('Error updating project dates:', error);
-            toastr.error(window.label_something_went_wrong || 'Something went wrong');
-            info.revert();
-        } finally {
-            confirmBtn.html(window.label_yes || 'Yes').attr("disabled", false);
-            $(modalId).modal("hide");
-        }
-    }
-
-    showTooltip(info) {
-        const tooltip = $(`<div class="calendar-tooltip">${info.event.title}</div>`);
-        tooltip.css({
-            position: "absolute",
-            background: "rgba(0, 0, 0, 0.8)",
-            color: "#fff",
-            padding: "5px",
-            borderRadius: "5px",
-            zIndex: "1000",
-            pointerEvents: "none"
-        });
-
-        $('body').append(tooltip);
-
-        const rect = info.el.getBoundingClientRect();
-        tooltip.css({
-            left: rect.left + window.scrollX,
-            top: rect.bottom + window.scrollY
-        });
-
-        $(info.el).one('mouseleave', () => tooltip.remove());
-    }
-
-    handleFilterLoadError() {
-        $(`#${this.config.statusFiltersId}`).html('<p class="text-danger small">Error loading statuses</p>');
-        $(`#${this.config.priorityFiltersId}`).html('<p class="text-danger small">Error loading priorities</p>');
-    }
-
-    destroy() {
-        if (this.state.calendar) {
-            this.state.calendar.destroy();
-        }
-
-        this.debounceTimers.forEach(timer => clearTimeout(timer));
-        this.debounceTimers.clear();
-        this.cache.clear();
-
-        $('.status-filter, .priority-filter').off('.pcm');
-        $('#selectAllFilters, #clearAllFilters, #refreshCalendar').off('.pcm');
-
-        this.state.isInitialized = false;
-    }
-
-    /**
-    * Utility methods
-    */
-    debounce(key, func, delay) {
-        if (this.debounceTimers.has(key)) {
-            clearTimeout(this.debounceTimers.get(key));
-        }
-
-        const timeoutId = setTimeout(() => {
-            func();
-            this.debounceTimers.delete(key);
-        }, delay);
-
-        this.debounceTimers.set(key, timeoutId);
-    }
-}
-
-// Usage function that wraps initialization
-async function initializeProjectCalendar(config = {}) {
-    try {
-        const calendarManager = new ProjectCalendarManager(config);
-        await calendarManager.init();
-
-        // Store instance globally for external access if needed
-        if (!window.projectCalendarInstances) {
-            window.projectCalendarInstances = new Map();
-        }
-        window.projectCalendarInstances.set(config.calendarContainerId || 'projectCalenderDiv', calendarManager);
-
-        return calendarManager;
-    } catch (error) {
-        console.error('Failed to initialize project calendar:', error);
-        throw error;
-    }
-}
-
-// Auto-initialize when document is ready (maintains backward compatibility)
-$(document).ready(function () {
-    const calendarEl = document.getElementById('projectCalenderDiv');
-    if (calendarEl) {
-        initializeProjectCalendar().catch(console.error);
-    }
-});
-function googleCalendarView(googleCalendarDiv) {
-    var googleCalendar = new FullCalendar.Calendar(googleCalendarDiv, {
-
-        plugins: ['interaction', 'dayGrid', 'list', 'googleCalendar'], // FullCalendar plugins
-        header: {
-            // left: 'prev,next today',
-            // center: 'title',
-            right: 'dayGridMonth,listMonth,prev,next today'
-        },
-        editable: false,
-        selectable: false,
-        height: "auto",
-        eventLimit: 4,
-        themeSystem: 'bootstrap5',
-
-        // ✅ Load Google Calendar Events
-        eventSources: [
-            {
-                googleCalendarId: google_calendar_id, // Replace with your Google Calendar ID
-                googleCalendarApiKey: google_calendar_api_key, // Replace with your API Key
-                backgroundColor: '#696cff',
-                borderColor: '#696cff',
-            },
-            function (fetchInfo, successCallback, failureCallback) {
-                fetchLeaveRequests(fetchInfo.start, fetchInfo.end, successCallback, failureCallback);
-            }
-        ],
-
-        eventMouseEnter: function (info) {
-            // Create a tooltip element
-
-            var tooltip = document.createElement("div");
-            tooltip.innerHTML = info.event.extendedProps.description || "No description available";
-            tooltip.style.position = "absolute";
-            tooltip.style.background = "rgba(0, 0, 0, 0.8)";
-            tooltip.style.color = "#fff";
-            tooltip.style.padding = "5px";
-            tooltip.style.borderRadius = "5px";
-            tooltip.style.zIndex = "1000";
-            tooltip.style.pointerEvents = "none"; // Prevent mouse events
-            // Append the tooltip to the body
-            document.body.appendChild(tooltip);
-            // Position the tooltip
-            var rect = info.el.getBoundingClientRect();
-            tooltip.style.left = rect.left + window.scrollX + "px";
-            tooltip.style.top = rect.bottom + window.scrollY + "px";
-            // Remove tooltip on mouse leave
-            info.el.addEventListener(
-                "mouseleave",
-                function () {
-                    document.body.removeChild(tooltip);
-                },
-                { once: true }
-            );
-        },
-
-        // ✅ Event Click → Show Details in a Bootstrap Modal
-        eventClick: function (info) {
-            var event = info.event;
-            info.jsEvent.preventDefault();
-        },
-
-
-    });
-
-    googleCalendar.render();
-}
-$(document).ready(function () {
-
-    var googleCalendarDiv = document.getElementById("googleCalendarDiv");
-    if (googleCalendarDiv) {
-        googleCalendarView(googleCalendarDiv);
-    }
-});
-
 
 
 $(document).on("click", ".edit-task-list", function () {
@@ -7425,8 +5905,6 @@ $(document).on("click", ".edit-task-list", function () {
         },
         dataType: "json",
         success: function (response) {
-            console.log(response.task_list.id);
-
             $("#task_list_id").val(response.task_list.id);
             $("#task_list_project").val(response.task_list.project.title);
             $("#task_list_name").val(response.task_list.name);
@@ -7434,14 +5912,11 @@ $(document).on("click", ".edit-task-list", function () {
                 id: response.task_list.project.id, // Ensure this matches your project's ID field
                 text: response.task_list.project.title, // Ensure this matches your project's title field
             };
-
             var $projectSelect = $("#task_list_project_id");
             $projectSelect.empty().append(new Option(projectData.text, projectData.id, true, true)).trigger("change");
         },
     });
 });
-
-
 // Edit Lead Sources
 $(document).on("click", ".edit-lead-source", function () {
     var id = $(this).data("id");
@@ -7454,17 +5929,14 @@ $(document).on("click", ".edit-lead-source", function () {
         },
         dataType: "json",
         success: function (response) {
-
             $("#lead_source_id").val(response.lead_source.id);
             $("#lead_source_name").val(response.lead_source.name);
         },
     });
 });
-
 $(document).on("click", ".edit-lead-follow-up", function () {
     var id = $(this).data("id");
     $("#edit_lead_follow_up_modal").modal("show");
-
     $.ajax({
         url: "/leads/follow-up/get/" + id,
         type: "GET",
@@ -7473,76 +5945,56 @@ $(document).on("click", ".edit-lead-follow-up", function () {
         },
         dataType: "json",
         success: function (response) {
-            console.log(response);
-
             // Prefill the form with data from the response
             var followUp = response.follow_up;
             var lead = response.follow_up.lead;
-
             // Prefill ID (hidden field)
             $('input[name="id"]').val(followUp.id);
-
             // Prefill Assigned To field (select)
             var dropdownSelector = $('select[name="assigned_to"]');
-
             if (dropdownSelector.length) {
                 var newItem = response.follow_up.assigned_to;
-
                 var newOption = $("<option></option>")
                     .attr("value", newItem.id)
                     .attr("selected", true)
                     .text(newItem.first_name + " " + newItem.last_name);
-
                 dropdownSelector.append(newOption).trigger("change");
             }
-
             // Prefill Follow Up Date
             var formatted = moment(followUp.follow_up_at).format('YYYY-MM-DDTHH:mm');
             $('input[name="follow_up_at"]').val(formatted);
-
             // Prefill Follow Up Type
             $('select[name="type"]').val(followUp.type);
-
             // Prefill Status field
             $('select[name="status"]').val(followUp.status);
-
             // Prefill Note field (make sure to decode HTML entities if needed)
             $('#edit_follow_up_note').val(followUp.note);
-
             // Optionally, you can populate any additional lead-related information if needed
             // Example: Pre-fill any lead-specific info in the form, if required
-
         },
         error: function (xhr, status, error) {
             console.error('Error:', error);
         }
     });
 });
-
-
 $(document).ready(function () {
     if ($("textarea#follow_up_note,textarea#edit_follow_up_note").length > 0) {
-
         $("textarea#follow_up_note,textarea#edit_follow_up_note").tinymce({
             height: 300,
             menubar: true,
         });
     }
 });
-
 $(document).ready(function () {
     // Use event delegation to handle clicks on dynamically loaded buttons
     $(document).on('click', '.convert-to-client', function (e) {
         e.preventDefault();
-
         var leadId = $(this).data('id');
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
         if (!leadId) {
             toastr.error('Invalid lead ID.');
             return;
         }
-
         $.ajax({
             url: '/leads/' + leadId + '/convert-to-client',
             type: 'POST',
@@ -7554,7 +6006,6 @@ $(document).ready(function () {
             error: handleConvertError
         });
     });
-
     function handleConvertSuccess(response) {
         if (response.error || response.status === false) {
             toastr.error(response.message || 'Conversion failed.');
@@ -7565,7 +6016,6 @@ $(document).ready(function () {
             }, parseFloat(toastTimeOut) * 1000);
         }
     }
-
     function handleConvertError(xhr) {
         let message = 'Something went wrong.';
         if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -7577,9 +6027,6 @@ $(document).ready(function () {
         }, parseFloat(toastTimeOut) * 1000);
     }
 });
-
-
-
 function setupScopedAIGenerator(generateBtnSelector, options = {}) {
     const defaultOptions = {
         promptSelector: '.ai-title',
@@ -7595,22 +6042,17 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
     $(document).on('change', settings.customPromptSwitchSelector, function () {
         const isChecked = $(this).is(':checked');
         const $container = $(settings.customPromptContainerSelector);
-
         if (isChecked) {
             $container.removeClass('d-none');
         } else {
             $container.addClass('d-none');
         }
     });
-
-
     $(document).on('click', generateBtnSelector, function () {
         const $btn = $(this);
         const $scope = $btn.closest('.ai-wrapper');
-
         const useCustomPrompt = $scope.find(settings.customPromptSwitchSelector).is(':checked');
         let prompt;
-
         if (useCustomPrompt) {
             prompt = $scope.find(settings.customPromptSelector).val();
             if (!prompt) {
@@ -7624,14 +6066,11 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
                 return;
             }
         }
-
         const $output = $scope.find(settings.outputSelector);
         const existingDescription = $output.val(); // Get the existing description
         const $loader = $scope.find(settings.loaderSelector);
-
         $btn.prop('disabled', true);
         if ($loader.length) $loader.removeClass('d-none');
-
         $.ajax({
             url: settings.endpoint,
             method: 'POST',
@@ -7682,16 +6121,12 @@ $(document).ready(function () {
     $('#openrouter_temperature').on('input', function () {
         $('#openrouter_temperature_value').text($(this).val());
     });
-
     $('#gemini_temperature').on('input', function () {
         $('#gemini_temperature_value').text($(this).val());
     });
-
     // Initialize Bootstrap tooltips
     $('[data-bs-toggle="tooltip"]').tooltip();
 });
-
-
 if (document.getElementById("install-plugin-dropzone")) {
     // Initialize Dropzone for plugin installation
     if (!$("#install-plugin").hasClass("dropzone")) {
@@ -7754,8 +6189,6 @@ if (document.getElementById("install-plugin-dropzone")) {
             toastr.error(errorMessage);
         });
         systemDropzone.on("success", function (file, response) {
-            console.log(response);
-
             $("#install_plugin_btn")
                 .attr("disabled", false)
                 .text(label_update_the_system);
@@ -7787,7 +6220,6 @@ if (document.getElementById("install-plugin-dropzone")) {
         });
     }
 }
-
 /**
  * Enhanced Form Submission Handler with Smart Modal/Offcanvas Management
  *
@@ -7933,13 +6365,10 @@ if (document.getElementById("install-plugin-dropzone")) {
  */
 $(document).on("submit", ".new-form-submit-event", function (e) {
     e.preventDefault();
-
     if ($("#net_payable").length > 0) {
         $("#net_pay").val($("#net_payable").text());
     }
-
     var formData = new FormData(this);
-
     // Encode HTML content for template saving
     if (
         $(this).attr("action").includes("store_template") ||
@@ -7955,25 +6384,21 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             formData.append("is_encoded", "1");
         }
     }
-
     var currentForm = $(this);
     var submit_btn = currentForm.find("#submit_btn");
     var button_text = submit_btn.html() || submit_btn.val();
     var redirect_url = currentForm.find('input[name="redirect_url"]').val() || "";
     var tableID = currentForm.find('input[name="table"]').val() || "table";
-
     // Enhanced overlay type detection
     var isInModal = currentForm.closest('.modal').length > 0;
     var isInOffcanvas = currentForm.closest('.offcanvas').length > 0;
     var parentModal = isInModal ? currentForm.closest('.modal') : null;
     var parentOffcanvas = isInOffcanvas ? currentForm.closest('.offcanvas') : null;
-
     // Enhanced dependent property detection
     var isDependentProperty = currentForm.hasClass('dependent-property-form') ||
         currentForm.find('input[name="is_dependent_property"]').length > 0 ||
         currentForm.closest('.modal').hasClass('dependent-property-modal') ||
         currentForm.closest('.offcanvas').hasClass('dependent-property-offcanvas');
-
     // Enhanced contract dropzone handling for both modal and offcanvas
     if (currentForm.closest("#edit_contract_offcanvas, #edit_contract_modal").length > 0 &&
         typeof Dropzone !== 'undefined' && Dropzone.instances.length > 0) {
@@ -7985,13 +6410,9 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 });
             }
         } catch (error) {
-            console.warn('Dropzone error:', error);
+            // console.warn('Dropzone error:', error);
         }
     }
-
-
-
-
     $.ajax({
         type: "POST",
         url: currentForm.attr("action"),
@@ -8008,37 +6429,24 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         dataType: "json",
         success: function (result) {
             submit_btn.html(button_text).prop("disabled", false);
-
-
-
             if (result.error) {
                 toastr.error(result.message);
                 return;
             }
-
             // Smart overlay closing
             handleOverlayClosing(isDependentProperty, parentModal, parentOffcanvas);
-
-
-
-
             // Handle success scenarios - REORDERED to check DNR first
             if (currentForm.find('input[name="dnr"]').length > 0) {
-
                 // DNR scenario - refresh table and reset form
                 if ($("#" + tableID).length) {
                     $("#" + tableID).bootstrapTable("refresh");
                 }
-
                 resetForm(currentForm);
                 toastr.success(result.message || "Success");
-
                 // Always try to refresh parent dropdowns for DNR forms in modal/offcanvas
                 if ((isInModal || isInOffcanvas) && result.type && result.data) {
-
                     refreshParentFormDropdowns(result);
                 }
-
                 // Also refresh for dependent properties
                 if (isDependentProperty) {
                     refreshParentFormDropdowns(result);
@@ -8048,22 +6456,17 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
             } else {
                 toastr.success(result.message || "Success");
-
                 // Always try to refresh parent dropdowns if we're in a modal/offcanvas
                 if ((isInModal || isInOffcanvas) && result.type && result.data) {
                     refreshParentFormDropdowns(result);
                 }
-
                 setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
             }
-
-
             // Clear all error messages
             currentForm.find(".error-message").remove();
         },
         error: function (xhr) {
             submit_btn.html(button_text).prop("disabled", false);
-
             if (xhr.status === 422) {
                 handleValidationErrors(xhr, currentForm, isInOffcanvas);
             } else {
@@ -8071,7 +6474,6 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             }
         }
     });
-
     // ✅ ENHANCED OVERLAY CLOSING LOGIC
     function handleOverlayClosing(isDependentProperty, parentModal, parentOffcanvas) {
         try {
@@ -8093,11 +6495,10 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 closeAllOverlays();
             }
         } catch (error) {
-            console.warn('Error in smart overlay closing:', error);
+            // console.warn('Error in smart overlay closing:', error);
             closeAllOverlays();
         }
     }
-
     // ✅ ENHANCED MODAL CLOSING
     function closeSpecificModal(modalElement) {
         try {
@@ -8108,12 +6509,11 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 modalElement.modal("hide");
             }
         } catch (error) {
-            console.warn('Error closing specific modal:', error);
+            // console.warn('Error closing specific modal:', error);
             modalElement.removeClass('show').css('display', 'none');
             modalElement.attr('aria-hidden', 'true').removeAttr('aria-modal');
         }
     }
-
     // ✅ ENHANCED OFFCANVAS CLOSING
     function closeSpecificOffcanvas(offcanvasElement) {
         try {
@@ -8125,13 +6525,12 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 $('body').removeClass('offcanvas-open');
             }
         } catch (error) {
-            console.warn('Error closing specific offcanvas:', error);
+            // console.warn('Error closing specific offcanvas:', error);
             offcanvasElement.removeClass('show').css('visibility', 'hidden');
             offcanvasElement.attr('aria-hidden', 'true');
             $('body').removeClass('offcanvas-open');
         }
     }
-
     // ✅ CLOSE ALL MODALS
     function closeAllModals() {
         try {
@@ -8144,11 +6543,10 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 }
             });
         } catch (error) {
-            console.warn('Error closing all modals:', error);
+            // console.warn('Error closing all modals:', error);
             $(".modal").removeClass('show').css('display', 'none');
         }
     }
-
     // ✅ ENHANCED CLOSE ALL OVERLAYS
     function closeAllOverlays() {
         try {
@@ -8161,7 +6559,6 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                     $(this).modal("hide");
                 }
             });
-
             // Close offcanvas
             $(".offcanvas.show").each(function () {
                 let offcanvasInstance = bootstrap.Offcanvas.getInstance(this);
@@ -8171,65 +6568,54 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                     $(this).removeClass('show').css('visibility', 'hidden');
                 }
             });
-
             // Cleanup backdrops and body classes after animation
             setTimeout(function () {
                 $('.modal-backdrop, .offcanvas-backdrop').remove();
                 $('body').removeClass('modal-open offcanvas-open');
             }, 300);
-
         } catch (error) {
-            console.warn('Error in closeAllOverlays:', error);
+            // console.warn('Error in closeAllOverlays:', error);
             // Force cleanup
             $('.modal, .offcanvas').removeClass('show');
             $('.modal-backdrop, .offcanvas-backdrop').remove();
             $('body').removeClass('modal-open offcanvas-open');
         }
     }
-
     // ✅ ENHANCED FORM RESET
     function resetForm(form) {
         try {
             form[0].reset();
             form.find("select").val(null).trigger("change");
-
             // Handle Select2 dropdowns
             form.find(".select2").each(function () {
                 $(this).val(null).trigger('change');
             });
-
             // Handle specific elements
             if ($("#partialLeave").length) {
                 $("#partialLeave").trigger("change");
             }
-
             if (typeof resetDateFields === 'function') {
                 resetDateFields(form);
             }
-
             // Clear any summernote editors
             form.find('.summernote').each(function () {
                 if ($(this).summernote) {
                     $(this).summernote('code', '');
                 }
             });
-
         } catch (error) {
-            console.warn('Error resetting form:', error);
+            // console.warn('Error resetting form:', error);
         }
     }
-
     // ✅ ENHANCED VALIDATION ERROR HANDLING
     function handleValidationErrors(xhr, currentForm, isInOffcanvas) {
         toastr.error(label_please_correct_errors);
         var errors = xhr.responseJSON.errors || {};
-
         // Show errors in overlay-specific container
         if (xhr.responseJSON.showInModal) {
             var errorContainerId = isInOffcanvas ? '#errorOffcanvasContent' : '#errorModalContent';
             var errorBodyId = isInOffcanvas ? '#errorOffcanvasBody' : '#errorModalBody';
             let errorHtmlBody = "";
-
             $.each(errors, function (field, messages) {
                 errorHtmlBody += `<div class="mb-2"><strong class="text-capitalize">${field.replace(/_/g, ' ')}</strong><ul class="mb-0 mt-1">`;
                 $.each(messages, function (_, msg) {
@@ -8237,30 +6623,23 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 });
                 errorHtmlBody += `</ul></div>`;
             });
-
             $(errorContainerId).html(errorHtmlBody);
             $(errorBodyId).removeClass('d-none');
         }
-
         // Render field-specific errors with enhanced targeting
         var inputFields = $(currentForm.find("input[name], select[name], textarea[name]").get().reverse());
         var firstErrorField = null;
-
         inputFields.each(function () {
             var input = $(this);
             var fieldName = input.attr("name");
             var errorMessage = errors[fieldName];
             var parent = input.closest(".form-group, .input-group, .form-control, .form-select, .mb-3, .mb-2");
-
             // Remove existing error messages
             parent.find(".text-danger.error-message").remove();
-
             if (errorMessage) {
                 if (!firstErrorField) firstErrorField = input;
-
                 var msg = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
                 var errorEl = $('<span class="text-danger error-message d-block mt-1 small"></span>').text(msg);
-
                 // Enhanced error placement logic
                 if (input.hasClass("select2-hidden-accessible")) {
                     input.siblings(".select2").after(errorEl);
@@ -8273,7 +6652,6 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 }
             }
         });
-
         // Scroll to first error field
         if (firstErrorField) {
             setTimeout(function () {
@@ -8282,11 +6660,9 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             }, 100);
         }
     }
-
     // ✅ ENHANCED SERVER ERROR HANDLING
     function handleServerErrors(xhr) {
         let msg = xhr.responseJSON?.message || "An unexpected error occurred.";
-
         // Enhanced error message parsing
         if (xhr.responseJSON?.exception) {
             // Database connection errors
@@ -8310,24 +6686,13 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 msg = "Database query error. Please contact support if this persists.";
             }
         }
-
         toastr.error(msg);
     }
-
     // ✅ ENHANCED DROPDOWN REFRESH WITH MORE ENTITY TYPES AND COMPREHENSIVE DEBUG
     function refreshParentFormDropdowns(result) {
-        console.log('=== DEBUG REFRESH FUNCTION ===');
-        console.log('Result received:', result);
-        console.log('isInModal:', isInModal);
-        console.log('isInOffcanvas:', isInOffcanvas);
-
         if (!result.data || !result.data.id || !result.data.name || !result.type) {
-            console.log('Missing required data - exiting function');
-            console.log('result.data:', result.data);
-            console.log('result.type:', result.type);
             return;
         }
-
         // Enhanced mapping for more entity types
         let selectMap = {
             status: ['status_id', 'project_status_id', 'task_status_id', 'status'],
@@ -8345,25 +6710,15 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             project: ['project_id'],
             workspace: ['workspace_id']
         };
-
-        console.log('Looking for type:', result.type);
         let targetSelects = selectMap[result.type] || [];
-        console.log('Target selects:', targetSelects);
-
         if (!targetSelects.length) {
-            console.log('No target selects found for type:', result.type);
             return;
         }
-
         // Look for selects in the active offcanvas first, then modal
         let activeContainer = $(".offcanvas.show");
         if (!activeContainer.length) {
             activeContainer = $(".modal.show").not('#create_status_modal'); // Exclude the status creation modal itself
         }
-
-        console.log('Active container found:', activeContainer.length);
-        console.log('Container selector:', activeContainer.selector || 'Direct jQuery object');
-
         if (activeContainer.length) {
             console.log('All selects in container:', activeContainer.find('select').map(function () {
                 return {
@@ -8372,18 +6727,11 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                     classes: this.className
                 };
             }).get());
-
             let foundAndUpdated = false;
-
             targetSelects.forEach(function (selectName) {
-                console.log('Looking for selector with name:', selectName);
                 let selector = activeContainer.find(`select[name="${selectName}"]`);
-                console.log("Found selector:", selector.length, selector);
-
                 if (selector.length) {
-                    console.log('Found matching selector - adding option');
                     foundAndUpdated = true;
-
                     // Check if option already exists
                     if (selector.find(`option[value="${result.data.id}"]`).length === 0) {
                         let newOption = new Option(result.data.name, result.data.id, true, true);
@@ -8393,32 +6741,21 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                             $(newOption).attr('data-color', result.priority.colorr); // Ensure data attribute is set
                         }
                         selector.append(newOption);
-                        console.log(result.priority.color);
-
-                        console.log('Added new option:', result.data.name, 'with color:', result.priority.color);
                     } else {
                         selector.val(result.data.id);
-                        console.log('Selected existing option:', result.data.name);
                     }
-
                     // Trigger change event for Select2 and other plugins
                     selector.trigger('change');
-
                     // Handle Select2 specifically
                     if (selector.hasClass('select2-hidden-accessible')) {
-                        console.log('Triggering Select2 events');
                         selector.trigger('change.select2');
-
                         // Force Select2 to recognize the new option
                         setTimeout(function () {
                             selector.val(result.data.id).trigger('change.select2');
                         }, 100);
                     }
-
                     // Handle Ajax Select2 dropdowns
                     if (selector.data('select2') && selector.data('select2').options && selector.data('select2').options.ajax) {
-                        console.log('Handling Ajax Select2');
-
                         selector.trigger({
                             type: 'select2:select',
                             params: {
@@ -8431,19 +6768,13 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                         });
                     }
                 } else {
-                    console.log('No selector found for:', selectName);
                 }
             });
-
             if (!foundAndUpdated) {
-                console.warn('No matching selector found for type:', result.type, 'in container');
             }
         } else {
-            console.log('No active container found');
         }
-        console.log('=== END DEBUG ===');
     }
-
     // ✅ ENHANCED REDIRECTION
     function handleRedirection() {
         try {
@@ -8453,19 +6784,15 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 window.location.reload();
             }
         } catch (error) {
-            console.warn('Redirection error:', error);
+            // console.warn('Redirection error:', error);
             window.location.reload();
         }
     }
 });
-
-
 // Opening Quick View Modal from URL Also
-
 $(document).ready(function () {
     // Base URL for AJAX requests (replace with your actual base URL)
     const baseUrl = window.location.origin;
-
     // Function to open the quick view modal
     function openQuickViewModal(type, id, updateUrl = true) {
         $("#type").val(type);
@@ -8486,7 +6813,6 @@ $(document).ready(function () {
                     $("#typePlaceholder").text(type === "task" ? "Task" : "Project");
                     $("#usersTable").bootstrapTable("refresh");
                     $("#clientsTable").bootstrapTable("refresh");
-
                     // Update URL with modal parameters
                     if (updateUrl) {
                         const urlParams = new URLSearchParams(window.location.search);
@@ -8505,7 +6831,6 @@ $(document).ready(function () {
             },
         });
     }
-
     // Handle click on quick-view elements
     $(document).on("click", ".quick-view", function (e) {
         e.preventDefault();
@@ -8513,7 +6838,6 @@ $(document).ready(function () {
         const type = $(this).data("type") || "task";
         openQuickViewModal(type, id);
     });
-
     // Check URL on page load to open modal if parameters exist
     function checkUrlForModal() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -8525,7 +6849,6 @@ $(document).ready(function () {
             }
         }
     }
-
     // Handle modal close to clear URL parameters (optional)
     $("#quickViewModal").on("hidden.bs.modal", function () {
         const urlParams = new URLSearchParams(window.location.search);
@@ -8539,7 +6862,6 @@ $(document).ready(function () {
             window.history.pushState({}, "", newUrl);
         }
     });
-
     // Handle popstate to restore modal state
     window.addEventListener("popstate", function (event) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -8553,7 +6875,6 @@ $(document).ready(function () {
             $("#quickViewModal").modal("hide");
         }
     });
-
     // Initialize by checking URL for modal parameters
     checkUrlForModal();
 });

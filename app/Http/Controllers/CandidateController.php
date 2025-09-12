@@ -766,13 +766,13 @@ class CandidateController extends Controller
 
 
       $candidate = Candidate::findOrFail($candidateId);
-    $media = $candidate->getMedia('candidate-media')->find($mediaId);
+      $media = $candidate->getMedia('candidate-media')->find($mediaId);
 
-    if (!$media) {
-      abort(404, 'Media not found');
-    }
+      if (!$media) {
+        abort(404, 'Media not found');
+      }
 
-    return response()->download($media->getPath());
+      return response()->download($media->getPath());
     } catch (ModelNotFoundException $e) {
       Log::error('Candidate not found in downloadAttachment', [
         'candidate_id' => $candidateId,
@@ -1080,15 +1080,14 @@ class CandidateController extends Controller
       }
     }
 
-    if($isApi){
+    if ($isApi) {
       return formatApiResponse(
         false,
         'Candidate Created Successfully!',
         [
-          'data'=> formatCandidate($candidate)
+          'data' => formatCandidate($candidate)
         ]
-        );
-
+      );
     } else {
       return response()->json([
         'error' => false,
@@ -1096,8 +1095,6 @@ class CandidateController extends Controller
         'candidate' => $candidate
       ]);
     }
-
-
   }
 
 
@@ -1426,7 +1423,7 @@ class CandidateController extends Controller
 
         return [
           'id' => $candidate->id,
-        'name' => "<a href='" . route('candidate.show', ['id' => $candidate->id]) . "' >" . ucwords($candidate->name) . "</a>",
+        'name' => "<a href='" . route('candidate.show', ['id' => $candidate->id]) . "' target='_blank'>" . ucwords($candidate->name) . "</a>",
           'email' => ucwords($candidate->email),
           'phone' => $candidate->phone,
           'position' => ucwords($candidate->position),

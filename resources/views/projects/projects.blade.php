@@ -97,6 +97,7 @@
                             class='bx bx-calendar'></i></button></a>
             </div>
         </div>
+        {{-- @dd($is_favorites) --}}
         <x-projects-card :projects="$projects" :favorites="$is_favorites" :customFields="$projectCustomFields" />
     </div>
 @endsection

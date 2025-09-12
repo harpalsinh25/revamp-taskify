@@ -105,7 +105,7 @@ function loadingTemplate(message) {
 function idFormatter(value, row, index) {
     var idPrefix = (row.type == 'Estimate') ? label_estimate_id_prefix : (row.type == 'Invoice') ? label_invoice_id_prefix : '';
     return [
-        '<a href="' + baseUrl + '/estimates-invoices/view/' + row.id + '">' + idPrefix + row.id + '</a>'
+        '<a href="' + baseUrl + '/estimates-invoices/view/' + row.id + '" target="_blank">' + idPrefix + row.id + '</a>'
     ];
 }
 $(document).on('click', '.status-badge', function (e) {

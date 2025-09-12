@@ -13,7 +13,7 @@
                         <li class="breadcrumb-item">
                             <a href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
                         </li>
-                       <li class="breadcrumb-item">
+                        <li class="breadcrumb-item">
                             <a href="{{ route('assets.index') }}">{{ get_label('assets', 'Assets') }}</a>
                         </li>
                         <li class="breadcrumb-item active">
@@ -23,9 +23,8 @@
                 </nav>
             </div>
             <div>
-                <button type="button" id="createCategoryModalBtn" class="btn btn-sm btn-primary action_create_template"
-                    data-bs-toggle="modal" data-bs-target="#createCategoryModal"
-                    data-bs-toggle="tooltip" data-bs-placement="left"
+                <button type="button" class="btn btn-sm btn-primary action_create_template" data-bs-toggle="offcanvas"
+                    data-bs-target="#createCategoryOffcanvas" data-bs-toggle="tooltip" data-bs-placement="left"
                     data-bs-original-title="{{ get_label('create_asset_category', 'Create Asset Category') }}">
                     <i class='bx bx-plus'></i>
                 </button>
@@ -86,13 +85,12 @@
                             <span>{{ get_label('assets_categories_not_found', 'Assets Categories Not Found') }}</span>
                         </h2>
                         <p class="mx-2 mb-4">
-                            {{ get_label('no_data_available','Oops! No data available yet.') }}
+                            {{ get_label('no_data_available', 'Oops! No data available yet.') }}
                         </p>
 
-                        <button type="button" id="createCategoryModalBtn"
-                            class="btn btn-md btn-primary action_create_template m-1"
-                            data-bs-toggle="modal" data-bs-target="#createCategoryModal"
-                            data-bs-toggle="tooltip" data-bs-placement="left"
+                        <button type="button" class="btn btn-md btn-primary action_create_template m-1"
+                            data-bs-toggle="offcanvas" data-bs-target="#createCategoryOffcanvas" data-bs-toggle="tooltip"
+                            data-bs-placement="left"
                             data-bs-original-title="{{ get_label('create_asset_category', 'Create Asset Category') }}">
                             {{ get_label('create_now', 'Create now') }}
                         </button>
@@ -107,7 +105,8 @@
         @endif
     </div>
 
-    @include('assets::assets.modals')
+    @include('assets::assets.offcanvas')
 
     <script src="{{ asset('assets/js/asset-plugin/assets.js') }}"></script>
 @endsection
+

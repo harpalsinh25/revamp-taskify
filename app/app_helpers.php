@@ -3270,7 +3270,7 @@ if (!function_exists('getMenus')) {
                     [
                         'id' => 'favorite_projects',
                         'label' => get_label('favorite_projects', 'Favorite projects'),
-                        'url' => url(getUserPreferences('projects', 'default_view') . '/favorite'),
+                        'url' => url('/projects/list/favorite?is_favorites=1'),
                         'class' => 'menu-item' . (Request::is('projects/favorite') || Request::is('projects/list/favorite') || Request::is('projects/kanban/favorite') ? ' active' : ''),
                         'show' => ($user->can('manage_projects')) ? 1 : 0
                     ],
@@ -4042,7 +4042,7 @@ if (!function_exists('formatUserHtml')) {
         return "<div class='d-flex justify-content-start align-items-center user-name'>
                     <div class='avatar-wrapper me-3'>
                         <div class='avatar avatar-sm pull-up'>
-                            <a href='{$profileLink}'>
+                            <a href='{$profileLink}' target='_blank'>
                                 <img src='{$photoUrl}' alt='Photo' class='rounded-circle'>
                             </a>
                         </div>
@@ -4092,7 +4092,7 @@ if (!function_exists('formatClientHtml')) {
         return "<div class='d-flex justify-content-start align-items-center user-name'>
                     <div class='avatar-wrapper me-3'>
                         <div class='avatar avatar-sm pull-up'>
-                            <a href='{$profileLink}'>
+                            <a href='{$profileLink}' target='_blank'>
                                 <img src='{$photoUrl}' alt='Photo' class='rounded-circle'>
                             </a>
                         </div>

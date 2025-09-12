@@ -42,13 +42,30 @@
         </div>
         <div class="row">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div id="leave_request_calendar_view"></div>
-                    </div>
-                </div>
+                @php
+                    $sidebarContent = '<div class="filter-section">
+                        <h6><i class="bx bx-star me-1"></i> ' . get_label('status', 'Status') . '</h6>
+                        <div id="leave-status-filters-container">
+                            <div class="skeleton-loader"></div>
+                            <div class="skeleton-loader"></div>
+                            <div class="skeleton-loader"></div>
+                        </div>
+                    </div>';
+                @endphp
+                <x-ui.calendar-wrapper
+                    calendarId="leave_requests_calendar_view"
+                    createButtonText="{{ get_label('leave_request', 'Leave Request') }}"
+                    createModalTarget="#create_leave_request_modal"
+                    entityType="leave_requests"
+                    showMiniCalendar="false"
+                    sidebarTitle="{{ get_label('leave_requests', 'Leave Requests') }}"
+                    :sidebarContent="$sidebarContent"
+                />
             </div>
         </div>
     </div>
 
+@endsection
+@section('page_scripts')
+<script src="{{ asset('assets/js/pages/leave-requests-calendar.js') }}"></script>
 @endsection

@@ -1,0 +1,9 @@
+{
+    "name": "Taskify - Social Media Management",
+    "slug": "social-media-management",
+    "description": "Manages social media posts, scheduling, analytics, and multi-platform publishing with AI-powered content creation.",
+    "version": "1.0.0",
+    "enabled": true,
+    "provider": "Plugins\\SocialMediaManagement\\Providers\\SocialMediaServiceProvider",
+    "publish_tag": "social-assets"
+}

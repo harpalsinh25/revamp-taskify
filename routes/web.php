@@ -196,7 +196,7 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
 
         Route::get('/home', [HomeController::class, 'index'])->name('home.index');
-
+        Route::any('/dashboard/data', [HomeController::class, 'getDashboardData'])->name('home.dashboard-data');
         Route::get('/home/upcoming-birthdays', [HomeController::class, 'upcoming_birthdays']);
 
         Route::get('/home/upcoming-work-anniversaries', [HomeController::class, 'upcoming_work_anniversaries']);
@@ -306,13 +306,11 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/projects/calendar-view', [ProjectsController::class, 'calendar_view'])->name('projects.calendar_view');
                 Route::get('/projects/get-calendar-data', [ProjectsController::class, 'get_calendar_data'])->name('projects.get_calendar_data');
                 Route::patch('/projects/update-dates', [ProjectsController::class, 'updateProjectDates']);
-
-                // Get Status and Priority
-
-                Route::get('/projects/get-statuses', [ProjectsController::class, 'getStatuses'])->name('projects.getStatusesAjax');
-                Route::get('/projects/get-priorities', [ProjectsController::class, 'getPriorities'])->name('projects.getPrioritiesAjax');
             });
+            // Get Status and Priority
 
+            Route::get('/get-statuses', [ProjectsController::class, 'getStatuses'])->name('projects.getStatusesAjax');
+            Route::get('/get-priorities', [ProjectsController::class, 'getPriorities'])->name('projects.getPrioritiesAjax');
             Route::middleware(['customcan:manage_tags'])->group(function () {
                 Route::get('/tags/manage', [TagsController::class, 'index']);
                 Route::post('/tags/store', [TagsController::class, 'store'])->middleware(['customcan:create_tags', 'log.activity']);

@@ -1,4 +1,3 @@
-
 class TableFilterSync {
     constructor(config) {
         this.tableId = config.tableId;
@@ -7,7 +6,7 @@ class TableFilterSync {
         this.preserveParams = config.preserveParams || [];
         this.debounceMs = config.debounceMs || 300;
         this.queryParamsFn = config.queryParamsFn || this.defaultQueryParams.bind(this);
-        this.debug = config.debug || true;
+        this.debug = true;
         this.updateTimeout = null;
         this.lastParams = null;
         this.$table = $(`#${this.tableId} `);
@@ -114,64 +113,68 @@ class TableFilterSync {
     }
 
     setFiltersFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const promises = this.filters.map(filter => new Promise(resolve => {
-            const $selector = this.getCachedSelector(filter.selector);
-            if (filter.type === 'select2') {
-                const values = urlParams.getAll(`${filter.name} []`);
-                if (values.length) {
-                    this.preFetchSelect2Options(filter, values, () => {
-                        $selector.val(values).trigger('change');
+        if (window.location.search && window.location.search.length > 1) {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            const promises = this.filters.map(filter => new Promise(resolve => {
+                const $selector = this.getCachedSelector(filter.selector);
+                if (filter.type === 'select2') {
+                    const values = urlParams.getAll(`${filter.name} []`);
+                    if (values.length) {
+                        this.preFetchSelect2Options(filter, values, () => {
+                            $selector.val(values).trigger('change');
+                            resolve();
+                        });
+                    } else {
+                        $selector.val(null).trigger('change');
                         resolve();
-                    });
-                } else {
-                    $selector.val(null).trigger('change');
+                    }
+                } else if (filter.type === 'daterangepicker') {
+                    // Use hidden input names for URL params
+                    const from = urlParams.get(filter.hiddenFrom.replace('#', ''));
+                    const to = urlParams.get(filter.hiddenTo.replace('#', ''));
+                    if (from && to) {
+                        const picker = $selector.data('daterangepicker');
+                        if (picker) {
+                            picker.setStartDate(moment(from));
+                            picker.setEndDate(moment(to));
+                            $selector.val(moment(from).format('MM/DD/YYYY') + ' - ' + moment(to).format('MM/DD/YYYY'));
+                        }
+                        this.getCachedSelector(filter.hiddenFrom).val(from);
+                        this.getCachedSelector(filter.hiddenTo).val(to);
+                    } else {
+                        $selector.val('');
+                        this.getCachedSelector(filter.hiddenFrom).val('');
+                        this.getCachedSelector(filter.hiddenTo).val('');
+                    }
+                    resolve();
+                } else if (filter.type === 'month') {
+                    const value = urlParams.get(filter.name);
+                    if (value && moment(value, 'YYYY-MM', true).isValid()) {
+                        $selector.val(value).trigger('change');
+                    } else {
+                        $selector.val('').trigger('change');
+                    }
+                    resolve();
+                } else if (filter.type === 'select' || filter.type === 'text' || filter.type === 'hidden') {
+                    const value = urlParams.get(filter.name);
+                    $selector.val(value || '').trigger('change'); // Added .trigger('change')
                     resolve();
                 }
-            } else if (filter.type === 'daterangepicker') {
-                // Use hidden input names for URL params
-                const from = urlParams.get(filter.hiddenFrom.replace('#', ''));
-                const to = urlParams.get(filter.hiddenTo.replace('#', ''));
-                if (from && to) {
-                    const picker = $selector.data('daterangepicker');
-                    if (picker) {
-                        picker.setStartDate(moment(from));
-                        picker.setEndDate(moment(to));
-                        $selector.val(moment(from).format('MM/DD/YYYY') + ' - ' + moment(to).format('MM/DD/YYYY'));
-                    }
-                    this.getCachedSelector(filter.hiddenFrom).val(from);
-                    this.getCachedSelector(filter.hiddenTo).val(to);
-                } else {
-                    $selector.val('');
-                    this.getCachedSelector(filter.hiddenFrom).val('');
-                    this.getCachedSelector(filter.hiddenTo).val('');
-                }
-                resolve();
-            } else if (filter.type === 'month') {
-                const value = urlParams.get(filter.name);
-                if (value && moment(value, 'YYYY-MM', true).isValid()) {
-                    $selector.val(value).trigger('change');
-                } else {
-                    $selector.val('').trigger('change');
-                }
-                resolve();
-            } else if (filter.type === 'select' || filter.type === 'text' || filter.type === 'hidden') {
-                const value = urlParams.get(filter.name);
-                $selector.val(value || '').trigger('change'); // Added .trigger('change')
-                resolve();
-            }
-        }));
 
-        const page = urlParams.get('page') || 1;
-        const limit = urlParams.get('limit') || 10;
-        this.$table.bootstrapTable('refresh', {
-            pageNumber: parseInt(page),
-            pageSize: parseInt(limit)
-        });
+            }));
 
-        Promise.all(promises).then(() => {
-            this.lastParams = this.getFilterParams().toString();
-        });
+            const page = urlParams.get('page') || 1;
+            const limit = urlParams.get('limit') || 10;
+            this.$table.bootstrapTable('refresh', {
+                pageNumber: parseInt(page),
+                pageSize: parseInt(limit)
+            });
+
+            Promise.all(promises).then(() => {
+                this.lastParams = this.getFilterParams().toString();
+            });
+        }
     }
 
     preFetchSelect2Options(filter, values, callback) {

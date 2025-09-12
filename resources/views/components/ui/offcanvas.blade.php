@@ -16,7 +16,7 @@
 
 <div class="offcanvas offcanvas-end {{ $size }}" tabindex="-1" id="{{ $id }}"
     aria-labelledby="{{ $id }}Label">
-    <div class="offcanvas-header bg-body">
+    <div class="offcanvas-header">
         <h5 class="offcanvas-title text-body" id="{{ $id }}Label">
             @if ($icon)
                 <i class="{{ $icon }} me-2"></i>

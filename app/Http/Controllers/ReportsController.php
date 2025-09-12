@@ -258,7 +258,7 @@ class ReportsController extends Controller
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $project->clients->map(function ($client) {
                     return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . " " . $client->last_name) . "'>
-                    <a href='" . route('clients.profile', ['id' => $client->id]) . "' target='_blank'>
+                    <a href='" . route('clients.profile', ['id' => $client->id]) . "' target='_blank' >
                         <img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' />
                     </a>
                 </li>";
@@ -1158,7 +1158,7 @@ class ReportsController extends Controller
             $prefix = $invoice->type == 'invoice' ? get_label('invoice_id_prefix', 'INVC-') : ($invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : '');
 
             return [
-                'id' => '<a href="' . route('estimates-invoices.view', ['id' => $invoice->id]) . '">' . $prefix . $invoice->id . '</a>',
+                'id' => '<a href="' . route('estimates-invoices.view', ['id' => $invoice->id]) . '" target="_blank">' . $prefix . $invoice->id . '</a>',
                 'type' => ucfirst($invoice->type),
                 'client' => formatClientHtml($invoice->client),
                 'total' => format_currency($invoice->total),

@@ -310,7 +310,6 @@ class ProjectsController extends Controller
             'priority_id' => 'nullable|exists:priorities,id',
             'start_date' => [
                 'nullable',
-                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
@@ -323,7 +322,6 @@ class ProjectsController extends Controller
             ],
             'end_date' => [
                 'nullable',
-                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
@@ -526,7 +524,7 @@ class ProjectsController extends Controller
             ]);
         } catch (\Exception $e) {
             // Log the full error for debugging
-            \Log::error('Project import error: ' . $e->getMessage(), [
+            Log::error('Project import error: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
@@ -721,7 +719,6 @@ class ProjectsController extends Controller
             ],
             'start_date' => [
                 'nullable',
-                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
@@ -734,7 +731,6 @@ class ProjectsController extends Controller
             ],
             'end_date' => [
                 'nullable',
-                'after_or_equal:today',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
@@ -1126,7 +1122,7 @@ class ProjectsController extends Controller
                     $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $project->id . '" data-type="project" title="' . get_label('quick_view', 'Quick View') . '">' .
                         '<i class="bx bx-info-circle text-info mx-3"></i>' .
                         '</a>';
-                    $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" title="' . get_label('mind_map', 'Mind Map') . '">' .
+                $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" title="' . get_label('mind_map', 'Mind Map') . '">' .
                         '<i class="bx bx-sitemap ms-2"></i>' .
                         '</a>';
                     $actions = $actions ?: '-';
@@ -1134,38 +1130,25 @@ class ProjectsController extends Controller
                     if (!empty($project->users) && count($project->users) > 0) {
                         $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->users as $user) {
-                            $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                        $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target=
+                            '_blank' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
-                        if ($canEdit) {
-                        $userHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a></li>';
-                        }
-                        $userHtml .= '</ul>';
+
+                    $userHtml .= '</ul>';
                     } else {
-                        $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
-                        if ($canEdit) {
-                        $userHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '">' .
-                                '<span class="bx bx-edit"></span>' .
-                                '</a>';
-                        }
-                    }
+                    $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                }
                     $clientHtml = '';
                     if (!empty($project->clients) && count($project->clients) > 0) {
                         $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->clients as $client) {
-                            $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                        $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
-                        if ($canEdit) {
-                        $clientHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a></li>';
-                        }
-                        $clientHtml .= '</ul>';
+
+                    $clientHtml .= '</ul>';
                     } else {
-                        $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
-                        if ($canEdit) {
-                        $clientHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '">' .
-                                '<span class="bx bx-edit"></span>' .
-                                '</a>';
-                        }
-                    }
+                    $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                }
                     $tagHtml = '';
                     foreach ($project->tags as $tag) {
                         $tagHtml .= "<span class='badge bg-label-{$tag->color}'>{$tag->title}</span> ";
@@ -1174,7 +1157,7 @@ class ProjectsController extends Controller
                     $isPinned = getPinnedStatus($project->id);
                     return [
                         'id' => $project->id,
-                        'title' => "<a href='" . url("/projects/information/{$project->id}") . "'><strong>{$project->title}</strong></a>
+                    'title' => "<a href='" . url("/projects/information/{$project->id}") . "' target='_blank'><strong>{$project->title}</strong></a>
                         <a href='javascript:void(0);' class='mx-2'>
                             <i class='bx " . ($isFavorite ? 'bxs' : 'bx') . "-star favorite-icon text-warning' data-favorite='{$isFavorite}' data-id='{$project->id}' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'></i>
                         </a><a href='javascript:void(0);' class='mr-2'>

@@ -1,12 +1,12 @@
-<ul class="p-0 m-0">
+<ul class="p-0 m-0 todo-list list-group list-group-flush">
     @if (is_countable($todos) && count($todos) > 0)
     @foreach ($todos as $todo)
-    <li class="d-flex mb-4 pb-1">
+    <li class="d-flex mb-4 pb-1 ">
         <div class="avatar flex-shrink-0">
             <input type="checkbox" id="{{ $todo->id }}" onclick="update_status(this)" name="{{ $todo->id }}" class="form-check-input mt-0" {{ $todo->is_completed ? 'checked' : '' }}>
         </div>
         <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-            <div class="me-2">
+            <div class="me-2 ">
                 <div class="d-flex align-items-center justify-content-between">
                     <h6 class="mb-0 {{ $todo->is_completed ? 'striked' : '' }}" id="{{ $todo->id }}_title">{{ $todo->title }}</h6>
                     <div class="user-progress d-flex align-items-center gap-1">

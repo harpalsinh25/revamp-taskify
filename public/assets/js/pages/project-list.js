@@ -12,7 +12,7 @@ function queryParamsProjects(p) {
         "project_start_date_to": $('#project_start_date_to').val(),
         "project_end_date_from": $('#project_end_date_from').val(),
         "project_end_date_to": $('#project_end_date_to').val(),
-        "is_favorites": $('#is_favorites').val(),
+        "is_favorites": $('#is_favorites').val() || 0,
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -173,7 +173,8 @@ $(document).ready(function () {
                 name: 'is_favorites'
             }
         ],
-        preserveParams: ['from_home'],
-        queryParamsFn: queryParamsProjects // Reuse existing function
+        preserveParams: ['from_home', 'is_favorites'],
+        queryParamsFn: queryParamsProjects  // Use your custom function
+
     });
 });
