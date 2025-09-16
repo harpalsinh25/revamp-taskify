@@ -52,6 +52,7 @@ $(document).on('click', '.duplicateAsset', function () {
 // For showing and filling update asset category modal
 $(document).on('click', '.updateCategoryModal', function () {
     const assetCategory = $(this).data('asset-category');
+    console.log(assetCategory);
     const color = assetCategory.color;
     const actionUrl = `/assets/category/update/${assetCategory.id}`;
 
