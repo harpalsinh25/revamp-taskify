@@ -117,6 +117,7 @@
             }
         }
     });
+
     // Function to reset asset-specific form fields
     function resetAssetFormFields(form) {
         // Reset image previews
@@ -130,6 +131,77 @@
         form.find('input[type="date"]').val('');
         form.find('input[type="number"]').val('');
         form.find('textarea').val('');
+
+});
+
+// Modal event handlers
+$(document).on('click', '#createCategoryModalBtn', function () {
+    $('#createCategoryModal').modal('show');
+});
+
+$(document).on('click', '#bulkAssignModalBtn', function () {
+    $('#bulkAssignModal').modal('show');
+});
+
+$(document).on('click', '#bulkAssetsUploadModalBtn', function () {
+    $('#bulkAssetsUploadModal').modal('show');
+});
+
+// For duplicating asset
+$(document).on('click', '.duplicateAsset', function () {
+    const asset = $(this).data('asset');
+    const actionUrl = `/assets/duplicate/${asset.id}`;
+
+    $('#duplicateForm').attr('action', actionUrl);
+    $('#duplicateAssetModal').modal('show');
+});
+
+// For showing and filling update asset category modal
+$(document).on('click', '.updateCategoryModal', function () {
+    const assetCategory = $(this).data('asset-category');
+    console.log(assetCategory);
+    const color = assetCategory.color;
+    const actionUrl = `/assets/category/update/${assetCategory.id}`;
+
+    $('#updateCategoryForm').attr('action', actionUrl);
+    $('#categoryName').val(assetCategory.name);
+    $('#categoryDescription').val(assetCategory.description);
+
+    $('#category_color').val(color).change();
+
+    $('#category_color')
+        .removeClass('select-bg-label-primary select-bg-label-secondary select-bg-label-success select-bg-label-danger select-bg-label-warning select-bg-label-info select-bg-label-dark')
+        .addClass(`select-bg-label-${color}`);
+
+    $('#updateCategoryModal').modal('show');
+});
+
+// Show create modal
+$(document).on('click', '#createAssetModalBtn', function () {
+    $('#assetForm')[0].reset();
+    resetImagePreview('create');
+    $('#createAssetModal').modal('show');
+});
+
+// Show update modal
+$(document).on('click', '.updateAssetModalBtn', function () {
+    const asset = $(this).data('asset');
+
+    $('#update-asset-name').val(asset.name);
+    $('#update-asset-tag').val(asset.asset_tag);
+    $('#update-asset-category').val(asset.category_id).trigger('change');
+    $('#update-asset-assign-to').val(asset.assigned_to).trigger('change');
+    $('#update-asset-purchase-date').val(asset.purchase_date);
+    $('#update-asset-purchase-cost').val(asset.purchase_cost);
+    $('#update-asset-description').val(asset.description);
+
+    $('#updateAssetForm').attr('action', `/assets/update/${asset.id}`);
+
+    if (asset.picture_url) {
+        showImagePreview('update', asset.picture_url);
+    } else {
+        resetImagePreview('update');
+
     }
     // Function to handle dropdown additions for asset forms
     function handleAssetDropdownAdditions(result, currentForm) {
