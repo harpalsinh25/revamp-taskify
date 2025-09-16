@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\LeadStage;
 use App\Models\Workspace;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class LeadStageController extends Controller
@@ -30,7 +30,9 @@ class LeadStageController extends Controller
         return view('lead_stages.index', compact('lead_stages'));
     }
 
-    public function create() {}
+    public function create()
+    {
+    }
 
     /**
      * Create a new lead stage.
@@ -43,6 +45,7 @@ class LeadStageController extends Controller
      *
      * @bodyParam name string required The name of the lead stage. Max 255 characters. Example: Contacted
      * @bodyParam color string required The color badge for the lead stage. Must be one of: primary, secondary, success, danger, info, dark, warning.   Example: success
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -97,18 +100,17 @@ class LeadStageController extends Controller
                     false,
                     'Lead Stage Created Successfully.',
                     [
-                        'data' => formatLeadStage($lead_stage)
+                        'data' => formatLeadStage($lead_stage),
                     ],
                     200
                 );
-            } else {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Lead Stage Created Successfully.',
-                    'id' => $lead_stage->id,
-                    'type' => 'lead_stage'
-                ]);
             }
+            return response()->json([
+                'error' => false,
+                'message' => 'Lead Stage Created Successfully.',
+                'id' => $lead_stage->id,
+                'type' => 'lead_stage',
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -120,16 +122,15 @@ class LeadStageController extends Controller
                     [
                         'error' => $e->getMessage(),
                         'line' => $e->getLine(),
-                        'file' => $e->getFile()
+                        'file' => $e->getFile(),
                     ],
                     500
                 );
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Lead Stage Couldn\'t Created.'
-                ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Lead Stage Couldn\'t Created.',
+            ]);
         }
     }
 
@@ -143,6 +144,7 @@ class LeadStageController extends Controller
      *  @group Leads Stage Management
      *
      * @urlParam id integer required The ID of the lead stage to retrieve. Must exist in the `lead_stages` table. Example: 5
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -180,7 +182,7 @@ class LeadStageController extends Controller
                 false,
                 'Lead Stage Retrived Successfully',
                 [
-                    'data' => formatLeadStage($lead_stage)
+                    'data' => formatLeadStage($lead_stage),
                 ],
                 200
             );
@@ -189,10 +191,8 @@ class LeadStageController extends Controller
         return response()->json(['error' => false, 'message' => 'Lead Stage Retrived Successfully', 'lead_stage' => $lead_stage]);
     }
 
-
     public function edit(string $id)
     {
-        //
     }
 
     /**
@@ -207,6 +207,7 @@ class LeadStageController extends Controller
      * @bodyParam id integer required The ID of the lead stage to update. Must exist in the `lead_stages` table. Example: 3
      * @bodyParam name string required The name of the lead stage. Max 255 characters. Example: Proposal Sent
      * @bodyParam color string required The color badge for the lead stage. Must be one of: primary, secondary, success, danger, info, dark, warning. Example: warning
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -269,9 +270,8 @@ class LeadStageController extends Controller
                     ],
                     200
                 );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Lead Stage Updated Successfully.', 'id' => $lead_stage->id, 'type' => 'lead_stage']);
             }
+            return response()->json(['error' => false, 'message' => 'Lead Stage Updated Successfully.', 'id' => $lead_stage->id, 'type' => 'lead_stage']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -285,15 +285,14 @@ class LeadStageController extends Controller
                         'file' => $e->getFile(),
                     ]
                 );
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Lead Stage Couldn\'t Updated.',
-                    'error' => $e->getMessage(),
-                    'line' => $e->getLine(),
-                    'file' => $e->getFile(),
-                ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Lead Stage Couldn\'t Updated.',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
         }
     }
 
@@ -345,12 +344,11 @@ class LeadStageController extends Controller
         return $response;
     }
 
-
     public function destroy_multiple(Request $request)
     {
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:lead_stages,id'
+            'ids.*' => 'integer|exists:lead_stages,id',
         ]);
 
         $ids = $validatedData['ids'];
@@ -384,16 +382,15 @@ class LeadStageController extends Controller
             'error' => false,
             'message' => 'LeadStage(s) deleted successfully.',
             'id' => $deletedIds,
-            'titles' => $deletedTitles
+            'titles' => $deletedTitles,
         ]);
     }
-
 
     public function list()
     {
         $search = request('search');
-        $sort = request('sort', "id");
-        $order = request('order', "DESC");
+        $sort = request('sort', 'id');
+        $order = request('order', 'DESC');
         $limit = request('limit', 10);
 
         $lead_stages_query = $this->workspace->lead_stages()->orderBy($sort, $order);
@@ -437,8 +434,8 @@ class LeadStageController extends Controller
             });
 
         return response()->json([
-            "rows" => $lead_stages->items(),
-            "total" => $total,
+            'rows' => $lead_stages->items(),
+            'total' => $total,
         ]);
     }
 
@@ -503,8 +500,8 @@ class LeadStageController extends Controller
     {
         try {
             $search = request('search');
-            $sort = request('sort', "id");
-            $order = request('order', "DESC");
+            $sort = request('sort', 'id');
+            $order = request('order', 'DESC');
             $limit = request('limit', 10);
 
             $lead_stages_query = $this->workspace->lead_stages()->orderBy($sort, $order);
@@ -533,8 +530,8 @@ class LeadStageController extends Controller
                     'data' => $lead_stages,
                     'permissions' => [
                         'can_delete' => checkPermission('manage_leads'),
-                        'can_edit' => checkPermission('manage_leads')
-                    ]
+                        'can_edit' => checkPermission('manage_leads'),
+                    ],
                 ],
                 200
             );
@@ -561,6 +558,7 @@ class LeadStageController extends Controller
      * @bodyParam order array required An array of objects containing lead stage IDs and their new positions. Example: [{"id": 1, "position": 1}, {"id": 2, "position": 2}]
      * @bodyParam order[].id integer required The ID of the lead stage to reorder. Must exist in the `lead_stages` table. Example: 1
      * @bodyParam order[].position integer required The new position for the lead stage. Example: 1
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -610,12 +608,12 @@ class LeadStageController extends Controller
             $request->validate([
                 'order' => 'required|array',
                 'order.*.id' => 'required|integer|exists:lead_stages,id',
-                'order.*.position' => 'required|integer'
+                'order.*.position' => 'required|integer',
             ]);
 
             foreach ($request->order as $item) {
                 LeadStage::where('id', $item['id'])->update([
-                    'order' => $item['position']
+                    'order' => $item['position'],
                 ]);
             }
 
@@ -628,12 +626,11 @@ class LeadStageController extends Controller
                     ],
                     200
                 );
-            } else {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Lead Stages Reordered Successfully'
-                ]);
             }
+            return response()->json([
+                'error' => false,
+                'message' => 'Lead Stages Reordered Successfully',
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -644,19 +641,18 @@ class LeadStageController extends Controller
                     [
                         'error' => $e->getMessage(),
                         'line' => $e->getLine(),
-                        'file' => $e->getFile()
+                        'file' => $e->getFile(),
                     ],
                     500
                 );
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Lead Stages Reordering Failed.',
-                    'error' => $e->getMessage(),
-                    'line' => $e->getLine(),
-                    'file' => $e->getFile()
-                ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Lead Stages Reordering Failed.',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
         }
     }
 }

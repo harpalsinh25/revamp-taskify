@@ -1,11 +1,11 @@
 <?php
+
 namespace Plugins\SocialMediaManagement\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Plugins\SocialMediaManagement\Models\SocialPost;
-use Plugins\SocialMediaManagement\Services\SocialMediaService;
 
 class PublishScheduledPosts extends Command
 {
@@ -17,14 +17,14 @@ class PublishScheduledPosts extends Command
         Log::info('Starting social:publish-scheduled command');
         $publisher = app('social.scheduler');
 
-        if (!$publisher) {
+        if (! $publisher) {
             Log::error('SocialMediaService not resolved.');
             $this->error('SocialMediaService not resolved.');
             return self::FAILURE;
         }
 
         $nowUtc = Carbon::now('UTC');
-        $this->info("Now (UTC): " . $nowUtc->toDateTimeString());
+        $this->info('Now (UTC): ' . $nowUtc->toDateTimeString());
 
         try {
             $scheduledPosts = SocialPost::where('status', 'scheduled')
@@ -50,7 +50,7 @@ class PublishScheduledPosts extends Command
                     ]);
                     $this->info("Published post ID: {$post->id}");
                     if (config('app.debug')) {
-                        $this->info("Responses: " . json_encode($responses));
+                        $this->info('Responses: ' . json_encode($responses));
                     }
                 } catch (\Exception $e) {
                     Log::error("Failed to publish post ID: {$post->id}", [

@@ -1,6 +1,7 @@
 <?php
 
 namespace Plugins\AssetManagement\Models;
+
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,7 @@ class AssetHistory extends Model
         'estimated_return_date',
         'actual_return_date',
         'returned_by',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [

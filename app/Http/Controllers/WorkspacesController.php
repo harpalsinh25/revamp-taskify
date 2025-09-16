@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Client;
+use App\Models\User;
 use App\Models\Workspace;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
@@ -18,7 +16,6 @@ class WorkspacesController extends Controller
     protected $user;
     public function __construct()
     {
-
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->workspace = Workspace::find(getWorkspaceId());
@@ -114,15 +111,15 @@ class WorkspacesController extends Controller
             $clientIds = $request->input('client_ids') ?? [];
 
             // Set creator as a participant automatically if !isAdminOrHasAllDataAccess
-            if (!isAdminOrHasAllDataAccess()) {
-                if (getGuardName() == 'client' && !in_array($this->user->id, $clientIds)) {
+            if (! isAdminOrHasAllDataAccess()) {
+                if (getGuardName() === 'client' && ! in_array($this->user->id, $clientIds)) {
                     array_splice($clientIds, 0, 0, $this->user->id);
-                } else if (getGuardName() == 'web' && !in_array($this->user->id, $userIds)) {
+                } elseif (getGuardName() === 'web' && ! in_array($this->user->id, $userIds)) {
                     array_splice($userIds, 0, 0, $this->user->id);
                 }
             }
 
-            $primaryWorkspace = isAdminOrHasAllDataAccess() &&  $request->input('primaryWorkspace') == 'on' ? 1 : 0;
+            $primaryWorkspace = isAdminOrHasAllDataAccess() && $request->input('primaryWorkspace') === 'on' ? 1 : 0;
             $formFields['is_primary'] = $primaryWorkspace;
 
             // Create the new workspace
@@ -142,7 +139,7 @@ class WorkspacesController extends Controller
                 'type' => 'workspace',
                 'type_id' => $workspace_id,
                 'type_title' => $workspace->title,
-                'action' => 'assigned'
+                'action' => 'assigned',
             ];
 
             // Combine user and client IDs for notification recipients
@@ -164,7 +161,7 @@ class WorkspacesController extends Controller
                 'Workspace created successfully.',
                 [
                     'id' => $workspace_id,
-                    'data' => formatWorkspace($workspace)
+                    'data' => formatWorkspace($workspace),
                 ]
             );
         } catch (ValidationException $e) {
@@ -173,29 +170,28 @@ class WorkspacesController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the workspace.'
+                'message' => 'An error occurred while creating the workspace.',
             ], 500);
         }
     }
 
-
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $user_ids = request('user_ids', []);
         $client_ids = request('client_ids', []);
 
         $workspaces = isAdminOrHasAllDataAccess() ? $this->workspace : $this->user->workspaces();
 
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $workspaces = $workspaces->whereHas('users', function ($query) use ($user_ids) {
                 $query->whereIn('users.id', $user_ids);
             });
         }
 
-        if (!empty($client_ids)) {
+        if (! empty($client_ids)) {
             $workspaces = $workspaces->whereHas('clients', function ($query) use ($client_ids) {
                 $query->whereIn('clients.id', $client_ids);
             });
@@ -211,9 +207,8 @@ class WorkspacesController extends Controller
         $canDelete = checkPermission('delete_workspaces');
 
         $workspaces = $workspaces->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($workspace) use ($canEdit, $canDelete, $canCreate) {
-
                 $actions = '';
 
                 if ($canEdit) {
@@ -234,10 +229,10 @@ class WorkspacesController extends Controller
                         '</a>';
                 }
 
-                $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
 
                 $userHtml = '';
-                if (!empty($workspace->users) && count($workspace->users) > 0) {
+                if (! empty($workspace->users) && count($workspace->users) > 0) {
                     $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($workspace->users as $user) {
                         $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
@@ -256,7 +251,7 @@ class WorkspacesController extends Controller
                 }
 
                 $clientHtml = '';
-                if (!empty($workspace->clients) && count($workspace->clients) > 0) {
+                if (! empty($workspace->clients) && count($workspace->clients) > 0) {
                     $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($workspace->clients as $client) {
                         $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
@@ -281,7 +276,7 @@ class WorkspacesController extends Controller
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox"
                                    id="defaultWorkspaceSwitch_' . $workspace->id . '"
-                                   ' . ($this->user->default_workspace_id == $workspace->id ? 'checked' : '') . '
+                                   ' . ($this->user->default_workspace_id === $workspace->id ? 'checked' : '') . '
                                    onchange="setDefaultWorkspace(' . $workspace->id . ', this.checked)">
                             <label class="form-check-label" for="defaultWorkspaceSwitch_' . $workspace->id . '">
                             </label>
@@ -290,13 +285,13 @@ class WorkspacesController extends Controller
                     'clients' => $clientHtml,
                     'created_at' => format_date($workspace->created_at, true),
                     'updated_at' => format_date($workspace->updated_at, true),
-                    'actions' => $actions
+                    'actions' => $actions,
                 ];
             });
 
         return response()->json([
-            "rows" => $workspaces->items(),
-            "total" => $totalworkspaces,
+            'rows' => $workspaces->items(),
+            'total' => $totalworkspaces,
         ]);
     }
 
@@ -365,7 +360,6 @@ class WorkspacesController extends Controller
      * }
      */
 
-
     public function apiList(Request $request, $id = '')
     {
         $search = $request->input('search');
@@ -378,7 +372,7 @@ class WorkspacesController extends Controller
         $offset = $request->input('offset', 0);
 
         $where = [];
-        if ($status != '') {
+        if ($status !== '') {
             $where['status_id'] = $status;
         }
 
@@ -387,13 +381,13 @@ class WorkspacesController extends Controller
         // Handle user_id filtering
         if ($user_id) {
             $user = User::find($user_id);
-            if (!$user) {
+            if (! $user) {
                 return formatApiResponse(
                     false,
                     'User not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -403,13 +397,13 @@ class WorkspacesController extends Controller
         // Handle client_id filtering
         if ($client_id) {
             $client = Client::find($client_id);
-            if (!$client) {
+            if (! $client) {
                 return formatApiResponse(
                     false,
                     'Client not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -426,13 +420,13 @@ class WorkspacesController extends Controller
 
         if ($id) {
             $workspace = $workspacesQuery->find($id);
-            if (!$workspace) {
+            if (! $workspace) {
                 return formatApiResponse(
                     false,
                     'Workspace not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -441,41 +435,40 @@ class WorkspacesController extends Controller
                 'Workspace retrieved successfully',
                 [
                     'total' => 1,
-                    'data' => [formatWorkspace($workspace)]
-                ]
-            );
-        } else {
-            $total = $workspacesQuery->count(); // Get total count before applying offset and limit
-
-            $workspaces = $workspacesQuery->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-
-            if ($workspaces->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Workspaces not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-
-            $data = $workspaces->map(function ($workspace) {
-                return formatWorkspace($workspace);
-            });
-
-            return formatApiResponse(
-                false,
-                'Workspaces retrieved successfully',
-                [
-                    'total' => $total,
-                    'data' => $data
+                    'data' => [formatWorkspace($workspace)],
                 ]
             );
         }
+        $total = $workspacesQuery->count(); // Get total count before applying offset and limit
+
+        $workspaces = $workspacesQuery->orderBy($sort, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        if ($workspaces->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Workspaces not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+
+        $data = $workspaces->map(function ($workspace) {
+            return formatWorkspace($workspace);
+        });
+
+        return formatApiResponse(
+            false,
+            'Workspaces retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
 
     public function get($id)
@@ -601,7 +594,7 @@ class WorkspacesController extends Controller
                 'type' => 'workspace',
                 'type_id' => $id,
                 'type_title' => $workspace->title,
-                'action' => 'assigned'
+                'action' => 'assigned',
             ];
 
             // Combine user and client IDs for notification recipients
@@ -626,7 +619,7 @@ class WorkspacesController extends Controller
                 'Workspace updated successfully.',
                 [
                     'id' => $id,
-                    'data' => formatWorkspace($workspace)
+                    'data' => formatWorkspace($workspace),
                 ]
             );
         } catch (ValidationException $e) {
@@ -635,7 +628,7 @@ class WorkspacesController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the workspace.'
+                'message' => 'An error occurred while updating the workspace.',
             ], 500);
         }
     }
@@ -650,6 +643,7 @@ class WorkspacesController extends Controller
      * @group Workspace Management
      *
      * @urlParam id int required The ID of the workspace to update.
+     *
      * @bodyParam is_default boolean required Indicates whether the workspace should be set as default. Use 1 for setting as default and 0 for removing it as default.
      *
      * @response 200 {
@@ -670,7 +664,6 @@ class WorkspacesController extends Controller
      * }
      */
 
-
     public function setDefaultWorkspace(Request $request, $id)
     {
         $isApi = request()->get('isApi', false);
@@ -679,20 +672,20 @@ class WorkspacesController extends Controller
                 'is_default' => 'required|boolean',
             ]);
             $workspace = Workspace::find($id);
-            if (!$workspace) {
+            if (! $workspace) {
                 return formatApiResponse(
                     true,
                     'Workspace not found',
                     []
                 );
             }
-            $isDefault = $request->input('is_default') == 1;
+            $isDefault = $request->input('is_default') === 1;
             $this->user->default_workspace_id = $isDefault ? $id : null;
             $this->user->save();
             return response()->json([
                 'error' => false,
                 'message' => 'Default status updated successfully',
-                'data' => formatWorkspace($workspace)
+                'data' => formatWorkspace($workspace),
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -700,7 +693,7 @@ class WorkspacesController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the workspace default status.'
+                'message' => 'An error occurred while updating the workspace default status.',
             ], 500);
         }
     }
@@ -740,8 +733,8 @@ class WorkspacesController extends Controller
     {
         $workspace = Workspace::find($id);
         if ($workspace) {
-            if ($this->workspace->id != $id) {
-                if ($workspace->is_primary == 0) {
+            if ($this->workspace->id !== $id) {
+                if ($workspace->is_primary === 0) {
                     $response = DeletionService::delete(Workspace::class, $id, 'Workspace');
                     $responseData = json_decode($response->getContent(), true);
                     if ($responseData['error']) {
@@ -749,25 +742,22 @@ class WorkspacesController extends Controller
                         return response()->json($responseData);
                     }
                     // Check if this workspace is the default workspace for the user
-                    if ($this->user->default_workspace_id == $id) {
+                    if ($this->user->default_workspace_id === $id) {
                         $this->user->default_workspace_id = null;
                         $this->user->save();
                     }
                     $workspace->notificationsForWorkspace()->delete();
                     return $response;
-                } else {
-                    return response()->json(['error' => true, 'message' => 'Primary workspace cannot be deleted.']);
                 }
-            } else {
-                return response()->json(['error' => true, 'message' => 'Current workspace cannot be deleted. Please switch to a different workspace first.']);
+                return response()->json(['error' => true, 'message' => 'Primary workspace cannot be deleted.']);
             }
-        } else {
-            return formatApiResponse(
-                true,
-                'Workspace not found.',
-                []
-            );
+            return response()->json(['error' => true, 'message' => 'Current workspace cannot be deleted. Please switch to a different workspace first.']);
         }
+        return formatApiResponse(
+            true,
+            'Workspace not found.',
+            []
+        );
     }
 
     public function destroy_multiple(Request $request)
@@ -775,7 +765,7 @@ class WorkspacesController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:workspaces,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:workspaces,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -788,9 +778,9 @@ class WorkspacesController extends Controller
         foreach ($ids as $id) {
             $workspace = Workspace::find($id);
             if ($workspace) {
-                if ($workspace->id == $this->workspace->id) {
+                if ($workspace->id === $this->workspace->id) {
                     $currentWorkspaceIds[] = $id;
-                } elseif ($workspace->is_primary == 1) {
+                } elseif ($workspace->is_primary === 1) {
                     $primaryWorkspaceIds[] = $id;
                 } else {
                     $deletedWorkspaces[] = $id;
@@ -801,15 +791,16 @@ class WorkspacesController extends Controller
             }
         }
 
-        if (count($ids) == 1) {
-            if (!empty($primaryWorkspaceIds)) {
+        if (count($ids) === 1) {
+            if (! empty($primaryWorkspaceIds)) {
                 return response()->json(['error' => true, 'message' => 'Primary workspace cannot be deleted.']);
-            } elseif (!empty($currentWorkspaceIds)) {
+            }
+            if (! empty($currentWorkspaceIds)) {
                 return response()->json(['error' => true, 'message' => 'Current workspace cannot be deleted.']);
             }
         }
 
-        if (!empty($primaryWorkspaceIds) && !empty($currentWorkspaceIds) && count($ids) == 2) {
+        if (! empty($primaryWorkspaceIds) && ! empty($currentWorkspaceIds) && count($ids) === 2) {
             return response()->json(['error' => true, 'message' => 'Current and primary workspaces cannot be deleted.']);
         }
 
@@ -819,11 +810,11 @@ class WorkspacesController extends Controller
         }
 
         $message = 'Workspace(s) deleted successfully.';
-        if (!empty($primaryWorkspaceIds) && !empty($currentWorkspaceIds)) {
+        if (! empty($primaryWorkspaceIds) && ! empty($currentWorkspaceIds)) {
             $message = 'Workspace(s) deleted successfully except primary and current.';
-        } elseif (!empty($primaryWorkspaceIds)) {
+        } elseif (! empty($primaryWorkspaceIds)) {
             $message = 'Workspace(s) deleted successfully except primary one.';
-        } elseif (!empty($currentWorkspaceIds)) {
+        } elseif (! empty($currentWorkspaceIds)) {
             $message = 'Workspace(s) deleted successfully except current one.';
         }
 
@@ -877,27 +868,23 @@ class WorkspacesController extends Controller
                         'Workspace changed successfully.',
                         ['data' => ['workspace_id' => $id]]
                     );
-                } else {
-                    // Fallback to session-based approach
-                    session()->put('workspace_id', $id);
-                    return back()->with('message', 'Workspace changed successfully.');
                 }
-            } else {
-                return formatApiResponse(
-                    true,
-                    'Workspace not found.',
-                    ['data' => []]
-                );
+                // Fallback to session-based approach
+                session()->put('workspace_id', $id);
+                return back()->with('message', 'Workspace changed successfully.');
             }
+            return formatApiResponse(
+                true,
+                'Workspace not found.',
+                ['data' => []]
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while switching the workspace.'
+                'message' => 'An error occurred while switching the workspace.',
             ], 500);
         }
     }
-
-
 
     /**
      * Remove the authenticated user from the current workspace.
@@ -927,14 +914,14 @@ class WorkspacesController extends Controller
     {
         try {
             $workspace = Workspace::find(getWorkspaceId());
-            if (getGuardName() == 'client') {
+            if (getGuardName() === 'client') {
                 $workspace->clients()->detach($this->user->id);
             } else {
                 $workspace->users()->detach($this->user->id);
             }
 
             // Update the workspace ID after removal
-            $workspace_id = isset($this->user->workspaces[0]['id']) && !empty($this->user->workspaces[0]['id']) ? $this->user->workspaces[0]['id'] : 0;
+            $workspace_id = isset($this->user->workspaces[0]['id']) && ! empty($this->user->workspaces[0]['id']) ? $this->user->workspaces[0]['id'] : 0;
             $data = ['workspace_id' => $workspace_id];
 
             if (isSanctumAuth()) {
@@ -943,26 +930,23 @@ class WorkspacesController extends Controller
                     'Removed from workspace successfully.',
                     ['data' => ['workspace_id' => $workspace->id]]
                 );
-            } else {
-                session()->put($data);
-                Session::flash('message', 'Removed from workspace successfully.');
-                return response()->json(['error' => false]);
             }
+            session()->put($data);
+            Session::flash('message', 'Removed from workspace successfully.');
+            return response()->json(['error' => false]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while removing the participant from the workspace.'
+                'message' => 'An error occurred while removing the participant from the workspace.',
             ], 500);
         }
     }
 
-
     public function duplicate(Request $request, $id)
     {
-
         $options = $request->input('options') ?? [];
-         // Normalize options to always be an array
-        if (!is_array($options)) {
+        // Normalize options to always be an array
+        if (! is_array($options)) {
             $options = explode(',', $options); // Split string into an array by commas if necessary
         }
         // Ensure default duplication of users and clients
@@ -970,16 +954,16 @@ class WorkspacesController extends Controller
         $options = array_merge($defaultOptions, $options);
 
         // Validation: Tasks can only be selected if Projects is selected
-        if (in_array('tasks', $options) && !in_array('projects', $options)) {
+        if (in_array('tasks', $options) && ! in_array('projects', $options)) {
             return response()->json(['error' => true, 'message' => 'Tasks can only be duplicated if Projects is selected.']);
         }
         $allowedOptions = ['projects', 'project_tasks', 'meetings', 'todos', 'notes', 'users', 'clients'];
         $relatedTables = array_intersect($options, $allowedOptions);
 
         // Use the general duplicateRecord function
-        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
+        $title = request()->has('title') && ! empty(trim(request()->title)) ? request()->title : '';
         $duplicate = duplicateRecord(Workspace::class, $id, $relatedTables, $title);
-        if (!$duplicate) {
+        if (! $duplicate) {
             return response()->json(['error' => true, 'message' => 'Workspace duplication failed.']);
         }
         $workspace = Workspace::find($duplicate->id);

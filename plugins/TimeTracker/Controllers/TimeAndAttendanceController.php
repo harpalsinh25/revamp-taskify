@@ -3,18 +3,17 @@
 namespace Plugins\TimeTracker\Controllers;
 
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Plugins\TimeTracker\Models\TimeTrackerConfig;
+use Illuminate\Support\Str;
 use Plugins\TimeTracker\Models\TimeTrackerActivityLog;
+use Plugins\TimeTracker\Models\TimeTrackerConfig;
 
 class TimeAndAttendanceController extends Controller
 {
     public function index()
     {
-
-        $workDayStartTime =  $this->loadConfig()['workDayStartTime'] ?? '09:00:00'; // Default to 9 AM if not set
+        $workDayStartTime = $this->loadConfig()['workDayStartTime'] ?? '09:00:00'; // Default to 9 AM if not set
         $workDayStartTime = Carbon::parse($workDayStartTime)->format('H:i:s');
         return view('timetracker::time_and_attendance.index', compact('workDayStartTime'));
     }
@@ -38,7 +37,7 @@ class TimeAndAttendanceController extends Controller
         if ($user_ids) {
             $query->where('user_id', $user_ids);
         }
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $query->forUser($user->id);
         }
 
@@ -55,7 +54,9 @@ class TimeAndAttendanceController extends Controller
 
         foreach ($grouped as $userId => $dates) {
             $userModel = \App\Models\User::find($userId);
-            if (!$userModel) continue;
+            if (! $userModel) {
+                continue;
+            }
 
             foreach ($dates as $date => $logs) {
                 $attendanceData[] = $this->processDay($userModel, $date, $logs);
@@ -64,8 +65,7 @@ class TimeAndAttendanceController extends Controller
 
         usort(
             $attendanceData,
-            fn($a, $b) =>
-            $a['employee'] === $b['employee']
+            fn ($a, $b) => $a['employee'] === $b['employee']
                 ? strcmp($a['date'], $b['date'])
                 : strcmp($a['employee'], $b['employee'])
         );
@@ -75,9 +75,104 @@ class TimeAndAttendanceController extends Controller
             'summary' => $this->calculateSummary($attendanceData),
             'filters' => [
                 'start_date' => $startDate,
-                'end_date' => $endDate
-            ]
+                'end_date' => $endDate,
+            ],
         ]);
+    }
+
+    public function timeline(Request $request)
+    {
+        $userId = $request->get('user_id');
+        $date = $request->get('date');
+
+        $date = Carbon::createFromFormat(app('php_date_format'), $date);
+        $date = format_date($date, to_format: 'Y-m-d');
+
+        $logs = TimeTrackerActivityLog::where('user_id', $userId)
+            ->whereBetween('timestamp', [
+                Carbon::parse($date)->startOfDay(),
+                Carbon::parse($date)->endOfDay(),
+            ])
+            ->orderBy('timestamp')
+            ->get();
+
+        $intervals = [];
+        $currentState = null;
+        $currentStart = null;
+
+        $typeMap = [
+            'manual-start' => 'manual',
+            'manual-stop' => 'manual',
+            'manual-processing-start' => 'pending_manual', // <-- Add this
+            'manual-processing-stop' => 'pending_manual',  // <-- Add this
+            'break-start' => 'break',
+            'break-stop' => 'break',
+            'idle-start' => 'idle',
+            'idle-stop' => 'idle',
+            'clock-in' => 'active',
+            'clock-out' => 'active',
+        ];
+
+        $activeStart = null;
+
+        foreach ($logs as $log) {
+            $action = $log->action;
+            $timestamp = Carbon::parse($log->timestamp);
+            $type = $typeMap[$action] ?? null;
+
+            if (! $type) {
+                continue;
+            }
+
+            $isStart = Str::endsWith($action, ['start', 'in']);
+            $isStop = Str::endsWith($action, ['stop', 'out']);
+
+            if ($action === 'clock-in') {
+                $activeStart = $timestamp;
+            } elseif ($action === 'clock-out') {
+                if ($activeStart) {
+                    $intervals[] = [
+                        'start' => $activeStart->toDateTimeString(),
+                        'end' => $timestamp->toDateTimeString(),
+                        'type' => 'active',
+                    ];
+                    $activeStart = null;
+                }
+            } elseif ($isStart) {
+                // If active was running, close it
+                if ($activeStart) {
+                    $intervals[] = [
+                        'start' => $activeStart->toDateTimeString(),
+                        'end' => $timestamp->toDateTimeString(),
+                        'type' => 'active',
+                    ];
+                    $activeStart = null;
+                }
+
+                // Start the current state
+                $currentState = $type;
+                $currentStart = $timestamp;
+            } elseif ($isStop && $type === $currentState && $currentStart) {
+                $intervals[] = [
+                    'start' => $currentStart->toDateTimeString(),
+                    'end' => $timestamp->toDateTimeString(),
+                    'type' => $currentState,
+                ];
+                $currentState = null;
+                $currentStart = null;
+
+                // Resume active after stop if within clock-in/clock-out window
+                $activeStart = $timestamp;
+            }
+        }
+
+        $intervals = collect($intervals)
+            ->unique(fn ($item) => $item['start'] . '_' . $item['end'] . '_' . $item['type'])
+            ->sortBy('start')
+            ->values()
+            ->toArray();
+
+        return response()->json(['sessions' => $intervals]);
     }
 
     private function processDay($user, $date, $logs)
@@ -96,7 +191,7 @@ class TimeAndAttendanceController extends Controller
             'manual_time' => 0,
             'pending_manual_time' => 0, // <-- Add this
             'break_time' => 0,
-            'idle_time' => 0
+            'idle_time' => 0,
         ];
 
         foreach ($logs as $log) {
@@ -106,7 +201,7 @@ class TimeAndAttendanceController extends Controller
             switch ($action) {
                 case 'clock-in':
                     $clockIn = $clockIn ?? $timestamp; // Keep first clock-in
-                    if ($currentSession && !isset($currentSession['end'])) {
+                    if ($currentSession && ! isset($currentSession['end'])) {
                         $currentSession['end'] = $timestamp;
                         $workSessions[] = $currentSession;
                     }
@@ -134,7 +229,7 @@ class TimeAndAttendanceController extends Controller
                     }
                     break;
 
-                // NEW: Pending manual time
+                    // NEW: Pending manual time
                 case 'manual-processing-start':
                     $activityStarts['pending_manual'] = $timestamp;
                     break;
@@ -174,7 +269,7 @@ class TimeAndAttendanceController extends Controller
         }
 
         // Handle unclosed session
-        if ($currentSession && !isset($currentSession['end'])) {
+        if ($currentSession && ! isset($currentSession['end'])) {
             $currentSession['end'] = $clockOut ?? now();
             $workSessions[] = $currentSession;
         }
@@ -194,7 +289,7 @@ class TimeAndAttendanceController extends Controller
         $productiveTime = $activities['manual_time'] > 0 ? $activities['manual_time'] : $activeTime;
 
         // Calculate utilization
-        $utilization = $totalWorkTime > 0 ? round(($productiveTime / $totalWorkTime) * 100, 1) : 0;
+        $utilization = $totalWorkTime > 0 ? round($productiveTime / $totalWorkTime * 100, 1) : 0;
 
         return [
             'employee' => trim($user->first_name . ' ' . $user->last_name),
@@ -209,7 +304,7 @@ class TimeAndAttendanceController extends Controller
             'break_time' => $this->formatTime($activities['break_time']),
             'idle_time' => $this->formatTime($activities['idle_time']),
             'utilization' => $utilization . '%',
-            'status' => $clockOut ? 'Completed' : 'Active'
+            'status' => $clockOut ? 'Completed' : 'Active',
         ];
     }
 
@@ -258,7 +353,7 @@ class TimeAndAttendanceController extends Controller
             'total_break_time' => $this->formatTime($totalBreak),
             'total_idle_time' => $this->formatTime($totalIdle),
             'total_pending_manual_time' => $this->formatTime($totalPendingManual), // <-- Add this
-            'average_utilization' => $avgUtil
+            'average_utilization' => $avgUtil,
         ];
     }
 
@@ -277,100 +372,6 @@ class TimeAndAttendanceController extends Controller
         $minutes = (int) $parts[1];
 
         return max(0, ($hours * 3600) + ($minutes * 60));
-    }
-
-    public function timeline(Request $request)
-    {
-        $userId = $request->get('user_id');
-        $date = $request->get('date');
-
-        $date = Carbon::createFromFormat(app('php_date_format'), $date);
-        $date = format_date($date, to_format: 'Y-m-d');
-
-        $logs = TimeTrackerActivityLog::where('user_id', $userId)
-            ->whereBetween('timestamp', [
-                Carbon::parse($date)->startOfDay(),
-                Carbon::parse($date)->endOfDay()
-            ])
-            ->orderBy('timestamp')
-            ->get();
-
-        $intervals = [];
-        $currentState = null;
-        $currentStart = null;
-
-        $typeMap = [
-            'manual-start' => 'manual',
-            'manual-stop' => 'manual',
-            'manual-processing-start' => 'pending_manual', // <-- Add this
-            'manual-processing-stop' => 'pending_manual',  // <-- Add this
-            'break-start' => 'break',
-            'break-stop' => 'break',
-            'idle-start' => 'idle',
-            'idle-stop' => 'idle',
-            'clock-in' => 'active',
-            'clock-out' => 'active',
-        ];
-
-        $activeStart = null;
-
-        foreach ($logs as $log) {
-            $action = $log->action;
-            $timestamp = Carbon::parse($log->timestamp);
-            $type = $typeMap[$action] ?? null;
-
-            if (!$type) continue;
-
-            $isStart = Str::endsWith($action, ['start', 'in']);
-            $isStop = Str::endsWith($action, ['stop', 'out']);
-
-            if ($action === 'clock-in') {
-                $activeStart = $timestamp;
-            } elseif ($action === 'clock-out') {
-                if ($activeStart) {
-                    $intervals[] = [
-                        'start' => $activeStart->toDateTimeString(),
-                        'end' => $timestamp->toDateTimeString(),
-                        'type' => 'active'
-                    ];
-                    $activeStart = null;
-                }
-            } elseif ($isStart) {
-                // If active was running, close it
-                if ($activeStart) {
-                    $intervals[] = [
-                        'start' => $activeStart->toDateTimeString(),
-                        'end' => $timestamp->toDateTimeString(),
-                        'type' => 'active'
-                    ];
-                    $activeStart = null;
-                }
-
-                // Start the current state
-                $currentState = $type;
-                $currentStart = $timestamp;
-            } elseif ($isStop && $type === $currentState && $currentStart) {
-                $intervals[] = [
-                    'start' => $currentStart->toDateTimeString(),
-                    'end' => $timestamp->toDateTimeString(),
-                    'type' => $currentState
-                ];
-                $currentState = null;
-                $currentStart = null;
-
-                // Resume active after stop if within clock-in/clock-out window
-                $activeStart = $timestamp;
-            }
-        }
-
-
-        $intervals = collect($intervals)
-            ->unique(fn($item) => $item['start'] . '_' . $item['end'] . '_' . $item['type'])
-            ->sortBy('start')
-            ->values()
-            ->toArray();
-
-        return response()->json(['sessions' => $intervals]);
     }
 
     private function loadConfig()

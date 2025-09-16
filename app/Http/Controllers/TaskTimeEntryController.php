@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Task;
-use App\Models\User;
 use App\Models\Client;
-use Ramsey\Uuid\Type\Time;
-use Illuminate\Http\Request;
+use App\Models\Task;
 use App\Models\TaskTimeEntry as TaskTimeEntryModel;
+use App\Models\User;
 use App\Services\DeletionService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class TaskTimeEntryController extends Controller
@@ -19,7 +18,6 @@ class TaskTimeEntryController extends Controller
      */
     public function index()
     {
-        //
     }
 
     public function list($id, Request $request)
@@ -50,7 +48,7 @@ class TaskTimeEntryController extends Controller
         $totalMinutes = 0;
         $allEntries = clone $entries;
         foreach ($allEntries->get() as $entry) {
-            if ($entry->entry_type == 'flexible') {
+            if ($entry->entry_type === 'flexible') {
                 $start = Carbon::createFromFormat('H:i:s', $entry->start_time);
                 $end = Carbon::createFromFormat('H:i:s', $entry->end_time);
                 if ($end < $start) {
@@ -71,23 +69,23 @@ class TaskTimeEntryController extends Controller
         // Transform entries for JSON response
         $entries->transform(function ($entry) {
             $userIdAndType = $entry->user_type();
-            if ($userIdAndType['type'] == 'user') {
+            if ($userIdAndType['type'] === 'user') {
                 $user = User::find($userIdAndType['id']);
-                if (!$user) {
-                    Log::warning("User not found with ID: " . $userIdAndType['id']);
+                if (! $user) {
+                    Log::warning('User not found with ID: ' . $userIdAndType['id']);
                 }
-            } elseif ($userIdAndType['type'] == 'client') {
+            } elseif ($userIdAndType['type'] === 'client') {
                 $user = Client::find($userIdAndType['id']);
-                if (!$user) {
-                    Log::warning("Client not found with ID: " . $userIdAndType['id']);
+                if (! $user) {
+                    Log::warning('Client not found with ID: ' . $userIdAndType['id']);
                 }
             } else {
                 $user = null;
-                Log::warning("Invalid user type: " . $userIdAndType['type']);
+                Log::warning('Invalid user type: ' . $userIdAndType['type']);
             }
             $userHtml = "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'><li class='avatar avatar-sm pull-up'><a href='" . route('users.profile', ['id' => $user->id]) . "' target='_blank' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle ' /></a></li></ul>";
             $totalDuration = '';
-            if ($entry->entry_type == 'flexible') {
+            if ($entry->entry_type === 'flexible') {
                 $start = Carbon::createFromFormat('H:i:s', $entry->start_time);
                 $end = Carbon::createFromFormat('H:i:s', $entry->end_time);
 
@@ -127,11 +125,9 @@ class TaskTimeEntryController extends Controller
                 'is_billable' => $entry->is_billable ? 'Yes' : 'No', // Convert boolean to human-readable
                 'created_at' => format_date($entry->created_at),
                 'updated_at' => format_date($entry->updated_at),
-                'actions' => $action
+                'actions' => $action,
             ];
         });
-
-
 
         // Return JSON response
         return response()->json([
@@ -140,8 +136,8 @@ class TaskTimeEntryController extends Controller
             'total' => $entries->total(), // Total entries
             'totalDuration' => [
                 'hours' => $totalHours,
-                'minutes' => $remainingMinutes
-            ]
+                'minutes' => $remainingMinutes,
+            ],
         ]);
     }
 
@@ -150,7 +146,6 @@ class TaskTimeEntryController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -158,7 +153,6 @@ class TaskTimeEntryController extends Controller
      */
     public function store(Request $request)
     {
-     
         $formFields = $request->validate([
             'task_id' => 'required',
             'entry_date' => 'required',
@@ -168,7 +162,6 @@ class TaskTimeEntryController extends Controller
             'end_time' => 'required_if:entry_type,flexible',
             'description' => 'nullable',
             'is_billable' => 'required',
-
 
         ]);
         $formFields['workspace_id'] = session()->get('workspace_id');
@@ -184,7 +177,6 @@ class TaskTimeEntryController extends Controller
      */
     public function show(string $id)
     {
-        //
     }
 
     /**
@@ -192,7 +184,6 @@ class TaskTimeEntryController extends Controller
      */
     public function edit(string $id)
     {
-        //
     }
 
     /**
@@ -200,7 +191,6 @@ class TaskTimeEntryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
     }
 
     /**
@@ -208,7 +198,6 @@ class TaskTimeEntryController extends Controller
      */
     public function destroy(string $id)
     {
-
         DeletionService::delete(TaskTimeEntryModel::class, $id, 'Task Time Entry');
         return response()->json(['error' => false, 'message' => 'Task time entry deleted successfully.']);
     }
@@ -217,7 +206,7 @@ class TaskTimeEntryController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:task_time_entries,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:task_time_entries,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedIds = [];

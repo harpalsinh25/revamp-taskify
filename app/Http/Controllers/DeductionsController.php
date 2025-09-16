@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Deduction;
 use App\Models\Workspace;
-use App\Http\Controllers\Controller;
+use App\Services\DeletionService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Models\Deduction;
-use Illuminate\Support\Facades\Session;
-use App\Services\DeletionService;
 
 class DeductionsController extends Controller
 {
@@ -30,7 +28,6 @@ class DeductionsController extends Controller
         $deductions = $deductions->count();
         return view('deductions.list', ['deductions' => $deductions]);
     }
-
 
     /**
      * Create a new deduction.
@@ -79,9 +76,7 @@ class DeductionsController extends Controller
 
     public function store(Request $request)
     {
-
         try {
-
             $isApi = request()->get('isApi', false);
 
             // Validate the request data
@@ -101,7 +96,7 @@ class DeductionsController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    }
+                    },
                 ],
                 'percentage' => [
                     Rule::requiredIf(function () use ($request) {
@@ -111,37 +106,34 @@ class DeductionsController extends Controller
                     'numeric',
                 ],
             ], [
-                'percentage.numeric' => 'Percentage must be a numeric value.'
+                'percentage.numeric' => 'Percentage must be a numeric value.',
             ]);
             $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
             $validatedData['amount'] = $validatedData['amount'] !== '' ? $validatedData['amount'] : null;
             $validatedData['workspace_id'] = $this->workspace->id;
             if ($deduction = Deduction::create($validatedData)) {
-
                 if ($isApi) {
                     return formatApiResponse(
                         false,
                         'Deduction created successfully.',
                         [
-                            'data' => formatDeduction($deduction)
+                            'data' => formatDeduction($deduction),
                         ]
                     );
                 }
 
                 return response()->json(['error' => false, 'message' => 'Deduction created successfully.', 'id' => $deduction->id, 'deduction' => $deduction]);
-            } else {
-
-                if ($isApi) {
-                    return formatApiResponse(
-                        true,
-                        'Deduction couldn\'t created.',
-                        [],
-
-                    );
-                }
-
-                return response()->json(['error' => true, 'message' => 'Deduction couldn\'t created.']);
             }
+
+            if ($isApi) {
+                return formatApiResponse(
+                    true,
+                    'Deduction couldn\'t created.',
+                    [],
+                );
+            }
+
+            return response()->json(['error' => true, 'message' => 'Deduction couldn\'t created.']);
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -155,8 +147,8 @@ class DeductionsController extends Controller
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $types = request('types');
         $deductions = $this->workspace->deductions();
         if ($search) {
@@ -168,7 +160,7 @@ class DeductionsController extends Controller
                     ->orWhere('id', 'like', '%' . $search . '%');
             });
         }
-        if (!empty($types)) {
+        if (! empty($types)) {
             $deductions = $deductions->whereIn('type', $types);
         }
         $canEdit = checkPermission('edit_deductions');
@@ -176,7 +168,7 @@ class DeductionsController extends Controller
 
         $total = $deductions->count();
         $deductions = $deductions->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($deduction) use ($canEdit, $canDelete) {
                 $actions = '';
 
@@ -192,7 +184,7 @@ class DeductionsController extends Controller
                         '</button>';
                 }
 
-                $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
 
                 return [
                     'id' => $deduction->id,
@@ -207,11 +199,10 @@ class DeductionsController extends Controller
             });
 
         return response()->json([
-            "rows" => $deductions->items(),
-            "total" => $total,
+            'rows' => $deductions->items(),
+            'total' => $total,
         ]);
     }
-
 
     /**
      * Get list of deductions.
@@ -244,15 +235,13 @@ class DeductionsController extends Controller
      * }
      */
 
-
     public function apiList()
     {
-
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
-        $limit = (request('order')) ? request('limit') : 10;
-        $types = array_filter(request('types', []), fn($v) => filled($v));
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
+        $limit = request('order') ? request('limit') : 10;
+        $types = array_filter(request('types', []), fn ($v) => filled($v));
         $deductions = $this->workspace->deductions();
         if ($search) {
             $deductions = $deductions->where(function ($query) use ($search) {
@@ -263,7 +252,7 @@ class DeductionsController extends Controller
                     ->orWhere('id', 'like', '%' . $search . '%');
             });
         }
-        if (!empty($types)) {
+        if (! empty($types)) {
             $deductions = $deductions->whereIn('type', $types);
         }
 
@@ -272,21 +261,18 @@ class DeductionsController extends Controller
             ->take($limit)
             ->get()
             ->map(function ($deduction) {
-
                 return formatDeduction($deduction);
             });
-
 
         return formatApiResponse(
             false,
             'Deduction retrieved successfully.',
             [
                 'total' => $total,
-                'data' => $deductions
+                'data' => $deductions,
             ]
         );
     }
-
 
     /**
      * Get a deduction by ID.
@@ -296,6 +282,7 @@ class DeductionsController extends Controller
      * @group Deduction Management
      *
      * @urlParam id integer required The ID of the deduction to retrieve. Must exist in the `deductions` table. Example: 1
+     *
      * @queryParam isApi boolean optional Whether to return a formatted API response. Defaults to false. Example: true
      *
      * @response 200 {
@@ -328,7 +315,6 @@ class DeductionsController extends Controller
     public function get($id)
     {
         try {
-
             $isApi = request()->get('isApi', false);
 
             $deduction = Deduction::findOrFail($id);
@@ -339,14 +325,13 @@ class DeductionsController extends Controller
                     false,
                     'Deduction retrieved successfully.',
                     [
-                        'data' => formatDeduction($deduction)
+                        'data' => formatDeduction($deduction),
                     ]
                 );
             }
 
             return response()->json(['deduction' => $deduction]);
         } catch (\Exception $e) {
-
             return formatApiResponse(
                 true,
                 config('app.debug') ? $e->getMessage() : 'An error occurred',
@@ -407,7 +392,6 @@ class DeductionsController extends Controller
      * }
      */
 
-
     public function update(Request $request)
     {
         try {
@@ -418,12 +402,12 @@ class DeductionsController extends Controller
                 'type' => ['required', Rule::in(['amount', 'percentage'])],
 
                 'amount' => [
-                    Rule::requiredIf(fn() => $request->type === 'amount'),
+                    Rule::requiredIf(fn () => $request->type === 'amount'),
                     'nullable',
                     function ($attribute, $value, $fail) {
                         if ($value !== null && $value !== '') {
                             $cleaned = str_replace(',', '', $value);
-                            if (!is_numeric($cleaned)) {
+                            if (! is_numeric($cleaned)) {
                                 $fail('The amount must be a valid numeric value.');
                             }
                             if ($cleaned < 0) {
@@ -434,7 +418,7 @@ class DeductionsController extends Controller
                 ],
 
                 'percentage' => [
-                    Rule::requiredIf(fn() => $request->type === 'percentage'),
+                    Rule::requiredIf(fn () => $request->type === 'percentage'),
                     'nullable',
                     'numeric',
                     'between:0,100',
@@ -475,16 +459,15 @@ class DeductionsController extends Controller
                     'message' => 'Deduction updated successfully.',
                     'id' => $deduction->id,
                 ]);
-            } else {
-                if ($isApi) {
-                    return formatApiResponse(true, 'Deduction could not be updated.', []);
-                }
-
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Deduction could not be updated.',
-                ]);
             }
+            if ($isApi) {
+                return formatApiResponse(true, 'Deduction could not be updated.', []);
+            }
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Deduction could not be updated.',
+            ]);
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -494,8 +477,6 @@ class DeductionsController extends Controller
             );
         }
     }
-
-
 
     /**
      * Delete a deduction.
@@ -523,15 +504,14 @@ class DeductionsController extends Controller
     {
         $deduction = Deduction::findOrFail($id);
         $deduction->payslips()->detach();
-        $response = DeletionService::delete(Deduction::class, $id, 'Deduction');
-        return $response;
+        return DeletionService::delete(Deduction::class, $id, 'Deduction');
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:deductions,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:deductions,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];

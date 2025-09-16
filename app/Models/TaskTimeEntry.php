@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TaskTimeEntry extends Model
 {
@@ -31,7 +30,7 @@ class TaskTimeEntry extends Model
 
         return [
             'type' => $type,
-            'id' => str_replace(['u_', 'c_'], '', $this->user_id)
+            'id' => str_replace(['u_', 'c_'], '', $this->user_id),
         ];
     }
 }

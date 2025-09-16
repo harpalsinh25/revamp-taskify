@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use RyanChandler\Comments\Models\Comment as BaseComment;
 
 class Comment extends BaseComment

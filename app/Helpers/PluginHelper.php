@@ -3,11 +3,11 @@
 namespace App\Helpers;
 
 use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class PluginHelper
 {
@@ -19,7 +19,7 @@ class PluginHelper
         $plugins = [];
 
         $pluginsPath = base_path('plugins');
-        if (!File::exists($pluginsPath)) {
+        if (! File::exists($pluginsPath)) {
             return $plugins;
         }
 
@@ -47,7 +47,7 @@ class PluginHelper
     {
         $path = base_path("plugins/{$slug}");
         $json = "{$path}/plugin.json";
-        if (!File::exists($json)) {
+        if (! File::exists($json)) {
             return null;
         }
 
@@ -67,7 +67,7 @@ class PluginHelper
     public static function updateStatus(string $slug, bool $enabled): void
     {
         $plugin = self::get($slug);
-        if (!$plugin) {
+        if (! $plugin) {
             throw new Exception("Plugin not found: {$slug}");
         }
 
@@ -76,7 +76,7 @@ class PluginHelper
 
         File::put($pluginJsonPath, json_encode($plugin, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        Log::info("🔄 Updated plugin status: {$slug} => " . ($enabled ? "enabled" : "disabled"));
+        Log::info("🔄 Updated plugin status: {$slug} => " . ($enabled ? 'enabled' : 'disabled'));
     }
 
     /**
@@ -85,12 +85,12 @@ class PluginHelper
     public static function delete(string $slug): bool
     {
         $plugin = self::get($slug);
-        if (!$plugin) {
+        if (! $plugin) {
             throw new \Exception("Plugin not found: {$slug}");
         }
 
-        if (!empty($plugin['enabled'])) {
-            throw new \Exception("Cannot uninstall plugin while enabled. Please disable it first.");
+        if (! empty($plugin['enabled'])) {
+            throw new \Exception('Cannot uninstall plugin while enabled. Please disable it first.');
         }
 
         $pluginNamespace = str_replace('-', '', ucwords($slug, '-'));
@@ -115,7 +115,7 @@ class PluginHelper
                         ]);
 
                         $rollbackOutput = Artisan::output();
-                        Log::info("Rollback output: " . $rollbackOutput);
+                        Log::info('Rollback output: ' . $rollbackOutput);
                         Log::info("🔄 Rolled back {$migrationCount} migrations for plugin: {$pluginNamespace}");
                     } catch (\Exception $e) {
                         Log::warning("⚠️ Standard rollback failed, trying manual method: {$e->getMessage()}");
@@ -152,10 +152,31 @@ class PluginHelper
             return true;
         } catch (\Throwable $e) {
             Log::error("❌ Failed to uninstall plugin '{$pluginNamespace}': {$e->getMessage()}", [
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw new \Exception("Failed to uninstall plugin: {$e->getMessage()}");
         }
+    }
+    public static function getPluginLabels()
+    {
+        $pluginLabels = [];
+
+        $pluginDirs = File::directories(base_path('plugins'));
+
+        foreach ($pluginDirs as $pluginDir) {
+            $labelFile = $pluginDir . '/Resources/lang/plugin_labels.php';
+
+            if (File::exists($labelFile)) {
+                $labels = include $labelFile;
+                if (is_array($labels)) {
+                    $pluginLabels = array_merge($pluginLabels, $labels);
+                }
+            }
+        }
+
+        // ksort($pluginLabels);
+
+        return $pluginLabels;
     }
 
     /**
@@ -176,9 +197,9 @@ class PluginHelper
                 }
             }
 
-            if (!empty($migrationNames)) {
+            if (! empty($migrationNames)) {
                 // Use a separate transaction for database cleanup
-                DB::transaction(function () use ($migrationNames, $pluginNamespace) {
+                DB::transaction(function () use ($migrationNames) {
                     // Get migrations that exist in the database
                     $existingMigrations = DB::table('migrations')
                         ->where(function ($query) use ($migrationNames) {
@@ -271,31 +292,10 @@ class PluginHelper
                 }
             });
 
-            Log::info("🧹 Database cleanup completed successfully");
+            Log::info('🧹 Database cleanup completed successfully');
         } catch (\Exception $e) {
             Log::warning("⚠️ Error during database cleanup: {$e->getMessage()}");
             // Don't throw the exception, just log it and continue
         }
-    }
-    public static function getPluginLabels()
-    {
-        $pluginLabels = [];
-
-        $pluginDirs = File::directories(base_path('plugins'));
-
-        foreach ($pluginDirs as $pluginDir) {
-            $labelFile = $pluginDir . '/Resources/lang/plugin_labels.php';
-
-            if (File::exists($labelFile)) {
-                $labels = include $labelFile;
-                if (is_array($labels)) {
-                    $pluginLabels = array_merge($pluginLabels, $labels);
-                }
-            }
-        }
-
-        // ksort($pluginLabels);
-
-        return $pluginLabels;
     }
 }

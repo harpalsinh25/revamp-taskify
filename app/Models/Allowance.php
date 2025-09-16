@@ -11,7 +11,7 @@ class Allowance extends Model
     protected $fillable = [
         'workspace_id',
         'title',
-        'amount'
+        'amount',
     ];
 
     public function payslips()

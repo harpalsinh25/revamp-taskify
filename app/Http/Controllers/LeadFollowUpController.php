@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\LeadFollowUp;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
-use Illuminate\Validation\ValidationException;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class LeadFollowUpController extends Controller
 {
@@ -16,7 +16,6 @@ class LeadFollowUpController extends Controller
      */
     public function index()
     {
-        //
     }
 
     /**
@@ -24,7 +23,6 @@ class LeadFollowUpController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**
@@ -76,16 +74,15 @@ class LeadFollowUpController extends Controller
         $isApi = $request->get('isApi', false);
 
         try {
-
             // 🔁 Normalize API input to web-style 'follow_up_at' if needed
             if ($isApi && $request->has(['follow_up_at_date', 'follow_up_at_time'])) {
                 // dd($request->input('follow_up_at_date') . 'T' . $request->input('follow_up_at_time'));
                 $request->merge([
-                    'follow_up_at' => $request->input('follow_up_at_date') . 'T' . $request->input('follow_up_at_time')
+                    'follow_up_at' => $request->input('follow_up_at_date') . 'T' . $request->input('follow_up_at_time'),
                 ]);
             }
 
-            $formFields =   $request->validate([
+            $formFields = $request->validate([
                 'assigned_to' => 'required|exists:users,id',
                 'lead_id' => 'required|exists:leads,id',
                 'type' => 'required|in:email,sms,call,meeting,other',
@@ -95,8 +92,7 @@ class LeadFollowUpController extends Controller
 
             ]);
 
-
-            if (!empty($formFields['follow_up_at'])) {
+            if (! empty($formFields['follow_up_at'])) {
                 // Step 1: Parse as local (assume app timezone or user timezone)
                 $localDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $formFields['follow_up_at'], config('app.timezone'));
 
@@ -107,28 +103,25 @@ class LeadFollowUpController extends Controller
                 $formFields['follow_up_at'] = $utcDate->format('Y-m-d H:i:s');
             }
 
-
-
             $follow_up = LeadFollowUp::create($formFields);
             return formatApiResponse(
                 false,
                 'Follow Up Created Successfully',
                 [
                     'id' => $follow_up->id,
-                    'type' =>'lead_follow_up',
+                    'type' => 'lead_follow_up',
                 ]
             );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
-
             return formatApiResponse(
                 true,
                 'Follow Up Couldn\'t Created.',
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ],
                 500
             );
@@ -140,7 +133,6 @@ class LeadFollowUpController extends Controller
      */
     public function show(string $id)
     {
-        //
     }
 
     /**
@@ -185,11 +177,11 @@ class LeadFollowUpController extends Controller
     public function edit(string $id)
     {
         $follow_up = LeadFollowUp::findOrFail($id);
-        $follow_up->load('assignedTo','lead');
+        $follow_up->load('assignedTo', 'lead');
         return response()->json([
             'error' => false,
             'message' => 'Follow Up Retrived Successfully',
-            'follow_up' => $follow_up
+            'follow_up' => $follow_up,
         ]);
     }
 
@@ -255,7 +247,7 @@ class LeadFollowUpController extends Controller
             ]);
 
             // Handle timezone conversion for follow_up_at
-            if (!empty($formFields['follow_up_at'])) {
+            if (! empty($formFields['follow_up_at'])) {
                 $localDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $formFields['follow_up_at'], config('app.timezone'));
                 $utcDate = $localDate->copy()->setTimezone('UTC');
                 $formFields['follow_up_at'] = $utcDate->format('Y-m-d H:i:s');
@@ -269,13 +261,12 @@ class LeadFollowUpController extends Controller
                 'Follow Up Updated Successfully',
                 [
                     'id' => $follow_up->id,
-                    'type' =>'lead_follow_up',
+                    'type' => 'lead_follow_up',
                 ]
             );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (ModelNotFoundException $e) {
-
             return formatApiResponse(true, 'follow up not found.', [], 404);
         } catch (Exception $e) {
             return formatApiResponse(
@@ -284,13 +275,12 @@ class LeadFollowUpController extends Controller
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ],
                 500
             );
         }
     }
-
 
     /**
      * Delete a lead follow-up.
@@ -326,7 +316,6 @@ class LeadFollowUpController extends Controller
 
     public function destroy(string $id)
     {
-        $response = DeletionService::delete(LeadFollowUp::class, $id, 'Lead Follow Up');
-        return $response;
+        return DeletionService::delete(LeadFollowUp::class, $id, 'Lead Follow Up');
     }
 }

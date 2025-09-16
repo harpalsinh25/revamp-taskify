@@ -4,17 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 
 class Priority extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
         'title',
         'color',
-        'slug'
+        'slug',
     ];
 
     public function projects($considerWorkspace = true)

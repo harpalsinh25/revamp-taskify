@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Support\Facades\Config;
 
 class CheckInstallation
 {
@@ -13,7 +12,7 @@ class CheckInstallation
         $installViewPath = resource_path('views/install.blade.php');
         // dd($is_installation_completed);
         // Check if the installation has been completed
-        if (!file_exists($sqlDumpPath) && !file_exists($installViewPath)) {
+        if (! file_exists($sqlDumpPath) && ! file_exists($installViewPath)) {
             // The installation has not been completed, redirect to the installation page
             // dd($sqlDumpPath, $installViewPath);
             return $next($request);

@@ -19,7 +19,7 @@ class Contract extends Model
         'contract_type_id',
         'description',
         'created_by',
-        'signed_pdf'
+        'signed_pdf',
     ];
 
     public function workspace()

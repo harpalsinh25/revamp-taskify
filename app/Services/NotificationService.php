@@ -2,15 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Client;
-use Illuminate\Support\Facades\Mail;
-use App\Notifications\BirthdayWishNotification;
+use App\Models\User;
 use App\Notifications\AnniversaryWishNotification;
-use Illuminate\Support\Facades\Notification;
+use App\Notifications\BirthdayWishNotification;
+use App\Notifications\SlackNotification;
 use App\Notifications\SmsNotification;
 use App\Notifications\WhatsappNotification;
-use App\Notifications\SlackNotification;
+use Illuminate\Support\Facades\Notification;
 
 class NotificationService
 {

@@ -29,7 +29,6 @@ class LetterHelper
         return $content;
     }
 
-
     /**
      * Return available variables grouped for UI display.
      */
@@ -53,12 +52,10 @@ class LetterHelper
         $customVars = LetterVariable::where('workspace_id', Auth::user()->workspace_id)
             ->where('is_active', true)
             ->pluck('value', 'name')
-            ->mapWithKeys(fn($value, $key) => [strtoupper($key) => $value])
+            ->mapWithKeys(fn ($value, $key) => [strtoupper($key) => $value])
             ->toArray();
 
-        $variables = array_merge($variables, $customVars);
-
-        return $variables;
+        return array_merge($variables, $customVars);
     }
 
     /**
@@ -80,7 +77,7 @@ class LetterHelper
             'CURRENT_MONTH' => 'Current Month',
             'CURRENT_YEAR' => 'Current Year',
             'COMPANY_TITLE' => 'Company Title',
-            'COMPANY_LOGO' => 'Company Logo'
+            'COMPANY_LOGO' => 'Company Logo',
         ];
     }
 
@@ -90,7 +87,6 @@ class LetterHelper
     public static function getSystemVariableValues($user = null)
     {
         $now = Carbon::now();
-
 
         return [
             'USER_NAME' => $user->name ?? '[User Name]',
@@ -106,7 +102,7 @@ class LetterHelper
             'CURRENT_MONTH' => $now->format('F Y'),
             'CURRENT_YEAR' => $now->format('Y'),
             'COMPANY_TITLE' => get_settings('general_settings')['company_title'] ?? 'Taskify',
-            'COMPANY_LOGO' => 'storage/'.get_settings('general_settings')['full_logo']?? 'storage/logos/default_full_logo.png'
+            'COMPANY_LOGO' => 'storage/'.get_settings('general_settings')['full_logo'] ?? 'storage/logos/default_full_logo.png',
         ];
     }
 
@@ -118,7 +114,7 @@ class LetterHelper
         return LetterVariable::where('workspace_id', Auth::user()->workspace_id)
             ->where('is_active', true)
             ->pluck('label', 'name')
-            ->mapWithKeys(fn($label, $key) => [strtoupper($key) => $label])
+            ->mapWithKeys(fn ($label, $key) => [strtoupper($key) => $label])
             ->toArray();
     }
 
@@ -147,7 +143,7 @@ class LetterHelper
      */
     public static function sendLetterEmail($email, $subject, $message, $pdf, $letter)
     {
-        $recipient = (object)['email' => $email];
+        $recipient = (object) ['email' => $email];
 
         $recipient->notify(new LetterEmailNotification($recipient, [
             'subject' => $subject,

@@ -1,79 +1,65 @@
 <?php
 
-use App\Models\Project;
-use App\Models\ActivityLog;
-use App\Http\Middleware\Authorize;
-use Google\Client as GoogleClient;
-use Illuminate\Support\Facades\DB;
-use GuzzleHttp\Client as HttpClient;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AIController;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Session;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LeadController;
-use App\Http\Controllers\TagsController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ItemsController;
-use App\Http\Controllers\NotesController;
-use App\Http\Controllers\RolesController;
-use App\Http\Controllers\TasksController;
-use App\Http\Controllers\TaxesController;
-use App\Http\Controllers\TodosController;
-use App\Http\Controllers\UnitsController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\StatusController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReportsController;
-use App\Http\Controllers\UpdaterController;
-use App\Http\Controllers\ExpensesController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\LeadFormController;
-use App\Http\Controllers\MeetingsController;
-use App\Http\Controllers\PaymentsController;
-use App\Http\Controllers\PayslipsController;
-use App\Http\Controllers\PriorityController;
-use App\Http\Controllers\ProjectsController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\TaskListController;
+use App\Http\Controllers\AllowancesController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CandidateStatusController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContractsController;
+use App\Http\Controllers\CustomFieldController;
+use App\Http\Controllers\DeductionsController;
 use App\Http\Controllers\EmailSendController;
+use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\EstimatesInvoicesController;
+use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\InterviewController;
-use App\Http\Controllers\LeadStageController;
-use App\Http\Middleware\CustomRoleMiddleware;
-use App\Http\Controllers\AllowancesController;
-use App\Http\Controllers\DeductionsController;
+use App\Http\Controllers\ItemsController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\LeadFollowUpController;
+use App\Http\Controllers\LeadFormController;
 use App\Http\Controllers\LeadImportController;
 use App\Http\Controllers\LeadSourceController;
-use App\Http\Controllers\PreferenceController;
-use App\Http\Controllers\PublicFormController;
-use App\Http\Controllers\WorkspacesController;
-use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\Auth\SignUpController;
-use App\Http\Controllers\CustomFieldController;
-use App\Http\Controllers\PwaManifestController;
-use App\Http\Controllers\PwaSettingsController;
-use App\Http\Controllers\TimeTrackerController;
-use App\Http\Controllers\LeadFollowUpController;
+use App\Http\Controllers\LeadStageController;
 use App\Http\Controllers\LeaveRequestController;
-use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\MeetingsController;
+use App\Http\Controllers\NotesController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\PluginManagerController;
-use App\Http\Controllers\TaskTimeEntryController;
-use Spatie\Permission\Middlewares\RoleMiddleware;
 use App\Http\Controllers\PaymentMethodsController;
-use App\Http\Controllers\CandidateStatusController;
+use App\Http\Controllers\PaymentsController;
+use App\Http\Controllers\PayslipsController;
 use App\Http\Controllers\PluginInstallerController;
-use App\Http\Controllers\EstimatesInvoicesController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use Spatie\Permission\Middlewares\PermissionMiddleware;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\PluginManagerController;
+use App\Http\Controllers\PreferenceController;
+use App\Http\Controllers\PriorityController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\PwaSettingsController;
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\TagsController;
+use App\Http\Controllers\TaskListController;
+use App\Http\Controllers\TasksController;
+use App\Http\Controllers\TaskTimeEntryController;
+use App\Http\Controllers\TaxesController;
+use App\Http\Controllers\TimeTrackerController;
+use App\Http\Controllers\TodosController;
+use App\Http\Controllers\UnitsController;
+use App\Http\Controllers\UpdaterController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkspacesController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,7 +71,6 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 
 //---------------------------------------------------------------
 /*
@@ -104,7 +89,6 @@ Route::get('/phpinfo', function () {
     phpinfo();
 });
 
-
 Route::get('/generate-api-doc', function () {
     Artisan::call('scribe:generate');
     return response()->json(['message' => 'API Documentation generated successfully!']);
@@ -113,7 +97,6 @@ Route::get('/migrate', function () {
     Artisan::call('migrate', ['--path' => 'database/migrations/2025_06_13_102308_add_custom_fields_to_leads_table.php']);
     return redirect('/home')->with('message', 'Database Migrated Successfully.');
 });
-
 
 Route::get('/clear-cache', function () {
     Artisan::call('optimize:clear');
@@ -132,11 +115,9 @@ Route::get('/create-symlink', function () {
         Artisan::call('storage:link');
 
         return redirect('/home')->with('message', 'Symbolik link created successfully.');
-    } else {
-        return redirect('/home')->with('message', 'This operation is not allowed in demo mode.');
     }
+    return redirect('/home')->with('message', 'This operation is not allowed in demo mode.');
 });
-
 
 Route::get('/install', [InstallerController::class, 'index'])->middleware('guest');
 
@@ -146,11 +127,7 @@ Route::post('/installer/install', [InstallerController::class, 'install'])->midd
 
 Route::get('/meetings/join/web-view/{id}', [MeetingsController::class, 'joinWebView']);
 
-
-
-
 Route::middleware(['CheckInstallation'])->group(function () {
-
     Route::get('/', [UserController::class, 'login'])->name('login')->middleware('guest');
 
     Route::post('/users/authenticate', [UserController::class, 'authenticate'])->middleware('customThrottle');
@@ -175,7 +152,7 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
     Route::post('/logout', [UserController::class, 'logout'])->middleware(['multiguard']);
 
-    Route::get("settings/languages/switch/{code}", [LanguageController::class, 'switch'])->middleware(['multiguard']);
+    Route::get('settings/languages/switch/{code}', [LanguageController::class, 'switch'])->middleware(['multiguard']);
 
     Route::prefix('forms')->group(function () {
         Route::get('{slug}', [PublicFormController::class, 'show'])->name('public.form');
@@ -193,8 +170,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
     });
     // ,'custom-verified'
     Route::middleware(['multiguard', 'custom-verified', 'system.check'])->group(function () {
-
-
         Route::get('/home', [HomeController::class, 'index'])->name('home.index');
         Route::any('/dashboard/data', [HomeController::class, 'getDashboardData'])->name('home.dashboard-data');
         Route::get('/home/upcoming-birthdays', [HomeController::class, 'upcoming_birthdays']);
@@ -213,7 +188,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
         Route::middleware(['has_workspace'])->group(function () {
             Route::middleware(['customcan:manage_projects'])->group(function () {
-
                 Route::get('/projects/{type?}', [ProjectsController::class, 'index'])->where('type', 'favorite')->name('projects.index');
 
                 Route::get('/projects/list/{type?}', [ProjectsController::class, 'list_view'])->where('type', 'favorite')->name('projects.list');
@@ -275,7 +249,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::put('/save-projects-view-preference', [ProjectsController::class, 'saveViewPreference']);
 
                 Route::middleware(['customcan:manage_media'])->group(function () {
-
                     Route::post('/projects/upload-media', [ProjectsController::class, 'upload_media'])
                         ->middleware(['customcan:create_media', 'log.activity', 'validate.upload.media']);
 
@@ -300,7 +273,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/reports/projects', [ReportsController::class, 'showProjectReport'])->name('reports.projects');
                 Route::get('/reports/projects-report-data', [ReportsController::class, 'getProjectReportData'])->name('reports.project-report-data');
                 Route::get('/reports/export-projects-report', [ReportsController::class, 'exportProjectReport'])->name('reports.export-projects-report');
-
 
                 // Calendar View For Projects
                 Route::get('/projects/calendar-view', [ProjectsController::class, 'calendar_view'])->name('projects.calendar_view');
@@ -362,9 +334,8 @@ Route::middleware(['CheckInstallation'])->group(function () {
             //Tasks-------------------------------------------------------------
 
             Route::middleware(['customcan:manage_tasks'])->group(function () {
-
                 Route::get('/tasks', [TasksController::class, 'index'])->name('tasks.index');
-                Route::get('/tasks/group-by-task-list', [TasksController::class, 'group_by_task_list'])->name('tasks.groupByTaskList');;
+                Route::get('/tasks/group-by-task-list', [TasksController::class, 'group_by_task_list'])->name('tasks.groupByTaskList');
 
                 Route::get('/tasks/information/{id}', [TasksController::class, 'show'])
                     ->middleware(['checkAccess:App\Models\Task,tasks,id,tasks'])->name('tasks.info');
@@ -422,7 +393,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::put('/save-tasks-view-preference', [TasksController::class, 'saveViewPreference']);
 
                 Route::middleware(['customcan:manage_media'])->group(function () {
-
                     Route::post('/tasks/upload-media', [TasksController::class, 'upload_media'])
                         ->middleware(['customcan:create_media', 'log.activity', 'validate.upload.media']);
 
@@ -445,10 +415,8 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::any('/tasks/time-entries/destroy_multiple', [TaskTimeEntryController::class, 'destroy_multiple'])->name('tasks.time_entries.destroy_multiple');
             });
 
-
             //Meetings-------------------------------------------------------------
             Route::middleware(['customcan:manage_meetings'])->group(function () {
-
                 Route::get('/meetings', [MeetingsController::class, 'index'])->name('meetings.index');
 
                 Route::post('/meetings/store', [MeetingsController::class, 'store'])->middleware(['customcan:create_meetings', 'log.activity']);
@@ -480,7 +448,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
             //Workspaces-------------------------------------------------------------
             Route::middleware(['customcan:manage_workspaces'])->group(function () {
-
                 Route::get('/workspaces', [WorkspacesController::class, 'index'])->name('workspaces.index');
 
                 Route::post('/workspaces/store', [WorkspacesController::class, 'store'])->middleware(['customcan:create_workspaces', 'log.activity']);
@@ -523,7 +490,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
             Route::get('/todos/get/{id}', [TodosController::class, 'get']);
 
-
             Route::get('/notes', [NotesController::class, 'index']);
 
             Route::post('/notes/store', [NotesController::class, 'store'])->middleware('log.activity');
@@ -548,7 +514,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
             Route::delete('/account/destroy', [ProfileController::class, 'destroy'])->middleware(['demo_restriction']);
 
             Route::middleware(['has_workspace', 'customcan:manage_users'])->group(function () {
-
                 Route::get('/users', [UserController::class, 'index']);
 
                 Route::get('/users/create', [UserController::class, 'create'])->middleware(['customcan:create_users']);
@@ -576,7 +541,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
             //Clients-------------------------------------------------------------
 
             Route::middleware(['has_workspace', 'customcan:manage_clients'])->group(function () {
-
                 Route::get('/clients', [ClientController::class, 'index']);
 
                 Route::get('/clients/profile/{id}', [ClientController::class, 'show'])->name('clients.profile');
@@ -588,7 +552,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/clients/bulk-upload', [ClientController::class, 'showBulkUploadForm'])->middleware(['customcan:create_clients'])->name('clients.showBulkUploadForm');
 
                 Route::post('/clients/process-bulk-upload', [ClientController::class, 'importBulkClients'])->middleware(['customcan:create_clients'])->name('clients.bulkUpload');
-
 
                 Route::get('/clients/get/{id}', [ClientController::class, 'get']);
 
@@ -606,10 +569,9 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
         //Settings-------------------------------------------------------------
 
-        Route::put("settings/languages/set-default", [LanguageController::class, 'set_default'])->middleware(['demo_restriction']);
+        Route::put('settings/languages/set-default', [LanguageController::class, 'set_default'])->middleware(['demo_restriction']);
 
         Route::middleware(['customRole:admin'])->group(function () {
-
             Route::get('/settings/permission/create', [RolesController::class, 'create_permission']);
 
             Route::get('/settings/permission', [RolesController::class, 'index']);
@@ -636,21 +598,21 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
             Route::post('/settings/languages/store', [LanguageController::class, 'store']);
 
-            Route::get("settings/languages/change/{code}", [LanguageController::class, 'change']);
+            Route::get('settings/languages/change/{code}', [LanguageController::class, 'change']);
 
-            Route::put("/settings/languages/save_labels", [LanguageController::class, 'save_labels'])->middleware(['demo_restriction'])->name('languages.save_labels');
+            Route::put('/settings/languages/save_labels', [LanguageController::class, 'save_labels'])->middleware(['demo_restriction'])->name('languages.save_labels');
 
-            Route::get("/settings/languages/manage", [LanguageController::class, 'manage']);
+            Route::get('/settings/languages/manage', [LanguageController::class, 'manage']);
 
             Route::get('/settings/languages/get/{id}', [LanguageController::class, 'get']);
 
             Route::post('/settings/languages/update', [LanguageController::class, 'update'])->middleware(['demo_restriction']);
 
-            Route::get("/settings/languages/list", [LanguageController::class, 'list']);
+            Route::get('/settings/languages/list', [LanguageController::class, 'list']);
 
-            Route::delete("/settings/languages/destroy/{id}", [LanguageController::class, 'destroy'])->middleware(['demo_restriction']);
+            Route::delete('/settings/languages/destroy/{id}', [LanguageController::class, 'destroy'])->middleware(['demo_restriction']);
 
-            Route::post("/settings/languages/destroy_multiple", [LanguageController::class, 'destroy_multiple'])->middleware(['demo_restriction']);
+            Route::post('/settings/languages/destroy_multiple', [LanguageController::class, 'destroy_multiple'])->middleware(['demo_restriction']);
 
             Route::get('/settings/email', [SettingsController::class, 'email']);
 
@@ -722,14 +684,11 @@ Route::middleware(['CheckInstallation'])->group(function () {
             });
         });
 
-
-
         Route::middleware(['customRole:admin'])->group(function () {
             Route::get('/reports/income-vs-expense', [ReportsController::class, 'showIncomeVsExpenseReport'])->name('reports.income-vs-expense');
             Route::get('/reports/income-vs-expense-report-data', [ReportsController::class, 'getIncomeVsExpenseReportData'])->name('reports.income-vs-expense-report-data');
             Route::get('/reports/export-income-vs-expense-report', [ReportsController::class, 'exportIncomeVsExpenseReport'])->name('reports.export-income-vs-expense-report');
         });
-
 
         Route::middleware(['has_workspace'])->group(function () {
             Route::get('/search', [SearchController::class, 'search']);
@@ -820,9 +779,9 @@ Route::middleware(['CheckInstallation'])->group(function () {
             });
 
             Route::middleware(['customcan:manage_estimates_invoices'])->group(function () {
-
                 Route::get('/estimates-invoices', [EstimatesInvoicesController::class, 'index']);
-                Route::get('/estimates-invoices/create', [EstimatesInvoicesController::class, 'create'])->middleware(['customcan:create_estimates_invoices']);;
+                Route::get('/estimates-invoices/create', [EstimatesInvoicesController::class, 'create'])->middleware(['customcan:create_estimates_invoices']);
+
                 Route::post('/estimates-invoices/store', [EstimatesInvoicesController::class, 'store'])->middleware(['customcan:create_estimates_invoices', 'log.activity']);
                 Route::get('/estimates-invoices/list', [EstimatesInvoicesController::class, 'list']);
                 Route::get('/estimates-invoices/edit/{id}', [EstimatesInvoicesController::class, 'edit'])->middleware(['customcan:edit_estimates_invoices', 'checkAccess:App\Models\EstimatesInvoice,estimates_invoices,id,estimates_invoices']);
@@ -839,7 +798,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
             });
 
             Route::middleware(['customcan:manage_payments'])->group(function () {
-
                 Route::get('/payments', [PaymentsController::class, 'index']);
                 Route::post('/payments/store', [PaymentsController::class, 'store'])->middleware(['customcan:create_payments', 'log.activity']);
                 Route::get('/payments/list', [PaymentsController::class, 'list']);
@@ -849,7 +807,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::post('/payments/destroy_multiple', [PaymentsController::class, 'destroy_multiple'])->middleware(['customcan:delete_payments', 'demo_restriction', 'log.activity']);
             });
             Route::middleware(['customcan:manage_taxes'])->group(function () {
-
                 Route::get('/taxes', [TaxesController::class, 'index']);
                 Route::post('/taxes/store', [TaxesController::class, 'store'])->middleware(['customcan:create_taxes', 'log.activity']);
                 Route::get('/taxes/get/{id}', [TaxesController::class, 'get']);
@@ -859,7 +816,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::post('/taxes/destroy_multiple', [TaxesController::class, 'destroy_multiple'])->middleware(['customcan:delete_taxes', 'demo_restriction', 'log.activity']);
             });
             Route::middleware(['customcan:manage_units'])->group(function () {
-
                 Route::get('/units', [UnitsController::class, 'index']);
                 Route::post('/units/store', [UnitsController::class, 'store'])->middleware(['customcan:create_units', 'log.activity']);
                 Route::get('/units/get/{id}', [UnitsController::class, 'get']);
@@ -932,7 +888,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
             });
         });
 
-
         // Lead Sources
         Route::prefix('lead-sources')->middleware(['customcan:manage_leads'])->group(function () {
             Route::get('/', [LeadSourceController::class, 'index'])->name('lead-sources.index');
@@ -984,7 +939,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
         });
         Route::put('/save-leads-view-preference', [LeadController::class, 'saveViewPreference'])->name('leads.save_view_preference');
 
-
         //Email Templates
         Route::middleware(['customcan:manage_email_template'])->group(function () {
             Route::get('/email-templates', [EmailTemplateController::class, 'index'])->name('email.templates');
@@ -1006,8 +960,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
             Route::delete('/history/destroy/{id}', [EmailSendController::class, 'destroy'])->name('emails.history.destroy');
             Route::post('/history/destroy_multiple', [EmailSendController::class, 'destroy_multiple'])->name('emails.history.destroy_multiple');
         })->middleware(['auth:web']);
-
-
 
         // Routes for Candidates
 
@@ -1045,7 +997,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
             Route::get('/list', [CandidateStatusController::class, 'list'])->name('candidate.status.list');
         });
 
-
         Route::get('/interviews/index', [InterviewController::class, 'index'])->name('interviews.index')->middleware('customcan:manage_interview');
         Route::post('/interviews/store', [InterviewController::class, 'store'])->name('interviews.store')->middleware(['customcan:create_interview', 'log.activity']);
         Route::put('/interviews/update/{id}', [InterviewController::class, 'update'])->name('interviews.update')->middleware(['customcan:edit_interview', 'log.activity']);
@@ -1057,9 +1008,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
             ->name('generate.description');
 
         // Route::get('lead-forms', [LeadFormController::class, 'index'])->name('lead-forms.index');
-
-
-
 
         // List all lead forms
         Route::get('lead-forms', [LeadFormController::class, 'index'])->name('lead-forms.index');

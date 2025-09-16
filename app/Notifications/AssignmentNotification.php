@@ -2,13 +2,11 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
-use App\Models\Client;
 use App\Models\Template;
+use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailBase;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailBase;
 
 class AssignmentNotification extends VerifyEmailBase
 {
@@ -28,20 +26,20 @@ class AssignmentNotification extends VerifyEmailBase
      * Get the mail representation of the notification.
      *
      * @param mixed $notifiable
+     *
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable)
     {
-        $full_logo_path = !isset($this->general_settings['full_logo']) || empty($this->general_settings['full_logo']) ? 'logos/default_full_logo.png' : $this->general_settings['full_logo'];
+        $full_logo_path = ! isset($this->general_settings['full_logo']) || empty($this->general_settings['full_logo']) ? 'logos/default_full_logo.png' : $this->general_settings['full_logo'];
         $full_logo_url = asset('storage/' . $full_logo_path);
         $subject = $this->getSubject();
         $content = $this->getContent();
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->view('mail.html', ['content' => $content, 'logo_url' => $full_logo_url])
             ->subject($subject);
     }
-
 
     protected function getSubject()
     {
@@ -50,7 +48,7 @@ class AssignmentNotification extends VerifyEmailBase
             ->where('name', $this->data['type'] . '_assignment')
             ->first();
 
-        if (!$fetched_data) {
+        if (! $fetched_data) {
             // If template with $this->data['type'] . '_assignment' name not found, check for template with $this->data['type'] name
             $fetched_data = Template::where('type', 'email')
                 ->where('name', $this->data['type'])
@@ -70,7 +68,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{LAST_NAME}' => $this->recipient->last_name,
                     '{ASSIGNEE_FIRST_NAME}' => $this->authUser->first_name,
                     '{ASSIGNEE_LAST_NAME}' => $this->authUser->last_name,
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'task':
@@ -81,7 +79,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{LAST_NAME}' => $this->recipient->last_name,
                     '{ASSIGNEE_FIRST_NAME}' => $this->authUser->first_name,
                     '{ASSIGNEE_LAST_NAME}' => $this->authUser->last_name,
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'workspace':
@@ -92,7 +90,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{LAST_NAME}' => $this->recipient->last_name,
                     '{ASSIGNEE_FIRST_NAME}' => $this->authUser->first_name,
                     '{ASSIGNEE_LAST_NAME}' => $this->authUser->last_name,
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'meeting':
@@ -103,7 +101,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{LAST_NAME}' => $this->recipient->last_name,
                     '{ASSIGNEE_FIRST_NAME}' => $this->authUser->first_name,
                     '{ASSIGNEE_LAST_NAME}' => $this->authUser->last_name,
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'leave_request_creation':
@@ -112,7 +110,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{STATUS}' => $this->data['status'],
                     '{REQUESTEE_FIRST_NAME}' => $this->data['team_member_first_name'],
                     '{REQUESTEE_LAST_NAME}' => $this->data['team_member_last_name'],
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'team_member_on_leave_alert':
@@ -120,7 +118,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{ID}' => $this->data['type_id'],
                     '{REQUESTEE_FIRST_NAME}' => $this->data['team_member_first_name'],
                     '{REQUESTEE_LAST_NAME}' => $this->data['team_member_last_name'],
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'leave_request_status_updation':
@@ -128,7 +126,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{ID}' => $this->data['type_id'],
                     '{OLD_STATUS}' => $this->data['old_status'],
                     '{NEW_STATUS}' => $this->data['new_status'],
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'project_status_updation':
@@ -141,7 +139,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{UPDATER_LAST_NAME}' => $this->data['updater_last_name'],
                     '{OLD_STATUS}' => $this->data['old_status'],
                     '{NEW_STATUS}' => $this->data['new_status'],
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'task_status_updation':
@@ -154,7 +152,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{UPDATER_LAST_NAME}' => $this->data['updater_last_name'],
                     '{OLD_STATUS}' => $this->data['old_status'],
                     '{NEW_STATUS}' => $this->data['new_status'],
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'task_reminder':
@@ -173,7 +171,7 @@ class AssignmentNotification extends VerifyEmailBase
                 ];
                 break;
 
-            // Case for Interview
+                // Case for Interview
             case 'interview_assignment':
                 $subjectPlaceholders = [
                     '{INTERVIEW_ID}' => $this->data['type_id'],
@@ -182,10 +180,10 @@ class AssignmentNotification extends VerifyEmailBase
                     '{SCHEDULED_AT}' => $this->data['scheduled_at'],
                     '{INTERVIEWER_FIRST_NAME}' => $this->data['interviewer_first_name'],
                     '{INTERVIEWER_LAST_NAME}' => $this->data['interviewer_last_name'],
-                    '{FULL_NAME}' =>  $this->recipient->name,
+                    '{FULL_NAME}' => $this->recipient->name,
                     '{ASSIGNEE_FIRST_NAME}' => $this->authUser->first_name,
                     '{ASSIGNEE_LAST_NAME}' => $this->authUser->last_name,
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
             case 'interview_status_update':
@@ -196,38 +194,35 @@ class AssignmentNotification extends VerifyEmailBase
                     '{SCHEDULED_AT}' => $this->data['scheduled_at'],
                     '{INTERVIEWER_FIRST_NAME}' => $this->data['interviewer_first_name'],
                     '{INTERVIEWER_LAST_NAME}' => $this->data['interviewer_last_name'],
-                    '{FULL_NAME}' =>  $this->recipient->name,
+                    '{FULL_NAME}' => $this->recipient->name,
                     '{UPDATER_FIRST_NAME}' => $this->data['updater_first_name'],
                     '{UPDATER_LAST_NAME}' => $this->data['updater_last_name'],
                     '{OLD_STATUS}' => $this->data['old_status'],
                     '{NEW_STATUS}' => $this->data['new_status'],
-                    '{COMPANY_TITLE}' => $company_title
+                    '{COMPANY_TITLE}' => $company_title,
                 ];
                 break;
         }
         if (filled(Arr::get($fetched_data, 'subject'))) {
             $subject = $fetched_data->subject;
         } else {
-            if ($this->data['type'] == 'leave_request_creation') {
+            if ($this->data['type'] === 'leave_request_creation') {
                 $subject = 'Leave Requested - {COMPANY_TITLE}';
-            } elseif ($this->data['type'] == 'leave_request_status_updation') {
+            } elseif ($this->data['type'] === 'leave_request_status_updation') {
                 $subject = 'Leave Request Status Updated - {COMPANY_TITLE}';
-            } elseif ($this->data['type'] == 'team_member_on_leave_alert') {
+            } elseif ($this->data['type'] === 'team_member_on_leave_alert') {
                 $subject = 'Team Member On Leave Alert - {COMPANY_TITLE}';
-            } elseif ($this->data['type'] == 'project_status_updation') {
+            } elseif ($this->data['type'] === 'project_status_updation') {
                 $subject = 'Project Status Updated - {COMPANY_TITLE}';
-            } elseif ($this->data['type'] == 'task_status_updation') {
+            } elseif ($this->data['type'] === 'task_status_updation') {
                 $subject = 'Task Status Updated - {COMPANY_TITLE}';
             } else {
                 $subject = 'New ' . ucfirst($this->data['type']) . ' Assignment - {COMPANY_TITLE}';
             }
         }
 
-        $subject = str_replace(array_keys($subjectPlaceholders), array_values($subjectPlaceholders), $subject);
-
-        return $subject;
+        return str_replace(array_keys($subjectPlaceholders), array_values($subjectPlaceholders), $subject);
     }
-
 
     protected function getContent()
     {
@@ -238,13 +233,12 @@ class AssignmentNotification extends VerifyEmailBase
             ->where('name', $this->data['type'] . '_assignment')
             ->first();
 
-        if (!$fetched_data) {
+        if (! $fetched_data) {
             // If template with $this->data['type'] . '_assignment' name not found, check for template with $this->data['type'] name
             $fetched_data = Template::where('type', 'email')
                 ->where('name', $this->data['type'])
                 ->first();
         }
-
 
         $templateContent = 'Default Content';
         $contentPlaceholders = []; // Initialize outside the switch
@@ -262,7 +256,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{COMPANY_TITLE}' => $company_title,
                     '{PROJECT_URL}' => $siteUrl . '/' . $this->data['access_url'],
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
             case 'task':
@@ -276,7 +270,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{COMPANY_TITLE}' => $company_title,
                     '{TASK_URL}' => $siteUrl . '/' . $this->data['access_url'],
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
             case 'workspace':
@@ -290,7 +284,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{COMPANY_TITLE}' => $company_title,
                     '{WORKSPACE_URL}' => $siteUrl . '/workspaces',
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
             case 'meeting':
@@ -304,7 +298,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{COMPANY_TITLE}' => $company_title,
                     '{MEETING_URL}' => $siteUrl . '/meetings',
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
             case 'leave_request_creation':
@@ -323,7 +317,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{STATUS}' => $this->data['status'],
                     '{COMPANY_TITLE}' => $company_title,
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
 
@@ -344,7 +338,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{NEW_STATUS}' => $this->data['new_status'],
                     '{COMPANY_TITLE}' => $company_title,
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
 
@@ -361,7 +355,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{DURATION}' => $this->data['duration'],
                     '{COMPANY_TITLE}' => $company_title,
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
 
@@ -378,7 +372,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{PROJECT_URL}' => $siteUrl . '/' . $this->data['access_url'],
                     '{COMPANY_TITLE}' => $company_title,
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
 
@@ -395,7 +389,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{TASK_URL}' => $siteUrl . '/' . $this->data['access_url'],
                     '{COMPANY_TITLE}' => $company_title,
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
             case 'task_reminder':
@@ -405,7 +399,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{TASK_TITLE}' => $this->data['type_title'],
                     '{TASK_URL}' => $siteUrl . '/' . $this->data['access_url'],
                     '{COMPANY_TITLE}' => $company_title,
-                    '{SITE_URL}' => $siteUrl
+                    '{SITE_URL}' => $siteUrl,
                 ];
                 break;
             case 'todo_reminder':
@@ -414,7 +408,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{TODO_TITLE}' => $this->data['type_title'],
                     '{TODO_URL}' => $siteUrl . '/' . $this->data['access_url'],
                     '{COMPANY_TITLE}' => $company_title,
-                    '{SITE_URL}' => $siteUrl
+                    '{SITE_URL}' => $siteUrl,
                 ];
                 break;
 
@@ -428,13 +422,13 @@ class AssignmentNotification extends VerifyEmailBase
                     '{LOCATION}' => $this->data['location'] ?? 'N/A',
                     '{INTERVIEWER_FIRST_NAME}' => $this->data['interviewer_first_name'],
                     '{INTERVIEWER_LAST_NAME}' => $this->data['interviewer_last_name'],
-                    '{FULL_NAME}' =>  $this->recipient->name,
+                    '{FULL_NAME}' => $this->recipient->name,
                     '{ASSIGNEE_FIRST_NAME}' => $this->authUser->first_name,
                     '{ASSIGNEE_LAST_NAME}' => $this->authUser->last_name,
                     '{COMPANY_TITLE}' => $company_title,
                     '{INTERVIEW_URL}' => $siteUrl . '/interviews',
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
             case 'interview_status_update':
@@ -447,7 +441,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{LOCATION}' => $this->data['location'] ?? 'N/A',
                     '{INTERVIEWER_FIRST_NAME}' => $this->data['interviewer_first_name'],
                     '{INTERVIEWER_LAST_NAME}' => $this->data['interviewer_last_name'],
-                    '{FULL_NAME}' =>  $this->recipient->name,
+                    '{FULL_NAME}' => $this->recipient->name,
                     '{UPDATER_FIRST_NAME}' => $this->data['updater_first_name'],
                     '{UPDATER_LAST_NAME}' => $this->data['updater_last_name'],
                     '{OLD_STATUS}' => $this->data['old_status'],
@@ -455,7 +449,7 @@ class AssignmentNotification extends VerifyEmailBase
                     '{COMPANY_TITLE}' => $company_title,
                     '{INTERVIEW_URL}' => $siteUrl . '/interviews',
                     '{SITE_URL}' => $siteUrl,
-                    '{CURRENT_YEAR}' => date('Y')
+                    '{CURRENT_YEAR}' => date('Y'),
                 ];
                 break;
         }
@@ -472,8 +466,6 @@ class AssignmentNotification extends VerifyEmailBase
         }
 
         // Replace placeholders with actual values
-        $content = str_replace(array_keys($contentPlaceholders), array_values($contentPlaceholders), $templateContent);
-
-        return $content;
+        return str_replace(array_keys($contentPlaceholders), array_values($contentPlaceholders), $templateContent);
     }
 }

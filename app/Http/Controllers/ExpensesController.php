@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Client;
 use App\Models\Expense;
-use App\Models\Workspace;
 use App\Models\ExpenseType;
-use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Workspace;
 use App\Services\DeletionService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class ExpensesController extends Controller
@@ -30,7 +28,7 @@ class ExpensesController extends Controller
     public function index(Request $request)
     {
         $expenses = $this->workspace->expenses();
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $expenses = $expenses->where(function ($query) {
                 $query->where('expenses.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('expenses.user_id', $this->user->id);
@@ -60,7 +58,6 @@ class ExpensesController extends Controller
      * @bodyParam title string required The amount of the expense. Example: Finish report
      * @bodyParam title string required The expense_date of the expense. Example: 2024-08-07
      * @bodyParam title string required The note of the expense. Example: Finish report
-
      *
      * @response 200 {
      * "error": false,
@@ -122,12 +119,12 @@ class ExpensesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    }
+                    },
                 ],
                 'expense_date' => 'required',
-                'note' => 'nullable'
+                'note' => 'nullable',
             ], [
-                'expense_type_id.required' => 'The expense type field is required.'
+                'expense_type_id.required' => 'The expense type field is required.',
             ]);
 
             $expense_date = $request->input('expense_date');
@@ -143,18 +140,17 @@ class ExpensesController extends Controller
             if ($isApi) {
                 $created_by = strpos($exp->created_by, 'u_') === 0 ? User::find(substr($exp->created_by, 2)) : Client::find(substr($exp->created_by, 2));
 
-                return
-                    formatApiResponse(
-                        false,
-                        'Expense updated successfully.',
-                        [
+                return formatApiResponse(
+                    false,
+                    'Expense updated successfully.',
+                    [
+                        'id' => $exp->id,
+                        'data' => [
                             'id' => $exp->id,
-                            'data' => [
-                                'id' => $exp->id,
-                                'title' => $exp->title,
-                                'expense_type_id' => $exp->expense_type_id,
+                            'title' => $exp->title,
+                            'expense_type_id' => $exp->expense_type_id,
                             'expense_type' => $exp->expense_type,
-                                'user_id' => $exp->user_id,
+                            'user_id' => $exp->user_id,
                             'user' => [
                                 'id' => $exp->user->id,
                                 'first_name' => $exp->user->first_name,
@@ -162,22 +158,19 @@ class ExpensesController extends Controller
                                 'email' => $exp->user->email,
                                 'photo' => $exp->user->photo ? asset('storage/' . $exp->user->photo) : asset('storage/photos/no-image.jpg'),
                             ],
-                                'amount' => format_currency($exp->amount, false, false),
-                                'expense_date' => format_date($exp->expense_date, false, to_format: 'Y-m-d'),
-                                'note' => $exp->note,
-                                'created_by' => ucwords($created_by->first_name . ' ' . $created_by->last_name),
-                                'created_at' => format_date($exp->created_at, true, to_format: 'Y-m-d'),
-                            ]
-                        ]
-
-                    );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Expense created successfully.', 'id' => $exp->id]);
+                            'amount' => format_currency($exp->amount, false, false),
+                            'expense_date' => format_date($exp->expense_date, false, to_format: 'Y-m-d'),
+                            'note' => $exp->note,
+                            'created_by' => ucwords($created_by->first_name . ' ' . $created_by->last_name),
+                            'created_at' => format_date($exp->created_at, true, to_format: 'Y-m-d'),
+                        ],
+                    ]
+                );
             }
+            return response()->json(['error' => false, 'message' => 'Expense created successfully.', 'id' => $exp->id]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-
             if ($isApi) {
                 return formatApiResponse(
                     true,
@@ -185,9 +178,8 @@ class ExpensesController extends Controller
                     [],
                     500
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Expense couldn\'t created.' .  $e->getMessage()]);
             }
+            return response()->json(['error' => true, 'message' => 'Expense couldn\'t created.' .  $e->getMessage()]);
         }
     }
 
@@ -202,7 +194,6 @@ class ExpensesController extends Controller
      *
      * @bodyParam title string required The title of the expense. Example: Finish report
      * @bodyParam description string required The description of the expense. Example: Finish report
-
      *
      * @response 200 {
      * "error": false,
@@ -238,30 +229,27 @@ class ExpensesController extends Controller
             $isApi = $request->get('isApi', false);
             $formFields = $request->validate([
                 'title' => 'required|unique:expense_types,title', // Validate the type
-                'description' => 'nullable'
+                'description' => 'nullable',
             ]);
             $formFields['workspace_id'] = $this->workspace->id;
 
             $et = ExpenseType::create($formFields);
             if ($isApi) {
-                return
-                    formatApiResponse(
-                        false,
-                        'Expense type created successfully.',
-                        [
+                return formatApiResponse(
+                    false,
+                    'Expense type created successfully.',
+                    [
+                        'id' => $et->id,
+                        'data' => [
                             'id' => $et->id,
-                            'data' => [
-                                'id' => $et->id,
-                                'title' => $et->title,
-                                'description' => $et->description,
-                                'created_at' => format_date($et->created_at, true),
-                            ]
-                        ]
-
-                    );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Expense type created successfully.', 'id' => $et->id, 'title' => $et->type, 'type' => 'expense_type']);
+                            'title' => $et->title,
+                            'description' => $et->description,
+                            'created_at' => format_date($et->created_at, true),
+                        ],
+                    ]
+                );
             }
+            return response()->json(['error' => false, 'message' => 'Expense type created successfully.', 'id' => $et->id, 'title' => $et->type, 'type' => 'expense_type']);
         } catch (ValidationException $e) {
             return formatApiValidationError($request->get('isApi', false), $e->errors());
         } catch (\Exception $e) {
@@ -272,21 +260,20 @@ class ExpensesController extends Controller
                     [],
                     500
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Expense type couldn\'t created.' .  $e->getMessage()]);
             }
+            return response()->json(['error' => true, 'message' => 'Expense type couldn\'t created.' .  $e->getMessage()]);
         }
     }
 
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $type_ids = request('type_ids', []);
         $user_ids = request('user_ids', []);
-        $exp_date_from = (request('date_from')) ? request('date_from') : "";
-        $exp_date_to = (request('date_to')) ? request('date_to') : "";
+        $exp_date_from = request('date_from') ? request('date_from') : '';
+        $exp_date_to = request('date_to') ? request('date_to') : '';
         $where = ['expenses.workspace_id' => $this->workspace->id];
 
         $expenses = Expense::select(
@@ -297,17 +284,16 @@ class ExpensesController extends Controller
             ->leftJoin('users', 'expenses.user_id', '=', 'users.id')
             ->leftJoin('expense_types', 'expenses.expense_type_id', '=', 'expense_types.id');
 
-
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $expenses = $expenses->where(function ($query) {
                 $query->where('expenses.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('expenses.user_id', $this->user->id);
             });
         }
-        if (!empty($type_ids)) {
+        if (! empty($type_ids)) {
             $expenses = $expenses->whereIn('expenses.expense_type_id', $type_ids);
         }
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $expenses = $expenses->whereIn('expenses.user_id', $user_ids);
         }
         if ($exp_date_from && $exp_date_to) {
@@ -330,7 +316,7 @@ class ExpensesController extends Controller
         $canDelete = checkPermission('delete_expenses');
 
         $expenses = $expenses->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($expense) use ($canEdit, $canDelete, $canCreate) {
                 $actions = '';
 
@@ -350,9 +336,7 @@ class ExpensesController extends Controller
                         '</a>';
                 }
 
-                $actions = $actions ?: '-';
-
-
+                $actions = $actions ? $actions : '-';
 
                 return [
                     'id' => $expense->id,
@@ -367,22 +351,21 @@ class ExpensesController extends Controller
                     'created_by' => strpos($expense->created_by, 'u_') === 0 ? formatUserHtml(User::find(substr($expense->created_by, 2))) : formatClientHtml(Client::find(substr($expense->created_by, 2))),
                     'created_at' => format_date($expense->created_at, true),
                     'updated_at' => format_date($expense->updated_at, true),
-                    'actions' => $actions
+                    'actions' => $actions,
                 ];
             });
 
-
         return response()->json([
-            "rows" => $expenses->items(),
-            "total" => $total,
+            'rows' => $expenses->items(),
+            'total' => $total,
         ]);
     }
 
     public function expense_types_list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $expense_types = ExpenseType::forWorkspace($this->workspace->id);
         if ($search) {
             $expense_types = $expense_types->where(function ($query) use ($search) {
@@ -395,27 +378,27 @@ class ExpensesController extends Controller
         $canEdit = checkPermission('edit_expense_types');
         $canDelete = checkPermission('delete_expense_types');
         $expense_types = $expense_types->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($expense_type) use ($canEdit, $canDelete) {
                 $actions = '';
 
-            if ($canEdit) {
-                $actions .= '<a href="javascript:void(0);" class="edit-expense-type" data-id="' . $expense_type->id . '" title="' . get_label('update', 'Update') . '">' .
-                    '<i class="bx bx-edit mx-1"></i>' .
-                    '</a>';
-            }
+                if ($canEdit) {
+                    $actions .= '<a href="javascript:void(0);" class="edit-expense-type" data-id="' . $expense_type->id . '" title="' . get_label('update', 'Update') . '">' .
+                        '<i class="bx bx-edit mx-1"></i>' .
+                        '</a>';
+                }
 
-            if ($canDelete) {
-                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $expense_type->id . '" data-type="expense-type">' .
-                    '<i class="bx bx-trash text-danger mx-1"></i>' .
-                    '</button>';
-            }
+                if ($canDelete) {
+                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $expense_type->id . '" data-type="expense-type">' .
+                        '<i class="bx bx-trash text-danger mx-1"></i>' .
+                        '</button>';
+                }
 
-            $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
 
                 return [
                     'id' => $expense_type->id,
-                    'title' => $expense_type->title . ($expense_type->id == 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
+                    'title' => $expense_type->title . ($expense_type->id === 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
                     'description' => $expense_type->description,
                     'created_at' => format_date($expense_type->created_at, true),
                     'updated_at' => format_date($expense_type->updated_at, true),
@@ -424,8 +407,8 @@ class ExpensesController extends Controller
             });
 
         return response()->json([
-            "rows" => $expense_types->items(),
-            "total" => $total,
+            'rows' => $expense_types->items(),
+            'total' => $total,
         ]);
     }
 
@@ -458,7 +441,6 @@ class ExpensesController extends Controller
      * @bodyParam amount string required The amount of the expense. Example: Finish report
      * @bodyParam expense_date string required The expense_date of the expense. Example: 2024-08-07
      * @bodyParam note string required The note of the expense. Example: Finish report
-
      *
      * @response 200 {
      * "error": false,
@@ -508,7 +490,6 @@ class ExpensesController extends Controller
     {
         // Validate the request data
         try {
-
             $isApi = $request->get('isApi', false);
             $formFields = $request->validate([
                 'id' => 'required',
@@ -522,12 +503,12 @@ class ExpensesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    }
+                    },
                 ],
                 'expense_date' => 'required',
-                'note' => 'nullable'
+                'note' => 'nullable',
             ], [
-                'expense_type_id.required' => 'The expense type field is required.'
+                'expense_type_id.required' => 'The expense type field is required.',
             ]);
             $expense_date = $request->input('expense_date');
 
@@ -540,18 +521,17 @@ class ExpensesController extends Controller
             if ($isApi) {
                 $created_by = strpos($exp->created_by, 'u_') === 0 ? User::find(substr($exp->created_by, 2)) : Client::find(substr($exp->created_by, 2));
 
-                return
-                    formatApiResponse(
-                        false,
-                        'Expense updated successfully.',
-                        [
+                return formatApiResponse(
+                    false,
+                    'Expense updated successfully.',
+                    [
+                        'id' => $exp->id,
+                        'data' => [
                             'id' => $exp->id,
-                            'data' => [
-                                'id' => $exp->id,
-                                'title' => $exp->title,
-                                'expense_type_id' => $exp->expense_type_id,
+                            'title' => $exp->title,
+                            'expense_type_id' => $exp->expense_type_id,
                             'expense_type' => $exp->expense_type,
-                                'user_id' => $exp->user_id,
+                            'user_id' => $exp->user_id,
                             'user' => [
                                 'id' => $exp->user->id,
                                 'first_name' => $exp->user->first_name,
@@ -559,22 +539,19 @@ class ExpensesController extends Controller
                                 'email' => $exp->user->email,
                                 'photo' => $exp->user->photo ? asset('storage/' . $exp->user->photo) : asset('storage/photos/no-image.jpg'),
                             ],
-                                'amount' => format_currency($exp->amount, false, false),
-                                'expense_date' => format_date($exp->expense_date, false, to_format: 'Y-m-d'),
-                                'note' => $exp->note,
-                                'created_by' => ucwords($created_by->first_name . ' ' . $created_by->last_name),
-                                'created_at' => format_date($exp->created_at, true, to_format: 'Y-m-d'),
-                            ]
-                        ]
-
-                    );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Expense updated successfully.', 'id' => $exp->id]);
+                            'amount' => format_currency($exp->amount, false, false),
+                            'expense_date' => format_date($exp->expense_date, false, to_format: 'Y-m-d'),
+                            'note' => $exp->note,
+                            'created_by' => ucwords($created_by->first_name . ' ' . $created_by->last_name),
+                            'created_at' => format_date($exp->created_at, true, to_format: 'Y-m-d'),
+                        ],
+                    ]
+                );
             }
+            return response()->json(['error' => false, 'message' => 'Expense updated successfully.', 'id' => $exp->id]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-
             if ($isApi) {
                 return formatApiResponse(
                     true,
@@ -582,9 +559,8 @@ class ExpensesController extends Controller
                     [],
                     500
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Expense couldn\'t updated. ' .  $e->getMessage()]);
             }
+            return response()->json(['error' => true, 'message' => 'Expense couldn\'t updated. ' .  $e->getMessage()]);
         }
     }
 
@@ -600,7 +576,6 @@ class ExpensesController extends Controller
      * @bodyParam id string required The id of the expense. Example: 1
      * @bodyParam title string required The title of the expense. Example: Finish report
      * @bodyParam description string required The description of the expense. Example: Finish report
-
      *
      * @response 200 {
      * "error": false,
@@ -642,24 +617,21 @@ class ExpensesController extends Controller
 
             $et->update($formFields);
             if ($isApi) {
-                return
-                    formatApiResponse(
-                        false,
-                        'Expense type updated successfully.',
-                        [
+                return formatApiResponse(
+                    false,
+                    'Expense type updated successfully.',
+                    [
+                        'id' => $et->id,
+                        'data' => [
                             'id' => $et->id,
-                            'data' => [
-                                'id' => $et->id,
-                                'title' => $et->title,
-                                'description' => $et->description,
-                                'created_at' => format_date($et->created_at, true),
-                            ]
-                        ]
-
-                    );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Expense type updated successfully.', 'id' => $et->id, 'type' => 'expense_type']);
+                            'title' => $et->title,
+                            'description' => $et->description,
+                            'created_at' => format_date($et->created_at, true),
+                        ],
+                    ]
+                );
             }
+            return response()->json(['error' => false, 'message' => 'Expense type updated successfully.', 'id' => $et->id, 'type' => 'expense_type']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
@@ -670,9 +642,8 @@ class ExpensesController extends Controller
                     [],
                     500
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Expense type couldn\'t updated.' .  $e->getMessage()]);
             }
+            return response()->json(['error' => true, 'message' => 'Expense type couldn\'t updated.' .  $e->getMessage()]);
         }
     }
 
@@ -749,7 +720,7 @@ class ExpensesController extends Controller
         if ($et->expenses()->exists()) {
             return response()->json([
                 'error' => true,
-                'message' => 'This expense type is currently assigned to some expenses and cannot be deleted.'
+                'message' => 'This expense type is currently assigned to some expenses and cannot be deleted.',
             ]);
         }
 
@@ -758,9 +729,8 @@ class ExpensesController extends Controller
         $data = $response->getData();
         if ($data->error) {
             return response()->json(['error' => true, 'message' => $data->message]);
-        } else {
-            return response()->json(['error' => false, 'message' => 'Expense type deleted successfully.', 'id' => $id, 'title' => $et->title, 'type' => 'expense_type']);
         }
+        return response()->json(['error' => false, 'message' => 'Expense type deleted successfully.', 'id' => $id, 'title' => $et->title, 'type' => 'expense_type']);
     }
 
     public function destroy_multiple(Request $request)
@@ -768,7 +738,7 @@ class ExpensesController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:expenses,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:expenses,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -790,7 +760,7 @@ class ExpensesController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:expense_types,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:expense_types,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -803,7 +773,7 @@ class ExpensesController extends Controller
         foreach ($ids as $id) {
             $et = ExpenseType::findOrFail($id);
             if ($et) {
-                if ($et->id == 0) { // Assuming 0 is the ID for default expense type
+                if ($et->id === 0) { // Assuming 0 is the ID for default expense type
                     $defaultExpenseTypeIds[] = $id;
                 } else {
                     $et->expenses()->update(['expense_type_id' => 0]);
@@ -816,22 +786,20 @@ class ExpensesController extends Controller
         }
 
         if (count($defaultExpenseTypeIds) > 0) {
-            if (count($ids) == 1) {
+            if (count($ids) === 1) {
                 return response()->json(['error' => true, 'message' => 'Default expense type cannot be deleted.']);
-            } else {
-                return response()->json(['error' => false, 'message' => 'Expense type(s) deleted successfully except default.', 'id' => $deletedIds, 'titles' => $deletedTitles, 'type' => 'expense_type']);
             }
-        } else {
-            return response()->json(['error' => false, 'message' => 'Expense type(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles, 'type' => 'expense_type']);
+            return response()->json(['error' => false, 'message' => 'Expense type(s) deleted successfully except default.', 'id' => $deletedIds, 'titles' => $deletedTitles, 'type' => 'expense_type']);
         }
+        return response()->json(['error' => false, 'message' => 'Expense type(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles, 'type' => 'expense_type']);
     }
 
     public function duplicate($id)
     {
         // Use the general duplicateRecord function
-        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
+        $title = request()->has('title') && ! empty(trim(request()->title)) ? request()->title : '';
         $duplicated = duplicateRecord(Expense::class, $id, [], $title);
-        if (!$duplicated) {
+        if (! $duplicated) {
             return response()->json(['error' => true, 'message' => 'Expense duplication failed.']);
         }
         return response()->json(['error' => false, 'message' => 'Expense duplicated successfully.', 'id' => $id]);
@@ -842,6 +810,7 @@ class ExpensesController extends Controller
      * Retrieve a paginated list of expenses or a single expense by ID.
      *
      * @authenticated
+     *
      * @group Expense Management
      *
      * @urlParam id int optional The ID of the expense to retrieve. Example: 1
@@ -894,12 +863,12 @@ class ExpensesController extends Controller
     public function apiList()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $type_ids = request('type_ids', []);
         $user_ids = request('user_ids', []);
-        $exp_date_from = (request('date_from')) ? request('date_from') : "";
-        $exp_date_to = (request('date_to')) ? request('date_to') : "";
+        $exp_date_from = request('date_from') ? request('date_from') : '';
+        $exp_date_to = request('date_to') ? request('date_to') : '';
         $where = ['expenses.workspace_id' => $this->workspace->id];
         $limit = request('limit', 10);
         $offset = request('offset', 0);
@@ -913,17 +882,16 @@ class ExpensesController extends Controller
             ->leftJoin('users', 'expenses.user_id', '=', 'users.id')
             ->leftJoin('expense_types', 'expenses.expense_type_id', '=', 'expense_types.id');
 
-
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $expenses = $expenses->where(function ($query) {
                 $query->where('expenses.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('expenses.user_id', $this->user->id);
             });
         }
-        if (!empty($type_ids)) {
+        if (! empty($type_ids)) {
             $expenses = $expenses->whereIn('expenses.expense_type_id', $type_ids);
         }
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $expenses = $expenses->whereIn('expenses.user_id', $user_ids);
         }
         if ($exp_date_from && $exp_date_to) {
@@ -943,13 +911,13 @@ class ExpensesController extends Controller
         if ($id) {
             $expense = $expenses->find($id);
 
-            if (!$expense) {
+            if (! $expense) {
                 return formatApiResponse(
                     false,
                     'Expense not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -979,58 +947,56 @@ class ExpensesController extends Controller
                             'note' => $expense->note,
                             'created_by' => ucwords($created_by->first_name . ' ' . $created_by->last_name),
                             'created_at' => format_date($expense->created_at, true, to_format: 'Y-m-d'),
-                        ]
-                    ]
-                ]
-            );
-        } else {
-
-            $expenses = $expenses->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-            if ($expenses->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Expense not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $expenses->map(function ($expense) {
-
-                $created_by = strpos($expense->created_by, 'u_') === 0 ? User::find(substr($expense->created_by, 2)) : Client::find(substr($expense->created_by, 2));
-                return [
-                    'id' => $expense->id,
-                    'title' => $expense->title,
-                    'expense_type_id' => $expense->expense_type_id,
-                    'expense_type' => $expense->expense_type,
-                    'user_id' => $expense->user_id,
-                    'user' => [
-                        'id' => $expense->user ? $expense->user->id : null,
-                        'first_name' => $expense->user ? $expense->user->first_name : null,
-                        'last_name' => $expense->user ? $expense->user->last_name : null,
-                        'email' => $expense->user ? $expense->user->email : null,
-                        'photo' => $expense->user && $expense->user->photo ? asset('storage/' . $expense->user->photo) : asset('storage/photos/no-image.jpg'),
+                        ],
                     ],
-                    'amount' => format_currency($expense->amount, false, false),
-                    'expense_date' => format_date($expense->expense_date, to_format: 'Y-m-d'),
-                    'note' => $expense->note,
-                    'created_by' => ucwords($created_by->first_name . ' ' . $created_by->last_name),
-                    'created_at' => format_date($expense->created_at, true, to_format: 'Y-m-d'),
-                ];
-            });
-            return formatApiResponse(
-                false,
-                'Expenses retrieved successfully',
-                [
-                    'total' => $total,
-                    'data' => $data
                 ]
             );
         }
+
+        $expenses = $expenses->orderBy($sort, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+        if ($expenses->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Expense not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+        $data = $expenses->map(function ($expense) {
+            $created_by = strpos($expense->created_by, 'u_') === 0 ? User::find(substr($expense->created_by, 2)) : Client::find(substr($expense->created_by, 2));
+            return [
+                'id' => $expense->id,
+                'title' => $expense->title,
+                'expense_type_id' => $expense->expense_type_id,
+                'expense_type' => $expense->expense_type,
+                'user_id' => $expense->user_id,
+                'user' => [
+                    'id' => $expense->user ? $expense->user->id : null,
+                    'first_name' => $expense->user ? $expense->user->first_name : null,
+                    'last_name' => $expense->user ? $expense->user->last_name : null,
+                    'email' => $expense->user ? $expense->user->email : null,
+                    'photo' => $expense->user && $expense->user->photo ? asset('storage/' . $expense->user->photo) : asset('storage/photos/no-image.jpg'),
+                ],
+                'amount' => format_currency($expense->amount, false, false),
+                'expense_date' => format_date($expense->expense_date, to_format: 'Y-m-d'),
+                'note' => $expense->note,
+                'created_by' => ucwords($created_by->first_name . ' ' . $created_by->last_name),
+                'created_at' => format_date($expense->created_at, true, to_format: 'Y-m-d'),
+            ];
+        });
+        return formatApiResponse(
+            false,
+            'Expenses retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
     /**
      * List or search expense types.
@@ -1095,8 +1061,8 @@ class ExpensesController extends Controller
     public function apiListExpenseTypes()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $limit = request('limit', 10);
         $offset = request('offset', 0);
         $id = request('id', null);
@@ -1112,13 +1078,13 @@ class ExpensesController extends Controller
         $total = $expense_types->count();
         if ($id) {
             $expense_type = $expense_types->find($id);
-            if (!$expense_type) {
+            if (! $expense_type) {
                 return formatApiResponse(
                     false,
                     'Expense type not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -1133,42 +1099,41 @@ class ExpensesController extends Controller
                             'title' => $expense_type->title,
                             'description' => $expense_type->description,
                             'created_at' => format_date($expense_type->created_at, true, to_format: 'Y-m-d'),
-                        ]
-                    ]
-                ]
-            );
-        } else {
-
-            $expense_types = $expense_types->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-            if ($expense_types->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Expense type not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $expense_types->map(function ($expense_type) {
-                return [
-                    'id' => $expense_type->id,
-                    'title' => $expense_type->title . ($expense_type->id == 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
-                    'description' => $expense_type->description,
-                    'created_at' => format_date($expense_type->created_at, true, to_format: 'Y-m-d'),
-                ];
-            });
-            return formatApiResponse(
-                false,
-                'Expense types retrieved successfully',
-                [
-                    'total' => $total,
-                    'data' => $data
+                        ],
+                    ],
                 ]
             );
         }
+
+        $expense_types = $expense_types->orderBy($sort, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+        if ($expense_types->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Expense type not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+        $data = $expense_types->map(function ($expense_type) {
+            return [
+                'id' => $expense_type->id,
+                'title' => $expense_type->title . ($expense_type->id === 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
+                'description' => $expense_type->description,
+                'created_at' => format_date($expense_type->created_at, true, to_format: 'Y-m-d'),
+            ];
+        });
+        return formatApiResponse(
+            false,
+            'Expense types retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
 }

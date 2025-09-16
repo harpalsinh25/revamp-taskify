@@ -2,18 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Task;
+use App\Models\Status;
 use App\Models\User;
-use App\Models\Client;
-use App\Models\Project;
 use App\Models\Workspace;
-use App\Models\LeaveRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use App\Models\Status;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class HomeController extends Controller
 {
@@ -22,7 +16,6 @@ class HomeController extends Controller
     protected $statuses;
     public function __construct()
     {
-
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->workspace = Workspace::find(getWorkspaceId());
@@ -52,7 +45,7 @@ class HomeController extends Controller
         $search = request('search');
         $sort = request('sort', 'dob');
         $order = request('order', 'ASC');
-        $upcoming_days = (int)request('upcoming_days', 30); // Cast to integer, default to 30 if not provided
+        $upcoming_days = (int) request('upcoming_days', 30); // Cast to integer, default to 30 if not provided
         $user_ids = request('user_ids');
         $client_ids = request('client_ids');
         $page = request('page', 1);  // Get current page, default to 1
@@ -86,7 +79,6 @@ class HomeController extends Controller
             ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
     + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
 
-
         // Clients Query
         $clients = $clients->whereRaw("
     DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
@@ -103,49 +95,45 @@ class HomeController extends Controller
             ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
     + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
 
-
         // Search by full name (first name + last name)
         if ($search) {
             $users->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%$search%")
-                    ->orWhere('last_name', 'LIKE', "%$search%")
-                    ->orWhere('users.id', 'LIKE', "%$search%")
-                    ->orWhere('dob', 'LIKE', "%$search%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('users.id', 'LIKE', "%{$search}%")
+                    ->orWhere('dob', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
             });
 
             $clients->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%$search%")
-                    ->orWhere('last_name', 'LIKE', "%$search%")
-                    ->orWhere('clients.id', 'LIKE', "%$search%")
-                    ->orWhere('dob', 'LIKE', "%$search%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('clients.id', 'LIKE', "%{$search}%")
+                    ->orWhere('dob', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
             });
         }
 
-
         // Check if both user_ids and client_ids are provided
-        if (!empty($user_ids) && !empty($client_ids)) {
+        if (! empty($user_ids) && ! empty($client_ids)) {
             // Filter users and clients based on the provided ids
             $users->whereIn('users.id', $user_ids);
             $clients->whereIn('clients.id', $client_ids);
         } else {
             // Filter by user_ids if provided
-            if (!empty($user_ids)) {
+            if (! empty($user_ids)) {
                 $users->whereIn('users.id', $user_ids);
                 // Clear client records if user_ids are provided
                 $clients->whereIn('clients.id', []);  // No clients if user_ids are present
             }
 
             // Filter by client_ids if provided
-            if (!empty($client_ids)) {
+            if (! empty($client_ids)) {
                 $clients->whereIn('clients.id', $client_ids);
                 // Clear user records if client_ids are provided
                 $users->whereIn('users.id', []);  // No users if client_ids are present
             }
         }
-
-
 
         // If both are empty, consider both users and clients
         if (empty($user_ids) && empty($client_ids)) {
@@ -173,7 +161,7 @@ class HomeController extends Controller
         $total = $mergedCollection->count();
 
         $paginated = $mergedCollection
-            ->sortBy(function ($item) use ($currentDate, $currentYear) {
+            ->sortBy(function ($item) use ($currentDate) {
                 $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['dob']);
                 $birthdayDate->year = $currentDate->year;
 
@@ -181,8 +169,7 @@ class HomeController extends Controller
                     $birthdayDate->year = $currentDate->year + 1;
                 }
 
-                $daysLeft = $currentDate->diffInDays($birthdayDate);
-                return $daysLeft; // Sort by days left for upcoming birthdays
+                return $currentDate->diffInDays($birthdayDate); // Sort by days left for upcoming birthdays
             })
             ->forPage($page, $limit);
 
@@ -228,15 +215,9 @@ class HomeController extends Controller
 
         return response()->json([
             'rows' => $formattedResults->values(),
-            "total" => $total,
+            'total' => $total,
         ]);
     }
-
-
-
-
-
-
 
     /**
      * List or search users with birthdays today or upcoming.
@@ -277,31 +258,28 @@ class HomeController extends Controller
      * }
      */
 
+    public function upcomingBirthdaysApi(Request $request)
+    {
+        $search = $request->input('search');
+        $order = $request->input('order', 'ASC');
+        $upcoming_days = (int) $request->input('upcoming_days', 30);
+        $user_ids = request('user_ids', []);
+        $client_ids = request('client_ids', []);
+        $limit = $request->input('limit', 15);
+        $offset = $request->input('offset', 0);
 
+        $users = $this->workspace->users();
+        $clients = $this->workspace->clients();
 
+        $currentDate = today();
+        $currentYear = $currentDate->format('Y');
+        $upcomingDate = $currentDate->copy()->addDays($upcoming_days);
 
-public function upcomingBirthdaysApi(Request $request)
-{
-    $search = $request->input('search');
-    $order = $request->input('order', 'ASC');
-    $upcoming_days = (int)$request->input('upcoming_days', 30);
-    $user_ids = request('user_ids', []);
-    $client_ids = request('client_ids', []);
-    $limit = $request->input('limit', 15);
-    $offset = $request->input('offset', 0);
+        $currentDateString = $currentDate->format('Y-m-d');
+        $upcomingDateString = $upcomingDate->format('Y-m-d');
 
-    $users = $this->workspace->users();
-    $clients = $this->workspace->clients();
-
-    $currentDate = today();
-    $currentYear = $currentDate->format('Y');
-    $upcomingDate = $currentDate->copy()->addDays($upcoming_days);
-
-    $currentDateString = $currentDate->format('Y-m-d');
-    $upcomingDateString = $upcomingDate->format('Y-m-d');
-
-    // Users Query
-    $users = $users->whereRaw("
+        // Users Query
+        $users = $users->whereRaw("
         DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
         + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR)
         BETWEEN ? AND ?
@@ -316,8 +294,8 @@ public function upcomingBirthdaysApi(Request $request)
             ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
         + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
 
-    // Clients Query
-    $clients = $clients->whereRaw("
+        // Clients Query
+        $clients = $clients->whereRaw("
         DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
         + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR)
         BETWEEN ? AND ?
@@ -332,107 +310,106 @@ public function upcomingBirthdaysApi(Request $request)
             ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(dob, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(dob)
         + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(dob, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
 
-    // Search functionality
-    if ($search) {
-        $users->where(function ($query) use ($search) {
-            $query->where('first_name', 'LIKE', "%$search%")
-                ->orWhere('last_name', 'LIKE', "%$search%")
-                ->orWhere('users.id', 'LIKE', "%$search%")
-                ->orWhere('dob', 'LIKE', "%$search%")
-                ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+        // Search functionality
+        if ($search) {
+            $users->where(function ($query) use ($search) {
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('users.id', 'LIKE', "%{$search}%")
+                    ->orWhere('dob', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+            });
+
+            $clients->where(function ($query) use ($search) {
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('clients.id', 'LIKE', "%{$search}%")
+                    ->orWhere('dob', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+            });
+        }
+
+        // Filtering by IDs
+        if (! empty($user_ids) || ! empty($client_ids)) {
+            if (! empty($user_ids)) {
+                $users->whereIn('users.id', $user_ids);
+            }
+            if (! empty($client_ids)) {
+                $clients->whereIn('clients.id', $client_ids);
+            }
+        }
+
+        $usersCollection = $users->get()->map(function ($user) {
+            $user->type = 'user';
+            return $user;
         });
 
-        $clients->where(function ($query) use ($search) {
-            $query->where('first_name', 'LIKE', "%$search%")
-                ->orWhere('last_name', 'LIKE', "%$search%")
-                ->orWhere('clients.id', 'LIKE', "%$search%")
-                ->orWhere('dob', 'LIKE', "%$search%")
-                ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+        $clientsCollection = $clients->get()->map(function ($client) {
+            $client->type = 'client';
+            return $client;
         });
-    }
 
-    // Filtering by IDs
-    if (!empty($user_ids) || !empty($client_ids)) {
-        if (!empty($user_ids)) {
-            $users->whereIn('users.id', $user_ids);
+        $mergedCollection = $usersCollection->merge($clientsCollection);
+        $total = $mergedCollection->count();
+
+        if ($total === 0) {
+            return formatApiResponse(
+                false,
+                'Upcoming birthdays not found.',
+                ['data' => []]
+            );
         }
-        if (!empty($client_ids)) {
-            $clients->whereIn('clients.id', $client_ids);
-        }
-    }
 
-    $usersCollection = $users->get()->map(function ($user) {
-        $user->type = 'user';
-        return $user;
-    });
+        $results = $mergedCollection
+            ->sortBy(function ($item) use ($currentDate) {
+                $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['dob']);
+                $birthdayDate->year = $currentDate->year;
 
-    $clientsCollection = $clients->get()->map(function ($client) {
-        $client->type = 'client';
-        return $client;
-    });
+                if ($birthdayDate->lt($currentDate)) {
+                    $birthdayDate->year = $currentDate->year + 1;
+                }
 
-    $mergedCollection = $usersCollection->merge($clientsCollection);
-    $total = $mergedCollection->count();
+                return $currentDate->diffInDays($birthdayDate);
+            })
+            ->slice($offset, $limit)
+            ->map(function ($item) use ($currentDate, $currentYear) {
+                $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['dob']);
+                $birthdayDateYear = $birthdayDate->year;
+                $yearDifference = $currentYear - $birthdayDateYear;
 
-    if ($total == 0) {
+                $birthdayDate->year = $currentDate->year;
+                if ($birthdayDate->lt($currentDate)) {
+                    $birthdayDate->year = $currentDate->year + 1;
+                }
+
+                $daysLeft = $currentDate->diffInDays($birthdayDate);
+
+                return [
+                    'id' => $item['id'],
+                    'member' => $item['first_name'] . ' ' . $item['last_name'],
+                    'photo' => $item['photo'] ?? ($item['type'] === 'user' ?
+                            asset('storage/photos/no-image.jpg') :
+                        asset('storage/photos/no-image.jpg')),
+                    'birthday_count' => $yearDifference,
+                    'days_left' => $daysLeft,
+                    'dob' => format_date($birthdayDate, to_format: 'Y-m-d'),
+                    'type' => $item['type'],
+                ];
+            })
+            ->values() // Reset array keys
+            ->toArray(); // Convert to plain array
+
         return formatApiResponse(
             false,
-            'Upcoming birthdays not found.',
-            ['data' => []]
+            'Upcoming birthdays retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $results,
+            ]
         );
     }
 
-    $results = $mergedCollection
-        ->sortBy(function ($item) use ($currentDate) {
-            $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['dob']);
-            $birthdayDate->year = $currentDate->year;
-
-            if ($birthdayDate->lt($currentDate)) {
-                $birthdayDate->year = $currentDate->year + 1;
-            }
-
-            return $currentDate->diffInDays($birthdayDate);
-        })
-        ->slice($offset, $limit)
-        ->map(function ($item) use ($currentDate, $currentYear) {
-            $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['dob']);
-            $birthdayDateYear = $birthdayDate->year;
-            $yearDifference = $currentYear - $birthdayDateYear;
-
-            $birthdayDate->year = $currentDate->year;
-            if ($birthdayDate->lt($currentDate)) {
-                $birthdayDate->year = $currentDate->year + 1;
-            }
-
-            $daysLeft = $currentDate->diffInDays($birthdayDate);
-
-            return [
-                'id' => $item['id'],
-                'member' => $item['first_name'] . ' ' . $item['last_name'],
-                    'photo' => $item['photo'] ?? ($item['type'] === 'user' ?
-                        asset('storage/photos/no-image.jpg') :
-                    asset('storage/photos/no-image.jpg')),
-                'birthday_count' => $yearDifference,
-                'days_left' => $daysLeft,
-                'dob' => format_date($birthdayDate, to_format: 'Y-m-d'),
-                'type' => $item['type']
-            ];
-        })
-        ->values() // Reset array keys
-        ->toArray(); // Convert to plain array
-
-    return formatApiResponse(
-        false,
-        'Upcoming birthdays retrieved successfully',
-        [
-            'total' => $total,
-            'data' => $results
-        ]
-    );
-}
-
-
- public function upcoming_work_anniversaries()
+    public function upcoming_work_anniversaries()
     {
         $search = request('search');
         $sort = request('sort', 'doj');
@@ -449,27 +426,28 @@ public function upcomingBirthdaysApi(Request $request)
         $users = $this->workspace->users()
             ->whereRaw(
                 "DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj) + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR) BETWEEN ? AND ? AND DATEDIFF(DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj) + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) <= ?",
-                [$currentDateString, $upcomingDateString, $upcoming_days])
+                [$currentDateString, $upcomingDateString, $upcoming_days]
+            )
             ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj) + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
 
         // Search conditions
-        if (!empty($search)) {
+        if (! empty($search)) {
             $users->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%$search%")
-                    ->orWhere('last_name', 'LIKE', "%$search%")
-                    ->orWhere('doj', 'LIKE', "%$search%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('doj', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
             });
         }
 
-        if (!empty($user_id)) {
+        if (! empty($user_id)) {
             $users->where('users.id', $user_id);
         }
 
         $total = $users->count();
 
         $users = $users->orderBy($sort, $order)
-            ->paginate(request("limit", 15))
+            ->paginate(request('limit', 15))
             ->through(function ($user) use ($currentDate) {
                 $doj = \Carbon\Carbon::createFromFormat('Y-m-d', $user->doj);
                 $doj->year = $currentDate->year;
@@ -495,27 +473,25 @@ public function upcomingBirthdaysApi(Request $request)
                     'id' => $user->id,
                     'member' => $user->first_name . ' ' . $user->last_name . $emoji .
                     "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
-                    "<li class='avatar avatar-sm pull-up' title='" . $user->first_name . " " . $user->last_name . "'>" .
+                    "<li class='avatar avatar-sm pull-up' title='" . $user->first_name . ' ' . $user->last_name . "'>" .
                     "<img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle'>" .
-                    "</li></ul>",
+                    '</li></ul>',
                     'wa_date' => format_date($doj) . $label,
                     'days_left' => $daysLeft,
                 ];
             });
 
         return response()->json([
-            "rows" => $users->items(),
-            "total" => $total,
+            'rows' => $users->items(),
+            'total' => $total,
         ]);
     }
 
-
-
- public function upcomingWorkAnniversariesApi(Request $request)
+    public function upcomingWorkAnniversariesApi(Request $request)
     {
         $search = $request->input('search');
         $order = $request->input('order', 'ASC');
-        $upcoming_days = (int)$request->input('upcoming_days', 30); // Cast to integer, default to 30 if not provided
+        $upcoming_days = (int) $request->input('upcoming_days', 30); // Cast to integer, default to 30 if not provided
         $user_ids = request('user_ids', []);
         $limit = $request->input('limit', 15); // Default limit to 15 if not provided
         $offset = $request->input('offset', 0); // Default offset to 0 if not provided
@@ -547,25 +523,24 @@ public function upcomingBirthdaysApi(Request $request)
             ->orderByRaw("DATEDIFF(DATE_ADD(DATE_FORMAT(doj, '%Y-%m-%d'), INTERVAL YEAR(CURRENT_DATE()) - YEAR(doj)
     + IF(DATE_FORMAT(CURRENT_DATE(), '%m-%d') > DATE_FORMAT(doj, '%m-%d'), 1, 0) YEAR), CURRENT_DATE()) " . $order);
 
-
         // Search by full name (first name + last name)
         if ($search) {
             $users->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%$search%")
-                    ->orWhere('last_name', 'LIKE', "%$search%")
-                    ->orWhere('users.id', 'LIKE', "%$search%")
-                    ->orWhere('doj', 'LIKE', "%$search%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('users.id', 'LIKE', "%{$search}%")
+                    ->orWhere('doj', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
             });
         }
 
-        if (!empty($user_ids)) {
-            $users->whereIn('users.id', (array)$user_ids);
+        if (! empty($user_ids)) {
+            $users->whereIn('users.id', (array) $user_ids);
         }
 
         $total = $users->count();
 
-        if ($total == 0) {
+        if ($total === 0) {
             return formatApiResponse(
                 false,
                 'Upcoming work anniversaries not found.',
@@ -597,7 +572,7 @@ public function upcomingBirthdaysApi(Request $request)
                     'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg'),
                     'anniversary_count' => $yearDifference,
                     'days_left' => $daysLeft,
-                    'doj' => format_date($anniversaryDate, to_format: 'Y-m-d')
+                    'doj' => format_date($anniversaryDate, to_format: 'Y-m-d'),
                 ];
             });
 
@@ -614,9 +589,9 @@ public function upcomingBirthdaysApi(Request $request)
     public function members_on_leave()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "from_date";
-        $order = (request('order')) ? request('order') : "ASC";
-        $upcoming_days = (request('upcoming_days')) ? request('upcoming_days') : 30;
+        $sort = request('sort') ? request('sort') : 'from_date';
+        $order = request('order') ? request('order') : 'ASC';
+        $upcoming_days = request('upcoming_days') ? request('upcoming_days') : 30;
         $user_ids = request('user_ids');
 
         // Calculate the current date
@@ -636,7 +611,7 @@ public function upcomingBirthdaysApi(Request $request)
             ->where('leave_requests.status', '=', 'approved')
             ->where('workspace_id', '=', $this->workspace->id);
 
-        if (!is_admin_or_leave_editor()) {
+        if (! is_admin_or_leave_editor()) {
             $leaveUsers->where(function ($query) {
                 $query->where('leave_requests.user_id', '=', $this->user->id)
                     ->orWhere('leave_request_visibility.user_id', '=', $this->user->id)
@@ -645,23 +620,22 @@ public function upcomingBirthdaysApi(Request $request)
         }
 
         // Search by full name (first name + last name)
-        if (!empty($search)) {
+        if (! empty($search)) {
             $leaveUsers->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%$search%")
-                    ->orWhere('last_name', 'LIKE', "%$search%")
-                    ->orWhere('users.id', 'LIKE', "%$search%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('users.id', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
             });
         }
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $leaveUsers->whereIn('leave_requests.user_id', $user_ids);
         }
         $total = $leaveUsers->count();
         $timezone = config('app.timezone');
         $leaveUsers = $leaveUsers->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($user) use ($currentDate, $timezone) {
-
                 $fromDate = \Carbon\Carbon::createFromFormat('Y-m-d', $user->from_date);
 
                 // Set the year to the current year
@@ -678,15 +652,15 @@ public function upcomingBirthdaysApi(Request $request)
                 $label = '';
                 if ($daysLeft === 0 && $user->from_time && $user->to_time && $user->from_time <= $currentTime && $user->to_time >= $currentTime) {
                     $label = ' <span class="badge bg-info">' . get_label('on_partial_leave', 'On Partial Leave') . '</span>';
-                } elseif (($daysLeft === 0 && (!$user->from_time && !$user->to_time)) ||
+                } elseif (($daysLeft === 0 && (! $user->from_time && ! $user->to_time)) ||
                     ($daysLeft === 0 && $user->from_time <= $currentTime && $user->to_time >= $currentTime)
                 ) {
                     $label = ' <span class="badge bg-success">' . get_label('on_leave', 'On leave') . '</span>';
                 } elseif ($daysLeft === 1) {
-                    $langLabel = $user->from_time && $user->to_time ?  get_label('on_partial_leave_tomorrow', 'On partial leave from tomorrow') : get_label('on_leave_tomorrow', 'On leave from tomorrow');
+                    $langLabel = $user->from_time && $user->to_time ? get_label('on_partial_leave_tomorrow', 'On partial leave from tomorrow') : get_label('on_leave_tomorrow', 'On leave from tomorrow');
                     $label = ' <span class="badge bg-primary">' . $langLabel . '</span>';
                 } elseif ($daysLeft === 2) {
-                    $langLabel = $user->from_time && $user->to_time ?  get_label('on_partial_leave_day_after_tomorow', 'On partial leave from day after tomorrow') : get_label('on_leave_day_after_tomorow', 'On leave from day after tomorrow');
+                    $langLabel = $user->from_time && $user->to_time ? get_label('on_partial_leave_day_after_tomorow', 'On partial leave from day after tomorrow') : get_label('on_leave_day_after_tomorow', 'On leave from day after tomorrow');
                     $label = ' <span class="badge bg-warning">' . $langLabel . '</span>';
                 }
 
@@ -715,8 +689,8 @@ public function upcomingBirthdaysApi(Request $request)
                 return [
                     'id' => $user->UserId,
                     'member' => formatUserHtml(User::find($user->UserId)),
-                    'from_date' =>  $fromDateDayOfWeek . ', ' . ($user->from_time ? format_date($user->from_date . ' ' . $user->from_time, true, null, null, false) : format_date($user->from_date)),
-                    'to_date' =>  $toDateDayOfWeek . ', ' . ($user->to_time ? format_date($user->to_date . ' ' . $user->to_time, true, null, null, false) : format_date($user->to_date)),
+                    'from_date' => $fromDateDayOfWeek . ', ' . ($user->from_time ? format_date($user->from_date . ' ' . $user->from_time, true, null, null, false) : format_date($user->from_date)),
+                    'to_date' => $toDateDayOfWeek . ', ' . ($user->to_time ? format_date($user->to_date . ' ' . $user->to_time, true, null, null, false) : format_date($user->to_date)),
                     'type' => $user->from_time && $user->to_time ? '<span class="badge bg-info">' . get_label('partial', 'Partial') . '</span>' : '<span class="badge bg-primary">' . get_label('full', 'Full') . '</span>',
                     'duration' => $user->from_time && $user->to_time ? $duration . ' hour' . ($duration > 1 ? 's' : '') : $duration . ' day' . ($duration > 1 ? 's' : ''),
                     'days_left' => $daysLeft,
@@ -724,11 +698,10 @@ public function upcomingBirthdaysApi(Request $request)
             });
 
         return response()->json([
-            "rows" => $leaveUsers->items(),
-            "total" => $total,
+            'rows' => $leaveUsers->items(),
+            'total' => $total,
         ]);
     }
-
 
     /**
      * List members currently on leave or scheduled to be on leave.
@@ -776,12 +749,12 @@ public function upcomingBirthdaysApi(Request $request)
     public function membersOnLeaveApi(Request $request)
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "from_date";
-        $order = (request('order')) ? request('order') : "ASC";
-        $upcoming_days = (request('upcoming_days')) ? request('upcoming_days') : 30;
+        $sort = request('sort') ? request('sort') : 'from_date';
+        $order = request('order') ? request('order') : 'ASC';
+        $upcoming_days = request('upcoming_days') ? request('upcoming_days') : 30;
         $user_ids = request('user_ids', []);
-        $limit = (int)$request->input('limit', 15); // Cast to integer, default to 15 if not provided
-        $offset = (int)$request->input('offset', 0); // Cast to integer, default to 0 if not provided
+        $limit = (int) $request->input('limit', 15); // Cast to integer, default to 15 if not provided
+        $offset = (int) $request->input('offset', 0); // Cast to integer, default to 0 if not provided
 
         // Calculate the current date
         $currentDate = today();
@@ -800,7 +773,7 @@ public function upcomingBirthdaysApi(Request $request)
             ->where('leave_requests.status', '=', 'approved')
             ->where('workspace_id', '=', $this->workspace->id);
 
-        if (!is_admin_or_leave_editor()) {
+        if (! is_admin_or_leave_editor()) {
             $leaveUsers->where(function ($query) {
                 $query->where('leave_requests.user_id', '=', $this->user->id)
                     ->orWhere('leave_request_visibility.user_id', '=', $this->user->id)
@@ -809,19 +782,19 @@ public function upcomingBirthdaysApi(Request $request)
         }
 
         // Search by full name (first name + last name)
-        if (!empty($search)) {
+        if (! empty($search)) {
             $leaveUsers->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%$search%")
-                    ->orWhere('last_name', 'LIKE', "%$search%")
-                    ->orWhere('users.id', 'LIKE', "%$search%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+                $query->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('users.id', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
             });
         }
-        if (!empty($user_ids)) {
-            $leaveUsers->whereIn('leave_requests.user_id', (array)$user_ids);
+        if (! empty($user_ids)) {
+            $leaveUsers->whereIn('leave_requests.user_id', (array) $user_ids);
         }
         $total = $leaveUsers->count();
-        if ($total == 0) {
+        if ($total === 0) {
             return formatApiResponse(
                 false,
                 'Members on leave not found',
@@ -833,7 +806,6 @@ public function upcomingBirthdaysApi(Request $request)
             ->offset($offset)
             ->get()
             ->map(function ($user) use ($currentDate) {
-
                 $fromDate = \Carbon\Carbon::createFromFormat('Y-m-d', $user->from_date);
 
                 // Set the year to the current year
@@ -871,9 +843,9 @@ public function upcomingBirthdaysApi(Request $request)
                     'id' => $user->UserId,
                     'member' => $user->first_name . ' ' . $user->last_name,
                     'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg'),
-                    'from_date' =>  format_date($user->from_date, to_format: 'Y-m-d'),
+                    'from_date' => format_date($user->from_date, to_format: 'Y-m-d'),
                     'from_time' => $user->from_time ? Carbon::parse($user->from_time)->format('h:i A') : '',
-                    'to_date' =>  format_date($user->to_date, to_format: 'Y-m-d'),
+                    'to_date' => format_date($user->to_date, to_format: 'Y-m-d'),
                     'to_time' => $user->to_time ? Carbon::parse($user->to_time)->format('h:i A') : '',
                     'type' => $user->from_time && $user->to_time ? get_label('partial', 'Partial') : get_label('full', 'Full'),
                     'duration' => $user->from_time && $user->to_time ? $duration . ' hour' . ($duration > 1 ? 's' : '') : $duration . ' day' . ($duration > 1 ? 's' : ''),
@@ -906,9 +878,7 @@ public function upcomingBirthdaysApi(Request $request)
             $entityEvents = [];
 
             foreach ($entities as $entity) {
-                if (!empty($entity->dob)) {
-
-
+                if (! empty($entity->dob)) {
                     $birthday = \Carbon\Carbon::createFromFormat('Y-m-d', $entity->dob);
                     $birthdayDateYear = $birthday->year;
                     $yearDifference = $startDate->year - $birthdayDateYear;
@@ -959,7 +929,6 @@ public function upcomingBirthdaysApi(Request $request)
         return response()->json($events);
     }
 
-
     public function upcoming_work_anniversaries_calendar(Request $request)
     {
         $users = $this->workspace->users()->get();
@@ -975,7 +944,7 @@ public function upcomingBirthdaysApi(Request $request)
             $entityEvents = [];
 
             foreach ($entities as $entity) {
-                if (!empty($entity->doj)) {
+                if (! empty($entity->doj)) {
                     $doj = \Carbon\Carbon::createFromFormat('Y-m-d', $entity->dob);
                     $dojYear = $doj->year;
                     $yearDifference = $startDate->year - $dojYear;
@@ -1026,8 +995,6 @@ public function upcomingBirthdaysApi(Request $request)
         return response()->json($events);
     }
 
-
-
     public function members_on_leave_calendar(Request $request)
     {
         $currentDate = today();
@@ -1053,7 +1020,7 @@ public function upcomingBirthdaysApi(Request $request)
             });
 
         // Add condition to restrict results based on user roles
-        if (!is_admin_or_leave_editor()) {
+        if (! is_admin_or_leave_editor()) {
             $leaveRequests->where(function ($query) {
                 $query->where('leave_requests.user_id', '=', $this->user->id)
                     ->orWhere('leave_request_visibility.user_id', '=', $this->user->id);
@@ -1077,7 +1044,7 @@ public function upcomingBirthdaysApi(Request $request)
             } else {
                 // If only dates are present, show just the formatted date
                 $title .= ' : ' . format_date($leave->from_date);
-                if ($leave->to_date != $leave->from_date) {
+                if ($leave->to_date !== $leave->from_date) {
                     $title .= ' ' . get_label('to', 'to') . ' ' . format_date($leave->to_date);
                 }
                 $backgroundColor = '#007bff';
@@ -1092,14 +1059,12 @@ public function upcomingBirthdaysApi(Request $request)
                 'endTime' => $leave->to_time,
                 'backgroundColor' => $backgroundColor,
                 'borderColor' => $backgroundColor,
-                'textColor' => '#ffffff'
+                'textColor' => '#ffffff',
             ];
         });
 
-
         return response()->json($events);
     }
-
 
     /**
      * Get Statistics
@@ -1211,7 +1176,7 @@ public function upcomingBirthdaysApi(Request $request)
                         'id' => $status->id,
                         'title' => $status->title,
                         'color' => $status->color,
-                        'total_projects' => $projectCount
+                        'total_projects' => $projectCount,
                     ];
                 }
                 // Sort status-wise projects by count in descending order
@@ -1228,7 +1193,7 @@ public function upcomingBirthdaysApi(Request $request)
                         'id' => $status->id,
                         'title' => $status->title,
                         'color' => $status->color,
-                        'total_tasks' => $taskCount
+                        'total_tasks' => $taskCount,
                     ];
                 }
                 // Sort status-wise tasks by count in descending order
@@ -1253,7 +1218,7 @@ public function upcomingBirthdaysApi(Request $request)
                         'pending_todos' => $total_pending_todos_count,
                         'status_wise_projects' => $statusCountsProjects,
                         'status_wise_tasks' => $statusCountsTasks,
-                    ]
+                    ],
                 ]
             );
         } catch (\Exception $e) {

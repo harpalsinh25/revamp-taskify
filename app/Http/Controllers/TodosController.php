@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
-use App\Models\User;
-use App\Models\Client;
 use App\Models\Workspace;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
@@ -18,7 +15,6 @@ class TodosController extends Controller
     protected $user;
     public function __construct()
     {
-
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->workspace = Workspace::find(getWorkspaceId());
@@ -96,7 +92,6 @@ class TodosController extends Controller
      * }
      */
 
-
     public function apiList(Request $request, $id = null)
     {
         try {
@@ -105,13 +100,13 @@ class TodosController extends Controller
                     ->where('id', $id)
                     ->first();
 
-                if (!$todo) {
+                if (! $todo) {
                     return formatApiResponse(
                         false,
                         'Todo not found.',
                         [
                             'total' => 0,
-                            'data' => []
+                            'data' => [],
                         ]
                     );
                 }
@@ -121,7 +116,7 @@ class TodosController extends Controller
                     'Todo retrieved successfully.',
                     [
                         'total' => 1,
-                        'data' => formatTodo($todo)
+                        'data' => formatTodo($todo),
                     ]
                 );
             }
@@ -138,9 +133,9 @@ class TodosController extends Controller
             $query = $this->user->todos()
                 ->when($search, function ($query, $search) {
                     return $query->where(function ($q) use ($search) {
-                        $q->where('title', 'LIKE', "%$search%")
-                            ->orWhere('description', 'LIKE', "%$search%")
-                            ->orWhere('id', 'LIKE', "%$search%");
+                        $q->where('title', 'LIKE', "%{$search}%")
+                            ->orWhere('description', 'LIKE', "%{$search}%")
+                            ->orWhere('id', 'LIKE', "%{$search}%");
                     });
                 })
                 ->when($status !== '', function ($query) use ($status) {
@@ -148,7 +143,7 @@ class TodosController extends Controller
                 });
 
             // Apply sorting
-            if ($sort != 'is_completed') {
+            if ($sort !== 'is_completed') {
                 $query->orderBy($sort, $order);
             } else {
                 $query->orderBy('is_completed', $request->input('order', 'asc'))
@@ -169,7 +164,7 @@ class TodosController extends Controller
                     'Todos not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -184,13 +179,13 @@ class TodosController extends Controller
                 'Todos retrieved successfully.',
                 [
                     'total' => $total,
-                    'data' => $formattedTodos
+                    'data' => $formattedTodos,
                 ]
             );
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while retrieving the todos.'
+                'message' => 'An error occurred while retrieving the todos.',
             ], 500);
         }
     }
@@ -242,7 +237,6 @@ class TodosController extends Controller
      * }
      */
 
-
     public function store(Request $request)
     {
         $isApi = request()->get('isApi', false);
@@ -272,7 +266,7 @@ class TodosController extends Controller
             $todo = Todo::find($todo->id);
 
             // Todo Reminder
-            if (isset($formFields['enable_reminder']) && $formFields['enable_reminder'] == 'on') {
+            if (isset($formFields['enable_reminder']) && $formFields['enable_reminder'] === 'on') {
                 $todo->reminders()->create([
                     'frequency_type' => $formFields['frequency_type'],
                     'day_of_week' => $formFields['day_of_week'],
@@ -281,13 +275,12 @@ class TodosController extends Controller
                 ]);
             }
 
-
             return formatApiResponse(
                 false,
                 'Todo created successfully.',
                 [
                     'id' => $todo->id,
-                    'data' => formatTodo($todo)
+                    'data' => formatTodo($todo),
                 ]
             );
         } catch (ValidationException $e) {
@@ -296,7 +289,7 @@ class TodosController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the todo.'
+                'message' => 'An error occurred while creating the todo.',
             ], 500);
         }
     }
@@ -371,7 +364,7 @@ class TodosController extends Controller
 
         $messages = [
             'priority.in' => 'The priority must be one of the following: low, medium, high.',
-            'id.exists' => 'The specified todo does not exist.'
+            'id.exists' => 'The specified todo does not exist.',
         ];
 
         try {
@@ -391,7 +384,7 @@ class TodosController extends Controller
                         'day_of_month' => $request->input('frequency_type') === 'monthly' ? $request->input('day_of_month') : null,
                         'time_of_day' => $request->input('time_of_day'),
                         'is_active' => 1,
-                        "last_sent_at" => null,
+                        'last_sent_at' => null,
                     ]);
                 } else {
                     // Create new reminder
@@ -400,7 +393,7 @@ class TodosController extends Controller
                         'day_of_week' => $request->input('frequency_type') === 'weekly' ? $request->input('day_of_week') : null,
                         'day_of_month' => $request->input('frequency_type') === 'monthly' ? $request->input('day_of_month') : null,
                         'time_of_day' => $request->input('time_of_day'),
-                        'is_active' => 1
+                        'is_active' => 1,
                     ]);
                 }
             } else {
@@ -427,7 +420,7 @@ class TodosController extends Controller
                 'Todo updated successfully.',
                 [
                     'id' => $request->id,
-                    'data' => $formattedTodo
+                    'data' => $formattedTodo,
                 ]
             );
         } catch (ValidationException $e) {
@@ -436,11 +429,10 @@ class TodosController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the todo.'
+                'message' => 'An error occurred while updating the todo.',
             ], 500);
         }
     }
-
 
     /**
      * Remove the specified todo.
@@ -474,8 +466,7 @@ class TodosController extends Controller
      */
     public function destroy($id)
     {
-        $response = DeletionService::delete(Todo::class, $id, 'Todo');
-        return $response;
+        return DeletionService::delete(Todo::class, $id, 'Todo');
     }
 
     public function destroy_multiple(Request $request)
@@ -483,7 +474,7 @@ class TodosController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:todos,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:todos,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -502,10 +493,9 @@ class TodosController extends Controller
             'error' => false,
             'message' => 'Todo(s) deleted successfully.',
             'id' => $deletedIds,
-            'titles' => $deletedTitles
+            'titles' => $deletedTitles,
         ]);
     }
-
 
     /**
      * Update the completion status of a todo.
@@ -517,6 +507,7 @@ class TodosController extends Controller
      * @group Todo Management
      *
      * @urlParam id int required The ID of the todo whose status is to be updated. Example: 1
+     *
      * @bodyParam status boolean required The new completion status of the todo. Example: true
      *
      * @response 200 {
@@ -533,7 +524,7 @@ class TodosController extends Controller
      * "created_at": "10-08-2024 10:28:59",
      * "updated_at": "12-08-2024 18:08:14"
      * }
-
+     *
      * }
      *
      * @response 422 {
@@ -563,14 +554,14 @@ class TodosController extends Controller
 
         $rules = [
             'id' => 'required|exists:todos,id',
-            'status' => 'required|boolean'
+            'status' => 'required|boolean',
         ];
         try {
             $request->validate($rules);
             $id = $request->id;
             $status = $request->status;
             $todo = Todo::findOrFail($id);
-            if ($todo->is_completed != $status) {
+            if ($todo->is_completed !== $status) {
                 $todo->is_completed = $status;
                 $statusText = $status ? 'Completed' : 'Pending';
                 $todo->save();
@@ -581,19 +572,18 @@ class TodosController extends Controller
                     [
                         'id' => $id,
                         'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' marked todo ' . trim($todo->title) . ' as ' . trim($statusText),
-                        'data' => formatTodo($todo)
+                        'data' => formatTodo($todo),
                     ]
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'No status change detected.']);
             }
+            return response()->json(['error' => true, 'message' => 'No status change detected.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Status couldn\'t be updated.'
+                'message' => 'Status couldn\'t be updated.',
             ], 500);
         }
     }
@@ -608,6 +598,7 @@ class TodosController extends Controller
      * @group Todo Management
      *
      * @urlParam id int required The ID of the todo whose priority is to be updated. Example: 1
+     *
      * @bodyParam priority string required The new priority of the todo. Must be one of 'low', 'medium', or 'high'. Example: medium
      *
      * @response 200 {
@@ -655,7 +646,7 @@ class TodosController extends Controller
 
         $rules = [
             'id' => 'required|exists:todos,id',
-            'priority' => 'required|in:low,medium,high'
+            'priority' => 'required|in:low,medium,high',
         ];
 
         try {
@@ -663,7 +654,7 @@ class TodosController extends Controller
             $id = $request->id;
             $priority = $request->priority;
             $todo = Todo::findOrFail($id);
-            if ($todo->priority != $priority) {
+            if ($todo->priority !== $priority) {
                 $currentPriorityText = ucfirst($todo->priority);
                 $todo->priority = $priority;
                 $todo->save();
@@ -676,28 +667,24 @@ class TodosController extends Controller
                     [
                         'id' => $id,
                         'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated the priority of todo ' . trim($todo->title) . ' from ' . trim($currentPriorityText) . ' to ' . trim($priorityText),
-                        'data' => formatTodo($todo)
+                        'data' => formatTodo($todo),
                     ]
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'No priority change detected.']);
             }
+            return response()->json(['error' => true, 'message' => 'No priority change detected.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Priority couldn\'t be updated.'
+                'message' => 'Priority couldn\'t be updated.',
             ], 500);
         }
     }
 
-
-
     public function get($id)
     {
-
         $todo = Todo::with('reminders')->findOrFail($id);
         return response()->json(['todo' => $todo]);
     }

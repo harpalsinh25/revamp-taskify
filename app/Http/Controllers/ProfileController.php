@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Client;
 use App\Models\Profile;
-use Illuminate\Http\Request;
+use App\Models\User;
+use App\Rules\UniqueEmailPassword;
 use App\Services\DeletionService;
-use Spatie\Permission\Models\Role;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use App\Rules\UniqueEmailPassword;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class ProfileController extends Controller
 {
@@ -62,12 +59,11 @@ class ProfileController extends Controller
      * "is_admin_or_has_all_data_access": true
      * }
      * }
-     *
      */
     public function profile(Request $request)
     {
         $user = $request->user();
-        $data = (getGuardName() == 'client') ? formatClient($user) : formatUser($user);
+        $data = getGuardName() === 'client' ? formatClient($user) : formatUser($user);
 
         $data['is_admin_or_leave_editor'] = is_admin_or_leave_editor();
         $data['is_admin_or_has_all_data_access'] = isAdminOrHasAllDataAccess();
@@ -76,7 +72,7 @@ class ProfileController extends Controller
             false,
             'Profile details retrieved successfully',
             [
-                'data' => $data
+                'data' => $data,
             ]
         );
     }
@@ -152,24 +148,21 @@ class ProfileController extends Controller
      *   "error": true,
      *   "message": "Profile details couldn\'t be updated."
      * }
-     *
      */
-
 
     public function update(Request $request, $id)
     {
         $isApi = request()->get('isApi', false);
-        if (getAuthenticatedUser()->getRoleNames()->first() != 'admin') {
+        if (getAuthenticatedUser()->getRoleNames()->first() !== 'admin') {
             $role = getAuthenticatedUser()->roles->pluck('id')[0];
             $request->merge(['role' => $role]);
         }
-
 
         $request->merge([
             'phone' => str_replace(' ', '', $request->input('phone')),
             'country_code' => str_replace(' ', '', $request->input('country_code')),
         ]);
-        $isUser = getGuardName() == 'web';
+        $isUser = getGuardName() === 'web';
         $rules = [
             'first_name' => ['required'],
             'last_name' => ['required'],
@@ -207,19 +200,19 @@ class ProfileController extends Controller
 
             if (request()->filled('password')) {
                 $uniqueEmailPasswordRule = new UniqueEmailPassword($isUser ? 'user' : 'client');
-                if (!$uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
+                if (! $uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
                     return formatApiValidationError($isApi, ['email' => [$uniqueEmailPasswordRule->message()]]);
                 }
             }
             $user = $isUser ? User::find($id) : Client::find($id);
-            if (!$user) {
+            if (! $user) {
                 return formatApiResponse(
                     true,
                     'User not found',
                     []
                 );
             }
-            if (isset($formFields['password']) && !empty($formFields['password'])) {
+            if (isset($formFields['password']) && ! empty($formFields['password'])) {
                 $formFields['password'] = bcrypt($formFields['password']);
             } else {
                 unset($formFields['password']);
@@ -260,7 +253,7 @@ class ProfileController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Profile details couldn\'t be updated.'
+                'message' => 'Profile details couldn\'t be updated.',
             ], 500);
         }
     }
@@ -325,7 +318,6 @@ class ProfileController extends Controller
      * }
      */
 
-
     public function update_photo(Request $request)
     {
         $isApi = request()->get('isApi', false);
@@ -343,7 +335,7 @@ class ProfileController extends Controller
             $rules['id'] .= '|exists:clients,id'; // Check existence in clients table
         }
         $messages = [
-            'upload.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).'
+            'upload.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).',
         ];
         try {
             $request->validate($rules, $messages);
@@ -364,17 +356,17 @@ class ProfileController extends Controller
                 }
             } else {
                 // Fallback to current authenticated user
-                $isUser = getGuardName() == 'web';
+                $isUser = getGuardName() === 'web';
                 $id = getAuthenticatedUser()->id;
                 $user = $isUser ? User::find($id) : Client::find($id);
             }
 
-            if (!$user) {
+            if (! $user) {
                 return formatApiResponse(true, 'User not found', []);
             }
 
             // Delete old photo if it exists
-            if ($user->photo != 'photos/no-image.jpg' && $user->photo !== null) {
+            if ($user->photo !== 'photos/no-image.jpg' && $user->photo !== null) {
                 Storage::disk('public')->delete($user->photo);
             }
 
@@ -395,7 +387,7 @@ class ProfileController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Profile picture couldn\'t be updated.'
+                'message' => 'Profile picture couldn\'t be updated.',
             ], 500);
         }
     }
@@ -425,25 +417,24 @@ class ProfileController extends Controller
      *   "error": true,
      *   "message": "Account couldn't be deleted."
      * }
-     *
      */
     public function destroy()
     {
         try {
             $user = getAuthenticatedUser();
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'error' => true,
                     'message' => 'User not found',
-                    'data' => []
+                    'data' => [],
                 ], 404);
             }
-            $isUser = getGuardName() == 'web';
+            $isUser = getGuardName() === 'web';
             $mainAdminId = getMainAdminId();
-            if ($isUser && $user->id == $mainAdminId) {
+            if ($isUser && $user->id === $mainAdminId) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'The main admin account cannot be deleted.'
+                    'message' => 'The main admin account cannot be deleted.',
                 ]);
             }
             $modelClass = $isUser ? User::class : Client::class;
@@ -459,13 +450,13 @@ class ProfileController extends Controller
             return response()->json([
                 'error' => false,
                 'message' => 'Account deleted successfully.',
-                'data' => []
+                'data' => [],
             ]);
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Account couldn\'t be deleted.'
+                'message' => 'Account couldn\'t be deleted.',
             ], 500);
         }
     }

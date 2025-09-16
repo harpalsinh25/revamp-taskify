@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Workspace;
 use App\Models\LeaveEditor;
-use Illuminate\Support\Str;
 use App\Models\LeaveRequest;
-use Illuminate\Http\Request;
-use App\Services\DeletionService;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\UserClientPreference;
+use App\Models\Workspace;
+use App\Services\DeletionService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LeaveRequestController extends Controller
@@ -31,12 +30,10 @@ class LeaveRequestController extends Controller
     }
     public function index()
     {
-
         $leave_requests = is_admin_or_leave_editor() ? $this->workspace->leave_requests() : $this->user->leave_requests();
         $leaveEditors = User::whereHas('leaveEditors')->get();
         return view('leave_requests.list', ['leave_requests' => $leave_requests->count(), 'leaveEditors' => $leaveEditors, 'auth_user' => $this->user]);
     }
-
 
     /**
      * Create a new leave request.
@@ -122,7 +119,7 @@ class LeaveRequestController extends Controller
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null, 'from date', startDateKey: 'from_date');
 
                     // Check and handle errors for from_date specifically
-                    if (!empty($errors['from_date'])) {
+                    if (! empty($errors['from_date'])) {
                         foreach ($errors['from_date'] as $error) {
                             $fail($error);
                         }
@@ -136,7 +133,7 @@ class LeaveRequestController extends Controller
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'to date', endDateKey: 'to_date');
 
                     // Check and handle errors for to_date specifically
-                    if (!empty($errors['to_date'])) {
+                    if (! empty($errors['to_date'])) {
                         foreach ($errors['to_date'] as $error) {
                             $fail($error);
                         }
@@ -148,7 +145,7 @@ class LeaveRequestController extends Controller
             'status' => ['nullable'],
             'user_id' => 'nullable|exists:users,id',
             'visible_to_ids.*' => 'exists:users,id',
-            'comment' => ['nullable']
+            'comment' => ['nullable'],
         ];
         $messages = [
             'from_time.required_if' => 'The from time field is required when partial leave is checked.',
@@ -157,7 +154,7 @@ class LeaveRequestController extends Controller
 
         try {
             $formFields = $request->validate($rules, $messages);
-            if (!$this->user->hasRole('admin') && $request->input('status') && $request->filled('status') && $request->input('status') == 'approved') {
+            if (! $this->user->hasRole('admin') && $request->input('status') && $request->filled('status') && $request->input('status') === 'approved') {
                 return response()->json(['error' => true, 'message' => 'You cannot approve your own leave request.']);
             }
 
@@ -166,17 +163,17 @@ class LeaveRequestController extends Controller
             $formFields['from_date'] = format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
             $formFields['to_date'] = format_date($to_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
 
-            if (is_admin_or_leave_editor() && $request->input('status') && $request->filled('status') && $request->input('status') != 'pending') {
+            if (is_admin_or_leave_editor() && $request->input('status') && $request->filled('status') && $request->input('status') !== 'pending') {
                 $formFields['action_by'] = $this->user->id;
             }
 
             $formFields['workspace_id'] = $this->workspace->id;
             $formFields['user_id'] = is_admin_or_leave_editor() && $request->filled('user_id') ? $request->input('user_id') : $this->user->id;
-            $formFields['comment'] = is_admin_or_leave_editor() && $request->filled('comment') ? $request->input('comment') : NULL;
-            $leaveVisibleToAll = $request->input('leaveVisibleToAll') && $request->filled('leaveVisibleToAll') && $request->input('leaveVisibleToAll') == 'on' ? 1 : 0;
+            $formFields['comment'] = is_admin_or_leave_editor() && $request->filled('comment') ? $request->input('comment') : null;
+            $leaveVisibleToAll = $request->input('leaveVisibleToAll') && $request->filled('leaveVisibleToAll') && $request->input('leaveVisibleToAll') === 'on' ? 1 : 0;
             $formFields['visible_to_all'] = $leaveVisibleToAll;
             if ($lr = LeaveRequest::create($formFields)) {
-                if ($leaveVisibleToAll == 0) {
+                if ($leaveVisibleToAll === 0) {
                     $visibleToUsers = $request->input('visible_to_ids', []);
                     $lr->visibleToUsers()->sync($visibleToUsers);
                 }
@@ -225,7 +222,7 @@ class LeaveRequestController extends Controller
                     'reason' => $lr->reason,
                     'comment' => $lr->comment ?? '-',
                     'status' => ucfirst($lr->status),
-                    'action' => 'created'
+                    'action' => 'created',
                 ];
 
                 $workspaceUsers = $this->workspace->users->pluck('id')->toArray();
@@ -258,7 +255,7 @@ class LeaveRequestController extends Controller
 
                 processNotifications($notificationData, $recipients);
 
-                if ($lr->status == 'approved') {
+                if ($lr->status === 'approved') {
                     // Get the timezone from the application configuration
                     $appTimezone = config('app.timezone');
 
@@ -280,7 +277,7 @@ class LeaveRequestController extends Controller
 
                     // Check if the leave end date and time have not passed
                     if ($currentDateTime < $leaveEndDate) {
-                        if ($lr->visible_to_all == 1) {
+                        if ($lr->visible_to_all === 1) {
                             $recipientTeamMembers = $this->workspace->users->pluck('id')->toArray();
                         } else {
                             $recipientTeamMembers = $lr->visibleToUsers->pluck('id')->toArray();
@@ -304,13 +301,13 @@ class LeaveRequestController extends Controller
                             'to' => $to,
                             'duration' => $duration,
                             'reason' => $lr->reason,
-                            'action' => 'team_member_on_leave_alert'
+                            'action' => 'team_member_on_leave_alert',
                         ];
                         processNotifications($notificationData, $recipientTeamMemberIds);
                     }
                 }
                 $leaveRequest = LeaveRequest::find($lr->id);
-                $partialLeave = $request->input('partialLeave') && $request->filled('partialLeave') && $request->input('partialLeave') == 'on' ? 'on' : 'off';
+                $partialLeave = $request->input('partialLeave') && $request->filled('partialLeave') && $request->input('partialLeave') === 'on' ? 'on' : 'off';
                 $leaveRequest->$leaveVisibleToAll = $leaveVisibleToAll ? 'on' : 'off';
                 $leaveRequest->$partialLeave = $partialLeave;
                 return formatApiResponse(
@@ -319,42 +316,40 @@ class LeaveRequestController extends Controller
                     [
                         'id' => $lr->id,
                         'type' => 'leave_request',
-                        'data' => formatLeaveRequest($leaveRequest)
+                        'data' => formatLeaveRequest($leaveRequest),
                     ]
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Leave request couldn\'t be created.']);
             }
+            return response()->json(['error' => true, 'message' => 'Leave request couldn\'t be created.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the leave request.'
+                'message' => 'An error occurred while creating the leave request.',
             ], 500);
         }
     }
 
-
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $user_ids = request('user_ids');
         $action_by_ids = request('action_by_ids');
         $types = request('types');
         $statuses = request('statuses');
-        $date_between_from = request('date_between_from') ?: "";
-        $date_between_to = request('date_between_to') ?: "";
-        $start_date_from = (request('start_date_from')) ? request('start_date_from') : "";
-        $start_date_to = (request('start_date_to')) ? request('start_date_to') : "";
-        $end_date_from = (request('end_date_from')) ? request('end_date_from') : "";
-        $end_date_to = (request('end_date_to')) ? request('end_date_to') : "";
+        $date_between_from = request('date_between_from') ?: '';
+        $date_between_to = request('date_between_to') ?: '';
+        $start_date_from = request('start_date_from') ? request('start_date_from') : '';
+        $start_date_to = request('start_date_to') ? request('start_date_to') : '';
+        $end_date_from = request('end_date_from') ? request('end_date_from') : '';
+        $end_date_to = request('end_date_to') ? request('end_date_to') : '';
         $where = ['workspace_id' => $this->workspace->id];
 
-        if (!is_admin_or_leave_editor()) {
+        if (! is_admin_or_leave_editor()) {
             // If the user is not an admin or leave editor, filter by user_id
             $where['user_id'] = $this->user->id;
         }
@@ -368,19 +363,19 @@ class LeaveRequestController extends Controller
             ->leftJoin('users', 'leave_requests.user_id', '=', 'users.id')
             ->leftJoin('users AS action_users', 'leave_requests.action_by', '=', 'action_users.id');
 
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $leave_requests = $leave_requests->whereIn('user_id', $user_ids);
         }
 
-        if (!empty($action_by_ids)) {
+        if (! empty($action_by_ids)) {
             $leave_requests = $leave_requests->whereIn('action_by', $action_by_ids);
         }
 
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $leave_requests = $leave_requests->whereIn('leave_requests.status', $statuses);
         }
 
-        if (!empty($types)) {
+        if (! empty($types)) {
             $leave_requests = $leave_requests->where(function ($query) use ($types) {
                 if (in_array('full', $types)) {
                     $query->orWhereNull('from_time')->whereNull('to_time');
@@ -414,7 +409,7 @@ class LeaveRequestController extends Controller
         $isAdminOrLeaveEditor = is_admin_or_leave_editor();
 
         $leave_requests = $leave_requests->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($leave_request) use ($isAdmin, $isAdminOrLeaveEditor) {
                 // Calculate the duration in hours if both from_time and to_time are provided
                 $fromDate = Carbon::parse($leave_request->from_date);
@@ -451,7 +446,7 @@ class LeaveRequestController extends Controller
                 ];
                 $statusBadge = $statusBadges[$leave_request->status] ?? '';
 
-                if ($leave_request->visible_to_all == 1) {
+                if ($leave_request->visible_to_all === 1) {
                     $visibleTo = get_label('all', 'All');
                 } else {
                     $visibleTo = $leave_request->visibleToUsers->isEmpty()
@@ -461,10 +456,9 @@ class LeaveRequestController extends Controller
                                 // Render clickable link if permission exists
                                 $profileLink = route('users.profile', ['id' => $user->id]);
                                 return '<a href="' . $profileLink . '">' . $user->first_name . ' ' . $user->last_name . '</a>';
-                            } else {
-                                // Render plain text if no permission
-                                return $user->first_name . ' ' . $user->last_name;
                             }
+                            // Render plain text if no permission
+                            return $user->first_name . ' ' . $user->last_name;
                         })->implode(', ');
                 }
 
@@ -473,7 +467,7 @@ class LeaveRequestController extends Controller
                     $actions .= '<a href="javascript:void(0);" class="edit-leave-request" data-bs-toggle="modal" data-bs-target="#edit_leave_request_modal" data-id=' . $leave_request->id . ' title=' . get_label('update', 'Update') . '><i class="bx bx-edit mx-1"></i></a>';
                 }
 
-                if ($isAdminOrLeaveEditor || $leave_request->status == 'pending') {
+                if ($isAdminOrLeaveEditor || $leave_request->status === 'pending') {
                     $actions .= '<button title=' . get_label('delete', 'Delete') . ' type="button" class="btn delete" data-id=' . $leave_request->id . ' data-type="leave-requests" data-table="lr_table">' .
                         '<i class="bx bx-trash text-danger mx-1"></i>' .
                         '</button>';
@@ -493,12 +487,12 @@ class LeaveRequestController extends Controller
                     'visible_to' => $visibleTo,
                     'created_at' => format_date($leave_request->created_at, true),
                     'updated_at' => format_date($leave_request->updated_at, true),
-                    'actions' => $actions ? $actions : '-'
+                    'actions' => $actions ? $actions : '-',
                 ];
             });
         return response()->json([
-            "rows" => $leave_requests->items(),
-            "total" => $total,
+            'rows' => $leave_requests->items(),
+            'total' => $total,
         ]);
     }
 
@@ -589,34 +583,33 @@ class LeaveRequestController extends Controller
 
         if ($id) {
             $leaveRequest = LeaveRequest::find($id);
-            if (!$leaveRequest) {
+            if (! $leaveRequest) {
                 return formatApiResponse(
                     false,
                     'Leave request not found',
                     [
                         'total' => 0,
-                        'data' => []
-                    ]
-                );
-            } else {
-                return formatApiResponse(
-                    false,
-                    'Leave request retrieved successfully',
-                    [
-                        'total' => 1,
-                        'data' => [formatLeaveRequest($leaveRequest)]
+                        'data' => [],
                     ]
                 );
             }
+            return formatApiResponse(
+                false,
+                'Leave request retrieved successfully',
+                [
+                    'total' => 1,
+                    'data' => [formatLeaveRequest($leaveRequest)],
+                ]
+            );
         }
 
         $leaveRequestsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->leave_requests() : $this->user->leave_requests();
 
-        if (!is_admin_or_leave_editor()) {
+        if (! is_admin_or_leave_editor()) {
             // If the user is not an admin or leave editor, filter by user_id
             $leaveRequestsQuery->where('leave_requests.user_id', $this->user->id);
         }
-        if ($status != '') {
+        if ($status !== '') {
             $leaveRequestsQuery->where('leave_requests.status', $status);
         }
         if ($user_id) {
@@ -632,9 +625,9 @@ class LeaveRequestController extends Controller
             $leaveRequestsQuery->whereBetween('leave_requests.to_date', [$end_date_from, $end_date_to]);
         }
         if ($type) {
-            if ($type == 'full') {
+            if ($type === 'full') {
                 $leaveRequestsQuery->whereNull('leave_requests.from_time')->whereNull('leave_requests.to_time');
-            } elseif ($type == 'partial') {
+            } elseif ($type === 'partial') {
                 $leaveRequestsQuery->whereNotNull('leave_requests.from_time')->whereNotNull('leave_requests.to_time');
             }
         }
@@ -658,7 +651,7 @@ class LeaveRequestController extends Controller
                 'Leave requests not found',
                 [
                     'total' => 0,
-                    'data' => []
+                    'data' => [],
                 ]
             );
         }
@@ -672,12 +665,10 @@ class LeaveRequestController extends Controller
             'Leave requests retrieved successfully',
             [
                 'total' => $total,
-                'data' => $data
+                'data' => $data,
             ]
         );
     }
-
-
 
     public function get($id)
     {
@@ -685,7 +676,6 @@ class LeaveRequestController extends Controller
         $visibleTo = $lr->visibleToUsers;
         return response()->json(['lr' => $lr, 'visibleTo' => $visibleTo]);
     }
-
 
     /**
      * Update an existing leave request.
@@ -777,7 +767,7 @@ class LeaveRequestController extends Controller
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null, 'from date', startDateKey: 'from_date');
 
                     // Check and handle errors for from_date specifically
-                    if (!empty($errors['from_date'])) {
+                    if (! empty($errors['from_date'])) {
                         foreach ($errors['from_date'] as $error) {
                             $fail($error);
                         }
@@ -791,7 +781,7 @@ class LeaveRequestController extends Controller
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'to date', endDateKey: 'to_date');
 
                     // Check and handle errors for to_date specifically
-                    if (!empty($errors['to_date'])) {
+                    if (! empty($errors['to_date'])) {
                         foreach ($errors['to_date'] as $error) {
                             $fail($error);
                         }
@@ -802,7 +792,7 @@ class LeaveRequestController extends Controller
             'to_time' => ['required_if:partialLeave,on'],
             'status' => $isAdminOrLe ? 'required|in:pending,approved,rejected' : 'nullable|in:pending,approved,rejected',
             'visible_to_ids.*' => 'exists:users,id',
-            'comment' => ['nullable']
+            'comment' => ['nullable'],
         ];
         $messages = [
             'from_time.required_if' => 'The from time field is required when partial leave is checked.',
@@ -816,21 +806,21 @@ class LeaveRequestController extends Controller
             $currentStatus = $leaveRequest->status;
             $newStatus = $validatedData['status'] ?? $currentStatus;
 
-            if (!is_null($leaveRequest->action_by) && !$this->user->hasRole('admin')) {
+            if (! is_null($leaveRequest->action_by) && ! $this->user->hasRole('admin')) {
                 return response()->json([
                     'error' => true,
                     'message' => 'Once actioned only admin can update leave request.',
                 ]);
             }
 
-            if ($leaveRequest->user_id == $this->user->id && !$this->user->hasRole('admin') && $request->input('status') && $request->filled('status') && $request->input('status') == 'approved') {
+            if ($leaveRequest->user_id === $this->user->id && ! $this->user->hasRole('admin') && $request->input('status') && $request->filled('status') && $request->input('status') === 'approved') {
                 return response()->json([
                     'error' => true,
                     'message' => 'You can not approve own leave request.',
                 ]);
             }
 
-            if (in_array($currentStatus, ['approved', 'rejected']) && $newStatus == 'pending') {
+            if (in_array($currentStatus, ['approved', 'rejected']) && $newStatus === 'pending') {
                 return response()->json([
                     'error' => true,
                     'message' => 'You cannot set the status to pending if it has already been approved or rejected.',
@@ -841,16 +831,16 @@ class LeaveRequestController extends Controller
             $to_date = $request->input('to_date');
             $validatedData['from_date'] = format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
             $validatedData['to_date'] = format_date($to_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            if ($newStatus != $currentStatus) {
+            if ($newStatus !== $currentStatus) {
                 $validatedData['action_by'] = $this->user->id;
             }
-            $leaveVisibleToAll = $request->input('leaveVisibleToAll') && $request->filled('leaveVisibleToAll') && $request->input('leaveVisibleToAll') == 'on' ? 1 : 0;
+            $leaveVisibleToAll = $request->input('leaveVisibleToAll') && $request->filled('leaveVisibleToAll') && $request->input('leaveVisibleToAll') === 'on' ? 1 : 0;
             $validatedData['visible_to_all'] = $leaveVisibleToAll;
-            $validatedData['comment'] = is_admin_or_leave_editor() && $request->filled('comment') ? $request->input('comment') : NULL;
+            $validatedData['comment'] = is_admin_or_leave_editor() && $request->filled('comment') ? $request->input('comment') : null;
             // Update the status of the leave request
             if ($leaveRequest->update($validatedData)) {
                 $leaveRequest = $leaveRequest->fresh();
-                if ($leaveVisibleToAll == 0) {
+                if ($leaveVisibleToAll === 0) {
                     // Sync the visibleToUsers with the provided visible_to_ids
                     $visibleToUsers = $request->input('visible_to_ids', []);
                     $leaveRequest->visibleToUsers()->sync($visibleToUsers);
@@ -858,7 +848,7 @@ class LeaveRequestController extends Controller
                     // Detach all users from the visibleToUsers relationship
                     $leaveRequest->visibleToUsers()->detach();
                 }
-                if ($newStatus != $currentStatus) {
+                if ($newStatus !== $currentStatus) {
                     $fromDate = Carbon::parse($leaveRequest->from_date);
                     $toDate = Carbon::parse($leaveRequest->to_date);
 
@@ -906,7 +896,7 @@ class LeaveRequestController extends Controller
                         'comment' => $leaveRequest->comment ?? '-',
                         'old_status' => ucfirst($currentStatus),
                         'new_status' => ucfirst($newStatus),
-                        'action' => 'status_updated'
+                        'action' => 'status_updated',
                     ];
                     $workspaceUsers = $this->workspace->users->pluck('id')->toArray();
                     // Determine recipients
@@ -938,7 +928,7 @@ class LeaveRequestController extends Controller
                     $recipients = array_merge($adminIds, $leaveEditorIdsWithPrefix, [$userWithPrefix]);
                     processNotifications($notificationData, $recipients);
 
-                    if ($newStatus == 'approved') {
+                    if ($newStatus === 'approved') {
                         // Get the timezone from the application configuration
                         $appTimezone = config('app.timezone');
 
@@ -960,7 +950,7 @@ class LeaveRequestController extends Controller
 
                         // Check if the leave end date and time have not passed
                         if ($currentDateTime < $leaveEndDate) {
-                            if ($leaveRequest->visible_to_all == 1) {
+                            if ($leaveRequest->visible_to_all === 1) {
                                 $recipientTeamMembers = $this->workspace->users->pluck('id')->toArray();
                             } else {
                                 $recipientTeamMembers = $leaveRequest->visibleToUsers->pluck('id')->toArray();
@@ -984,7 +974,7 @@ class LeaveRequestController extends Controller
                                 'to' => $to,
                                 'duration' => $duration,
                                 'reason' => $leaveRequest->reason,
-                                'action' => 'team_member_on_leave_alert'
+                                'action' => 'team_member_on_leave_alert',
                             ];
                             processNotifications($notificationData, $recipientTeamMemberIds);
                         }
@@ -997,29 +987,27 @@ class LeaveRequestController extends Controller
                     [
                         'id' => $leaveRequest->id,
                         'type' => 'leave_request',
-                        'data' => formatLeaveRequest($leaveRequest)
+                        'data' => formatLeaveRequest($leaveRequest),
                     ]
                 );
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Leave request couldn\'t updated.'
-                ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Leave request couldn\'t updated.',
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the leave request.'
+                'message' => 'An error occurred while updating the leave request.',
             ], 500);
         }
     }
 
     public function update_editors(Request $request)
     {
-
         $userIds = $request->input('user_ids') ?? [];
         $currentLeaveEditorUserIds = LeaveEditor::pluck('user_id')->toArray();
         $usersToDetach = array_diff($currentLeaveEditorUserIds, $userIds);
@@ -1028,7 +1016,7 @@ class LeaveRequestController extends Controller
             // Check if a leave editor with the same user_id already exists
             $existingLeaveEditor = LeaveEditor::where('user_id', $assignedUserId)->first();
 
-            if (!$existingLeaveEditor) {
+            if (! $existingLeaveEditor) {
                 // Create a new LeaveEditor only if it doesn't exist
                 $leaveEditor = new LeaveEditor();
                 $leaveEditor->user_id = $assignedUserId;
@@ -1086,16 +1074,15 @@ class LeaveRequestController extends Controller
                 [
                     'id' => $id,
                     'type' => 'leave_request',
-                    'data' => []
+                    'data' => [],
                 ]
             );
-        } else {
-            return formatApiResponse(
-                true,
-                'Leave request not found.',
-                []
-            );
         }
+        return formatApiResponse(
+            true,
+            'Leave request not found.',
+            []
+        );
     }
 
     public function destroy_multiple(Request $request)
@@ -1103,7 +1090,7 @@ class LeaveRequestController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:leave_requests,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:leave_requests,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -1132,9 +1119,8 @@ class LeaveRequestController extends Controller
             )
         ) {
             return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
-        } else {
-            return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
         }
+        return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
     }
     public function calendar_view()
     {
@@ -1160,12 +1146,9 @@ class LeaveRequestController extends Controller
         // dd($start, $end, $leaveRequestsQuery->get());
         // Apply date range filter
         $leave_requests = $leaveRequestsQuery->where(function ($query) use ($start, $end) {
-
-
             $query->whereBetween('from_date', [$start, $end])
                 ->orWhereBetween('to_date', [$start, $end]);
         })->get();
-
 
         // Format leave request for FullCalendar
         $events = $leave_requests->map(function ($leave_request) {
@@ -1188,7 +1171,6 @@ class LeaveRequestController extends Controller
                 default:
             }
 
-
             return [
                 'id' => $leave_request->id,
                 'title' => ucwords($leave_request->user->first_name . ' ' . $leave_request->user->last_name) . ' (' . ucwords($leave_request->status) . ')',
@@ -1199,15 +1181,15 @@ class LeaveRequestController extends Controller
                 'backgroundColor' => $backgroundColor,
                 'borderColor' => $borderColor,
                 'textColor' => $textColor,
-                'description' => "
-            <strong>Reason:</strong> " . ucwords(Str::limit($leave_request->reason, 20, '....')) . "<br>
-            <strong>Status:</strong> " . ucfirst($leave_request->status) . "<br>
-           <strong>From:</strong> " . format_date($leave_request->from_date) . " at " . ($leave_request->from_time ? date('H:i', strtotime($leave_request->from_time)) : '00:00') . "<br>
-<strong>To:</strong> " . format_date($leave_request->to_date) . " at " . ($leave_request->to_time ? date('H:i', strtotime($leave_request->to_time)) : '24:00'),
+                'description' => '
+            <strong>Reason:</strong> ' . ucwords(Str::limit($leave_request->reason, 20, '....')) . '<br>
+            <strong>Status:</strong> ' . ucfirst($leave_request->status) . '<br>
+           <strong>From:</strong> ' . format_date($leave_request->from_date) . ' at ' . ($leave_request->from_time ? date('H:i', strtotime($leave_request->from_time)) : '00:00') . '<br>
+<strong>To:</strong> ' . format_date($leave_request->to_date) . ' at ' . ($leave_request->to_time ? date('H:i', strtotime($leave_request->to_time)) : '24:00'),
                 'allDay' => false,
                 'extendedProps' => [
                     'status' => $leave_request->status,
-                ]
+                ],
             ];
         });
 

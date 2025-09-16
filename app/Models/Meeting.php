@@ -13,7 +13,7 @@ class Meeting extends Model
         'user_id',
         'start_date_time',
         'end_date_time',
-        'workspace_id'
+        'workspace_id',
     ];
 
     public function users()

@@ -11,7 +11,8 @@ class CandidateStatus extends Model
 
     protected $fillable = ['name','order','color'];
 
-    public function candidates(){
-        return $this->hasMany(Candidate::class,'status_id');
+    public function candidates()
+    {
+        return $this->hasMany(Candidate::class, 'status_id');
     }
 }

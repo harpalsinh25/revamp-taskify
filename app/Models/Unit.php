@@ -11,6 +11,6 @@ class Unit extends Model
     protected $fillable = [
         'workspace_id',
         'title',
-        'description'
+        'description',
     ];
 }

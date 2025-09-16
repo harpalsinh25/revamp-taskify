@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Pinned extends Model
 {
     protected $table = 'pinned';
-    
+
     protected $fillable = [
         'user_id',
         'client_id',

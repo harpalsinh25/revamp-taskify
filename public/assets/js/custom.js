@@ -3331,9 +3331,8 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
     } else {
         $overlay.modal("show");
     }
-
     $.ajax({
-        url: `${baseUrl}/tasks/get/${taskId}`,
+        url: `/tasks/get/${taskId}`,
         type: "GET",
         headers: {
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),

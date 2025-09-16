@@ -2,10 +2,10 @@
 
 namespace Plugins\AssetManagement\Exports;
 
-use Plugins\AssetManagement\Models\Asset;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Plugins\AssetManagement\Models\Asset;
 
 class AssetsExport implements FromQuery, WithHeadings, WithMapping
 {
@@ -19,7 +19,6 @@ class AssetsExport implements FromQuery, WithHeadings, WithMapping
 
     public function map($asset): array
     {
-
         $general_settings = get_settings('general_settings');
         $currency_symbol = $general_settings['currency_symbol'] ?? '₹';
 
@@ -31,7 +30,7 @@ class AssetsExport implements FromQuery, WithHeadings, WithMapping
             $asset->assignedUser ? $asset->assignedUser->first_name . ' ' . $asset->assignedUser->last_name : null,
             $asset->status,
             $asset->description,
-            $asset->purchase_cost ? $currency_symbol . " " . $asset->purchase_cost : '-',
+            $asset->purchase_cost ? $currency_symbol . ' ' . $asset->purchase_cost : '-',
             $asset->purchase_date,
             $asset->created_at,
             $asset->updated_at,

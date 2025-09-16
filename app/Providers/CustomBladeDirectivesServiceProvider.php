@@ -14,7 +14,6 @@ class CustomBladeDirectivesServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
     }
 
     /**
@@ -33,13 +32,13 @@ class CustomBladeDirectivesServiceProvider extends ServiceProvider
         });
 
         Blade::directive('hasRole', function ($expression) {
-            return "<?php if(auth()->check() && auth()->user()->hasRole($expression)): ?>";
+            return "<?php if(auth()->check() && auth()->user()->hasRole({$expression})): ?>";
         });
-    
+
         Blade::directive('elsehasRole', function ($expression) {
-            return "<?php elseif(auth()->check() && auth()->user()->hasRole($expression)): ?>";
+            return "<?php elseif(auth()->check() && auth()->user()->hasRole({$expression})): ?>";
         });
-    
+
         Blade::directive('endhasRole', function () {
             return '<?php endif; ?>';
         });

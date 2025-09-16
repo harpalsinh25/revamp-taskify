@@ -2,38 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use Carbon\Carbon;
+use App\Helpers\FileValidationHelper;
+use App\Imports\ProjectsImport;
+use App\Models\Client;
+use App\Models\Comment;
+use App\Models\CommentAttachment;
+use App\Models\CustomField;
+use App\Models\Milestone;
+use App\Models\Priority;
+use App\Models\Project;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\User;
-use App\Models\Client;
-use App\Models\Status;
-use App\Models\Comment;
-use App\Models\Project;
-use App\Models\Priority;
-use App\Models\Milestone;
-use App\Models\Workspace;
-use App\Models\CustomField;
-use App\Models\ProjectUser;
-use Illuminate\Http\Request;
-use App\Models\ProjectClient;
-use App\Imports\ProjectsImport;
-use App\Models\CommentAttachment;
-use App\Services\DeletionService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Models\UserClientPreference;
+use App\Models\Workspace;
+use App\Services\DeletionService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Helpers\FileValidationHelper;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Chatify\Facades\ChatifyMessenger as Chatify;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Request as FacadesRequest;
 
 class ProjectsController extends Controller
 {
@@ -87,10 +81,10 @@ class ProjectsController extends Controller
                 break;
         }
         $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $projectsQuery->whereIn('status_id', $statuses); // Apply multiple status filter
         }
-        if (!empty($selectedTags)) {
+        if (! empty($selectedTags)) {
             $projectsQuery->whereHas('tags', function ($q) use ($selectedTags) {
                 $q->whereIn('tags.id', $selectedTags);
             });
@@ -120,7 +114,7 @@ class ProjectsController extends Controller
             'auth_user' => $this->user,
             'selectedTags' => $selectedTags,
             'is_favorite' => $is_favorite,
-            'customFields' => $customFields
+            'customFields' => $customFields,
         ]);
     }
     public function kanban_view(Request $request, $type = null)
@@ -131,26 +125,26 @@ class ProjectsController extends Controller
         if ($type === 'favorite') {
             $is_favorite = 1;
         }
-        $sort = (request('sort')) ? request('sort') : "id";
+        $sort = request('sort') ? request('sort') : 'id';
         $order = 'desc';
-        if ($sort == 'newest') {
+        if ($sort === 'newest') {
             $sort = 'created_at';
             $order = 'desc';
-        } elseif ($sort == 'oldest') {
+        } elseif ($sort === 'oldest') {
             $sort = 'created_at';
             $order = 'asc';
-        } elseif ($sort == 'recently-updated') {
+        } elseif ($sort === 'recently-updated') {
             $sort = 'updated_at';
             $order = 'desc';
-        } elseif ($sort == 'earliest-updated') {
+        } elseif ($sort === 'earliest-updated') {
             $sort = 'updated_at';
             $order = 'asc';
         }
         $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $projectsQuery->whereIn('status_id', $statuses); // Apply multiple status filter
         }
-        if (!empty($selectedTags)) {
+        if (! empty($selectedTags)) {
             $projectsQuery->whereHas('tags', function ($q) use ($selectedTags) {
                 $q->whereIn('tags.id', $selectedTags);
             });
@@ -300,7 +294,7 @@ class ProjectsController extends Controller
     public function store(Request $request)
     {
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
+        if ($request->input('priority_id') === 0) {
             $request->merge(['priority_id' => null]);
         }
         // Define validation rules
@@ -313,7 +307,7 @@ class ProjectsController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -325,7 +319,7 @@ class ProjectsController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['end_date'])) {
+                    if (! empty($errors['end_date'])) {
                         foreach ($errors['end_date'] as $error) {
                             $fail($error);
                         }
@@ -339,7 +333,7 @@ class ProjectsController extends Controller
                     if ($error) {
                         $fail($error);
                     }
-                }
+                },
             ],
             'task_accessibility' => [
                 'required',
@@ -348,7 +342,7 @@ class ProjectsController extends Controller
                     if ($value !== 'project_users' && $value !== 'assigned_users') {
                         $fail('The task accessibility must be either project_users or assigned_users.');
                     }
-                }
+                },
             ],
             'description' => 'nullable|string',
             'note' => 'nullable|string',
@@ -364,7 +358,7 @@ class ProjectsController extends Controller
         $messages = [
             'status_id.required' => 'The status field is required.',
             'start_date.after_or_equal' => 'The start date must be today or a future date.',
-            'end_date.after_or_equal'   => 'The end date must be today or a future date.',
+            'end_date.after_or_equal' => 'The end date must be today or a future date.',
         ];
         // Validate the request
         try {
@@ -385,17 +379,17 @@ class ProjectsController extends Controller
                 unset($formFields['user_id']);
                 unset($formFields['client_id']);
                 unset($formFields['tag_ids']);
-                $clientCanDiscuss = isAdminOrHasAllDataAccess() && $request->filled('clientCanDiscuss') && $request->input('clientCanDiscuss') == 'on' ? 1 : 0;
+                $clientCanDiscuss = isAdminOrHasAllDataAccess() && $request->filled('clientCanDiscuss') && $request->input('clientCanDiscuss') === 'on' ? 1 : 0;
                 $formFields['client_can_discuss'] = $clientCanDiscuss;
                 $new_project = Project::create($formFields);
                 $userIds = $request->input('user_id') ?? [];
                 $clientIds = $request->input('client_id') ?? [];
                 $tagIds = $request->input('tag_ids') ?? [];
                 // Set creator as a participant automatically if !isAdminOrHasAllDataAccess
-                if (!isAdminOrHasAllDataAccess()) {
-                    if (getGuardName() == 'client' && !in_array($this->user->id, $clientIds)) {
+                if (! isAdminOrHasAllDataAccess()) {
+                    if (getGuardName() === 'client' && ! in_array($this->user->id, $clientIds)) {
                         array_splice($clientIds, 0, 0, $this->user->id);
-                    } else if (getGuardName() == 'web' && !in_array($this->user->id, $userIds)) {
+                    } elseif (getGuardName() === 'web' && ! in_array($this->user->id, $userIds)) {
                         array_splice($userIds, 0, 0, $this->user->id);
                     }
                 }
@@ -404,7 +398,7 @@ class ProjectsController extends Controller
                 $project->users()->attach($userIds);
                 $project->clients()->attach($clientIds);
                 $project->tags()->attach($tagIds);
-                if ($request->has('is_favorite') && $request->input('is_favorite') == 1) {
+                if ($request->has('is_favorite') && $request->input('is_favorite') === 1) {
                     $this->user->favorites()->create([
                         'favoritable_type' => Project::class,
                         'favoritable_id' => $project_id,
@@ -428,7 +422,7 @@ class ProjectsController extends Controller
 
                         $project->customFieldValues()->create([
                             'custom_field_id' => $field_id,
-                            'value' => $value
+                            'value' => $value,
                         ]);
                     }
                 }
@@ -438,7 +432,7 @@ class ProjectsController extends Controller
                     'type_id' => $project_id,
                     'type_title' => $project->title,
                     'access_url' => 'projects/information/' . $project_id,
-                    'action' => 'assigned'
+                    'action' => 'assigned',
                 ];
                 $recipients = array_merge(
                     array_map(function ($userId) {
@@ -454,12 +448,11 @@ class ProjectsController extends Controller
                     'Project created successfully.',
                     [
                         'id' => $new_project->id,
-                        'data' => formatProject($project)
+                        'data' => formatProject($project),
                     ]
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
+            return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
@@ -467,7 +460,7 @@ class ProjectsController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the project.'
+                'message' => 'An error occurred while creating the project.',
             ], 500);
         }
     }
@@ -479,19 +472,19 @@ class ProjectsController extends Controller
             'entity' => 'projects',
             'form_action' => url('projects/process-bulk-upload'),
             'sample_file_url' => $sampleFileUrl,
-            'help_url' => $helpUrl
+            'help_url' => $helpUrl,
         ]);
     }
     public function importBulkProjects(Request $request)
     {
         // Validate file type (ensure it's Excel or CSV)
         $request->validate([
-            'bulk_file' => 'required|mimes:xlsx,xls,csv'
+            'bulk_file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
         try {
             // Initialize the import class
-            $import = new ProjectsImport;
+            $import = new ProjectsImport();
 
             // Use the import class for bulk upload
             Excel::import($import, $request->file('bulk_file'));
@@ -505,7 +498,7 @@ class ProjectsController extends Controller
             // Get the count of successful imports (you might want to track this in your import class)
             $successfulImports = 0; // You can add a counter in your import class to track this
 
-            if (!empty($validationErrors)) {
+            if (! empty($validationErrors)) {
                 // Return partial success with validation errors
                 return response()->json([
                     'error' => false, // Changed to false since some might have succeeded
@@ -513,26 +506,26 @@ class ProjectsController extends Controller
                         "Import completed with some errors. {$successfulImports} projects imported successfully." :
                         'Some validation errors occurred.',
                     'validation_errors' => $validationErrors,
-                    'partial_success' => true
+                    'partial_success' => true,
                 ], 200); // Changed to 200 since it's partial success
             }
 
             // If no validation errors, return success message
             return response()->json([
                 'error' => false,
-                'message' => 'All projects imported successfully.'
+                'message' => 'All projects imported successfully.',
             ]);
         } catch (\Exception $e) {
             // Log the full error for debugging
             Log::error('Project import error: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while importing projects: ' . $e->getMessage()
+                'message' => 'An error occurred while importing projects: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -540,6 +533,7 @@ class ProjectsController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -560,7 +554,7 @@ class ProjectsController extends Controller
         $tags = $project->tags()->get();
         $workspace_users = $this->workspace->users;
         $workspace_clients = $this->workspace->clients;
-        $project->load("customFieldValues");
+        $project->load('customFieldValues');
         // Prepare custom field values for API response
         $customFields = CustomField::where('module', 'project')->get();
         // dd($project->customFieldValues);
@@ -579,7 +573,7 @@ class ProjectsController extends Controller
             'workspace_clients' => $workspace_clients,
             'tags' => $tags,
             'customFields' => $customFields,
-            'customFieldValues' => $customFieldValues
+            'customFieldValues' => $customFieldValues,
         ]);
     }
     /**
@@ -690,9 +684,8 @@ class ProjectsController extends Controller
      */
     public function update(Request $request)
     {
-
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
+        if ($request->input('priority_id') === 0) {
             $request->merge(['priority_id' => null]);
         }
         $rules = [
@@ -707,7 +700,7 @@ class ProjectsController extends Controller
                     if ($error) {
                         $fail($error);
                     }
-                }
+                },
             ],
             'task_accessibility' => [
                 'required',
@@ -715,14 +708,14 @@ class ProjectsController extends Controller
                     if ($value !== 'project_users' && $value !== 'assigned_users') {
                         $fail('The task accessibility must be either project_users or assigned_users.');
                     }
-                }
+                },
             ],
             'start_date' => [
                 'nullable',
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -734,7 +727,7 @@ class ProjectsController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['end_date'])) {
+                    if (! empty($errors['end_date'])) {
                         foreach ($errors['end_date'] as $error) {
                             $fail($error);
                         }
@@ -752,7 +745,7 @@ class ProjectsController extends Controller
         $messages = [
             'status_id.required' => 'The status field is required.',
             'start_date.after_or_equal' => 'The start date must be today or a future date.',
-            'end_date.after_or_equal'   => 'The end date must be today or a future date.',
+            'end_date.after_or_equal' => 'The end date must be today or a future date.',
         ];
         // Validate the request
         try {
@@ -771,9 +764,9 @@ class ProjectsController extends Controller
                 'enable_tasks_time_entries' => $request->input('enable_tasks_time_entries', false),
             ];
             // Check if the status has changed
-            if ($currentStatusId != $request->input('status_id')) {
+            if ($currentStatusId !== $request->input('status_id')) {
                 $status = Status::findOrFail($request->input('status_id'));
-                if (!canSetStatus($status)) {
+                if (! canSetStatus($status)) {
                     return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
                 }
                 // Status Time Storing
@@ -800,7 +793,7 @@ class ProjectsController extends Controller
                 $formFieldsToUpdate['end_date'] = null;
             }
             $clientCanDiscuss = isAdminOrHasAllDataAccess()
-                ? ($request->input('clientCanDiscuss') == 'on' ? 1 : 0)
+                ? ($request->input('clientCanDiscuss') === 'on' ? 1 : 0)
                 : $project->client_can_discuss;
             $formFieldsToUpdate['client_can_discuss'] = $clientCanDiscuss;
             $userIds = $request->input('user_id') ?? [];
@@ -820,7 +813,6 @@ class ProjectsController extends Controller
 
             // Update custom field values
             if ($request->has('custom_fields')) {
-
                 foreach ($request->custom_fields as $field_id => $value) {
                     // Handle checkboxes (arrays)
                     if (is_array($value)) {
@@ -837,7 +829,7 @@ class ProjectsController extends Controller
                     } else {
                         $project->customFieldValues()->create([
                             'custom_field_id' => $field_id,
-                            'value' => $value
+                            'value' => $value,
                         ]);
                     }
                 }
@@ -849,7 +841,7 @@ class ProjectsController extends Controller
                 'type_id' => $project->id,
                 'type_title' => $project->title,
                 'access_url' => 'projects/information/' . $project->id,
-                'action' => 'assigned'
+                'action' => 'assigned',
             ];
             // Determine recipients
             $recipients = array_merge(
@@ -862,7 +854,7 @@ class ProjectsController extends Controller
             );
             // Process notifications
             processNotifications($notificationData, $recipients);
-            if ($currentStatusId != $request->input('status_id')) {
+            if ($currentStatusId !== $request->input('status_id')) {
                 $currentStatus = Status::findOrFail($currentStatusId);
                 $newStatus = Status::findOrFail($request->input('status_id'));
                 $notification_data = [
@@ -874,7 +866,7 @@ class ProjectsController extends Controller
                     'old_status' => $currentStatus->title,
                     'new_status' => $newStatus->title,
                     'access_url' => 'projects/information/' . $project->id,
-                    'action' => 'status_updated'
+                    'action' => 'status_updated',
                 ];
                 $currentRecipients = array_merge(
                     array_map(function ($userId) {
@@ -892,7 +884,7 @@ class ProjectsController extends Controller
                 'Project updated successfully.',
                 [
                     'id' => $project->id,
-                    'data' => formatProject($project)
+                    'data' => formatProject($project),
                 ]
             );
         } catch (ValidationException $e) {
@@ -901,7 +893,7 @@ class ProjectsController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the project.'
+                'message' => 'An error occurred while updating the project.',
             ], 500);
         }
     }
@@ -960,20 +952,19 @@ class ProjectsController extends Controller
             $project->comments()->forceDelete();
             $project->notificationsForProject()->delete();
             return $response;
-        } else {
-            return formatApiResponse(
-                true,
-                'Project not found.',
-                []
-            );
         }
+        return formatApiResponse(
+            true,
+            'Project not found.',
+            []
+        );
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:projects,id' // Ensure each ID in 'ids' is an integer and exists in the 'projects' table
+            'ids.*' => 'integer|exists:projects,id', // Ensure each ID in 'ids' is an integer and exists in the 'projects' table
         ]);
         $ids = $validatedData['ids'];
         $deletedProjects = [];
@@ -1006,46 +997,46 @@ class ProjectsController extends Controller
     public function list(Request $request, $id = '', $type = '')
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $status_ids = request('status_ids', []);
         $priority_ids = request('priority_ids', []);
         $user_ids = request('user_ids', []);
         $client_ids = request('client_ids', []);
         $tag_ids = $request->input('tag_ids', []);
-        $date_between_from = request('project_date_between_from') ?: "";
-        $date_between_to = request('project_date_between_to') ?: "";
-        $start_date_from = (request('project_start_date_from')) ? request('project_start_date_from') : "";
-        $start_date_to = (request('project_start_date_to')) ? request('project_start_date_to') : "";
-        $end_date_from = (request('project_end_date_from')) ? request('project_end_date_from') : "";
-        $end_date_to = (request('project_end_date_to')) ? request('project_end_date_to') : "";
-        $is_favorites = (request('is_favorites')) ? request('is_favorites') : "";
+        $date_between_from = request('project_date_between_from') ?: '';
+        $date_between_to = request('project_date_between_to') ?: '';
+        $start_date_from = request('project_start_date_from') ? request('project_start_date_from') : '';
+        $start_date_to = request('project_start_date_to') ? request('project_start_date_to') : '';
+        $end_date_from = request('project_end_date_from') ? request('project_end_date_from') : '';
+        $end_date_to = request('project_end_date_to') ? request('project_end_date_to') : '';
+        $is_favorites = request('is_favorites') ? request('is_favorites') : '';
         if ($id) {
             $id = explode('_', $id);
             $belongs_to = $id[0];
             $belongs_to_id = $id[1];
-            $userOrClient = $belongs_to == 'user' ? User::find($belongs_to_id) : Client::find($belongs_to_id);
+            $userOrClient = $belongs_to === 'user' ? User::find($belongs_to_id) : Client::find($belongs_to_id);
             $projects = isAdminOrHasAllDataAccess($belongs_to, $belongs_to_id) ? $this->workspace->projects() : $userOrClient->projects();
         } else {
             $projects = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
         }
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $projects = $projects->whereHas('users', function ($query) use ($user_ids) {
                 $query->whereIn('users.id', $user_ids);
             });
         }
-        if (!empty($client_ids)) {
+        if (! empty($client_ids)) {
             $projects = $projects->whereHas('clients', function ($query) use ($client_ids) {
                 $query->whereIn('clients.id', $client_ids);
             });
         }
-        if (!empty($status_ids)) {
+        if (! empty($status_ids)) {
             $projects->whereIn('status_id', $status_ids);
         }
-        if (!empty($priority_ids)) {
+        if (! empty($priority_ids)) {
             $projects->whereIn('priority_id', $priority_ids);
         }
-        if (!empty($tag_ids)) {
+        if (! empty($tag_ids)) {
             $projects->whereHas('tags', function ($query) use ($tag_ids) {
                 $query->whereIn('tags.id', $tag_ids);
             });
@@ -1078,7 +1069,7 @@ class ProjectsController extends Controller
         $canDelete = checkPermission('delete_projects');
         $statuses = Status::all();
         $priorities = Priority::all();
-        $isHome = $request->query('from_home') == '1';
+        $isHome = $request->query('from_home') === '1';
         $webGuard = Auth::guard('web')->check();
         $projects = $projects->leftJoin('pinned', function ($join) {
             $join->on('pinned.pinnable_id', '=', 'projects.id')
@@ -1087,7 +1078,7 @@ class ProjectsController extends Controller
             ->select('projects.*', 'pinned.id as pinned_id')  // Select the projects and alias pinned.id as pinned_id
             ->orderByDesc('pinned.id') // Projects that are pinned will appear first
             ->orderBy('projects.' . $sort, $order)  // Then order by other parameters (e.g., id or title)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(
                 function ($project) use ($statuses, $priorities, $canEdit, $canDelete, $canCreate, $isHome, $webGuard) {
                     $statusOptions = '';
@@ -1095,19 +1086,19 @@ class ProjectsController extends Controller
                         // Determine if the option should be disabled
                         $disabled = canSetStatus($status) ? '' : 'disabled';
                         // Render the option with appropriate attributes
-                        $selected = $project->status_id == $status->id ? 'selected' : '';
-                        $statusOptions .= "<option value='{$status->id}' class='badge bg-label-$status->color' $selected $disabled>$status->title</option>";
+                        $selected = $project->status_id === $status->id ? 'selected' : '';
+                        $statusOptions .= "<option value='{$status->id}' class='badge bg-label-{$status->color}' {$selected} {$disabled}>{$status->title}</option>";
                     }
                     $priorityOptions = "<option value='' class='badge bg-label-secondary'>-</option>";
                     foreach ($priorities as $priority) {
-                        $selected = $project->priority_id == $priority->id ? 'selected' : '';
-                        $priorityOptions .= "<option value='{$priority->id}' class='badge bg-label-$priority->color' $selected>$priority->title</option>";
+                        $selected = $project->priority_id === $priority->id ? 'selected' : '';
+                        $priorityOptions .= "<option value='{$priority->id}' class='badge bg-label-{$priority->color}' {$selected}>{$priority->title}</option>";
                     }
                     $actions = '';
                     if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-project" data-offcanvas="true" data-id="' . $project->id . '" title="' . get_label('update', 'Update') . '">' .
-                            '<i class="bx bx-edit mx-1"></i>' .
-                            '</a>';
+                        $actions .= '<a href="javascript:void(0);" class="edit-project" data-offcanvas="true" data-id="' . $project->id . '" title="' . get_label('update', 'Update') . '">' .
+                                '<i class="bx bx-edit mx-1"></i>' .
+                                '</a>';
                     }
                     if ($canDelete) {
                         $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $project->id . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '">' .
@@ -1122,33 +1113,33 @@ class ProjectsController extends Controller
                     $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $project->id . '" data-type="project" title="' . get_label('quick_view', 'Quick View') . '">' .
                         '<i class="bx bx-info-circle text-info mx-3"></i>' .
                         '</a>';
-                $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" title="' . get_label('mind_map', 'Mind Map') . '">' .
-                        '<i class="bx bx-sitemap ms-2"></i>' .
-                        '</a>';
-                    $actions = $actions ?: '-';
+                    $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" title="' . get_label('mind_map', 'Mind Map') . '">' .
+                            '<i class="bx bx-sitemap ms-2"></i>' .
+                            '</a>';
+                    $actions = $actions ? $actions : '-';
                     $userHtml = '';
-                    if (!empty($project->users) && count($project->users) > 0) {
+                    if (! empty($project->users) && count($project->users) > 0) {
                         $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->users as $user) {
-                        $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target=
+                            $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target=
                             '_blank' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
 
-                    $userHtml .= '</ul>';
+                        $userHtml .= '</ul>';
                     } else {
-                    $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
-                }
+                        $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                    }
                     $clientHtml = '';
-                    if (!empty($project->clients) && count($project->clients) > 0) {
+                    if (! empty($project->clients) && count($project->clients) > 0) {
                         $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->clients as $client) {
-                        $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                            $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
 
-                    $clientHtml .= '</ul>';
+                        $clientHtml .= '</ul>';
                     } else {
-                    $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
-                }
+                        $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                    }
                     $tagHtml = '';
                     foreach ($project->tags as $tag) {
                         $tagHtml .= "<span class='badge bg-label-{$tag->color}'>{$tag->title}</span> ";
@@ -1157,7 +1148,7 @@ class ProjectsController extends Controller
                     $isPinned = getPinnedStatus($project->id);
                     return [
                         'id' => $project->id,
-                    'title' => "<a href='" . url("/projects/information/{$project->id}") . "' target='_blank'><strong>{$project->title}</strong></a>
+                        'title' => "<a href='" . url("/projects/information/{$project->id}") . "' target='_blank'><strong>{$project->title}</strong></a>
                         <a href='javascript:void(0);' class='mx-2'>
                             <i class='bx " . ($isFavorite ? 'bxs' : 'bx') . "-star favorite-icon text-warning' data-favorite='{$isFavorite}' data-id='{$project->id}' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'></i>
                         </a><a href='javascript:void(0);' class='mr-2'>
@@ -1166,32 +1157,32 @@ class ProjectsController extends Controller
                             "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions'  class='ms-2'>
                                 <i class='bx bx-message-rounded-dots text-danger' data-bs-toggle='tooltip' data-bs-placement='right' title='" . get_label('discussions', 'Discussions') . "'></i>
                             </a>"
-                            : ""),
+                            : ''),
                         'users' => $userHtml,
                         'clients' => $clientHtml,
                         'start_date' => format_date($project->start_date),
                         'end_date' => format_date($project->end_date),
-                        'budget' => !empty($project->budget) && $project->budget !== null ? format_currency($project->budget) : '-',
+                        'budget' => ! empty($project->budget) && $project->budget !== null ? format_currency($project->budget) : '-',
                         'status_id' => "<div class='d-flex align-items-center'>
                             <select class='form-select form-select-sm select-bg-label-{$project->status->color} fixed-width-select' id='statusSelect' data-id='{$project->id}' data-original-status-id='{$project->status->id}' data-original-color-class='select-bg-label-{$project->status->color}'" . ($isHome ? ' data-reload="true"' : '') . ">
                                 {$statusOptions}
                             </select>
                             " . ($project->note ?
                             "<i class='bx bx-notepad ms-2 text-primary' title='{$project->note}'></i>"
-                            : "") . "
-                        </div>",
+                            : '') . '
+                        </div>',
                         'priority_id' => "<select class='form-select form-select-sm select-bg-label-" . ($project->priority ? $project->priority->color : 'secondary') . "' id='prioritySelect' data-id='{$project->id}' data-original-priority-id='" . ($project->priority ? $project->priority->id : '') . "' data-original-color-class='select-bg-label-" . ($project->priority ? $project->priority->color : 'secondary') . "'>{$priorityOptions}</select>",
-                        'task_accessibility' => get_label($project->task_accessibility, ucwords(str_replace("_", " ", $project->task_accessibility))),
-                        'tags' => $tagHtml ?: ' - ',
+                        'task_accessibility' => get_label($project->task_accessibility, ucwords(str_replace('_', ' ', $project->task_accessibility))),
+                        'tags' => $tagHtml ? $tagHtml : ' - ',
                         'created_at' => format_date($project->created_at, true),
                         'updated_at' => format_date($project->updated_at, true),
-                        'actions' => $actions
+                        'actions' => $actions,
                     ];
                 }
             );
         return response()->json([
-            "rows" => $projects->items(),
-            "total" => $totalprojects,
+            'rows' => $projects->items(),
+            'total' => $totalprojects,
         ]);
     }
     /**
@@ -1305,110 +1296,108 @@ class ProjectsController extends Controller
         $offset = $request->input('offset', 0); // default offset
         if ($id) {
             $project = Project::find($id);
-            if (!$project) {
+            if (! $project) {
                 return formatApiResponse(
                     false,
                     'Project not found',
                     [
                         'total' => 0,
-                        'data' => []
-                    ]
-                );
-            } else {
-                return formatApiResponse(
-                    false,
-                    'Project retrieved successfully',
-                    [
-                        'total' => 1,
-                        'data' => [formatProject($project)]
+                        'data' => [],
                     ]
                 );
             }
-        } else {
-            $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
-            // Multi-select filters
-            if (!empty($user_ids)) {
-                $projectsQuery->whereHas('users', function ($query) use ($user_ids) {
-                    $query->whereIn('users.id', $user_ids);
-                });
-            }
-            if (!empty($client_ids)) {
-                $projectsQuery->whereHas('clients', function ($query) use ($client_ids) {
-                    $query->whereIn('clients.id', $client_ids);
-                });
-            }
-            if (!empty($status_ids)) {
-                $projectsQuery->whereIn('status_id', $status_ids);
-            }
-            if (!empty($priority_ids)) {
-                $projectsQuery->whereIn('priority_id', $priority_ids);
-            }
-            if (!empty($tag_ids)) {
-                $projectsQuery->whereHas('tags', function ($query) use ($tag_ids) {
-                    $query->whereIn('tags.id', $tag_ids);
-                });
-            }
-            if ($start_date_from && $start_date_to) {
-                $projectsQuery->whereBetween('start_date', [$start_date_from, $start_date_to]);
-            }
-            if ($end_date_from && $end_date_to) {
-                $projectsQuery->whereBetween('end_date', [$end_date_from, $end_date_to]);
-            }
-            if ($start_date_from) {
-                $projectsQuery->where('start_date', '>=', $start_date_from);
-            }
-            if ($end_date_to) {
-                $projectsQuery->where('end_date', '<=', $end_date_to);
-            }
-            if ($is_favorites) {
-                // Get the IDs of the projects marked as favorites by the user
-                $favoriteProjectIds = $this->user->favoriteProjects()
-                    ->pluck('favoritable_id')  // Get the project IDs
-                    ->toArray();
-                // Filter projects based on the favorite project IDs
-                $projectsQuery->whereIn('projects.id', $favoriteProjectIds);
-            }
-            // Fixed search functionality to respect workspace constraints
-            if ($search) {
-                $projectsQuery->where(function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%')
-                        ->orWhere('projects.description', 'like', '%' . $search . '%')
-                        ->orWhere('projects.id', 'like', '%' . $search . '%');
-                });
-            }
-            $total = $projectsQuery->count(); // get total count before applying offset and limit
-            $projects = $projectsQuery->leftJoin('pinned', function ($join) {
-                $join->on('pinned.pinnable_id', '=', 'projects.id')
-                    ->where('pinned.pinnable_type', '=', Project::class);
-            })
-                ->select('projects.*', 'pinned.id as pinned_id')  // Select projects and alias pinned.id as pinned_id
-                ->orderByDesc('pinned.id')  // Projects that are pinned will appear first
-                ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
-                ->skip($offset)  // Apply the offset
-                ->take($limit)  // Apply the limit
-                ->get();
-            if ($projects->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Projects not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $projects->map(function ($project) {
-                return formatProject($project);
-            });
             return formatApiResponse(
                 false,
-                'Projects retrieved successfully',
+                'Project retrieved successfully',
                 [
-                    'total' => $total,
-                    'data' => $data
+                    'total' => 1,
+                    'data' => [formatProject($project)],
                 ]
             );
         }
+        $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
+        // Multi-select filters
+        if (! empty($user_ids)) {
+            $projectsQuery->whereHas('users', function ($query) use ($user_ids) {
+                $query->whereIn('users.id', $user_ids);
+            });
+        }
+        if (! empty($client_ids)) {
+            $projectsQuery->whereHas('clients', function ($query) use ($client_ids) {
+                $query->whereIn('clients.id', $client_ids);
+            });
+        }
+        if (! empty($status_ids)) {
+            $projectsQuery->whereIn('status_id', $status_ids);
+        }
+        if (! empty($priority_ids)) {
+            $projectsQuery->whereIn('priority_id', $priority_ids);
+        }
+        if (! empty($tag_ids)) {
+            $projectsQuery->whereHas('tags', function ($query) use ($tag_ids) {
+                $query->whereIn('tags.id', $tag_ids);
+            });
+        }
+        if ($start_date_from && $start_date_to) {
+            $projectsQuery->whereBetween('start_date', [$start_date_from, $start_date_to]);
+        }
+        if ($end_date_from && $end_date_to) {
+            $projectsQuery->whereBetween('end_date', [$end_date_from, $end_date_to]);
+        }
+        if ($start_date_from) {
+            $projectsQuery->where('start_date', '>=', $start_date_from);
+        }
+        if ($end_date_to) {
+            $projectsQuery->where('end_date', '<=', $end_date_to);
+        }
+        if ($is_favorites) {
+            // Get the IDs of the projects marked as favorites by the user
+            $favoriteProjectIds = $this->user->favoriteProjects()
+                ->pluck('favoritable_id')  // Get the project IDs
+                ->toArray();
+            // Filter projects based on the favorite project IDs
+            $projectsQuery->whereIn('projects.id', $favoriteProjectIds);
+        }
+        // Fixed search functionality to respect workspace constraints
+        if ($search) {
+            $projectsQuery->where(function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('projects.description', 'like', '%' . $search . '%')
+                    ->orWhere('projects.id', 'like', '%' . $search . '%');
+            });
+        }
+        $total = $projectsQuery->count(); // get total count before applying offset and limit
+        $projects = $projectsQuery->leftJoin('pinned', function ($join) {
+            $join->on('pinned.pinnable_id', '=', 'projects.id')
+                ->where('pinned.pinnable_type', '=', Project::class);
+        })
+            ->select('projects.*', 'pinned.id as pinned_id')  // Select projects and alias pinned.id as pinned_id
+            ->orderByDesc('pinned.id')  // Projects that are pinned will appear first
+            ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
+            ->skip($offset)  // Apply the offset
+            ->take($limit)  // Apply the limit
+            ->get();
+        if ($projects->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Projects not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+        $data = $projects->map(function ($project) {
+            return formatProject($project);
+        });
+        return formatApiResponse(
+            false,
+            'Projects retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
     /**
      * Update the favorite status of a project.
@@ -1420,6 +1409,7 @@ class ProjectsController extends Controller
      * @group Project Management
      *
      * @urlParam id int required The ID of the project to update.
+     *
      * @bodyParam is_favorite int required Indicates whether the project is a favorite. Use 1 for true and 0 for false.
      *
      * @response 200 {
@@ -1498,7 +1488,7 @@ class ProjectsController extends Controller
             // Find the project by ID
             $project = Project::find($id);
             // If the project is not found, return an error response
-            if (!$project) {
+            if (! $project) {
                 return formatApiResponse(
                     true,
                     'Project not found',
@@ -1512,7 +1502,7 @@ class ProjectsController extends Controller
                 ->first();
             if ($isFavorite) {
                 // If no existing favorite, create a new one
-                if (!$favorite) {
+                if (! $favorite) {
                     $authUser->favorites()->create([
                         'favoritable_type' => Project::class,
                         'favoritable_id' => $id,
@@ -1536,7 +1526,7 @@ class ProjectsController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the project favorite status.'
+                'message' => 'An error occurred while updating the project favorite status.',
             ], 500);
         }
     }
@@ -1550,6 +1540,7 @@ class ProjectsController extends Controller
      * @group Project Management
      *
      * @urlParam id int required The ID of the project to update.
+     *
      * @bodyParam is_pinned int required Indicates whether the project is pinned. Use 1 for true and 0 for false.
      *
      * @response 200 {
@@ -1596,7 +1587,7 @@ class ProjectsController extends Controller
             // Find the project by ID
             $project = Project::find($id);
             // If the project is not found, return an error response
-            if (!$project) {
+            if (! $project) {
                 return formatApiResponse(
                     true,
                     'Project not found',
@@ -1610,7 +1601,7 @@ class ProjectsController extends Controller
                 ->first();
             if ($isPinned) {
                 // If no existing pinned item, create a new one
-                if (!$pinned) {
+                if (! $pinned) {
                     $authUser->pinnedProjects()->create([
                         'pinnable_type' => Project::class,
                         'pinnable_id' => $id,
@@ -1640,7 +1631,7 @@ class ProjectsController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the project pinned status.'
+                'message' => 'An error occurred while updating the project pinned status.',
             ], 500);
         }
     }
@@ -1649,9 +1640,9 @@ class ProjectsController extends Controller
         // Define the related tables for this meeting
         $relatedTables = ['users', 'clients', 'tasks', 'tags']; // Include related tables as needed
         // Use the general duplicateRecord function
-        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
+        $title = request()->has('title') && ! empty(trim(request()->title)) ? request()->title : '';
         $duplicate = duplicateRecord(Project::class, $id, $relatedTables, $title);
-        if (!$duplicate) {
+        if (! $duplicate) {
             return response()->json(['error' => true, 'message' => 'Project duplication failed.']);
         }
         if (request()->has('reload') && request()->input('reload') === 'true') {
@@ -1701,14 +1692,13 @@ class ProjectsController extends Controller
      */
     public function upload_media(Request $request)
     {
-
         $isApi = request()->get('isApi', false);
         try {
             $maxFileSizeBytes = config('media-library.max_file_size');
             $maxFileSizeKb = (int) ($maxFileSizeBytes / 1024);
             $validatedData = $request->validate([
                 'id' => ['required', 'integer', 'exists:projects,id'],
-                'media_files.*' => "file|max:$maxFileSizeKb"
+                'media_files.*' => "file|max:{$maxFileSizeKb}",
             ]);
             $mediaIds = [];
             if ($request->hasFile('media_files')) {
@@ -1732,25 +1722,24 @@ class ProjectsController extends Controller
                     'id' => $mediaIds,
                     'type' => 'media',
                     'parent_type' => 'project',
-                    'parent_id' => $project->id
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No file(s) chosen.'
+                    'parent_id' => $project->id,
                 ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'No file(s) chosen.',
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Project not found."
+                'error' => true,
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "An error occurred during file upload."
+                'error' => true,
+                'message' => 'An error occurred during file upload.',
             ], 500);
         }
     }
@@ -1765,16 +1754,15 @@ class ProjectsController extends Controller
             $media = $project->getMedia('project-media');
             if ($search) {
                 $media = $media->filter(function ($mediaItem) use ($search) {
-                    return (
-                        stripos($mediaItem->id, $search) !== false ||
+                    return stripos($mediaItem->id, $search) !== false ||
                         stripos($mediaItem->file_name, $search) !== false ||
                         stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                    );
+                    ;
                 });
             }
             $canDelete = checkPermission('delete_media');
             $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
-                $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
+                $isPublicDisk = $mediaItem->disk === 'public' ? 1 : 0;
                 $fileUrl = $isPublicDisk
                     ? asset('storage/project-media/' . $mediaItem->file_name)
                     : $mediaItem->getFullUrl();
@@ -1817,13 +1805,13 @@ class ProjectsController extends Controller
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Project not found."
+                'error' => true,
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve media files."
+                'error' => true,
+                'message' => 'Could not retrieve media files.',
             ], 500);
         }
     }
@@ -1837,6 +1825,7 @@ class ProjectsController extends Controller
      * @group Project Media
      *
      * @urlParam id int required The ID of the project whose media files are to be retrieved.
+     *
      * @queryParam search string optional A search query to filter media files by name, ID, or upload date.
      * @queryParam sort string optional The column to sort by (default: "id").
      * @queryParam order string optional The sorting order: "ASC" or "DESC" (default: "DESC").
@@ -1878,16 +1867,15 @@ class ProjectsController extends Controller
             $media = $project->getMedia('project-media');
             if ($search) {
                 $media = $media->filter(function ($mediaItem) use ($search) {
-                    return (
-                        stripos($mediaItem->id, $search) !== false ||
+                    return stripos($mediaItem->id, $search) !== false ||
                         stripos($mediaItem->file_name, $search) !== false ||
                         stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                    );
+                    ;
                 });
             }
             $canDelete = checkPermission('delete_media');
             $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
-                $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
+                $isPublicDisk = $mediaItem->disk === 'public' ? 1 : 0;
                 $fileUrl = $isPublicDisk
                     ? asset('storage/project-media/' . $mediaItem->file_name)
                     : $mediaItem->getFullUrl();
@@ -1919,13 +1907,13 @@ class ProjectsController extends Controller
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Project not found."
+                'error' => true,
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve media files."
+                'error' => true,
+                'message' => 'Could not retrieve media files.',
             ], 500);
         }
     }
@@ -1975,17 +1963,17 @@ class ProjectsController extends Controller
                 'title' => $mediaItem->file_name,
                 'parent_id' => $mediaItem->model_id,
                 'type' => 'media',
-                'parent_type' => 'project'
+                'parent_type' => 'project',
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'File not found.'
+                'message' => 'File not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => "File couldn't be deleted."
+                'message' => "File couldn't be deleted.",
             ], 500);
         }
     }
@@ -1994,7 +1982,7 @@ class ProjectsController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:media,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:media,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedIds = [];
@@ -2065,7 +2053,7 @@ class ProjectsController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -2077,7 +2065,7 @@ class ProjectsController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['end_date'])) {
+                    if (! empty($errors['end_date'])) {
                         foreach ($errors['end_date'] as $error) {
                             $fail($error);
                         }
@@ -2091,7 +2079,7 @@ class ProjectsController extends Controller
                     if ($error) {
                         $fail($error);
                     }
-                }
+                },
             ],
             'description' => 'nullable|string',
         ];
@@ -2117,16 +2105,15 @@ class ProjectsController extends Controller
                     'id' => $milestone->id,
                     'type' => 'milestone',
                     'parent_type' => 'project',
-                    'parent_id' => $milestone->project_id
+                    'parent_id' => $milestone->project_id,
                 ]
             );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-
             return response()->json([
                 'error' => true,
-                'message' => 'Milestone couldn\'t be created.' . $e->getMessage()
+                'message' => 'Milestone couldn\'t be created.' . $e->getMessage(),
             ], 500);
         }
     }
@@ -2170,7 +2157,7 @@ class ProjectsController extends Controller
             $canEdit = checkPermission('edit_milestones');
             $canDelete = checkPermission('delete_milestones');
             $milestones = $milestones->orderBy($sort, $order)
-                ->paginate(request("limit"))
+                ->paginate(request('limit'))
                 ->through(function ($milestone) use ($canEdit, $canDelete) {
                     $statusBadge = match ($milestone->status) {
                         'incomplete' => '<span class="badge bg-danger">' . get_label('incomplete', 'Incomplete') . '</span>',
@@ -2208,7 +2195,7 @@ class ProjectsController extends Controller
                         'description' => $milestone->description,
                         'created_at' => format_date($milestone->created_at, true),
                         'updated_at' => format_date($milestone->updated_at, true),
-                        'actions' => $actions ?: '-'
+                        'actions' => $actions ? $actions : '-',
                     ];
                 });
             return formatApiResponse(
@@ -2218,13 +2205,13 @@ class ProjectsController extends Controller
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Project not found."
+                'error' => true,
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve milestones."
+                'error' => true,
+                'message' => 'Could not retrieve milestones.',
             ], 500);
         }
     }
@@ -2239,6 +2226,7 @@ class ProjectsController extends Controller
      * @group Milestone Management
      *
      * @urlParam id int required The ID of the project whose milestones are to be retrieved.
+     *
      * @queryParam search string optional Search for milestones by title, ID, cost, or description.
      * @queryParam sort string optional Field to sort by (default: "id").
      * @queryParam order string optional Sorting order (ASC/DESC, default: "DESC").
@@ -2314,7 +2302,7 @@ class ProjectsController extends Controller
             }
             $total = $milestones->count();
             $milestones = $milestones->orderBy($sort, $order)
-                ->paginate(request("limit"))
+                ->paginate(request('limit'))
                 ->through(function ($milestone) {
                     $statusBadge = match ($milestone->status) {
                         'incomplete' => get_label('incomplete', 'Incomplete'),
@@ -2346,14 +2334,14 @@ class ProjectsController extends Controller
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Project not found."
+                'error' => true,
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
             dd($e);
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve milestones."
+                'error' => true,
+                'message' => 'Could not retrieve milestones.',
             ], 500);
         }
     }
@@ -2401,13 +2389,13 @@ class ProjectsController extends Controller
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Milestone not found."
+                'error' => true,
+                'message' => 'Milestone not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve milestone."
+                'error' => true,
+                'message' => 'Could not retrieve milestone.',
             ], 500);
         }
     }
@@ -2421,6 +2409,7 @@ class ProjectsController extends Controller
      * @group Milestone Management
      *
      * @urlParam id int required The ID of the milestone to be updated.
+     *
      * @bodyParam title string required The updated title of the milestone.
      * @bodyParam status string required The updated status of the milestone.
      * @bodyParam start_date date optional The updated start date of the milestone (YYYY-MM-DD).
@@ -2470,7 +2459,7 @@ class ProjectsController extends Controller
                     function ($attribute, $value, $fail) {
                         $endDate = request()->input('end_date');
                         $errors = validate_date_format_and_order($value, $endDate);
-                        if (!empty($errors['start_date'])) {
+                        if (! empty($errors['start_date'])) {
                             foreach ($errors['start_date'] as $error) {
                                 $fail($error);
                             }
@@ -2482,7 +2471,7 @@ class ProjectsController extends Controller
                     function ($attribute, $value, $fail) {
                         $startDate = request()->input('start_date');
                         $errors = validate_date_format_and_order($startDate, $value);
-                        if (!empty($errors['end_date'])) {
+                        if (! empty($errors['end_date'])) {
                             foreach ($errors['end_date'] as $error) {
                                 $fail($error);
                             }
@@ -2496,7 +2485,7 @@ class ProjectsController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    }
+                    },
                 ],
                 'progress' => ['required', 'integer', 'min:0', 'max:100'],
                 'description' => ['nullable', 'string'],
@@ -2524,20 +2513,20 @@ class ProjectsController extends Controller
                     'id' => $milestone->id,
                     'type' => 'milestone',
                     'parent_type' => 'project',
-                    'parent_id' => $milestone->project_id
+                    'parent_id' => $milestone->project_id,
                 ]
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Milestone not found."
+                'error' => true,
+                'message' => 'Milestone not found.',
             ], 404);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Milestone couldn't be updated."
+                'error' => true,
+                'message' => "Milestone couldn't be updated.",
             ], 500);
         }
     }
@@ -2586,18 +2575,18 @@ class ProjectsController extends Controller
                     'title' => $milestone->title,
                     'type' => 'milestone',
                     'parent_type' => 'project',
-                    'parent_id' => $milestone->project_id
+                    'parent_id' => $milestone->project_id,
                 ]
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Milestone not found."
+                'error' => true,
+                'message' => 'Milestone not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Milestone couldn't be deleted."
+                'error' => true,
+                'message' => "Milestone couldn't be deleted.",
             ], 500);
         }
     }
@@ -2606,7 +2595,7 @@ class ProjectsController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:milestones,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:milestones,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedIds = [];
@@ -2632,6 +2621,7 @@ class ProjectsController extends Controller
      * @group Project Management
      *
      * @urlParam id int required The ID of the project whose status is to be updated.
+     *
      * @bodyParam statusId int required The ID of the new status to set for the project.
      * @bodyParam note string optional An optional note to attach to the project update.
      *
@@ -2711,7 +2701,7 @@ class ProjectsController extends Controller
         }
         $rules = [
             'id' => 'required|exists:projects,id',
-            'statusId' => 'required|exists:statuses,id'
+            'statusId' => 'required|exists:statuses,id',
         ];
         try {
             $request->validate($rules);
@@ -2721,7 +2711,7 @@ class ProjectsController extends Controller
             if (canSetStatus($status)) {
                 $project = Project::findOrFail($id);
                 $oldStatus = $project->status_id;
-                if ($project->status->id != $statusId) {
+                if ($project->status->id !== $statusId) {
                     $currentStatus = $project->status->title;
                     $project->status_id = $statusId;
                     $project->note = $request->note;
@@ -2747,7 +2737,7 @@ class ProjectsController extends Controller
                             'old_status' => $currentStatus,
                             'new_status' => $newStatus,
                             'access_url' => 'projects/information/' . $id,
-                            'action' => 'status_updated'
+                            'action' => 'status_updated',
                         ];
                         $userIds = $project->users->pluck('id')->toArray();
                         $clientIds = $project->clients->pluck('id')->toArray();
@@ -2767,25 +2757,22 @@ class ProjectsController extends Controller
                                 'id' => $id,
                                 'type' => 'project',
                                 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated project status from ' . trim($currentStatus) . ' to ' . trim($newStatus),
-                                'data' => formatProject($project)
+                                'data' => formatProject($project),
                             ]
                         );
-                    } else {
-                        return response()->json(['error' => true, 'message' => 'Status couldn\'t be updated.']);
                     }
-                } else {
-                    return response()->json(['error' => true, 'message' => 'No status change detected.']);
+                    return response()->json(['error' => true, 'message' => 'Status couldn\'t be updated.']);
                 }
-            } else {
-                return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
+                return response()->json(['error' => true, 'message' => 'No status change detected.']);
             }
+            return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Status couldn\'t be updated.'
+                'message' => 'Status couldn\'t be updated.',
             ], 500);
         }
     }
@@ -2799,6 +2786,7 @@ class ProjectsController extends Controller
      * @group Project Management
      *
      * @urlParam id int required The ID of the project whose priority is to be updated.
+     *
      * @bodyParam priorityId int required The ID of the new priority to set for the project.
      *
      * @response 200 {
@@ -2870,19 +2858,19 @@ class ProjectsController extends Controller
         if ($id) {
             $request->merge(['id' => $id]);
         }
-        if ($request->input('priorityId') == 0) {
+        if ($request->input('priorityId') === 0) {
             $request->merge(['priorityId' => null]);
         }
         $rules = [
             'id' => 'required|exists:projects,id',
-            'priorityId' => 'nullable|exists:priorities,id'
+            'priorityId' => 'nullable|exists:priorities,id',
         ];
         try {
             $request->validate($rules);
             $id = $request->id;
             $priorityId = $request->priorityId;
             $project = Project::findOrFail($id);
-            if ($project->priority_id != $priorityId) {
+            if ($project->priority_id !== $priorityId) {
                 $currentPriority = $project->priority ? $project->priority->title : '-';
                 $project->priority_id = $priorityId;
                 if ($project->save()) {
@@ -2897,22 +2885,20 @@ class ProjectsController extends Controller
                             'id' => $id,
                             'type' => 'project',
                             'activity_message' => $message,
-                            'data' => formatProject($project)
+                            'data' => formatProject($project),
                         ]
                     );
-                } else {
-                    return response()->json(['error' => true, 'message' => 'Priority couldn\'t be updated.']);
                 }
-            } else {
-                return response()->json(['error' => true, 'message' => 'No priority change detected.']);
+                return response()->json(['error' => true, 'message' => 'Priority couldn\'t be updated.']);
             }
+            return response()->json(['error' => true, 'message' => 'No priority change detected.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Priority couldn\'t be updated.'
+                'message' => 'Priority couldn\'t be updated.',
             ], 500);
         }
     }
@@ -2927,6 +2913,7 @@ class ProjectsController extends Controller
      * @group Project Comments
      *
      * @urlParam id int required The ID of the project to add a comment to.
+     *
      * @bodyParam model_type string required The type of model being commented on (e.g., "Task", "Project").
      * @bodyParam model_id int required The ID of the model being commented on.
      * @bodyParam content string required The comment text.
@@ -2984,15 +2971,15 @@ class ProjectsController extends Controller
                 'model_id' => 'required|integer',
                 'content' => 'required|string',
                 'parent_id' => 'nullable|integer|exists:comments,id',
-                'attachments.*' => "file|max:$maxFileSizeKb"
+                'attachments.*' => "file|max:{$maxFileSizeKb}",
             ], [
-                'content.required' => 'Please enter a comment'
+                'content.required' => 'Please enter a comment',
             ]);
             $fileValidationResponse = FileValidationHelper::validateFileUpload($request, 'attachments');
             if ($fileValidationResponse !== true) {
                 return $fileValidationResponse;
             }
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
+            [$processedContent, $mentionedUserIds, $mentionedClientIds] = replaceUserMentionsWithLinks($request->content);
             $comment = Comment::create([
                 'commentable_type' => $request->model_type,
                 'commentable_id' => $request->model_id,
@@ -3003,7 +2990,7 @@ class ProjectsController extends Controller
             ]);
             // Create directory if it does not exist
             $directoryPath = storage_path('app/public/comment_attachments');
-            if (!is_dir($directoryPath)) {
+            if (! is_dir($directoryPath)) {
                 mkdir($directoryPath, 0755, true);
             }
             // Save attachments
@@ -3024,14 +3011,14 @@ class ProjectsController extends Controller
                 'message' => 'Comment Added Successfully',
                 'comment' => $comment->load('attachments'),
                 'user' => $comment->commenter,
-                'created_at' => $comment->created_at->diffForHumans()
+                'created_at' => $comment->created_at->diffForHumans(),
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Comment could not be added.'
+                'message' => 'Comment could not be added.',
             ], 500);
         }
     }
@@ -3085,12 +3072,12 @@ class ProjectsController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Comment not found.'
+                'message' => 'Comment not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Could not retrieve comment.'
+                'message' => 'Could not retrieve comment.',
             ], 500);
         }
     }
@@ -3139,9 +3126,9 @@ class ProjectsController extends Controller
                 'comment_id' => ['required', 'integer', 'exists:comments,id'],
                 'content' => ['required', 'string'],
             ], [
-                'content.required' => 'Please enter a comment'
+                'content.required' => 'Please enter a comment',
             ]);
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
+            [$processedContent, $mentionedUserIds, $mentionedClientIds] = replaceUserMentionsWithLinks($request->content);
             $comment = Comment::findOrFail($request->comment_id);
             $comment->content = $processedContent;
             if ($comment->save()) {
@@ -3150,25 +3137,24 @@ class ProjectsController extends Controller
                     'error' => false,
                     'message' => 'Comment updated successfully.',
                     'id' => $comment->id,
-                    'type' => 'project'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be updated.'
+                    'type' => 'project',
                 ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Comment couldn\'t be updated.',
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment not found."
+                'error' => true,
+                'message' => 'Comment not found.',
             ], 404);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment couldn't be updated."
+                'error' => true,
+                'message' => "Comment couldn't be updated.",
             ], 500);
         }
     }
@@ -3228,29 +3214,28 @@ class ProjectsController extends Controller
                     'error' => false,
                     'message' => 'Comment deleted successfully.',
                     'id' => $comment->id,
-                    'type' => 'project'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be deleted.'
+                    'type' => 'project',
                 ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Comment couldn\'t be deleted.',
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment not found."
+                'error' => true,
+                'message' => 'Comment not found.',
             ], 404);
         } catch (ValidationException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Validation errors occurred",
-                "errors" => $e->errors()
+                'error' => true,
+                'message' => 'Validation errors occurred',
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment couldn't be deleted."
+                'error' => true,
+                'message' => "Comment couldn't be deleted.",
             ], 500);
         }
     }
@@ -3284,7 +3269,6 @@ class ProjectsController extends Controller
      */
     public function destroy_comment_attachment($id)
     {
-
         try {
             $attachment = CommentAttachment::findOrFail($id);
 
@@ -3312,8 +3296,11 @@ class ProjectsController extends Controller
      * Get all comments for a project with attachments and children.
      *
      * @authenticated
+     *
      * @group Project Comments
+     *
      * @urlParam id int required The ID of the project.
+     *
      * @response 200 {
      *   "error": false,
      *   "comments": [
@@ -3354,7 +3341,6 @@ class ProjectsController extends Controller
                 ->orderBy('created_at', 'desc');
             $total = $commentsQuery->count();
 
-
             $comments = $commentsQuery
                 ->skip($offset)
                 ->take($limit)
@@ -3372,17 +3358,15 @@ class ProjectsController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Project not found.'
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
-
             return response()->json([
                 'error' => true,
-                'message' => 'Could not retrieve comments.'
+                'message' => 'Could not retrieve comments.',
             ], 500);
         }
     }
-
 
     public function saveViewPreference(Request $request)
     {
@@ -3395,9 +3379,8 @@ class ProjectsController extends Controller
             )
         ) {
             return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
-        } else {
-            return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
         }
+        return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
     }
     public function mind_map(Request $request, $projectId)
     {
@@ -3425,114 +3408,114 @@ class ProjectsController extends Controller
      *   "data":  {
      *       "id": "project_2",
      *       "topic": "hola",
-            "link": "https://dev-taskify.taskhub.company/projects/information/2",
-            "isroot": true,
-            "level": 1,
-            "children": [
-                {
-                    "id": "tasks",
-                    "topic": "Tasks",
-                    "level": 2,
-                    "children": [
-                        {
-                            "id": "task_4",
-                            "topic": "Test",
-                            "link": "https://dev-taskify.taskhub.company/tasks/information/4",
-                            "children": [
-                                {
-                                    "id": "task_users_4",
-                                    "topic": "Users",
-                                    "children": [
-                                        {
-                                            "id": "task_user_4_1",
-                                            "topic": "Admin User",
-                                            "link": "https://dev-taskify.taskhub.company/users/profile/1"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": "task_clients_4",
-                                    "topic": "Clients",
-                                    "children": []
-                                }
-                            ]
-                        },
-                        {
-                            "id": "task_5",
-                            "topic": "test",
-                            "link": "https://dev-taskify.taskhub.company/tasks/information/5",
-                            "children": [
-                                {
-                                    "id": "task_users_5",
-                                    "topic": "Users",
-                                    "children": [
-                                        {
-                                            "id": "task_user_5_1",
-                                            "topic": "Admin User",
-                                            "link": "https://dev-taskify.taskhub.company/users/profile/1"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": "task_clients_5",
-                                    "topic": "Clients",
-                                    "children": []
-                                }
-                            ]
-                        },
-                        {
-                            "id": "task_6",
-                            "topic": "test 1",
-                            "link": "https://dev-taskify.taskhub.company/tasks/information/6",
-                            "children": [
-                                {
-                                    "id": "task_users_6",
-                                    "topic": "Users",
-                                    "children": [
-                                        {
-                                            "id": "task_user_6_1",
-                                            "topic": "Admin User",
-                                            "link": "https://dev-taskify.taskhub.company/users/profile/1"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": "task_clients_6",
-                                    "topic": "Clients",
-                                    "children": []
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "users",
-                    "topic": "Users",
-                    "children": [
-                        {
-                            "id": "user_1",
-                            "topic": "Admin User",
-                            "link": "https://dev-taskify.taskhub.company/users/profile/1"
-                        }
-                    ]
-                },
-                {
-                    "id": "clients",
-                    "topic": "Clients",
-                    "children": []
-                },
-                {
-                    "id": "milestones",
-                    "topic": "Milestones",
-                    "children": []
-                },
-                {
-                    "id": "media",
-                    "topic": "Media",
-                    "children": []
-                }
-            ]
-        }
+     * "link": "https://dev-taskify.taskhub.company/projects/information/2",
+     * "isroot": true,
+     * "level": 1,
+     * "children": [
+     * {
+     * "id": "tasks",
+     * "topic": "Tasks",
+     * "level": 2,
+     * "children": [
+     * {
+     * "id": "task_4",
+     * "topic": "Test",
+     * "link": "https://dev-taskify.taskhub.company/tasks/information/4",
+     * "children": [
+     * {
+     * "id": "task_users_4",
+     * "topic": "Users",
+     * "children": [
+     * {
+     * "id": "task_user_4_1",
+     * "topic": "Admin User",
+     * "link": "https://dev-taskify.taskhub.company/users/profile/1"
+     * }
+     * ]
+     * },
+     * {
+     * "id": "task_clients_4",
+     * "topic": "Clients",
+     * "children": []
+     * }
+     * ]
+     * },
+     * {
+     * "id": "task_5",
+     * "topic": "test",
+     * "link": "https://dev-taskify.taskhub.company/tasks/information/5",
+     * "children": [
+     * {
+     * "id": "task_users_5",
+     * "topic": "Users",
+     * "children": [
+     * {
+     * "id": "task_user_5_1",
+     * "topic": "Admin User",
+     * "link": "https://dev-taskify.taskhub.company/users/profile/1"
+     * }
+     * ]
+     * },
+     * {
+     * "id": "task_clients_5",
+     * "topic": "Clients",
+     * "children": []
+     * }
+     * ]
+     * },
+     * {
+     * "id": "task_6",
+     * "topic": "test 1",
+     * "link": "https://dev-taskify.taskhub.company/tasks/information/6",
+     * "children": [
+     * {
+     * "id": "task_users_6",
+     * "topic": "Users",
+     * "children": [
+     * {
+     * "id": "task_user_6_1",
+     * "topic": "Admin User",
+     * "link": "https://dev-taskify.taskhub.company/users/profile/1"
+     * }
+     * ]
+     * },
+     * {
+     * "id": "task_clients_6",
+     * "topic": "Clients",
+     * "children": []
+     * }
+     * ]
+     * }
+     * ]
+     * },
+     * {
+     * "id": "users",
+     * "topic": "Users",
+     * "children": [
+     * {
+     * "id": "user_1",
+     * "topic": "Admin User",
+     * "link": "https://dev-taskify.taskhub.company/users/profile/1"
+     * }
+     * ]
+     * },
+     * {
+     * "id": "clients",
+     * "topic": "Clients",
+     * "children": []
+     * },
+     * {
+     * "id": "milestones",
+     * "topic": "Milestones",
+     * "children": []
+     * },
+     * {
+     * "id": "media",
+     * "topic": "Media",
+     * "children": []
+     * }
+     * ]
+     * }
      *
      * @response 404 {
      *   "error": true,
@@ -3549,13 +3532,13 @@ class ProjectsController extends Controller
             if ($isApi) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Project not found.'
+                    'message' => 'Project not found.',
                 ], 404);
             }
-            if (!$project) {
+            if (! $project) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Project not found.'
+                    'message' => 'Project not found.',
                 ], 404);
             }
         }
@@ -3564,7 +3547,7 @@ class ProjectsController extends Controller
             'meta' => [
                 'name' => $project->title,
                 'author' => $project->created_by,
-                'version' => '1.0'
+                'version' => '1.0',
             ],
             'format' => 'node_tree', // Specify format if required by your jsMind version
             'data' => [
@@ -3591,9 +3574,9 @@ class ProjectsController extends Controller
                                             return [
                                                 'id' => 'task_user_' . $task->id . '_' . $user->id, // Unique ID
                                                 'topic' => $user->first_name . ' ' . $user->last_name,
-                                                'link' => route('users.profile', $user->id)
+                                                'link' => route('users.profile', $user->id),
                                             ];
-                                        })->toArray()
+                                        })->toArray(),
                                     ],
                                     [
                                         'id' => 'task_clients_' . $task->id, // Make it unique with task ID
@@ -3602,13 +3585,13 @@ class ProjectsController extends Controller
                                             return [
                                                 'id' => 'task_client_' . $task->id . '_' . $client->id, // Unique ID
                                                 'topic' => $client->first_name . ' ' . $client->last_name,
-                                                'link' => route('clients.profile', $client->id)
+                                                'link' => route('clients.profile', $client->id),
                                             ];
-                                        })->toArray()
-                                    ]
-                                ]
+                                        })->toArray(),
+                                    ],
+                                ],
                             ];
-                        })->toArray()
+                        })->toArray(),
                     ],
                     [
                         'id' => 'users',
@@ -3617,9 +3600,9 @@ class ProjectsController extends Controller
                             return [
                                 'id' => 'user_' . $user->id,
                                 'topic' => $user->first_name . ' ' . $user->last_name,
-                                'link' => route('users.profile', $user->id)
+                                'link' => route('users.profile', $user->id),
                             ];
-                        })->toArray()
+                        })->toArray(),
                     ],
                     [
                         'id' => 'clients',
@@ -3628,9 +3611,9 @@ class ProjectsController extends Controller
                             return [
                                 'id' => 'client_' . $client->id,
                                 'topic' => $client->first_name . ' ' . $client->last_name,
-                                'link' => route('clients.profile', $client->id)
+                                'link' => route('clients.profile', $client->id),
                             ];
-                        })->toArray()
+                        })->toArray(),
                     ],
                     [
                         'id' => 'milestones',
@@ -3638,15 +3621,15 @@ class ProjectsController extends Controller
                         'children' => $project->milestones->map(function ($milestone) {
                             return [
                                 'id' => 'milestone_' . $milestone->id,
-                                'topic' => $milestone->title
+                                'topic' => $milestone->title,
                             ];
-                        })->toArray()
+                        })->toArray(),
                     ],
                     [
                         'id' => 'media',
                         'topic' => 'Media',
                         'children' => $project->media->map(function ($mediaItem) {
-                            $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
+                            $isPublicDisk = $mediaItem->disk === 'public' ? 1 : 0;
                             $fileUrl = $isPublicDisk
                                 ? asset('storage/project-media/' . $mediaItem->file_name)
                                 : $mediaItem->getFullUrl();
@@ -3654,29 +3637,27 @@ class ProjectsController extends Controller
                                 'id' => 'media_' . $mediaItem->id,
                                 'topic' => $mediaItem->file_name,
                                 'data' => [
-                                    'url' => $fileUrl
+                                    'url' => $fileUrl,
                                 ],
-                                'link' => $fileUrl
+                                'link' => $fileUrl,
                             ];
-                        })->toArray()
+                        })->toArray(),
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
         if ($isApi) {
-
             return response()->json(
                 formatApiResponse(
                     false,
                     'Mind map data retrieved successfully.',
                     [
-                        'data' => $mindMapData['data']
+                        'data' => $mindMapData['data'],
                     ],
                 )
             );
-        } else {
-            return $mindMapData;
         }
+        return $mindMapData;
     }
     public function ganttProjectsTasks(Request $request)
     {
@@ -3696,26 +3677,15 @@ class ProjectsController extends Controller
         $projects = $query->get();
         // Filter projects with valid start and end dates
         $filteredProjects = $projects->filter(function ($project) {
-            return !is_null($project->start_date) && !is_null($project->end_date);
+            return ! is_null($project->start_date) && ! is_null($project->end_date);
         });
         // Filter tasks within each project for valid start and due dates
         $filteredProjects->each(function ($project) {
             $project->tasks = $project->tasks->filter(function ($task) {
-                return !is_null($task->start_date) && !is_null($task->due_date);
+                return ! is_null($task->start_date) && ! is_null($task->due_date);
             });
         });
         return response()->json($filteredProjects->values());
-    }
-    protected function parseDate($dateString)
-    {
-        // Remove timezone abbreviation and parse the date
-        $dateString = preg_replace('/\s\([^)]+\)$/', '', $dateString);
-        try {
-            $date = Carbon::parse($dateString);
-            return $date->format('Y-m-d'); // Format to 'YYYY-MM-DD'
-        } catch (\Exception $e) {
-            return null;
-        }
     }
     public function update_module_dates(Request $request)
     {
@@ -3736,45 +3706,43 @@ class ProjectsController extends Controller
             'start_date' => [
                 'required',
                 function ($attribute, $value, $fail) use ($startDate) {
-                    if (!$startDate) {
+                    if (! $startDate) {
                         $fail('The start date is not valid.');
                     }
-                }
+                },
             ],
             'end_date' => [
                 'required',
                 function ($attribute, $value, $fail) use ($endDate, $startDate) {
-                    if (!$endDate) {
+                    if (! $endDate) {
                         $fail('The end date is not valid.');
                     } elseif ($endDate < $startDate) {
                         $fail('The end date must be after or equal to the start date.');
                     }
-                }
+                },
             ],
         ]);
-        if ($module['type'] == 'project') {
+        if ($module['type'] === 'project') {
             $project = Project::find($module['id']);
             if ($project) {
                 $project->start_date = $startDate;
                 $project->end_date = $endDate;
                 $project->save();
                 return response()->json(['error' => false, 'message' => 'Project dates updated successfully.']);
-            } else {
-                return response()->json(['error' => true, 'message' => 'Project not found.']);
             }
-        } elseif ($module['type'] == 'task') {
+            return response()->json(['error' => true, 'message' => 'Project not found.']);
+        }
+        if ($module['type'] === 'task') {
             $task = Task::find($module['id']);
             if ($task) {
                 $task->start_date = $startDate;
                 $task->due_date = $endDate;
                 $task->save();
                 return response()->json(['error' => false, 'message' => 'Task dates updated successfully.']);
-            } else {
-                return response()->json(['error' => true, 'message' => 'Task not found.']);
             }
-        } else {
-            return response()->json(['error' => true, 'message' => 'Unknown module type.']);
+            return response()->json(['error' => true, 'message' => 'Task not found.']);
         }
+        return response()->json(['error' => true, 'message' => 'Unknown module type.']);
     }
     /**
      * Get project status timeline.
@@ -3850,18 +3818,18 @@ class ProjectsController extends Controller
                 'Status timelines retrieved successfully.',
                 [
                     'data' => $statusTimelines,
-                    'total' => $statusTimelines->count()
+                    'total' => $statusTimelines->count(),
                 ]
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Project not found."
+                'error' => true,
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve status timelines."
+                'error' => true,
+                'message' => 'Could not retrieve status timelines.',
             ], 500);
         }
     }
@@ -3877,7 +3845,6 @@ class ProjectsController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
-
         $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
 
         // Apply date range filter with grouping
@@ -3890,7 +3857,6 @@ class ProjectsController extends Controller
         }
         // Retrieve the tasks
         $projects = $projectsQuery->get();
-
 
         // Format the tasks for FullCalendar
         $events = $projects->map(function ($project) {
@@ -3925,7 +3891,7 @@ class ProjectsController extends Controller
                     $backgroundColor = '#5ab0ff'; // Lighter default blue
             }
             $title = $project->title . ' : ' . format_date($project->start_date);
-            if ($project->end_date != $project->start_date) {
+            if ($project->end_date !== $project->start_date) {
                 $title .= ' ' . get_label('to', 'to') . ' ' . format_date($project->end_date);
             }
             return [
@@ -3954,7 +3920,7 @@ class ProjectsController extends Controller
                 function ($attribute, $value, $fail) {
                     $endDate = request()->input('end_date');
                     $errors = validate_date_format_and_order($value, $endDate);
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -3966,7 +3932,7 @@ class ProjectsController extends Controller
                 function ($attribute, $value, $fail) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, endDateKey: 'end_date');
-                    if (!empty($errors['end_date'])) {
+                    if (! empty($errors['end_date'])) {
                         foreach ($errors['end_date'] as $error) {
                             $fail($error);
                         }
@@ -3990,7 +3956,7 @@ class ProjectsController extends Controller
                 [
                     'id' => $project->id,
                     'type' => 'project',
-                    'data' => formatProject($project)
+                    'data' => formatProject($project),
                 ]
             );
         } catch (ValidationException $e) {
@@ -4018,13 +3984,13 @@ class ProjectsController extends Controller
             return response()->json([
                 'error' => false,
                 'statuses' => $statuses,
-                'message' => 'Statuses retrieved successfully'
+                'message' => 'Statuses retrieved successfully',
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error in getStatuses: ' . $e->getMessage());
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while fetching statuses'
+                'message' => 'An error occurred while fetching statuses',
             ], 500);
         }
     }
@@ -4042,14 +4008,25 @@ class ProjectsController extends Controller
             return response()->json([
                 'error' => false,
                 'priorities' => $priorities,
-                'message' => 'Priorities retrieved successfully'
+                'message' => 'Priorities retrieved successfully',
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error in getPriorities: ' . $e->getMessage());
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while fetching priorities'
+                'message' => 'An error occurred while fetching priorities',
             ], 500);
+        }
+    }
+    protected function parseDate($dateString)
+    {
+        // Remove timezone abbreviation and parse the date
+        $dateString = preg_replace('/\s\([^)]+\)$/', '', $dateString);
+        try {
+            $date = Carbon::parse($dateString);
+            return $date->format('Y-m-d'); // Format to 'YYYY-MM-DD'
+        } catch (\Exception $e) {
+            return null;
         }
     }
 }

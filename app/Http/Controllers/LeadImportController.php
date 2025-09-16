@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lead;
-use App\Models\LeadStage;
 use App\Models\LeadSource;
+use App\Models\LeadStage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LeadImportController extends Controller
 {
@@ -27,6 +27,7 @@ class LeadImportController extends Controller
      * Parse the uploaded Excel/CSV file and return headers and preview data
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function parse(Request $request)
@@ -40,7 +41,7 @@ class LeadImportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'File validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -53,12 +54,12 @@ class LeadImportController extends Controller
 
             if (in_array($extension, ['xlsx', 'xls'])) {
                 $data = Excel::toArray([], storage_path('app/' . $tempPath));
-            } elseif ($extension == 'csv') {
+            } elseif ($extension === 'csv') {
                 $data = Excel::toArray([], storage_path('app/' . $tempPath), null, \Maatwebsite\Excel\Excel::CSV);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unsupported file type'
+                    'message' => 'Unsupported file type',
                 ], 400);
             }
 
@@ -69,7 +70,7 @@ class LeadImportController extends Controller
             if (count($sheet) < 2) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'File contains insufficient data'
+                    'message' => 'File contains insufficient data',
                 ], 400);
             }
 
@@ -87,8 +88,8 @@ class LeadImportController extends Controller
                     'rows' => $rows,
                     'temp_path' => $tempPath,
                     'showModal' => true,
-                    'total_rows' => count($sheet) - 1
-                ]
+                    'total_rows' => count($sheet) - 1,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('File parsing error: ' . $e->getMessage());
@@ -96,7 +97,7 @@ class LeadImportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to parse file',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -105,6 +106,7 @@ class LeadImportController extends Controller
      * Preview the mapped leads data before import
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function previewMappedLeads(Request $request)
@@ -112,14 +114,14 @@ class LeadImportController extends Controller
         // Validate inputs
         $validator = Validator::make($request->all(), [
             'mapping' => 'required|array',
-            'temp_path' => 'required|string'
+            'temp_path' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid mapping data',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -128,10 +130,10 @@ class LeadImportController extends Controller
         $filePath = storage_path('app/' . $tempPath);
 
         // Check if file exists
-        if (!Storage::exists($tempPath)) {
+        if (! Storage::exists($tempPath)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Uploaded file not found'
+                'message' => 'Uploaded file not found',
             ], 404);
         }
 
@@ -142,12 +144,12 @@ class LeadImportController extends Controller
             // Load the file based on its extension
             if (in_array($extension, ['xlsx', 'xls'])) {
                 $data = Excel::toArray([], $filePath);
-            } elseif ($extension == 'csv') {
+            } elseif ($extension === 'csv') {
                 $data = Excel::toArray([], $filePath, null, \Maatwebsite\Excel\Excel::CSV);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unsupported file type'
+                    'message' => 'Unsupported file type',
                 ], 400);
             }
 
@@ -168,7 +170,9 @@ class LeadImportController extends Controller
             // Map the rows to the selected database fields
             $mappedData = [];
             foreach ($rows as $index => $row) {
-                if ($index >= 5) break; // Only preview first 5 rows
+                if ($index >= 5) {
+                    break; // Only preview first 5 rows
+                }
 
                 $mappedRow = [];
                 foreach ($mapping as $dbField => $excelField) {
@@ -193,8 +197,8 @@ class LeadImportController extends Controller
                 'message' => 'Data mapped successfully',
                 'data' => [
                     'mapped_data' => $mappedData,
-                    'total_rows' => count($rows)
-                ]
+                    'total_rows' => count($rows),
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Data mapping error: ' . $e->getMessage());
@@ -202,7 +206,7 @@ class LeadImportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to map data',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -211,6 +215,7 @@ class LeadImportController extends Controller
      * Import the leads from the uploaded and mapped file
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function import(Request $request)
@@ -218,14 +223,14 @@ class LeadImportController extends Controller
         // Validate inputs
         $validator = Validator::make($request->all(), [
             'mapping' => 'required|array',
-            'temp_path' => 'required|string'
+            'temp_path' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid import data',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -233,10 +238,10 @@ class LeadImportController extends Controller
         $path = $request->input('temp_path');
 
         // Check if file exists
-        if (!Storage::exists($path)) {
+        if (! Storage::exists($path)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Uploaded file not found'
+                'message' => 'Uploaded file not found',
             ], 404);
         }
 
@@ -247,7 +252,7 @@ class LeadImportController extends Controller
             if (count($rows) <= 1) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No data to import'
+                    'message' => 'No data to import',
                 ], 400);
             }
 
@@ -274,7 +279,7 @@ class LeadImportController extends Controller
                 // Handle source and stage before validation
                 try {
                     // Process source
-                    if (!empty($leadData['source'])) {
+                    if (! empty($leadData['source'])) {
                         $source = LeadSource::where('name', $leadData['source'])
                             ->where(function ($query) {
                                 $query->where('workspace_id', getWorkspaceId())
@@ -284,7 +289,7 @@ class LeadImportController extends Controller
                             })
                             ->first(); // Look for a matching source based on name and workspace
 
-                        if (!$source) {
+                        if (! $source) {
                             // If no matching source is found, create a new one
                             $source = LeadSource::create([
                                 'workspace_id' => getWorkspaceId(),
@@ -297,7 +302,7 @@ class LeadImportController extends Controller
                     unset($leadData['source']); // Remove source name from leadData
 
                     // Process stage
-                    if (!empty($leadData['stage'])) {
+                    if (! empty($leadData['stage'])) {
                         // Get the maximum order value
                         $maxOrder = LeadStage::getNextOrderForWorkspace(getWorkspaceId());
 
@@ -310,8 +315,7 @@ class LeadImportController extends Controller
                             })
                             ->first(); // Look for a matching stage based on name and workspace
 
-                        if (!$stage) {
-
+                        if (! $stage) {
                             // If no matching stage is found, create a new one
                             $stage = LeadStage::create([
                                 'workspace_id' => getWorkspaceId(),
@@ -325,18 +329,16 @@ class LeadImportController extends Controller
                         $leadData['stage_id'] = $stage->id;
                     }
                     unset($leadData['stage']); // Remove stage name from leadData
-
                 } catch (\Exception $e) {
                     Log::error('Error processing source/stage at row ' . $rowNumber . ': ' . $e->getMessage());
                     $errors["Row {$rowNumber}"] = ['source_stage_error' => $e->getMessage()];
                     $failedRows[] = [
                         'row' => $rowNumber,
                         'data' => $leadData,
-                        'errors' => ['source_stage_error' => $e->getMessage()]
+                        'errors' => ['source_stage_error' => $e->getMessage()],
                     ];
                     continue;
                 }
-
 
                 // Add required system fields
                 $leadData['workspace_id'] = getWorkspaceId();
@@ -345,26 +347,26 @@ class LeadImportController extends Controller
 
                 // Validation rules
                 $validationRules = [
-                    'first_name'        => 'required|string|max:255',
-                    'last_name'         => 'required|string|max:255',
-                    'email'             => 'required|email|unique:leads,email',
-                    'phone'             => 'required|string|max:20',
-                    'country_code'      => 'required|string|max:5',
-                    'country_iso_code'  => 'required|string|size:2',
-                    'source_id'         => 'required|exists:lead_sources,id',
-                    'stage_id'          => 'required|exists:lead_stages,id',
-                    'job_title'         => 'nullable|string|max:255',
-                    'industry'          => 'nullable|string|max:255',
-                    'company'           => 'required|string|max:255',
-                    'website'           => 'nullable|url|max:255',
-                    'linkedin'          => 'nullable|url|max:255',
-                    'instagram'         => 'nullable|url|max:255',
-                    'facebook'          => 'nullable|url|max:255',
-                    'pinterest'         => 'nullable|url|max:255',
-                    'city'              => 'nullable|string|max:255',
-                    'state'             => 'nullable|string|max:255',
-                    'zip'               => 'nullable|string|max:20',
-                    'country'           => 'nullable|string|max:255',
+                    'first_name' => 'required|string|max:255',
+                    'last_name' => 'required|string|max:255',
+                    'email' => 'required|email|unique:leads,email',
+                    'phone' => 'required|string|max:20',
+                    'country_code' => 'required|string|max:5',
+                    'country_iso_code' => 'required|string|size:2',
+                    'source_id' => 'required|exists:lead_sources,id',
+                    'stage_id' => 'required|exists:lead_stages,id',
+                    'job_title' => 'nullable|string|max:255',
+                    'industry' => 'nullable|string|max:255',
+                    'company' => 'required|string|max:255',
+                    'website' => 'nullable|url|max:255',
+                    'linkedin' => 'nullable|url|max:255',
+                    'instagram' => 'nullable|url|max:255',
+                    'facebook' => 'nullable|url|max:255',
+                    'pinterest' => 'nullable|url|max:255',
+                    'city' => 'nullable|string|max:255',
+                    'state' => 'nullable|string|max:255',
+                    'zip' => 'nullable|string|max:20',
+                    'country' => 'nullable|string|max:255',
                 ];
 
                 $validator = Validator::make($leadData, $validationRules);
@@ -374,13 +376,12 @@ class LeadImportController extends Controller
                     $failedRows[] = [
                         'row' => $rowNumber,
                         'data' => $leadData,
-                        'errors' => $validator->errors()->messages()
+                        'errors' => $validator->errors()->messages(),
                     ];
                     continue;
                 }
 
                 try {
-
                     $lead = Lead::create($leadData);
                     $ids[] = $lead->id;
                     $importedLeads[] = $lead->toArray();
@@ -390,13 +391,13 @@ class LeadImportController extends Controller
                     $failedRows[] = [
                         'row' => $rowNumber,
                         'data' => $leadData,
-                        'errors' => ['exception' => $e->getMessage()]
+                        'errors' => ['exception' => $e->getMessage()],
                     ];
                 }
             }
 
             // Prepare response
-            if (!empty($errors)) {
+            if (! empty($errors)) {
                 return response()->json([
                     'success' => false,
                     'message' => count($importedLeads) . ' leads imported successfully with ' . count($errors) . ' errors.',
@@ -406,8 +407,8 @@ class LeadImportController extends Controller
                         'total' => count($rows),
                         'imported_leads' => $importedLeads,
                         'failed_rows' => $failedRows,
-                        'showInModal' => true
-                    ]
+                        'showInModal' => true,
+                    ],
                 ], 422);
             }
 
@@ -419,7 +420,7 @@ class LeadImportController extends Controller
                 'message' => count($importedLeads) . ' leads imported successfully.',
                 'data' => [
                     'total' => count($importedLeads),
-                    'imported_leads' => $importedLeads
+                    'imported_leads' => $importedLeads,
                 ],
                 'ids' => $ids,
                 'type' => 'leads',
@@ -430,7 +431,7 @@ class LeadImportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to import leads',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

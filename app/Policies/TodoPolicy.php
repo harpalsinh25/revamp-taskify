@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\User;
 use App\Models\Client;
 use App\Models\Todo;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TodoPolicy
 {
@@ -15,11 +15,11 @@ class TodoPolicy
      * Determine whether the user can view any models.
      *
      * @param  \App\Models\User  $user
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function viewAny(User $user)
     {
-        //
     }
 
     /**
@@ -27,22 +27,22 @@ class TodoPolicy
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Todo  $todo
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function view(User $user, Todo $todo)
     {
-        //
     }
 
     /**
      * Determine whether the user can create models.
      *
      * @param  \App\Models\User  $user
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function create(User $user)
     {
-        //
     }
 
     /**
@@ -50,13 +50,15 @@ class TodoPolicy
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Todo  $todo
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function update($userOrClient, Todo $todo)
     {
         if ($userOrClient instanceof User) {
             return $userOrClient->id === $todo->creator_id;
-        } elseif ($userOrClient instanceof Client) {
+        }
+        if ($userOrClient instanceof Client) {
             return $userOrClient->id === $todo->creator_id;
         }
     }
@@ -66,6 +68,7 @@ class TodoPolicy
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Todo  $todo
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function delete(User $user, Todo $todo)
@@ -78,11 +81,11 @@ class TodoPolicy
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Todo  $todo
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function restore(User $user, Todo $todo)
     {
-        //
     }
 
     /**
@@ -90,10 +93,10 @@ class TodoPolicy
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Todo  $todo
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function forceDelete(User $user, Todo $todo)
     {
-        //
     }
 }

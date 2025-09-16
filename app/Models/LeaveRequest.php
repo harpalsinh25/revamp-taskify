@@ -20,7 +20,7 @@ class LeaveRequest extends Model
         'comment',
         'status',
         'visible_to_all',
-        'action_by'
+        'action_by',
     ];
 
     public function visibleToUsers()

@@ -13,9 +13,7 @@ class CustomPathGenerator implements PathGenerator
         $collectionName = $media->collection_name;
 
         // Your custom logic to generate the path
-        $customPath = $collectionName . '/';
-
-        return $customPath;
+        return $collectionName . '/';
     }
 
     public function getPathForConversions(Media $media): string

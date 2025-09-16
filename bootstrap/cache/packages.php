@@ -104,13 +104,6 @@
       0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
     ),
   ),
-  'mahesh-kerai/update-generator' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Mahesh\\UpdateGenerator\\UpdateGeneratorServiceProvider',
-    ),
-  ),
   'munafio/chatify' => 
   array (
     'aliases' => 
@@ -136,6 +129,13 @@
       0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     ),
   ),
+  'nunomaduro/phpinsights' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'NunoMaduro\\PhpInsights\\Application\\Adapters\\Laravel\\InsightsServiceProvider',
+    ),
+  ),
   'nunomaduro/termwind' => 
   array (
     'providers' => 
@@ -159,6 +159,13 @@
     'providers' => 
     array (
       0 => 'RyanChandler\\Comments\\CommentsServiceProvider',
+    ),
+  ),
+  'siddharthgor/update-file-generator' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Siddharthgor\\UpdateFileGenerator\\UpdateFileGeneratorServiceProvider',
     ),
   ),
   'silviolleite/laravelpwa' => 

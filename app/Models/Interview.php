@@ -16,16 +16,16 @@ class Interview extends Model
         'scheduled_at',
         'mode',
         'location',
-        'status'
+        'status',
     ];
 
-    public function candidate(){
+    public function candidate()
+    {
         return $this->belongsTo(Candidate::class);
     }
 
-    public function interviewer(){
+    public function interviewer()
+    {
         return $this->belongsTo(User::class, 'interviewer_id');
     }
-
-
 }

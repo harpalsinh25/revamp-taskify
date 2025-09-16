@@ -2,15 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\User;
 use App\Models\Client;
 use App\Models\Notification as ModelNotification;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+use App\Models\User;
 use App\Notifications\BirthdayWishNotification;
 use App\Notifications\WorkAnniversaryWishNotification;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class SendWishes extends Command
 {
@@ -20,8 +20,8 @@ class SendWishes extends Command
     public function handle()
     {
         $today = Carbon::now()->format('m-d');
-        $this->info("Running send:wishes for date: $today");
-        Log::info("SendWishes command started for date: $today");
+        $this->info("Running send:wishes for date: {$today}");
+        Log::info("SendWishes command started for date: {$today}");
 
         $globalSettings = ['email', 'sms', 'push', 'whatsapp', 'system', 'slack'];
         $notificationTypes = ['birthday_wish', 'work_anniversary_wish'];
@@ -30,7 +30,7 @@ class SendWishes extends Command
         foreach ($notificationTypes as $type) {
             foreach ($globalSettings as $channel) {
                 $template = getNotificationTemplate($type, $channel);
-                $globalNotifications[$type][$channel] = !$template || $template->status === 1;
+                $globalNotifications[$type][$channel] = ! $template || $template->status === 1;
                 Log::debug("Template check: {$type} / {$channel} => " . json_encode($globalNotifications[$type][$channel]));
             }
         }
@@ -40,32 +40,32 @@ class SendWishes extends Command
         // === USERS ===
         $birthdayUsers = User::where('status', 1)
             ->whereRaw("DATE_FORMAT(dob, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(dob) <= ?", [$currentYear]) // FIXED
+            ->whereRaw('YEAR(dob) <= ?', [$currentYear]) // FIXED
             ->get();
         $this->info("Found {$birthdayUsers->count()} birthday users.");
-        Log::info("Birthday Users: " . $birthdayUsers->pluck('id')->join(', '));
+        Log::info('Birthday Users: ' . $birthdayUsers->pluck('id')->join(', '));
 
         $workAnniversaryUsers = User::where('status', 1)
             ->whereRaw("DATE_FORMAT(doj, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(doj) <= ?", [$currentYear]) // FIXED
+            ->whereRaw('YEAR(doj) <= ?', [$currentYear]) // FIXED
             ->get();
         $this->info("Found {$workAnniversaryUsers->count()} work anniversary users.");
-        Log::info("Work Anniversary Users: " . $workAnniversaryUsers->pluck('id')->join(', '));
+        Log::info('Work Anniversary Users: ' . $workAnniversaryUsers->pluck('id')->join(', '));
 
         // === CLIENTS ===
         $birthdayClients = Client::where('status', 1)
             ->whereRaw("DATE_FORMAT(dob, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(dob) <= ?", [$currentYear]) // FIXED
+            ->whereRaw('YEAR(dob) <= ?', [$currentYear]) // FIXED
             ->get();
         $this->info("Found {$birthdayClients->count()} birthday clients.");
-        Log::info("Birthday Clients: " . $birthdayClients->pluck('id')->join(', '));
+        Log::info('Birthday Clients: ' . $birthdayClients->pluck('id')->join(', '));
 
         $workAnniversaryClients = Client::where('status', 1)
             ->whereRaw("DATE_FORMAT(doj, '%m-%d') = ?", [$today])
-            ->whereRaw("YEAR(doj) <= ?", [$currentYear]) // FIXED
+            ->whereRaw('YEAR(doj) <= ?', [$currentYear]) // FIXED
             ->get();
         $this->info("Found {$workAnniversaryClients->count()} work anniversary clients.");
-        Log::info("Work Anniversary Clients: " . $workAnniversaryClients->pluck('id')->join(', '));
+        Log::info('Work Anniversary Clients: ' . $workAnniversaryClients->pluck('id')->join(', '));
 
         $this->sendNotifications($birthdayUsers, 'birthday_wish', $globalNotifications);
         $this->sendNotifications($workAnniversaryUsers, 'work_anniversary_wish', $globalNotifications);
@@ -73,14 +73,14 @@ class SendWishes extends Command
         $this->sendNotifications($workAnniversaryClients, 'work_anniversary_wish', $globalNotifications);
 
         $this->info('✅ Birthday and work anniversary wishes sent successfully.');
-        Log::info("SendWishes command completed.");
+        Log::info('SendWishes command completed.');
     }
 
     private function sendNotifications($recipients, $type, $globalNotifications)
     {
         $currentYear = today()->year;
         foreach ($recipients as $recipient) {
-            $recipientId = ($recipient instanceof User) ? 'u_' . $recipient->id : 'c_' . $recipient->id;
+            $recipientId = $recipient instanceof User ? 'u_' . $recipient->id : 'c_' . $recipient->id;
             $this->info("Sending {$type} for recipient ID: {$recipientId}");
             Log::debug("Sending {$type} to {$recipient->first_name} [{$recipientId}]");
 
@@ -127,7 +127,7 @@ class SendWishes extends Command
                 $workspace = $recipient->workspaces->where('is_primary', '1')->first()
                     ?? $recipient->workspaces->first();
 
-                if (!empty($title) && !empty($message)) {
+                if (! empty($title) && ! empty($message)) {
                     $notification = ModelNotification::create([
                         'workspace_id' => $workspace->id,
                         'type' => $notificationData['type'],
@@ -176,9 +176,8 @@ class SendWishes extends Command
 
     private function isNotificationEnabled($enabledNotifications, $type, $channel)
     {
-        return (
-            (is_array($enabledNotifications) && empty($enabledNotifications)) ||
+        return (is_array($enabledNotifications) && empty($enabledNotifications)) ||
             (is_array($enabledNotifications) && in_array("{$channel}_{$type}", $enabledNotifications))
-        );
+        ;
     }
 }

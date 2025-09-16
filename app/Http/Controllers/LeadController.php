@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\Lead;
-use App\Models\LeadStage;
-use App\Models\Workspace;
 use App\Models\LeadSource;
-use Illuminate\Http\Request;
-use App\Services\DeletionService;
+use App\Models\LeadStage;
 use App\Models\UserClientPreference;
-use Illuminate\Validation\ValidationException;
+use App\Models\Workspace;
+use App\Services\DeletionService;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class LeadController extends Controller
 {
@@ -28,13 +28,11 @@ class LeadController extends Controller
         });
     }
 
-
     public function index()
     {
         $leads = $this->workspace->leads();
         return view('leads.index', compact('leads'));
     }
-
 
     public function create()
     {
@@ -147,6 +145,7 @@ class LeadController extends Controller
      * @bodyParam state string optional The state of the lead. Max 255 characters. Example: NY
      * @bodyParam zip string optional The zip/postal code. Max 20 characters. Example: 10001
      * @bodyParam country string optional The country of the lead. Max 255 characters. Example: United States
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -186,27 +185,27 @@ class LeadController extends Controller
 
         try {
             $formFields = $request->validate([
-                'first_name'        => 'required|string|max:255',
-                'last_name'         => 'required|string|max:255',
-                'email'             => 'required|email|unique:leads,email',
-                'phone'             => 'required|string|max:20',
-                'country_code'      => 'required|string|max:5',
-                'country_iso_code'  => 'required|string|size:2',
-                'source_id'         => 'required|exists:lead_sources,id',
-                'stage_id'          => 'required|exists:lead_stages,id',
-                'assigned_to'       => 'required|exists:users,id',
-                'job_title'         => 'nullable|string|max:255',
-                'industry'          => 'nullable|string|max:255',
-                'company'           => 'required|string|max:255',
-                'website'           => 'nullable|url|max:255',
-                'linkedin'          => 'nullable|url|max:255',
-                'instagram'         => 'nullable|url|max:255',
-                'facebook'          => 'nullable|url|max:255',
-                'pinterest'         => 'nullable|url|max:255',
-                'city'              => 'nullable|string|max:255',
-                'state'             => 'nullable|string|max:255',
-                'zip'               => 'nullable|string|max:20',
-                'country'           => 'nullable|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|email|unique:leads,email',
+                'phone' => 'required|string|max:20',
+                'country_code' => 'required|string|max:5',
+                'country_iso_code' => 'required|string|size:2',
+                'source_id' => 'required|exists:lead_sources,id',
+                'stage_id' => 'required|exists:lead_stages,id',
+                'assigned_to' => 'required|exists:users,id',
+                'job_title' => 'nullable|string|max:255',
+                'industry' => 'nullable|string|max:255',
+                'company' => 'required|string|max:255',
+                'website' => 'nullable|url|max:255',
+                'linkedin' => 'nullable|url|max:255',
+                'instagram' => 'nullable|url|max:255',
+                'facebook' => 'nullable|url|max:255',
+                'pinterest' => 'nullable|url|max:255',
+                'city' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'zip' => 'nullable|string|max:20',
+                'country' => 'nullable|string|max:255',
             ]);
 
             $formFields['created_by'] = $this->user->id;
@@ -223,38 +222,33 @@ class LeadController extends Controller
                     ],
                     200
                 );
-            } else {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Lead Created Successfully.',
-                    'id' => $lead->id,
-                    'type' => 'lead'
-                ]);
             }
+            return response()->json([
+                'error' => false,
+                'message' => 'Lead Created Successfully.',
+                'id' => $lead->id,
+                'type' => 'lead',
+            ]);
         } catch (ValidationException $e) {
-            
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
-            
             return formatApiResponse(
                 true,
                 'Lead Couldn\'t Created.',
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ]
             );
         }
     }
-
 
     public function show(string $id)
     {
         $lead = Lead::findOrFail($id);
         return view('leads.show', compact('lead'));
     }
-
 
     public function edit(string $id)
     {
@@ -272,6 +266,7 @@ class LeadController extends Controller
      * @group Leads Management
      *
      * @urlParam id integer required The ID of the lead to update. Must exist in the `leads` table. Example: 5
+     *
      * @bodyParam first_name string required The first name of the lead. Max 255 characters. Example: John
      * @bodyParam last_name string required The last name of the lead. Max 255 characters. Example: Doe
      * @bodyParam email string required The email address. Must be unique except for this lead. Example: john.doe@example.com
@@ -293,6 +288,7 @@ class LeadController extends Controller
      * @bodyParam state string optional The state of the lead. Max 255 characters. Example: CA
      * @bodyParam zip string optional The zip/postal code. Max 20 characters. Example: 94107
      * @bodyParam country string optional The country of the lead. Max 255 characters. Example: United States
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -341,27 +337,27 @@ class LeadController extends Controller
                 ->firstOrFail();
 
             $formFields = $request->validate([
-                'first_name'        => 'required|string|max:255',
-                'last_name'         => 'required|string|max:255',
-                'email'             => 'required|email|unique:leads,email,' . $lead->id,
-                'phone'             => 'required|string|max:20',
-                'country_code'      => 'required|string|max:5',
-                'country_iso_code'  => 'required|string|size:2',
-                'source_id'         => 'required|exists:lead_sources,id',
-                'stage_id'          => 'required|exists:lead_stages,id',
-                'assigned_to'       => 'required|exists:users,id',
-                'job_title'         => 'nullable|string|max:255',
-                'industry'          => 'nullable|string|max:255',
-                'company'           => 'required|string|max:255',
-                'website'           => 'nullable|url|max:255',
-                'linkedin'          => 'nullable|url|max:255',
-                'instagram'         => 'nullable|url|max:255',
-                'facebook'          => 'nullable|url|max:255',
-                'pinterest'         => 'nullable|url|max:255',
-                'city'              => 'nullable|string|max:255',
-                'state'             => 'nullable|string|max:255',
-                'zip'               => 'nullable|string|max:20',
-                'country'           => 'nullable|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|email|unique:leads,email,' . $lead->id,
+                'phone' => 'required|string|max:20',
+                'country_code' => 'required|string|max:5',
+                'country_iso_code' => 'required|string|size:2',
+                'source_id' => 'required|exists:lead_sources,id',
+                'stage_id' => 'required|exists:lead_stages,id',
+                'assigned_to' => 'required|exists:users,id',
+                'job_title' => 'nullable|string|max:255',
+                'industry' => 'nullable|string|max:255',
+                'company' => 'required|string|max:255',
+                'website' => 'nullable|url|max:255',
+                'linkedin' => 'nullable|url|max:255',
+                'instagram' => 'nullable|url|max:255',
+                'facebook' => 'nullable|url|max:255',
+                'pinterest' => 'nullable|url|max:255',
+                'city' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'zip' => 'nullable|string|max:20',
+                'country' => 'nullable|string|max:255',
             ]);
 
             $lead->update($formFields);
@@ -374,14 +370,13 @@ class LeadController extends Controller
                         'data' => formatLead($lead),
                     ]
                 );
-            } else {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Lead Updated Successfully.',
-                    'id' => $lead->id,
-                    'type' => 'lead'
-                ]);
             }
+            return response()->json([
+                'error' => false,
+                'message' => 'Lead Updated Successfully.',
+                'id' => $lead->id,
+                'type' => 'lead',
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (ModelNotFoundException $e) {
@@ -391,7 +386,7 @@ class LeadController extends Controller
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ]
             );
         } catch (Exception $e) {
@@ -401,7 +396,7 @@ class LeadController extends Controller
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ]
             );
         }
@@ -435,16 +430,14 @@ class LeadController extends Controller
      */
     public function destroy(string $id)
     {
-        $response = DeletionService::delete(Lead::class, $id, 'leads');
-        return $response;
+        return DeletionService::delete(Lead::class, $id, 'leads');
     }
-
 
     public function destroy_multiple(Request $request)
     {
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:leads,id'
+            'ids.*' => 'integer|exists:leads,id',
         ]);
         $ids = $validatedData['ids'];
         $deletedLeads = [];
@@ -461,7 +454,6 @@ class LeadController extends Controller
         return response()->json(['error' => false, 'message' => 'Lead(s) deleted successfully.', 'id' => $deletedLeads, 'titles' => $deletedLeadsTitles]);
     }
 
-
     public function list()
     {
         $search = request('search');
@@ -472,8 +464,8 @@ class LeadController extends Controller
             'earliest-updated' => ['updated_at', 'asc'],
         ];
         [$sort, $order] = $sortOptions[request()->input('sort')] ?? ['id', 'desc'];
-        $source_ids  = request('source_ids', []);
-        $stage_ids   = request('stage_ids', []);
+        $source_ids = request('source_ids', []);
+        $stage_ids = request('stage_ids', []);
         $start_date = request('start_date');
         $end_date = request('end_date');
 
@@ -488,20 +480,20 @@ class LeadController extends Controller
 
         if ($search) {
             $leads->where(function ($query) use ($search) {
-                $query->where('first_name', 'like', "%$search%")
-                    ->orWhere('last_name', 'like', "%$search%")
-                    ->orWhere('email', 'like', "%$search%")
-                    ->orWhere('phone', 'like', "%$search%")
-                    ->orWhere('company', 'like', "%$search%")
-                    ->orWhere('job_title', 'like', "%$search%")
-                    ->orWhere('id', 'like', "%$search%");
+                $query->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('company', 'like', "%{$search}%")
+                    ->orWhere('job_title', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%");
             });
         }
 
-        if (!empty($source_ids)) {
+        if (! empty($source_ids)) {
             $leads->whereIn('source_id', $source_ids);
         }
-        if (!empty($stage_ids)) {
+        if (! empty($stage_ids)) {
             $leads->whereIn('stage_id', $stage_ids);
         }
         if ($start_date && $end_date) {
@@ -514,7 +506,7 @@ class LeadController extends Controller
             if ($lead->stage) {
                 $stage = '<span class="badge bg-' . $lead->stage->color . '">' . $lead->stage->name . '</span>';
             } else {
-                $stage = "-";
+                $stage = '-';
             }
 
             return [
@@ -603,8 +595,8 @@ class LeadController extends Controller
                 'earliest-updated' => ['updated_at', 'asc'],
             ];
             [$sort, $order] = $sortOptions[request()->input('sort')] ?? ['id', 'desc'];
-            $source_ids  = request('source_ids', []);
-            $stage_ids   = request('stage_ids', []);
+            $source_ids = request('source_ids', []);
+            $stage_ids = request('stage_ids', []);
             $start_date = request('start_date');
             $end_date = request('end_date');
 
@@ -619,20 +611,20 @@ class LeadController extends Controller
 
             if ($search) {
                 $leads->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', "%$search%")
-                        ->orWhere('last_name', 'like', "%$search%")
-                        ->orWhere('email', 'like', "%$search%")
-                        ->orWhere('phone', 'like', "%$search%")
-                        ->orWhere('company', 'like', "%$search%")
-                        ->orWhere('job_title', 'like', "%$search%")
-                        ->orWhere('id', 'like', "%$search%");
+                    $query->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('company', 'like', "%{$search}%")
+                        ->orWhere('job_title', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
                 });
             }
 
-            if (!empty($source_ids)) {
+            if (! empty($source_ids)) {
                 $leads->whereIn('source_id', $source_ids);
             }
-            if (!empty($stage_ids)) {
+            if (! empty($stage_ids)) {
                 $leads->whereIn('stage_id', $stage_ids);
             }
             if ($start_date && $end_date) {
@@ -653,8 +645,8 @@ class LeadController extends Controller
                     'data' => $leads,
                     'permissions' => [
                         'can_edit' => checkPermission('edit_leads'),
-                        'can_delete' => checkPermission('delete_leads')
-                    ]
+                        'can_delete' => checkPermission('delete_leads'),
+                    ],
                 ],
                 200
             );
@@ -667,7 +659,6 @@ class LeadController extends Controller
             );
         }
     }
-
 
     public function kanban(Request $request)
     {
@@ -689,7 +680,7 @@ class LeadController extends Controller
             ->with(['source', 'stage', 'assigned_user'])
             ->orderBy($sort, $order);
 
-        if (!empty($sources)) {
+        if (! empty($sources)) {
             $leadsQuery->whereIn('source_id', $sources);
         }
         if ($start_date && $end_date) {
@@ -721,6 +712,7 @@ class LeadController extends Controller
      *
      * @bodyParam id integer required The ID of the lead to update. Must exist in the `leads` table. Example: 123
      * @bodyParam stage_id integer required The ID of the new lead stage. Must exist in the `lead_stages` table. Example: 5
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -773,7 +765,7 @@ class LeadController extends Controller
                             'id' => $lead->id,
                             'type' => 'lead',
                             'activity_message' => 'Lead Stage Changed to ' . $lead->stage->name,
-                        ]
+                        ],
                     ]
                 );
             }
@@ -793,7 +785,7 @@ class LeadController extends Controller
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ]
             );
         } catch (Exception $e) {
@@ -803,7 +795,7 @@ class LeadController extends Controller
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ]
             );
         }
@@ -819,6 +811,7 @@ class LeadController extends Controller
      * @group Leads Management
      *
      * @bodyParam view string required The preferred view type (e.g., list, kanban). Example: kanban
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -850,12 +843,10 @@ class LeadController extends Controller
                     [],
                     200
                 );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
             }
-        } else {
-            return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
+            return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
         }
+        return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
     }
 
     /**
@@ -907,12 +898,12 @@ class LeadController extends Controller
      */
     public function convertToClient(Request $request, Lead $lead)
     {
-        if ($lead->is_converted == 1) {
+        if ($lead->is_converted === 1) {
             return formatApiResponse(
                 true,
                 'Lead is already converted to the client.',
                 [
-                    'id' => $lead->id
+                    'id' => $lead->id,
                 ]
             );
         }
@@ -945,7 +936,7 @@ class LeadController extends Controller
             );
         }
 
-        if ($response->getStatusCode() != 200) {
+        if ($response->getStatusCode() !== 200) {
             return formatApiResponse(
                 true,
                 'Something went wrong while converting the lead.',
@@ -968,7 +959,7 @@ class LeadController extends Controller
         $actions = '';
         $canEdit = checkPermission('edit_leads');
         $canDelete = checkPermission('delete_leads');
-        $isConverted = $lead->is_converted == 1 ? true : false;
+        $isConverted = $lead->is_converted === 1 ? true : false;
 
         $actions = '<div class="d-flex align-items-center">';
 
@@ -998,7 +989,7 @@ class LeadController extends Controller
                     <i class="bx bx-trash"></i>
                 </button>';
         }
-        if (!$isConverted) {
+        if (! $isConverted) {
             $actions .= '<button class="btn btn-sm text-primary convert-to-client" title="' . get_label('convert_to_client', 'Convert To Client') . '"
                              data-id="' . $lead->id . '"><i
                             class="bx bxs-analyse me-1 p-1"></i>

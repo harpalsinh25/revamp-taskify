@@ -17,7 +17,7 @@ class Notification extends Model
         'type_id',
         'action',
         'title',
-        'message'
+        'message',
     ];
 
     public function clients()
@@ -34,7 +34,6 @@ class Notification extends Model
     {
         return $this->belongsToMany(Candidate::class, 'candidate_notification')->withPivot('read_at', 'is_system', 'is_push');
     }
-
 
     public function workspace()
     {

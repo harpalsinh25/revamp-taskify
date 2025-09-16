@@ -2,21 +2,20 @@
 
 namespace Plugins\TimeTracker\Controllers;
 
-use Carbon\Carbon;
 use App\Models\User;
-use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Plugins\TimeTracker\Models\TimeTrackerConfig;
 use Plugins\TimeTracker\Models\TimeTrackerActivityLog;
+use Plugins\TimeTracker\Models\TimeTrackerConfig;
 
 class ManualTimeController extends Controller
 {
     public function index()
     {
         $employees = User::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
-        if (!isAdminOrHasAllDataAccess() || !$this->isManualTimeApprover()) {
+        if (! isAdminOrHasAllDataAccess() || ! $this->isManualTimeApprover()) {
             $employees = $employees->filter(function ($employee) {
                 return $employee->id === getAuthenticatedUser()->id;
             });
@@ -32,10 +31,10 @@ class ManualTimeController extends Controller
                 'manual-start',
                 'manual-stop',
                 'manual-processing-start',
-                'manual-processing-stop'
+                'manual-processing-stop',
             ]);
 
-        if (!isAdminOrHasAllDataAccess() || !$this->isManualTimeApprover()) {
+        if (! isAdminOrHasAllDataAccess() || ! $this->isManualTimeApprover()) {
             $query->where('user_id', getAuthenticatedUser()->id);
         }
 
@@ -73,10 +72,10 @@ class ManualTimeController extends Controller
             'status',
             'approved_at',
             'approver',
-            'timestamp'
+            'timestamp',
         ];
 
-        if (!in_array($sort, $allowedSorts)) {
+        if (! in_array($sort, $allowedSorts)) {
             $sort = 'timestamp';
         }
 
@@ -98,8 +97,6 @@ class ManualTimeController extends Controller
             $pendingStart = null;
 
             foreach ($items as $item) {
-
-
                 if (in_array($item->action, ['manual-start', 'manual-processing-start'])) {
                     $pendingStart = $item;
                 } elseif (in_array($item->action, ['manual-stop', 'manual-processing-stop']) && $pendingStart) {
@@ -149,12 +146,10 @@ class ManualTimeController extends Controller
                         'actions' => $actionsHtml,
                     ];
 
-
                     $pendingStart = null;
                 }
             }
         }
-
 
         // Apply frontend sorting if sorting on virtual fields
         if ($sort !== 'timestamp') {
@@ -175,8 +170,6 @@ class ManualTimeController extends Controller
             'rows' => $pagedData,
         ]);
     }
-
-
 
     public function store(Request $request)
     {
@@ -212,24 +205,12 @@ class ManualTimeController extends Controller
 
         return response()->json(['message' => 'Manual time added successfully.']);
     }
-
-    private function isManualTimeApprover()
-    {
-        // Check if the user has the role or permission to approve manual time entries
-        $configData = TimeTrackerConfig::where('name', 'time_tracker_config')->value('value');
-
-        $manualApprovers = $configData['manualTimeApprover'];
-        if (is_array($manualApprovers) && in_array(getAuthenticatedUser()->id, $manualApprovers)) {
-            return true;
-        }
-        return false;
-    }
     public function approve(Request $request)
     {
-        if (!isAdminOrHasAllDataAccess() && !$this->isManualTimeApprover()) {
+        if (! isAdminOrHasAllDataAccess() && ! $this->isManualTimeApprover()) {
             return response()->json([
                 'error' => true,
-                'message' => 'Unauthorized Action. You are not authorized to perform this action. '
+                'message' => 'Unauthorized Action. You are not authorized to perform this action. ',
             ], 403);
         }
 
@@ -247,10 +228,10 @@ class ManualTimeController extends Controller
             ->orderBy('timestamp')
             ->first();
 
-        if (!$manualStop) {
+        if (! $manualStop) {
             return response()->json([
                 'error' => true,
-                'message' => 'Matching stop entry not found. '
+                'message' => 'Matching stop entry not found. ',
             ], 404);
         }
 
@@ -320,7 +301,7 @@ class ManualTimeController extends Controller
             ->where('action', 'manual-processing-start')
             ->first();
 
-        if (!$startLog) {
+        if (! $startLog) {
             return response()->json(['error' => 'Manual time entry not found.'], 404);
         }
 
@@ -341,5 +322,17 @@ class ManualTimeController extends Controller
             'end_time' => $stopLog ? Carbon::parse($stopLog->timestamp)->format('H:i') : '',
             'reason' => $reason,
         ]);
+    }
+
+    private function isManualTimeApprover()
+    {
+        // Check if the user has the role or permission to approve manual time entries
+        $configData = TimeTrackerConfig::where('name', 'time_tracker_config')->value('value');
+
+        $manualApprovers = $configData['manualTimeApprover'];
+        if (is_array($manualApprovers) && in_array(getAuthenticatedUser()->id, $manualApprovers)) {
+            return true;
+        }
+        return false;
     }
 }

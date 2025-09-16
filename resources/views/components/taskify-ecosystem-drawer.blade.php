@@ -1,32 +1,31 @@
 {{-- Taskify Ecosystem Drawer Blade Component --}}
 {{-- Usage: @include('components.taskify-ecosystem-drawer') --}}
-@php
+ @php
     $taskifyProducts = [
         [
             'name' => 'Taskify Core',
             'price' => "$39",
-            'description' =>'Organize your workflow effortlessly by breaking projects into manageable tasks with clear deadlines, progress tracking, and team accountability tools.',
+            'description' =>
+                'Streamline your workflow with Taskify Core—divide projects into clear, manageable tasks with deadlines, track progress, and boost team accountability effortlessly.',
             'features' => ['CRM', 'Project & Task Management', 'Team Collaboration', 'Custom Workflows'],
             'badge' => ['text' => 'Most Popular', 'class' => 'bg-primary'],
             'icon' => 'bx bx-task text-primary',
-            'button' => ['text' => 'Get Taskify', 'class' => 'btn btn-primary', 'icon' => 'bx bx-cart'],
+            'button' => ['text' => 'Buy Now', 'class' => 'btn btn-primary', 'icon' => 'bx bx-cart'],
             'color' => 'text-primary',
-            'image_url' =>'http://market-resized.envatousercontent.com/codecanyon.net/files/642341747/Taskify%20regular%20promo.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=4229edeb5163ddfe49cb801e8db755c5694db7e6371a1c611f155153ace54d6d',
+            'image_url' =>
+                'http://market-resized.envatousercontent.com/codecanyon.net/files/642341747/Taskify%20regular%20promo.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=4229edeb5163ddfe49cb801e8db755c5694db7e6371a1c611f155153ace54d6d',
             'product_url' =>
                 'https://codecanyon.net/item/taskify-project-management-task-management-productivity-tool/48903161?s_rank=7',
         ],
         [
             'name' => 'Taskify Flutter App',
             'price' => "$39",
-            'description' =>'Take Taskify on the go with our Flutter app for Android and iOS, enabling mobile project and task management anytime, anywhere, with a clean, intuitive interface.',
+            'description' =>
+                'Manage your projects on the go with the Taskify Flutter App for Android and iOS. Stay connected, assign tasks, and track progress with a modern, user-friendly mobile experience.',
             'features' => ['Android', 'iOS', 'Mobile App', 'Project & Task Management'],
             'badge' => ['text' => 'Mobile App', 'class' => 'bg-warning'],
             'icon' => 'bx bxl-flutter text-warning',
-            'button' => [
-                'text' => 'Get Taskify Flutter App',
-                'class' => 'btn btn-warning',
-                'icon' => 'bx bx-cart',
-            ],
+            'button' => ['text' => 'Buy Now', 'class' => 'btn btn-warning', 'icon' => 'bx bx-cart'],
             'color' => 'text-warning',
             'image_url' =>
                 'https://market-resized.envatousercontent.com/codecanyon.net/files/643134271/Group%201000007409.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=3a1f29e3d42aea6397b6b6a6fd2faa2deb0c349ce588c6bfcedab24f8c66ac13',
@@ -37,15 +36,11 @@
             'name' => 'Assets & Resources Organizer, Tracker and Management Plugin',
             'price' => "$29",
             'description' =>
-                'The Taskify – Assets & Resources Organizer, Tracker and Management Plugin lets you manage all your company-owned physical assets in one organized place.',
+                'Easily manage and track all your company-owned assets in one centralized place. From allocation to utilization, Taskify’s Assets & Resources Plugin helps you stay organized and efficient.',
             'features' => ['Plugin', 'Add On', 'Assets Management'],
             'badge' => ['text' => 'Add On', 'class' => 'bg-secondary'],
             'icon' => 'bx bx-plug text-secondary',
-            'button' => [
-                'text' => 'Get Assets & Resources Organizer Plugin',
-                'class' => 'btn btn-secondary',
-                'icon' => 'bx bx-cart',
-            ],
+            'button' => ['text' => 'Buy Now', 'class' => 'btn btn-secondary', 'icon' => 'bx bx-cart'],
             'color' => 'text-secondary',
             'image_url' =>
                 'https://market-resized.envatousercontent.com/codecanyon.net/files/649552542/Taskify%20Asset%20Plugin%20promo.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=5af5e1f0d1babab45ee3bb5758c77bd3f915a5c65467be52c06c6f0697357699',
@@ -53,14 +48,29 @@
                 'https://codecanyon.net/item/assets-resources-organizer-tracker-and-management-plugin-for-taskify/59718153',
         ],
         [
+            'name' => 'Social Media Automation - Manager, Publisher & Scheduler Plugin for Taskify',
+            'price' => "$29",
+            'description' =>
+                'Simplify your social media management with Taskify’s Social Media Plugin. Schedule posts, generate AI-powered captions, and track engagement across Facebook, Instagram, LinkedIn, and Pinterest—right from your Taskify dashboard.',
+            'features' => ['Plugin', 'Add On', 'Social Media Manager', 'Social Media Scheduler'],
+            'badge' => ['text' => 'Add On', 'class' => 'bg-danger'],
+            'icon' => 'bx bx-plug text-danger',
+            'button' => ['text' => 'Buy Now', 'class' => 'btn btn-danger', 'icon' => 'bx bx-cart'],
+            'color' => 'text-danger',
+            'image_url' =>
+                'https://market-resized.envatousercontent.com/codecanyon.net/files/650053598/taskify%20post%20schduler%20plugin%20promo.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=b54c2a55b3f6e82bf212b5ce2c74e00109289e46f4a4dd64184c5292418b7026',
+            'product_url' =>
+                'https://codecanyon.net/item/social-media-automation-manager-publisher-scheduler-plugin-for-taskify/59753681?s_rank=1',
+        ],
+        [
             'name' => 'Taskify SaaS',
             'price' => "$49",
             'description' =>
-                'Launch your own SaaS business with Taskify, the robust, feature-rich project and task management tool designed for seamless scalability, white-labeling, and recurring revenue.',
+                'Transform Taskify into your own SaaS platform. With powerful project management features, white-label options, and recurring revenue capabilities, Taskify SaaS is built for scalability and enterprise growth.',
             'features' => ['SaaS', 'CRM', 'Project & Task Management', 'White-label Options'],
             'badge' => ['text' => 'Enterprise', 'class' => 'bg-info'],
             'icon' => 'bx bx-cloud text-info',
-            'button' => ['text' => 'Get Taskify SaaS', 'class' => 'btn btn-info', 'icon' => 'bx bx-cart'],
+            'button' => ['text' => 'Buy Now', 'class' => 'btn btn-info', 'icon' => 'bx bx-cart'],
             'color' => 'text-info',
             'image_url' =>
                 'https://market-resized.envatousercontent.com/codecanyon.net/files/642341776/taskify%20saas.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=c66d177e341e5772e65e673c6eaeb63be9596ed729e09df9e437609ac855029c',

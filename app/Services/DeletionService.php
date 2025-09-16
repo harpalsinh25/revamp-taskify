@@ -11,28 +11,25 @@ class DeletionService
         try {
             if ($id > 0) {
                 $item = $model::find($id);
-                if (!$item) {
+                if (! $item) {
                     return self::errorResponse($type . ' not found.', []);
                 }
                 $title = match ($type) {
                     'User', 'Client' => $item->first_name . ' ' . $item->last_name,
-                    'Payslip'       => get_label('payslip_id_prefix', 'PSL-') . $id,
-                    'Payment'       => get_label('payment_id', 'Payment ID') . $id,
-                    'LeadSource'    => $item->name,
-                    default          => $item->title ?? $item->name,
+                    'Payslip' => get_label('payslip_id_prefix', 'PSL-') . $id,
+                    'Payment' => get_label('payment_id', 'Payment ID') . $id,
+                    'LeadSource' => $item->name,
+                    default => $item->title ?? $item->name,
                 };
-
 
                 if ($item->delete()) {
                     return self::successResponse($type . ' deleted successfully.', $id, $title);
                 }
 
                 return self::errorResponse($type . ' couldn\'t be deleted.');
-            } else {
-                return self::errorResponse('Default ' . $type . ' cannot be deleted.');
             }
+            return self::errorResponse('Default ' . $type . ' cannot be deleted.');
         } catch (\Exception $e) {
-
             // Log the exception and return a 500 error response
             return response()->json(['error' => true, 'message' => 'An internal server error occurred.'], 500);
         }
@@ -47,17 +44,16 @@ class DeletionService
             [
                 'id' => $id,
                 'title' => $title,
-                'data' => []
+                'data' => [],
             ]
         );
     }
 
     private static function errorResponse($message, $data = null)
     {
-
         $response = ['error' => true, 'message' => $message];
 
-        if (!is_null($data)) {
+        if (! is_null($data)) {
             $response['data'] = $data;
         }
 

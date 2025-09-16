@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserClientPreference extends Model
 {
     use HasFactory;
+    public $timestamps = false;
 
     protected $table = 'user_client_preferences';
 
@@ -21,5 +22,4 @@ class UserClientPreference extends Model
     protected $casts = [
         'visible_columns' => 'array',
     ];
-    public $timestamps = false;
 }

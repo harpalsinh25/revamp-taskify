@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\Tax;
 use App\Models\Workspace;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Services\DeletionService;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class TaxesController extends Controller
@@ -46,7 +44,6 @@ class TaxesController extends Controller
      * @bodyParam type string required The type of the tax. Example: amount
      * @bodyParam amount string required if type is amount The amount of the tax. Example: 100
      * @bodyParam percentage string required if type is percentage The percentage of the tax. Example: 10
-
      *
      * @response 200 {
      * "error": false,
@@ -106,7 +103,7 @@ class TaxesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    }
+                    },
                 ],
                 'percentage' => [
                     Rule::requiredIf(function () use ($request) {
@@ -116,7 +113,7 @@ class TaxesController extends Controller
                     'numeric',
                 ],
             ], [
-                'percentage.numeric' => 'Percentage must be a numeric value.'
+                'percentage.numeric' => 'Percentage must be a numeric value.',
             ]);
             $validatedData['amount'] = str_replace(',', '', $request->input('amount'));
             $validatedData['amount'] = $validatedData['amount'] !== '' ? $validatedData['amount'] : null;
@@ -138,17 +135,16 @@ class TaxesController extends Controller
                             'amount' => format_currency($tax->amount, false, false),
                             'percentage' => $tax->percentage,
                             'created_at' => format_date($tax->created_at, true, to_format: 'Y-m-d'),
-                            'updated_at' => format_date($tax->updated_at, true, to_format: 'Y-m-d')
-                        ]
+                            'updated_at' => format_date($tax->updated_at, true, to_format: 'Y-m-d'),
+                        ],
                     ]
                 );
-            } else {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Tax created successfully.',
-                    'id' => $tax->id,
-                ]);
             }
+            return response()->json([
+                'error' => false,
+                'message' => 'Tax created successfully.',
+                'id' => $tax->id,
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -158,21 +154,19 @@ class TaxesController extends Controller
                     'Tax couldn\'t be created',
                     []
                 );
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Tax couldn\'t be created.',
-                ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Tax couldn\'t be created.',
+            ]);
         }
     }
-
 
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $types = request('types');
         $taxes = $this->workspace->taxes();
         if ($search) {
@@ -184,14 +178,14 @@ class TaxesController extends Controller
                     ->orWhere('id', 'like', '%' . $search . '%');
             });
         }
-        if (!empty($types)) {
+        if (! empty($types)) {
             $taxes = $taxes->whereIn('type', $types);
         }
         $canEdit = checkPermission('edit_taxes');
         $canDelete = checkPermission('delete_taxes');
         $total = $taxes->count();
         $taxes = $taxes->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($tax) use ($canEdit, $canDelete) {
                 $actions = '';
 
@@ -207,14 +201,14 @@ class TaxesController extends Controller
                         '</button>';
                 }
 
-                $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
 
                 return [
                     'id' => $tax->id,
                     'title' => $tax->title,
                     'type' => ucfirst($tax->type),
                     'percentage' => $tax->percentage,
-                'amount' => $tax->amount,
+                    'amount' => $tax->amount,
                     'created_at' => format_date($tax->created_at, true),
                     'updated_at' => format_date($tax->updated_at, 'H:i:s'),
                     'actions' => $actions,
@@ -222,12 +216,10 @@ class TaxesController extends Controller
             });
 
         return response()->json([
-            "rows" => $taxes->items(),
-            "total" => $total,
+            'rows' => $taxes->items(),
+            'total' => $total,
         ]);
     }
-
-
 
     public function get($id)
     {
@@ -246,7 +238,6 @@ class TaxesController extends Controller
      *
      * @bodyParam id string required The id of the tax. Example: 1
      * @bodyParam title string required The title of the tax. Example: Title
-
      *
      * @response 200 {
      * "error": false,
@@ -273,7 +264,7 @@ class TaxesController extends Controller
      *     "title": [
      *       "The title field is required."
      *     ],
-
+     *
      *
      *   }
      * }
@@ -289,7 +280,7 @@ class TaxesController extends Controller
             $isApi = $request->get('isApi', false);
             // Validate the request data
             $formFields = $request->validate([
-                'title' => 'required|unique:taxes,title,' . $request->id
+                'title' => 'required|unique:taxes,title,' . $request->id,
             ]);
 
             $formFields['workspace_id'] = $this->workspace->id;
@@ -311,12 +302,11 @@ class TaxesController extends Controller
                             'percentage' => $tax->percentage,
                             'created_at' => format_date($tax->created_at, true, to_format: 'Y-m-d'),
                             'updated_at' => format_date($tax->updated_at, true, to_format: 'Y-m-d'),
-                        ]
+                        ],
                     ]
                 );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Tax updated successfully.', 'id' => $tax->id]);
             }
+            return response()->json(['error' => false, 'message' => 'Tax updated successfully.', 'id' => $tax->id]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -326,9 +316,8 @@ class TaxesController extends Controller
                     'Tax couldn\'t updated',
                     []
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Tax couldn\'t updated.']);
             }
+            return response()->json(['error' => true, 'message' => 'Tax couldn\'t updated.']);
         }
     }
     /**
@@ -366,15 +355,14 @@ class TaxesController extends Controller
         DB::table('estimates_invoice_item')
             ->where('tax_id', $tax->id)
             ->update(['tax_id' => null]);
-        $response = DeletionService::delete(Tax::class, $id, 'Tax');
-        return $response;
+        return DeletionService::delete(Tax::class, $id, 'Tax');
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:taxes,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:taxes,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -455,8 +443,8 @@ class TaxesController extends Controller
     public function apiList()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $types = request('types');
         $id = request('id', null);
         $limit = request('limit', 10);
@@ -471,19 +459,19 @@ class TaxesController extends Controller
                     ->orWhere('id', 'like', '%' . $search . '%');
             });
         }
-        if (!empty($types)) {
+        if (! empty($types)) {
             $taxes = $taxes->whereIn('type', $types);
         }
         $total = $taxes->count();
         if ($id) {
             $tax = $taxes->find($id);
-            if (!$tax) {
+            if (! $tax) {
                 return formatApiResponse(
                     false,
                     'Tax Not Found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -499,42 +487,41 @@ class TaxesController extends Controller
                         'amount' => format_currency($tax->amount, false, false),
                         'percentage' => $tax->percentage,
                         'created_at' => format_date($tax->created_at, true, to_format: 'Y-m-d'),
-                        'updated_at' => format_date($tax->updated_at, true, to_format: 'Y-m-d')
-                    ]
-                ]
-            );
-        } else {
-            $taxes = $taxes->orderBy($sort, $order)->skip($offset)->take($limit)->get();
-            if ($taxes->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Taxes Not Found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $taxes->map(function ($tax) {
-                return [
-                    'id' => $tax->id,
-                    'title' => $tax->title,
-                    'type' => $tax->type,
-                    'amount' => format_currency($tax->amount, false, false),
-                    'percentage' => $tax->percentage,
-                    'created_at' => format_date($tax->created_at, true, to_format: 'Y-m-d'),
-                    'updated_at' => format_date($tax->updated_at, true, to_format: 'Y-m-d')
-                ];
-            });
-
-            return formatApiResponse(
-                false,
-                'Taxes Retrived Successfully',
-                [
-                    'total' => $total,
-                    'data' => $data
+                        'updated_at' => format_date($tax->updated_at, true, to_format: 'Y-m-d'),
+                    ],
                 ]
             );
         }
+        $taxes = $taxes->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+        if ($taxes->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Taxes Not Found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+        $data = $taxes->map(function ($tax) {
+            return [
+                'id' => $tax->id,
+                'title' => $tax->title,
+                'type' => $tax->type,
+                'amount' => format_currency($tax->amount, false, false),
+                'percentage' => $tax->percentage,
+                'created_at' => format_date($tax->created_at, true, to_format: 'Y-m-d'),
+                'updated_at' => format_date($tax->updated_at, true, to_format: 'Y-m-d'),
+            ];
+        });
+
+        return formatApiResponse(
+            false,
+            'Taxes Retrived Successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
 }

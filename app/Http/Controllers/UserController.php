@@ -2,37 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Throwable;
-use App\Models\Task;
-use App\Models\User;
+use App\Imports\UsersImport;
 use App\Models\Client;
 use App\Models\Project;
-use App\Models\TaskUser;
+use App\Models\Task;
 use App\Models\Template;
-use App\Models\Workspace;
-use Illuminate\Http\Request;
-use App\Services\DeletionService;
-use GuzzleHttp\Promise\TaskQueue;
-use App\Notifications\VerifyEmail;
-use Spatie\Permission\Models\Role;
+use App\Models\User;
 use App\Models\UserClientPreference;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Workspace;
 use App\Notifications\AccountCreation;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Artisan;
+use App\Notifications\VerifyEmail;
+use App\Rules\UniqueEmailPassword;
+use App\Services\DeletionService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Contracts\Role as ContractsRole;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Support\Facades\Request as FacadesRequest;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
-use App\Rules\UniqueEmailPassword;
-use Illuminate\Support\Facades\DB;
-use App\Imports\UsersImport;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Permission\Models\Role;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Throwable;
 
 class UserController extends Controller
 {
@@ -146,13 +137,12 @@ class UserController extends Controller
         ini_set('max_execution_time', 300);
         $isApi = request()->get('isApi', false);
 
-
         $require_ev = $request->has('require_ev') ? $request->input('require_ev') : 1;
-        if ($require_ev == 1 && !isEmailConfigured()) {
+        if ($require_ev === 1 && ! isEmailConfigured()) {
             return response()->json(
                 [
                     'error' => true,
-                    'message' => 'Email settings are not configured. Please configure email settings to enable email verification.'
+                    'message' => 'Email settings are not configured. Please configure email settings to enable email verification.',
                 ]
             );
         }
@@ -184,7 +174,7 @@ class UserController extends Controller
                         $dob = request()->input('dob');
                         $errors = validate_date_format_and_order($value, $dob, $isApi ? 'Y-m-d' : null, startDateLabel: 'DOB', startDateKey: 'dob');
 
-                        if (!empty($errors['dob'])) {
+                        if (! empty($errors['dob'])) {
                             foreach ($errors['dob'] as $error) {
                                 $fail($error);
                             }
@@ -197,7 +187,7 @@ class UserController extends Controller
                         $doj = request()->input('doj');
                         $errors = validate_date_format_and_order($doj, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'DOJ', endDateKey: 'doj');
 
-                        if (!empty($errors['doj'])) {
+                        if (! empty($errors['doj'])) {
                             foreach ($errors['doj'] as $error) {
                                 $fail($error);
                             }
@@ -215,14 +205,13 @@ class UserController extends Controller
                 'status.boolean' => 'The status field must be true or false (0 or 1).',
                 'require_ev.required' => 'The email verification requirement field is required.',
                 'require_ev.boolean' => 'The email verification requirement field must be true or false (0 or 1).',
-                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).'
+                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).',
             ]);
 
             $uniqueEmailPasswordRule = new UniqueEmailPassword('user');
-            if (!$uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
+            if (! $uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
                 return formatApiValidationError($isApi, ['email' => [$uniqueEmailPasswordRule->message()]]);
             }
-
 
             // Format dates if present
             $dob = $request->input('dob');
@@ -241,9 +230,9 @@ class UserController extends Controller
                 'photos/no-image.jpg';
 
             // Determine email verification and status
-            $require_ev = isAdminOrHasAllDataAccess() && $request->has('require_ev') && $request->input('require_ev') == 0 ? 0 : 1;
-            $status = isAdminOrHasAllDataAccess() && $request->has('status') && $request->input('status') == 1 ? 1 : 0;
-            $formFields['email_verified_at'] = $require_ev == 0 ? now()->tz(config('app.timezone')) : null;
+            $require_ev = isAdminOrHasAllDataAccess() && $request->has('require_ev') && $request->input('require_ev') === 0 ? 0 : 1;
+            $status = isAdminOrHasAllDataAccess() && $request->has('status') && $request->input('status') === 1 ? 1 : 0;
+            $formFields['email_verified_at'] = $require_ev === 0 ? now()->tz(config('app.timezone')) : null;
             $formFields['status'] = $status;
 
             try {
@@ -254,7 +243,7 @@ class UserController extends Controller
                 $user->assignRole($roleName);
 
                 // Notify the user if email verification is required
-                if ($require_ev == 1) {
+                if ($require_ev === 1) {
                     $user->notify(new VerifyEmail($user));
                 }
 
@@ -267,7 +256,7 @@ class UserController extends Controller
                     $account_creation_template = Template::where('type', 'email')
                         ->where('name', 'account_creation')
                         ->first();
-                    if (!$account_creation_template || ($account_creation_template->status !== 0)) {
+                    if (! $account_creation_template || ($account_creation_template->status !== 0)) {
                         $user->notify(new AccountCreation($user, $request->input('password')));
                     }
                 }
@@ -278,7 +267,7 @@ class UserController extends Controller
                     'User created successfully.',
                     [
                         'id' => $user->id,
-                        'data' => $data
+                        'data' => $data,
                     ]
                 );
             } catch (TransportExceptionInterface $e) {
@@ -304,7 +293,7 @@ class UserController extends Controller
             'entity' => 'users',
             'form_action' => route('users.bulkUpload'),
             'sample_file_url' => $sampleFileUrl,
-            'help_url' => $helpUrl
+            'help_url' => $helpUrl,
         ]);
     }
 
@@ -312,12 +301,12 @@ class UserController extends Controller
     {
         // Validate file type (ensure it's Excel or CSV)
         $request->validate([
-            'bulk_file' => 'required|mimes:xlsx,xls,csv'
+            'bulk_file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
         try {
             // Initialize the import class
-            $import = new UsersImport;
+            $import = new UsersImport();
 
             // Use the import class for bulk upload
             Excel::import($import, $request->file('bulk_file'));
@@ -327,28 +316,27 @@ class UserController extends Controller
             $validationErrors = array_filter($validationErrors, function ($value) {
                 return $value !== null && $value !== '';
             });
-            if (!empty($validationErrors)) {
+            if (! empty($validationErrors)) {
                 // Return validation errors if any
                 return response()->json([
                     'error' => true,
                     'message' => 'Validation errors occurred.',
-                    'validation_errors' => $validationErrors
+                    'validation_errors' => $validationErrors,
                 ], 400);
             }
 
             // If no validation errors, return success message
             return response()->json([
                 'error' => false,
-                'message' => 'Users imported successfully.'
+                'message' => 'Users imported successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
-
 
     public function email_verification()
     {
@@ -356,20 +344,19 @@ class UserController extends Controller
         $user = getAuthenticatedUser();
 
         // Check email verification based on the guard
-        if ($guard == 'web') {
+        if ($guard === 'web') {
             $mainAdminId = getMainAdminId();
-            if (!$user->hasVerifiedEmail() && $user->id != $mainAdminId) {
+            if (! $user->hasVerifiedEmail() && $user->id !== $mainAdminId) {
                 return view('auth.verification-notice');
             }
-        } else if ($guard == 'client') {
-            if (!$user->hasVerifiedEmail()) {
+        } elseif ($guard === 'client') {
+            if (! $user->hasVerifiedEmail()) {
                 return view('auth.verification-notice');
             }
         }
 
         return redirect('/home');
     }
-
 
     public function resend_verification_link(Request $request)
     {
@@ -388,19 +375,19 @@ class UserController extends Controller
         return back();
     }
 
-
     /**
      * Display the specified resource.
      *
      * @param  int  $id
+     *
      * @return \Illuminate\Http\Response
      */
-
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
+     *
      * @return \Illuminate\Http\Response
      */
 
@@ -410,8 +397,6 @@ class UserController extends Controller
         $roles = Role::where('guard_name', 'web')->get();
         return view('users.edit_user', ['user' => $user, 'roles' => $roles]);
     }
-
-
 
     /**
      * Update an existing user.
@@ -470,7 +455,7 @@ class UserController extends Controller
      *     "tasks": 12
      *   }
      * }
-
+     *
      * }
      * @response 422 {
      * "error": true,
@@ -502,7 +487,7 @@ class UserController extends Controller
         $id = $request->input('id');
         if ($id) {
             $user = User::find($id);
-            if (!$user) {
+            if (! $user) {
                 return response()->json(['error' => true, 'message' => 'User not found.']);
             }
 
@@ -542,7 +527,7 @@ class UserController extends Controller
                         $dob = request()->input('dob');
                         $errors = validate_date_format_and_order($value, $dob, $isApi ? 'Y-m-d' : null, startDateLabel: 'DOB', startDateKey: 'dob');
 
-                        if (!empty($errors['dob'])) {
+                        if (! empty($errors['dob'])) {
                             foreach ($errors['dob'] as $error) {
                                 $fail($error);
                             }
@@ -555,7 +540,7 @@ class UserController extends Controller
                         $doj = request()->input('doj');
                         $errors = validate_date_format_and_order($doj, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'DOJ', endDateKey: 'doj');
 
-                        if (!empty($errors['doj'])) {
+                        if (! empty($errors['doj'])) {
                             foreach ($errors['doj'] as $error) {
                                 $fail($error);
                             }
@@ -572,26 +557,26 @@ class UserController extends Controller
                 'country_code.required_with' => 'The country code must be provided when the phone number is present.',
                 'phone.unique' => 'The combination of this phone number and country code is already in use.',
                 'status.boolean' => 'The status field must be true or false (0 or 1).',
-                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).'
+                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).',
             ]);
 
             if (request()->filled('password')) {
                 $uniqueEmailPasswordRule = new UniqueEmailPassword('user');
-                if (!$uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
+                if (! $uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
                     return formatApiValidationError($isApi, ['email' => [$uniqueEmailPasswordRule->message()]]);
                 }
             }
 
             // Handle profile photo upload
             if ($request->hasFile('profile')) {
-                if ($user->photo != 'photos/no-image.jpg' && $user->photo !== null) {
+                if ($user->photo !== 'photos/no-image.jpg' && $user->photo !== null) {
                     Storage::disk('public')->delete($user->photo);
                 }
                 $formFields['photo'] = $request->file('profile')->store('photos', 'public');
             }
 
             // Handle password update
-            if (isAdminOrHasAllDataAccess() && isset($formFields['password']) && !empty($formFields['password'])) {
+            if (isAdminOrHasAllDataAccess() && isset($formFields['password']) && ! empty($formFields['password'])) {
                 $formFields['password'] = bcrypt($formFields['password']);
             } else {
                 unset($formFields['password']);
@@ -620,24 +605,23 @@ class UserController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'User couldn\'t be updated.'
+                'message' => 'User couldn\'t be updated.',
             ], 500);
         }
     }
-
 
     public function update_photo(Request $request, $id)
     {
         if ($request->hasFile('upload')) {
             $old = User::findOrFail($id);
-            if ($old->photo != 'photos/no-image.jpg' && $old->photo !== null)
+            if ($old->photo !== 'photos/no-image.jpg' && $old->photo !== null) {
                 Storage::disk('public')->delete($old->photo);
+            }
             $formFields['photo'] = $request->file('upload')->store('photos', 'public');
             User::findOrFail($id)->update($formFields);
             return back()->with('message', 'Profile picture updated successfully.');
-        } else {
-            return back()->with('error', 'No profile picture selected.');
         }
+        return back()->with('error', 'No profile picture selected.');
     }
 
     /**
@@ -674,10 +658,10 @@ class UserController extends Controller
     public function delete_user($id)
     {
         $user = User::find($id);
-        if ($user && $user->id == getMainAdminId()) {
+        if ($user && $user->id === getMainAdminId()) {
             return response()->json([
                 'error' => true,
-                'message' => 'The main admin account cannot be deleted.'
+                'message' => 'The main admin account cannot be deleted.',
             ]);
         }
         $response = DeletionService::delete(User::class, $id, 'User');
@@ -697,7 +681,7 @@ class UserController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:users,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:users,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -711,7 +695,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
 
             // Check if the user is the main admin
-            if ($user && $user->id == $mainAdminId) {
+            if ($user && $user->id === $mainAdminId) {
                 $mainAdminInSelection = true;
                 continue; // Skip deletion for the main admin
             }
@@ -725,17 +709,18 @@ class UserController extends Controller
         }
 
         // Handle the response
-        if (count($ids) == 1 && $mainAdminInSelection) {
+        if (count($ids) === 1 && $mainAdminInSelection) {
             return response()->json([
                 'error' => true,
-                'message' => 'The main admin account cannot be deleted.'
+                'message' => 'The main admin account cannot be deleted.',
             ]);
-        } elseif ($mainAdminInSelection) {
+        }
+        if ($mainAdminInSelection) {
             return response()->json([
                 'error' => false,
                 'message' => 'Users deleted successfully except the main admin.',
                 'id' => $deletedUsers,
-                'titles' => $deletedUserNames
+                'titles' => $deletedUserNames,
             ]);
         }
 
@@ -743,10 +728,9 @@ class UserController extends Controller
             'error' => false,
             'message' => 'User(s) deleted successfully.',
             'id' => $deletedUsers,
-            'titles' => $deletedUserNames
+            'titles' => $deletedUserNames,
         ]);
     }
-
 
     public function logout(Request $request)
     {
@@ -803,7 +787,6 @@ class UserController extends Controller
      *     "password": ["The password field is required."]
      *   }
      * }
-     *
      */
 
     public function authenticate(Request $request)
@@ -816,7 +799,7 @@ class UserController extends Controller
             ]);
 
             $settings = get_settings('general_settings');
-            if (!empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'] && !$isApi) {
+            if (! empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'] && ! $isApi) {
                 $request->validate([
                     'g-recaptcha-response' => 'required|captcha',
                 ], ['g-recaptcha-response.required' => 'google captcha required.']);
@@ -833,7 +816,7 @@ class UserController extends Controller
             $user = auth('web')->user();
 
             // Check if user has active status
-            if ($user->hasRole('admin') || $user->status == 1) {
+            if ($user->hasRole('admin') || $user->status === 1) {
                 // Check if user has any assigned role
                 if ($user->getRoleNames()->count() > 0) {
                     $logged_in = true;
@@ -848,11 +831,11 @@ class UserController extends Controller
         }
 
         // If user login fails, attempt client login
-        if (!$logged_in && auth('client')->attempt($formFields)) {
+        if (! $logged_in && auth('client')->attempt($formFields)) {
             $client = auth('client')->user();
 
             // Now check if client has active status
-            if ($client->internal_purpose == 0 && $client->status == 1) {
+            if ($client->internal_purpose === 0 && $client->status === 1) {
                 $logged_in = true;
             } else {
                 auth('client')->logout();
@@ -864,12 +847,12 @@ class UserController extends Controller
         $userExists = User::where('email', $formFields['email'])->exists();
         $clientExists = Client::where('email', $formFields['email'])->exists();
 
-        if (!$logged_in && !$userExists && !$clientExists) {
+        if (! $logged_in && ! $userExists && ! $clientExists) {
             return response()->json(['error' => true, 'message' => get_label('account_not_found', 'Account not found!')]);
         }
 
         // Handle failed login
-        if (!$logged_in) {
+        if (! $logged_in) {
             return response()->json(['error' => true, 'message' => get_label('login_failed', 'Login failed! Please check your credentials.')]);
         }
 
@@ -880,45 +863,42 @@ class UserController extends Controller
             storeFcmToken($user, $request->input('fcm_token'));
         }
 
-        $workspace_id = $user->default_workspace_id ?? (isset($user->workspaces[0]['id']) && !empty($user->workspaces[0]['id']) ? $user->workspaces[0]['id'] : 0);
-        $my_locale = $locale = isset($user->lang) && !empty($user->lang) ? $user->lang : 'en';
+        $workspace_id = $user->default_workspace_id ?? (isset($user->workspaces[0]['id']) && ! empty($user->workspaces[0]['id']) ? $user->workspaces[0]['id'] : 0);
+        $my_locale = $locale = isset($user->lang) && ! empty($user->lang) ? $user->lang : 'en';
         $data = ['user_id' => $user->id, 'workspace_id' => $workspace_id, 'email' => $formFields['email'], 'password' => $formFields['password'], 'my_locale' => $my_locale, 'locale' => $locale];
 
-        if (!$isApi) {
+        if (! $isApi) {
             session()->put($data);
             $request->session()->regenerate();
             Session::flash('message', 'Logged in successfully.');
             return response()->json(['error' => false]);
-        } else {
-            if ($workspace_id !== 0) {
-                $workspace = Workspace::find($workspace_id);
-                $workspace_title = $workspace ? $workspace->title : 'No workspace(s) found';
-            } else {
-                $workspace_title = 'No workspace(s) found';
-            }
-            $role = $user->roles->first(); // Get the first (and only) role
-            $role_name = $role ? $role->name : null; // Role name
-            $role_id = $role ? $role->id : null; // Role ID
-            $data['role'] = $role_name;
-            $data['role_id'] = $role_id;
-            $data['guard'] = $guard;
-            $data['workspace_title'] = $workspace_title;
-            $data['is_admin_or_has_all_data_access'] = isAdminOrHasAllDataAccess();
-            $data['is_leave_editor'] = $guard == 'web' && \App\Models\LeaveEditor::where('user_id', $user->id)->exists() ? true : false;
-            $data['is_admin_or_leave_editor'] = is_admin_or_leave_editor();
-            $token = $user->createToken('authToken')->plainTextToken;
-            return formatApiResponse(
-                false,
-                'Logged in successfully.',
-                [
-                    'token' => $token,
-                    'data' => $data
-                ]
-            );
         }
+        if ($workspace_id !== 0) {
+            $workspace = Workspace::find($workspace_id);
+            $workspace_title = $workspace ? $workspace->title : 'No workspace(s) found';
+        } else {
+            $workspace_title = 'No workspace(s) found';
+        }
+        $role = $user->roles->first(); // Get the first (and only) role
+        $role_name = $role ? $role->name : null; // Role name
+        $role_id = $role ? $role->id : null; // Role ID
+        $data['role'] = $role_name;
+        $data['role_id'] = $role_id;
+        $data['guard'] = $guard;
+        $data['workspace_title'] = $workspace_title;
+        $data['is_admin_or_has_all_data_access'] = isAdminOrHasAllDataAccess();
+        $data['is_leave_editor'] = $guard === 'web' && \App\Models\LeaveEditor::where('user_id', $user->id)->exists() ? true : false;
+        $data['is_admin_or_leave_editor'] = is_admin_or_leave_editor();
+        $token = $user->createToken('authToken')->plainTextToken;
+        return formatApiResponse(
+            false,
+            'Logged in successfully.',
+            [
+                'token' => $token,
+                'data' => $data,
+            ]
+        );
     }
-
-
 
     public function show($id)
     {
@@ -945,10 +925,10 @@ class UserController extends Controller
         $ev_statuses = request('ev_statuses', []);
 
         if ($type && $typeId) {
-            if ($type == 'project') {
+            if ($type === 'project') {
                 $project = Project::find($typeId);
                 $users = $project->users();
-            } elseif ($type == 'task') {
+            } elseif ($type === 'task') {
                 $task = Task::find($typeId);
                 $users = $task->users();
             } else {
@@ -970,11 +950,11 @@ class UserController extends Controller
             });
         });
 
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $users->whereIn('status', $statuses);
         }
 
-        if (!empty($role_ids)) {
+        if (! empty($role_ids)) {
             $users = $users->where(function ($query) use ($role_ids) {
                 // Check if "no_role" is in the role_ids
                 if (in_array('no_role', $role_ids)) {
@@ -984,15 +964,15 @@ class UserController extends Controller
 
                 // Include users with selected roles, excluding "no_role"
                 $filtered_role_ids = array_diff($role_ids, ['no_role']);
-                if (!empty($filtered_role_ids)) {
+                if (! empty($filtered_role_ids)) {
                     $query->orWhereHas('roles', function ($subQuery) use ($filtered_role_ids) {
                         $subQuery->whereIn('roles.id', $filtered_role_ids);
                     });
                 }
             });
         }
-        $mainAdminId  = getMainAdminId();
-        if (!empty($ev_statuses)) {
+        $mainAdminId = getMainAdminId();
+        if (! empty($ev_statuses)) {
             $users = $users->where(function ($query) use ($ev_statuses, $mainAdminId) {
                 // Check if email is verified or not, and also consider the main admin always verified
                 if (in_array(1, $ev_statuses)) {
@@ -1022,7 +1002,7 @@ class UserController extends Controller
             ->orderByRaw("CASE WHEN roles.name = 'admin' THEN 0 ELSE 1 END")
             ->orderByRaw("CASE WHEN roles.name = 'admin' THEN users.id END ASC")
             ->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(
                 function ($user) use ($workspace, $canEdit, $canDelete, $canManageProjects, $canManageTasks, $mainAdminId, $guardName, $authUserId) {
                     $actions = '';
@@ -1032,13 +1012,13 @@ class UserController extends Controller
                             '</a>';
                     }
 
-                    if ($canDelete && $user->id != $mainAdminId) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $user->id . '" data-type="users" data-table="user_table">' .
-                            '<i class="bx bx-trash text-danger mx-1"></i>' .
-                            '</button>';
+                    if ($canDelete && $user->id !== $mainAdminId) {
+                        $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $user->id . '" data-type="users" data-table="user_table">' .
+                                '<i class="bx bx-trash text-danger mx-1"></i>' .
+                                '</button>';
                     }
 
-                    $actions = $actions ?: '-';
+                    $actions = $actions ? $actions : '-';
 
                     $projectsBadge = '<span class="badge rounded-pill bg-primary">' . (isAdminOrHasAllDataAccess('user', $user->id) ? count($workspace->projects) : count($user->projects)) . '</span>';
                     if ($canManageProjects) {
@@ -1052,7 +1032,7 @@ class UserController extends Controller
                             $tasksBadge . '</a>';
                     }
 
-                    $photoHtml = "<div class='avatar avatar-sm pull-up' title='" . $user->first_name . " " . $user->last_name . "'>
+                    $photoHtml = "<div class='avatar avatar-sm pull-up' title='" . $user->first_name . ' ' . $user->last_name . "'>
                     <a href='" . url("/users/profile/{$user->id}") . "'>
                         <img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle'>
                     </a>
@@ -1062,7 +1042,7 @@ class UserController extends Controller
                         ? '<span class="badge bg-success">' . get_label('active', 'Active') . '</span>'
                         : '<span class="badge bg-danger">' . get_label('deactive', 'Deactive') . '</span>';
 
-                    $emailVerificationBadge = is_null($user->email_verified_at) && $user->id != $mainAdminId
+                    $emailVerificationBadge = is_null($user->email_verified_at) && $user->id !== $mainAdminId
                         ? '<span class="badge bg-danger ms-1">' . get_label('unverified_email', 'Unverified Email') . '</span>'
                         : '';
 
@@ -1073,7 +1053,7 @@ class UserController extends Controller
                         '<div>' .
                         '<small class="text-muted">' . $user->email . '</small>' .
                         // Add the send email icon with mailto link immediately after the email
-                        (!empty($user->email) ?
+                        (! empty($user->email) ?
                             ' <a href="mailto:' . $user->email . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '"><i class="bx bx-envelope text-primary"></i></a>'
                             : '') .
                         '</div>' .
@@ -1081,42 +1061,35 @@ class UserController extends Controller
                         '</div>' .
                         '</div>';
 
-
-
-                    $phone = (empty($user->country_code) && empty($user->phone)) ? '-' : (
-                        // If both country code and phone exist, show both with the call icon
-                        (!empty($user->country_code) && !empty($user->phone)) ?
+                    $phone = empty($user->country_code) && empty($user->phone) ? '-' : (// If both country code and phone exist, show both with the call icon
+                        ! empty($user->country_code) && ! empty($user->phone) ?
                         $user->country_code . ' ' . $user->phone . ' ' .
-                        (
-                            // Only show call icon if guard is not 'web' or auth user is different
-                            ($guardName !== 'web' || $authUserId !== $user->id) ?
+                        (// Only show call icon if guard is not 'web' or auth user is different
+                            $guardName !== 'web' || $authUserId !== $user->id ?
                             '<a href="tel:' . $user->country_code . $user->phone . '" class="text-decoration-none" title="' . get_label('make_call', 'Make Call') . '"><i class="bx bx-phone-call text-primary"></i></a>'
                             : ''
                         )
                         :
                         // If only the phone exists, show phone number with the call icon
-                        (!empty($user->phone) ?
+                        (! empty($user->phone) ?
                             $user->phone . ' ' .
-                            (
-                                // Only show call icon if guard is not 'web' or auth user is different
-                                ($guardName !== 'web' || $authUserId !== $user->id) ?
+                            (// Only show call icon if guard is not 'web' or auth user is different
+                                $guardName !== 'web' || $authUserId !== $user->id ?
                                 '<a href="tel:' . $user->phone . '" class="text-decoration-none" title="' . get_label('make_call', 'Make Call') . '"><i class="bx bx-phone-call text-primary"></i></a>'
                                 : ''
                             )
                             :
                             // If only the country code exists, show the country code
-                            ($user->country_code ? $user->country_code : '')
-                        )
+                            ($user->country_code ? $user->country_code : ''))
                     );
-
 
                     return [
                         'id' => $user->id,
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
                         'role' => $user->getRoleNames()->count() > 0
-                            ? "<span class='badge bg-label-" . (isset(config('taskhub.role_labels')[$user->getRoleNames()->first()]) ? config('taskhub.role_labels')[$user->getRoleNames()->first()] : config('taskhub.role_labels')['default']) . " me-1'>" . $user->getRoleNames()->first() . "</span>"
-                            : "<span class='badge bg-label-danger me-1'>" . get_label('not_assigned', 'Not Assigned') . "</span>",
+                            ? "<span class='badge bg-label-" . (isset(config('taskhub.role_labels')[$user->getRoleNames()->first()]) ? config('taskhub.role_labels')[$user->getRoleNames()->first()] : config('taskhub.role_labels')['default']) . " me-1'>" . $user->getRoleNames()->first() . '</span>'
+                            : "<span class='badge bg-label-danger me-1'>" . get_label('not_assigned', 'Not Assigned') . '</span>',
                         'email' => $user->email,
                         'phone' => $phone,
                         'dob' => $user->dob ? format_date($user->dob) : '-',
@@ -1135,17 +1108,16 @@ class UserController extends Controller
                             '<div>' . get_label('tasks', 'Tasks') . '</div>' .
                             '</div>' .
                             '</div>',
-                        'actions' => $actions
+                        'actions' => $actions,
                     ];
                 }
             );
 
         return response()->json([
-            "rows" => $users->items(),
-            "total" => $totalusers,
+            'rows' => $users->items(),
+            'total' => $totalusers,
         ]);
     }
-
 
     /**
      * List or search users.
@@ -1242,108 +1214,106 @@ class UserController extends Controller
 
         if ($id) {
             $user = User::find($id);
-            if (!$user) {
+            if (! $user) {
                 return formatApiResponse(
                     false,
                     'User not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
-            } else {
-                return formatApiResponse(false, 'User retrieved successfully', [
-                    'total' => 1,
-                    'data' => [formatUser($user)],
-                ]);
             }
-        } else {
-            $workspace = Workspace::find(getWorkspaceId());
+            return formatApiResponse(false, 'User retrieved successfully', [
+                'total' => 1,
+                'data' => [formatUser($user)],
+            ]);
+        }
+        $workspace = Workspace::find(getWorkspaceId());
 
-            if ($type && $type_id) {
-                if ($type == 'project') {
-                    $project = Project::find($type_id);
-                    if ($project) {
-                        $usersQuery = $project->users();
-                    } else {
-                        return formatApiResponse(
-                            true,
-                            'Project not found',
-                            [
-                                'total' => 0,
-                                'data' => []
-                            ]
-                        );
-                    }
-                } elseif ($type == 'task') {
-                    $task = Task::find($type_id);
-                    if ($task) {
-                        $usersQuery = $task->users();
-                    } else {
-                        return formatApiResponse(
-                            true,
-                            'Task not found',
-                            [
-                                'total' => 0,
-                                'data' => []
-                            ]
-                        );
-                    }
+        if ($type && $type_id) {
+            if ($type === 'project') {
+                $project = Project::find($type_id);
+                if ($project) {
+                    $usersQuery = $project->users();
                 } else {
-                    $usersQuery = $workspace->users();
+                    return formatApiResponse(
+                        true,
+                        'Project not found',
+                        [
+                            'total' => 0,
+                            'data' => [],
+                        ]
+                    );
+                }
+            } elseif ($type === 'task') {
+                $task = Task::find($type_id);
+                if ($task) {
+                    $usersQuery = $task->users();
+                } else {
+                    return formatApiResponse(
+                        true,
+                        'Task not found',
+                        [
+                            'total' => 0,
+                            'data' => [],
+                        ]
+                    );
                 }
             } else {
                 $usersQuery = $workspace->users();
             }
-
-            $usersQuery->when($search, function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%')
-                        ->orWhere('users.id', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
-                });
-            });
-
-            if ($status != '') {
-                $usersQuery->where('status', $status);
-            }
-
-            if (!empty($role_ids)) {
-                $usersQuery->whereHas('roles', function ($query) use ($role_ids) {
-                    $query->whereIn('roles.id', $role_ids);
-                });
-            }
-
-            $total = $usersQuery->count(); // get total count before applying offset and limit
-
-            $users = $usersQuery->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-
-            if ($users->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Users not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-
-            $data = $users->map(function ($user) {
-                return formatUser($user);
-            });
-
-            return formatApiResponse(false, 'Users retrieved successfully', [
-                'total' => $total,
-                'data' => $data,
-            ]);
+        } else {
+            $usersQuery = $workspace->users();
         }
+
+        $usersQuery->when($search, function ($query) use ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%')
+                    ->orWhere('users.id', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
+            });
+        });
+
+        if ($status !== '') {
+            $usersQuery->where('status', $status);
+        }
+
+        if (! empty($role_ids)) {
+            $usersQuery->whereHas('roles', function ($query) use ($role_ids) {
+                $query->whereIn('roles.id', $role_ids);
+            });
+        }
+
+        $total = $usersQuery->count(); // get total count before applying offset and limit
+
+        $users = $usersQuery->orderBy($sort, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        if ($users->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Users not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+
+        $data = $users->map(function ($user) {
+            return formatUser($user);
+        });
+
+        return formatApiResponse(false, 'Users retrieved successfully', [
+            'total' => $total,
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -1367,10 +1337,10 @@ class UserController extends Controller
             ]);
 
             $authUser = getAuthenticatedUser();
-            $isUser = getGuardName() == 'web';
+            $isUser = getGuardName() === 'web';
             $user = $isUser ? User::find($authUser->id) : Client::find($authUser->id);
 
-            if (!$user) {
+            if (! $user) {
                 return formatApiResponse(
                     true,
                     'User not found',

@@ -123,6 +123,11 @@ return [
             'path' => storage_path('logs/update.log'),
             'level' => 'info',
         ],
+        'update-file-generator' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/update-file-generator.log'),
+            'level' => 'info',
+        ],
     ],
 
 ];

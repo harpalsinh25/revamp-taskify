@@ -4,14 +4,13 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class SystemIntegrity
 {
-     public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
         // Only check for authenticated users
-        if (auth()->check() && !$this->checkSystemHealth()) {
+        if (auth()->check() && ! $this->checkSystemHealth()) {
             return redirect()->route('system.health');
         }
 
@@ -24,7 +23,7 @@ class SystemIntegrity
         $data = get_settings($key);
 
         // dd($data);
-        if (!$data) {
+        if (! $data) {
             return false;
         }
 
@@ -40,7 +39,7 @@ class SystemIntegrity
             'e5f6g7h8' => 'code_bravo',
             'i9j0k1l2' => 'time_check',
             'm3n4o5p6' => 'code_adam',
-            'q7r8s9t0' => 'dr_firestone'
+            'q7r8s9t0' => 'dr_firestone',
         ];
 
         return $keys[$hash] ?? null;

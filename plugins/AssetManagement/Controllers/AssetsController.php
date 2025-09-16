@@ -2,27 +2,22 @@
 
 namespace Plugins\AssetManagement\Controllers;
 
-use Carbon\Carbon;
 use App\Models\User;
-use App\Imports\AssetImport;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Services\DeletionService;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Database\QueryException;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Plugins\AssetManagement\Models\AssetHistory;
+use Maatwebsite\Excel\Facades\Excel;
 use Plugins\AssetManagement\Exports\AssetsExport;
 use Plugins\AssetManagement\Imports\AssetsImport;
-use Plugins\AssetManagement\Models\AssetCategory;
 use Plugins\AssetManagement\Models\Asset;
-use Illuminate\Routing\Controller;
-
+use Plugins\AssetManagement\Models\AssetCategory;
+use Plugins\AssetManagement\Models\AssetHistory;
 
 class AssetsController extends Controller
 {
-
     public function index()
     {
         $users = User::all();
@@ -39,11 +34,11 @@ class AssetsController extends Controller
 
     public function show($id)
     {
-
         $asset = Asset::with(['histories' => function ($query) {
             $query->with(['user', 'lentToUser', 'returnedByUser'])
                 ->orderBy('created_at', 'desc');
-        }])->findOrfail($id);
+        },
+        ])->findOrfail($id);
 
         $users = User::all(); // For lending modal
 
@@ -55,7 +50,8 @@ class AssetsController extends Controller
         $asset = Asset::with(['histories' => function ($query) {
             $query->with(['user', 'lentToUser', 'returnedByUser'])
                 ->orderBy('created_at', 'desc');
-        }])->findOrFail($id);
+        },
+        ])->findOrFail($id);
 
         return response()->json($asset->histories);
     }
@@ -65,7 +61,7 @@ class AssetsController extends Controller
         $request->validate([
             'lent_to' => 'required|exists:users,id',
             'estimated_return_date' => 'nullable|date|after:today',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
         ]);
 
         $asset = Asset::findOrFail($id);
@@ -74,7 +70,7 @@ class AssetsController extends Controller
         if ($asset->status !== 'available') {
             return response()->json([
                 'error' => true,
-                'message' => 'Asset is not available for lending.'
+                'message' => 'Asset is not available for lending.',
             ], 400);
         }
 
@@ -88,24 +84,24 @@ class AssetsController extends Controller
                     'lent_to' => $request->lent_to,
                     'date_given' => now(),
                     'estimated_return_date' => $request->estimated_return_date,
-                    'notes' => $request->notes
+                    'notes' => $request->notes,
                 ]);
 
                 // Update asset status and assignment
                 $asset->update([
                     'assigned_to' => $request->lent_to,
-                    'status' => 'lent'
+                    'status' => 'lent',
                 ]);
             });
 
             return response()->json([
                 'error' => false,
-                'message' => 'Asset lent successfully!'
+                'message' => 'Asset lent successfully!',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while lending the asset.'
+                'message' => 'An error occurred while lending the asset.',
             ], 500);
         }
     }
@@ -115,15 +111,12 @@ class AssetsController extends Controller
         $asset = Asset::findOrFail($id);
 
         // check if user is authorized to return asset
-        if (!isAdminOrHasAllDataAccess() && $asset->assigned_to !== auth()->id()) {
-
+        if (! isAdminOrHasAllDataAccess() && $asset->assigned_to !== auth()->id()) {
             return response()->json([
                 'error' => true,
-                'message' => 'Unauthorized: You can only return assets assigned to you.'
+                'message' => 'Unauthorized: You can only return assets assigned to you.',
             ], 403);
         }
-
-
 
         // Find the current lending record
         $currentLending = AssetHistory::where('asset_id', $id)
@@ -131,10 +124,10 @@ class AssetsController extends Controller
             ->whereNull('actual_return_date')
             ->first();
 
-        if (!$currentLending) {
+        if (! $currentLending) {
             return response()->json([
                 'error' => true,
-                'message' => 'No active lending record found for this asset.'
+                'message' => 'No active lending record found for this asset.',
             ], 400);
         }
 
@@ -143,7 +136,7 @@ class AssetsController extends Controller
                 // Update the lending record with return information
                 $currentLending->update([
                     'actual_return_date' => now(),
-                    'returned_by' => auth()->id()
+                    'returned_by' => auth()->id(),
                 ]);
 
                 // Create a return history record
@@ -157,18 +150,18 @@ class AssetsController extends Controller
                 // Update asset status
                 $asset->update([
                     'status' => 'available',
-                    'assigned_to' => null
+                    'assigned_to' => null,
                 ]);
             });
 
             return response()->json([
                 'error' => false,
-                'message' => 'Asset returned successfully!'
+                'message' => 'Asset returned successfully!',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while returning the asset.'
+                'message' => 'An error occurred while returning the asset.',
             ], 500);
         }
     }
@@ -186,12 +179,10 @@ class AssetsController extends Controller
             'status' => 'required|string|in:available,non-functional,lent,lost,damaged,under-maintenance',
             'purchase_date' => 'nullable|date|before:today',
             'purchase_cost' => 'nullable|numeric',
-            'picture' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp'
+            'picture' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp',
         ];
 
-
         try {
-
             // Validating data from request
             $data = $request->validate($rules);
 
@@ -207,7 +198,6 @@ class AssetsController extends Controller
             // Handle picture
             if ($request->hasFile('picture')) {
                 $asset->addMedia($request->file('picture'))->sanitizingFileName(function ($fileName) {
-
                     $baseName = pathinfo($fileName, PATHINFO_FILENAME);
 
                     $extension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -218,10 +208,9 @@ class AssetsController extends Controller
                 })->toMediaCollection('asset-media');
             }
 
-
             return response()->json([
                 'error' => false,
-                'message' => 'Asset created successfully'
+                'message' => 'Asset created successfully',
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -236,7 +225,7 @@ class AssetsController extends Controller
     }
 
     public function update(Request $request, $id)
-    {;
+    {
         $isApi = request()->get('isApi', false);
 
         // Defining rules for validation
@@ -252,12 +241,10 @@ class AssetsController extends Controller
             'status' => 'required|string|in:available,lent,non-functional,lost,damaged,under-maintenance',
             'purchase_date' => 'nullable|date',
             'purchase_cost' => 'nullable|numeric',
-            'picture' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp'
+            'picture' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp',
         ];
 
-
         try {
-
             // Validating data from request
             $data = $request->validate($rules);
 
@@ -272,7 +259,6 @@ class AssetsController extends Controller
                 'notes' => 'Asset details updated.',
             ]);
 
-
             // Remove picture
             if ($request->boolean('remove_picture')) {
                 $asset->clearMediaCollection('asset-media');
@@ -283,7 +269,6 @@ class AssetsController extends Controller
                 // Optionally clear existing media if you only want one picture
                 $asset->clearMediaCollection('asset-media');
                 $asset->addMedia($request->file('picture'))->sanitizingFileName(function ($fileName) {
-
                     $baseName = pathinfo($fileName, PATHINFO_FILENAME);
 
                     $extension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -294,10 +279,9 @@ class AssetsController extends Controller
                 })->toMediaCollection('asset-media');
             }
 
-
             return response()->json([
                 'error' => false,
-                'message' => 'Asset Updated successfully'
+                'message' => 'Asset Updated successfully',
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -313,27 +297,22 @@ class AssetsController extends Controller
 
     public function destroy($id)
     {
-
         $asset = Asset::findOrfail($id);
 
-        $response = DeletionService::delete(Asset::class, $asset->id, 'Asset');
-
-        return $response;
+        return DeletionService::delete(Asset::class, $asset->id, 'Asset');
     }
 
     public function destroy_multiple(Request $request)
     {
-
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:assets,id'
+            'ids.*' => 'exists:assets,id',
         ]);
 
         $ids = $validatedData['ids'];
         $deletedIds = [];
 
         foreach ($ids as $id) {
-
             $asset = Asset::findOrFail($id);
             $deletedIds[] = $id;
             DeletionService::delete(Asset::class, $asset->id, 'Asset');
@@ -342,7 +321,7 @@ class AssetsController extends Controller
         return response()->json([
             'error' => false,
             'message' => 'Asset(s) deleted successfully.',
-            'id' => $deletedIds
+            'id' => $deletedIds,
         ]);
     }
 
@@ -355,8 +334,6 @@ class AssetsController extends Controller
             'assigned_to' => 'required|exists:users,id',
             'notes' => 'nullable',
         ]);
-
-
 
         try {
             $asset_ids = $request->asset_ids;
@@ -375,15 +352,12 @@ class AssetsController extends Controller
             }
 
             DB::transaction(function () use ($asset_ids, $assigned_to, $notes) {
-
                 foreach ($asset_ids as $asset_id) {
-
                     $asset = Asset::findorFail($asset_id);
-
 
                     $asset->update([
                         'assigned_to' => $assigned_to,
-                        'status' => 'lent'
+                        'status' => 'lent',
                     ]);
 
                     AssetHistory::create([
@@ -392,28 +366,25 @@ class AssetsController extends Controller
                         'user_id' => auth()->id(),
                         'action' => 'Lent',
                         'notes' => $notes,
-                        'date_given' => now()
+                        'date_given' => now(),
                     ]);
                 }
             });
             return response()->json([
                 'error' => false,
-                'message' => 'Assets assigned successfully!'
+                'message' => 'Assets assigned successfully!',
             ]);
         } catch (ValidationException $e) {
             $errors = $e->validator->errors()->all();
             $message = 'Validation failed: ' . implode(', ', $errors);
             return formatApiResponse(true, $message, [], 422);
         } catch (\Exception $e) {
-
             return response()->json([
                 'error' => true,
                 'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',
             ], 500);
         }
     }
-
-
 
     public function list()
     {
@@ -429,15 +400,15 @@ class AssetsController extends Controller
         $query = Asset::query();
 
         // Restrict normal users to their own assets
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $query->where('assigned_to', auth()->id());
         }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->OrWhere('asset_tag', 'like', "%$search%")
-                    ->Orwhere('description', 'like', "%$search%");
+                $q->where('name', 'like', "%{$search}%")
+                    ->OrWhere('asset_tag', 'like', "%{$search}%")
+                    ->Orwhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -449,11 +420,9 @@ class AssetsController extends Controller
             $query->whereIn('assigned_to', $assigned_to);
         }
 
-
         if ($asset_status) {
             $query->whereIn('status', $asset_status);
         }
-
 
         $total = $query->count();
 
@@ -500,14 +469,16 @@ class AssetsController extends Controller
                 // Duplicate Assets
 
                 if ($canCreate) {
-                    $actions .= '<a href="javascript:void(0);" class="duplicateAsset" data-asset=\'' . htmlspecialchars(json_encode($assetData), ENT_QUOTES, 'UTF-8') . '\' data-id="' . $asset->id . '" data-title="' . $asset->title . '" data-type="asset" data-table="asset_table" data-reload="' . ('true') . '" title="' . get_label('duplicate', 'Duplicate') . '">' .
+                    $actions .= '<a href="javascript:void(0);" class="duplicateAsset" data-asset=\'' . htmlspecialchars(json_encode($assetData), ENT_QUOTES, 'UTF-8') . '\' data-id="' . $asset->id . '" data-title="' . $asset->title . '" data-type="asset" data-table="asset_table" data-reload="' . 'true' . '" title="' . get_label('duplicate', 'Duplicate') . '">' .
                         '<i class="bx bx-copy text-warning mx-2"></i>' .
                         '</a>';
                 }
 
                 // Helper function to get asset tag badge color (dynamic based on tag hash)
                 $getAssetTagBadgeClass = function ($assetTag) {
-                    if (empty($assetTag)) return 'bg-secondary';
+                    if (empty($assetTag)) {
+                        return 'bg-secondary';
+                    }
 
                     $colors = [
                         'bg-primary',
@@ -517,7 +488,7 @@ class AssetsController extends Controller
                         'bg-danger',
                         'bg-dark',
                         'bg-secondary',
-                        'bg-light text-dark'
+                        'bg-light text-dark',
                     ];
 
                     // Use string hash to ensure consistent color for same asset tag
@@ -542,7 +513,7 @@ class AssetsController extends Controller
                     'category' => $category,
                     'status' => '<span class="badge ' . $asset->getStatusBadgeClass() . '">' . ucfirst(str_replace('-', ' ', $asset->status)) . '</span>',
                     'purchase_date' => format_date($asset->purchase_date, false, 'Y-m-d'),
-                    'purchase_cost' => $asset->purchase_cost ? ($currency_symbol . " " . $asset->purchase_cost) : "-",
+                    'purchase_cost' => $asset->purchase_cost ? ($currency_symbol . ' ' . $asset->purchase_cost) : '-',
                     'description' => $asset->description,
                     'created_at' => format_date($asset->created_at, false, 'Y-m-d'),
                     'updated_at' => format_date($asset->updated_at, false, 'Y-m-d'),
@@ -552,7 +523,7 @@ class AssetsController extends Controller
 
         return response()->json([
             'rows' => $assets,
-            'total' => $total
+            'total' => $total,
         ]);
     }
 
@@ -566,7 +537,7 @@ class AssetsController extends Controller
         // Get all assets and count status in PHP
         $statusCounts = Asset::all()
             ->groupBy('status')
-            ->map(fn($items) => $items->count());
+            ->map(fn ($items) => $items->count());
 
         $allStatuses = ['available', 'lent', 'non-functional', 'lost', 'damaged', 'under-maintenance'];
 
@@ -577,7 +548,6 @@ class AssetsController extends Controller
 
         return view('assets::assets.global_analytics', compact('users', 'statusData'));
     }
-
 
     public function search(Request $request)
     {
@@ -594,7 +564,7 @@ class AssetsController extends Controller
                     foreach ($asset_categories as $asset_category) {
                         $results[] = [
                             'id' => $asset_category->id,
-                            'text' => $asset_category->name
+                            'text' => $asset_category->name,
                         ];
                     }
                     break;
@@ -603,7 +573,7 @@ class AssetsController extends Controller
                     foreach ($assets as $asset) {
                         $results[] = [
                             'id' => $asset->id,
-                            'text' => $asset->name
+                            'text' => $asset->name,
                         ];
                     }
                     break;
@@ -613,7 +583,7 @@ class AssetsController extends Controller
                     foreach ($users as $user) {
                         $results[] = [
                             'id' => $user->id,
-                            'text' => $user->first_name . " " . $user->last_name
+                            'text' => $user->first_name . ' ' . $user->last_name,
                         ];
                     }
                     break;
@@ -659,7 +629,6 @@ class AssetsController extends Controller
                 }
             }
 
-
             AssetHistory::create([
                 'asset_id' => $duplicateAsset->id,
                 'user_id' => auth()->id(),
@@ -671,7 +640,7 @@ class AssetsController extends Controller
 
             return response()->json([
                 'error' => false,
-                'message' => 'Asset duplicated successfully.'
+                'message' => 'Asset duplicated successfully.',
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -693,10 +662,10 @@ class AssetsController extends Controller
                 'file' => 'required|mimes:xlsx,xls,csv',
             ]);
 
-            $importer = new AssetsImport;
+            $importer = new AssetsImport();
             Excel::import($importer, $request->file('file'));
 
-            if (!empty($importer->errors)) {
+            if (! empty($importer->errors)) {
                 return response()->json([
                     'error' => true,
                     'message' => 'Some rows failed validation.',
@@ -706,45 +675,43 @@ class AssetsController extends Controller
 
             return response()->json([
                 'error' => false,
-                'message' => 'Assets imported successfully.'
+                'message' => 'Assets imported successfully.',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Illuminate\Database\QueryException $e) {
-            if ($e->getCode() == 23000 && str_contains($e->getMessage(), 'Duplicate entry')) {
+            if ($e->getCode() === 23000 && str_contains($e->getMessage(), 'Duplicate entry')) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'One or more assets have duplicate asset tags. Please ensure each asset_tag is unique.'
+                    'message' => 'One or more assets have duplicate asset tags. Please ensure each asset_tag is unique.',
                 ], 422);
             }
 
             return response()->json([
                 'error' => true,
-                'message' => config('app.debug') ? $e->getMessage() : 'Database error during import.'
+                'message' => config('app.debug') ? $e->getMessage() : 'Database error during import.',
             ], 500);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => config('app.debug') ? $e->getMessage() : 'Asset import failed.'
+                'message' => config('app.debug') ? $e->getMessage() : 'Asset import failed.',
             ], 500);
         }
     }
 
-
     public function export()
     {
         try {
-            return Excel::download(new AssetsExport, 'assets.xlsx');
-
+            return Excel::download(new AssetsExport(), 'assets.xlsx');
 
             return response()->json([
                 'error' => false,
-                'message' => 'Assets exported successfully'
+                'message' => 'Assets exported successfully',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => config('app.debug') ? $e->getMessage() : 'Asset import failed.'
+                'message' => config('app.debug') ? $e->getMessage() : 'Asset import failed.',
             ], 500);
         }
     }

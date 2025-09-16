@@ -25,6 +25,7 @@ class Screenshot extends Model
     }
     /**
      * Get the URL of the screenshot image.
+     *
      * @return string
      */
     public function getImageUrlAttribute()
@@ -33,6 +34,7 @@ class Screenshot extends Model
     }
     /**
      * Get the formatted captured date.
+     *
      * @return string
      */
 }

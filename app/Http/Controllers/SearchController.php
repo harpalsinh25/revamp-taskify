@@ -2,34 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tag;
-use App\Models\Item;
-use App\Models\Note;
-use App\Models\Task;
-use App\Models\Todo;
-use App\Models\User;
-use App\Models\Client;
-use App\Models\Status;
-use App\Models\Meeting;
-use App\Models\Project;
-use App\Models\Priority;
 use App\Models\Allowance;
 use App\Models\Candidate;
-use App\Models\Deduction;
-use App\Models\LeadStage;
-use App\Models\Workspace;
-use App\Models\LeadSource;
-use App\Models\ExpenseType;
-use App\Models\ContractType;
-use Illuminate\Http\Request;
 use App\Models\CandidateStatus;
+use App\Models\Client;
+use App\Models\ContractType;
+use App\Models\Deduction;
 use App\Models\EstimatesInvoice;
+use App\Models\ExpenseType;
+use App\Models\Item;
+use App\Models\LeadSource;
+use App\Models\LeadStage;
+use App\Models\Meeting;
+use App\Models\Priority;
+use App\Models\Project;
+use App\Models\Status;
+use App\Models\Tag;
+use App\Models\Task;
+use App\Models\User;
+use App\Models\Workspace;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use ProtoneMedia\LaravelCrossEloquentSearch\Search;
 
 class SearchController extends Controller
 {
-
     public function search(Request $request)
     {
         $query = $request->input('q');
@@ -52,7 +48,7 @@ class SearchController extends Controller
                         if (isAdminOrHasAllDataAccess() || $this->hasAccess($authUser, 'projects', Project::class, $project->id)) {
                             $results[] = [
                                 'id' => $project->id,
-                                'text' => $project->title
+                                'text' => $project->title,
                             ];
                         }
                     }
@@ -62,7 +58,7 @@ class SearchController extends Controller
                     foreach ($statuses as $status) {
                         $results[] = [
                             'id' => $status->id,
-                            'text' => $status->title
+                            'text' => $status->title,
                         ];
                     }
                     break;
@@ -72,15 +68,14 @@ class SearchController extends Controller
                     foreach ($priorities as $priority) {
                         $results[] = [
                             'id' => $priority->id,
-                            'text' => $priority->title
+                            'text' => $priority->title,
                         ];
                     }
                     break;
 
-
                 case 'users':
                     $queryBuilder = User::query();
-                    if ($considerWorkspace == "true") {
+                    if ($considerWorkspace === 'true') {
                         $queryBuilder->whereHas('workspaces', function ($queryBuilder) use ($workspace_id, $query) {
                             $queryBuilder->where('workspace_id', $workspace_id)
                                 ->where(function ($subQuery) use ($query) {
@@ -99,16 +94,16 @@ class SearchController extends Controller
                     $users = $queryBuilder->get();
                     foreach ($users as $user) {
                         // If leaveVisibleToUsers is true, include user only if not an admin or leave editor
-                        if ($leaveVisibleToUsers == "true") {
-                            if (!is_admin_or_leave_editor($user) && $authUser->id !== $user->id) {
+                        if ($leaveVisibleToUsers === 'true') {
+                            if (! is_admin_or_leave_editor($user) && $authUser->id !== $user->id) {
                                 $results[] = [
                                     'id' => $user->id,
                                     'text' => $user->first_name . ' ' . $user->last_name,
                                     'email' => $user->email,
                                 ];
                             }
-                        } elseif ($ignoreAdmins == "true") {
-                            if ($user->hasRole('admin') == false) {
+                        } elseif ($ignoreAdmins === 'true') {
+                            if ($user->hasRole('admin') === false) {
                                 $results[] = [
                                     'id' => $user->id,
                                     'text' => $user->first_name . ' ' . $user->last_name,
@@ -128,7 +123,7 @@ class SearchController extends Controller
 
                 case 'clients':
                     $queryBuilder = Client::query();
-                    if ($considerWorkspace == "true") {
+                    if ($considerWorkspace === 'true') {
                         $queryBuilder->whereHas('workspaces', function ($queryBuilder) use ($workspace_id, $query) {
                             $queryBuilder->where('workspace_id', $workspace_id)
                                 ->where(function ($subQuery) use ($query) {
@@ -148,7 +143,7 @@ class SearchController extends Controller
                     foreach ($clients as $client) {
                         $results[] = [
                             'id' => $client->id,
-                            'text' => $client->first_name . ' ' . $client->last_name
+                            'text' => $client->first_name . ' ' . $client->last_name,
                         ];
                     }
                     break;
@@ -164,7 +159,7 @@ class SearchController extends Controller
                     foreach ($contract_types as $contract_type) {
                         $results[] = [
                             'id' => $contract_type->id,
-                            'text' => $contract_type->type
+                            'text' => $contract_type->type,
                         ];
                     }
                     break;
@@ -180,7 +175,7 @@ class SearchController extends Controller
                     foreach ($expense_types as $expense_type) {
                         $results[] = [
                             'id' => $expense_type->id,
-                            'text' => $expense_type->title
+                            'text' => $expense_type->title,
                         ];
                     }
                     break;
@@ -191,7 +186,7 @@ class SearchController extends Controller
                         $results[] = [
                             'id' => $tag->id,
                             'text' => $tag->title,
-                            'color' => $tag->color // Include the color attribute for the tags
+                            'color' => $tag->color, // Include the color attribute for the tags
                         ];
                     }
                     break;
@@ -205,7 +200,7 @@ class SearchController extends Controller
                     foreach ($allowances as $allowance) {
                         $results[] = [
                             'id' => $allowance->id,
-                            'text' => $allowance->title
+                            'text' => $allowance->title,
                         ];
                     }
                     break;
@@ -219,7 +214,7 @@ class SearchController extends Controller
                     foreach ($deductions as $deduction) {
                         $results[] = [
                             'id' => $deduction->id,
-                            'text' => $deduction->title
+                            'text' => $deduction->title,
                         ];
                     }
                     break;
@@ -233,7 +228,7 @@ class SearchController extends Controller
                     foreach ($items as $item) {
                         $results[] = [
                             'id' => $item->id,
-                            'text' => $item->title
+                            'text' => $item->title,
                         ];
                     }
                     break;
@@ -251,7 +246,7 @@ class SearchController extends Controller
                         // Format the result to include the prefix "INV-"
                         $results[] = [
                             'id' => $invoice->id,
-                            'text' => get_label('invoice_id_prefix', 'INVC-') . $invoice->id
+                            'text' => get_label('invoice_id_prefix', 'INVC-') . $invoice->id,
                         ];
                     }
 
@@ -259,17 +254,17 @@ class SearchController extends Controller
                 case 'lead_sources':
                     $lead_sources = LeadSource::where('name', 'like', '%' . $query . '%')
                         ->where(function ($query) use ($workspace_id) {
-                        $query->where('workspace_id', $workspace_id)
-                            ->orWhere(function ($q) {
-                                $q->whereNull('workspace_id')->where('is_default', true);
-                            });
+                            $query->where('workspace_id', $workspace_id)
+                                ->orWhere(function ($q) {
+                                    $q->whereNull('workspace_id')->where('is_default', true);
+                                });
                         })
                         ->get();
 
                     foreach ($lead_sources as $lead_source) {
                         $results[] = [
                             'id' => $lead_source->id,
-                            'text' => $lead_source->name
+                            'text' => $lead_source->name,
                         ];
                     }
                     break;
@@ -277,29 +272,27 @@ class SearchController extends Controller
                 case 'lead_stages':
                     $lead_stages = LeadStage::where('name', 'like', '%' . $query . '%')
                         ->where(function ($query) use ($workspace_id) {
-                        $query->where('workspace_id', $workspace_id)
-                            ->orWhere(function ($q) {
-                                $q->whereNull('workspace_id')->where('is_default', true);
-                            });
+                            $query->where('workspace_id', $workspace_id)
+                                ->orWhere(function ($q) {
+                                    $q->whereNull('workspace_id')->where('is_default', true);
+                                });
                         })
                         ->get();
 
                     foreach ($lead_stages as $lead_stage) {
                         $results[] = [
                             'id' => $lead_stage->id,
-                            'text' => $lead_stage->name
+                            'text' => $lead_stage->name,
                         ];
                     }
                     break;
-
-
 
                 case 'candidate_statuses':
                     $candidate_statuses = CandidateStatus::where('name', 'like', '%' . $query . '%')->get();
                     foreach ($candidate_statuses as $candidate_status) {
                         $results[] = [
                             'id' => $candidate_status->id,
-                            'text' => $candidate_status->name
+                            'text' => $candidate_status->name,
                         ];
                     }
                     break;
@@ -309,7 +302,7 @@ class SearchController extends Controller
                     foreach ($interview_candidates as $interview_candidate) {
                         $results[] = [
                             'id' => $interview_candidate->id,
-                            'text' => $interview_candidate->name
+                            'text' => $interview_candidate->name,
                         ];
                     }
                     break;
@@ -320,11 +313,10 @@ class SearchController extends Controller
                     foreach ($interview_interviewers as $interview_interviewer) {
                         $results[] = [
                             'id' => $interview_interviewer->id,
-                            'text' => $interview_interviewer->first_name . " " . $interview_interviewer->last_name,
+                            'text' => $interview_interviewer->first_name . ' ' . $interview_interviewer->last_name,
                         ];
                     }
                     break;
-
 
                 default:
                     break;
@@ -340,7 +332,7 @@ class SearchController extends Controller
                 'clients' => [],
                 'notes' => [],
                 'todos' => [],
-                'lead_sources' => []
+                'lead_sources' => [],
             ];
 
             if ($authUser->can('manage_projects')) {
@@ -351,7 +343,7 @@ class SearchController extends Controller
                     if (isAdminOrHasAllDataAccess() || $this->hasAccess($authUser, 'projects', Project::class, $project->id)) {
                         $results['projects'][] = [
                             'id' => $project->id,
-                            'title' => $project->title
+                            'title' => $project->title,
                         ];
                     }
                 }
@@ -364,7 +356,7 @@ class SearchController extends Controller
                     if (isAdminOrHasAllDataAccess() || $this->hasAccess($authUser, 'tasks', Task::class, $task->id)) {
                         $results['tasks'][] = [
                             'id' => $task->id,
-                            'title' => $task->title
+                            'title' => $task->title,
                         ];
                     }
                 }
@@ -378,7 +370,7 @@ class SearchController extends Controller
                     if (isAdminOrHasAllDataAccess() || $this->hasAccess($authUser, 'meetings', Meeting::class, $meeting->id)) {
                         $results['meetings'][] = [
                             'id' => $meeting->id,
-                            'title' => $meeting->title
+                            'title' => $meeting->title,
                         ];
                     }
                 }
@@ -391,7 +383,7 @@ class SearchController extends Controller
                     if (isAdminOrHasAllDataAccess() || $this->hasAccess($authUser, 'workspaces', Workspace::class, $workspace->id)) {
                         $results['workspaces'][] = [
                             'id' => $workspace->id,
-                            'title' => $workspace->title
+                            'title' => $workspace->title,
                         ];
                     }
                 }
@@ -410,7 +402,7 @@ class SearchController extends Controller
                 foreach ($users as $user) {
                     $results['users'][] = [
                         'id' => $user->id,
-                        'title' => $user->first_name . ' ' . $user->last_name
+                        'title' => $user->first_name . ' ' . $user->last_name,
                     ];
                 }
             }
@@ -428,7 +420,7 @@ class SearchController extends Controller
                 foreach ($clients as $client) {
                     $results['clients'][] = [
                         'id' => $client->id,
-                        'title' => $client->first_name . ' ' . $client->last_name
+                        'title' => $client->first_name . ' ' . $client->last_name,
                     ];
                 }
             }
@@ -437,7 +429,7 @@ class SearchController extends Controller
             $results['notes'] = $notes->map(function ($note) {
                 return [
                     'id' => $note->id,
-                    'title' => $note->title
+                    'title' => $note->title,
                 ];
             })->toArray();
 
@@ -445,7 +437,7 @@ class SearchController extends Controller
             $results['todos'] = $todos->map(function ($todo) {
                 return [
                     'id' => $todo->id,
-                    'title' => $todo->title
+                    'title' => $todo->title,
                 ];
             })->toArray();
         }
@@ -458,8 +450,7 @@ class SearchController extends Controller
         // Check if $user->$typeKey is a relationship or a collection
         if ($user->$typeKey() instanceof Illuminate\Database\Eloquent\Relations\Relation) {
             return $user->$typeKey->contains($typeModel::find($itemId));
-        } else {
-            return $user->$typeKey()->get()->contains($typeModel::find($itemId));
         }
+        return $user->$typeKey()->get()->contains($typeModel::find($itemId));
     }
 }

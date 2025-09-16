@@ -1,13 +1,14 @@
 <?php
+
 namespace Plugins\SocialMediaManagement\Providers;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
-use Plugins\SocialMediaManagement\Models\SocialPost;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
 use Plugins\SocialMediaManagement\Commands\PublishScheduledPosts;
+use Plugins\SocialMediaManagement\Models\SocialPost;
 
 class SocialMediaServiceProvider extends ServiceProvider
 {
@@ -26,7 +27,7 @@ class SocialMediaServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../public/js' => public_path('assets/js/social'),
             __DIR__ . '/../public/css' => public_path('assets/css/social'),
-             __DIR__ . '/../public/img'  => public_path('assets/img/social'),
+            __DIR__ . '/../public/img' => public_path('assets/img/social'),
         ], ['social-assets', 'public']);
 
         // Auto-publish assets
@@ -36,9 +37,9 @@ class SocialMediaServiceProvider extends ServiceProvider
         if (file_exists(__DIR__ . '/../plugin.json')) {
             $pluginJson = json_decode(file_get_contents(__DIR__ . '/../plugin.json'), true);
             if (json_last_error() === JSON_ERROR_NONE) {
-                Log::info("Social Media Scheduler Plugin Loaded - Version: " . ($pluginJson['version'] ?? 'unknown'));
+                Log::info('Social Media Scheduler Plugin Loaded - Version: ' . ($pluginJson['version'] ?? 'unknown'));
             } else {
-                Log::warning("Failed to parse plugin.json: " . json_last_error_msg());
+                Log::warning('Failed to parse plugin.json: ' . json_last_error_msg());
             }
         }
 
@@ -111,7 +112,7 @@ class SocialMediaServiceProvider extends ServiceProvider
     {
         $sourcePathJs = __DIR__ . '/../public/js';
         $destinationPathJs = public_path('assets/js/social');
-        if (File::exists($sourcePathJs) && (!File::exists($destinationPathJs) || $this->assetsNeedUpdate($sourcePathJs, $destinationPathJs))) {
+        if (File::exists($sourcePathJs) && (! File::exists($destinationPathJs) || $this->assetsNeedUpdate($sourcePathJs, $destinationPathJs))) {
             File::ensureDirectoryExists($destinationPathJs);
             File::copyDirectory($sourcePathJs, $destinationPathJs);
             Log::info("Social Media Scheduler Plugin: JS assets auto-published to {$destinationPathJs}");
@@ -119,25 +120,24 @@ class SocialMediaServiceProvider extends ServiceProvider
 
         $sourcePathCss = __DIR__ . '/../public/css';
         $destinationPathCss = public_path('assets/css/social');
-        if (File::exists($sourcePathCss) && (!File::exists($destinationPathCss) || $this->assetsNeedUpdate($sourcePathCss, $destinationPathCss))) {
+        if (File::exists($sourcePathCss) && (! File::exists($destinationPathCss) || $this->assetsNeedUpdate($sourcePathCss, $destinationPathCss))) {
             File::ensureDirectoryExists($destinationPathCss);
             File::copyDirectory($sourcePathCss, $destinationPathCss);
             Log::info("Social Media Scheduler Plugin: CSS assets auto-published to {$destinationPathCss}");
         }
-        
-        $sourcePathImg = __DIR__ . '/../public/img';
-	$destinationPathImg = public_path('assets/img/social');
-	if (File::exists($sourcePathImg) && (!File::exists($destinationPathImg) || $this->assetsNeedUpdate($sourcePathImg, $destinationPathImg))) {
-    	   File::ensureDirectoryExists($destinationPathImg);
-    	   File::copyDirectory($sourcePathImg, $destinationPathImg);
-    	   Log::info("Social Media Scheduler Plugin: IMG assets auto-published to {$destinationPathImg}");
-}
 
+        $sourcePathImg = __DIR__ . '/../public/img';
+        $destinationPathImg = public_path('assets/img/social');
+        if (File::exists($sourcePathImg) && (! File::exists($destinationPathImg) || $this->assetsNeedUpdate($sourcePathImg, $destinationPathImg))) {
+            File::ensureDirectoryExists($destinationPathImg);
+            File::copyDirectory($sourcePathImg, $destinationPathImg);
+            Log::info("Social Media Scheduler Plugin: IMG assets auto-published to {$destinationPathImg}");
+        }
     }
 
     private function assetsNeedUpdate(string $sourcePath, string $destinationPath): bool
     {
-        if (!File::exists($destinationPath)) {
+        if (! File::exists($destinationPath)) {
             return true;
         }
         $sourceTime = File::lastModified($sourcePath);

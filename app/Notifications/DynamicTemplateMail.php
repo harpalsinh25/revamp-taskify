@@ -2,14 +2,12 @@
 
 namespace App\Notifications;
 
-
+use App\Models\ScheduledEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use App\Models\ScheduledEmail;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class DynamicTemplateMail extends Mailable
 {
@@ -25,7 +23,6 @@ class DynamicTemplateMail extends Mailable
     public function __construct(ScheduledEmail $email)
     {
         $this->email = $email;
-
     }
 
     public function build()
@@ -57,7 +54,7 @@ class DynamicTemplateMail extends Mailable
                 // Get the full path and check if file exists
                 $filePath = $attachment->getPath();
                 Log::info("- Full path: {$filePath}");
-                Log::info("- File exists: " . (file_exists($filePath) ? 'Yes' : 'No'));
+                Log::info('- File exists: ' . (file_exists($filePath) ? 'Yes' : 'No'));
 
                 // Get disk information
                 $disk = $attachment->disk;
@@ -67,12 +64,12 @@ class DynamicTemplateMail extends Mailable
                     // Method 1: Attach directly using the path
                     $mail->attach($filePath, [
                         'as' => $attachment->file_name,
-                        'mime' => $attachment->mime_type ?? 'application/octet-stream'
+                        'mime' => $attachment->mime_type ?? 'application/octet-stream',
                     ]);
-                    Log::info("- Attached using direct path method");
+                    Log::info('- Attached using direct path method');
                 } else {
                     // Method 2: Try using storage path if direct path fails
-                    Log::warning("- Direct path failed, trying alternative method");
+                    Log::warning('- Direct path failed, trying alternative method');
 
                     try {
                         // Try using the storage disk
@@ -86,7 +83,7 @@ class DynamicTemplateMail extends Mailable
                                 $attachment->file_name,
                                 ['mime' => $attachment->mime_type ?? 'application/octet-stream']
                             );
-                            Log::info("- Attached using storage disk method");
+                            Log::info('- Attached using storage disk method');
                         } else {
                             // Try another common path pattern with Spatie
                             $alternatePath = $attachment->collection_name . '/' . $attachment->id . '/' . $attachment->file_name;
@@ -99,13 +96,13 @@ class DynamicTemplateMail extends Mailable
                                     $attachment->file_name,
                                     ['mime' => $attachment->mime_type ?? 'application/octet-stream']
                                 );
-                                Log::info("- Attached using alternate path");
+                                Log::info('- Attached using alternate path');
                             } else {
-                                Log::error("- Failed to find attachment file using any method");
+                                Log::error('- Failed to find attachment file using any method');
                             }
                         }
                     } catch (\Exception $e) {
-                        Log::error("- Exception while attaching file: " . $e->getMessage());
+                        Log::error('- Exception while attaching file: ' . $e->getMessage());
                     }
                 }
             }

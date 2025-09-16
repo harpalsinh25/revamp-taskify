@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Client;
-use App\Models\Workspace;
 use App\Models\Notification;
+use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use App\Services\DeletionService;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 
 class NotificationsController extends Controller
@@ -37,7 +34,7 @@ class NotificationsController extends Controller
             'project_comment_mention',
             'task_comment_mention',
             'birthday_wish',
-            'work_anniversary_wish'
+            'work_anniversary_wish',
             // Add more types as needed
         ];
         $notifications_count = $this->user->notifications()->count();
@@ -56,20 +53,18 @@ class NotificationsController extends Controller
         return response()->json(['error' => false]);
     }
 
-
-
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $statuses = request('statuses') ?: [];
         $types = request('types') ?: [];
         $notification_types = request('notification_types') ?: [];
         $user_ids = request('user_ids') ?: [];
         $client_ids = request('client_ids') ?: [];
-        $date_from = (request('date_from')) ? request('date_from') : "";
-        $date_to = (request('date_to')) ? request('date_to') : "";
+        $date_from = request('date_from') ? request('date_from') : '';
+        $date_to = request('date_to') ? request('date_to') : '';
         $date_from = $date_from ? date('Y-m-d H:i:s', strtotime($date_from . ' 00:00:00')) : null;
         $date_to = $date_to ? date('Y-m-d H:i:s', strtotime($date_to . ' 23:59:59')) : null;
 
@@ -80,10 +75,10 @@ class NotificationsController extends Controller
             $pivotTable = 'notification_user';
         }
 
-        if (!empty($user_ids) && isAdminOrHasAllDataAccess()) {
+        if (! empty($user_ids) && isAdminOrHasAllDataAccess()) {
             $notifications = User::whereIn('id', $user_ids)->firstOrFail()->notifications();
             $pivotTable = 'notification_user';
-        } elseif (!empty($client_ids) && isAdminOrHasAllDataAccess()) {
+        } elseif (! empty($client_ids) && isAdminOrHasAllDataAccess()) {
             $notifications = Client::whereIn('id', $client_ids)->firstOrFail()->notifications();
             $pivotTable = 'client_notifications';
         } else {
@@ -98,7 +93,7 @@ class NotificationsController extends Controller
             });
         }
 
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $notifications = $notifications->where(function ($query) use ($statuses, $pivotTable) {
                 if (in_array('read', $statuses)) {
                     $query->whereNotNull("{$pivotTable}.read_at");
@@ -109,7 +104,7 @@ class NotificationsController extends Controller
             });
         }
 
-        if ($sort === "status") {
+        if ($sort === 'status') {
             // Sort by read status
             $notifications = $notifications->orderBy(function ($query) use ($pivotTable) {
                 return $query->selectRaw("CASE WHEN {$pivotTable}.read_at IS NULL THEN 0 ELSE 1 END");
@@ -119,18 +114,18 @@ class NotificationsController extends Controller
             $notifications = $notifications->orderBy($sort, $order);
         }
 
-        if (!empty($types)) {
+        if (! empty($types)) {
             $notifications = $notifications->whereIn('type', $types);
         }
 
-        if (!empty($notification_types)) {
+        if (! empty($notification_types)) {
             $notifications = $notifications->where(function ($query) use ($notification_types, $pivotTable) {
                 foreach ($notification_types as $type) {
-                    if ($type == 'system') {
+                    if ($type === 'system') {
                         $query->orWhere(function ($q) use ($pivotTable) {
                             $q->where("{$pivotTable}.is_system", 1);
                         });
-                    } elseif ($type == 'push') {
+                    } elseif ($type === 'push') {
                         $query->orWhere(function ($q) use ($pivotTable) {
                             $q->where("{$pivotTable}.is_push", 1);
                         });
@@ -147,20 +142,20 @@ class NotificationsController extends Controller
 
         $canDelete = checkPermission('delete_system_notifications');
 
-        $notifications = $notifications->paginate(request("limit"));
+        $notifications = $notifications->paginate(request('limit'));
 
         $notifications->through(function ($notification) use ($canDelete) {
             // Construct the base URL based on the notification type
             $baseUrl = '';
-            if ($notification->type == 'project') {
+            if ($notification->type === 'project') {
                 $baseUrl = url('/projects/information/' . $notification->type_id);
-            } else if ($notification->type == 'task') {
+            } elseif ($notification->type === 'task') {
                 $baseUrl = url('/tasks/information/' . $notification->type_id);
-            } else if ($notification->type == 'workspace') {
+            } elseif ($notification->type === 'workspace') {
                 $baseUrl = url('/workspaces');
-            } else if ($notification->type == 'meeting') {
+            } elseif ($notification->type === 'meeting') {
                 $baseUrl = url('/meetings');
-            } else if ($notification->type == 'leave_request') {
+            } elseif ($notification->type === 'leave_request') {
                 $baseUrl = url('/leave-requests');
             }
             $readAt = $notification->notification_user_read_at
@@ -188,7 +183,7 @@ class NotificationsController extends Controller
             $statusBadge = is_null($readAt) ? '<span class="badge bg-danger">' . get_label('unread', 'Unread') . '</span>' : '<span class="badge bg-success">' . get_label('read', 'Read') . '</span>';
 
             // Append view option only if $notification->type is 'project' or 'task'
-            if ($notification->action != 'team_member_on_leave_alert' && $notification->type != 'birthday_wish' && $notification->type != 'work_anniversary_wish') {
+            if ($notification->action !== 'team_member_on_leave_alert' && $notification->type !== 'birthday_wish' && $notification->type !== 'work_anniversary_wish') {
                 $actionsHtml .= '<a href="' . $baseUrl . '" title="' . get_label('view', 'View') . '" class="card-link update-notification-status" data-id="' . $notification->id . '"><i class="bx bx-info-circle mx-1"></i></a>';
             }
             if ($canDelete) {
@@ -228,17 +223,16 @@ class NotificationsController extends Controller
                 'read_at' => format_date($readAt, true),
                 'created_at' => format_date($notification->created_at, true),
                 'updated_at' => format_date($notification->updated_at, true),
-                'actions' => $actionsHtml
+                'actions' => $actionsHtml,
             ];
         });
-
 
         foreach ($notifications->items() as $notification => $collection) {
             foreach ($collection['clients'] as $i => $client) {
                 $collection['clients'][$i] = "<a href='" . url("/clients/profile/{$client->id}") . "'><li class='avatar avatar-sm pull-up' title='{$client['first_name']} {$client['last_name']}'>
                                 <img src='" . ($client['photo'] ? asset('storage/' . $client['photo']) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' />
                             </li></a>";
-            };
+            }
         }
 
         foreach ($notifications->items() as $notification => $collection) {
@@ -246,25 +240,24 @@ class NotificationsController extends Controller
                 $collection['users'][$i] = "<a href='" . url("/users/profile/{$user->id}") . "'><li class='avatar avatar-sm pull-up' title='{$user['first_name']} {$user['last_name']}'>
                                 <img src='" . ($user['photo'] ? asset('storage/' . $user['photo']) : asset('storage/photos/no-image.jpg')) . "' class='rounded-circle' />
                             </li></a>";
-            };
+            }
         }
 
         return response()->json([
-            "rows" => $notifications->items(),
-            "total" => $total,
+            'rows' => $notifications->items(),
+            'total' => $total,
         ]);
     }
 
-
     /**
      * List or search notifications.
-     * 
+     *
      * This endpoint retrieves a list of notifications based on various filters. The user must be authenticated to perform this action. The request allows filtering by status, type, user, client, and other parameters.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @group Notification Management
-     * 
+     *
      * @urlParam id int optional The ID of the meeting to retrieve. Example: 1
      *
      * @queryParam search string optional The search term to filter notifications by title, message and id. Example: Alert
@@ -277,7 +270,7 @@ class NotificationsController extends Controller
      * @queryParam notification_type string optional The notification type to filter by. Can be "system" or "push". Example: system
      * @queryParam limit int optional The number of notifications per page for pagination. Example: 10
      * @queryParam offset int optional The offset for pagination, indicating the starting point of results. Example: 0
-     * 
+     *
      * @response 200 {
      *   "error": false,
      *   "message": "Notifications retrieved successfully",
@@ -312,14 +305,14 @@ class NotificationsController extends Controller
      *     }
      *   ]
      * }
-     * 
+     *
      * @response 200 {
      *   "error": true,
      *   "message": "Notification not found",
      *   "total": 0,
      *   "data": []
      * }
-     * 
+     *
      * @response 200 {
      *   "error": true,
      *   "message": "Notifications not found",
@@ -342,126 +335,124 @@ class NotificationsController extends Controller
 
         if ($id) {
             $notification = Notification::find($id);
-            if (!$notification) {
+            if (! $notification) {
                 return formatApiResponse(
                     false,
                     'Notification not found',
                     [
                         'total' => 0,
-                        'data' => []
-                    ]
-                );
-            } else {
-                return formatApiResponse(
-                    false,
-                    'Notification retrieved successfully',
-                    [
-                        'total' => 1,
-                        'data' => [formatNotification($notification)]
+                        'data' => [],
                     ]
                 );
             }
-        } else {
-            $pivotTable = getGuardName() == 'client' ? 'client_notifications' : 'notification_user';
-            if ($user_id && isAdminOrHasAllDataAccess()) {
-                $pivotTable = 'notification_user';
-                $user = User::find($user_id);
-                if (!$user) {
-                    return formatApiResponse(
-                        false,
-                        'User not found',
-                        [
-                            'total' => 0,
-                            'data' => []
-                        ]
-                    );
-                }
-                $notificationsQuery = $user->notifications();
-            } elseif ($client_id && isAdminOrHasAllDataAccess()) {
-                $pivotTable = 'client_notifications';
-                $client = Client::find($client_id);
-                if (!$client) {
-                    return formatApiResponse(
-                        false,
-                        'Client not found',
-                        [
-                            'total' => 0,
-                            'data' => []
-                        ]
-                    );
-                }
-                $notificationsQuery = $client->notifications();
-            } else {
-                $notificationsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->notifications() : $this->user->notifications();
-            }
-
-            if ($search) {
-                $notificationsQuery->where(function ($query) use ($search) {
-                    $query->where('id', 'like', '%' . $search . '%')
-                        ->orWhere('title', 'like', '%' . $search . '%')
-                        ->orWhere('message', 'like', '%' . $search . '%');
-                });
-            }
-
-            if ($status === "read") {
-                $notificationsQuery->where(function ($query) use ($pivotTable) {
-                    $query->whereNotNull("{$pivotTable}.read_at");
-                });
-            } elseif ($status === "unread") {
-                $notificationsQuery->where(function ($query) use ($pivotTable) {
-                    $query->whereNull("{$pivotTable}.read_at");
-                });
-            }
-
-            if ($notificationType) {
-                if ($notificationType === 'system') {
-                    $notificationsQuery->where("{$pivotTable}.is_system", 1);
-                } elseif ($notificationType === 'push') {
-                    $notificationsQuery->where("{$pivotTable}.is_push", 1);
-                }
-            }
-            if (!empty($type)) {
-                $notificationsQuery->where('type', $type);
-            }
-            if ($sort === "status") {
-                $notificationsQuery->orderBy(function ($query) use ($pivotTable) {
-                    return $query->selectRaw("CASE WHEN {$pivotTable}.read_at IS NULL THEN 0 ELSE 1 END");
-                }, $order);
-            } else {
-                $notificationsQuery->orderBy($sort, $order);
-            }
-
-            $total = $notificationsQuery->count();
-
-            $notifications = $notificationsQuery->skip($offset)
-                ->take($limit)
-                ->get();
-
-            if ($notifications->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Notifications not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-
-            $data = $notifications->map(function ($notification) {
-                // Define formatNotification function to format notification data
-                return formatNotification($notification);
-            });
-
             return formatApiResponse(
                 false,
-                'Notifications retrieved successfully',
+                'Notification retrieved successfully',
                 [
-                    'total' => $total,
-                    'data' => $data
+                    'total' => 1,
+                    'data' => [formatNotification($notification)],
                 ]
             );
         }
+        $pivotTable = getGuardName() === 'client' ? 'client_notifications' : 'notification_user';
+        if ($user_id && isAdminOrHasAllDataAccess()) {
+            $pivotTable = 'notification_user';
+            $user = User::find($user_id);
+            if (! $user) {
+                return formatApiResponse(
+                    false,
+                    'User not found',
+                    [
+                        'total' => 0,
+                        'data' => [],
+                    ]
+                );
+            }
+            $notificationsQuery = $user->notifications();
+        } elseif ($client_id && isAdminOrHasAllDataAccess()) {
+            $pivotTable = 'client_notifications';
+            $client = Client::find($client_id);
+            if (! $client) {
+                return formatApiResponse(
+                    false,
+                    'Client not found',
+                    [
+                        'total' => 0,
+                        'data' => [],
+                    ]
+                );
+            }
+            $notificationsQuery = $client->notifications();
+        } else {
+            $notificationsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->notifications() : $this->user->notifications();
+        }
+
+        if ($search) {
+            $notificationsQuery->where(function ($query) use ($search) {
+                $query->where('id', 'like', '%' . $search . '%')
+                    ->orWhere('title', 'like', '%' . $search . '%')
+                    ->orWhere('message', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($status === 'read') {
+            $notificationsQuery->where(function ($query) use ($pivotTable) {
+                $query->whereNotNull("{$pivotTable}.read_at");
+            });
+        } elseif ($status === 'unread') {
+            $notificationsQuery->where(function ($query) use ($pivotTable) {
+                $query->whereNull("{$pivotTable}.read_at");
+            });
+        }
+
+        if ($notificationType) {
+            if ($notificationType === 'system') {
+                $notificationsQuery->where("{$pivotTable}.is_system", 1);
+            } elseif ($notificationType === 'push') {
+                $notificationsQuery->where("{$pivotTable}.is_push", 1);
+            }
+        }
+        if (! empty($type)) {
+            $notificationsQuery->where('type', $type);
+        }
+        if ($sort === 'status') {
+            $notificationsQuery->orderBy(function ($query) use ($pivotTable) {
+                return $query->selectRaw("CASE WHEN {$pivotTable}.read_at IS NULL THEN 0 ELSE 1 END");
+            }, $order);
+        } else {
+            $notificationsQuery->orderBy($sort, $order);
+        }
+
+        $total = $notificationsQuery->count();
+
+        $notifications = $notificationsQuery->skip($offset)
+            ->take($limit)
+            ->get();
+
+        if ($notifications->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Notifications not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+
+        $data = $notifications->map(function ($notification) {
+            // Define formatNotification function to format notification data
+            return formatNotification($notification);
+        });
+
+        return formatApiResponse(
+            false,
+            'Notifications retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
     /**
      * Remove the specified notification.
@@ -513,29 +504,26 @@ class NotificationsController extends Controller
                     false,
                     'Notification deleted successfully.',
                     [
-                        'data' => []
+                        'data' => [],
                     ]
                 );
-            } else {
-                return formatApiResponse(
-                    true,
-                    'Notification not found.',
-                    []
-                );
             }
+            return formatApiResponse(
+                true,
+                'Notification not found.',
+                []
+            );
         } catch (\Exception $e) {
             return response()->json(['error' => true, 'message' => 'An error occurred while deleting the notification.'], 500);
         }
     }
-
-
 
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:notifications,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:notifications,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -560,14 +548,13 @@ class NotificationsController extends Controller
         return response()->json(['error' => false, 'message' => 'Notification(s) deleted successfully.']);
     }
 
-
     public function update_status(Request $request)
     {
         $notificationId = $request->input('id');
         $needConfirm = $request->input('needConfirm') || false;
         // Find the notification
-        $notification =  $this->user->notifications()->findOrFail($notificationId);
-        $readAt = isset($notification->pivot->read_at) ? $notification->pivot->read_at : null;
+        $notification = $this->user->notifications()->findOrFail($notificationId);
+        $readAt = $notification->pivot->read_at ?? null;
         if ($needConfirm) {
             // Toggle the status
             if (is_null($readAt)) {
@@ -582,12 +569,11 @@ class NotificationsController extends Controller
 
             // Return a response indicating success
             return response()->json(['error' => false, 'message' => $message]);
-        } else {
-            if (is_null($readAt)) {
-                $this->user->notifications()->updateExistingPivot($notification->id, ['read_at' => now()]);
-            }
-            return response()->json(['error' => false, 'notification' => $notification]);
         }
+        if (is_null($readAt)) {
+            $this->user->notifications()->updateExistingPivot($notification->id, ['read_at' => now()]);
+        }
+        return response()->json(['error' => false, 'notification' => $notification]);
     }
 
     public function getUnreadNotifications()
@@ -611,7 +597,7 @@ class NotificationsController extends Controller
         // Return JSON response with count and HTML
         return response()->json([
             'count' => $unreadNotificationsCount,
-            'html' => $unreadNotificationsHtml
+            'html' => $unreadNotificationsHtml,
         ]);
     }
 
@@ -632,17 +618,17 @@ class NotificationsController extends Controller
      *   "error": false,
      *   "message": "Notification marked as read successfully."
      * }
-     * 
+     *
      * @response 200 {
      *   "error": false,
-     *   "message": "All notifications marked as read successfully."     
+     *   "message": "All notifications marked as read successfully."
      * }
      *
      * @response 404 {
      *   "error": true,
      *   "message": "Notification not found."
      * }
-     * 
+     *
      * @response 500 {
      *   "error": true,
      *   "message": "Failed to mark notifications as read."
@@ -656,12 +642,12 @@ class NotificationsController extends Controller
                 // Mark specific notification as read
                 $notification = $this->user->notifications()->find($id);
 
-                if (!$notification) {
+                if (! $notification) {
                     return formatApiResponse(
                         true,
                         'Notification not found.',
                         [
-                            'data' => []
+                            'data' => [],
                         ]
                     );
                 }
@@ -672,7 +658,7 @@ class NotificationsController extends Controller
                         true,
                         'Notification is already marked as read.',
                         [
-                            'data' => []
+                            'data' => [],
                         ]
                     );
                 }
@@ -682,39 +668,38 @@ class NotificationsController extends Controller
                     false,
                     'Notification marked as read successfully.',
                     [
-                        'data' => []
-                    ]
-                );
-            } else {
-                // Mark all unread notifications as read
-                $notifications = $this->user->notifications()->whereNull('read_at')->get();
-
-                if ($notifications->isEmpty()) {
-                    return formatApiResponse(
-                        true,
-                        'No unread notifications found.',
-                        [
-                            'data' => []
-                        ]
-                    );
-                }
-
-                foreach ($notifications as $notification) {
-                    $this->user->notifications()->updateExistingPivot($notification->id, ['read_at' => now()]);
-                }
-
-                return formatApiResponse(
-                    false,
-                    'All notifications marked as read successfully.',
-                    [
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
+            // Mark all unread notifications as read
+            $notifications = $this->user->notifications()->whereNull('read_at')->get();
+
+            if ($notifications->isEmpty()) {
+                return formatApiResponse(
+                    true,
+                    'No unread notifications found.',
+                    [
+                        'data' => [],
+                    ]
+                );
+            }
+
+            foreach ($notifications as $notification) {
+                $this->user->notifications()->updateExistingPivot($notification->id, ['read_at' => now()]);
+            }
+
+            return formatApiResponse(
+                false,
+                'All notifications marked as read successfully.',
+                [
+                    'data' => [],
+                ]
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Failed to mark notifications as read.'
+                'message' => 'Failed to mark notifications as read.',
             ], 500);
         }
     }

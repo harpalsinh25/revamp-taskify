@@ -13,6 +13,6 @@ class Tax extends Model
         'title',
         'type',
         'amount',
-        'percentage'
+        'percentage',
     ];
 }

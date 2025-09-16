@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use App\Models\Workspace;
 use App\Models\LeadSource;
-use Illuminate\Http\Request;
+use App\Models\Workspace;
 use App\Services\DeletionService;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class LeadSourceController extends Controller
@@ -24,17 +24,14 @@ class LeadSourceController extends Controller
         });
     }
 
-
     public function index()
     {
         $lead_sources = $this->workspace->lead_sources();
         return view('lead_sources.index', compact('lead_sources'));
     }
 
-
     public function create()
     {
-        //
     }
 
     /**
@@ -47,6 +44,7 @@ class LeadSourceController extends Controller
      * @group Leads Source Management
      *
      * @bodyParam name string required The name of the lead source. Max 255 characters. Example: Referral
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -79,7 +77,7 @@ class LeadSourceController extends Controller
         $isApi = request()->get('isApi', false);
         try {
             $request->validate([
-                'name' => 'required|string'
+                'name' => 'required|string',
             ]);
             $lead_source = new LeadSource();
             $lead_source->workspace_id = getWorkspaceId();
@@ -91,14 +89,13 @@ class LeadSourceController extends Controller
                     'Lead Source Created Successfully',
                     [
                         'data' => [
-                            formatLeadSource($lead_source)
-                        ]
+                            formatLeadSource($lead_source),
+                        ],
                     ],
                     200
                 );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Lead Source Created Successfully', 'id' => $lead_source->id, 'type' => 'lead_source']);
             }
+            return response()->json(['error' => false, 'message' => 'Lead Source Created Successfully', 'id' => $lead_source->id, 'type' => 'lead_source']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -107,16 +104,13 @@ class LeadSourceController extends Controller
                     true,
                     'Lead Source Couldn\'t Created',
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Lead Source Couldn\'t Created']);
             }
+            return response()->json(['error' => true, 'message' => 'Lead Source Couldn\'t Created']);
         }
     }
 
-
     public function show(string $id)
     {
-        //
     }
 
     /**
@@ -129,6 +123,7 @@ class LeadSourceController extends Controller
      * @group Leads Source Management
      *
      * @urlParam id integer required The ID of the lead source to retrieve. Must exist in the `lead_sources` table. Example: 1
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -183,6 +178,7 @@ class LeadSourceController extends Controller
      *
      * @bodyParam id integer required The ID of the lead source to update. Must exist in the `lead_sources` table. Example: 1
      * @bodyParam name string required The new name for the lead source. Max 255 characters. Example: Referral
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -236,9 +232,8 @@ class LeadSourceController extends Controller
                     ],
                     200
                 );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Lead Source Updated Successfully', 'id' => $lead_source->id, 'type' => 'lead_source']);
             }
+            return response()->json(['error' => false, 'message' => 'Lead Source Updated Successfully', 'id' => $lead_source->id, 'type' => 'lead_source']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -249,18 +244,17 @@ class LeadSourceController extends Controller
                     [
                         'error' => $e->getMessage(),
                         'line' => $e->getLine(),
-                        'file' => $e->getFile()
+                        'file' => $e->getFile(),
                     ]
                 );
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Lead Source Couldn\'t Updated.',
-                    'error' => $e->getMessage(),
-                    'line' => $e->getLine(),
-                    'file' => $e->getFile()
-                ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Lead Source Couldn\'t Updated.',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
         }
     }
 
@@ -292,16 +286,14 @@ class LeadSourceController extends Controller
      */
     public function destroy(string $id)
     {
-        $response = DeletionService::delete(LeadSource::class, $id, 'lead_source');
-        return $response;
+        return DeletionService::delete(LeadSource::class, $id, 'lead_source');
     }
-
 
     public function destroy_multiple(Request $request)
     {
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:lead_sources,id'
+            'ids.*' => 'integer|exists:lead_sources,id',
         ]);
 
         $ids = $validatedData['ids'];
@@ -317,16 +309,15 @@ class LeadSourceController extends Controller
         return response()->json(['error' => false, 'message' => 'LeadSource(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
     }
 
-
     public function list()
     {
         $search = request('search');
-        $sort = request('sort', "id");
-        $order = request('order', "DESC");
+        $sort = request('sort', 'id');
+        $order = request('order', 'DESC');
         $limit = request('limit', 10);
 
         $lead_sources = $this->workspace->lead_sources();
-        $lead_sources  = $lead_sources->orderBy($sort, $order);
+        $lead_sources = $lead_sources->orderBy($sort, $order);
 
         if ($search) {
             $lead_sources->where(function ($query) use ($search) {
@@ -340,7 +331,7 @@ class LeadSourceController extends Controller
         $lead_sources = $lead_sources
             ->paginate($limit)
             ->through(
-                fn($lead_source) => [
+                fn ($lead_source) => [
                     'id' => $lead_source->id,
                     'name' => ucwords($lead_source->name),
                     'created_at' => format_date($lead_source->created_at, true),
@@ -350,8 +341,8 @@ class LeadSourceController extends Controller
             );
 
         return response()->json([
-            "rows" => $lead_sources->items(),
-            "total" => $total,
+            'rows' => $lead_sources->items(),
+            'total' => $total,
         ]);
     }
 
@@ -406,19 +397,17 @@ class LeadSourceController extends Controller
      */
     public function apiList()
     {
-
         try {
-
             $limit = request('limit', 10);
             $offset = request('offset', 0);
             $id = request('id', null);
             $search = request('search');
-            $sort = request('sort', "id");
-            $order = request('order', "DESC");
+            $sort = request('sort', 'id');
+            $order = request('order', 'DESC');
             $limit = request('limit', 10);
 
             $lead_sources = $this->workspace->lead_sources();
-            $lead_sources  = $lead_sources->orderBy($sort, $order);
+            $lead_sources = $lead_sources->orderBy($sort, $order);
 
             if ($search) {
                 $lead_sources->where(function ($query) use ($search) {
@@ -431,13 +420,13 @@ class LeadSourceController extends Controller
             // dd($total);
             if ($id) {
                 $lead_source = $lead_sources->find($id);
-                if (!$lead_source) {
+                if (! $lead_source) {
                     return formatApiResponse(
                         false,
                         'Lead Source Not Found.',
                         [
                             'total' => 0,
-                            'data' => []
+                            'data' => [],
                         ],
                         404
                     );
@@ -447,40 +436,39 @@ class LeadSourceController extends Controller
                     'Lead Source Retrived Successfully.',
                     [
                         'total' => 1,
-                        'data' => formatLeadSource($lead_source)
-                    ],
-                    200
-                );
-            } else {
-                $lead_sources = $lead_sources->orderBy($sort, $order)->skip($offset)->take($limit)->get();
-                if ($lead_sources->isEmpty()) {
-                    return formatApiResponse(
-                        false,
-                        'Lead Sources Not Found.',
-                        [
-                            'total' => 0,
-                            'data' => []
-                        ],
-                        404
-                    );
-                }
-                $data = $lead_sources->map(function ($lead_source) {
-                    return formatLeadSource($lead_source);
-                });
-                return formatApiResponse(
-                    false,
-                    'Lead Sources Retrived Successfully.',
-                    [
-                        'total' => $total,
-                        'data' => $data,
-                        'permissions' => [
-                            'can_delete' => checkPermission('manage_leads'),
-                            'can_edit' => checkPermission('manage_leads')
-                        ]
+                        'data' => formatLeadSource($lead_source),
                     ],
                     200
                 );
             }
+            $lead_sources = $lead_sources->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+            if ($lead_sources->isEmpty()) {
+                return formatApiResponse(
+                    false,
+                    'Lead Sources Not Found.',
+                    [
+                        'total' => 0,
+                        'data' => [],
+                    ],
+                    404
+                );
+            }
+            $data = $lead_sources->map(function ($lead_source) {
+                return formatLeadSource($lead_source);
+            });
+            return formatApiResponse(
+                false,
+                'Lead Sources Retrived Successfully.',
+                [
+                    'total' => $total,
+                    'data' => $data,
+                    'permissions' => [
+                        'can_delete' => checkPermission('manage_leads'),
+                        'can_edit' => checkPermission('manage_leads'),
+                    ],
+                ],
+                200
+            );
         } catch (\Exception $e) {
             dd($e);
         }
@@ -509,6 +497,6 @@ class LeadSourceController extends Controller
                 '</button>';
         }
 
-        return $actions ?: '-';
+        return $actions ? $actions : '-';
     }
 }

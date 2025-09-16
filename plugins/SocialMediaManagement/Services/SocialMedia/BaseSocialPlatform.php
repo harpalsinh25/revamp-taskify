@@ -1,6 +1,7 @@
 <?php
 
 // App/Services/SocialMedia/BaseSocialPlatform.php
+
 namespace Plugins\SocialMediaManagement\Services\SocialMedia;
 
 use Carbon\Carbon;
@@ -63,7 +64,7 @@ abstract class BaseSocialPlatform
             'platform_id' => $platformId,
             'status' => 'published',
             'response' => $response,
-            'published_at' => Carbon::now()->toISOString()
+            'published_at' => Carbon::now()->toISOString(),
         ];
     }
 
@@ -76,7 +77,7 @@ abstract class BaseSocialPlatform
             'success' => false,
             'error' => $error,
             'status' => 'failed',
-            'failed_at' => Carbon::now()->toISOString()
+            'failed_at' => Carbon::now()->toISOString(),
         ];
     }
 }

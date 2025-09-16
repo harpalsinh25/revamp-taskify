@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Plugins\AssetManagement\Controllers\AssetsController;
 use Plugins\AssetManagement\Controllers\AssetsCategoryController;
+use Plugins\AssetManagement\Controllers\AssetsController;
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('assets')->group(function () {
@@ -31,4 +31,3 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/category/list', [AssetsCategoryController::class, 'list'])->name('assets.category.list');
     });
 });
-

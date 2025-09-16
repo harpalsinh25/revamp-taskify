@@ -1,12 +1,13 @@
 <?php
 
 namespace Plugins\TimeTracker\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class TimeTrackerConfig extends Model
 {
-    protected $table = 'time_tracker_configs';
     public $timestamps = true;
+    protected $table = 'time_tracker_configs';
     protected $fillable = [
         'name', // Config key like 'screenshot_interval'
         'value', // Config value (can be JSON for complex values),
@@ -20,6 +21,7 @@ class TimeTrackerConfig extends Model
      * Get the configuration value by name.
      *
      * @param string $name
+     *
      * @return mixed
      */
     public static function getConfig($name)
@@ -32,6 +34,7 @@ class TimeTrackerConfig extends Model
      *
      * @param string $name
      * @param mixed $value
+     *
      * @return bool
      */
     public static function setConfig($name, $value)

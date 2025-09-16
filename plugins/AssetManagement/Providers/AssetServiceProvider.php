@@ -1,11 +1,12 @@
 <?php
+
 namespace Plugins\AssetManagement\Providers;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider;
+use App\Models\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\File;
-use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
 use Plugins\AssetManagement\Models\Asset;
 
 class AssetServiceProvider extends ServiceProvider
@@ -39,7 +40,7 @@ class AssetServiceProvider extends ServiceProvider
         // Optional: Log plugin version when loaded
         if (file_exists(__DIR__ . '/../plugin.json')) {
             $pluginJson = json_decode(file_get_contents(__DIR__ . '/../plugin.json'), true);
-            Log::info("Asset Plugin Loaded - Version: " . ($pluginJson['version'] ?? 'unknown'));
+            Log::info('Asset Plugin Loaded - Version: ' . ($pluginJson['version'] ?? 'unknown'));
         }
 
         // Optional: Add scheduled tasks for Asset plugin
@@ -57,7 +58,6 @@ class AssetServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
     }
 
     /**
@@ -70,7 +70,7 @@ class AssetServiceProvider extends ServiceProvider
         $destinationPathJs = public_path('assets/js/asset-plugin');
 
         if (File::exists($sourcePathJs)) {
-            if (!File::exists($destinationPathJs) || $this->assetsNeedUpdate($sourcePathJs, $destinationPathJs)) {
+            if (! File::exists($destinationPathJs) || $this->assetsNeedUpdate($sourcePathJs, $destinationPathJs)) {
                 File::ensureDirectoryExists($destinationPathJs);
                 File::copyDirectory($sourcePathJs, $destinationPathJs);
                 Log::info(" Asset Plugin: JS assets auto-published to {$destinationPathJs}");
@@ -82,7 +82,7 @@ class AssetServiceProvider extends ServiceProvider
         $destinationPathStorage = public_path('storage');
 
         if (File::exists($sourcePathStorage)) {
-            if (!File::exists($destinationPathStorage)) {
+            if (! File::exists($destinationPathStorage)) {
                 File::makeDirectory($destinationPathStorage, 0755, true);
             }
             File::copyDirectory($sourcePathStorage, $destinationPathStorage);
@@ -90,13 +90,12 @@ class AssetServiceProvider extends ServiceProvider
         }
     }
 
-
     /**
      * Check if assets need to be updated
      */
     private function assetsNeedUpdate(string $sourcePath, string $destinationPath): bool
     {
-        if (!File::exists($destinationPath)) {
+        if (! File::exists($destinationPath)) {
             return true;
         }
 

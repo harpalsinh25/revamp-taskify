@@ -4,9 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Auth;
 
 class CustomCanMiddleware
 {
@@ -16,6 +13,7 @@ class CustomCanMiddleware
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @param  string  ...$permissions
+     *
      * @return mixed
      */
     public function handle(Request $request, Closure $next, ...$permissions)
@@ -24,11 +22,11 @@ class CustomCanMiddleware
         $authUser = getAuthenticatedUser();
 
         // Check specific route conditions
-        if ($routeName == 'users.profile' && getGuardName() == 'web' && $request->route('id') == $authUser->id) {
+        if ($routeName === 'users.profile' && getGuardName() === 'web' && $request->route('id') === $authUser->id) {
             return $next($request);
         }
 
-        if ($routeName == 'clients.profile' && getGuardName() == 'client' && $request->route('id') == $authUser->id) {
+        if ($routeName === 'clients.profile' && getGuardName() === 'client' && $request->route('id') === $authUser->id) {
             return $next($request);
         }
 
@@ -45,8 +43,7 @@ class CustomCanMiddleware
                 true,
                 get_label('permission_denied', 'You do not have permission to access this resource.')
             );
-        } else {
-            return response()->view('auth.not-authorized', ['unauthorized' => true], 403);
         }
+        return response()->view('auth.not-authorized', ['unauthorized' => true], 403);
     }
 }

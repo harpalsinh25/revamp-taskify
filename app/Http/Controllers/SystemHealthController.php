@@ -21,19 +21,17 @@ class SystemHealthController extends Controller
 
     public function validateHealth(Request $request)
     {
-
         $request->validate([
             'health_code' => [
                 'required',
                 'string',
-                'regex:/^[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}$/'
+                'regex:/^[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}$/',
             ],
         ], [
             'health_code.required' => 'Please enter your purchase code.',
-            'health_code.regex' => 'Invalid format. Please check your code.'
+            'health_code.regex' => 'Invalid format. Please check your code.',
         ]);
         $healthCode = $request->input('health_code');
-
 
         $result = $this->performHealthCheck($healthCode);
 
@@ -43,6 +41,29 @@ class SystemHealthController extends Controller
         }
 
         return formatApiResponse(true, $result['message'], [], 200);
+    }
+    public function checkPurchaseCode(Request $request, $key)
+    {
+        // Optional: key verification
+        $secretKey = $this->decodeKey('u1v2w3x4');
+        if ($key !== $secretKey) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Get from cache or DB
+        $settings = $this->getSystemData();
+
+        // Extract data
+        $purchaseCode = $settings['code_bravo'] ?? null;
+        $isValidated = ! empty($purchaseCode) && ! empty($settings['code_adam']); // validate based on non-empty values
+
+        return response()->json([
+            'purchase_code' => $purchaseCode,
+            'is_validated' => $isValidated,
+            'last_checked' => ! empty($settings['time_check'])
+                ? date('Y-m-d H:i:s', $settings['time_check'])
+                : null,
+        ]);
     }
 
     private function getSystemData()
@@ -60,7 +81,7 @@ class SystemHealthController extends Controller
 
             $response = Http::timeout(30)->withHeaders([
                 'Accept' => 'application/json',
-                'User-Agent' => 'SystemHealth/1.0'
+                'User-Agent' => 'SystemHealth/1.0',
             ])->get($url);
 
             if ($response->failed()) {
@@ -71,12 +92,11 @@ class SystemHealthController extends Controller
 
             cache()->forget('settings_cache');
 
-            if ($data['error'] == false) {
-
+            if ($data['error'] === false) {
                 return [
                     'success' => true,
                     'message' => $data['message'] ?? 'Health validation successful',
-                    'data' => $this->mapHealthData($data)
+                    'data' => $this->mapHealthData($data),
                 ];
             }
             return ['success' => false, 'message' => $data['message'] ?? 'Health validation failed'];
@@ -87,14 +107,13 @@ class SystemHealthController extends Controller
 
     private function buildHealthUrl($code)
     {
-
         $base = 'https://validator.infinitietech.com';
         $path = '/home/validator';
 
         $params = [
             'purchase_code' => $code,
             'domain_url' => url('/'),
-            'item_id' => config('app.system_id', config('constants.medicine_code'))
+            'item_id' => config('app.system_id', config('constants.medicine_code')),
         ];
 
         return $base . $path . '?' . http_build_query($params);
@@ -125,29 +144,5 @@ class SystemHealthController extends Controller
         $keys = config('taskhub.system_map');
 
         return $keys[$hash] ?? null;
-    }
-    public function checkPurchaseCode(Request $request, $key)
-    {
-
-        // Optional: key verification
-        $secretKey = $this->decodeKey('u1v2w3x4');
-        if ($key !== $secretKey) {
-            abort(403, 'Unauthorized');
-        }
-
-        // Get from cache or DB
-        $settings = $this->getSystemData();
-
-        // Extract data
-        $purchaseCode = $settings['code_bravo'] ?? null;
-        $isValidated  = !empty($purchaseCode) && !empty($settings['code_adam']); // validate based on non-empty values
-
-        return response()->json([
-            'purchase_code' => $purchaseCode,
-            'is_validated'  => $isValidated,
-            'last_checked'  => !empty($settings['time_check'])
-                ? date('Y-m-d H:i:s', $settings['time_check'])
-                : null,
-        ]);
     }
 }

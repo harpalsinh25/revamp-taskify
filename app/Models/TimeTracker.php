@@ -14,7 +14,7 @@ class TimeTracker extends Model
         'start_date_time',
         'end_date_time',
         'duration',
-        'message'
+        'message',
     ];
 
     public function users()
@@ -29,5 +29,4 @@ class TimeTracker extends Model
     {
         return $this->belongsTo(Workspace::class);
     }
-
 }

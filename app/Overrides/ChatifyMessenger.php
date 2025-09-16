@@ -2,26 +2,16 @@
 
 namespace Chatify;
 
-use App\Models\ChMessage as Message;
 use App\Models\ChFavorite as Favorite;
+use App\Models\ChMessage as Message;
+use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Pusher\Pusher;
-use Illuminate\Support\Facades\Auth;
-use Exception;
 
 class ChatifyMessenger
 {
     public $pusher;
-
-    /**
-     * Get max file's upload size in MB.
-     *
-     * @return int
-     */
-    public function getMaxUploadSize()
-    {
-        return config('chatify.attachments.max_upload_size') * 1048576;
-    }
 
     public function __construct()
     {
@@ -31,6 +21,16 @@ class ChatifyMessenger
             config('chatify.pusher.app_id'),
             config('chatify.pusher.options'),
         );
+    }
+
+    /**
+     * Get max file's upload size in MB.
+     *
+     * @return int
+     */
+    public function getMaxUploadSize()
+    {
+        return config('chatify.attachments.max_upload_size') * 1048576;
     }
 
     public function conciseDiffForHumans($date)
@@ -107,6 +107,7 @@ class ChatifyMessenger
      * @param string $channel
      * @param string $event
      * @param array $data
+     *
      * @return void
      */
     public function push($channel, $event, $data)
@@ -122,6 +123,7 @@ class ChatifyMessenger
      * @param string $channelName
      * @param string $socket_id
      * @param array $data
+     *
      * @return void
      */
     public function pusherAuth($requestUser, $authUser, $channelName, $socket_id)
@@ -130,12 +132,12 @@ class ChatifyMessenger
         $authData = json_encode([
             'user_id' => $authUser->id,
             'user_info' => [
-                'name' => $authUser->name
-            ]
+                'name' => $authUser->name,
+            ],
         ]);
         // check if user authenticated
         if (Auth::check()) {
-            if ($requestUser->id == $authUser->id) {
+            if ($requestUser->id === $authUser->id) {
                 return $this->pusher->socket_auth(
                     $channelName,
                     $socket_id,
@@ -155,6 +157,7 @@ class ChatifyMessenger
      *
      * @param Message $prefetchedMessage
      * @param int $id
+     *
      * @return array
      */
     public function parseMessage($prefetchedMessage = null, $id = null)
@@ -163,11 +166,11 @@ class ChatifyMessenger
         $attachment = null;
         $attachment_type = null;
         $attachment_title = null;
-        if (!!$prefetchedMessage) {
+        if ((bool) $prefetchedMessage) {
             $msg = $prefetchedMessage;
         } else {
             $msg = Message::where('id', $id)->first();
-            if (!$msg) {
+            if (! $msg) {
                 return [];
             }
         }
@@ -186,11 +189,11 @@ class ChatifyMessenger
             'attachment' => (object) [
                 'file' => $attachment,
                 'title' => $attachment_title,
-                'type' => $attachment_type
+                'type' => $attachment_type,
             ],
             'timeAgo' => $this->conciseDiffForHumans($msg->created_at),
             'created_at' => $msg->created_at->toIso8601String(),
-            'isSender' => ($msg->from_id == Auth::user()->id),
+            'isSender' => ($msg->from_id === Auth::user()->id),
             'seen' => $msg->seen,
         ];
     }
@@ -199,16 +202,17 @@ class ChatifyMessenger
      * Return a message card with the given data.
      *
      * @param Message $data
-     * @param boolean $isSender
+     * @param bool $isSender
+     *
      * @return string
      */
     public function messageCard($data, $renderDefaultCard = false)
     {
-        if (!$data) {
+        if (! $data) {
             return '';
         }
         if ($renderDefaultCard) {
-            $data['isSender'] =  false;
+            $data['isSender'] = false;
         }
         return view('Chatify::layouts.messageCard', $data)->render();
     }
@@ -217,6 +221,7 @@ class ChatifyMessenger
      * Default fetch messages query between a Sender and Receiver.
      *
      * @param int $user_id
+     *
      * @return Message|\Illuminate\Database\Eloquent\Builder
      */
     public function fetchMessagesQuery($user_id, $type = null, $type_id = null)
@@ -247,11 +252,11 @@ class ChatifyMessenger
         return $query;
     }
 
-
     /**
      * create a new message to database
      *
      * @param array $data
+     *
      * @return Message
      */
     public function newMessage($data)
@@ -273,6 +278,7 @@ class ChatifyMessenger
      * the receiver [User id] as seen.
      *
      * @param int $user_id
+     *
      * @return bool
      */
     public function makeSeen($user_id)
@@ -287,6 +293,7 @@ class ChatifyMessenger
      * Get last message for a specific user
      *
      * @param int $user_id
+     *
      * @return Message|Collection|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
      */
     public function getLastMessageQuery($user_id, $type = null, $type_id = null)
@@ -298,6 +305,7 @@ class ChatifyMessenger
      * Count Unseen messages
      *
      * @param int $user_id
+     *
      * @return Collection
      */
     public function countUnseenMessages($user_id, $type = null, $type_id = null)
@@ -306,7 +314,7 @@ class ChatifyMessenger
             'from_id' => $user_id,
             'seen' => 0,
             'to_id' => Auth::user()->id,
-            'workspace_id' => getWorkspaceId()
+            'workspace_id' => getWorkspaceId(),
         ];
 
         // Add conditions for type and type_id if they are not null
@@ -329,6 +337,7 @@ class ChatifyMessenger
      *
      * @param int $messenger_id
      * @param Collection $user
+     *
      * @return string
      */
     public function getContactItem($user, $type = null, $type_id = null)
@@ -357,11 +366,12 @@ class ChatifyMessenger
      * Get user with avatar (formatted).
      *
      * @param Collection $user
+     *
      * @return Collection
      */
     public function getUserWithAvatar($user)
     {
-        if ($user->avatar == 'avatar.png' && config('chatify.gravatar.enabled')) {
+        if ($user->avatar === 'avatar.png' && config('chatify.gravatar.enabled')) {
             $imageSize = config('chatify.gravatar.image_size');
             $imageset = config('chatify.gravatar.imageset');
             $user->avatar = asset('storage/' . $user->photo);
@@ -376,14 +386,15 @@ class ChatifyMessenger
      * Check if a user in the favorite list
      *
      * @param int $user_id
-     * @return boolean
+     *
+     * @return bool
      */
     public function inFavorite($user_id, $typeId = null, $type = null)
     {
         $where = [
             'favorite_id' => $user_id,
             'user_id' => Auth::user()->id,
-            'workspace_id' => getWorkspaceId()
+            'workspace_id' => getWorkspaceId(),
         ];
 
         if ($typeId !== null && $type !== null) {
@@ -403,7 +414,8 @@ class ChatifyMessenger
      *
      * @param int $user_id
      * @param int $star
-     * @return boolean
+     *
+     * @return bool
      */
     public function makeInFavorite($user_id, $action, $typeId = null, $type = null)
     {
@@ -419,32 +431,32 @@ class ChatifyMessenger
             }
             $star->save();
             return $star ? true : false;
-        } else {
-            // UnStar
-            $query = Favorite::where('user_id', Auth::user()->id)
-                ->where('favorite_id', $user_id)
-                ->where('workspace_id', getWorkspaceId());
-            if ($typeId !== null && $type !== null) {
-                $query->where('type_id', $typeId);
-                $query->where('type', $type);
-            } else {
-                $query->where('type_id', null);
-                $query->where('type', null);
-            }
-            $star = $query->delete();
-            return $star ? true : false;
         }
+        // UnStar
+        $query = Favorite::where('user_id', Auth::user()->id)
+            ->where('favorite_id', $user_id)
+            ->where('workspace_id', getWorkspaceId());
+        if ($typeId !== null && $type !== null) {
+            $query->where('type_id', $typeId);
+            $query->where('type', $type);
+        } else {
+            $query->where('type_id', null);
+            $query->where('type', null);
+        }
+        $star = $query->delete();
+        return $star ? true : false;
     }
 
     /**
      * Get shared photos of the conversation
      *
      * @param int $user_id
+     *
      * @return array
      */
     public function getSharedPhotos($user_id, $type = null, $type_id = null)
     {
-        $images = array(); // Default
+        $images = []; // Default
         // Get messages
         $msgs = $this->fetchMessagesQuery($user_id, $type, $type_id)->orderBy('created_at', 'DESC');
         if ($msgs->count() > 0) {
@@ -465,7 +477,8 @@ class ChatifyMessenger
      * Delete Conversation
      *
      * @param int $user_id
-     * @return boolean
+     *
+     * @return bool
      */
     public function deleteConversation($user_id, $type = null, $typeId = null)
     {
@@ -491,7 +504,8 @@ class ChatifyMessenger
      * Delete message by ID
      *
      * @param int $id
-     * @return boolean
+     *
+     * @return bool
      */
     public function deleteMessage($id)
     {
@@ -512,7 +526,6 @@ class ChatifyMessenger
 
     /**
      * Return a storage instance with disk name specified in the config.
-     *
      */
     public function storage()
     {
@@ -523,6 +536,7 @@ class ChatifyMessenger
      * Get user avatar url.
      *
      * @param string $user_avatar_name
+     *
      * @return string
      */
     public function getUserAvatarUrl($user_avatar_name)
@@ -534,6 +548,7 @@ class ChatifyMessenger
      * Get attachment's url.
      *
      * @param string $attachment_name
+     *
      * @return string
      */
     public function getAttachmentUrl($attachment_name)

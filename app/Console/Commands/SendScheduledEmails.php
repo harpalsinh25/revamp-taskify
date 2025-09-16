@@ -2,14 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Throwable;
-use Carbon\Carbon;
-use App\Jobs\SendEmailJob;
 use App\Models\ScheduledEmail;
+use App\Notifications\DynamicTemplateMail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Notifications\DynamicTemplateMail;
+use Throwable;
 
 class SendScheduledEmails extends Command
 {
@@ -35,7 +33,7 @@ class SendScheduledEmails extends Command
         $now = now('UTC');
 
         $this->info("Current time (UTC): {$now->toDateTimeString()}");
-        $this->info("Fetching scheduled emails that are due...");
+        $this->info('Fetching scheduled emails that are due...');
 
         $scheduledEmails = ScheduledEmail::where('status', 'pending')
             ->where('scheduled_at', '<=', $now)
@@ -45,7 +43,7 @@ class SendScheduledEmails extends Command
         $this->info("Found {$totalEmails} scheduled emails to process.");
 
         if ($totalEmails === 0) {
-            $this->info("No scheduled emails to send at this time.");
+            $this->info('No scheduled emails to send at this time.');
             return Command::SUCCESS;
         }
 
@@ -59,7 +57,7 @@ class SendScheduledEmails extends Command
                 $mailable = new DynamicTemplateMail($email);
 
                 // Attach files if they exist (if attachments are stored properly)
-                if (!empty($email->attachments) && is_array($email->attachments)) {
+                if (! empty($email->attachments) && is_array($email->attachments)) {
                     foreach ($email->attachments as $attachment) {
                         try {
                             $mailable->attachFromStorageDisk(
@@ -90,7 +88,7 @@ class SendScheduledEmails extends Command
             }
         }
 
-        $this->info("Scheduled emails processing complete.");
+        $this->info('Scheduled emails processing complete.');
         $this->info("Total: {$totalEmails} | Sent: {$sentCount} | Failed: {$failedCount}");
 
         return Command::SUCCESS;

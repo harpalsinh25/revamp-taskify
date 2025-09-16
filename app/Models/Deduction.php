@@ -13,7 +13,7 @@ class Deduction extends Model
         'title',
         'type',
         'amount',
-        'percentage'
+        'percentage',
     ];
 
     public function payslips()

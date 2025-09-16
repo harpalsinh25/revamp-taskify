@@ -2,8 +2,8 @@
 
 namespace Plugins\TimeTracker\Controllers;
 
-use Carbon\Carbon;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
@@ -11,7 +11,6 @@ use Plugins\TimeTracker\Models\TimeTrackerActivityLog;
 
 class DashboardController extends Controller
 {
-
     /**
      * Display the productivity dashboard with filters and comparison.
      */
@@ -21,9 +20,9 @@ class DashboardController extends Controller
         $endDate = $request->input('end_date', Carbon::today()->endOfMonth()->format('Y-m-d'));
         $comparisonStartDate = $request->input('comparison_start_date');
         $comparisonEndDate = $request->input('comparison_end_date');
-        if(!isAdminOrHasAllDataAccess()){
+        if (! isAdminOrHasAllDataAccess()) {
             $userIds = [getAuthenticatedUser()->id];
-        }else{
+        } else {
             $userIds = array_filter($request->input('user_id', [])); // array or null
         }
 
@@ -34,7 +33,7 @@ class DashboardController extends Controller
                 'metrics' => $this->calculateMetrics($startDate, $endDate, $userIds),
                 'daily_breakdown' => $this->getDailyBreakdown($startDate, $endDate, $userIds),
                 'activity_distribution' => $this->getActivityDistribution($startDate, $endDate, $userIds),
-            ]
+            ],
         ];
 
         if ($comparisonStartDate && $comparisonEndDate) {
@@ -102,7 +101,7 @@ class DashboardController extends Controller
 
         $query = TimeTrackerActivityLog::whereBetween('timestamp', [$startDateTime, $endDateTime]);
 
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $query->where('user_id', getAuthenticatedUser()->id);
         } elseif ($userIds) {
             $query->whereIn('user_id', $userIds);
@@ -144,7 +143,7 @@ class DashboardController extends Controller
         // $metrics['pending_time'] = $metrics['manual_processing_time']; // Track pending approval time
 
         if ($metrics['work_time'] > 0) {
-            $metrics['utilization'] = ($metrics['productive_time'] / $metrics['work_time']) * 100;
+            $metrics['utilization'] = $metrics['productive_time'] / $metrics['work_time'] * 100;
         }
 
         return $this->formatMetrics($metrics);
@@ -230,15 +229,13 @@ class DashboardController extends Controller
         return $metrics;
     }
 
-    private function getDailyBreakdown($startDate, $endDate, $userIds =[]): array
+    private function getDailyBreakdown($startDate, $endDate, $userIds = []): array
     {
         // Fix date range - ensure we include the entire end date
         $startDateTime = Carbon::parse($startDate)->startOfDay();
         $endDateTime = Carbon::parse($endDate)->endOfDay();
 
         $query = TimeTrackerActivityLog::whereBetween('timestamp', [$startDateTime, $endDateTime]);
-
-
 
         $logs = $query->orderBy('timestamp')->get();
         $userSessions = $this->groupLogsByUserAndDay($logs);
@@ -295,7 +292,6 @@ class DashboardController extends Controller
         $grouped = [];
 
         foreach ($logs as $log) {
-
             $userId = $log->user_id;
             $date = Carbon::parse($log->timestamp)->format('Y-m-d');
             $grouped[$userId][$date][] = $log;
@@ -334,7 +330,7 @@ class DashboardController extends Controller
             $prevVal = $key === 'utilization' ? $previous[$key]['value'] : $previous[$key]['minutes'];
 
             if ($prevVal > 0) {
-                $percent = (($curVal - $prevVal) / $prevVal) * 100;
+                $percent = ($curVal - $prevVal) / $prevVal * 100;
                 $changes[$key] = [
                     'percentage' => round($percent, 1),
                     'direction' => $percent > 0 ? 'increase' : ($percent < 0 ? 'decrease' : 'no_change'),
@@ -354,7 +350,7 @@ class DashboardController extends Controller
     private function getEmployeeList(): array
     {
         $query = TimeTrackerActivityLog::select('user_id')->distinct();
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $query->where('user_id', getAuthenticatedUser()->id);
         }
 
@@ -426,7 +422,7 @@ class DashboardController extends Controller
 
         $query = TimeTrackerActivityLog::whereBetween('timestamp', [$startDateTime, $endDateTime]);
 
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $query->where('user_id', getAuthenticatedUser()->id);
         }
 
@@ -480,7 +476,7 @@ class DashboardController extends Controller
 
         $query = TimeTrackerActivityLog::whereBetween('timestamp', [$startDateTime, $endDateTime]);
 
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $query->where('user_id', getAuthenticatedUser()->id);
         } elseif ($userIds) {
             $query->whereIn('user_id', $userIds);

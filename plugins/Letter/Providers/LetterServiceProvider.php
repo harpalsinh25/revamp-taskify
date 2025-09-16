@@ -20,7 +20,7 @@ class LetterServiceProvider extends ServiceProvider
         // Optional logging for plugin version on load
         if (file_exists(__DIR__ . '/../plugin.json')) {
             $pluginJson = json_decode(file_get_contents(__DIR__ . '/../plugin.json'), true);
-            Log::info("✅ Letter Plugin Loaded - Version: " . ($pluginJson['version'] ?? 'unknown'));
+            Log::info('✅ Letter Plugin Loaded - Version: ' . ($pluginJson['version'] ?? 'unknown'));
         }
 
         // Attach plugin's scheduled task cleanly
@@ -28,6 +28,5 @@ class LetterServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-
     }
 }

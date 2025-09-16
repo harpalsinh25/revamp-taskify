@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\CandidateStatus;
 use App\Services\DeletionService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CandidateStatusController extends Controller
 {
@@ -16,9 +16,6 @@ class CandidateStatusController extends Controller
         $candidate_statuses = CandidateStatus::all();
         return view('candidate.candidate_status.index', compact('candidate_statuses'));
     }
-
-
-
 
     // Method: store
     /**
@@ -32,6 +29,7 @@ class CandidateStatusController extends Controller
      *
      * @bodyParam name string required The name of the candidate status. Maximum length is 255 characters. Example: Interviewing
      * @bodyParam color string required The color associated with the status (e.g., primary, success). Example: primary
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 201 {
@@ -58,41 +56,39 @@ class CandidateStatusController extends Controller
      * }
      */
 
-
     public function store(Request $request)
     {
-
         $isApi = request()->get('isApi', false);
         try {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:candidate_statuses,name',
-            'color' => 'required'
-        ]);
+            $request->validate([
+                'name' => 'required|string|max:255|unique:candidate_statuses,name',
+                'color' => 'required',
+            ]);
 
-        $order = CandidateStatus::max('order') + 1;
+            $order = CandidateStatus::max('order') + 1;
 
-        $candidate_status = CandidateStatus::create([
-            'name' => $request->name,
-            'order' => $order,
-            'color' => $request->color
-        ]);
+            $candidate_status = CandidateStatus::create([
+                'name' => $request->name,
+                'order' => $order,
+                'color' => $request->color,
+            ]);
 
             if ($isApi) {
-            return formatApiResponse(
-                false,
-                'Candidate status Created successfully!',
-                [
-                    'data' => formatCandidateStatus($candidate_status)
-                ],
-                200
-            );
-        }
+                return formatApiResponse(
+                    false,
+                    'Candidate status Created successfully!',
+                    [
+                        'data' => formatCandidateStatus($candidate_status),
+                    ],
+                    200
+                );
+            }
 
-        return response()->json([
-            'error' => false,
-            'message' => 'Status Created Successfully!',
-            'candidate_statuses' => $candidate_status
-        ]);
+            return response()->json([
+                'error' => false,
+                'message' => 'Status Created Successfully!',
+                'candidate_statuses' => $candidate_status,
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors(), 'Validation failed while creating candidate status.');
         } catch (\Exception $e) {
@@ -103,12 +99,10 @@ class CandidateStatusController extends Controller
             ]);
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the candidate status.'
+                'message' => 'An error occurred while creating the candidate status.',
             ], 500);
         }
     }
-
-
 
     // Method: update
     /**
@@ -121,8 +115,10 @@ class CandidateStatusController extends Controller
      * @group Candidate Status Management
      *
      * @urlParam id integer required The ID of the candidate status to update. Must exist in the `candidate_statuses` table. Example: 1
+     *
      * @bodyParam name string required The name of the candidate status. Maximum length is 255 characters. Example: Interviewing
      * @bodyParam color string optional The color associated with the status (e.g., primary, success). Example: success
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -154,20 +150,18 @@ class CandidateStatusController extends Controller
      * }
      */
 
-
     public function update(Request $request, $id)
     {
-
         $isApi = request('isApi', false);
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
         ]);
 
         $candidate_status = CandidateStatus::findOrFail($id);
 
         $candidate_status->update([
             'name' => $request->name,
-            'color' => $request->color
+            'color' => $request->color,
         ]);
 
         if ($isApi) {
@@ -175,7 +169,7 @@ class CandidateStatusController extends Controller
                 false,
                 'Candidate status updated successfully!',
                 [
-                    'data' => $candidate_status
+                    'data' => $candidate_status,
                 ],
                 200
             );
@@ -184,11 +178,9 @@ class CandidateStatusController extends Controller
         return response()->json([
             'error' => false,
             'message' => 'Status updated Successfully!',
-            'candidate_status' => $candidate_status
+            'candidate_status' => $candidate_status,
         ]);
     }
-
-
 
     // Method: destroy
     /**
@@ -223,10 +215,8 @@ class CandidateStatusController extends Controller
      * }
      */
 
-
     public function destroy($id)
     {
-
         $candidate_status = CandidateStatus::findOrFail($id);
 
         $candidateCount = $candidate_status->candidates->count();
@@ -234,21 +224,18 @@ class CandidateStatusController extends Controller
         if ($candidateCount > 0) {
             return response()->json([
                 'error' => false,
-                'message' => ' Cannot delete . This status is assigned to one or more candidates . '
+                'message' => ' Cannot delete . This status is assigned to one or more candidates . ',
             ]);
         }
 
-        $response = DeletionService::delete(CandidateStatus::class, $candidate_status->id, 'Candidate Status');
-
-        return $response;
+        return DeletionService::delete(CandidateStatus::class, $candidate_status->id, 'Candidate Status');
     }
 
     public function destroy_multiple(Request $request)
     {
-
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:candidate_statuses,id'
+            'ids.*' => 'exists:candidate_statuses,id',
         ]);
 
         $ids = $validatedData['ids'];
@@ -264,7 +251,6 @@ class CandidateStatusController extends Controller
                 continue;
             }
 
-
             DeletionService::delete(CandidateStatus::class, $candidate_status->id, 'Candidate Status');
             $deletedIds[] = $id;
         }
@@ -275,8 +261,6 @@ class CandidateStatusController extends Controller
             'id' => $deletedIds,
         ]);
     }
-
-
 
     // Method: reorder
     /**
@@ -307,13 +291,12 @@ class CandidateStatusController extends Controller
      * }
      */
 
-
     public function reorder(Request $request)
     {
         $isApi = request('isApi', false);
         foreach ($request->order as $item) {
             CandidateStatus::where('id', $item['id'])->update([
-                'order' => $item['position']
+                'order' => $item['position'],
             ]);
         }
 
@@ -328,14 +311,12 @@ class CandidateStatusController extends Controller
 
         return response()->json([
             'error' => false,
-            'message' => 'Order updated successfully!'
+            'message' => 'Order updated successfully!',
         ]);
     }
 
-
     public function list()
     {
-
         $search = request('search');
         $limit = request('limit', 10);
         $offset = request('offset', 0);
@@ -344,9 +325,8 @@ class CandidateStatusController extends Controller
 
         $query = CandidateStatus::orderBy('order');
 
-
         if ($search) {
-            $query->where('name', 'like', "%$search%");
+            $query->where('name', 'like', "%{$search}%");
         }
 
         $total = $query->count();
@@ -359,37 +339,35 @@ class CandidateStatusController extends Controller
             ->take($limit)
             ->get()
             ->map(function ($status) use ($canDelete, $canEdit) {
+                $actions = '';
 
-            $actions = '';
-
-            if ($canEdit) {
-                $actions .= '<a href="javascript:void(0);" class="edit-candidate-status-btn"
+                if ($canEdit) {
+                    $actions .= '<a href="javascript:void(0);" class="edit-candidate-status-btn"
                                         data-candidate-status=\'' . htmlspecialchars(json_encode($status), ENT_QUOTES, 'UTF-8') . '\'
                                         title="' . get_label('update', 'Update') . '">
                                         <i class="bx bx-edit mx-1"></i>
                                         </a>';
-            }
+                }
 
-
-            if ($canDelete) {
-                $actions .= '<button type="button"
+                if ($canDelete) {
+                    $actions .= '<button type="button"
                                         class="btn delete"
                                         data-id="' . $status->id . '"
                                         data-type="candidate_status"
                                         title="' . get_label('delete', 'Delete') . '">
                                         <i class="bx bx-trash text-danger mx-1"></i>
                                         </button>';
-            }
+                }
 
-            return [
-                'id' => $status->id,
-                'order' => $status->order,
-                'name' => ucwords($status->name),
-                'created_at' => format_date($status->created_at),
-                'color' => '<span class="badge bg-' . $status->color . '">' . ucfirst($status->color) . '</span>',
-                'updated_at' => format_date($status->updated_at),
-                'actions' => $actions ?: '-'
-            ];
+                return [
+                    'id' => $status->id,
+                    'order' => $status->order,
+                    'name' => ucwords($status->name),
+                    'created_at' => format_date($status->created_at),
+                    'color' => '<span class="badge bg-' . $status->color . '">' . ucfirst($status->color) . '</span>',
+                    'updated_at' => format_date($status->updated_at),
+                    'actions' => $actions ? $actions : '-',
+                ];
             });
 
         return response()->json([
@@ -397,8 +375,6 @@ class CandidateStatusController extends Controller
             'total' => $total,
         ]);
     }
-
-
 
     // Method: apiList
     /**
@@ -411,6 +387,7 @@ class CandidateStatusController extends Controller
      * @group Candidate Status Management
      *
      * @urlParam id integer optional The ID of the candidate status to retrieve. If provided, returns a single status. Must exist in the `candidate_statuses` table. Example: 1
+     *
      * @queryParam search string optional Filters statuses by name. Example: Interview
      * @queryParam sort string optional The field to sort by (id, name, color, order, created_at, updated_at). Defaults to id. Example: name
      * @queryParam order string optional The sort order (ASC, DESC). Defaults to DESC. Example: ASC
@@ -460,7 +437,6 @@ class CandidateStatusController extends Controller
      * }
      */
 
-
     public function apiList(Request $request, $id = null)
     {
         try {
@@ -474,7 +450,7 @@ class CandidateStatusController extends Controller
             ]);
 
             // Validate ID if provided
-            if ($id !== null && (!is_numeric($id) || $id <= 0)) {
+            if ($id !== null && (! is_numeric($id) || $id <= 0)) {
                 throw new \InvalidArgumentException('Invalid email ID.');
             }
 
@@ -490,7 +466,6 @@ class CandidateStatusController extends Controller
 
             //Fetch single status if id is provided
             if ($id) {
-
                 $candidate_status = $query->findOrFail($id);
                 $data = formatCandidateStatus($candidate_status);
                 $data['can_edit'] = checkPermission('edit_candidate_status');
@@ -509,8 +484,8 @@ class CandidateStatusController extends Controller
                         'data' => [$data],
                         'permissions' => [
                             'can_edit' => $data['can_edit'],
-                            'cad_delete' => $data['can_delete']
-                        ]
+                            'cad_delete' => $data['can_delete'],
+                        ],
 
                     ]
                 );
@@ -544,8 +519,8 @@ class CandidateStatusController extends Controller
                     'data' => $candidate_statuses->toArray(),
                     'permissions' => [
                         'can_edit' => $canEdit,
-                        'can_delete' => $canDelete
-                    ]
+                        'can_delete' => $canDelete,
+                    ],
                 ],
                 200
             );

@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\User;
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 
 class SendBirthdayAndAnniversaryWishes extends Job

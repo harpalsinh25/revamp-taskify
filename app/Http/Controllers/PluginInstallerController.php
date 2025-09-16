@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use ZipArchive;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use ZipArchive;
 
 class PluginInstallerController extends Controller
 {
@@ -28,7 +27,7 @@ class PluginInstallerController extends Controller
 
         File::ensureDirectoryExists($tmpDir);
 
-        $zip = new ZipArchive;
+        $zip = new ZipArchive();
         if ($zip->open($uploadedZip->getRealPath()) !== true) {
             return response()->json(['error' => true, 'message' => 'Unable to open zip file.']);
         }
@@ -37,7 +36,7 @@ class PluginInstallerController extends Controller
         $zip->close();
 
         $pluginFolder = collect(File::directories($tmpDir))->first();
-        if (!$pluginFolder || !File::exists($pluginFolder . '/plugin.json')) {
+        if (! $pluginFolder || ! File::exists($pluginFolder . '/plugin.json')) {
             File::deleteDirectory($tmpDir);
             return response()->json(['error' => true, 'message' => 'plugin.json not found in the uploaded plugin.']);
         }
@@ -57,7 +56,7 @@ class PluginInstallerController extends Controller
                     File::deleteDirectory($tmpDir);
                     return response()->json([
                         'error' => true,
-                        'message' => 'Plugin already installed with the same or higher version.'
+                        'message' => 'Plugin already installed with the same or higher version.',
                     ]);
                 }
 
@@ -67,7 +66,7 @@ class PluginInstallerController extends Controller
                 Log::info("🔄 Plugin backed up to: {$backupDir}");
             }
 
-            if (!File::moveDirectory($pluginFolder, $destination)) {
+            if (! File::moveDirectory($pluginFolder, $destination)) {
                 throw new Exception("Failed to move plugin to: {$destination}");
             }
             Log::info("✅ Plugin moved to: {$destination}");
@@ -97,9 +96,9 @@ class PluginInstallerController extends Controller
                 // Check if there are any migration files
                 $migrationFiles = File::files($fullMigrationPath);
 
-                if (!empty($migrationFiles)) {
+                if (! empty($migrationFiles)) {
                     Log::info("🔄 Running migrations for plugin: {$pluginNamespace}");
-                    Log::info("Migration files found: " . count($migrationFiles));
+                    Log::info('Migration files found: ' . count($migrationFiles));
 
                     try {
                         // Run migrations with --realpath flag to ensure proper path resolution
@@ -110,11 +109,11 @@ class PluginInstallerController extends Controller
                         ]);
 
                         $migrationOutput = Artisan::output();
-                        Log::info("Migration output: " . $migrationOutput);
+                        Log::info('Migration output: ' . $migrationOutput);
                         Log::info("✅ Migrations executed for plugin: {$pluginNamespace}");
                     } catch (Exception $migrationException) {
-                        Log::error("❌ Migration failed: " . $migrationException->getMessage());
-                        throw new Exception("Migration failed: " . $migrationException->getMessage());
+                        Log::error('❌ Migration failed: ' . $migrationException->getMessage());
+                        throw new Exception('Migration failed: ' . $migrationException->getMessage());
                     }
                 } else {
                     Log::info("ℹ️ No migration files found in: {$fullMigrationPath}");
@@ -131,7 +130,7 @@ class PluginInstallerController extends Controller
             }
 
             // Publish assets if publish_tag is defined
-            if (!empty($pluginData['publish_tag'])) {
+            if (! empty($pluginData['publish_tag'])) {
                 Log::info("🔄 Publishing plugin assets with tag: {$pluginData['publish_tag']}");
 
                 try {
@@ -141,15 +140,15 @@ class PluginInstallerController extends Controller
                     ]);
 
                     $publishOutput = Artisan::output();
-                    Log::info("Publish output: " . $publishOutput);
+                    Log::info('Publish output: ' . $publishOutput);
                     Log::info("✅ Published plugin assets with tag: {$pluginData['publish_tag']}");
                 } catch (Exception $publishException) {
-                    Log::error("❌ Asset publishing failed: " . $publishException->getMessage());
+                    Log::error('❌ Asset publishing failed: ' . $publishException->getMessage());
                     // Don't throw here as this might not be critical
-                    Log::warning("⚠️ Continuing installation despite asset publishing failure");
+                    Log::warning('⚠️ Continuing installation despite asset publishing failure');
                 }
             } else {
-                Log::info("ℹ️ No publish_tag defined in plugin.json, skipping vendor:publish.");
+                Log::info('ℹ️ No publish_tag defined in plugin.json, skipping vendor:publish.');
             }
 
             // No need to commit since we're not using a global transaction
@@ -161,12 +160,12 @@ class PluginInstallerController extends Controller
                 'error' => false,
                 'message' => 'Plugin installed/updated successfully.',
                 'plugin_name' => $pluginData['name'] ?? $pluginNamespace,
-                'plugin_version' => $pluginData['version'] ?? 'unknown'
+                'plugin_version' => $pluginData['version'] ?? 'unknown',
             ]);
         } catch (Exception $e) {
             Log::error("❌ Plugin installation failed: {$e->getMessage()}", [
                 'trace' => $e->getTraceAsString(),
-                'plugin' => $pluginNamespace ?? 'unknown'
+                'plugin' => $pluginNamespace ?? 'unknown',
             ]);
 
             // No need to rollback since we're not using a global transaction
@@ -174,7 +173,7 @@ class PluginInstallerController extends Controller
 
             return response()->json([
                 'error' => true,
-                'message' => 'Plugin installation failed: ' . $e->getMessage()
+                'message' => 'Plugin installation failed: ' . $e->getMessage(),
             ]);
         }
     }
@@ -196,9 +195,9 @@ class PluginInstallerController extends Controller
             }
         }
 
-        $phpContent = "<?php\\n\\nuse Illuminate\\\\Support\\\\Facades\\\\Schema;\\n\\n";
+        $phpContent = '<?php\\n\\nuse Illuminate\\\\Support\\\\Facades\\\\Schema;\\n\\n';
         foreach ($dropStatements as $drop) {
-            $phpContent .= "$drop\\n";
+            $phpContent .= "{$drop}\\n";
         }
 
         File::put($uninstallScript, $phpContent);

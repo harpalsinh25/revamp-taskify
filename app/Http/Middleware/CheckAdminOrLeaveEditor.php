@@ -4,10 +4,9 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Auth;
 use App\Models\LeaveEditor;
 use App\Models\LeaveRequest;
+use Closure;
 
 class CheckAdminOrLeaveEditor
 {
@@ -24,11 +23,11 @@ class CheckAdminOrLeaveEditor
         $leaveRequestId = $request->route('id');
         if ($leaveRequestId) {
             $leaveRequest = LeaveRequest::find($leaveRequestId);
-            if (!$leaveRequest) {
+            if (! $leaveRequest) {
                 return response()->json(['error' => true, 'message' => 'Leave request not found']);
             }
 
-            if ($leaveRequest->user_id == $user->id && $leaveRequest->status == 'pending') {
+            if ($leaveRequest->user_id === $user->id && $leaveRequest->status === 'pending') {
                 return $next($request);
             }
         }

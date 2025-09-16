@@ -252,5 +252,5 @@ return [
     'files' => 'Files',
     'video_not_supported' => 'Your browser does not support the video tag.',
     'publishing_platforms' => 'Publishing Platforms',
-    'summary' => 'Summary'
+    'summary' => 'Summary',
 ];

@@ -2,9 +2,9 @@
 
 namespace Plugins\TimeTracker\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Console\Scheduling\Schedule;
 use Plugins\TimeTracker\Console\CleanupScreenshots;
 
 class TimeTrackerServiceProvider extends ServiceProvider
@@ -28,7 +28,7 @@ class TimeTrackerServiceProvider extends ServiceProvider
         // Optional logging for plugin version on load
         if (file_exists(__DIR__ . '/../plugin.json')) {
             $pluginJson = json_decode(file_get_contents(__DIR__ . '/../plugin.json'), true);
-            Log::info("✅ TimeTracker Plugin Loaded - Version: " . ($pluginJson['version'] ?? 'unknown'));
+            Log::info('✅ TimeTracker Plugin Loaded - Version: ' . ($pluginJson['version'] ?? 'unknown'));
         }
 
         // Attach plugin's scheduled task cleanly

@@ -1,20 +1,20 @@
 <?php
 
 namespace Plugins\TimeTracker\Controllers;
-use Exception;
-use Carbon\Carbon;
+
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Plugins\TimeTracker\Models\TimeTrack;
 use Plugins\TimeTracker\Models\Screenshot;
-use Plugins\TimeTracker\Models\TimeTrackerConfig;
 use Plugins\TimeTracker\Models\TimeTrackerActivityLog;
+use Plugins\TimeTracker\Models\TimeTrackerConfig;
+
 class TimeTrackerController extends Controller
 {
     /**
@@ -51,7 +51,7 @@ class TimeTrackerController extends Controller
     public function logUpdate(Request $request)
     {
         $isApi = $request->get('isApi', false);
-        if (!($request->has('user_id'))) {
+        if (! $request->has('user_id')) {
             $request->merge(['user_id' => getAuthenticatedUser()->id]);
         }
         // dd($request, getAuthenticatedUser());
@@ -75,8 +75,8 @@ class TimeTrackerController extends Controller
                         'employeeId' => $data['user_id'],
                         'user_id' => $data['user_id'],
                         'action' => $data['action'],
-                        'timestamp' => $data['timestamp']
-                    ]
+                        'timestamp' => $data['timestamp'],
+                    ],
                 ]
             );
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -85,8 +85,8 @@ class TimeTrackerController extends Controller
             Log::error('Log update failed: ' . $e->getMessage());
             return formatApiResponse(true, 'Failed to update log' .
                 ' - ' . $e->getMessage(), [
-                'data' => []
-            ]);
+                    'data' => [],
+                ]);
         }
     }
     /**
@@ -122,18 +122,17 @@ class TimeTrackerController extends Controller
      *     "screenshot": ["The screenshot must be an image."]
      *   }
      * }
-     *
      */
     public function uploadScreenshot(Request $request)
     {
         $isApi = $request->get('isApi', false);
 
         try {
-            if (!$request->hasFile('screenshot')) {
+            if (! $request->hasFile('screenshot')) {
                 return response()->json([
                     'error' => true,
                     'message' => 'No file uploaded.',
-                    'data' => []
+                    'data' => [],
                 ], 400);
             }
 
@@ -150,11 +149,11 @@ class TimeTrackerController extends Controller
 
             $path = $file->storeAs('screenshots', $filename, 'public');
 
-            if (!$path) {
+            if (! $path) {
                 return response()->json([
                     'error' => true,
                     'message' => 'Failed to store the screenshot.',
-                    'data' => []
+                    'data' => [],
                 ], 500);
             }
 
@@ -164,7 +163,7 @@ class TimeTrackerController extends Controller
                 'filename' => $filename,
                 'file_size' => $file->getSize(),
                 'captured_at' => $data['captured_at'] ?? now(),
-                'metadata' => !empty($data['metadata']) ? json_encode($data['metadata']) : null,
+                'metadata' => ! empty($data['metadata']) ? json_encode($data['metadata']) : null,
             ]);
 
             return response()->json([
@@ -178,7 +177,7 @@ class TimeTrackerController extends Controller
                     'file_size_kb' => round($screenshot->file_size / 1024, 2) . ' KB',
                     'metadata' => $screenshot->metadata ? json_decode($screenshot->metadata, true) : null,
 
-                ]
+                ],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -191,7 +190,7 @@ class TimeTrackerController extends Controller
             return response()->json([
                 'error' => true,
                 'message' => 'Failed to upload screenshot.',
-                'data' => []
+                'data' => [],
             ], 500);
         }
     }
@@ -218,7 +217,6 @@ class TimeTrackerController extends Controller
      *   "error": true,
      *   "message": "Failed to load configuration"
      * }
-     *
      */
     public function loadConfig(Request $request)
     {
@@ -226,17 +224,17 @@ class TimeTrackerController extends Controller
             // Try to load from database first
             $configData = TimeTrackerConfig::where('name', 'time_tracker_config')->value('value');
             $config = [
-                'screenshotInterval' => (int) ($configData['screenshotInterval'] ??  '60000'), // Default to 60 seconds
-                'idleTimeThreshold' => (int) ($configData['idleTimeThreshold'] ??  '300000'), // Default to 5 minutes
-                'breakTimeThreshold' => (int) ($configData['breakTimeThreshold'] ??  '600000'), // Default to 10 minutes
-                'maxDailyBreakTime' => (int) ($configData['maxDailyBreakTime'] ??  '3600000'), // Default to 1 hour
-                'manualTimeApprover' => $configData['manualTimeApprover'] ?? []
+                'screenshotInterval' => (int) ($configData['screenshotInterval'] ?? '60000'), // Default to 60 seconds
+                'idleTimeThreshold' => (int) ($configData['idleTimeThreshold'] ?? '300000'), // Default to 5 minutes
+                'breakTimeThreshold' => (int) ($configData['breakTimeThreshold'] ?? '600000'), // Default to 10 minutes
+                'maxDailyBreakTime' => (int) ($configData['maxDailyBreakTime'] ?? '3600000'), // Default to 1 hour
+                'manualTimeApprover' => $configData['manualTimeApprover'] ?? [],
             ];
             return formatApiResponse(
                 false,
                 'Config loaded successfully.',
                 [
-                    'data' => $config
+                    'data' => $config,
                 ]
             );
         } catch (Exception $e) {
@@ -305,7 +303,7 @@ class TimeTrackerController extends Controller
                 ['name' => 'time_tracker_config'],
                 [
                     'value' => json_encode($config),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]
             );
             DB::commit();
@@ -323,7 +321,7 @@ class TimeTrackerController extends Controller
                     'data' => [
                         'error' => $e->getMessage(),
                         'line' => $e->getLine(),
-                    ]
+                    ],
                 ]
             );
         }

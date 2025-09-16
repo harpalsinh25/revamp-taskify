@@ -6,7 +6,6 @@ use Plugins\TimeTracker\Controllers\TimeTrackerController;
 
 // Time Tracker API Routes
 Route::prefix('api/plugin/timetracker')->middleware(['api', 'isDevice:electron', 'isApi'])->group(function () {
-
     // Authentication routes (no middleware needed for login)
     Route::post('/login', [UserController::class, 'authenticate']);
     Route::middleware('auth:sanctum')->get('/validate-token', [UserController::class, 'validateToken']);

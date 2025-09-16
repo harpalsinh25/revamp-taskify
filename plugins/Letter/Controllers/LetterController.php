@@ -2,18 +2,16 @@
 
 namespace Plugins\Letter\Controllers;
 
-use Exception;
-use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Workspace;
-use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\DeletionService;
-use Plugins\Letter\Models\Letter;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Collection;
-use Plugins\Letter\Helper\LetterHelper;
 use Illuminate\Validation\ValidationException;
+use Plugins\Letter\Helper\LetterHelper;
+use Plugins\Letter\Models\Letter;
 use Plugins\Letter\Models\LetterTemplate;
 
 class LetterController extends Controller
@@ -40,14 +38,15 @@ class LetterController extends Controller
         $letters = Letter::where(['workspace_id' => $this->workspace->id])->get()->toArray();
         return view('letters::letters.index', [
             'categories' => LetterHelper::getLetterCategories(),
-            'letters' => $letters
+            'letters' => $letters,
         ]);
     }
 
-    public function create (Request $request){
+    public function create(Request $request)
+    {
         $users = $this->workspace->users ?? [];
         $templates = LetterTemplate::where(['workspace_id' => $this->workspace->id])->get()->toArray();
-        return view('letters::letters.create',compact('users','templates'));
+        return view('letters::letters.create', compact('users', 'templates'));
     }
     /**
      * List letters via AJAX.
@@ -63,10 +62,10 @@ class LetterController extends Controller
 
         if ($search) {
             $letters->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%$search%")
+                $q->where('title', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($q) use ($search) {
-                        $q->where('name', 'like', "%$search%")
-                            ->orWhere('email', 'like', "%$search%");
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
                     });
             });
         }
@@ -96,12 +95,11 @@ class LetterController extends Controller
      */
     public function preview(Request $request)
     {
-
         $content = $request->content ?? '';
         $parsedContent = LetterHelper::processContent($content, getAuthenticatedUser());
 
         return response()->json([
-            'preview' => $parsedContent
+            'preview' => $parsedContent,
         ]);
     }
 

@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use DB;
-use Carbon\Carbon;
-use App\Models\User;
 use App\Models\Client;
 use App\Models\Meeting;
-use App\Models\Workspace;
-use Illuminate\Http\Request;
-use App\Services\DeletionService;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\UserClientPreference;
+use App\Models\Workspace;
+use App\Services\DeletionService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class MeetingsController extends Controller
@@ -101,7 +97,6 @@ class MeetingsController extends Controller
      * }
      */
 
-
     public function store(Request $request)
     {
         $isApi = request()->get('isApi', false);
@@ -114,7 +109,7 @@ class MeetingsController extends Controller
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
 
                     // Check and handle errors for start_date specifically
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -128,7 +123,7 @@ class MeetingsController extends Controller
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
 
                     // Check and handle errors for end_date specifically
-                    if (!empty($errors['end_date'])) {
+                    if (! empty($errors['end_date'])) {
                         foreach ($errors['end_date'] as $error) {
                             $fail($error);
                         }
@@ -160,10 +155,10 @@ class MeetingsController extends Controller
             $clientIds = $request->input('client_ids', []);
 
             // Set creator as a participant automatically if !isAdminOrHasAllDataAccess
-            if (!isAdminOrHasAllDataAccess()) {
-                if (getGuardName() == 'client' && !in_array($this->user->id, $clientIds)) {
+            if (! isAdminOrHasAllDataAccess()) {
+                if (getGuardName() === 'client' && ! in_array($this->user->id, $clientIds)) {
                     array_splice($clientIds, 0, 0, $this->user->id);
-                } else if (getGuardName() == 'web' && !in_array($this->user->id, $userIds)) {
+                } elseif (getGuardName() === 'web' && ! in_array($this->user->id, $userIds)) {
                     array_splice($userIds, 0, 0, $this->user->id);
                 }
             }
@@ -179,7 +174,7 @@ class MeetingsController extends Controller
                 'type' => 'meeting',
                 'type_id' => $meeting_id,
                 'type_title' => $meeting->title,
-                'action' => 'assigned'
+                'action' => 'assigned',
             ];
 
             // Combine user and client IDs for notification recipients
@@ -199,7 +194,7 @@ class MeetingsController extends Controller
                 'Meeting created successfully.',
                 [
                     'id' => $meeting_id,
-                    'data' => formatMeeting($meeting)
+                    'data' => formatMeeting($meeting),
                 ]
             );
         } catch (ValidationException $e) {
@@ -208,7 +203,7 @@ class MeetingsController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the meeting.'
+                'message' => 'An error occurred while creating the meeting.',
             ], 500);
         }
     }
@@ -216,17 +211,17 @@ class MeetingsController extends Controller
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $statuses = request('statuses', []);
         $user_ids = request('user_ids', []);
         $client_ids = request('client_ids', []);
-        $date_between_from = request('date_between_from') ?: "";
-        $date_between_to = request('date_between_to') ?: "";
-        $start_date_from = (request('start_date_from')) ? request('start_date_from') : "";
-        $start_date_to = (request('start_date_to')) ? request('start_date_to') : "";
-        $end_date_from = (request('end_date_from')) ? request('end_date_from') : "";
-        $end_date_to = (request('end_date_to')) ? request('end_date_to') : "";
+        $date_between_from = request('date_between_from') ?: '';
+        $date_between_to = request('date_between_to') ?: '';
+        $start_date_from = request('start_date_from') ? request('start_date_from') : '';
+        $start_date_to = request('start_date_to') ? request('start_date_to') : '';
+        $end_date_from = request('end_date_from') ? request('end_date_from') : '';
+        $end_date_to = request('end_date_to') ? request('end_date_to') : '';
         $meetings = isAdminOrHasAllDataAccess() ? $this->workspace->meetings() : $this->user->meetings();
         if ($search) {
             $meetings = $meetings->where(function ($query) use ($search) {
@@ -235,34 +230,34 @@ class MeetingsController extends Controller
             });
         }
 
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $meetings = $meetings->whereHas('users', function ($query) use ($user_ids) {
                 $query->whereIn('users.id', $user_ids);
             });
         }
 
-        if (!empty($client_ids)) {
+        if (! empty($client_ids)) {
             $meetings = $meetings->whereHas('clients', function ($query) use ($client_ids) {
                 $query->whereIn('clients.id', $client_ids);
             });
         }
         if ($date_between_from && $date_between_to) {
-            $date_between_from = $date_between_from . ' 00:00:00';
-            $date_between_to = $date_between_to . ' 23:59:59';
+            $date_between_from .= ' 00:00:00';
+            $date_between_to .= ' 23:59:59';
             $meetings = $meetings->where('start_date_time', '>=', $date_between_from)
                 ->where('end_date_time', '<=', $date_between_to);
         }
         if ($start_date_from && $start_date_to) {
-            $start_date_from = $start_date_from . ' 00:00:00';
-            $start_date_to = $start_date_to . ' 23:59:59';
+            $start_date_from .= ' 00:00:00';
+            $start_date_to .= ' 23:59:59';
             $meetings = $meetings->whereBetween('start_date_time', [$start_date_from, $start_date_to]);
         }
         if ($end_date_from && $end_date_to) {
-            $end_date_from = $end_date_from . ' 00:00:00';
-            $end_date_to = $end_date_to . ' 23:59:59';
+            $end_date_from .= ' 00:00:00';
+            $end_date_to .= ' 23:59:59';
             $meetings = $meetings->whereBetween('end_date_time', [$end_date_from, $end_date_to]);
         }
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $meetings = $meetings->where(function ($query) use ($statuses) {
                 if (in_array('ongoing', $statuses)) {
                     $query->orWhere(function ($q) {
@@ -288,28 +283,27 @@ class MeetingsController extends Controller
 
         $currentDateTime = Carbon::now(config('app.timezone'));
         $meetings = $meetings->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($meeting) use ($canEdit, $canDelete, $canCreate, $currentDateTime) {
-
-            $currentDateTime = Carbon::now(config('app.timezone'));
-            $meetingStartTime = \Carbon\Carbon::parse($meeting->start_date_time, config('app.timezone'));
+                $currentDateTime = Carbon::now(config('app.timezone'));
+                $meetingStartTime = \Carbon\Carbon::parse($meeting->start_date_time, config('app.timezone'));
 
             // Correct approach: Convert stored UTC times to local timezone for comparison
-            $currentDateTime = Carbon::now(config('app.timezone')); // Current time in your timezone
+                $currentDateTime = Carbon::now(config('app.timezone')); // Current time in your timezone
 
-            // Parse stored UTC times and convert to your timezone
-            $meetingStart = Carbon::parse($meeting->start_date_time, config('app.timezone'));
-            $meetingEnd = Carbon::parse($meeting->end_date_time, config('app.timezone'));
+                // Parse stored UTC times and convert to your timezone
+                $meetingStart = Carbon::parse($meeting->start_date_time, config('app.timezone'));
+                $meetingEnd = Carbon::parse($meeting->end_date_time, config('app.timezone'));
 
-            if ($currentDateTime < $meetingStart) {
-                $diff = $currentDateTime->diff($meetingStart);
-                $status = 'Will start in ' . $diff->format('%a days %H hours %I minutes %S seconds');
-            } elseif ($currentDateTime > $meetingEnd) {
-                $diff = $meetingEnd->diff($currentDateTime);
-                $status = 'Ended before ' . $diff->format('%a days %H hours %I minutes %S seconds');
-            } else {
-                $status = 'Ongoing';
-            }
+                if ($currentDateTime < $meetingStart) {
+                    $diff = $currentDateTime->diff($meetingStart);
+                    $status = 'Will start in ' . $diff->format('%a days %H hours %I minutes %S seconds');
+                } elseif ($currentDateTime > $meetingEnd) {
+                    $diff = $meetingEnd->diff($currentDateTime);
+                    $status = 'Ended before ' . $diff->format('%a days %H hours %I minutes %S seconds');
+                } else {
+                    $status = 'Ongoing';
+                }
 
                 $actions = '';
 
@@ -331,16 +325,16 @@ class MeetingsController extends Controller
                         '</a>';
                 }
 
-                if ($status == 'Ongoing') {
+                if ($status === 'Ongoing') {
                     $actions .= '<a href="' . url("/meetings/join/{$meeting->id}") . '" title="Join">' .
                         '<i class="bx bx-arrow-to-right text-success mx-3"></i>' .
                         '</a>';
                 }
 
-                $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
 
                 $userHtml = '';
-                if (!empty($meeting->users) && count($meeting->users) > 0) {
+                if (! empty($meeting->users) && count($meeting->users) > 0) {
                     $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($meeting->users as $user) {
                         $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
@@ -359,7 +353,7 @@ class MeetingsController extends Controller
                 }
 
                 $clientHtml = '';
-                if (!empty($meeting->clients) && count($meeting->clients) > 0) {
+                if (! empty($meeting->clients) && count($meeting->clients) > 0) {
                     $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($meeting->clients as $client) {
                         $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
@@ -379,7 +373,7 @@ class MeetingsController extends Controller
 
                 return [
                     'id' => $meeting->id,
-                    'title' => ($status == 'Ongoing')
+                    'title' => $status === 'Ongoing'
                         ? '<a href="/meetings/join/' . $meeting->id . '" target="_blank" class="text-primary" title="Join">' .
                         '<i class="bx bx-arrow-to-right text-success mx-2"></i> ' . $meeting->title .
                         '</a>'
@@ -391,12 +385,12 @@ class MeetingsController extends Controller
                     'status' => $status,
                     'created_at' => format_date($meeting->created_at, true),
                     'updated_at' => format_date($meeting->updated_at, true),
-                    'actions' => $actions
+                    'actions' => $actions,
                 ];
             });
         return response()->json([
-            "rows" => $meetings->items(),
-            "total" => $totalmeetings,
+            'rows' => $meetings->items(),
+            'total' => $totalmeetings,
         ]);
     }
 
@@ -483,111 +477,109 @@ class MeetingsController extends Controller
 
         if ($id) {
             $meeting = Meeting::find($id);
-            if (!$meeting) {
+            if (! $meeting) {
                 return formatApiResponse(
                     false,
                     'Meeting not found',
                     [
                         'total' => 0,
-                        'data' => []
-                    ]
-                );
-            } else {
-                return formatApiResponse(
-                    false,
-                    'Meeting retrieved successfully',
-                    [
-                        'total' => 1,
-                        'data' => [formatMeeting($meeting)]
+                        'data' => [],
                     ]
                 );
             }
-        } else {
-            $meetingsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->meetings() : $this->user->meetings();
-
-            if ($user_id) {
-                $user = User::find($user_id);
-                if (!$user) {
-                    return formatApiResponse(
-                        false,
-                        'User not found',
-                        [
-                            'total' => 0,
-                            'data' => []
-                        ]
-                    );
-                }
-                $meetingsQuery = $user->meetings();
-            }
-            if ($client_id) {
-                $client = Client::find($client_id);
-                if (!$client) {
-                    return formatApiResponse(
-                        false,
-                        'Client not found',
-                        [
-                            'total' => 0,
-                            'data' => []
-                        ]
-                    );
-                }
-                $meetingsQuery = $client->meetings();
-            }
-            if ($start_date_from && $start_date_to) {
-                $start_date_from = $start_date_from . ' 00:00:00';
-                $start_date_to = $start_date_to . ' 23:59:59';
-                $meetingsQuery->whereBetween('start_date_time', [$start_date_from, $start_date_to]);
-            }
-            if ($end_date_from && $end_date_to) {
-                $end_date_from = $end_date_from . ' 00:00:00';
-                $end_date_to = $end_date_to . ' 23:59:59';
-                $meetingsQuery->whereBetween('end_date_time', [$end_date_from, $end_date_to]);
-            }
-            if ($status) {
-                if ($status === 'ongoing') {
-                    $meetingsQuery->where('start_date_time', '<=', Carbon::now(config('app.timezone')))
-                        ->where('end_date_time', '>=', Carbon::now(config('app.timezone')));
-                } elseif ($status === 'yet_to_start') {
-                    $meetingsQuery->where('start_date_time', '>', Carbon::now(config('app.timezone')));
-                } elseif ($status === 'ended') {
-                    $meetingsQuery->where('end_date_time', '<', Carbon::now(config('app.timezone')));
-                }
-            }
-            $meetingsQuery->when($search, function ($query) use ($search) {
-                $query->where('title', 'like', '%' . $search . '%')
-                    ->orWhere('id', 'like', '%' . $search . '%');
-            });
-
-            $total = $meetingsQuery->count(); // get total count before applying offset and limit
-
-            $meetings = $meetingsQuery->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-
-            if ($meetings->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Meetings not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $meetings->map(function ($meeting) {
-                return formatMeeting($meeting);
-            });
-
             return formatApiResponse(
                 false,
-                'Meetings retrieved successfully',
+                'Meeting retrieved successfully',
                 [
-                    'total' => $total,
-                    'data' => $data
+                    'total' => 1,
+                    'data' => [formatMeeting($meeting)],
                 ]
             );
         }
+        $meetingsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->meetings() : $this->user->meetings();
+
+        if ($user_id) {
+            $user = User::find($user_id);
+            if (! $user) {
+                return formatApiResponse(
+                    false,
+                    'User not found',
+                    [
+                        'total' => 0,
+                        'data' => [],
+                    ]
+                );
+            }
+            $meetingsQuery = $user->meetings();
+        }
+        if ($client_id) {
+            $client = Client::find($client_id);
+            if (! $client) {
+                return formatApiResponse(
+                    false,
+                    'Client not found',
+                    [
+                        'total' => 0,
+                        'data' => [],
+                    ]
+                );
+            }
+            $meetingsQuery = $client->meetings();
+        }
+        if ($start_date_from && $start_date_to) {
+            $start_date_from .= ' 00:00:00';
+            $start_date_to .= ' 23:59:59';
+            $meetingsQuery->whereBetween('start_date_time', [$start_date_from, $start_date_to]);
+        }
+        if ($end_date_from && $end_date_to) {
+            $end_date_from .= ' 00:00:00';
+            $end_date_to .= ' 23:59:59';
+            $meetingsQuery->whereBetween('end_date_time', [$end_date_from, $end_date_to]);
+        }
+        if ($status) {
+            if ($status === 'ongoing') {
+                $meetingsQuery->where('start_date_time', '<=', Carbon::now(config('app.timezone')))
+                    ->where('end_date_time', '>=', Carbon::now(config('app.timezone')));
+            } elseif ($status === 'yet_to_start') {
+                $meetingsQuery->where('start_date_time', '>', Carbon::now(config('app.timezone')));
+            } elseif ($status === 'ended') {
+                $meetingsQuery->where('end_date_time', '<', Carbon::now(config('app.timezone')));
+            }
+        }
+        $meetingsQuery->when($search, function ($query) use ($search) {
+            $query->where('title', 'like', '%' . $search . '%')
+                ->orWhere('id', 'like', '%' . $search . '%');
+        });
+
+        $total = $meetingsQuery->count(); // get total count before applying offset and limit
+
+        $meetings = $meetingsQuery->orderBy($sort, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        if ($meetings->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Meetings not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+        $data = $meetings->map(function ($meeting) {
+            return formatMeeting($meeting);
+        });
+
+        return formatApiResponse(
+            false,
+            'Meetings retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
 
     public function get($id)
@@ -651,7 +643,7 @@ class MeetingsController extends Controller
      *   "created_at": "07-08-2024 17:11:05",
      *   "updated_at": "07-08-2024 17:15:15"
      * }
-
+     *
      * }
      *
      * @response 422 {
@@ -692,7 +684,7 @@ class MeetingsController extends Controller
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
 
                     // Check and handle errors for start_date specifically
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -706,7 +698,7 @@ class MeetingsController extends Controller
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
 
                     // Check and handle errors for end_date specifically
-                    if (!empty($errors['end_date'])) {
+                    if (! empty($errors['end_date'])) {
                         foreach ($errors['end_date'] as $error) {
                             $fail($error);
                         }
@@ -759,7 +751,7 @@ class MeetingsController extends Controller
                 'type' => 'meeting',
                 'type_id' => $id,
                 'type_title' => $meeting->title,
-                'action' => 'assigned'
+                'action' => 'assigned',
             ];
 
             // Combine user and client IDs for notification recipients
@@ -779,7 +771,7 @@ class MeetingsController extends Controller
                 'error' => false,
                 'message' => 'Meeting updated successfully.',
                 'id' => $meeting->id,
-                'data' => formatMeeting($meeting)
+                'data' => formatMeeting($meeting),
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -787,7 +779,7 @@ class MeetingsController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the meeting.'
+                'message' => 'An error occurred while updating the meeting.',
             ], 500);
         }
     }
@@ -835,13 +827,12 @@ class MeetingsController extends Controller
             }
             $meeting->notificationsForMeeting()->delete();
             return $response;
-        } else {
-            return formatApiResponse(
-                true,
-                'Meeting not found.',
-                []
-            );
         }
+        return formatApiResponse(
+            true,
+            'Meeting not found.',
+            []
+        );
     }
 
     public function destroy_multiple(Request $request)
@@ -849,7 +840,7 @@ class MeetingsController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:meetings,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:meetings,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -875,20 +866,19 @@ class MeetingsController extends Controller
         $currentDateTime = Carbon::now(config('app.timezone'));
         if ($currentDateTime < $meeting->start_date_time) {
             return redirect('/meetings')->with('error', 'Meeting is yet to start');
-        } elseif ($currentDateTime > $meeting->end_date_time) {
-            return redirect('/meetings')->with('error', 'Meeting has been ended');
-        } else {
-            if ($meeting->users->contains($this->user->id) || isAdminOrHasAllDataAccess()) {
-                $is_meeting_admin = $this->user->id == $meeting['user_id'];
-                $meeting_id = $meeting['id'];
-                $room_name = $meeting['title'];
-                $user_email = $this->user->email;
-                $user_display_name = $this->user->first_name . ' ' . $this->user->last_name;
-                return view('meetings.join_meeting', compact('is_meeting_admin', 'meeting_id', 'room_name', 'user_email', 'user_display_name'));
-            } else {
-                return redirect('/meetings')->with('error', 'You are not authorized to join this meeting');
-            }
         }
+        if ($currentDateTime > $meeting->end_date_time) {
+            return redirect('/meetings')->with('error', 'Meeting has been ended');
+        }
+        if ($meeting->users->contains($this->user->id) || isAdminOrHasAllDataAccess()) {
+            $is_meeting_admin = $this->user->id === $meeting['user_id'];
+            $meeting_id = $meeting['id'];
+            $room_name = $meeting['title'];
+            $user_email = $this->user->email;
+            $user_display_name = $this->user->first_name . ' ' . $this->user->last_name;
+            return view('meetings.join_meeting', compact('is_meeting_admin', 'meeting_id', 'room_name', 'user_email', 'user_display_name'));
+        }
+        return redirect('/meetings')->with('error', 'You are not authorized to join this meeting');
     }
 
     public function joinWebView(Request $request, $id)
@@ -910,20 +900,19 @@ class MeetingsController extends Controller
         $currentDateTime = Carbon::now(config('app.timezone'));
         if ($currentDateTime < $meeting->start_date_time) {
             return redirect('/meetings')->with('error', 'Meeting is yet to start');
-        } elseif ($currentDateTime > $meeting->end_date_time) {
-            return redirect('/meetings')->with('error', 'Meeting has been ended');
-        } else {
-            if ($meeting->users->contains($user->id) || isAdminOrHasAllDataAccess()) {
-                $is_meeting_admin = $user->id == $meeting['user_id'];
-                $meeting_id = $meeting['id'];
-                $room_name = $meeting['title'];
-                $user_email = $user->email;
-                $user_display_name = $user->first_name . ' ' . $user->last_name;
-                return view('meetings.join_meeting', compact('is_meeting_admin', 'meeting_id', 'room_name', 'user_email', 'user_display_name'));
-            } else {
-                return redirect('/meetings')->with('error', 'You are not authorized to join this meeting');
-            }
         }
+        if ($currentDateTime > $meeting->end_date_time) {
+            return redirect('/meetings')->with('error', 'Meeting has been ended');
+        }
+        if ($meeting->users->contains($user->id) || isAdminOrHasAllDataAccess()) {
+            $is_meeting_admin = $user->id === $meeting['user_id'];
+            $meeting_id = $meeting['id'];
+            $room_name = $meeting['title'];
+            $user_email = $user->email;
+            $user_display_name = $user->first_name . ' ' . $user->last_name;
+            return view('meetings.join_meeting', compact('is_meeting_admin', 'meeting_id', 'room_name', 'user_email', 'user_display_name'));
+        }
+        return redirect('/meetings')->with('error', 'You are not authorized to join this meeting');
     }
 
     public function duplicate($id)
@@ -932,9 +921,9 @@ class MeetingsController extends Controller
         $relatedTables = ['users', 'clients']; // Include related tables as needed
 
         // Use the general duplicateRecord function
-        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
+        $title = request()->has('title') && ! empty(trim(request()->title)) ? request()->title : '';
         $duplicateMeeting = duplicateRecord(Meeting::class, $id, $relatedTables, $title);
-        if (!$duplicateMeeting) {
+        if (! $duplicateMeeting) {
             return response()->json(['error' => true, 'message' => 'Meeting duplication failed.']);
         }
         return response()->json(['error' => false, 'message' => 'Meeting duplicated successfully.', 'id' => $id]);
@@ -944,7 +933,6 @@ class MeetingsController extends Controller
 
     public function calendar_view()
     {
-
         return view('meetings.calendar_view');
     }
 
@@ -959,20 +947,16 @@ class MeetingsController extends Controller
             ? Carbon::parse($request->query('end'), config('app.timezone'))
             : Carbon::now(config('app.timezone'))->endOfMonth();
 
-
         // Retrieve meetings based on user access
         $meetingsQuery = isAdminOrHasAllDataAccess()
             ? $this->workspace->meetings()
             : $this->user->meetings();
-
-
 
         // Apply date range filter
         $meetings = $meetingsQuery->where(function ($query) use ($start, $end) {
             $query->whereBetween('start_date_time', [$start->toDateTimeString(), $end->toDateTimeString()])
                 ->orWhereBetween('end_date_time', [$start->toDateTimeString(), $end->toDateTimeString()]);
         })->get();
-
 
         // Current time for status calculations
         $currentDateTime = Carbon::now(config('app.timezone'));
@@ -1018,17 +1002,33 @@ class MeetingsController extends Controller
                     'status' => $status,
                     'organizer' => $meeting->organizer->name ?? 'Unknown',
                     'location' => $meeting->location ?? null,
-                ]
+                ],
             ];
         });
 
         return response()->json($events);
     }
 
+    public function saveViewPreference(Request $request)
+    {
+        $view = $request->input('view');
+        $prefix = isClient() ? 'c_' : 'u_';
+        if (
+            UserClientPreference::updateOrCreate(
+                ['user_id' => $prefix . $this->user->id, 'table_name' => 'meetings'],
+                ['default_view' => $view]
+            )
+        ) {
+            return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
+        }
+        return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
+    }
+
     /**
      * Format a DateInterval into a human-readable string
      *
      * @param \DateInterval $interval
+     *
      * @return string
      */
     private function formatTimeRemaining(\DateInterval $interval)
@@ -1048,27 +1048,10 @@ class MeetingsController extends Controller
         }
 
         // Only show seconds if less than an hour remains
-        if (empty($parts) || ($interval->d == 0 && $interval->h == 0)) {
+        if (empty($parts) || ($interval->d === 0 && $interval->h === 0)) {
             $parts[] = $interval->s . ' second' . ($interval->s > 1 ? 's' : '');
         }
 
         return implode(', ', $parts);
     }
-
-    public function saveViewPreference(Request $request)
-    {
-        $view = $request->input('view');
-        $prefix = isClient() ? 'c_' : 'u_';
-        if (
-            UserClientPreference::updateOrCreate(
-                ['user_id' => $prefix . $this->user->id, 'table_name' => 'meetings'],
-                ['default_view' => $view]
-            )
-        ) {
-            return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
-        } else {
-            return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
-        }
-    }
-
 }

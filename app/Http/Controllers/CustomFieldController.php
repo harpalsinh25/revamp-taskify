@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Models\CustomField;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
-use Illuminate\Support\Facades\Log;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -27,9 +26,7 @@ class CustomFieldController extends Controller
      */
     public function create()
     {
-        //
     }
-
 
     /**
      * Create a new custom field.
@@ -79,7 +76,6 @@ class CustomFieldController extends Controller
 
     public function store(Request $request)
     {
-
         $isApi = $request->get('isApi', false);
         try {
             $request->validate([
@@ -96,7 +92,7 @@ class CustomFieldController extends Controller
             $customField->field_label = $request->field_label;
             $customField->name = '';
             $customField->options = in_array($request->field_type, ['radio', 'checkbox', 'select'])
-                ? json_encode(($request->options))
+                ? json_encode($request->options)
                 : null;
 
             $customField->required = $request->required;
@@ -108,7 +104,7 @@ class CustomFieldController extends Controller
                 [
                     'id' => $customField->id,
                     'type' => 'custom_field',
-                    'data' => formatCustomField($customField)
+                    'data' => formatCustomField($customField),
                 ],
                 200
             );
@@ -121,10 +117,9 @@ class CustomFieldController extends Controller
                 [
                     'error' => $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
                 ],
                 500
-
             );
         }
     }
@@ -134,12 +129,10 @@ class CustomFieldController extends Controller
      */
     public function show(string $id)
     {
-        //
     }
 
     public function edit(string $id)
     {
-
         $field = CustomField::find($id);
         // Decode JSON options for radio, checkbox, select
         if (in_array($field->field_type, ['radio', 'checkbox', 'select']) && $field->options) {
@@ -147,7 +140,6 @@ class CustomFieldController extends Controller
         }
         return response()->json(['success' => true, 'data' => $field]);
     }
-
 
     /**
      * Update an existing custom field.
@@ -200,7 +192,6 @@ class CustomFieldController extends Controller
     {
         $field = CustomField::find($id);
 
-
         $rules = [
             'module' => 'required|string|in:project,task',
             'field_label' => 'required|string',
@@ -216,7 +207,6 @@ class CustomFieldController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
 
         $field->module = $request->module;
         $field->field_label = $request->field_label;
@@ -235,10 +225,9 @@ class CustomFieldController extends Controller
             [
                 'id' => $field->id,
                 'type' => 'custom_field',
-                'data' => formatCustomField($field)
+                'data' => formatCustomField($field),
             ],
             200
-
         );
     }
 
@@ -277,11 +266,8 @@ class CustomFieldController extends Controller
         try {
             $field = CustomField::find($id);
 
-            $response = DeletionService::delete(CustomField::class, $field->id, 'CustomeField');
-
-            return $response;
+            return DeletionService::delete(CustomField::class, $field->id, 'CustomeField');
         } catch (\Exception $e) {
-
             return formatApiResponse(
                 true,
                 config('app.debug') ? $e->getMessage() : 'An error occurred',
@@ -291,7 +277,6 @@ class CustomFieldController extends Controller
         }
     }
 
-
     public function list()
     {
         $search = request('search');
@@ -299,7 +284,6 @@ class CustomFieldController extends Controller
         $order = request('order', 'DESC');
         $limit = request('limit', 10);
         $offset = request('offset', 0);
-
 
         $customFields = CustomField::orderBy($sort, $order);
 
@@ -321,48 +305,44 @@ class CustomFieldController extends Controller
             ->take($limit)
             ->get()
             ->map(
-            function ($field) use ($canEdit, $canDelete) {
+                function ($field) use ($canEdit, $canDelete) {
+                    $actions = '';
 
-                $actions = '';
-
-
-
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-custom-field"
+                    if ($canEdit) {
+                        $actions .= '<a href="javascript:void(0);" class="edit-custom-field"
                                         data-id=' . $field->id . '
                                         title="' . get_label('update', 'Update') . '">
                                         <i class="bx bx-edit mx-1"></i>
                                     </a>';
-                }
+                    }
 
-                if ($canDelete) {
-                    $actions .= '<button type="button"
+                    if ($canDelete) {
+                        $actions .= '<button type="button"
                                         class="btn delete"
                                         data-id="' . $field->id . '"
                                         data-type="settings/custom-fields"
                                         title="' . get_label('delete', 'Delete') . '">
                                         <i class="bx bx-trash text-danger mx-1"></i>
                                     </button>';
-                }
+                    }
 
-                return [
-                    'id' => $field->id,
-                    'module' => $field->module,
-                    'field_label' => $field->field_label,
-                    'field_type' => $field->field_type,
-                    'required' => ($field->required == '1') ? 'Yes' : 'No',
-                    'visibility' => ($field->visibility == '1') ? 'Yes' : 'No',
-                    'actions' => $actions ?: '-'
-                ];
-            }
+                    return [
+                        'id' => $field->id,
+                        'module' => $field->module,
+                        'field_label' => $field->field_label,
+                        'field_type' => $field->field_type,
+                        'required' => $field->required === '1' ? 'Yes' : 'No',
+                        'visibility' => $field->visibility === '1' ? 'Yes' : 'No',
+                        'actions' => $actions ? $actions : '-',
+                    ];
+                }
             );
 
         return response()->json([
-            "rows" => $customFields,
-            "total" => $total,
+            'rows' => $customFields,
+            'total' => $total,
         ]);
     }
-
 
     /**
      * List custom fields or retrieve a single custom field.
@@ -424,31 +404,28 @@ class CustomFieldController extends Controller
     public function apiList(Request $request, $id = null)
     {
         try {
-
             if ($id) {
-
                 $customField = CustomField::find($id);
 
-                if (!$customField) {
+                if (! $customField) {
                     return formatApiResponse(
                         true, // this is error
                         'CustomField not found',
                         [],
                         404
                     );
-                } else {
-
-                    $data = formatCustomField($customField);
-
-                    return formatApiResponse(
-                        false,
-                        'CustomField retrieved successfully!',
-                        [
-                            'data' => $data
-                        ],
-                        200
-                    );
                 }
+
+                $data = formatCustomField($customField);
+
+                return formatApiResponse(
+                    false,
+                    'CustomField retrieved successfully!',
+                    [
+                        'data' => $data,
+                    ],
+                    200
+                );
             }
 
             $search = $request->input('search');
@@ -458,7 +435,6 @@ class CustomFieldController extends Controller
             $order = $request->input('order', 'DESC');
 
             $customFields = CustomField::orderBy($sort, $order);
-
 
             if ($search) {
                 $customFields = $customFields->where(function ($query) use ($search) {
@@ -470,7 +446,6 @@ class CustomFieldController extends Controller
 
             $total = $customFields->count();
 
-
             $customFields = $customFields
                 ->skip($offset)
                 ->take($limit)
@@ -479,18 +454,16 @@ class CustomFieldController extends Controller
                     return formatCustomField($field);
                 });
 
-
             return formatApiResponse(
                 false,
                 'CustomFields retrieved successfully!',
                 [
                     'total' => $total,
-                    'data' => $customFields
+                    'data' => $customFields,
                 ],
                 200
             );
         } catch (\Exception $e) {
-
             return formatApiResponse(
                 true,
                 config('app.debug') ? $e->getMessage() : 'An error occurred',
@@ -502,10 +475,9 @@ class CustomFieldController extends Controller
 
     public function destroy_multiple(Request $request)
     {
-
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:custom_fields,id'
+            'ids.*' => 'integer|exists:custom_fields,id',
         ]);
 
         $ids = $validatedData['ids'];

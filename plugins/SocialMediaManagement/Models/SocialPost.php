@@ -3,11 +3,11 @@
 namespace Plugins\SocialMediaManagement\Models;
 
 use App\Models\User;
-use Spatie\MediaLibrary\HasMedia;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class SocialPost extends Model implements HasMedia
 {
@@ -20,15 +20,14 @@ class SocialPost extends Model implements HasMedia
         'platforms',
         'scheduled_at',
         'status',
-        'response_logs'
+        'response_logs',
     ];
 
     protected $casts = [
         'platforms' => 'array',
         'scheduled_at' => 'datetime',
-        'response_logs'=> 'array',
+        'response_logs' => 'array',
     ];
-
 
     public function registerMediaCollections(): void
     {
@@ -42,35 +41,36 @@ class SocialPost extends Model implements HasMedia
         }
     }
 
-
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function getMediaFiles(){
+    public function getMediaFiles()
+    {
         return $this->getMedia('social-media');
     }
 
-    public function getPlatformStatusAttribute(){
-        if(!$this->response_logs){
+    public function getPlatformStatusAttribute()
+    {
+        if (! $this->response_logs) {
             return [];
         }
 
         $status = [];
 
-        foreach($this->platforms as $platform){
+        foreach ($this->platforms as $platform) {
             $status[$platform] = $this->response_logs[$platform]['status'] ?? 'pending';
         }
         return $status;
     }
-
 
     /**
      * Get platforms that were successfully published to
      */
     public function getSuccessfulPlatforms()
     {
-        if (!$this->response_logs) {
+        if (! $this->response_logs) {
             return [];
         }
 
@@ -84,7 +84,7 @@ class SocialPost extends Model implements HasMedia
      */
     public function getFailedPlatforms()
     {
-        if (!$this->response_logs) {
+        if (! $this->response_logs) {
             return [];
         }
 
@@ -92,7 +92,6 @@ class SocialPost extends Model implements HasMedia
             return isset($log['success']) && $log['success'] === false;
         }));
     }
-
 
     /**
      * Boot method for model events
@@ -103,7 +102,7 @@ class SocialPost extends Model implements HasMedia
 
         // Set default status when creating
         static::creating(function ($post) {
-            if (!$post->status) {
+            if (! $post->status) {
                 $post->status = 'pending';
             }
         });
@@ -115,7 +114,7 @@ class SocialPost extends Model implements HasMedia
                     'post_id' => $post->id,
                     'old_status' => $post->getOriginal('status'),
                     'new_status' => $post->status,
-                    'user_id' => auth()->id()
+                    'user_id' => auth()->id(),
                 ]);
             }
         });

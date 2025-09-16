@@ -4,8 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class CustomVerifiedMiddleware
 {
@@ -14,6 +12,7 @@ class CustomVerifiedMiddleware
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
+     *
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -21,13 +20,13 @@ class CustomVerifiedMiddleware
         $guard = getGuardName();
         $user = getAuthenticatedUser();
         // Check if the 'web' guard (for users) email is verified
-        if ($guard == 'web') {
+        if ($guard === 'web') {
             $mainAdminId = getMainAdminId();
-            if (!$user->hasVerifiedEmail() && $user->id != $mainAdminId) {
+            if (! $user->hasVerifiedEmail() && $user->id !== $mainAdminId) {
                 return $this->handleUnverifiedEmail($request);
             }
-        } else if ($guard == 'client') {
-            if (!$user->hasVerifiedEmail()) {
+        } elseif ($guard === 'client') {
+            if (! $user->hasVerifiedEmail()) {
                 return $this->handleUnverifiedEmail($request);
             }
         }
@@ -39,8 +38,7 @@ class CustomVerifiedMiddleware
     {
         if ($request->expectsJson()) {
             return formatApiResponse(true, 'Email not verified.');
-        } else {
-            return redirect()->route('verification.notice'); // Customize this route
         }
+        return redirect()->route('verification.notice'); // Customize this route
     }
 }

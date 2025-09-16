@@ -1,13 +1,13 @@
 <?php
+
 namespace Plugins\SocialMediaManagement\Services;
 
-use Carbon\Carbon;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Log;
 use Plugins\SocialMediaManagement\Models\SocialPost;
 use Plugins\SocialMediaManagement\Services\SocialMedia\FacebookService;
-use Plugins\SocialMediaManagement\Services\SocialMedia\LinkedInService;
 use Plugins\SocialMediaManagement\Services\SocialMedia\InstagramService;
+use Plugins\SocialMediaManagement\Services\SocialMedia\LinkedInService;
 use Plugins\SocialMediaManagement\Services\SocialMedia\PinterestService;
 
 class SocialMediaService
@@ -23,22 +23,12 @@ class SocialMediaService
         $this->initializePlatformServices();
     }
 
-    private function initializePlatformServices()
-    {
-        $this->platformServices = [
-            'facebook' => new FacebookService($this->socialSettings),
-            'instagram' => new InstagramService($this->socialSettings),
-            'linkedin' => new LinkedInService($this->socialSettings),
-            'pinterest' => new PinterestService($this->socialSettings),
-        ];
-    }
-
     // In App/Services/SocialMediaService.php
     public function publishPost(SocialPost $post)
     {
-        Log::info("=== STARTING PUBLISH POST ===", [
+        Log::info('=== STARTING PUBLISH POST ===', [
             'post_id' => $post->id,
-            'platforms' => $post->platforms
+            'platforms' => $post->platforms,
         ]);
 
         $responses = [];
@@ -63,7 +53,7 @@ class SocialMediaService
                     'error_code' => 'SERVICE_EXCEPTION',
                     'failed_at' => now()->toISOString(),
                     'retry_count' => 0,
-                    'exception' => true
+                    'exception' => true,
                 ];
                 $hasFailure = true;
             }
@@ -71,7 +61,7 @@ class SocialMediaService
 
         // Determine final status
         $finalStatus = 'failed';
-        if ($hasSuccess && !$hasFailure) {
+        if ($hasSuccess && ! $hasFailure) {
             $finalStatus = 'published';
         } elseif ($hasSuccess && $hasFailure) {
             $finalStatus = 'partially_published';
@@ -81,10 +71,60 @@ class SocialMediaService
         $post->update([
             'response_logs' => $responses,  // Store detailed logs
             'status' => $finalStatus,
-            'published_at' => $hasSuccess ? now() : null
+            'published_at' => $hasSuccess ? now() : null,
         ]);
 
         return $responses;
+    }
+
+    public function verifyCredentials($platform)
+    {
+        try {
+            if (! isset($this->platformServices[$platform])) {
+                return false;
+            }
+
+            return $this->platformServices[$platform]->verifyCredentials();
+        } catch (\Exception $e) {
+            Log::error("Error verifying {$platform} credentials: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    protected function publishToPlatform($platform, SocialPost $post)
+    {
+        $mediaFiles = $post->getMedia('social-media');
+        if ($mediaFiles->isEmpty()) {
+            throw new \Exception("No media files found for post ID {$post->id}");
+        }
+
+        // Clean caption before publishing
+        $cleanPost = clone $post;
+        $cleanPost->caption = $this->cleanCaption($post->caption);
+
+        // Check if platform service exists
+        if (! isset($this->platformServices[$platform])) {
+            throw new \Exception("Unsupported platform: {$platform}");
+        }
+
+        $service = $this->platformServices[$platform];
+
+        // Validate platform settings
+        if (! $service->validateSettings()) {
+            throw new \Exception("{$platform} credentials are missing or invalid");
+        }
+
+        return $service->publish($cleanPost, $mediaFiles);
+    }
+
+    private function initializePlatformServices()
+    {
+        $this->platformServices = [
+            'facebook' => new FacebookService($this->socialSettings),
+            'instagram' => new InstagramService($this->socialSettings),
+            'linkedin' => new LinkedInService($this->socialSettings),
+            'pinterest' => new PinterestService($this->socialSettings),
+        ];
     }
 
     // Alternative more robust version if you want to preserve line breaks:
@@ -107,49 +147,6 @@ class SocialMediaService
         // Clean up whitespace but preserve intentional line breaks
         $caption = preg_replace('/[ \t]+/', ' ', $caption); // Convert multiple spaces/tabs to single space
         $caption = preg_replace('/\n\s*\n\s*\n+/', "\n\n", $caption); // Convert multiple newlines to double newline
-        $caption = trim($caption);
-
-        return $caption;
-    }
-
-    protected function publishToPlatform($platform, SocialPost $post)
-    {
-        $mediaFiles = $post->getMedia('social-media');
-        if ($mediaFiles->isEmpty()) {
-            throw new \Exception("No media files found for post ID {$post->id}");
-        }
-
-        // Clean caption before publishing
-        $cleanPost = clone $post;
-        $cleanPost->caption = $this->cleanCaption($post->caption);
-
-
-        // Check if platform service exists
-        if (!isset($this->platformServices[$platform])) {
-            throw new \Exception("Unsupported platform: {$platform}");
-        }
-
-        $service = $this->platformServices[$platform];
-
-        // Validate platform settings
-        if (!$service->validateSettings()) {
-            throw new \Exception("{$platform} credentials are missing or invalid");
-        }
-
-        return $service->publish($cleanPost, $mediaFiles);
-    }
-
-    public function verifyCredentials($platform)
-    {
-        try {
-            if (!isset($this->platformServices[$platform])) {
-                return false;
-            }
-
-            return $this->platformServices[$platform]->verifyCredentials();
-        } catch (\Exception $e) {
-            Log::error("Error verifying {$platform} credentials: " . $e->getMessage());
-            return false;
-        }
+        return trim($caption);
     }
 }

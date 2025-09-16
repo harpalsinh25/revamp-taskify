@@ -3,15 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Plugins\Letter\Controllers\LetterController;
 use Plugins\Letter\Controllers\LetterTemplateController;
-use Plugins\Letter\Models\Letter;
 
 Route::middleware(['web', 'auth'])->group(function () {
-
-
     // Letter Templates Routes
     Route::prefix('/letter-templates')->name('letter-templates.')->group(function () {
         Route::get('/', [LetterTemplateController::class, 'index'])->name('index');
-        Route::get('/list',[LetterTemplateController::class,'list'])->name('list');
+        Route::get('/list', [LetterTemplateController::class,'list'])->name('list');
         Route::get('/create', [LetterTemplateController::class, 'create'])->name('create');
         Route::post('/', [LetterTemplateController::class, 'store'])->name('store');
         Route::any('/sample-content', [LetterTemplateController::class, 'getSampleContent'])->name('sample_content');

@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
 class ResetDemoData extends Command
@@ -30,7 +29,7 @@ class ResetDemoData extends Command
     public function handle()
     {
         // dd(config('constants.ALLOW_MODIFICATION'));
-        if(config('constants.ALLOW_MODIFICATION') == '1') {
+        if (config('constants.ALLOW_MODIFICATION') === '1') {
             $this->info('Demo Mode is Off , skip the Database Reset !');
             exit;
         }
@@ -47,7 +46,7 @@ class ResetDemoData extends Command
             $this->info('Resetting the database...');
             $sql = file_get_contents($sqlFilePath);
 
-            if (!$sql) {
+            if (! $sql) {
                 $this->error('Failed to read demo_data_taskify.sql!');
                 return 1;
             }
@@ -75,7 +74,7 @@ class ResetDemoData extends Command
 
         if (file_exists($zipFilePath)) {
             $this->info('Unzipping public.zip...');
-            $zip = new ZipArchive;
+            $zip = new ZipArchive();
 
             if ($zip->open($zipFilePath) === true) {
                 $zip->extractTo($extractPath);
@@ -111,7 +110,7 @@ class ResetDemoData extends Command
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         foreach ($tableNames as $table) {
-            DB::statement("DROP TABLE IF EXISTS `$table`");
+            DB::statement("DROP TABLE IF EXISTS `{$table}`");
         }
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 

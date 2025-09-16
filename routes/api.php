@@ -1,54 +1,51 @@
 <?php
 
-use App\Models\Expense;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LeadController;
-use App\Http\Controllers\TagsController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ItemsController;
-use App\Http\Controllers\NotesController;
-use App\Http\Controllers\RolesController;
-use App\Http\Controllers\TasksController;
-use App\Http\Controllers\TaxesController;
-use App\Http\Controllers\TodosController;
-use App\Http\Controllers\UnitsController;
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AllowancesController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\StatusController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\ContractsController;
+use App\Http\Controllers\CustomFieldController;
+use App\Http\Controllers\DeductionsController;
+use App\Http\Controllers\EmailSendController;
+use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\EstimatesInvoicesController;
 use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\ItemsController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\LeadFollowUpController;
 use App\Http\Controllers\LeadFormController;
+use App\Http\Controllers\LeadSourceController;
+use App\Http\Controllers\LeadStageController;
+use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\MeetingsController;
+use App\Http\Controllers\NotesController;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\PaymentMethodsController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\PayslipsController;
 use App\Http\Controllers\PriorityController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\TagsController;
 use App\Http\Controllers\TaskListController;
-use App\Http\Controllers\CandidateController;
-use App\Http\Controllers\ContractsController;
-use App\Http\Controllers\EmailSendController;
-use App\Http\Controllers\InterviewController;
-use App\Http\Controllers\LeadStageController;
-use App\Http\Controllers\AllowancesController;
-use App\Http\Controllers\DeductionsController;
-use App\Http\Controllers\LeadImportController;
-use App\Http\Controllers\LeadSourceController;
-use App\Http\Controllers\WorkspacesController;
-use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\Auth\SignUpController;
-use App\Http\Controllers\CustomFieldController;
+use App\Http\Controllers\TasksController;
+use App\Http\Controllers\TaxesController;
 use App\Http\Controllers\TimeTrackerController;
-use App\Http\Controllers\LeadFollowUpController;
-use App\Http\Controllers\LeaveRequestController;
-use App\Http\Controllers\EmailTemplateController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\PaymentMethodsController;
-use App\Http\Controllers\CandidateStatusController;
-use App\Http\Controllers\EstimatesInvoicesController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\TodosController;
+use App\Http\Controllers\UnitsController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkspacesController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,7 +76,6 @@ Route::post('/settings/update', [SettingsController::class, 'store_settings_api'
 
 // Protected Routes
 Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api.')->group(function () {
-
     Route::patch('/user/fcm-token', [UserController::class, 'updateFcmToken']);
 
     // Profile Management
@@ -104,14 +100,11 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
         Route::delete('/clients/destroy/{id}', [ClientController::class, 'destroy'])->middleware(['customcan:delete_clients', 'demo_restriction', 'log.activity']);
     });
 
-
-
     // Dashboard
     Route::get('/upcoming-birthdays', [HomeController::class, 'upcomingBirthdaysApi']);
     Route::get('/upcoming-work-anniversaries', [HomeController::class, 'upcomingWorkAnniversariesApi']);
     Route::get('/members-on-leave', [HomeController::class, 'membersOnLeaveApi']);
     Route::get('/dashboard/statistics', [HomeController::class, 'getStatistics']);
-
 
     // Projects
     Route::get('/projects/{id?}', [ProjectsController::class, 'apiList']);
@@ -134,7 +127,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
         Route::get('/milestones/get/{id?}', [ProjectsController::class, 'get_milestone']);
         Route::post('/milestones/update', [ProjectsController::class, 'update_milestone'])->middleware(['customcan:edit_milestones', 'log.activity', 'isApi']);
         Route::delete('/milestones/destroy/{id}', [ProjectsController::class, 'delete_milestone'])->middleware(['customcan:delete_milestones', 'demo_restriction', 'checkAccess:App\Models\Milestone,milestones,id,milestones', 'log.activity']);
-
     });
 
     // Project Comments
@@ -158,8 +150,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
             ->middleware(['customcan:delete_media', 'log.activity']);
     });
 
-
-
     // Tasks
     Route::middleware(['customcan:manage_tasks'])->group(function () {
         Route::post('/tasks/store', [TasksController::class, 'store'])->middleware(['customcan:create_tasks', 'log.activity', 'isApi']);
@@ -171,8 +161,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
         Route::patch('tasks/{id}/priority', [TasksController::class, 'update_priority'])->middleware(['customcan:edit_tasks', 'log.activity', 'isApi']);
         Route::delete('/tasks/destroy/{id}', [TasksController::class, 'destroy'])->middleware(['customcan:delete_tasks', 'demo_restriction', 'checkAccess:App\Models\Task,tasks,id,tasks', 'log.activity']);
         Route::get('/tasks/{id}/status-timelines', [TasksController::class, 'get_status_timelines_api']);
-
-
     });
 
     //Task Comments
@@ -276,9 +264,9 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
 
     // Roles and Permissions
     Route::middleware(['customRole:admin'])->group(function () {
-        Route::post('/roles/store',[RolesController::class, 'store_api']);
-        Route::post('/roles/update/{id}',[RolesController::class, 'update_api']);
-        Route::delete('/roles/destroy/{id}',[RolesController::class, 'destroy_api']);
+        Route::post('/roles/store', [RolesController::class, 'store_api']);
+        Route::post('/roles/update/{id}', [RolesController::class, 'update_api']);
+        Route::delete('/roles/destroy/{id}', [RolesController::class, 'destroy_api']);
 
         Route::get('/roles/get/{id?}', [RolesController::class, 'get_role_api']);
         Route::get('/permissions-list', [RolesController::class, 'get_permissions_api']);
@@ -322,7 +310,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
 
     //Taxes
     Route::middleware(['customcan:manage_taxes', 'isApi'])->group(function () {
-
         Route::get('/taxes/{id?}', [TaxesController::class, 'apiList']);
         Route::post('/taxes/store', [TaxesController::class, 'store'])->middleware(['customcan:create_taxes', 'log.activity']);
         Route::post('/taxes/update', [TaxesController::class, 'update'])->middleware(['customcan:edit_taxes', 'log.activity']);
@@ -331,7 +318,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
 
     //Units
     Route::middleware(['customcan:manage_units', 'isApi'])->group(function () {
-
         Route::get('/units/{id?}', [UnitsController::class, 'apiList']);
         Route::post('/units/store', [UnitsController::class, 'store'])->middleware(['customcan:create_units', 'log.activity']);
         Route::post('/units/update', [UnitsController::class, 'update'])->middleware(['customcan:edit_units', 'log.activity']);
@@ -348,14 +334,12 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
 
     //Estimate Invoices
     Route::middleware(['customcan:manage_estimates_invoices', 'isApi'])->group(function () {
-
         Route::get('/estimates-invoices', [EstimatesInvoicesController::class, 'apiList']);
         Route::post('/estimates-invoices/store', [EstimatesInvoicesController::class, 'store'])->middleware(['customcan:create_estimates_invoices', 'log.activity']);
 
         Route::post('/estimates-invoices/update', [EstimatesInvoicesController::class, 'update'])->middleware(['customcan:edit_estimates_invoices', 'log.activity']);
         Route::delete('/estimates-invoices/destroy/{id}', [EstimatesInvoicesController::class, 'destroy'])->middleware(['demo_restriction', 'customcan:delete_estimates_invoices', 'checkAccess:App\Models\EstimatesInvoice,estimates_invoices,id,estimates_invoices', 'log.activity']);
     });
-
 
     //Email Templates
     Route::middleware(['customcan:manage_email_template', 'isApi'])->group(function () {
@@ -365,7 +349,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
         Route::get('/email-templates/list/{id?}', [EmailTemplateController::class, 'apiList'])->name('email.templates.list');
     });
 
-
     // Email Sending Routes
     Route::prefix('emails')->middleware('customcan:send_email, isApi')->group(function () {
         Route::post('/preview', [EmailSendController::class, 'preview'])->name('emails.preview');
@@ -374,7 +357,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
         Route::delete('/history/destroy/{id}', [EmailSendController::class, 'destroy'])->name('emails.history.destroy');
         Route::get('/template-data/{id}', [EmailSendController::class, 'getTemplateData']);
     })->middleware(['auth:web']);
-
 
     // Routes for Candidates
     Route::prefix('candidate')->middleware('customcan:manage_candidate', 'isApi')->group(function () {
@@ -404,12 +386,10 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
         Route::get('/list/{id?}', [CandidateStatusController::class, 'apiList'])->name('candidate.status.list');
     });
 
-
     Route::post('/interviews/store', [InterviewController::class, 'store'])->name('interviews.store')->middleware(['customcan:create_interview', 'log.activity']);
     Route::post('/interviews/update/{id}', [InterviewController::class, 'update'])->name('interviews.update')->middleware(['customcan:edit_interview', 'log.activity']);
     Route::delete('/interviews/destroy/{id}', [InterviewController::class, 'destroy'])->name('interviews.destroy')->middleware(['customcan:delete_interview', 'log.activity']);
     Route::get('/interviews/list/{id?}', [InterviewController::class, 'apiList'])->name('interviews.list')->middleware('customcan:manage_interview');
-
 
     // Lead Sources
     Route::prefix('lead-sources')->middleware(['customcan:manage_leads', 'isApi'])->group(function () {
@@ -432,7 +412,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
 
     // Leads
     Route::prefix('leads')->middleware(['customcan:manage_leads', 'isApi'])->group(function () {
-
         Route::post('/store', [LeadController::class, 'store'])->name('leads.store')->middleware(['customcan:create_leads', 'log.activity']);
         Route::get('/get/{id?}', [LeadController::class, 'get'])->name('leads.get');
         Route::get('/list', [LeadController::class, 'apiList'])->name('leads.list');
@@ -457,8 +436,6 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
         Route::post('/{leadForm}/toggle', [LeadFormController::class, 'toggleStatus']);
         Route::get('/responses/api-list/{id}', [LeadFormController::class, 'apiResponseList']);
     });
-
-
 
     Route::post('/custom-fields', [CustomFieldController::class, 'store']);
     Route::get('/custom-fields/list', [CustomFieldController::class, 'apiList']);
@@ -509,11 +486,9 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
 
     // Contracts Types
     Route::middleware(['customcan:manage_contract_types', 'isApi'])->group(function () {
-
         Route::post('/contracts/store-contract-type', [ContractsController::class, 'store_contract_type'])->middleware(['customcan:create_contract_types', 'log.activity']);
 
         Route::post('/contracts/update-contract-type', [ContractsController::class, 'update_contract_type'])->middleware(['customcan:edit_contract_types', 'log.activity']);
-
 
         Route::get('/contracts/contract-types-list', [ContractsController::class, 'contract_types_apiList']);
 

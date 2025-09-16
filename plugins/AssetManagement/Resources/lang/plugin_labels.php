@@ -115,16 +115,13 @@ return [
     'upload_errors' => 'Upload Errors',
     'validation_errors' => 'Validation Errors',
     'import_configuration' => 'Import Configuration',
-    'download_the_sample_file_to_see_the_required_format_and_the_instruction_file_for_detailed_guidance'=>'Download the sample file to see the required format, and the instruction file for detailed guidance.',
-    'import_instruction'=> 'Import Instructions',
-    'use_the_sample_file_as_a_template_for_your_data'=>'Use the sample file as a template for your data',
+    'download_the_sample_file_to_see_the_required_format_and_the_instruction_file_for_detailed_guidance' => 'Download the sample file to see the required format, and the instruction file for detailed guidance.',
+    'import_instruction' => 'Import Instructions',
+    'use_the_sample_file_as_a_template_for_your_data' => 'Use the sample file as a template for your data',
     'ensure_all_required_fields_are_filled' => 'Ensure all required fields are filled',
-    'category_names_should_match_existing_categories'=>'Category names should match existing categories',
-    'asset_tags_must_be_unique'=>'Asset tags must be unique',
-    'upload_errors'=>'Upload Errors:',
-    'validation_errors'=>'Validation Errors:'
-
-
-
+    'category_names_should_match_existing_categories' => 'Category names should match existing categories',
+    'asset_tags_must_be_unique' => 'Asset tags must be unique',
+    'upload_errors' => 'Upload Errors:',
+    'validation_errors' => 'Validation Errors:',
 
 ];

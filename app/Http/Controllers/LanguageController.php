@@ -2,22 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Language;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\App;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
 
 class LanguageController extends Controller
 {
     protected $user;
     public function __construct()
     {
-
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->user = getAuthenticatedUser();
@@ -37,31 +32,28 @@ class LanguageController extends Controller
 
     public function create()
     {
-
         return view('languages.create_language');
     }
 
     public function store(Request $request)
     {
-
         $formFields = $request->validate([
             'name' => ['required'],
-            'code' => ['required', 'unique:languages,code']
+            'code' => ['required', 'unique:languages,code'],
 
         ]);
 
         if (language::create($formFields)) {
             Session::flash('message', 'Language created successfully.');
             return response()->json(['error' => false]);
-        } else {
         }
     }
 
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $languages = Language::orderBy($sort, $order);
 
         if ($search) {
@@ -73,10 +65,10 @@ class LanguageController extends Controller
         }
         $total = $languages->count();
         $languages = $languages
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($language) {
                 $name = $language->name;
-                $primaryBadge = ($language->code == $this->user->lang) ? ' <span class="badge bg-primary">Primary</span>' : '';
+                $primaryBadge = $language->code === $this->user->lang ? ' <span class="badge bg-primary">Primary</span>' : '';
                 return [
                     'id' => $language->id,
                     'name' => $name . $primaryBadge,
@@ -87,11 +79,10 @@ class LanguageController extends Controller
             });
 
         return response()->json([
-            "rows" => $languages->items(),
-            "total" => $total,
+            'rows' => $languages->items(),
+            'total' => $total,
         ]);
     }
-
 
     public function get($id)
     {
@@ -103,16 +94,15 @@ class LanguageController extends Controller
     {
         $formFields = $request->validate([
             'id' => ['required'],
-            'name' => ['required']
+            'name' => ['required'],
         ]);
 
         $language = language::findOrFail($request->id);
 
         if ($language->update($formFields)) {
             return response()->json(['error' => false, 'message' => 'Language updated successfully.']);
-        } else {
-            return response()->json(['error' => true, 'message' => 'Language couldn\'t updated.']);
         }
+        return response()->json(['error' => true, 'message' => 'Language couldn\'t updated.']);
     }
 
     public function destroy($id)
@@ -120,7 +110,7 @@ class LanguageController extends Controller
         // Retrieve the language record to get its code
         $language = Language::findOrFail($id);
 
-        if ($language->code == app()->getLocale()) {
+        if ($language->code === app()->getLocale()) {
             return response()->json(['error' => true, 'message' => 'The current language cannot be deleted. Please switch to another one before delete.']);
         }
 
@@ -144,7 +134,7 @@ class LanguageController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:languages,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:languages,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -153,7 +143,7 @@ class LanguageController extends Controller
             // Retrieve the language record to get its code
             $language = Language::findOrFail($id);
 
-            if ($language->code != app()->getLocale()) {
+            if ($language->code !== app()->getLocale()) {
                 // Construct the directory path for the language files
                 $languageDirectoryPath = resource_path('lang/' . $language->code);
 
@@ -171,13 +161,12 @@ class LanguageController extends Controller
 
     public function save_labels(Request $request, Language $lang)
     {
-
         // If input is too big, abort early with a proper message
-        if (count($request->except(["_token", "_method"])) > 9000) {
+        if (count($request->except(['_token', '_method'])) > 9000) {
             return response()->json(['error' => true, 'message' => 'Too many labels. Increase max_input_vars in php.ini'], 422);
         }
 
-        $data = $request->except(["_token", "_method"]);
+        $data = $request->except(['_token', '_method']);
 
         $langstr = '';
 
@@ -187,12 +176,12 @@ class LanguageController extends Controller
             $langstr .= "'" . $label_key . "' => '" . addslashes($label_data) . "'," . "\n";
         }
 
-        $langstr_final = "<?php return [" . "\n\n\n" . $langstr . "];";
+        $langstr_final = '<?php return [' . "\n\n\n" . $langstr . '];';
 
-        $root = base_path("/resources/lang");
+        $root = base_path('/resources/lang');
         $dir = $root . '/' . $request->langcode;
 
-        if (!file_exists($dir)) {
+        if (! file_exists($dir)) {
             mkdir($dir, 0755, true);
         }
         $filename = $dir . '/labels.php';
@@ -202,7 +191,6 @@ class LanguageController extends Controller
         Session::flash('message', 'Language labels saved successfully.');
         return response()->json(['error' => false]);
     }
-
 
     public function change($code)
     {
@@ -221,7 +209,7 @@ class LanguageController extends Controller
     public function set_default(Request $request)
     {
         $formFields = $request->validate([
-            'lang' => ['required']
+            'lang' => ['required'],
 
         ]);
         $locale = $request->lang;
@@ -231,11 +219,9 @@ class LanguageController extends Controller
                 session(['my_locale' => $locale, 'locale' => $locale]);
                 Session::flash('message', 'Primary language set successfully.');
                 return response()->json(['error' => false]);
-            } else {
-                return response()->json(['error' => true, 'message' => 'Primary language couldn\'t set.']);
             }
-        } else {
-            return response()->json(['error' => true, 'message' => 'Invalid language.']);
+            return response()->json(['error' => true, 'message' => 'Primary language couldn\'t set.']);
         }
+        return response()->json(['error' => true, 'message' => 'Invalid language.']);
     }
 }

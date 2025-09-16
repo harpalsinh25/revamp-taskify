@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Client;
 use App\Models\Payslip;
+use App\Models\User;
 use App\Models\Workspace;
+use App\Services\DeletionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
@@ -40,7 +39,6 @@ class PayslipsController extends Controller
         $payment_methods = $this->workspace->payment_methods;
         return view('payslips.create', ['users' => $users, 'payment_methods' => $payment_methods]);
     }
-
 
     /**
      * Create a new payslip.
@@ -124,10 +122,8 @@ class PayslipsController extends Controller
      * }
      */
 
-
     public function store(Request $request)
     {
-
         try {
             $isApi = request()->get('isApi', false);
             // dd($isApi);
@@ -151,7 +147,7 @@ class PayslipsController extends Controller
                 'payment_method_id' => ['nullable', 'required_if:status,1'],
                 'payment_date' => ['nullable', 'required_if:status,1'],
                 'status' => ['required'],
-                'note' => ['nullable']
+                'note' => ['nullable'],
             ], [
                 'user_id.required' => 'The user field is required.',
                 'payment_date.required_if' => 'The payment date is required when status is paid.',
@@ -165,19 +161,18 @@ class PayslipsController extends Controller
                 'total_allowance.regex' => 'The total allowances must be a valid number with or without decimals.',
                 'total_deductions.regex' => 'The total deductions must be a valid number with or without decimals.',
                 'total_earnings.regex' => 'The total earnings must be a valid number with or without decimals.',
-                'net_pay.regex' => 'The net payable must be a valid number with or without decimals.'
+                'net_pay.regex' => 'The net payable must be a valid number with or without decimals.',
             ]);
 
             $payment_date = $request->input('payment_date');
 
             $status = $request->input('status');
 
-            if ($status == '0') {
+            if ($status === '0') {
                 $formFields['payment_date'] = null;
                 $formFields['payment_method_id'] = null;
-            } elseif (!empty($payment_date)) {
-             $formFields['payment_date'] = format_date(trim($payment_date), false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d H:i:s');
-
+            } elseif (! empty($payment_date)) {
+                $formFields['payment_date'] = format_date(trim($payment_date), false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d H:i:s');
             }
 
             $formFields['workspace_id'] = $this->workspace->id;
@@ -188,15 +183,12 @@ class PayslipsController extends Controller
                 $payslip->allowances()->attach($allowance_ids);
                 $payslip->deductions()->attach($deduction_ids);
 
-
-
                 if ($isApi) {
-
                     return formatApiResponse(
                         false,
                         'Payslip created successfully.',
                         [
-                            'data' => formatPayslip($payslip)
+                            'data' => formatPayslip($payslip),
                         ],
                         200
                     );
@@ -204,17 +196,12 @@ class PayslipsController extends Controller
 
                 Session::flash('message', 'Payslip created successfully.');
 
-
-
-
                 return response()->json(['error' => false, 'id' => $payslip->id]);
-            } else {
-                return response()->json(['error' => true, 'message' => 'Payslip couldn\'t created.']);
             }
+            return response()->json(['error' => true, 'message' => 'Payslip couldn\'t created.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-
             return formatApiResponse(
                 true,
                 config('app.debug') ? $e->getMessage() : 'An error occurred.',
@@ -227,15 +214,14 @@ class PayslipsController extends Controller
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $statuses = request('statuses', []);
         $user_ids = request('user_ids', []);
         $created_by_user_ids = request('created_by_user_ids', []);
         $created_by_client_ids = request('created_by_client_ids', []);
-        $month = (request('month')) ? request('month') : "";
+        $month = request('month') ? request('month') : '';
         $where = ['payslips.workspace_id' => $this->workspace->id];
-
 
         $payslips = Payslip::select(
             'payslips.*',
@@ -245,29 +231,28 @@ class PayslipsController extends Controller
             ->leftJoin('users', 'payslips.user_id', '=', 'users.id')
             ->leftJoin('payment_methods', 'payslips.payment_method_id', '=', 'payment_methods.id');
 
-
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $payslips = $payslips->where(function ($query) {
                 $query->where('payslips.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('payslips.user_id', $this->user->id);
             });
         }
 
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $payslips->whereIn('payslips.status', $statuses);
         }
 
-        if (!empty($user_ids)) {
+        if (! empty($user_ids)) {
             $payslips->whereIn('payslips.user_id', $user_ids);
         }
 
-        if (!empty($created_by_user_ids)) {
+        if (! empty($created_by_user_ids)) {
             $payslips->whereIn('payslips.created_by', array_map(function ($id) {
                 return 'u_' . $id;
             }, $created_by_user_ids));
         }
 
-        if (!empty($created_by_client_ids)) {
+        if (! empty($created_by_client_ids)) {
             $payslips->whereIn('payslips.created_by', array_map(function ($id) {
                 return 'c_' . $id;
             }, $created_by_client_ids));
@@ -293,7 +278,7 @@ class PayslipsController extends Controller
         $canDelete = checkPermission('delete_payslips');
 
         $payslips = $payslips->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($payslip) use ($canEdit, $canDelete, $canCreate) {
                 $month = Carbon::parse($payslip->month);
                 $payment_date = $payslip->payment_date !== null ? Carbon::parse($payslip->payment_date) : '';
@@ -318,8 +303,7 @@ class PayslipsController extends Controller
                         '</a>';
                 }
 
-                $actions = $actions ?: '-';
-
+                $actions = $actions ? $actions : '-';
 
                 return [
                     'id' => $payslip->id,
@@ -340,31 +324,24 @@ class PayslipsController extends Controller
                     'total_earnings' => format_currency($payslip->total_earnings),
                     'total_deductions' => format_currency($payslip->total_deductions),
                     'net_pay' => format_currency($payslip->net_pay),
-                    'payment_date' => $payment_date != '' ? format_date($payment_date) : '-',
-                    'status' => $payslip->status == 1 ? '<span class="badge bg-success">' . get_label('paid', 'Paid') . '</span>' : '<span class="badge bg-danger">' . get_label('unpaid', 'Unpaid') . '</span>',
+                    'payment_date' => $payment_date !== '' ? format_date($payment_date) : '-',
+                    'status' => $payslip->status === 1 ? '<span class="badge bg-success">' . get_label('paid', 'Paid') . '</span>' : '<span class="badge bg-danger">' . get_label('unpaid', 'Unpaid') . '</span>',
                     'note' => $payslip->note,
                     'created_by' => strpos($payslip->created_by, 'u_') === 0 ? formatUserHtml(User::find(substr($payslip->created_by, 2))) : formatClientHtml(Client::find(substr($payslip->created_by, 2))),
                     'created_at' => format_date($payslip->created_at, true),
                     'updated_at' => format_date($payslip->updated_at, true),
-                    'actions' => $actions
+                    'actions' => $actions,
                 ];
             });
 
-
         return response()->json([
-            "rows" => $payslips->items(),
-            "total" => $total,
+            'rows' => $payslips->items(),
+            'total' => $total,
         ]);
     }
 
-
-
-
-
-
     public function edit(Request $request, $id)
     {
-
         $payslip = Payslip::select(
             'payslips.*',
             DB::raw('CONCAT(users.first_name, " ", users.last_name) AS user_name'),
@@ -383,7 +360,6 @@ class PayslipsController extends Controller
         $payment_methods = $this->workspace->payment_methods;
         return view('payslips.update', ['payslip' => $payslip, 'users' => $users, 'payment_methods' => $payment_methods]);
     }
-
 
     /**
      * Update an existing payslip.
@@ -474,12 +450,9 @@ class PayslipsController extends Controller
      * }
      */
 
-
     public function update(Request $request)
     {
-
         try {
-
             $isApi = request()->get('isApi', false);
 
             $formFields = $request->validate([
@@ -503,7 +476,7 @@ class PayslipsController extends Controller
                 'payment_method_id' => ['nullable', 'required_if:status,1'],
                 'payment_date' => ['nullable', 'required_if:status,1'],
                 'status' => ['required'],
-                'note' => ['nullable']
+                'note' => ['nullable'],
             ], [
                 'user_id.required' => 'The user field is required.',
                 'payment_date.required_if' => 'The payment date is required when status is paid.',
@@ -517,17 +490,16 @@ class PayslipsController extends Controller
                 'total_allowance.regex' => 'The total allowances must be a valid number with or without decimals.',
                 'total_deductions.regex' => 'The total deductions must be a valid number with or without decimals.',
                 'total_earnings.regex' => 'The total earnings must be a valid number with or without decimals.',
-                'net_pay.regex' => 'The net payable must be a valid number with or without decimals.'
+                'net_pay.regex' => 'The net payable must be a valid number with or without decimals.',
             ]);
-
 
             $payment_date = $request->input('payment_date');
             $status = $request->input('status');
 
-            if ($status == '0') {
+            if ($status === '0') {
                 $formFields['payment_date'] = null;
                 $formFields['payment_method_id'] = null;
-            } elseif (!empty($payment_date)) {
+            } elseif (! empty($payment_date)) {
                 $formFields['payment_date'] = format_date(trim($payment_date), false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d H:i:s');
             }
 
@@ -543,10 +515,10 @@ class PayslipsController extends Controller
             $payslip->update($formFields);
 
             // Sync the related allowances and deductions
-            if (!empty($allowance_ids)) {
+            if (! empty($allowance_ids)) {
                 $payslip->allowances()->sync($allowance_ids);
             }
-            if (!empty($deduction_ids)) {
+            if (! empty($deduction_ids)) {
                 $payslip->deductions()->sync($deduction_ids);
             }
 
@@ -555,7 +527,7 @@ class PayslipsController extends Controller
                     false,
                     'Payslips updated successfully.',
                     [
-                        'data' => formatPayslip($payslip)
+                        'data' => formatPayslip($payslip),
                     ],
                     200
                 );
@@ -584,7 +556,6 @@ class PayslipsController extends Controller
             ->leftJoin('users', 'payslips.user_id', '=', 'users.id')
             ->leftJoin('payment_methods', 'payslips.payment_method_id', '=', 'payment_methods.id')->first();
 
-
         // The ID corresponds to a user
         $creator = User::find(substr($payslip->created_by, 2)); // Remove the 'u_' prefix
         if ($creator !== null) {
@@ -594,12 +565,11 @@ class PayslipsController extends Controller
         }
         $payslip->month = Carbon::parse($payslip->month);
         $payment_date = $payslip->payment_date !== null ? Carbon::parse($payslip->payment_date) : '';
-        $payment_date = $payment_date != '' ? format_date($payment_date) : '-';
+        $payment_date = $payment_date !== '' ? format_date($payment_date) : '-';
         $payslip->payment_date = $payment_date;
-        $payslip->status = $payslip->status == 1 ? '<span class="badge bg-success">' . get_label('paid', 'Paid') . '</span>' : '<span class="badge bg-danger">' . get_label('unpaid', 'Unpaid') . '</span>';
+        $payslip->status = $payslip->status === 1 ? '<span class="badge bg-success">' . get_label('paid', 'Paid') . '</span>' : '<span class="badge bg-danger">' . get_label('unpaid', 'Unpaid') . '</span>';
         return view('payslips.view', compact('payslip'));
     }
-
 
     /**
      * Delete a payslip.
@@ -628,16 +598,13 @@ class PayslipsController extends Controller
      * }
      */
 
-
     public function destroy($id)
     {
-
         try {
             $payslip = Payslip::findOrFail($id);
             $payslip->allowances()->detach();
             $payslip->deductions()->detach();
-            $response = DeletionService::delete(Payslip::class, $id, 'Payslip');
-            return $response;
+            return DeletionService::delete(Payslip::class, $id, 'Payslip');
         } catch (\Exception $e) {
             formatApiResponse(
                 false,
@@ -653,7 +620,7 @@ class PayslipsController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:payslips,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:payslips,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -682,13 +649,11 @@ class PayslipsController extends Controller
         // Use the general duplicateRecord function
         $duplicate = duplicateRecord(Payslip::class, $id, $relatedTables);
 
-        if (!$duplicate) {
+        if (! $duplicate) {
             return response()->json(['error' => true, 'message' => 'Payslip duplication failed.']);
         }
         return response()->json(['error' => false, 'message' => 'Payslip duplicated successfully.', 'id' => $id]);
     }
-
-
 
     /**
      * List payslips with filtering (API format).
@@ -754,19 +719,17 @@ class PayslipsController extends Controller
 
     public function apiList()
     {
-
         try {
             $search = request('search');
-            $sort = (request('sort')) ? request('sort') : "id";
-            $order = (request('order')) ? request('order') : "DESC";
-            $limit = (request('limit')) ? request('limit') : 10;
+            $sort = request('sort') ? request('sort') : 'id';
+            $order = request('order') ? request('order') : 'DESC';
+            $limit = request('limit') ? request('limit') : 10;
             $statuses = request('statuses', []);
             $user_ids = request('user_ids', []);
             $created_by_user_ids = request('created_by_user_ids', []);
             $created_by_client_ids = request('created_by_client_ids', []);
-            $month = (request('month')) ? request('month') : "";
+            $month = request('month') ? request('month') : '';
             $where = ['payslips.workspace_id' => $this->workspace->id];
-
 
             $payslips = Payslip::select(
                 'payslips.*',
@@ -776,29 +739,28 @@ class PayslipsController extends Controller
                 ->leftJoin('users', 'payslips.user_id', '=', 'users.id')
                 ->leftJoin('payment_methods', 'payslips.payment_method_id', '=', 'payment_methods.id');
 
-
-            if (!isAdminOrHasAllDataAccess()) {
+            if (! isAdminOrHasAllDataAccess()) {
                 $payslips = $payslips->where(function ($query) {
                     $query->where('payslips.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                         ->orWhere('payslips.user_id', $this->user->id);
                 });
             }
 
-            if (!empty($statuses)) {
+            if (! empty($statuses)) {
                 $payslips->whereIn('payslips.status', $statuses);
             }
 
-            if (!empty($user_ids)) {
+            if (! empty($user_ids)) {
                 $payslips->whereIn('payslips.user_id', $user_ids);
             }
 
-            if (!empty($created_by_user_ids)) {
+            if (! empty($created_by_user_ids)) {
                 $payslips->whereIn('payslips.created_by', array_map(function ($id) {
                     return 'u_' . $id;
                 }, $created_by_user_ids));
             }
 
-            if (!empty($created_by_client_ids)) {
+            if (! empty($created_by_client_ids)) {
                 $payslips->whereIn('payslips.created_by', array_map(function ($id) {
                     return 'c_' . $id;
                 }, $created_by_client_ids));
@@ -826,13 +788,12 @@ class PayslipsController extends Controller
                     return formatPayslip($payslip);
                 });
 
-
             return formatApiResponse(
                 false,
                 'Payslip retrieved successfully.',
                 [
                     'total' => $total,
-                    'data' => $payslips
+                    'data' => $payslips,
                 ]
             );
         } catch (\Exception $e) {

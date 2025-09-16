@@ -19,11 +19,10 @@ class Milestone extends Model
         'cost',
         'progress',
         'description',
-        'created_by'
+        'created_by',
     ];
     public function project()
     {
         return $this->belongsTo(Project::class);
     }
-
 }

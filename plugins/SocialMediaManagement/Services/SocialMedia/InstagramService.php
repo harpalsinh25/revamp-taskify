@@ -1,20 +1,15 @@
 <?php
 // App/Services/SocialMedia/InstagramService.php
+
 namespace Plugins\SocialMediaManagement\Services\SocialMedia;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Plugins\SocialMediaManagement\Models\SocialPost;
-
 
 class InstagramService extends BaseSocialPlatform
 {
-    protected function getPlatformName(): string
-    {
-        return 'instagram';
-    }
-
     public function getRequiredSettings(): array
     {
         return ['instagram_business_account_id', 'instagram_access_token'];
@@ -26,7 +21,7 @@ class InstagramService extends BaseSocialPlatform
             $accountId = $this->settings['instagram_business_account_id'] ?? null;
             $token = $this->settings['instagram_access_token'] ?? null;
 
-            if (!$accountId || !$token) {
+            if (! $accountId || ! $token) {
                 Log::warning("Missing Instagram credentials: accountId={$accountId}, token=" . ($token ? '***' : 'null'));
                 return false;
             }
@@ -34,18 +29,18 @@ class InstagramService extends BaseSocialPlatform
             $url = "https://graph.facebook.com/v21.0/{$accountId}";
             $params = [
                 'fields' => 'id,username',
-                'access_token' => $token
+                'access_token' => $token,
             ];
 
             $response = Http::timeout(10)->get($url, $params);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error("Instagram verify failed. Status: {$response->status()}. Body: " . $response->body());
             }
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error("Error verifying Instagram credentials: " . $e->getMessage());
+            Log::error('Error verifying Instagram credentials: ' . $e->getMessage());
             return false;
         }
     }
@@ -55,16 +50,16 @@ class InstagramService extends BaseSocialPlatform
         $accountId = $this->settings['instagram_business_account_id'];
         $token = $this->settings['instagram_access_token'];
 
-        Log::info("=== STARTING INSTAGRAM PUBLISH DEBUG ===", [
+        Log::info('=== STARTING INSTAGRAM PUBLISH DEBUG ===', [
             'post_id' => $post->id,
             'account_id' => $accountId,
-            'token_exists' => !empty($token),
+            'token_exists' => ! empty($token),
             'token_length' => strlen($token ?? ''),
-            'media_count' => $mediaFiles->count()
+            'media_count' => $mediaFiles->count(),
         ]);
 
         if ($mediaFiles->isEmpty()) {
-            Log::error("Instagram publish failed: No media files", ['post_id' => $post->id]);
+            Log::error('Instagram publish failed: No media files', ['post_id' => $post->id]);
             throw new \Exception('Instagram requires at least one media file');
         }
 
@@ -89,44 +84,46 @@ class InstagramService extends BaseSocialPlatform
                     Log::info('Instagram publish SUCCESS', [
                         'post_id' => $post->id,
                         'instagram_id' => $publishData['id'],
-                        'full_response' => $publishData
+                        'full_response' => $publishData,
                     ]);
 
                     return $this->createSuccessResponse($publishData['id'], $publishData);
-                } else {
-                    Log::error('Instagram publish response missing ID', [
-                        'response' => $publishData
-                    ]);
-                    throw new \Exception("Instagram publish response missing ID: " . $publishResponse->body());
                 }
+                Log::error('Instagram publish response missing ID', [
+                    'response' => $publishData,
+                ]);
+                throw new \Exception('Instagram publish response missing ID: ' . $publishResponse->body());
             }
 
             Log::error('Instagram publish failed', [
                 'status' => $publishResponse->status(),
                 'error' => $publishResponse->json(),
-                'body' => $publishResponse->body()
+                'body' => $publishResponse->body(),
             ]);
-            throw new \Exception("Instagram publish failed: " . $publishResponse->body());
+            throw new \Exception('Instagram publish failed: ' . $publishResponse->body());
         } catch (\Exception $e) {
-            Log::error("=== INSTAGRAM PUBLISH EXCEPTION ===", [
+            Log::error('=== INSTAGRAM PUBLISH EXCEPTION ===', [
                 'post_id' => $post->id,
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         } finally {
-            Log::info("=== INSTAGRAM PUBLISH DEBUG END ===", [
-                'post_id' => $post->id
+            Log::info('=== INSTAGRAM PUBLISH DEBUG END ===', [
+                'post_id' => $post->id,
             ]);
         }
+    }
+    protected function getPlatformName(): string
+    {
+        return 'instagram';
     }
 
     private function createSingleMediaContainer(SocialPost $post, $media, string $accountId, string $token): array
     {
-        
-        $mediaUrl = $media->getFullUrl(); 
+        $mediaUrl = $media->getFullUrl();
         $mediaType = Str::startsWith($media->mime_type, 'video') ? 'REELS' : 'IMAGE';
         $urlField = $mediaType === 'REELS' ? 'video_url' : 'image_url';
 
@@ -137,14 +134,14 @@ class InstagramService extends BaseSocialPlatform
             'mime_type' => $media->mime_type,
             'file_size' => $media->size ?? 'unknown',
             'post_id' => $post->id,
-            'caption_length' => strlen($post->caption ?? '')
+            'caption_length' => strlen($post->caption ?? ''),
         ]);
 
         $requestData = [
             $urlField => $mediaUrl,
             'caption' => $post->caption ?: '',
             'media_type' => $mediaType,
-            'access_token' => $token
+            'access_token' => $token,
         ];
 
         $response = Http::timeout(30)->post("https://graph.facebook.com/v21.0/{$accountId}/media", $requestData);
@@ -152,21 +149,21 @@ class InstagramService extends BaseSocialPlatform
         Log::info('Instagram media container response', [
             'status' => $response->status(),
             'body' => $response->json(),
-            'successful' => $response->successful()
+            'successful' => $response->successful(),
         ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             $errorData = $response->json();
             Log::error('Failed to create Instagram media container', [
                 'status' => $response->status(),
                 'error' => $errorData,
-                'body' => $response->body()
+                'body' => $response->body(),
             ]);
             throw new \Exception('Failed to create media container: ' . $response->body());
         }
 
         $responseData = $response->json();
-        if (!isset($responseData['id'])) {
+        if (! isset($responseData['id'])) {
             throw new \Exception('No media container ID in response');
         }
 
@@ -176,7 +173,7 @@ class InstagramService extends BaseSocialPlatform
     private function createCarouselContainer(SocialPost $post, $mediaFiles, string $accountId, string $token): array
     {
         Log::info('Creating Instagram carousel', [
-            'media_count' => $mediaFiles->count()
+            'media_count' => $mediaFiles->count(),
         ]);
 
         $childIds = [];
@@ -190,7 +187,7 @@ class InstagramService extends BaseSocialPlatform
                 $urlField => $mediaUrl,
                 'media_type' => $mediaType,
                 'is_carousel_item' => true,
-                'access_token' => $token
+                'access_token' => $token,
             ];
 
             $childResponse = Http::timeout(30)->post("https://graph.facebook.com/v21.0/{$accountId}/media", $requestData);
@@ -201,10 +198,10 @@ class InstagramService extends BaseSocialPlatform
                     $childIds[] = $childData['id'];
                     sleep(2); // recommended delay
                 } else {
-                    throw new \Exception("Failed to get carousel item ID: " . $childResponse->body());
+                    throw new \Exception('Failed to get carousel item ID: ' . $childResponse->body());
                 }
             } else {
-                throw new \Exception("Failed to create carousel item: " . $childResponse->body());
+                throw new \Exception('Failed to create carousel item: ' . $childResponse->body());
             }
         }
 
@@ -216,17 +213,17 @@ class InstagramService extends BaseSocialPlatform
             'media_type' => 'CAROUSEL',
             'caption' => $post->caption ?: '',
             'children' => implode(',', $childIds),
-            'access_token' => $token
+            'access_token' => $token,
         ];
 
         $carouselResponse = Http::timeout(30)->post("https://graph.facebook.com/v21.0/{$accountId}/media", $carouselData);
 
-        if (!$carouselResponse->successful()) {
+        if (! $carouselResponse->successful()) {
             throw new \Exception('Failed to create carousel container: ' . $carouselResponse->body());
         }
 
         $carouselData = $carouselResponse->json();
-        if (!isset($carouselData['id'])) {
+        if (! isset($carouselData['id'])) {
             throw new \Exception('No carousel container ID in response');
         }
 
@@ -242,11 +239,11 @@ class InstagramService extends BaseSocialPlatform
             $statusResponse = Http::get("https://graph.facebook.com/v21.0/{$containerId}?fields=status_code&access_token={$token}");
             $statusData = $statusResponse->json();
 
-            Log::info("Media container status check", [
+            Log::info('Media container status check', [
                 'try' => $i + 1,
                 'container_id' => $containerId,
                 'status_code' => $statusData['status_code'] ?? null,
-                'raw' => $statusData
+                'raw' => $statusData,
             ]);
 
             if (isset($statusData['status_code']) && $statusData['status_code'] === 'FINISHED') {
@@ -263,12 +260,12 @@ class InstagramService extends BaseSocialPlatform
     {
         Log::info('Publishing Instagram media', [
             'creation_id' => $containerId,
-            'account_id' => $accountId
+            'account_id' => $accountId,
         ]);
 
         $publishData = [
             'creation_id' => $containerId,
-            'access_token' => $token
+            'access_token' => $token,
         ];
 
         return Http::timeout(30)->post("https://graph.facebook.com/v21.0/{$accountId}/media_publish", $publishData);

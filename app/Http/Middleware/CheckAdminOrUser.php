@@ -11,7 +11,7 @@ class CheckAdminOrUser
     public function handle($request, Closure $next)
     {
         // Check if the user is an admin or a team member
-        if (getGuardName() == 'web') {
+        if (getGuardName() === 'web') {
             return $next($request);
         }
 
@@ -19,9 +19,10 @@ class CheckAdminOrUser
         if ($request->expectsJson()) {
             return response()->json([
                 'error' => true,
-                'message' => get_label('not_authorized', 'You are not authorized to perform this action.')
+                'message' => get_label('not_authorized', 'You are not authorized to perform this action.'),
             ], 403);
-        } elseif (!$request->ajax()) {
+        }
+        if (! $request->ajax()) {
             return redirect('/home')->with('error', get_label('not_authorized', 'You are not authorized to perform this action.'));
         }
         return response()->json(['error' => true, 'message' => get_label('not_authorized', 'You are not authorized to perform this action.')]);

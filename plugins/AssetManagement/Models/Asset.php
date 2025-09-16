@@ -2,16 +2,24 @@
 
 namespace Plugins\AssetManagement\Models;
 
-use Spatie\MediaLibrary\HasMedia;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Asset extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+
+    // Add status constants for better maintainability
+    public const STATUS_AVAILABLE = 'available';
+    public const STATUS_LENT = 'lent';
+    public const STATUS_NON_FUNCTIONAL = 'non-functional';
+    public const STATUS_LOST = 'lost';
+    public const STATUS_DAMAGED = 'damaged';
+    public const STATUS_UNDER_MAINTENANCE = 'under-maintenance';
 
     protected $fillable = [
         'name',
@@ -21,7 +29,7 @@ class Asset extends Model implements HasMedia
         'category_id',
         'status',
         'purchase_date',
-        'purchase_cost'
+        'purchase_cost',
     ];
 
     protected $casts = [
@@ -66,7 +74,6 @@ class Asset extends Model implements HasMedia
             ->first();
     }
 
-
     // Update isCurrentlyLent to use status
     public function isCurrentlyLent()
     {
@@ -82,21 +89,11 @@ class Asset extends Model implements HasMedia
         return $this->assignedUser;
     }
 
-
     // Scope for available assets
     public function scopeAvailable($query)
     {
         return $query->where('status', 'available');
     }
-
-
-    // Add status constants for better maintainability
-    const STATUS_AVAILABLE = 'available';
-    const STATUS_LENT = 'lent';
-    const STATUS_NON_FUNCTIONAL = 'non-functional';
-    const STATUS_LOST = 'lost';
-    const STATUS_DAMAGED = 'damaged';
-    const STATUS_UNDER_MAINTENANCE = 'under-maintenance';
 
     // Add status helper methods
     public function isAvailable()
@@ -108,8 +105,6 @@ class Asset extends Model implements HasMedia
     {
         return $this->status === self::STATUS_LENT;
     }
-
-
 
     // Add a method to get status badge class
     public function getStatusBadgeClass()

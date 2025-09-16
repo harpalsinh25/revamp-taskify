@@ -319,7 +319,9 @@
 <!-- Custom js -->
 <script>
     var csrf_token = '{{ csrf_token() }}';
-    var js_date_format = '{{ $js_date_format ?? 'YYYY-MM-DD' }}';
+
+    window.js_date_format = '{{ $js_date_format ?? 'YYYY-MM-DD' }}';
+
 </script>
 @role('admin')
 <script>

@@ -17,7 +17,7 @@ class Payment extends Model
         'amount',
         'payment_date',
         'note',
-        'created_by'
+        'created_by',
     ];
 
     public function paymentMethod()

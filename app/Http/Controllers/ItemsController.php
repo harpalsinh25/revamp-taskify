@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Workspace;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Models\Item;
-use Illuminate\Support\Facades\Session;
+use App\Models\Workspace;
 use App\Services\DeletionService;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class ItemsController extends Controller
@@ -54,12 +51,12 @@ class ItemsController extends Controller
      * "id": 36,
      * "data": {
      *           "id": 1,
-                 "title": "title",
-                 "price" : 100,
-                 "unit_id": 1,
-                 "description" : "description",
-                 "created_at": "2025-04-16 09:41:57",
-                 "updated_at": "2025-04-16 09:41:57"
+     * "title": "title",
+     * "price" : 100,
+     * "unit_id": 1,
+     * "description" : "description",
+     * "created_at": "2025-04-16 09:41:57",
+     * "updated_at": "2025-04-16 09:41:57"
      *          }
      *
      *
@@ -96,18 +93,18 @@ class ItemsController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    }
+                    },
                 ],
                 'unit_id' => 'nullable',
                 'description' => 'nullable',
             ], [
-                'price.regex' => 'The price must be a valid number with or without decimals.'
+                'price.regex' => 'The price must be a valid number with or without decimals.',
             ]);
             $formFields['price'] = str_replace(',', '', $request->input('price'));
             $formFields['workspace_id'] = $this->workspace->id;
             $res = Item::create($formFields);
             $res->load('unit');
-            
+
             if ($isApi) {
                 return formatApiResponse(
                     false,
@@ -119,37 +116,34 @@ class ItemsController extends Controller
                             'title' => $res->title,
                             'price' => format_currency($res->price, false, false),
                             'unit_id' => (string) $res->unit_id,
-                            'unit_name' => $res->unit ?  $res->unit->title :'-',
+                            'unit_name' => $res->unit ? $res->unit->title : '-',
                             'description' => $res->description,
                             'created_at' => format_date($res->created_at, true, to_format: 'Y-m-d'),
-                            'updated_at' => format_date($res->updated_at, true, to_format: 'Y-m-d')
-                        ]
+                            'updated_at' => format_date($res->updated_at, true, to_format: 'Y-m-d'),
+                        ],
                     ]
                 );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Item created successfully.', 'id' => $res->id, 'item' => $res]);
             }
+            return response()->json(['error' => false, 'message' => 'Item created successfully.', 'id' => $res->id, 'item' => $res]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
-            
             if ($isApi) {
                 return formatApiResponse(
                     true,
                     'Item couldn\'t created',
                     []
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Item couldn\'t created.']);
             }
+            return response()->json(['error' => true, 'message' => 'Item couldn\'t created.']);
         }
     }
 
     public function list()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $unit_ids = request('unit_ids');
         $where = ['items.workspace_id' => $this->workspace->id];
         $items = Item::select(
@@ -166,7 +160,7 @@ class ItemsController extends Controller
                     ->orWhere('items.id', 'like', '%' . $search . '%');
             });
         }
-        if (!empty($unit_ids)) {
+        if (! empty($unit_ids)) {
             $items = $items->whereIn('unit_id', $unit_ids);
         }
         $items->where($where);
@@ -175,7 +169,7 @@ class ItemsController extends Controller
 
         $total = $items->count();
         $items = $items->orderBy($sort, $order)
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($item) use ($canEdit, $canDelete) {
                 $actions = '';
 
@@ -191,11 +185,11 @@ class ItemsController extends Controller
                         '</button>';
                 }
 
-                $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
 
                 return [
                     'id' => $item->id,
-                'unit_id' =>  $item->unit_id,
+                    'unit_id' => $item->unit_id,
                     'unit' => $item->unit,
                     'title' => $item->title,
                     'price' => format_currency($item->price),
@@ -207,12 +201,10 @@ class ItemsController extends Controller
             });
 
         return response()->json([
-            "rows" => $items->items(),
-            "total" => $total,
+            'rows' => $items->items(),
+            'total' => $total,
         ]);
     }
-
-
 
     public function get($id)
     {
@@ -241,12 +233,12 @@ class ItemsController extends Controller
      * "id": 36,
      * "data": {
      *           "id": 1,
-                 "title": "title",
-                 "price" : 100,
-                 "unit_id": 1,
-                 "description" : "description",
-                 "created_at": "2025-04-16 09:41:57",
-                 "updated_at": "2025-04-16 09:41:57"
+     * "title": "title",
+     * "price" : 100,
+     * "unit_id": 1,
+     * "description" : "description",
+     * "created_at": "2025-04-16 09:41:57",
+     * "updated_at": "2025-04-16 09:41:57"
      *          }
      *
      *
@@ -283,7 +275,7 @@ class ItemsController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    }
+                    },
                 ],
                 'unit_id' => 'nullable',
                 'description' => 'nullable',
@@ -303,17 +295,16 @@ class ItemsController extends Controller
                             'id' => $item->id,
                             'title' => $item->title,
                             'price' => format_currency($item->price, false, false),
-                            'unit_id' => (string)$item->unit_id,
+                            'unit_id' => (string) $item->unit_id,
                             'unit_name' => $item->unit->title,
                             'description' => $item->description,
                             'created_at' => format_date($item->created_at, true, to_format: 'Y-m-d'),
-                            'updated_at' => format_date($item->updated_at, true, to_format: 'Y-m-d')
-                        ]
+                            'updated_at' => format_date($item->updated_at, true, to_format: 'Y-m-d'),
+                        ],
                     ]
                 );
-            } else {
-                return response()->json(['error' => false, 'message' => 'Item updated successfully.', 'id' => $item->id]);
             }
+            return response()->json(['error' => false, 'message' => 'Item updated successfully.', 'id' => $item->id]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -322,9 +313,8 @@ class ItemsController extends Controller
                     true,
                     'Item couldn\'t updated',
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Item couldn\'t updated.']);
             }
+            return response()->json(['error' => true, 'message' => 'Item couldn\'t updated.']);
         }
     }
     /**
@@ -358,15 +348,14 @@ class ItemsController extends Controller
      */
     public function destroy($id)
     {
-        $response = DeletionService::delete(Item::class, $id, 'Item');
-        return $response;
+        return DeletionService::delete(Item::class, $id, 'Item');
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:items,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:items,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -458,8 +447,8 @@ class ItemsController extends Controller
     public function apiList()
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $unit_ids = request('unit_ids');
         $where = ['items.workspace_id' => $this->workspace->id];
         $id = request('id', null);
@@ -479,20 +468,20 @@ class ItemsController extends Controller
                     ->orWhere('items.id', 'like', '%' . $search . '%');
             });
         }
-        if (!empty($unit_ids)) {
+        if (! empty($unit_ids)) {
             $items = $items->whereIn('unit_id', $unit_ids);
         }
         $items->where($where);
         $total = $items->count();
         if ($id) {
             $item = $items->find($id);
-            if (!$item) {
+            if (! $item) {
                 return formatApiResponse(
                     false,
                     'Item not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -505,48 +494,46 @@ class ItemsController extends Controller
                         'id' => $item->id,
                         'title' => $item->title,
                         'price' => format_currency($item->price, false, false),
-                        'unit_id' => (string)$item->unit_id,
+                        'unit_id' => (string) $item->unit_id,
                         'unit_name' => $item->unit,
                         'description' => $item->description,
                         'created_at' => format_date($item->created_at, true, to_format: 'Y-m-d'),
-                        'updated_at' => format_date($item->updated_at, true, to_format: 'Y-m-d')
-                    ]
-                ]
-            );
-        } else {
-            $items = $items->orderBy($sort, $order)->skip($offset)->take($limit)->get();
-            if ($items->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Items Not Found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $items->map(function ($item) {
-
-                return [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'price' => format_currency($item->price, false, false),
-                    'unit_id' => (string)$item->unit_id,
-                    'unit_name' => $item->unit,
-                    'description' => $item->description,
-                    'created_at' => format_date($item->created_at, true, to_format: 'Y-m-d'),
-                    'updated_at' => format_date($item->updated_at, true, to_format: 'Y-m-d')
-
-                ];
-            });
-            return formatApiResponse(
-                false,
-                'Items Retrived Successfully',
-                [
-                    'total' => $total,
-                    'data' => $data
+                        'updated_at' => format_date($item->updated_at, true, to_format: 'Y-m-d'),
+                    ],
                 ]
             );
         }
+        $items = $items->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+        if ($items->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Items Not Found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+        $data = $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'price' => format_currency($item->price, false, false),
+                'unit_id' => (string) $item->unit_id,
+                'unit_name' => $item->unit,
+                'description' => $item->description,
+                'created_at' => format_date($item->created_at, true, to_format: 'Y-m-d'),
+                'updated_at' => format_date($item->updated_at, true, to_format: 'Y-m-d'),
+
+            ];
+        });
+        return formatApiResponse(
+            false,
+            'Items Retrived Successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
 }

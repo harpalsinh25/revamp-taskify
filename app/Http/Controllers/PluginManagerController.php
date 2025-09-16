@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use Illuminate\Http\Request;
 use App\Helpers\PluginHelper;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
+use Exception;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class PluginManagerController extends Controller
 {
@@ -23,7 +20,7 @@ class PluginManagerController extends Controller
     {
         try {
             $plugin = PluginHelper::get($slug);
-            if (!$plugin) {
+            if (! $plugin) {
                 throw new Exception("Plugin not found: {$slug}");
             }
 
@@ -31,7 +28,7 @@ class PluginManagerController extends Controller
             PluginHelper::updateStatus($slug, true);
 
             // Optionally re-publish plugin assets if publish_tag exists
-            if (!empty($plugin['publish_tag'])) {
+            if (! empty($plugin['publish_tag'])) {
                 Artisan::call('vendor:publish', [
                     '--tag' => $plugin['publish_tag'],
                     '--force' => true,
@@ -56,7 +53,7 @@ class PluginManagerController extends Controller
     {
         try {
             $plugin = PluginHelper::get($slug);
-            if (!$plugin) {
+            if (! $plugin) {
                 throw new Exception("Plugin not found: {$slug}");
             }
 
@@ -75,12 +72,11 @@ class PluginManagerController extends Controller
         }
     }
 
-
     public function uninstall($slug)
     {
         try {
             $plugin = PluginHelper::get($slug);
-            if (!$plugin) {
+            if (! $plugin) {
                 throw new Exception("Plugin not found: {$slug}");
             }
 

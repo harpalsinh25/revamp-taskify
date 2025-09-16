@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use Carbon\Carbon;
-use App\Models\Workspace;
-use App\Jobs\SendEmailJob;
-use Illuminate\Http\Request;
 use App\Models\EmailTemplate;
 use App\Models\ScheduledEmail;
+use App\Models\Workspace;
+use App\Notifications\DynamicTemplateMail;
 use App\Services\DeletionService;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-use App\Notifications\DynamicTemplateMail;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EmailSendController extends Controller
 {
@@ -41,8 +39,6 @@ class EmailSendController extends Controller
         }
     }
 
-
-
     // Method: getTemplateData
     /**
      * Retrieve email template data.
@@ -54,6 +50,7 @@ class EmailSendController extends Controller
      * @group Email Management
      *
      * @urlParam id integer required The ID of the email template to retrieve. Must exist in the `email_templates` table. Example: 1
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -80,7 +77,6 @@ class EmailSendController extends Controller
      * }
      */
 
-
     public function getTemplateData($id)
     {
         $isApi = request()->get('isApi', false);
@@ -100,24 +96,21 @@ class EmailSendController extends Controller
                     false,
                     'Template data retrieved successfully!',
                     [
-                        'data' => $templateData
+                        'data' => $templateData,
                     ]
                 );
-            } else {
-                return response()->json([
-                    'subject' => $template->subject,
-                    'body' => $template->body,
-                    'placeholders' => array_values($placeholders) // Ensure we return an array
-                ]);
             }
+            return response()->json([
+                'subject' => $template->subject,
+                'body' => $template->body,
+                'placeholders' => array_values($placeholders), // Ensure we return an array
+            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Template not found'
+                'error' => 'Template not found',
             ], 404);
         }
     }
-
-
 
     // Method: preview
     /**
@@ -134,6 +127,7 @@ class EmailSendController extends Controller
      * @bodyParam placeholders array optional Key-value pairs of placeholders to replace in the subject and body. Example: "USER_NAME": "John Doe"
      * @bodyParam attachments array optional An array of files to include as attachments. Each file must not exceed the configured size limit. Example: [attachment.pdf]
      * @bodyParam is_encoded string optional Indicates if the body is base64-encoded (value: '1'). Defaults to false. Example: 1
+     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -148,11 +142,10 @@ class EmailSendController extends Controller
      * }
      */
 
-
     public function preview(Request $request)
     {
         $isApi = request()->get('isApi', false);
-        if ($request->has('is_encoded') && $request->is_encoded == '1') {
+        if ($request->has('is_encoded') && $request->is_encoded === '1') {
             $decodedContent = base64_decode($request->content);
             $request->merge(['body' => $decodedContent]);
         }
@@ -170,11 +163,11 @@ class EmailSendController extends Controller
             $attachmentPreview = '';
             if ($request->hasFile('attachments')) {
                 $files = $request->file('attachments');
-                $attachmentPreview .= "<hr><div><strong>Attachments:</strong><ul>";
+                $attachmentPreview .= '<hr><div><strong>Attachments:</strong><ul>';
                 foreach ($files as $file) {
                     $attachmentPreview .= "<li>{$file->getClientOriginalName()}</li>";
                 }
-                $attachmentPreview .= "</ul></div>";
+                $attachmentPreview .= '</ul></div>';
             }
 
             $body = preg_replace('/background-color:\s*[^;]+;?/i', '', $body);
@@ -190,18 +183,15 @@ class EmailSendController extends Controller
                     false,
                     'preview generated successfully!',
                     [
-                        'data' => $html
+                        'data' => $html,
                     ]
                 );
-            } else {
-                return response()->json(['preview' => $html]);
             }
+            return response()->json(['preview' => $html]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to generate preview'], 500);
         }
     }
-
-
 
     // Method: store
     /**
@@ -247,16 +237,15 @@ class EmailSendController extends Controller
      * }
      */
 
-
     public function store(Request $request)
     {
         // $isApi = request()->get('isApi', false);
 
-        if (!isEmailConfigured()) {
+        if (! isEmailConfigured()) {
             return response()->json(
                 [
                     'error' => true,
-                    'message' => 'Email settings are not configured. Please configure email settings to send emails.'
+                    'message' => 'Email settings are not configured. Please configure email settings to send emails.',
                 ]
             );
         }
@@ -274,7 +263,7 @@ class EmailSendController extends Controller
                 'emails' => 'required|array|min:1',
                 'emails.*' => 'email',
                 'attachments' => 'nullable|array',
-                'attachments.*' => "file|max:$maxFileSizeKb",
+                'attachments.*' => "file|max:{$maxFileSizeKb}",
                 'scheduled_at' => 'nullable|date|after:now',
             ];
 
@@ -316,7 +305,7 @@ class EmailSendController extends Controller
                 $data['placeholders'] = array_merge($data['placeholders'], [
                     'CURRENT_YEAR' => now()->year,
                     'COMPANY_TITLE' => $general_settings['company_title'] ?? 'Company Title',
-                    'COMPANY_LOGO' => '<img src="' . asset("/storage/" . (get_settings('general_settings')['full_logo'] ?? 'logos/default_full_logo.png')) . '" width="200px" alt="Company Logo">',
+                    'COMPANY_LOGO' => '<img src="' . asset('/storage/' . (get_settings('general_settings')['full_logo'] ?? 'logos/default_full_logo.png')) . '" width="200px" alt="Company Logo">',
 
                     'SUBJECT' => $subject,
                 ]);
@@ -332,7 +321,7 @@ class EmailSendController extends Controller
             }
 
             // Determine if scheduled
-            $isScheduled = !empty($data['scheduled_at']);
+            $isScheduled = ! empty($data['scheduled_at']);
             $status = $isScheduled ? 'pending' : 'sent';
             $scheduledAtUtc = $isScheduled
                 ? Carbon::parse($data['scheduled_at'], config('app.timezone', 'UTC'))->setTimezone('UTC')
@@ -368,7 +357,7 @@ class EmailSendController extends Controller
                     }
                 }
 
-                if (!$isScheduled) {
+                if (! $isScheduled) {
                     try {
                         Mail::to($email->to_email)->send(new DynamicTemplateMail($email));
                         $email->update(['status' => 'sent']);
@@ -386,7 +375,7 @@ class EmailSendController extends Controller
             // } else {
             return response()->json([
                 'error' => false,
-                'message' => $message
+                'message' => $message,
             ]);
             // }
         } catch (Exception $e) {
@@ -401,7 +390,6 @@ class EmailSendController extends Controller
         }
     }
 
-
     public function history()
     {
         try {
@@ -413,7 +401,6 @@ class EmailSendController extends Controller
             return redirect()->back()->with('error', 'Failed to load email history.');
         }
     }
-
 
     // Method: destroy
     /**
@@ -443,14 +430,11 @@ class EmailSendController extends Controller
      * }
      */
 
-
     public function destroy($id)
     {
         $email = ScheduledEmail::findOrFail($id);
 
-        $response = DeletionService::delete(ScheduledEmail::class, $email->id, 'Scheduled Email');
-
-        return $response;
+        return DeletionService::delete(ScheduledEmail::class, $email->id, 'Scheduled Email');
     }
 
     public function destroy_multiple(Request $request)
@@ -458,7 +442,6 @@ class EmailSendController extends Controller
         $validatedData = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:scheduled_emails,id',
-
 
         ]);
 
@@ -478,8 +461,6 @@ class EmailSendController extends Controller
         ]);
     }
 
-
-
     public function historyList(Request $request)
     {
         $search = $request->input('search');
@@ -489,7 +470,7 @@ class EmailSendController extends Controller
 
         $user = auth()->user();
 
-        $query = isAdminOrHasAllDataAccess() ?  $this->workspace->scheduledEmails() :  $this->user->scheduledEmails();
+        $query = isAdminOrHasAllDataAccess() ? $this->workspace->scheduledEmails() : $this->user->scheduledEmails();
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -502,8 +483,8 @@ class EmailSendController extends Controller
 
         $paginated = $query->paginate($limit)
             ->through(function ($email) {
-                $canDelete = isAdminOrHasAllDataAccess() || ($email->user_id == auth()->id());
-                $status = $email->status == 'pending' ? '<span class="badge bg-warning">Pending</span>' : ($email->status == 'sent' ? '<span class="badge bg-success">Sent</span>' :
+                $canDelete = isAdminOrHasAllDataAccess() || ($email->user_id === auth()->id());
+                $status = $email->status === 'pending' ? '<span class="badge bg-warning">Pending</span>' : ($email->status === 'sent' ? '<span class="badge bg-success">Sent</span>' :
                         '<span class="badge bg-danger">Failed</span>');
                 $actions = $canDelete ? '<button type="button"
                     class="btn delete"
@@ -533,8 +514,6 @@ class EmailSendController extends Controller
         ]);
     }
 
-
-
     // Method: apihistoryList
     /**
      * List scheduled emails or retrieve a single email.
@@ -546,6 +525,7 @@ class EmailSendController extends Controller
      * @group Email Management
      *
      * @urlParam id integer optional The ID of the scheduled email to retrieve. If provided, returns a single email. Must exist in the `scheduled_emails` table. Example: 1
+     *
      * @queryParam search string optional Filters emails by recipient email or subject. Example: john.doe
      * @queryParam sort string optional The field to sort by (id, to_email, subject, scheduled_at, created_at, updated_at). Defaults to id. Example: subject
      * @queryParam order string optional The sort order (ASC, DESC). Defaults to DESC. Example: ASC
@@ -598,7 +578,6 @@ class EmailSendController extends Controller
      * }
      */
 
-
     public function apihistoryList(Request $request, $id = null)
     {
         try {
@@ -612,7 +591,7 @@ class EmailSendController extends Controller
             ]);
 
             // Validate ID if provided
-            if ($id !== null && (!is_numeric($id) || $id <= 0)) {
+            if ($id !== null && (! is_numeric($id) || $id <= 0)) {
                 throw new \InvalidArgumentException('Invalid email ID.');
             }
 

@@ -2,34 +2,26 @@
 
 namespace App\Providers;
 
-use Carbon\Carbon;
-use App\Models\Tag;
-use App\Models\User;
 use App\Models\Client;
-use App\Models\Status;
-use App\Models\Setting;
+use App\Models\CustomField;
 use App\Models\Language;
 use App\Models\Priority;
-use App\Models\CustomField;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\View;
+use App\Models\Setting;
+use App\Models\Status;
+use App\Models\Tag;
+use App\Models\User;
 use App\Services\CustomPathGenerator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Config;
-use App\Services\CustomManifestService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use LaravelPWA\Services\ManifestService;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Cache for loaded settings to avoid repeated database queries
-     */
-    private array $settingsCache = [];
-
     /**
      * Default configuration values
      */
@@ -91,33 +83,37 @@ class AppServiceProvider extends ServiceProvider
             'calendar_name' => '',
         ],
         'ai_models' => [
-            "openrouter_endpoint" => "https://openrouter.ai/api/v1/chat/completions",
-            "openrouter_system_prompt" => "You are a helpful assistant that writes concise, professional project or task descriptions.",
-            "openrouter_temperature" => "0.7",
-            "openrouter_max_tokens" => "1024",
-            "openrouter_top_p" => "0.95",
-            "gemini_endpoint" => "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
-            "gemini_temperature" => "0.7",
-            "gemini_top_k" => "40",
-            "gemini_top_p" => "0.95",
-            "gemini_max_output_tokens" => "1024",
-            "rate_limit_per_minute" => "15",
-            "rate_limit_per_day" => "1500",
-            "max_retries" => "2",
-            "retry_delay" => "1",
-            "request_timeout" => "15",
-            "max_prompt_length" => "1000",
-            "enable_fallback" => "1",
-            "fallback_provider" => "openrouter",
-            "openrouter_api_key" => "",
-            "gemini_api_key" => "",
-            "is_active" => "gemini",
-            "openrouter_model" => "nousresearch/deephermes-3-mistral-24b-preview:free",
-            "openrouter_frequency_penalty" => "0",
-            "openrouter_presence_penalty" => "0",
-            "gemini_model" => "gemini-2.0-flash",
-        ]
+            'openrouter_endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+            'openrouter_system_prompt' => 'You are a helpful assistant that writes concise, professional project or task descriptions.',
+            'openrouter_temperature' => '0.7',
+            'openrouter_max_tokens' => '1024',
+            'openrouter_top_p' => '0.95',
+            'gemini_endpoint' => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+            'gemini_temperature' => '0.7',
+            'gemini_top_k' => '40',
+            'gemini_top_p' => '0.95',
+            'gemini_max_output_tokens' => '1024',
+            'rate_limit_per_minute' => '15',
+            'rate_limit_per_day' => '1500',
+            'max_retries' => '2',
+            'retry_delay' => '1',
+            'request_timeout' => '15',
+            'max_prompt_length' => '1000',
+            'enable_fallback' => '1',
+            'fallback_provider' => 'openrouter',
+            'openrouter_api_key' => '',
+            'gemini_api_key' => '',
+            'is_active' => 'gemini',
+            'openrouter_model' => 'nousresearch/deephermes-3-mistral-24b-preview:free',
+            'openrouter_frequency_penalty' => '0',
+            'openrouter_presence_penalty' => '0',
+            'gemini_model' => 'gemini-2.0-flash',
+        ],
     ];
+    /**
+     * Cache for loaded settings to avoid repeated database queries
+     */
+    private array $settingsCache = [];
 
     /**
      * Register any application services.
@@ -146,8 +142,6 @@ class AppServiceProvider extends ServiceProvider
         // Register PHP date format singleton
         $this->registerDateFormatSingleton();
 
-
-
         $this->loadPlugins();
     }
 
@@ -159,7 +153,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('modals', function ($view) {
             $view->with([
                 'toSelectWorkspaceUsers' => User::select('id', 'first_name', 'last_name')->get(),
-                'toSelectWorkspaceClients' => Client::select('id', 'first_name', 'last_name')->get()
+                'toSelectWorkspaceClients' => Client::select('id', 'first_name', 'last_name')->get(),
             ]);
         });
     }
@@ -169,7 +163,7 @@ class AppServiceProvider extends ServiceProvider
      */
     private function loadDatabaseSettings(): void
     {
-        if (!$this->isDatabaseConnected()) {
+        if (! $this->isDatabaseConnected()) {
             return;
         }
 
@@ -234,7 +228,7 @@ class AppServiceProvider extends ServiceProvider
      */
     private function loadAllSettings(): array
     {
-        if (!empty($this->settingsCache)) {
+        if (! empty($this->settingsCache)) {
             return $this->settingsCache;
         }
 
@@ -270,7 +264,7 @@ class AppServiceProvider extends ServiceProvider
 
         if ($settings instanceof \Illuminate\Support\Collection) {
             $settings = $settings->toArray();
-    }
+        }
 
         // In case it's stored as a JSON string (common with one-row settings table)
         if (is_string($settings)) {
@@ -283,7 +277,6 @@ class AppServiceProvider extends ServiceProvider
         return array_merge($defaults, is_array($settings) ? $settings : []);
     }
 
-
     /**
      * Process logo paths by adding storage prefix if needed.
      */
@@ -294,8 +287,8 @@ class AppServiceProvider extends ServiceProvider
         foreach ($logoKeys as $key) {
             if (
                 isset($generalSettings[$key]) &&
-                !empty($generalSettings[$key]) &&
-                !str_starts_with($generalSettings[$key], 'storage/')
+                ! empty($generalSettings[$key]) &&
+                ! str_starts_with($generalSettings[$key], 'storage/')
             ) {
                 $generalSettings[$key] = 'storage/' . $generalSettings[$key];
             }
@@ -359,7 +352,7 @@ class AppServiceProvider extends ServiceProvider
                 'secret' => $pusherSettings['pusher_app_secret'],
                 'app_id' => $pusherSettings['pusher_app_id'],
                 'options' => ['cluster' => $pusherSettings['pusher_app_cluster']],
-            ]
+            ],
         ]);
     }
 
@@ -381,7 +374,7 @@ class AppServiceProvider extends ServiceProvider
             'mail.from' => [
                 'name' => $companyTitle,
                 'address' => $emailSettings['email'],
-            ]
+            ],
         ]);
     }
 
@@ -396,7 +389,7 @@ class AppServiceProvider extends ServiceProvider
                 'secret' => $mediaStorageSettings['s3_secret'],
                 'region' => $mediaStorageSettings['s3_region'],
                 'bucket' => $mediaStorageSettings['s3_bucket'],
-            ]
+            ],
         ]);
     }
 
@@ -425,7 +418,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $pwaSettings = Setting::where('variable', 'pwa_settings')->value('value');
 
-        if (!$pwaSettings) {
+        if (! $pwaSettings) {
             return [];
         }
 
@@ -451,7 +444,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Set custom icons if logo is provided
-        if (!empty($pwaSettings['logo'])) {
+        if (! empty($pwaSettings['logo'])) {
             $this->setPwaIcons($pwaSettings['logo']);
         }
     }
@@ -465,7 +458,7 @@ class AppServiceProvider extends ServiceProvider
             '512x512' => [
                 'path' => $logoPath,
                 'sizes' => '512x512',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
         ];
 
@@ -512,12 +505,12 @@ class AppServiceProvider extends ServiceProvider
         $manifest = array_merge($manifestDefaults, $pwaSettings);
 
         // Handle logo/icon override
-        if (!empty($pwaSettings['logo']) && isset($manifest['icons'][0]) && is_array($manifest['icons'][0])) {
+        if (! empty($pwaSettings['logo']) && isset($manifest['icons'][0]) && is_array($manifest['icons'][0])) {
             $manifest['icons'][0]['path'] = $pwaSettings['logo'];
         }
 
         // Handle splash screens override
-        if (!empty($pwaSettings['splash']) && is_array($pwaSettings['splash'])) {
+        if (! empty($pwaSettings['splash']) && is_array($pwaSettings['splash'])) {
             $manifest['splash'] = array_merge($manifestDefaults['splash'] ?? [], $pwaSettings['splash']);
         }
 
@@ -527,7 +520,7 @@ class AppServiceProvider extends ServiceProvider
     // reCAPATCHA
     private function configureRecaptcha(array $generalSettings): void
     {
-        if (!empty($generalSettings['recaptcha_site_key']) && !empty($generalSettings['recaptcha_secret_key'])) {
+        if (! empty($generalSettings['recaptcha_site_key']) && ! empty($generalSettings['recaptcha_secret_key'])) {
             Config::set('captcha.sitekey', $generalSettings['recaptcha_site_key']);
             Config::set('captcha.secret', $generalSettings['recaptcha_secret_key']);
         }
@@ -546,14 +539,14 @@ class AppServiceProvider extends ServiceProvider
                     $pluginConfig = json_decode(File::get($pluginJson), true);
 
                     if (
-                        !empty($pluginConfig['enabled']) &&
-                        !empty($pluginConfig['provider'])
+                        ! empty($pluginConfig['enabled']) &&
+                        ! empty($pluginConfig['provider'])
                     ) {
                         $providerClass = $pluginConfig['provider'];
 
                         // Manually require the provider if not autoloaded
                         $providerFile = $pluginDir . '/Providers/' . class_basename(str_replace('\\', '/', $providerClass)) . '.php';
-                        if (File::exists($providerFile) && !class_exists($providerClass)) {
+                        if (File::exists($providerFile) && ! class_exists($providerClass)) {
                             require_once $providerFile;
                         }
 

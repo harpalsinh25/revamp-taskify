@@ -33,12 +33,10 @@ class Payslip extends Model
         'created_by',
     ];
 
-
     public function allowances()
     {
         return $this->belongsToMany(Allowance::class);
     }
-
 
     public function deductions()
     {
@@ -49,7 +47,8 @@ class Payslip extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    public function paymentMethod(){
-        return $this->belongsTo(PaymentMethod::class,'payment_method_id');
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
-    }
+}

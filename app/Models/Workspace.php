@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Workspace extends Model
 {
@@ -13,7 +13,7 @@ class Workspace extends Model
     protected $fillable = [
         'title',
         'user_id',
-        'is_primary'
+        'is_primary',
     ];
 
     public function users()
@@ -109,11 +109,11 @@ class Workspace extends Model
     {
         $query = $this->hasMany(EstimatesInvoice::class);
 
-        if ($type != '') {
+        if ($type !== '') {
             $query->where('type', $type);
         }
 
-        if ($status != '') {
+        if ($status !== '') {
             $query->where('status', $status);
         }
 
@@ -170,19 +170,18 @@ class Workspace extends Model
         return DB::table('lead_sources')
             ->where('workspace_id', $this->id)
             ->orWhere(function ($query) {
-            $query->whereNull('workspace_id')
-                ->where('is_default', 1);
+                $query->whereNull('workspace_id')
+                    ->where('is_default', 1);
             });
     }
-
 
     public function lead_stages()
     {
         return DB::table('lead_stages')
             ->where('workspace_id', $this->id)
             ->orWhere(function ($query) {
-            $query->whereNull('workspace_id')
-                ->where('is_default', 1);
+                $query->whereNull('workspace_id')
+                    ->where('is_default', 1);
             });
     }
 

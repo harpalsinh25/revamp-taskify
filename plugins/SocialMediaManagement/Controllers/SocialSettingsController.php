@@ -6,13 +6,10 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
-
 class SocialSettingsController extends Controller
 {
-    //
-
-    public function index(){
-
+    public function index()
+    {
         $settings = Setting::where('variable', 'social_settings')->first();
 
         $socialSettings = $settings ? json_decode($settings->value, true) : [];
@@ -20,8 +17,8 @@ class SocialSettingsController extends Controller
         return view('social-media-scheduler::social-media-scheduler.settings.index', compact('socialSettings'));
     }
 
-    public function update(Request $request){
-
+    public function update(Request $request)
+    {
         $validated = $request->validate([
             'facebook_access_token' => 'nullable|string',
             'facebook_page_id' => 'nullable|string',
@@ -35,11 +32,10 @@ class SocialSettingsController extends Controller
             'linkedin_person_id' => 'nullable|string',
             'pinterest_app_id' => 'nullable|string',
             'pinterest_app_secret' => 'nullable|string',
-            'pinterest_app_type' => 'nullable|string'
+            'pinterest_app_type' => 'nullable|string',
         ]);
 
-        try{
-
+        try {
             Setting::updateOrCreate(
                 ['variable' => 'social_settings'],
                 ['value' => json_encode($validated)]
@@ -47,11 +43,9 @@ class SocialSettingsController extends Controller
 
             return response()->json([
                 'error' => false,
-                'message' => 'Social media tokens updated successfully.'
+                'message' => 'Social media tokens updated successfully.',
             ]);
-
-
-        }catch(\Exception $e){
+        } catch(\Exception $e) {
             return response()->json([
                 'error' => true,
                 'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',

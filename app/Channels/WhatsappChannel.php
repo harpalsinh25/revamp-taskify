@@ -10,8 +10,7 @@ class WhatsappChannel
     {
         // Check if the notification has a toWhatsApp method
         if (method_exists($notification, 'toWhatsApp')) {
-            $message = $notification->toWhatsApp($notifiable);            
+            $message = $notification->toWhatsApp($notifiable);
         }
     }
 }
-

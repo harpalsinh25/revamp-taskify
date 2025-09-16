@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasPermissions;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Traits\HasPermissions;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -104,7 +104,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $meetings = $this->belongsToMany(Meeting::class)->where('workspace_id', '=', getWorkspaceId());
 
-        if ($status !== null && $status == 'ongoing') {
+        if ($status !== null && $status === 'ongoing') {
             $meetings->where('start_date_time', '<=', Carbon::now(config('app.timezone')))
                 ->where('end_date_time', '>=', Carbon::now(config('app.timezone')));
         }
@@ -119,7 +119,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(Role::class);
     }
-
 
     public function todos($status = null, $search = '')
     {
@@ -147,7 +146,6 @@ class User extends Authenticatable implements MustVerifyEmail
             });
     }
 
-
     public function contracts()
     {
         return Contract::where(function ($query) {
@@ -164,7 +162,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getresult()
     {
-        return str($this->first_name . " " . $this->last_name);
+        return str($this->first_name . ' ' . $this->last_name);
     }
 
     public function leave_requests()
@@ -205,7 +203,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $notes;
     }
 
-
     public function timesheets()
     {
         return $this->hasMany(TimeTracker::class, 'user_id', 'id')
@@ -218,10 +215,10 @@ class User extends Authenticatable implements MustVerifyEmail
             $query->where('created_by', 'u_' . $this->getKey());
         })
             ->where('workspace_id', getWorkspaceId()) // Apply workspace_id filter
-            ->when($status != '', function ($query) use ($status) {
+            ->when($status !== '', function ($query) use ($status) {
                 $query->where('status', $status);
             })
-            ->when($type != '', function ($query) use ($type) {
+            ->when($type !== '', function ($query) use ($type) {
                 $query->where('type', $type);
             });
     }
@@ -270,7 +267,6 @@ class User extends Authenticatable implements MustVerifyEmail
         // For other cases, use the original can() method
         return parent::can($ability, $arguments);
     }
-
 
     public function getlink()
     {

@@ -2,14 +2,14 @@
 
 namespace Plugins\Letter\Controllers;
 
-use Exception;
 use App\Models\Workspace;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Validation\ValidationException;
 use Plugins\Letter\Helper\LetterHelper;
 use Plugins\Letter\Models\LetterTemplate;
-use Illuminate\Validation\ValidationException;
 
 class LetterTemplateController extends Controller
 {
@@ -32,7 +32,7 @@ class LetterTemplateController extends Controller
 
         return view('letters::templates.index', [
             'templates' => $templates,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -43,7 +43,7 @@ class LetterTemplateController extends Controller
 
         return view('letters::templates.create', [
             'categories' => $categories,
-            'variables' => $variables
+            'variables' => $variables,
         ]);
     }
 
@@ -74,11 +74,11 @@ class LetterTemplateController extends Controller
                 }
                 return response()->json([
                     'error' => true,
-                    'message' => 'Template with this name already exists.'
+                    'message' => 'Template with this name already exists.',
                 ]);
             }
 
-            if (empty($formFields['content']) && !empty($formFields['category'])) {
+            if (empty($formFields['content']) && ! empty($formFields['category'])) {
                 $formFields['content'] = LetterHelper::getSampleContent($formFields['category']);
             }
 
@@ -90,7 +90,7 @@ class LetterTemplateController extends Controller
             if ($isApi) {
                 return formatApiResponse(false, 'Letter template created successfully.', [
                     'id' => $template->id,
-                    'data' => $this->formatTemplateData($template)
+                    'data' => $this->formatTemplateData($template),
                 ]);
             }
 
@@ -98,7 +98,7 @@ class LetterTemplateController extends Controller
                 'error' => false,
                 'message' => 'Letter template created successfully.',
                 'id' => $template->id,
-                'redirect_url' => route('letter-templates.index')
+                'redirect_url' => route('letter-templates.index'),
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -132,7 +132,7 @@ class LetterTemplateController extends Controller
             });
         }
 
-        if (!empty($categories)) {
+        if (! empty($categories)) {
             $query->whereIn('letter_templates.category', $categories);
         }
 
@@ -166,8 +166,8 @@ class LetterTemplateController extends Controller
             });
 
         return response()->json([
-            "rows" => $templates->items(),
-            "total" => $total,
+            'rows' => $templates->items(),
+            'total' => $total,
         ]);
     }
 
@@ -178,7 +178,7 @@ class LetterTemplateController extends Controller
 
         return view('letters::templates.show', [
             'template' => $template,
-            'variables' => $variables
+            'variables' => $variables,
         ]);
     }
 
@@ -197,7 +197,7 @@ class LetterTemplateController extends Controller
         return view('letters::templates.edit', [
             'template' => $template,
             'categories' => $categories,
-            'variables' => $variables
+            'variables' => $variables,
         ]);
     }
 
@@ -214,7 +214,7 @@ class LetterTemplateController extends Controller
                 'category' => 'required|string|max:100',
                 'description' => 'nullable|string|max:500',
                 'content' => 'required|string',
-                'is_active' => 'required|in:0,1'
+                'is_active' => 'required|in:0,1',
             ]);
 
             $template = LetterTemplate::findOrFail($id);
@@ -230,7 +230,7 @@ class LetterTemplateController extends Controller
                 }
                 return response()->json([
                     'error' => true,
-                    'message' => 'Template with this name already exists.'
+                    'message' => 'Template with this name already exists.',
                 ]);
             }
 
@@ -240,7 +240,7 @@ class LetterTemplateController extends Controller
             if ($isApi) {
                 return formatApiResponse(false, 'Letter template updated successfully', [
                     'id' => $template->id,
-                    'data' => $this->formatTemplateData($template)
+                    'data' => $this->formatTemplateData($template),
                 ]);
             }
 
@@ -248,7 +248,7 @@ class LetterTemplateController extends Controller
                 'error' => false,
                 'message' => 'Letter template updated successfully.',
                 'id' => $template->id,
-                'redirect_url' => route('letter-templates.index')
+                'redirect_url' => route('letter-templates.index'),
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -266,12 +266,12 @@ class LetterTemplateController extends Controller
             return response()->json([
                 'error' => false,
                 'message' => 'Letter template deleted successfully.',
-                'id' => $id
+                'id' => $id,
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Letter template couldn\'t be deleted.'
+                'message' => 'Letter template couldn\'t be deleted.',
             ]);
         }
     }
@@ -302,12 +302,12 @@ class LetterTemplateController extends Controller
                 'error' => false,
                 'message' => 'Letter template duplicated successfully.',
                 'id' => $duplicatedTemplate->id,
-                'template' => $duplicatedTemplate
+                'template' => $duplicatedTemplate,
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Letter template couldn\'t be duplicated.'
+                'message' => 'Letter template couldn\'t be duplicated.',
             ]);
         }
     }
@@ -325,7 +325,7 @@ class LetterTemplateController extends Controller
 
             if ($id) {
                 $template = LetterTemplate::findOrFail($id);
-                $content = $content ?: $template->content;
+                $content = $content ? $content : $template->content;
             }
 
             $processedContent = LetterHelper::processContent($content);
@@ -334,12 +334,12 @@ class LetterTemplateController extends Controller
                 'error' => false,
                 'preview' => [
                     'content' => $processedContent,
-                ]
+                ],
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Could not generate preview.'
+                'message' => 'Could not generate preview.',
             ]);
         }
     }
@@ -351,7 +351,7 @@ class LetterTemplateController extends Controller
 
         return response()->json([
             'error' => false,
-            'content' => $sampleContent
+            'content' => $sampleContent,
         ]);
     }
 
@@ -359,18 +359,18 @@ class LetterTemplateController extends Controller
     {
         try {
             $template = LetterTemplate::findOrFail($id);
-            $template->is_active = !$template->is_active;
+            $template->is_active = ! $template->is_active;
             $template->save();
 
             return response()->json([
                 'error' => false,
                 'message' => 'Template status updated successfully.',
-                'is_active' => $template->is_active
+                'is_active' => $template->is_active,
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Could not update template status.'
+                'message' => 'Could not update template status.',
             ]);
         }
     }
@@ -427,13 +427,13 @@ class LetterTemplateController extends Controller
 
         if ($id) {
             $template = $query->find($id);
-            if (!$template) {
+            if (! $template) {
                 return formatApiResponse(true, 'Letter template not found', ['total' => 0, 'data' => []]);
             }
 
             return formatApiResponse(false, 'Letter template retrieved successfully', [
                 'total' => 1,
-                'data' => $this->formatTemplateData($template, true)
+                'data' => $this->formatTemplateData($template, true),
             ]);
         }
 
@@ -449,7 +449,7 @@ class LetterTemplateController extends Controller
 
         return formatApiResponse(false, 'Letter templates retrieved successfully', [
             'total' => $total,
-            'data' => $data
+            'data' => $data,
         ]);
     }
 
@@ -462,7 +462,7 @@ class LetterTemplateController extends Controller
             'description' => $template->description,
             'is_active' => $template->is_active,
             'created_at' => format_date($template->created_at, true, to_format: 'Y-m-d'),
-            'updated_at' => format_date($template->updated_at, true, to_format: 'Y-m-d')
+            'updated_at' => format_date($template->updated_at, true, to_format: 'Y-m-d'),
         ];
 
         if ($includeContent) {
@@ -496,7 +496,7 @@ class LetterTemplateController extends Controller
                 '<i class="bx bx-trash"></i></button>';
         }
 
-        return $actions ?: '-';
+        return $actions ? $actions : '-';
     }
 
     private function handleException($e, $isApi, $action)

@@ -2,12 +2,10 @@
 
 namespace Plugins\TimeTracker\Controllers;
 
-
-use Carbon\Carbon;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Collection;
 use Plugins\TimeTracker\Models\Screenshot;
 
 class ScreenShotController extends Controller
@@ -27,7 +25,6 @@ class ScreenShotController extends Controller
      */
     public function data(Request $request)
     {
-
         $query = Screenshot::query()
             ->with('user:id,first_name,last_name')
             ->orderByDesc('captured_at');
@@ -47,7 +44,6 @@ class ScreenShotController extends Controller
 
         return response()->json([
             'data' => $screenshots->map(function ($screenshot) {
-
                 return [
                     'id' => $screenshot->id,
                     'user_name' => $screenshot->user->first_name .' '. $screenshot->user->last_name ?? 'N/A',

@@ -2,9 +2,9 @@
 
 namespace App\Notifications;
 
-use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\MailMessage;
 use App\Models\Template;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
@@ -25,7 +25,7 @@ class WorkAnniversaryWishNotification extends Notification
     public function toMail($notifiable)
     {
         $general_settings = get_settings('general_settings');
-        $full_logo = !isset($general_settings['full_logo']) || empty($general_settings['full_logo']) ? 'storage/logos/default_full_logo.png' : 'storage/' . $general_settings['full_logo'];
+        $full_logo = ! isset($general_settings['full_logo']) || empty($general_settings['full_logo']) ? 'storage/logos/default_full_logo.png' : 'storage/' . $general_settings['full_logo'];
         $company_title = $general_settings['company_title'] ?? 'Taskify';
         $company_title = $general_settings['company_title'] ?? 'Taskify';
         $siteUrl = $general_settings['site_url'] ?? request()->getSchemeAndHttpHost();
@@ -40,7 +40,7 @@ class WorkAnniversaryWishNotification extends Notification
             '{LAST_NAME}' => $notification_data['last_name'],
             '{WORK_ANNIVERSARY_COUNT}' => $notification_data['work_anniversary_count'],
             '{ORDINAL_SUFFIX}' => $notification_data['ordinal_suffix'],
-            '{COMPANY_TITLE}' => $company_title
+            '{COMPANY_TITLE}' => $company_title,
         ];
 
         $subject = filled(Arr::get($fetched_data, 'subject')) ? $fetched_data->subject : 'Happy Birthday - {COMPANY_TITLE}';
@@ -54,7 +54,7 @@ class WorkAnniversaryWishNotification extends Notification
             '{ORDINAL_SUFFIX}' => $notification_data['ordinal_suffix'],
             '{COMPANY_TITLE}' => $company_title,
             '{SITE_URL}' => $siteUrl,
-            '{CURRENT_YEAR}' => date('Y')
+            '{CURRENT_YEAR}' => date('Y'),
         ];
 
         if (filled(Arr::get($fetched_data, 'content'))) {
@@ -67,7 +67,7 @@ class WorkAnniversaryWishNotification extends Notification
 
         $emailTemplate = str_replace(array_keys($messagePlaceholders), array_values($messagePlaceholders), $emailTemplate);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->view('mail.html', ['content' => $emailTemplate, 'logo_url' => asset($full_logo)])
             ->subject($subject);
     }

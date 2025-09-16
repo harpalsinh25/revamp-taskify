@@ -4,11 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Plugins\TimeTracker\Controllers\DashboardController;
 use Plugins\TimeTracker\Controllers\ManualTimeController;
 use Plugins\TimeTracker\Controllers\ScreenShotController;
-use Plugins\TimeTracker\Controllers\TimeTrackerController;
 use Plugins\TimeTracker\Controllers\TimeAndAttendanceController;
+use Plugins\TimeTracker\Controllers\TimeTrackerController;
 
 Route::middleware(['web', 'auth'])->prefix('timetracker')->group(function () {
-
     // Main Time Tracker Routes
     Route::get('/', [TimeTrackerController::class, 'index'])->name('timetracker.index');
     Route::get('/dashboard-data', [DashboardController::class, 'index'])->name('timetracker.dashboard.data');
@@ -43,7 +42,6 @@ Route::middleware(['web', 'auth'])->prefix('timetracker')->group(function () {
     });
 
     Route::get('/clear-timetracker-data', function () {
-
         \Plugins\TimeTracker\Models\Screenshot::truncate();
         \Plugins\TimeTracker\Models\TimeTrackerActivityLog::truncate();
 

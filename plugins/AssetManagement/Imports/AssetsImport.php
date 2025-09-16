@@ -3,14 +3,14 @@
 namespace Plugins\AssetManagement\Imports;
 
 use Carbon\Carbon;
-use Maatwebsite\Excel\Row;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\OnEachRow;
-use Plugins\AssetManagement\Models\Asset;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Plugins\AssetManagement\Models\AssetHistory;
+use Maatwebsite\Excel\Row;
+use Plugins\AssetManagement\Models\Asset;
 use Plugins\AssetManagement\Models\AssetCategory;
+use Plugins\AssetManagement\Models\AssetHistory;
 
 class AssetsImport implements OnEachRow, WithHeadingRow
 {
@@ -20,9 +20,8 @@ class AssetsImport implements OnEachRow, WithHeadingRow
     {
         $rowData = $row->toArray();
 
-
         // Normalize purchase_date to Y-m-d if present
-        if (!empty($rowData['purchase_date'])) {
+        if (! empty($rowData['purchase_date'])) {
             try {
                 $rowData['purchase_date'] = Carbon::parse($rowData['purchase_date'])->format('Y-m-d');
             } catch (\Exception $e) {
@@ -33,7 +32,6 @@ class AssetsImport implements OnEachRow, WithHeadingRow
                 return; // skip this row if date is bad
             }
         }
-
 
         $rules = [
             'name' => 'required|string|max:255',
@@ -59,7 +57,7 @@ class AssetsImport implements OnEachRow, WithHeadingRow
         // Find or create category by name
         $category = AssetCategory::where('name', $rowData['category'])->first();
 
-        if (!$category) {
+        if (! $category) {
             $category = AssetCategory::create([
                 'name' => $rowData['category'],
             ]);
@@ -85,7 +83,7 @@ class AssetsImport implements OnEachRow, WithHeadingRow
             'notes' => 'Asset created through bulk import',
         ]);
 
-        if (!empty($rowData['asset_image_url'])) {
+        if (! empty($rowData['asset_image_url'])) {
             $asset->addMediaFromUrl($rowData['asset_image_url'])
                 ->toMediaCollection('asset-media');
         }

@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Priority;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class PriorityController extends Controller
 {
@@ -21,7 +19,6 @@ class PriorityController extends Controller
     {
         return view('priority.list');
     }
-
 
     /**
      * Create a new priority.
@@ -67,7 +64,7 @@ class PriorityController extends Controller
         try {
             $formFields = $request->validate([
                 'title' => ['required', 'string', 'max:255'],
-                'color' => ['required', 'string']
+                'color' => ['required', 'string'],
             ]);
 
             $formFields['slug'] = generateUniqueSlug($request->title, Priority::class);
@@ -84,13 +81,13 @@ class PriorityController extends Controller
                         'name' => $priority->title,
                     ],
                     'id' => $priority->id,
-                    'priority' => $priority
+                    'priority' => $priority,
                 ]);
             }
 
             return response()->json([
                 'error' => true,
-                'message' => "Priority couldn't be created."
+                'message' => "Priority couldn't be created.",
             ], 500);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
@@ -98,11 +95,10 @@ class PriorityController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => "Priority couldn't be created."
+                'message' => "Priority couldn't be created.",
             ], 500);
         }
     }
-
 
     public function list()
     {
@@ -125,7 +121,7 @@ class PriorityController extends Controller
         $canDelete = checkPermission('delete_priorities');
 
         $priority = $priority
-            ->paginate(request("limit"))
+            ->paginate(request('limit'))
             ->through(function ($priority) use ($canEdit, $canDelete) {
                 $actions = '';
 
@@ -140,7 +136,7 @@ class PriorityController extends Controller
                         '<i class="bx bx-trash text-danger mx-1"></i>' .
                         '</button>';
                 }
-                $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
                 return [
                     'id' => $priority->id,
                     'title' => $priority->title,
@@ -152,11 +148,10 @@ class PriorityController extends Controller
             });
 
         return response()->json([
-            "rows" => $priority->items(),
-            "total" => $total,
+            'rows' => $priority->items(),
+            'total' => $total,
         ]);
     }
-
 
     /**
      * List or search priorities.
@@ -224,13 +219,13 @@ class PriorityController extends Controller
 
         if ($id) {
             $priority = $priorityQuery->find($id);
-            if (!$priority) {
+            if (! $priority) {
                 return formatApiResponse(
                     false,
                     'Priority not found',
                     [
                         'total' => 0,
-                        'data' => []
+                        'data' => [],
                     ]
                 );
             }
@@ -246,48 +241,47 @@ class PriorityController extends Controller
                             'color' => $priority->color,
                             'created_at' => format_date($priority->created_at, to_format: 'Y-m-d'),
                             'updated_at' => format_date($priority->updated_at, to_format: 'Y-m-d'),
-                        ]
-                    ]
-                ]
-            );
-        } else {
-            $total = $priorityQuery->count(); // Get total count before applying offset and limit
-
-            $priorities = $priorityQuery->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-
-            if ($priorities->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Priorities not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-
-            $data = $priorities->map(function ($priority) {
-                return [
-                    'id' => $priority->id,
-                    'title' => $priority->title,
-                    'color' => $priority->color,
-                    'created_at' => format_date($priority->created_at, to_format: 'Y-m-d'),
-                    'updated_at' => format_date($priority->updated_at, to_format: 'Y-m-d'),
-                ];
-            });
-
-            return formatApiResponse(
-                false,
-                'Priorities retrieved successfully',
-                [
-                    'total' => $total,
-                    'data' => $data
+                        ],
+                    ],
                 ]
             );
         }
+        $total = $priorityQuery->count(); // Get total count before applying offset and limit
+
+        $priorities = $priorityQuery->orderBy($sort, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        if ($priorities->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Priorities not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+
+        $data = $priorities->map(function ($priority) {
+            return [
+                'id' => $priority->id,
+                'title' => $priority->title,
+                'color' => $priority->color,
+                'created_at' => format_date($priority->created_at, to_format: 'Y-m-d'),
+                'updated_at' => format_date($priority->updated_at, to_format: 'Y-m-d'),
+            ];
+        });
+
+        return formatApiResponse(
+            false,
+            'Priorities retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
 
     /**
@@ -333,21 +327,20 @@ class PriorityController extends Controller
             return response()->json([
                 'error' => false,
                 'message' => 'Priority retrieved successfully.',
-                'priority' => $priority
+                'priority' => $priority,
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Priority not found.'
+                'message' => 'Priority not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Could not retrieve priority.'
+                'message' => 'Could not retrieve priority.',
             ], 500);
         }
     }
-
 
     /**
      * Update an existing priority.
@@ -395,7 +388,7 @@ class PriorityController extends Controller
             $formFields = $request->validate([
                 'id' => ['required', 'integer', 'exists:priorities,id'],
                 'title' => ['required', 'string', 'max:255'],
-                'color' => ['required', 'string']
+                'color' => ['required', 'string'],
             ]);
 
             $priority = Priority::findOrFail($request->id);
@@ -407,13 +400,13 @@ class PriorityController extends Controller
                     'message' => 'Priority updated successfully.',
                     'id' => $priority->id,
                     'title' => $priority->title,
-                    'type' => 'priority'
+                    'type' => 'priority',
                 ]);
             }
 
             return response()->json([
                 'error' => true,
-                'message' => "Priority couldn't be updated."
+                'message' => "Priority couldn't be updated.",
             ], 500);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
@@ -421,12 +414,12 @@ class PriorityController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Priority not found.'
+                'message' => 'Priority not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => "Priority couldn't be updated."
+                'message' => "Priority couldn't be updated.",
             ], 500);
         }
     }
@@ -477,7 +470,7 @@ class PriorityController extends Controller
             if ($data->error) {
                 return response()->json([
                     'error' => true,
-                    'message' => $data->message
+                    'message' => $data->message,
                 ]);
             }
 
@@ -486,28 +479,27 @@ class PriorityController extends Controller
                 'message' => 'Priority deleted successfully.',
                 'id' => $id,
                 'title' => $priority->title,
-                'type' => 'priority'
+                'type' => 'priority',
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Priority not found.'
+                'message' => 'Priority not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => "Priority couldn't be deleted."
+                'message' => "Priority couldn't be deleted.",
             ], 500);
         }
     }
-
 
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer'
+            'ids.*' => 'integer',
         ]);
 
         $ids = $validatedData['ids'];
@@ -518,12 +510,12 @@ class PriorityController extends Controller
 
         // Perform deletion using validated IDs
         foreach ($ids as $id) {
-            if ($id == 0) {
+            if ($id === 0) {
                 $defaultPriorityIds[] = $id;
             } else {
                 // Update related records
                 $priority = Priority::find($id);
-                if($priority){
+                if ($priority) {
                     $priority->projects(false)->update(['priority_id' => null]);
                     $priority->tasks(false)->update(['priority_id' => null]);
 
@@ -538,13 +530,11 @@ class PriorityController extends Controller
 
         // Respond based on whether default priorities were included in the request
         if (count($defaultPriorityIds) > 0) {
-            if (count($ids) == 1) {
+            if (count($ids) === 1) {
                 return response()->json(['error' => true, 'message' => 'Default priority cannot be deleted.']);
-            } else {
-                return response()->json(['error' => false, 'message' => 'Priority/Priorities deleted successfully except default.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
             }
-        } else {
-            return response()->json(['error' => false, 'message' => 'Priority/Priorities deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
+            return response()->json(['error' => false, 'message' => 'Priority/Priorities deleted successfully except default.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
         }
+        return response()->json(['error' => false, 'message' => 'Priority/Priorities deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
     }
 }

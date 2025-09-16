@@ -2,11 +2,11 @@
 
 namespace Plugins\AssetManagement\Controllers;
 
-use Illuminate\Http\Request;
-use Plugins\AssetManagement\Models\AssetCategory;
 use App\Services\DeletionService;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Validation\ValidationException;
+use Plugins\AssetManagement\Models\AssetCategory;
 
 class AssetsCategoryController extends Controller
 {
@@ -118,8 +118,8 @@ class AssetsCategoryController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->orWhere('description', 'like', "%$search%");
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 

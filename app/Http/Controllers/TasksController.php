@@ -2,39 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use PDO;
-use Exception;
-use Carbon\Carbon;
-use App\Models\Task;
-use App\Models\User;
-use App\Models\Client;
-use App\Models\Status;
-use App\Models\Comment;
-use App\Models\Project;
-use App\Models\Priority;
-use App\Models\TaskList;
-use App\Models\Workspace;
-use App\Models\CustomField;
-use Illuminate\Support\Arr;
-use App\Imports\TasksImport;
-use Illuminate\Http\Request;
-use App\Models\RecurringTask;
-use App\Models\CommentAttachment;
-use App\Services\DeletionService;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
-use App\Models\UserClientPreference;
-use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Helpers\FileValidationHelper;
+use App\Imports\TasksImport;
+use App\Models\Client;
+use App\Models\Comment;
+use App\Models\CommentAttachment;
+use App\Models\CustomField;
+use App\Models\Priority;
+use App\Models\Project;
+use App\Models\Status;
+use App\Models\Task;
+use App\Models\TaskList;
+use App\Models\User;
+use App\Models\UserClientPreference;
+use App\Models\Workspace;
+use App\Services\DeletionService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Request as FacadesRequest;
 
 class TasksController extends Controller
 {
@@ -59,7 +52,7 @@ class TasksController extends Controller
     public function index(Request $request, $id = '')
     {
         $isFavorites = request()->get('favorite', false);
-        $project = (object)[];
+        $project = (object) [];
         if ($id) {
             $project = Project::findOrFail($id);
             $tasks = isAdminOrHasAllDataAccess() ? $project->tasks : $this->user->project_tasks($id);
@@ -155,7 +148,7 @@ class TasksController extends Controller
     public function store(Request $request)
     {
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
+        if ($request->input('priority_id') === 0) {
             $request->merge(['priority_id' => null]);
         }
         $rules = [
@@ -167,7 +160,7 @@ class TasksController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('due_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -179,7 +172,7 @@ class TasksController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateKey: 'due_date');
-                    if (!empty($errors['due_date'])) {
+                    if (! empty($errors['due_date'])) {
                         foreach ($errors['due_date'] as $error) {
                             $fail($error);
                         }
@@ -211,7 +204,7 @@ class TasksController extends Controller
             'task_list_id' => 'nullable|exists:task_lists,id',
         ];
         $messages = [
-            'status_id.required' => 'The status field is required.'
+            'status_id.required' => 'The status field is required.',
         ];
         try {
             $formFields = $request->validate($rules, $messages);
@@ -231,7 +224,7 @@ class TasksController extends Controller
                 $formFields['project_id'] = $project_id;
                 $userIds = $request->input('user_id', []);
                 unset($formFields['user_id']);
-                $clientCanDiscuss = isAdminOrHasAllDataAccess() && $request->filled('clientCanDiscuss') && $request->input('clientCanDiscuss') == 'on' ? 1 : 0;
+                $clientCanDiscuss = isAdminOrHasAllDataAccess() && $request->filled('clientCanDiscuss') && $request->input('clientCanDiscuss') === 'on' ? 1 : 0;
                 $formFields['client_can_discuss'] = $clientCanDiscuss;
                 $new_task = Task::create($formFields);
                 $task_id = $new_task->id;
@@ -243,20 +236,20 @@ class TasksController extends Controller
                     'changed_at' => now(),
                 ]);
                 // Set creator as a participant automatically if !isAdminOrHasAllDataAccess
-                if (!isAdminOrHasAllDataAccess()) {
-                    if ($this->guard == 'web' && !in_array($this->user->id, $userIds)) {
+                if (! isAdminOrHasAllDataAccess()) {
+                    if ($this->guard === 'web' && ! in_array($this->user->id, $userIds)) {
                         array_splice($userIds, 0, 0, $this->user->id);
                     }
                 }
                 $task->users()->attach($userIds);
-                if ($request->has('is_favorite') && $request->input('is_favorite') == 1) {
+                if ($request->has('is_favorite') && $request->input('is_favorite') === 1) {
                     $this->user->favorites()->create([
                         'favoritable_type' => Task::class,
                         'favoritable_id' => $task_id,
                     ]);
                 }
                 // Check Task Reminder is On than add the reminder
-                if (isset($formFields['enable_reminder']) && $formFields['enable_reminder'] == 'on') {
+                if (isset($formFields['enable_reminder']) && $formFields['enable_reminder'] === 'on') {
                     $task->reminders()->create([
                         'frequency_type' => $formFields['frequency_type'],
                         'day_of_week' => $formFields['day_of_week'],
@@ -265,7 +258,7 @@ class TasksController extends Controller
                     ]);
                 }
                 // Check Task Recurring Task is On than add the recurring task
-                if (isset($formFields['enable_recurring_task']) && $formFields['enable_recurring_task'] == 'on') {
+                if (isset($formFields['enable_recurring_task']) && $formFields['enable_recurring_task'] === 'on') {
                     $task->recurringTask()->create([
                         'frequency' => $formFields['recurrence_frequency'],
                         'day_of_week' => $formFields['recurrence_day_of_week'],
@@ -285,18 +278,17 @@ class TasksController extends Controller
 
                         $task->customFields()->create([
                             'custom_field_id' => $fieldId,
-                            'value' => $value
+                            'value' => $value,
                         ]);
                     }
                 }
-
 
                 $notification_data = [
                     'type' => 'task',
                     'type_id' => $task_id,
                     'type_title' => $task->title,
                     'access_url' => 'tasks/information/' . $task->id,
-                    'action' => 'assigned'
+                    'action' => 'assigned',
                 ];
                 // $clientIds = $project->clients()->pluck('clients.id')->toArray();
                 // $recipients = array_merge(
@@ -318,19 +310,18 @@ class TasksController extends Controller
                         'id' => $new_task->id,
                         'parent_id' => $project_id,
                         'parent_type' => 'project',
-                        'data' => formatTask($task)
+                        'data' => formatTask($task),
                     ]
                 );
-            } else {
-                return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
+            return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the task.' . $e->getMessage()
+                'message' => 'An error occurred while creating the task.' . $e->getMessage(),
             ], 500);
         }
     }
@@ -342,18 +333,18 @@ class TasksController extends Controller
             'entity' => 'tasks',
             'form_action' => url('tasks/process-bulk-upload'),
             'sample_file_url' => $sampleFileUrl,
-            'help_url' => $helpUrl
+            'help_url' => $helpUrl,
         ]);
     }
     public function importBulkTasks(Request $request)
     {
         // Validate file type (ensure it's Excel or CSV)
         $request->validate([
-            'bulk_file' => 'required|mimes:xlsx,xls,csv'
+            'bulk_file' => 'required|mimes:xlsx,xls,csv',
         ]);
         try {
             // Initialize the import class
-            $import = new TasksImport;
+            $import = new TasksImport();
             // Use the import class for bulk upload
             Excel::import($import, $request->file('bulk_file'));
             // Check if there are any validation errors
@@ -361,23 +352,23 @@ class TasksController extends Controller
             $validationErrors = array_filter($validationErrors, function ($value) {
                 return $value !== null && $value !== '';
             });
-            if (!empty($validationErrors)) {
+            if (! empty($validationErrors)) {
                 // Return validation errors if any
                 return response()->json([
                     'error' => true,
                     'message' => 'Validation errors occurred.',
-                    'validation_errors' => $validationErrors
+                    'validation_errors' => $validationErrors,
                 ], 400);
             }
             // If no validation errors, return success message
             return response()->json([
                 'error' => false,
-                'message' => 'Tasks imported successfully.'
+                'message' => 'Tasks imported successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while importing tasks: ' . $e->getMessage()
+                'message' => 'An error occurred while importing tasks: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -385,6 +376,7 @@ class TasksController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -407,12 +399,12 @@ class TasksController extends Controller
                 'field_id' => $fieldable->custom_field_id,
                 'field_label' => $fieldable->customField->field_label,
                 'field_type' => $fieldable->customField->field_type,
-                'value' => $fieldable->value
+                'value' => $fieldable->value,
             ];
         }
         // dd($formattedCustomFields);
         $task->formatted_custom_fields = $formattedCustomFields;
-        return response()->json(['error' => false, 'task' => $task, 'project' => $project,]);
+        return response()->json(['error' => false, 'task' => $task, 'project' => $project]);
     }
     /**
      * Update an existing task.
@@ -493,7 +485,7 @@ class TasksController extends Controller
     public function update(Request $request)
     {
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
+        if ($request->input('priority_id') === 0) {
             $request->merge(['priority_id' => null]);
         }
         $rules = [
@@ -506,7 +498,7 @@ class TasksController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $endDate = request()->input('due_date');
                     $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -518,7 +510,7 @@ class TasksController extends Controller
                 function ($attribute, $value, $fail) use ($isApi) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateKey: 'due_date');
-                    if (!empty($errors['due_date'])) {
+                    if (! empty($errors['due_date'])) {
                         foreach ($errors['due_date'] as $error) {
                             $fail($error);
                         }
@@ -548,7 +540,7 @@ class TasksController extends Controller
             'task_list_id' => 'nullable|exists:task_lists,id',
         ];
         $messages = [
-            'status_id.required' => 'The status field is required.'
+            'status_id.required' => 'The status field is required.',
         ];
         try {
             $request->validate($rules, $messages);
@@ -557,9 +549,9 @@ class TasksController extends Controller
             $task = Task::findOrFail($id);
             $currentStatusId = $task->status_id;
             // Check if the status has changed
-            if ($currentStatusId != $request->input('status_id')) {
+            if ($currentStatusId !== $request->input('status_id')) {
                 $status = Status::findOrFail($request->input('status_id'));
-                if (!canSetStatus($status)) {
+                if (! canSetStatus($status)) {
                     return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
                 }
                 $oldStatus = Status::findOrFail($currentStatusId);
@@ -568,7 +560,7 @@ class TasksController extends Controller
                     'new_color' => $status->color,
                     'previous_status' => $oldStatus->title,
                     'old_color' => $oldStatus->color,
-                    'changed_at' => now()
+                    'changed_at' => now(),
                 ]);
             }
             $formFieldsToUpdate = [
@@ -594,7 +586,7 @@ class TasksController extends Controller
                 $formFieldsToUpdate['due_date'] = null;
             }
             $clientCanDiscuss = isAdminOrHasAllDataAccess()
-                ? ($request->input('clientCanDiscuss') == 'on' ? 1 : 0)
+                ? ($request->input('clientCanDiscuss') === 'on' ? 1 : 0)
                 : $task->client_can_discuss;
             $formFieldsToUpdate['client_can_discuss'] = $clientCanDiscuss;
             $userIds = $request->input('user_id', []);
@@ -611,7 +603,7 @@ class TasksController extends Controller
                         'day_of_month' => $request->input('frequency_type') === 'monthly' ? $request->input('day_of_month') : null,
                         'time_of_day' => $request->input('time_of_day'),
                         'is_active' => 1,
-                        "last_sent_at" => null,
+                        'last_sent_at' => null,
                     ]);
                 } else {
                     // Create new reminder
@@ -620,7 +612,7 @@ class TasksController extends Controller
                         'day_of_week' => $request->input('frequency_type') === 'weekly' ? $request->input('day_of_week') : null,
                         'day_of_month' => $request->input('frequency_type') === 'monthly' ? $request->input('day_of_month') : null,
                         'time_of_day' => $request->input('time_of_day'),
-                        'is_active' => 1
+                        'is_active' => 1,
                     ]);
                 }
             } else {
@@ -661,7 +653,6 @@ class TasksController extends Controller
             $newUsers = array_diff($userIds, $currentUsers);
             // Prepare notification data for new users
 
-
             if ($request->has('custom_fields')) {
                 foreach ($request->custom_fields as $field_id => $value) {
                     // Handle checkboxes (arrays)
@@ -679,19 +670,18 @@ class TasksController extends Controller
                     } else {
                         $task->customFields()->create([
                             'custom_field_id' => $field_id,
-                            'value' => $value
+                            'value' => $value,
                         ]);
                     }
                 }
             }
-
 
             $notification_data = [
                 'type' => 'task',
                 'type_id' => $id,
                 'type_title' => $task->title,
                 'access_url' => 'tasks/information/' . $task->id,
-                'action' => 'assigned'
+                'action' => 'assigned',
             ];
             // Notify only the new users
             $recipients = array_map(function ($userId) {
@@ -699,7 +689,7 @@ class TasksController extends Controller
             }, $newUsers);
             // Process notifications for new users
             processNotifications($notification_data, $recipients);
-            if ($currentStatusId != $request->input('status_id')) {
+            if ($currentStatusId !== $request->input('status_id')) {
                 $currentStatus = Status::findOrFail($currentStatusId);
                 $newStatus = Status::findOrFail($request->input('status_id'));
                 $notification_data = [
@@ -711,7 +701,7 @@ class TasksController extends Controller
                     'old_status' => $currentStatus->title,
                     'new_status' => $newStatus->title,
                     'access_url' => 'tasks/information/' . $id,
-                    'action' => 'status_updated'
+                    'action' => 'status_updated',
                 ];
                 $currentRecipients = array_merge(
                     array_map(function ($userId) {
@@ -731,7 +721,7 @@ class TasksController extends Controller
                     'id' => $task->id,
                     'parent_id' => $task->project->id,
                     'parent_type' => 'project',
-                    'data' => formatTask($task)
+                    'data' => formatTask($task),
                 ]
             );
         } catch (ValidationException $e) {
@@ -740,7 +730,7 @@ class TasksController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the task.' . $e->getMessage()
+                'message' => 'An error occurred while creating the task.' . $e->getMessage(),
             ], 500);
         }
     }
@@ -755,7 +745,7 @@ class TasksController extends Controller
                 function ($attribute, $value, $fail) {
                     $endDate = request()->input('due_date');
                     $errors = validate_date_format_and_order($value, $endDate);
-                    if (!empty($errors['start_date'])) {
+                    if (! empty($errors['start_date'])) {
                         foreach ($errors['start_date'] as $error) {
                             $fail($error);
                         }
@@ -767,7 +757,7 @@ class TasksController extends Controller
                 function ($attribute, $value, $fail) {
                     $startDate = request()->input('start_date');
                     $errors = validate_date_format_and_order($startDate, $value, endDateKey: 'due_date');
-                    if (!empty($errors['due_date'])) {
+                    if (! empty($errors['due_date'])) {
                         foreach ($errors['due_date'] as $error) {
                             $fail($error);
                         }
@@ -792,7 +782,7 @@ class TasksController extends Controller
                     'id' => $task->id,
                     'parent_id' => $task->project->id,
                     'parent_type' => 'project',
-                    'data' => formatTask($task)
+                    'data' => formatTask($task),
                 ]
             );
         } catch (ValidationException $e) {
@@ -871,23 +861,22 @@ class TasksController extends Controller
                     'title' => $task->title,
                     'parent_id' => $task->project_id,
                     'parent_type' => 'project',
-                    'data' => []
+                    'data' => [],
                 ]
             );
-        } else {
-            return formatApiResponse(
-                true,
-                'Task not found.',
-                []
-            );
         }
+        return formatApiResponse(
+            true,
+            'Task not found.',
+            []
+        );
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:tasks,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:tasks,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedTasks = [];
@@ -941,11 +930,11 @@ class TasksController extends Controller
         $where = [];
         if ($id) {
             [$belongs_to, $belongs_to_id] = explode('_', $id);
-            if ($belongs_to == 'project') {
+            if ($belongs_to === 'project') {
                 $project = Project::find($belongs_to_id);
                 $tasks = $project->tasks();
             } else {
-                $userOrClient = $belongs_to == 'user' ? User::find($belongs_to_id) : Client::find($belongs_to_id);
+                $userOrClient = $belongs_to === 'user' ? User::find($belongs_to_id) : Client::find($belongs_to_id);
                 $tasks = isAdminOrHasAllDataAccess($belongs_to, $belongs_to_id) ? $this->workspace->tasks() : $userOrClient->tasks();
             }
         } else {
@@ -953,19 +942,19 @@ class TasksController extends Controller
         }
 
         // Apply filters
-        if (!empty($user_ids)) {
-            $tasks->whereHas('users', fn($query) => $query->whereIn('users.id', $user_ids));
+        if (! empty($user_ids)) {
+            $tasks->whereHas('users', fn ($query) => $query->whereIn('users.id', $user_ids));
         }
-        if (!empty($client_ids)) {
-            $tasks->whereHas('project', fn($query) => $query->whereHas('clients', fn($query) => $query->whereIn('clients.id', $client_ids)));
+        if (! empty($client_ids)) {
+            $tasks->whereHas('project', fn ($query) => $query->whereHas('clients', fn ($query) => $query->whereIn('clients.id', $client_ids)));
         }
-        if (!empty($project_ids)) {
+        if (! empty($project_ids)) {
             $tasks->whereIn('project_id', $project_ids);
         }
-        if (!empty($status_ids)) {
+        if (! empty($status_ids)) {
             $tasks->whereIn('status_id', $status_ids);
         }
-        if (!empty($priority_ids)) {
+        if (! empty($priority_ids)) {
             $tasks->whereIn('priority_id', $priority_ids);
         }
         if ($date_between_from && $date_between_to) {
@@ -982,7 +971,7 @@ class TasksController extends Controller
             $tasks->whereIn('tasks.id', $favoriteTaskIds);
         }
         if ($search) {
-            $tasks->where(fn($query) => $query->where('title', 'like', '%' . $search . '%')
+            $tasks->where(fn ($query) => $query->where('title', 'like', '%' . $search . '%')
                 ->orWhere('tasks.id', 'like', '%' . $search . '%'));
         }
         if ($task_parent_id === '') {
@@ -1014,7 +1003,7 @@ class TasksController extends Controller
         });
 
         // Paginate and format tasks
-        $tasks = $tasks->leftJoin('pinned', fn($join) => $join->on('pinned.pinnable_id', '=', 'tasks.id')
+        $tasks = $tasks->leftJoin('pinned', fn ($join) => $join->on('pinned.pinnable_id', '=', 'tasks.id')
             ->where('pinned.pinnable_type', '=', Task::class))
             ->select('tasks.*', 'pinned.id as pinned_id')
             ->orderByDesc('pinned.id')
@@ -1024,90 +1013,89 @@ class TasksController extends Controller
                 // Status options
                 $statusOptions = '';
                 foreach ($statuses as $status) {
-                $disabled = canSetStatus($status) ? '' : 'disabled';
-                    $selected = $task->status_id == $status->id ? 'selected' : '';
+                    $disabled = canSetStatus($status) ? '' : 'disabled';
+                    $selected = $task->status_id === $status->id ? 'selected' : '';
                     $statusOptions .= "<option value='{$status->id}' class='badge bg-label-{$status->color}' {$selected} {$disabled}>{$status->title}</option>";
                 }
 
-            // Priority options
-            $priorityOptions = "<option value='' class='badge bg-label-secondary'>-</option>";
+                // Priority options
+                $priorityOptions = "<option value='' class='badge bg-label-secondary'>-</option>";
                 foreach ($priorities as $priority) {
-                    $selectedPriority = $task->priority_id == $priority->id ? 'selected' : '';
+                    $selectedPriority = $task->priority_id === $priority->id ? 'selected' : '';
                     $priorityOptions .= "<option value='{$priority->id}' class='badge bg-label-{$priority->color}' {$selectedPriority}>{$priority->title}</option>";
                 }
 
-            // Actions
-            $actions = '';
+                // Actions
+                $actions = '';
                 if ($canEdit) {
-                $actions .= '<a href="javascript:void(0);" class="edit-task" data-id="' . $task->id . '" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
+                    $actions .= '<a href="javascript:void(0);" class="edit-task" data-id="' . $task->id . '" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
                 }
                 if ($canDelete) {
-                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '"><i class="bx bx-trash text-danger mx-1"></i></button>';
+                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '"><i class="bx bx-trash text-danger mx-1"></i></button>';
                 }
                 if ($canCreate) {
-                $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '"><i class="bx bx-copy text-warning mx-2"></i></a>';
+                    $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '"><i class="bx bx-copy text-warning mx-2"></i></a>';
                 }
-            $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $task->id . '" title="' . get_label('quick_view', 'Quick View') . '"><i class="bx bx-info-circle mx-3"></i></a>';
-                $actions = $actions ?: '-';
+                $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $task->id . '" title="' . get_label('quick_view', 'Quick View') . '"><i class="bx bx-info-circle mx-3"></i></a>';
+                $actions = $actions ? $actions : '-';
 
-            // Users HTML
-            $userHtml = '';
-            if (!empty($task->users) && $task->users->count() > 0) {
+                // Users HTML
+                $userHtml = '';
+                if (! empty($task->users) && $task->users->count() > 0) {
                     $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($task->users as $user) {
-                    $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}' target='_blank'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                        $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}' target='_blank'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                     }
 
-                $userHtml .= '</ul>';
+                    $userHtml .= '</ul>';
                 } else {
-                $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
-            }
+                    $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                }
 
-            // Clients HTML
-            $clientHtml = '';
-            if (!empty($task->project->clients) && $task->project->clients->count() > 0) {
+                // Clients HTML
+                $clientHtml = '';
+                if (! empty($task->project->clients) && $task->project->clients->count() > 0) {
                     $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                     foreach ($task->project->clients as $client) {
-                    $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                        $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                     }
                     $clientHtml .= '</ul>';
                 } else {
                     $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                 }
 
-            // Favorite and pinned status
-            $isFavorite = getFavoriteStatus($task->id, Task::class);
+                // Favorite and pinned status
+                $isFavorite = getFavoriteStatus($task->id, Task::class);
                 $isFavoriteProject = getFavoriteStatus($task->project->id);
-            $isPinned = getPinnedStatus($task->id, Task::class);
+                $isPinned = getPinnedStatus($task->id, Task::class);
 
-            // Custom fields
-            $customFieldValues = [];
-            foreach ($task->customFieldValues as $fieldValue) {
-                $value = $fieldValue->value;
-                $decoded = json_decode($value, true);
-                if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
-                    array_walk_recursive($decoded, fn(&$item) => $item = is_null($item) ? '' : $item);
-                    $customFieldValues[$fieldValue->custom_field_id] = $decoded;
-                } else {
-                    $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
+                // Custom fields
+                $customFieldValues = [];
+                foreach ($task->customFieldValues as $fieldValue) {
+                    $value = $fieldValue->value;
+                    $decoded = json_decode($value, true);
+                    if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
+                        array_walk_recursive($decoded, fn (&$item) => $item = is_null($item) ? '' : $item);
+                        $customFieldValues[$fieldValue->custom_field_id] = $decoded;
+                    } else {
+                        $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
+                    }
                 }
-            }
 
-            // Prepare response array
-            $response = [
+                // Prepare response array
+                $response = [
                     'id' => $task->id,
-                'title' => "<a href='" . url("/tasks/information/{$task->id}") . "' target='_blank'><strong>{$task->title}</strong></a> <a href='javascript:void(0);' class='ms-2'>
+                    'title' => "<a href='" . url("/tasks/information/{$task->id}") . "' target='_blank'><strong>{$task->title}</strong></a> <a href='javascript:void(0);' class='ms-2'>
                                 <i class='bx " . ($isFavorite ? 'bxs' : 'bx') . "-star favorite-icon text-warning' data-favorite='{$isFavorite}' data-id='{$task->id}' data-type='tasks' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'></i>
                             </a><a href='javascript:void(0);' class='ms-2'>
                                 <i class='bx " . ($isPinned ? 'bxs' : 'bx') . "-pin pinned-icon text-success' data-pinned='{$isPinned}' data-id='{$task->id}' data-require_reload='0' data-table='task_table' data-type='tasks' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'></i>
                             </a>" . ($webGuard || $task->client_can_discuss ?
-                    "<a href='" . route('tasks.info', ['id' => $task->id]) . "#navs-top-discussions' class='ms-2' target='_blank'>
+                        "<a href='" . route('tasks.info', ['id' => $task->id]) . "#navs-top-discussions' class='ms-2' target='_blank'>
                                     <i class='bx bx-message-rounded-dots text-danger' data-bs-toggle='tooltip' data-bs-placement='right' title='" . get_label('discussions', 'Discussions') . "'></i>
-                                </a>" : ""),
+                                </a>" : ''),
                     'project_id' => ($canManageProjects
-                    ? "<a href='" . url("/projects/information/{$task->project->id}") . "' target='_blank'><strong>" . $task->project->title . "</strong></a>"
-                        : "<strong>" . $task->project->title . "</strong>"
-                ) . "<a href='javascript:void(0);' class='mx-2'>
+                        ? "<a href='" . url("/projects/information/{$task->project->id}") . "' target='_blank'><strong>" . $task->project->title . '</strong></a>'
+                            : '<strong>' . $task->project->title . '</strong>') . "<a href='javascript:void(0);' class='mx-2'>
                                 <i class='bx " . ($isFavoriteProject ? 'bxs' : 'bx') . "-star favorite-icon text-warning'
                                    data-favorite='{$isFavoriteProject}'
                                    data-id='{$task->project->id}'
@@ -1118,21 +1106,21 @@ class TasksController extends Controller
                     'clients' => $clientHtml,
                     'start_date' => format_date($task->start_date),
                     'due_date' => format_date($task->due_date),
-                    'status_id' => "<div class='d-flex align-items-center'><select class='form-select form-select-sm select-bg-label-{$task->status->color} fixed-width-select' id='statusSelect' data-id='{$task->id}' data-original-status-id='{$task->status->id}' data-original-color-class='select-bg-label-{$task->status->color}' data-type='task'" . ($isHome ? " data-reload='true'" : "") . ">{$statusOptions}</select>" . ($task->note ?
-                    "<i class='bx bx-notepad ms-2 text-primary' title='{$task->note}'></i>" : "") . "</div>",
+                    'status_id' => "<div class='d-flex align-items-center'><select class='form-select form-select-sm select-bg-label-{$task->status->color} fixed-width-select' id='statusSelect' data-id='{$task->id}' data-original-status-id='{$task->status->id}' data-original-color-class='select-bg-label-{$task->status->color}' data-type='task'" . ($isHome ? " data-reload='true'" : '') . ">{$statusOptions}</select>" . ($task->note ?
+                        "<i class='bx bx-notepad ms-2 text-primary' title='{$task->note}'></i>" : '') . '</div>',
                     'priority_id' => "<select class='form-select form-select-sm select-bg-label-" . ($task->priority ? $task->priority->color : 'secondary') . "' id='prioritySelect' data-id='{$task->id}' data-original-priority-id='" . ($task->priority ? $task->priority->id : '') . "' data-original-color-class='select-bg-label-" . ($task->priority ? $task->priority->color : 'secondary') . "' data-type='task'>{$priorityOptions}</select>",
                     'created_at' => format_date($task->created_at, true),
                     'updated_at' => format_date($task->updated_at, true),
-                    'actions' => $actions
+                    'actions' => $actions,
                 ];
 
-            // Add dynamic custom fields
-            foreach ($customFields as $customField) {
-                $fieldKey = "custom_field_{$customField->id}";
-                $response[$fieldKey] = $customFieldValues[$customField->id] ?? [''];
-            }
+                // Add dynamic custom fields
+                foreach ($customFields as $customField) {
+                    $fieldKey = "custom_field_{$customField->id}";
+                    $response[$fieldKey] = $customFieldValues[$customField->id] ?? [''];
+                }
 
-            return $response;
+                return $response;
             });
 
         return response()->json([
@@ -1256,118 +1244,116 @@ class TasksController extends Controller
         $is_favorites = $request->input('is_favorites', '');
         $limit = $request->input('limit', 10);
         $offset = $request->input('offset', 0);
-        $task_parent_id = (request('task_parent_id')) ? request('task_parent_id') : "";
+        $task_parent_id = request('task_parent_id') ? request('task_parent_id') : '';
         if ($id) {
             $task = Task::with('reminders', 'recurringTask')->find($id);
 
-            if (!$task) {
+            if (! $task) {
                 return formatApiResponse(
                     false,
                     'Task not found',
                     [
                         'total' => 0,
-                        'data' => []
-                    ]
-                );
-            } else {
-                return formatApiResponse(
-                    false,
-                    'Task retrieved successfully',
-                    [
-                        'total' => 1,
-                        'data' => [formatTask($task)]
+                        'data' => [],
                     ]
                 );
             }
-        } else {
-            $tasksQuery = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
-
-            // Multi-select filters
-            if (!empty($user_ids)) {
-                $taskIds = DB::table('task_user')->whereIn('user_id', $user_ids)->pluck('task_id')->toArray();
-                $tasksQuery = $tasksQuery->whereIn('tasks.id', $taskIds);
-            }
-            if (!empty($client_ids)) {
-                $projectIds = DB::table('client_project')->whereIn('client_id', $client_ids)->pluck('project_id')->toArray();
-                $tasksQuery = $tasksQuery->whereIn('project_id', $projectIds);
-            }
-            if (!empty($project_ids)) {
-                $tasksQuery->whereIn('project_id', $project_ids);
-            }
-            if (!empty($status_ids)) {
-                $tasksQuery->whereIn('status_id', $status_ids);
-            }
-            if (!empty($priority_ids)) {
-                $tasksQuery->whereIn('priority_id', $priority_ids);
-            }
-            if ($start_date_from && $start_date_to) {
-                $tasksQuery->whereBetween('start_date', [$start_date_from, $start_date_to]);
-            }
-            if ($end_date_from && $end_date_to) {
-                $tasksQuery->whereBetween('due_date', [$end_date_from, $end_date_to]);
-            }
-            if ($start_date_from) {
-                $tasksQuery->where('start_date', '>=', $start_date_from);
-            }
-            if ($end_date_to) {
-                $tasksQuery->where('due_date', '<=', $end_date_to);
-            }
-            if ($is_favorites) {
-                $favoriteTaskIds = $this->user->favorites()
-                    ->where('favoritable_type', \App\Models\Task::class)
-                    ->pluck('favoritable_id')
-                    ->toArray();
-                $tasksQuery->whereIn('tasks.id', $favoriteTaskIds);
-            }
-            if ($search) {
-                $tasksQuery->where(function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%')
-                        ->orWhere('tasks.id', 'like', '%' . $search . '%');
-                });
-            }
-            if ($task_parent_id === "") {
-                // Add whereNull condition for parent_id to get only parent tasks
-                $tasksQuery->whereNull('parent_id');
-            } else {
-                $tasksQuery->where('parent_id', $task_parent_id);
-            }
-            $total = $tasksQuery->count(); // Get total count before applying offset and limit
-            $tasks = $tasksQuery->leftJoin('pinned', function ($join) {
-                $join->on('pinned.pinnable_id', '=', 'tasks.id')
-                    ->where('pinned.pinnable_type', '=', Task::class);
-            })
-                ->select('tasks.*', 'pinned.id as pinned_id')  // Select tasks and alias pinned.id as pinned_id
-                ->orderByDesc('pinned.id')  // Tasks that are pinned will appear first
-                ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
-                ->skip($offset)  // Apply the offset
-                ->take($limit)  // Apply the limit
-                ->get();
-            if ($tasks->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Tasks not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $tasks->map(function ($task) {
-                return formatTask($task);
-            });
             return formatApiResponse(
                 false,
-                'Tasks retrieved successfully',
+                'Task retrieved successfully',
                 [
-                    'total' => $total,
-                    'data' => $data,
+                    'total' => 1,
+                    'data' => [formatTask($task)],
                 ]
             );
         }
+        $tasksQuery = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
+
+        // Multi-select filters
+        if (! empty($user_ids)) {
+            $taskIds = DB::table('task_user')->whereIn('user_id', $user_ids)->pluck('task_id')->toArray();
+            $tasksQuery = $tasksQuery->whereIn('tasks.id', $taskIds);
+        }
+        if (! empty($client_ids)) {
+            $projectIds = DB::table('client_project')->whereIn('client_id', $client_ids)->pluck('project_id')->toArray();
+            $tasksQuery = $tasksQuery->whereIn('project_id', $projectIds);
+        }
+        if (! empty($project_ids)) {
+            $tasksQuery->whereIn('project_id', $project_ids);
+        }
+        if (! empty($status_ids)) {
+            $tasksQuery->whereIn('status_id', $status_ids);
+        }
+        if (! empty($priority_ids)) {
+            $tasksQuery->whereIn('priority_id', $priority_ids);
+        }
+        if ($start_date_from && $start_date_to) {
+            $tasksQuery->whereBetween('start_date', [$start_date_from, $start_date_to]);
+        }
+        if ($end_date_from && $end_date_to) {
+            $tasksQuery->whereBetween('due_date', [$end_date_from, $end_date_to]);
+        }
+        if ($start_date_from) {
+            $tasksQuery->where('start_date', '>=', $start_date_from);
+        }
+        if ($end_date_to) {
+            $tasksQuery->where('due_date', '<=', $end_date_to);
+        }
+        if ($is_favorites) {
+            $favoriteTaskIds = $this->user->favorites()
+                ->where('favoritable_type', \App\Models\Task::class)
+                ->pluck('favoritable_id')
+                ->toArray();
+            $tasksQuery->whereIn('tasks.id', $favoriteTaskIds);
+        }
+        if ($search) {
+            $tasksQuery->where(function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('tasks.id', 'like', '%' . $search . '%');
+            });
+        }
+        if ($task_parent_id === '') {
+            // Add whereNull condition for parent_id to get only parent tasks
+            $tasksQuery->whereNull('parent_id');
+        } else {
+            $tasksQuery->where('parent_id', $task_parent_id);
+        }
+        $total = $tasksQuery->count(); // Get total count before applying offset and limit
+        $tasks = $tasksQuery->leftJoin('pinned', function ($join) {
+            $join->on('pinned.pinnable_id', '=', 'tasks.id')
+                ->where('pinned.pinnable_type', '=', Task::class);
+        })
+            ->select('tasks.*', 'pinned.id as pinned_id')  // Select tasks and alias pinned.id as pinned_id
+            ->orderByDesc('pinned.id')  // Tasks that are pinned will appear first
+            ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
+            ->skip($offset)  // Apply the offset
+            ->take($limit)  // Apply the limit
+            ->get();
+        if ($tasks->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Tasks not found',
+                [
+                    'total' => 0,
+                    'data' => [],
+                ]
+            );
+        }
+        $data = $tasks->map(function ($task) {
+            return formatTask($task);
+        });
+        return formatApiResponse(
+            false,
+            'Tasks retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
     public function dragula(Request $request, $id = '')
     {
-        $project = (object)[];
+        $project = (object) [];
         $isFavorites = request()->get('favorite', false);
 
         if ($id) {
@@ -1411,7 +1397,7 @@ class TasksController extends Controller
             $join->on('pinned.pinnable_id', '=', 'tasks.id')
                 ->where('pinned.pinnable_type', '=', Task::class);
         })
-            ->selectRaw('tasks.*, tasks.id as task_id, pinned.id as pinned_id') //
+            ->selectRaw('tasks.*, tasks.id as task_id, pinned.id as pinned_id')
             ->orderByDesc('pinned.id');
 
         // Get the total count and the tasks
@@ -1424,7 +1410,7 @@ class TasksController extends Controller
             'tasks' => $tasks,
             'total_tasks' => $total_tasks,
             'is_favorites' => $isFavorites,
-            'customFields' => $customFields
+            'customFields' => $customFields,
         ]);
     }
 
@@ -1447,7 +1433,7 @@ class TasksController extends Controller
                     'old_status' => $current_status,
                     'new_status' => $new_status,
                     'access_url' => 'tasks/information/' . $id,
-                    'action' => 'status_updated'
+                    'action' => 'status_updated',
                 ];
                 $userIds = $task->users->pluck('id')->toArray();
                 $clientIds = $task->project->clients->pluck('id')->toArray();
@@ -1461,12 +1447,10 @@ class TasksController extends Controller
                 );
                 processNotifications($notification_data, $recipients);
                 return response()->json(['error' => false, 'message' => 'Task status updated successfully.', 'id' => $id, 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task status from ' . trim($current_status) . ' to ' . trim($new_status)]);
-            } else {
-                return response()->json(['error' => true, 'message' => 'Task status couldn\'t updated.']);
             }
-        } else {
-            return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
+            return response()->json(['error' => true, 'message' => 'Task status couldn\'t updated.']);
         }
+        return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
     }
     /**
      * Update the status of a task.
@@ -1478,6 +1462,7 @@ class TasksController extends Controller
      * @group Task Management
      *
      * @urlParam id int required The ID of the task whose status is to be updated. Example: 1
+     *
      * @bodyParam statusId int required The ID of the new status to set for the task. Must exist in the `statuses` table. Example: 2
      * @bodyParam note string optional An optional note to attach to the task update. Example: Updated due to client request.
      *
@@ -1554,7 +1539,7 @@ class TasksController extends Controller
         }
         $rules = [
             'id' => 'required|exists:tasks,id',
-            'statusId' => 'required|exists:statuses,id'
+            'statusId' => 'required|exists:statuses,id',
         ];
         try {
             $request->validate($rules);
@@ -1563,7 +1548,7 @@ class TasksController extends Controller
             $status = Status::findOrFail($statusId);
             if (canSetStatus($status)) {
                 $task = Task::findOrFail($id);
-                if ($task->status->id != $statusId) {
+                if ($task->status->id !== $statusId) {
                     $currentStatus = $task->status->title;
                     $oldStatus = $task->status_id;
                     $task->status_id = $statusId;
@@ -1589,7 +1574,7 @@ class TasksController extends Controller
                             'old_status' => $currentStatus,
                             'new_status' => $newStatus,
                             'access_url' => 'tasks/information/' . $id,
-                            'action' => 'status_updated'
+                            'action' => 'status_updated',
                         ];
                         $userIds = $task->users->pluck('id')->toArray();
                         $clientIds = $task->project->clients->pluck('id')->toArray();
@@ -1609,25 +1594,22 @@ class TasksController extends Controller
                                 'id' => $id,
                                 'type' => 'task',
                                 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task status from ' . trim($currentStatus) . ' to ' . trim($newStatus),
-                                'data' => formatTask($task)
+                                'data' => formatTask($task),
                             ]
                         );
-                    } else {
-                        return response()->json(['error' => true, 'message' => 'Status couldn\'t updated.']);
                     }
-                } else {
-                    return response()->json(['error' => true, 'message' => 'No status change detected.']);
+                    return response()->json(['error' => true, 'message' => 'Status couldn\'t updated.']);
                 }
-            } else {
-                return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
+                return response()->json(['error' => true, 'message' => 'No status change detected.']);
             }
+            return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Status couldn\'t be updated.'
+                'message' => 'Status couldn\'t be updated.',
             ], 500);
         }
     }
@@ -1636,9 +1618,9 @@ class TasksController extends Controller
         // Define the related tables for this meeting
         $relatedTables = ['users']; // Include related tables as needed
         // Use the general duplicateRecord function
-        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
+        $title = request()->has('title') && ! empty(trim(request()->title)) ? request()->title : '';
         $duplicate = duplicateRecord(Task::class, $id, $relatedTables, $title);
-        if (!$duplicate) {
+        if (! $duplicate) {
             return response()->json(['error' => true, 'message' => 'Task duplication failed.']);
         }
         if (request()->has('reload') && request()->input('reload') === 'true') {
@@ -1690,7 +1672,7 @@ class TasksController extends Controller
         try {
             $validatedData = $request->validate([
                 'id' => 'required|integer|exists:tasks,id',
-                'media_files.*' => 'required|file|max:' . $maxFileSizeKb
+                'media_files.*' => 'required|file|max:' . $maxFileSizeKb,
             ]);
 
             $mediaIds = [];
@@ -1719,21 +1701,20 @@ class TasksController extends Controller
                     'id' => $mediaIds,
                     'type' => 'media',
                     'parent_type' => 'task',
-                    'parent_id' => $task->id
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No file(s) chosen.'
+                    'parent_id' => $task->id,
                 ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'No file(s) chosen.',
+            ]);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred during file upload: ' . $e->getMessage()
+                'message' => 'An error occurred during file upload: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -1741,26 +1722,25 @@ class TasksController extends Controller
     public function get_media($id)
     {
         $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
+        $sort = request('sort') ? request('sort') : 'id';
+        $order = request('order') ? request('order') : 'DESC';
         $task = Task::findOrFail($id);
         $media = $task->getMedia('task-media');
         if ($search) {
             $media = $media->filter(function ($mediaItem) use ($search) {
-                return (
-                    // Check if ID contains the search query
+                return // Check if ID contains the search query
                     stripos($mediaItem->id, $search) !== false ||
                     // Check if file name contains the search query
                     stripos($mediaItem->file_name, $search) !== false ||
                     // Check if date created contains the search query
                     stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                );
+                ;
             });
         }
         $canDelete = checkPermission('delete_media');
         $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
             // Check if the disk is public
-            $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
+            $isPublicDisk = $mediaItem->disk === 'public' ? 1 : 0;
             // Generate file URL based on disk visibility
             $fileUrl = $isPublicDisk
                 ? asset('storage/task-media/' . $mediaItem->file_name)
@@ -1785,7 +1765,7 @@ class TasksController extends Controller
                     '<i class="bx bx-trash text-danger"></i>' .
                     '</button>';
             }
-            $actions = $actions ?: '-';
+            $actions = $actions ? $actions : '-';
             return [
                 'id' => $mediaItem->id,
                 'file' => $html,
@@ -1796,7 +1776,7 @@ class TasksController extends Controller
                 'actions' => $actions,
             ];
         });
-        if ($order == 'asc') {
+        if ($order === 'asc') {
             $formattedMedia = $formattedMedia->sortBy($sort);
         } else {
             $formattedMedia = $formattedMedia->sortByDesc($sort);
@@ -1817,6 +1797,7 @@ class TasksController extends Controller
      * @group Task Media
      *
      * @urlParam id int required The ID of the project whose media files are to be retrieved.
+     *
      * @queryParam search string optional A search query to filter media files by name, ID, or upload date.
      * @queryParam sort string optional The column to sort by (default: "id").
      * @queryParam order string optional The sorting order: "ASC" or "DESC" (default: "DESC").
@@ -1858,16 +1839,15 @@ class TasksController extends Controller
             $media = $task->getMedia('task-media');
             if ($search) {
                 $media = $media->filter(function ($mediaItem) use ($search) {
-                    return (
-                        stripos($mediaItem->id, $search) !== false ||
+                    return stripos($mediaItem->id, $search) !== false ||
                         stripos($mediaItem->file_name, $search) !== false ||
                         stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                    );
+                    ;
                 });
             }
             $canDelete = checkPermission('delete_media');
             $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
-                $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
+                $isPublicDisk = $mediaItem->disk === 'public' ? 1 : 0;
                 $fileUrl = $isPublicDisk
                     ? asset('storage/task-media/' . $mediaItem->file_name)
                     : $mediaItem->getFullUrl();
@@ -1899,13 +1879,13 @@ class TasksController extends Controller
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Task not found."
+                'error' => true,
+                'message' => 'Task not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve media files."
+                'error' => true,
+                'message' => 'Could not retrieve media files.',
             ], 500);
         }
     }
@@ -1946,10 +1926,10 @@ class TasksController extends Controller
         try {
             $mediaItem = Media::find($mediaId);
 
-            if (!$mediaItem) {
+            if (! $mediaItem) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'File not found.'
+                    'message' => 'File not found.',
                 ], 404);
             }
 
@@ -1963,12 +1943,12 @@ class TasksController extends Controller
                 'title' => $mediaItem->file_name,
                 'parent_id' => $mediaItem->model_id,
                 'type' => 'media',
-                'parent_type' => 'task'
+                'parent_type' => 'task',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while deleting the file.'
+                'message' => 'An error occurred while deleting the file.',
             ], 500);
         }
     }
@@ -1978,7 +1958,7 @@ class TasksController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:media,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:media,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedIds = [];
@@ -2006,6 +1986,7 @@ class TasksController extends Controller
      * @group Task Management
      *
      * @urlParam id int required The ID of the task whose priority is to be updated. Example: 1
+     *
      * @bodyParam priorityId int required The ID of the new priority to set for the task. Must exist in the `priorities` table. Example: 3
      *
      * @response 200 {
@@ -2073,19 +2054,19 @@ class TasksController extends Controller
         if ($id) {
             $request->merge(['id' => $id]);
         }
-        if ($request->input('priorityId') == 0) {
+        if ($request->input('priorityId') === 0) {
             $request->merge(['priorityId' => null]);
         }
         $rules = [
             'id' => 'required|exists:tasks,id',
-            'priorityId' => 'nullable|exists:priorities,id'
+            'priorityId' => 'nullable|exists:priorities,id',
         ];
         try {
             $request->validate($rules);
             $id = $request->id;
             $priorityId = $request->priorityId;
             $task = Task::findOrFail($id);
-            if ($task->priority_id != $priorityId) {
+            if ($task->priority_id !== $priorityId) {
                 $currentPriority = $task->priority ? $task->priority->title : '-';
                 $task->priority_id = $priorityId;
                 if ($task->save()) {
@@ -2100,22 +2081,20 @@ class TasksController extends Controller
                             'id' => $id,
                             'type' => 'task',
                             'activity_message' => $message,
-                            'data' => formatTask($task)
+                            'data' => formatTask($task),
                         ]
                     );
-                } else {
-                    return response()->json(['error' => true, 'message' => 'Priority couldn\'t updated.']);
                 }
-            } else {
-                return response()->json(['error' => true, 'message' => 'No priority change detected.']);
+                return response()->json(['error' => true, 'message' => 'Priority couldn\'t updated.']);
             }
+            return response()->json(['error' => true, 'message' => 'No priority change detected.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Priority couldn\'t be updated.'
+                'message' => 'Priority couldn\'t be updated.',
             ], 500);
         }
     }
@@ -2131,7 +2110,7 @@ class TasksController extends Controller
     }
     public function calendar(Request $request, $id = null)
     {
-        $project = (object)[];
+        $project = (object) [];
         $isFavorites = request()->get('favorite', false);
         $customFields = CustomField::where('module', 'task')->get();
         if ($id) {
@@ -2144,7 +2123,7 @@ class TasksController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
         $projectId = $request->query('projectId');
-        $is_favorites = (request('is_favorites')) ? request('is_favorites') : "";
+        $is_favorites = request('is_favorites') ? request('is_favorites') : '';
         if ($projectId) {
             $project = Project::find($projectId);
             if ($project) {
@@ -2204,7 +2183,7 @@ class TasksController extends Controller
                     $backgroundColor = '#5ab0ff'; // Lighter default blue
             }
             $title = $task->title . ' : ' . format_date($task->start_date);
-            if ($task->due_date != $task->start_date) {
+            if ($task->due_date !== $task->start_date) {
                 $title .= ' ' . get_label('to', 'to') . ' ' . format_date($task->due_date);
             }
             return [
@@ -2287,15 +2266,15 @@ class TasksController extends Controller
                 'model_id' => 'required|integer',
                 'content' => 'required|string',
                 'parent_id' => 'nullable|integer|exists:comments,id',
-                'attachments.*' => "file|max:$maxFileSizeKb"
+                'attachments.*' => "file|max:{$maxFileSizeKb}",
             ], [
-                'content.required' => 'Please enter a comment'
+                'content.required' => 'Please enter a comment',
             ]);
             $fileValidationResponse = FileValidationHelper::validateFileUpload($request, 'attachments');
             if ($fileValidationResponse !== true) {
                 return $fileValidationResponse;
             }
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
+            [$processedContent, $mentionedUserIds, $mentionedClientIds] = replaceUserMentionsWithLinks($request->content);
             $comment = Comment::create([
                 'commentable_type' => $request->model_type,
                 'commentable_id' => $request->model_id,
@@ -2306,7 +2285,7 @@ class TasksController extends Controller
             ]);
             // Create directory if it does not exist
             $directoryPath = storage_path('app/public/comment_attachments');
-            if (!is_dir($directoryPath)) {
+            if (! is_dir($directoryPath)) {
                 mkdir($directoryPath, 0755, true);
             }
             // Save attachments
@@ -2327,16 +2306,15 @@ class TasksController extends Controller
                 'message' => 'Comment Added Successfully',
                 'comment' => $comment->load('attachments'),
                 'user' => $comment->commenter,
-                'created_at' => $comment->created_at->diffForHumans()
+                'created_at' => $comment->created_at->diffForHumans(),
             ]);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-
             return response()->json([
                 'success' => false,
-                'message' => 'Comment could not be added.'
+                'message' => 'Comment could not be added.',
             ], 500);
         }
     }
@@ -2396,12 +2374,12 @@ class TasksController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Comment not found.'
+                'message' => 'Comment not found.',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Could not retrieve comment.'
+                'message' => 'Could not retrieve comment.',
             ], 500);
         }
     }
@@ -2449,9 +2427,9 @@ class TasksController extends Controller
                 'comment_id' => ['required', 'integer', 'exists:comments,id'],
                 'content' => ['required', 'string'],
             ], [
-                'content.required' => 'Please enter a comment'
+                'content.required' => 'Please enter a comment',
             ]);
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
+            [$processedContent, $mentionedUserIds, $mentionedClientIds] = replaceUserMentionsWithLinks($request->content);
             $comment = Comment::findOrFail($request->comment_id);
             $comment->content = $processedContent;
             if ($comment->save()) {
@@ -2460,26 +2438,25 @@ class TasksController extends Controller
                     'error' => false,
                     'message' => 'Comment updated successfully.',
                     'id' => $comment->id,
-                    'type' => 'task'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be updated.'
+                    'type' => 'task',
                 ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Comment couldn\'t be updated.',
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment not found."
+                'error' => true,
+                'message' => 'Comment not found.',
             ], 404);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment couldn't be updated."
+                'error' => true,
+                'message' => "Comment couldn't be updated.",
             ], 500);
         }
     }
@@ -2539,29 +2516,28 @@ class TasksController extends Controller
                     'error' => false,
                     'message' => 'Comment deleted successfully.',
                     'id' => $comment->id,
-                    'type' => 'task'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be deleted.'
+                    'type' => 'task',
                 ]);
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Comment couldn\'t be deleted.',
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment not found."
+                'error' => true,
+                'message' => 'Comment not found.',
             ], 404);
         } catch (ValidationException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Validation errors occurred",
-                "errors" => $e->errors()
+                'error' => true,
+                'message' => 'Validation errors occurred',
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Comment couldn't be deleted."
+                'error' => true,
+                'message' => "Comment couldn't be deleted.",
             ], 500);
         }
     }
@@ -2595,7 +2571,6 @@ class TasksController extends Controller
      */
     public function destroy_comment_attachment($id)
     {
-
         try {
             $attachment = CommentAttachment::findOrFail($id);
 
@@ -2623,8 +2598,11 @@ class TasksController extends Controller
      * Get all comments for a task with attachments and children.
      *
      * @authenticated
+     *
      * @group Task Comments
+     *
      * @urlParam id int required The ID of the project.
+     *
      * @response 200 {
      *   "error": false,
      *   "comments": [
@@ -2665,7 +2643,6 @@ class TasksController extends Controller
                 ->orderBy('created_at', 'desc');
             $total = $commentsQuery->count();
 
-
             $comments = $commentsQuery
                 ->skip($offset)
                 ->take($limit)
@@ -2683,13 +2660,12 @@ class TasksController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Project not found.'
+                'message' => 'Project not found.',
             ], 404);
         } catch (\Exception $e) {
-
             return response()->json([
                 'error' => true,
-                'message' => 'Could not retrieve comments.'
+                'message' => 'Could not retrieve comments.',
             ], 500);
         }
     }
@@ -2704,6 +2680,7 @@ class TasksController extends Controller
      * @group Task Management
      *
      * @urlParam id int required The ID of the task to update.
+     *
      * @bodyParam is_favorite int required Indicates whether the task is a favorite. Use 1 for true and 0 for false.
      *
      * @response 200 {
@@ -2750,7 +2727,7 @@ class TasksController extends Controller
             // Find the task by ID
             $task = Task::find($id);
             // If the task is not found, return an error response
-            if (!$task) {
+            if (! $task) {
                 return formatApiResponse(
                     true,
                     'Task not found',
@@ -2764,7 +2741,7 @@ class TasksController extends Controller
                 ->first();
             if ($isFavorite) {
                 // If no existing favorite, create a new one
-                if (!$favorite) {
+                if (! $favorite) {
                     $authUser->favorites()->create([
                         'favoritable_type' => Task::class,
                         'favoritable_id' => $id,
@@ -2788,7 +2765,7 @@ class TasksController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the task favorite status.'
+                'message' => 'An error occurred while updating the task favorite status.',
             ], 500);
         }
     }
@@ -2802,6 +2779,7 @@ class TasksController extends Controller
      * @group Task Management
      *
      * @urlParam id int required The ID of the task to update.
+     *
      * @bodyParam is_pinned int required Indicates whether the task is pinned. Use 1 for true and 0 for false.
      *
      * @response 200 {
@@ -2848,7 +2826,7 @@ class TasksController extends Controller
             // Find the task by ID
             $task = Task::find($id);
             // If the task is not found, return an error response
-            if (!$task) {
+            if (! $task) {
                 return formatApiResponse(
                     true,
                     'Task not found',
@@ -2862,7 +2840,7 @@ class TasksController extends Controller
                 ->first();
             if ($isPinned) {
                 // If no existing pinned item, create a new one
-                if (!$pinned) {
+                if (! $pinned) {
                     $authUser->pinnedTasks()->create([
                         'pinnable_type' => Task::class,
                         'pinnable_id' => $id,
@@ -2892,7 +2870,7 @@ class TasksController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the task pinned status.'
+                'message' => 'An error occurred while updating the task pinned status.',
             ], 500);
         }
     }
@@ -2909,14 +2887,14 @@ class TasksController extends Controller
             $taskLists = TaskList::with([
                 'tasks' => function ($query) {
                     $query->with('users');
-                }
+                },
             ])
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
             if ($request->ajax()) {
                 return response()->json([
                     'html' => view('components.group-task-list', compact('taskLists'))->render(),
-                    'hasMorePages' => $taskLists->hasMorePages()
+                    'hasMorePages' => $taskLists->hasMorePages(),
                 ]);
             }
             $toSelectTaskUsers = $this->workspace->users;
@@ -3003,19 +2981,18 @@ class TasksController extends Controller
                 'Status timelines retrieved successfully.',
                 [
                     'data' => $statusTimelines,
-                    'total' => $statusTimelines->count()
+                    'total' => $statusTimelines->count(),
                 ]
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "error" => true,
-                "message" => "Task not found."
+                'error' => true,
+                'message' => 'Task not found.',
             ], 404);
         } catch (\Exception $e) {
-
             return response()->json([
-                "error" => true,
-                "message" => "Could not retrieve status timelines."
+                'error' => true,
+                'message' => 'Could not retrieve status timelines.',
             ], 500);
         }
     }

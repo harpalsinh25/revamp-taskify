@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use DB;
-use Carbon\Carbon;
-use App\Models\Workspace;
 use App\Models\TimeTracker;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\Workspace;
 use App\Services\DeletionService;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
+use DB;
+use Illuminate\Http\Request;
 
 class TimeTrackerController extends Controller
 {
@@ -31,8 +28,6 @@ class TimeTrackerController extends Controller
         $timesheet = isAdminOrHasAllDataAccess() ? $this->workspace->timesheets : $this->user->timesheets;
         return view('time_trackers.timesheet', compact('timesheet'));
     }
-
-
 
     /**
      * Start a new time tracker.
@@ -67,23 +62,18 @@ class TimeTrackerController extends Controller
 
     public function store(Request $request)
     {
-
-
         $isApi = request()->get('isApi', false);
 
         $formFields['workspace_id'] = $this->workspace->id;
-        $formFields['user_id'] =  $this->user->id;
+        $formFields['user_id'] = $this->user->id;
         $formFields['start_date_time'] = date('Y-m-d H:i:s');
         $formattedDateTime = format_date($formFields['start_date_time'], true);
 
-        if ($request->has('message') && !empty($request->input('message'))) {
+        if ($request->has('message') && ! empty($request->input('message'))) {
             $formFields['message'] = $request->input('message');
         }
 
         try {
-
-
-
             $new_record = TimeTracker::create($formFields);
             $recorded_id = $new_record->id;
 
@@ -92,7 +82,7 @@ class TimeTrackerController extends Controller
                     false,
                     'Timer has been started successfully.',
                     [
-                        'data' => formatTimeTracker($new_record)
+                        'data' => formatTimeTracker($new_record),
                     ],
                     200
                 );
@@ -108,7 +98,6 @@ class TimeTrackerController extends Controller
             );
         }
     }
-
 
     /**
      * Stop an existing time tracker.
@@ -152,16 +141,13 @@ class TimeTrackerController extends Controller
     {
         $isApi = request()->get('isApi', false);
 
-        $formFields['end_date_time'] =  date('Y-m-d H:i:s');
+        $formFields['end_date_time'] = date('Y-m-d H:i:s');
         $formattedDateTime = format_date($formFields['end_date_time'], true);
-        if ($request->has('message') && !empty($request->input('message'))) {
+        if ($request->has('message') && ! empty($request->input('message'))) {
             $formFields['message'] = $request->input('message');
         }
 
-
         try {
-
-
             $time_tracker = TimeTracker::findOrFail($request->input('record_id'));
             $time_tracker->update($formFields);
 
@@ -170,7 +156,7 @@ class TimeTrackerController extends Controller
                     false,
                     'Timer has been stopped successfully.',
                     [
-                        'data' => formatTimeTracker($time_tracker)
+                        'data' => formatTimeTracker($time_tracker),
                     ]
                 );
             }
@@ -192,8 +178,8 @@ class TimeTrackerController extends Controller
         $sort = request('sort', 'id');
         $order = request('order', 'DESC');
         $user_id = request('user_id', '');
-        $date_between_from = request('date_between_from') ?: "";
-        $date_between_to = request('date_between_to') ?: "";
+        $date_between_from = request('date_between_from') ?: '';
+        $date_between_to = request('date_between_to') ?: '';
         $start_date_from = request('start_date_from', '');
         $start_date_to = request('start_date_to', '');
         $end_date_from = request('end_date_from', '');
@@ -209,26 +195,26 @@ class TimeTrackerController extends Controller
             ->leftJoin('users', 'time_trackers.user_id', '=', 'users.id')
             ->where('workspace_id', $this->workspace->id);
 
-        if (!isAdminOrHasAllDataAccess()) {
+        if (! isAdminOrHasAllDataAccess()) {
             $timesheet = $timesheet->where('user_id', $this->user->id);
         }
 
         if ($date_between_from && $date_between_to) {
-            $date_between_from = $date_between_from . ' 00:00:00';
-            $date_between_to = $date_between_to . ' 23:59:59';
+            $date_between_from .= ' 00:00:00';
+            $date_between_to .= ' 23:59:59';
             $timesheet = $timesheet->where('start_date_time', '>=', $date_between_from)
                 ->where('end_date_time', '<=', $date_between_to);
         }
 
         if ($start_date_from && $start_date_to) {
-            $start_date_from = $start_date_from . ' 00:00:00';
-            $start_date_to = $start_date_to . ' 23:59:59';
+            $start_date_from .= ' 00:00:00';
+            $start_date_to .= ' 23:59:59';
             $timesheet = $timesheet->whereBetween('start_date_time', [$start_date_from, $start_date_to]);
         }
 
         if ($end_date_from && $end_date_to) {
-            $end_date_from = $end_date_from . ' 00:00:00';
-            $end_date_to = $end_date_to . ' 23:59:59';
+            $end_date_from .= ' 00:00:00';
+            $end_date_to .= ' 23:59:59';
             $timesheet = $timesheet->whereBetween('end_date_time', [$end_date_from, $end_date_to]);
         }
 
@@ -281,8 +267,8 @@ class TimeTrackerController extends Controller
         });
 
         return response()->json([
-            "rows" => $timesheet,
-            "total" => $total,
+            'rows' => $timesheet,
+            'total' => $total,
         ]);
     }
 
@@ -294,18 +280,19 @@ class TimeTrackerController extends Controller
      * @group Time Tracker Management
      *
      * @urlParam id integer required The ID of the time tracker to delete. Must exist in the `time_trackers` table. Example: 1
+     *
      * @bodyParam isApi boolean optional Whether to return a formatted API response. Defaults to false. Example: true
      *
      * @response 200 {
      *   "error": false,
      *   "message": "Record deleted successfully.",
-
+     *
      * }
      *
      * @response 404 {
      *   "error": true,
      *   "message": "No query results for model [App\\Models\\TimeTracker] 9999",
-
+     *
      * }
      *
      * @response 500 {
@@ -316,9 +303,7 @@ class TimeTrackerController extends Controller
 
     public function destroy($id)
     {
-
         try {
-
             $isApi = request()->get('isApi', false);
 
             DeletionService::delete(TimeTracker::class, $id, 'Record');
@@ -347,7 +332,7 @@ class TimeTrackerController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:time_trackers,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:time_trackers,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -411,8 +396,8 @@ class TimeTrackerController extends Controller
             $sort = request('sort', 'id');
             $order = request('order', 'DESC');
             $user_id = request('user_id', '');
-            $date_between_from = request('date_between_from') ?: "";
-            $date_between_to = request('date_between_to') ?: "";
+            $date_between_from = request('date_between_from') ?: '';
+            $date_between_to = request('date_between_to') ?: '';
             $start_date_from = request('start_date_from', '');
             $start_date_to = request('start_date_to', '');
             $end_date_from = request('end_date_from', '');
@@ -428,26 +413,26 @@ class TimeTrackerController extends Controller
                 ->leftJoin('users', 'time_trackers.user_id', '=', 'users.id')
                 ->where('workspace_id', $this->workspace->id);
 
-            if (!isAdminOrHasAllDataAccess()) {
+            if (! isAdminOrHasAllDataAccess()) {
                 $timesheet = $timesheet->where('user_id', $this->user->id);
             }
 
             if ($date_between_from && $date_between_to) {
-                $date_between_from = $date_between_from . ' 00:00:00';
-                $date_between_to = $date_between_to . ' 23:59:59';
+                $date_between_from .= ' 00:00:00';
+                $date_between_to .= ' 23:59:59';
                 $timesheet = $timesheet->where('start_date_time', '>=', $date_between_from)
                     ->where('end_date_time', '<=', $date_between_to);
             }
 
             if ($start_date_from && $start_date_to) {
-                $start_date_from = $start_date_from . ' 00:00:00';
-                $start_date_to = $start_date_to . ' 23:59:59';
+                $start_date_from .= ' 00:00:00';
+                $start_date_to .= ' 23:59:59';
                 $timesheet = $timesheet->whereBetween('start_date_time', [$start_date_from, $start_date_to]);
             }
 
             if ($end_date_from && $end_date_to) {
-                $end_date_from = $end_date_from . ' 00:00:00';
-                $end_date_to = $end_date_to . ' 23:59:59';
+                $end_date_from .= ' 00:00:00';
+                $end_date_to .= ' 23:59:59';
                 $timesheet = $timesheet->whereBetween('end_date_time', [$end_date_from, $end_date_to]);
             }
 
@@ -495,9 +480,8 @@ class TimeTrackerController extends Controller
                 'Record(s) retrieved successfully!',
                 [
                     'total' => $total,
-                    'data' => $timesheet
+                    'data' => $timesheet,
                 ]
-
             );
         } catch (\Exception $e) {
             return formatApiResponse(

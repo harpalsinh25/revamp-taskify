@@ -360,7 +360,7 @@ class TaskCalendarManager {
 
     async handleEventClick(info) {
         try {
-           editTask(info.event.id,true);
+            editTask(info.event.id, true, this.config.baseUrl, this.config.dateFormat);
         } catch (error) {
             console.error('Error:', error);
         }

@@ -1,7 +1,5 @@
 <?php
 
-
-
 return [
 
     /*
@@ -90,4 +88,3 @@ return [
     'language' => 'en',
 
 ];
-

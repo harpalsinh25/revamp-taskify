@@ -5,7 +5,6 @@ namespace Plugins\Letter\Models;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
-use Plugins\Letter\Models\LetterTemplate;
 
 class Letter extends Model
 {

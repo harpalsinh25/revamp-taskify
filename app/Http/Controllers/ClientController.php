@@ -2,31 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Throwable;
-use App\Models\Task;
-use App\Models\User;
+use App\Imports\ClientsImport;
 use App\Models\Client;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\Template;
-use App\Models\Workspace;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use App\Services\DeletionService;
-use App\Notifications\VerifyEmail;
-use Spatie\Permission\Models\Role;
+use App\Models\User;
 use App\Models\UserClientPreference;
+use App\Models\Workspace;
 use App\Notifications\AccountCreation;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Support\Facades\Request as FacadesRequest;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Carbon\Carbon;
-use Illuminate\Validation\ValidationException;
+use App\Notifications\VerifyEmail;
 use App\Rules\UniqueEmailPassword;
-use App\Imports\ClientsImport;
+use App\Services\DeletionService;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Permission\Models\Role;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Throwable;
 
 class ClientController extends Controller
 {
@@ -134,14 +130,14 @@ class ClientController extends Controller
     {
         ini_set('max_execution_time', 300);
         $isApi = request()->get('isApi', false);
-        $internal_purpose = $request->has('internal_purpose') && $request->input('internal_purpose') == 'on' ? 1 : 0;
+        $internal_purpose = $request->has('internal_purpose') && $request->input('internal_purpose') === 'on' ? 1 : 0;
 
         $require_ev = $request->has('require_ev') ? $request->input('require_ev') : 1;
-        if ($require_ev == 1 && !isEmailConfigured()) {
+        if ($require_ev === 1 && ! isEmailConfigured()) {
             return response()->json(
                 [
                     'error' => true,
-                    'message' => 'Email settings are not configured. Please configure email settings to enable email verification.'
+                    'message' => 'Email settings are not configured. Please configure email settings to enable email verification.',
                 ]
             );
         }
@@ -173,7 +169,7 @@ class ClientController extends Controller
                         $dob = request()->input('dob');
                         $errors = validate_date_format_and_order($value, $dob, $isApi ? 'Y-m-d' : null, startDateLabel: 'DOB', startDateKey: 'dob');
 
-                        if (!empty($errors['dob'])) {
+                        if (! empty($errors['dob'])) {
                             foreach ($errors['dob'] as $error) {
                                 $fail($error);
                             }
@@ -186,7 +182,7 @@ class ClientController extends Controller
                         $doj = request()->input('doj');
                         $errors = validate_date_format_and_order($doj, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'DOJ', endDateKey: 'doj');
 
-                        if (!empty($errors['doj'])) {
+                        if (! empty($errors['doj'])) {
                             foreach ($errors['doj'] as $error) {
                                 $fail($error);
                             }
@@ -197,19 +193,19 @@ class ClientController extends Controller
                 'phone.required_with' => 'The phone number must be provided when the country code is present.',
                 'country_code.required_with' => 'The country code must be provided when the phone number is present.',
                 'phone.unique' => 'The combination of this phone number and country code is already in use.',
-                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).'
+                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).',
             ]);
 
             $uniqueEmailPasswordRule = new UniqueEmailPassword('client');
-            if (!$uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
+            if (! $uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
                 return formatApiValidationError($isApi, ['email' => [$uniqueEmailPasswordRule->message()]]);
             }
-            if (!$internal_purpose && $request->input('password')) {
+            if (! $internal_purpose && $request->input('password')) {
                 $password = $request->input('password');
                 $formFields['password'] = bcrypt($formFields['password']);
             }
 
-            $formFields['internal_purpose'] =  $internal_purpose;
+            $formFields['internal_purpose'] = $internal_purpose;
 
             if ($request->hasFile('profile')) {
                 $formFields['photo'] = $request->file('profile')->store('photos', 'public');
@@ -220,10 +216,10 @@ class ClientController extends Controller
             $role_id = Role::where('guard_name', 'client')->first()->id;
             $workspace = Workspace::find(getWorkspaceId());
 
-            $require_ev = isAdminOrHasAllDataAccess() && $request->has('require_ev') && $request->input('require_ev') == 0 ? 0 : 1;
-            $status = !$internal_purpose && isAdminOrHasAllDataAccess() && $request->has('status') && $request->input('status') == 1 ? 1 : 0;
+            $require_ev = isAdminOrHasAllDataAccess() && $request->has('require_ev') && $request->input('require_ev') === 0 ? 0 : 1;
+            $status = ! $internal_purpose && isAdminOrHasAllDataAccess() && $request->has('status') && $request->input('status') === 1 ? 1 : 0;
 
-            if (!$internal_purpose && $require_ev == 0) {
+            if (! $internal_purpose && $require_ev === 0) {
                 $formFields['email_verified_at'] = now()->tz(config('app.timezone'));
             }
             $formFields['status'] = $status;
@@ -240,7 +236,7 @@ class ClientController extends Controller
             $client = Client::create($formFields);
 
             try {
-                if (!$internal_purpose && $require_ev == 1) {
+                if (! $internal_purpose && $require_ev === 1) {
                     $client->notify(new VerifyEmail($client));
                     $client->update(['email_verification_mail_sent' => 1]);
                 } else {
@@ -248,12 +244,11 @@ class ClientController extends Controller
                 }
                 $workspace->clients()->attach($client->id);
                 $client->assignRole($role_id);
-                if (!$internal_purpose && isEmailConfigured()) {
-
+                if (! $internal_purpose && isEmailConfigured()) {
                     $account_creation_template = Template::where('type', 'email')
                         ->where('name', 'account_creation')
                         ->first();
-                    if (!$account_creation_template || ($account_creation_template->status !== 0)) {
+                    if (! $account_creation_template || ($account_creation_template->status !== 0)) {
                         $client->notify(new AccountCreation($client, $password));
                         $client->update(['acct_create_mail_sent' => 1]);
                     } else {
@@ -266,7 +261,6 @@ class ClientController extends Controller
                 $data['require_ev'] = $require_ev;
                 return formatApiResponse(false, 'Client created successfully.', ['id' => $client->id, 'data' => $data]);
             } catch (TransportExceptionInterface $e) {
-
                 $client = Client::findOrFail($client->id);
                 $client->delete();
                 return response()->json(['error' => true, 'message' => 'Client couldn\'t be created, please make sure email settings are oprational.']);
@@ -290,7 +284,7 @@ class ClientController extends Controller
             'entity' => 'clients',
             'form_action' => route('clients.bulkUpload'),
             'sample_file_url' => $sampleFileUrl,
-            'help_url' => $helpUrl
+            'help_url' => $helpUrl,
         ]);
     }
 
@@ -298,12 +292,12 @@ class ClientController extends Controller
     {
         // Validate file type (ensure it's Excel or CSV)
         $request->validate([
-            'bulk_file' => 'required|mimes:xlsx,xls,csv'
+            'bulk_file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
         try {
             // Initialize the import class
-            $import = new ClientsImport;
+            $import = new ClientsImport();
 
             // Use the import class for bulk upload
             Excel::import($import, $request->file('bulk_file'));
@@ -313,24 +307,24 @@ class ClientController extends Controller
             $validationErrors = array_filter($validationErrors, function ($value) {
                 return $value !== null && $value !== '';
             });
-            if (!empty($validationErrors)) {
+            if (! empty($validationErrors)) {
                 // Return validation errors if any
                 return response()->json([
                     'error' => true,
                     'message' => 'Validation errors occurred.',
-                    'validation_errors' => $validationErrors
+                    'validation_errors' => $validationErrors,
                 ], 400);
             }
 
             // If no validation errors, return success message
             return response()->json([
                 'error' => false,
-                'message' => 'Clients imported successfully.'
+                'message' => 'Clients imported successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -339,6 +333,7 @@ class ClientController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -356,6 +351,7 @@ class ClientController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -454,12 +450,12 @@ class ClientController extends Controller
         }
         if ($id) {
             $client = Client::find($id);
-            if (!$client) {
+            if (! $client) {
                 return response()->json(['error' => true, 'message' => 'Client not found.']);
             }
-            $internal_purpose = $request->has('internal_purpose') && $request->input('internal_purpose') == 'on' ? 1 : 0;
-            if ($internal_purpose && $request->has('password') && !empty($request->input('password'))) {
-                $request->merge(['password' => NULL]);
+            $internal_purpose = $request->has('internal_purpose') && $request->input('internal_purpose') === 'on' ? 1 : 0;
+            if ($internal_purpose && $request->has('password') && ! empty($request->input('password'))) {
+                $request->merge(['password' => null]);
             }
         }
         $request->merge([
@@ -497,7 +493,7 @@ class ClientController extends Controller
                         $dob = request()->input('dob');
                         $errors = validate_date_format_and_order($value, $dob, $isApi ? 'Y-m-d' : null, startDateLabel: 'DOB', startDateKey: 'dob');
 
-                        if (!empty($errors['dob'])) {
+                        if (! empty($errors['dob'])) {
                             foreach ($errors['dob'] as $error) {
                                 $fail($error);
                             }
@@ -510,7 +506,7 @@ class ClientController extends Controller
                         $doj = request()->input('doj');
                         $errors = validate_date_format_and_order($doj, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'DOJ', endDateKey: 'doj');
 
-                        if (!empty($errors['doj'])) {
+                        if (! empty($errors['doj'])) {
                             foreach ($errors['doj'] as $error) {
                                 $fail($error);
                             }
@@ -518,7 +514,7 @@ class ClientController extends Controller
                     },
                 ],
             ];
-            if (!$internal_purpose && $client->password === NULL) {
+            if (! $internal_purpose && $client->password === null) {
                 $rules['password'] = 'required|min:6';
             } else {
                 $rules['password'] = 'nullable';
@@ -529,25 +525,26 @@ class ClientController extends Controller
                 'phone.required_with' => 'The phone number must be provided when the country code is present.',
                 'country_code.required_with' => 'The country code must be provided when the phone number is present.',
                 'phone.unique' => 'The combination of this phone number and country code is already in use.',
-                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).'
+                'profile.image' => 'The file must be a valid image (jpg, jpeg, png, gif, bmp, webp).',
             ]);
 
             if (request()->filled('password')) {
                 $uniqueEmailPasswordRule = new UniqueEmailPassword('client');
-                if (!$uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
+                if (! $uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
                     return formatApiValidationError($isApi, ['email' => [$uniqueEmailPasswordRule->message()]]);
                 }
             }
             if ($request->hasFile('profile')) {
-                if ($client->photo != 'photos/no-image.jpg' && $client->photo !== null)
+                if ($client->photo !== 'photos/no-image.jpg' && $client->photo !== null) {
                     Storage::disk('public')->delete($client->photo);
+                }
                 $formFields['photo'] = $request->file('profile')->store('photos', 'public');
             }
 
             $status = $internal_purpose ? $client->status : (isAdminOrHasAllDataAccess() && $request->has('status') ? $request->input('status') : $client->status);
             $formFields['status'] = $status;
 
-            if (!$internal_purpose && isAdminOrHasAllDataAccess() && isset($formFields['password']) && !empty($formFields['password'])) {
+            if (! $internal_purpose && isAdminOrHasAllDataAccess() && isset($formFields['password']) && ! empty($formFields['password'])) {
                 $password = $formFields['password'];
                 $formFields['password'] = bcrypt($formFields['password']);
             } else {
@@ -569,26 +566,26 @@ class ClientController extends Controller
 
             $require_ev = 0;
 
-            if (!$internal_purpose && $client->email_verified_at === null && $client->email_verification_mail_sent === 0) {
-                $require_ev = isAdminOrHasAllDataAccess() && $request->has('require_ev') && $request->input('require_ev') == 0 ? 0 : 1;
+            if (! $internal_purpose && $client->email_verified_at === null && $client->email_verification_mail_sent === 0) {
+                $require_ev = isAdminOrHasAllDataAccess() && $request->has('require_ev') && $request->input('require_ev') === 0 ? 0 : 1;
             }
 
             $send_account_creation_email = 0;
 
-            if (!$internal_purpose && $client->acct_create_mail_sent === 0) {
+            if (! $internal_purpose && $client->acct_create_mail_sent === 0) {
                 $send_account_creation_email = 1;
             }
 
             try {
-                if (!$internal_purpose && $require_ev == 1) {
+                if (! $internal_purpose && $require_ev === 1) {
                     $client->notify(new VerifyEmail($client));
                     $client->update(['email_verification_mail_sent' => 1]);
                 }
-                if (!$internal_purpose && $send_account_creation_email == 1 && isEmailConfigured()) {
+                if (! $internal_purpose && $send_account_creation_email === 1 && isEmailConfigured()) {
                     $account_creation_template = Template::where('type', 'email')
                         ->where('name', 'account_creation')
                         ->first();
-                    if (!$account_creation_template || ($account_creation_template->status !== 0)) {
+                    if (! $account_creation_template || ($account_creation_template->status !== 0)) {
                         $client->notify(new AccountCreation($client, $password));
                         $client->update(['acct_create_mail_sent' => 1]);
                     }
@@ -613,11 +610,10 @@ class ClientController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'Client couldn\'t be updated.'
+                'message' => 'Client couldn\'t be updated.',
             ], 500);
         }
     }
-
 
     public function get($id)
     {
@@ -676,13 +672,12 @@ class ClientController extends Controller
         return $response;
     }
 
-
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:clients,id' // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:clients,id', // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -702,8 +697,6 @@ class ClientController extends Controller
         return response()->json(['error' => false, 'message' => 'Clients(s) deleted successfully.', 'id' => $deletedClients, 'titles' => $deletedClientNames]);
     }
 
-
-
     public function list()
     {
         $workspace = Workspace::find(getWorkspaceId());
@@ -717,10 +710,10 @@ class ClientController extends Controller
         $ev_statuses = request('ev_statuses', []);
 
         if ($type && $typeId) {
-            if ($type == 'project') {
+            if ($type === 'project') {
                 $project = Project::find($typeId);
                 $clients = $project->clients();
-            } elseif ($type == 'task') {
+            } elseif ($type === 'task') {
                 $task = Task::find($typeId);
                 $clients = $task->project->clients();
             } else {
@@ -742,15 +735,15 @@ class ClientController extends Controller
             });
         });
 
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $clients = $clients->whereIn('status', $statuses);
         }
 
-        if (!empty($clientTypes)) {
+        if (! empty($clientTypes)) {
             $clients = $clients->whereIn('internal_purpose', $clientTypes);
         }
 
-        if (!empty($ev_statuses)) {
+        if (! empty($ev_statuses)) {
             // Apply email verification filter
             $clients = $clients->where(function ($query) use ($ev_statuses) {
                 // Treat internal_purpose == 1 as not applicable
@@ -788,12 +781,12 @@ class ClientController extends Controller
                 }
 
                 if ($canDelete) {
-                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $client->id . '" data-type="clients" data-table="clients_table">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
+                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $client->id . '" data-type="clients" data-table="clients_table">' .
+                            '<i class="bx bx-trash text-danger mx-1"></i>' .
+                            '</button>';
                 }
 
-                $actions = $actions ?: '-';
+                $actions = $actions ? $actions : '-';
 
                 $badge = $client->status === 1
                     ? '<span class="badge bg-success">' . get_label('active', 'Active') . '</span>'
@@ -805,7 +798,7 @@ class ClientController extends Controller
                 </a>
             </div>";
 
-                $emailVerificationBadge = is_null($client->email_verified_at) && $client->internal_purpose == 0
+                $emailVerificationBadge = is_null($client->email_verified_at) && $client->internal_purpose === 0
                     ? '<span class="badge bg-danger ms-1">' . get_label('unverified_email', 'Unverified Email') . '</span>'
                     : '';
 
@@ -818,44 +811,39 @@ class ClientController extends Controller
                     '</h6>' .
                     '<div>' .
                     '<small class="text-muted">' . $client->email . '</small>' .
-                    (!empty($client->email) ?
+                    (! empty($client->email) ?
                         ' <a href="mailto:' . $client->email . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '"><i class="bx bx-envelope"></i></a>'
                         : '') .
                     '</div>' .
                     $emailVerificationBadge;
 
-                if ($client->internal_purpose == 1) {
+                if ($client->internal_purpose === 1) {
                     $formattedHtml .= '<span class="badge bg-info ms-2">' . get_label('internal_purpose', 'Internal Purpose') . '</span>';
                 }
-
 
                 $formattedHtml .= '</div>' .
                     '</div>';
 
-                $phone = (empty($client->country_code) && empty($client->phone)) ? '-' : (
-                    // If both country code and phone exist, show both with the call icon
-                    (!empty($client->country_code) && !empty($client->phone)) ?
+                $phone = empty($client->country_code) && empty($client->phone) ? '-' : (// If both country code and phone exist, show both with the call icon
+                    ! empty($client->country_code) && ! empty($client->phone) ?
                     $client->country_code . ' ' . $client->phone . ' ' .
-                    (
-                        // Only show call icon if guard is not 'web' or auth user is different
-                        ($guardName !== 'client' || $authUserId !== $client->id) ?
+                    (// Only show call icon if guard is not 'web' or auth user is different
+                        $guardName !== 'client' || $authUserId !== $client->id ?
                         '<a href="tel:' . $client->country_code . $client->phone . '" class="text-decoration-none" title="' . get_label('make_call', 'Make Call') . '"><i class="bx bx-phone-call text-primary"></i></a>'
                         : ''
                     )
                     :
                     // If only the phone exists, show phone number with the call icon
-                    (!empty($client->phone) ?
+                    (! empty($client->phone) ?
                         $client->phone . ' ' .
-                        (
-                            // Only show call icon if guard is not 'web' or auth user is different
-                            ($guardName !== 'client' || $authUserId !== $client->id) ?
+                        (// Only show call icon if guard is not 'web' or auth user is different
+                            $guardName !== 'client' || $authUserId !== $client->id ?
                             '<a href="tel:' . $client->phone . '" class="text-decoration-none" title="' . get_label('make_call', 'Make Call') . '"><i class="bx bx-phone-call text-primary"></i></a>'
                             : ''
                         )
                         :
                         // If only the country code exists, show the country code
-                        ($client->country_code ? $client->country_code : '')
-                    )
+                        ($client->country_code ? $client->country_code : ''))
                 );
 
                 return [
@@ -884,7 +872,7 @@ class ClientController extends Controller
                         '<div>' . get_label('tasks', 'Tasks') . '</div>' .
                         '</div>' .
                         '</div>',
-                    'actions' => $actions
+                    'actions' => $actions,
                 ];
             });
 
@@ -981,90 +969,86 @@ class ClientController extends Controller
 
         if ($id) {
             $client = Client::find($id);
-            if (!$client) {
+            if (! $client) {
                 return formatApiResponse(false, 'Client not found', ['total' => 0, 'data' => []]);
-            } else {
-                return formatApiResponse(
-                    false,
-                    'Client retrieved successfully',
-                    [
-                        'total' => 1,
-                        'data' => [formatClient($client)],
-                    ]
-                );
             }
-        } else {
-            $workspace = Workspace::find(getWorkspaceId());
+            return formatApiResponse(
+                false,
+                'Client retrieved successfully',
+                [
+                    'total' => 1,
+                    'data' => [formatClient($client)],
+                ]
+            );
+        }
+        $workspace = Workspace::find(getWorkspaceId());
 
-            if ($type && $type_id) {
-                if ($type == 'project') {
-                    $project = Project::find($type_id);
-                    if ($project) {
-                        $clientsQuery = $project->clients();
-                    } else {
-                        return formatApiResponse(true, 'Project not found', ['total' => 0, 'data' => []]);
-                    }
-                } elseif ($type == 'task') {
-                    $task = Task::find($type_id);
-                    if ($task) {
-                        $clientsQuery = $task->project->clients();
-                    } else {
-                        return formatApiResponse(true, 'Task not found', ['total' => 0, 'data' => []]);
-                    }
+        if ($type && $type_id) {
+            if ($type === 'project') {
+                $project = Project::find($type_id);
+                if ($project) {
+                    $clientsQuery = $project->clients();
                 } else {
-                    $clientsQuery = $workspace->clients();
+                    return formatApiResponse(true, 'Project not found', ['total' => 0, 'data' => []]);
+                }
+            } elseif ($type === 'task') {
+                $task = Task::find($type_id);
+                if ($task) {
+                    $clientsQuery = $task->project->clients();
+                } else {
+                    return formatApiResponse(true, 'Task not found', ['total' => 0, 'data' => []]);
                 }
             } else {
                 $clientsQuery = $workspace->clients();
             }
-
-            $clientsQuery->when($search, function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%')
-                        ->orWhere('company', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('clients.id', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%')
-                        ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
-                });
-            });
-
-            if ($status != '') {
-                $clientsQuery->where('status', $status);
-            }
-
-            if ($internal_purpose != '') {
-                $clientsQuery->where('internal_purpose', $internal_purpose);
-            }
-
-            $total = $clientsQuery->count(); // get total count before applying offset and limit
-
-            $clients = $clientsQuery->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-
-            if ($clients->isEmpty()) {
-                return formatApiResponse(false, 'Clients not found', ['total' => 0, 'data' => []]);
-            }
-
-            $data = $clients->map(function ($client) {
-                return formatClient($client);
-            });
-
-            return formatApiResponse(
-                false,
-                'Clients retrieved successfully',
-                [
-                    'total' => $total,
-                    'data' => $data,
-                ]
-            );
+        } else {
+            $clientsQuery = $workspace->clients();
         }
+
+        $clientsQuery->when($search, function ($query) use ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhere('company', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('clients.id', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%')
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%']);
+            });
+        });
+
+        if ($status !== '') {
+            $clientsQuery->where('status', $status);
+        }
+
+        if ($internal_purpose !== '') {
+            $clientsQuery->where('internal_purpose', $internal_purpose);
+        }
+
+        $total = $clientsQuery->count(); // get total count before applying offset and limit
+
+        $clients = $clientsQuery->orderBy($sort, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        if ($clients->isEmpty()) {
+            return formatApiResponse(false, 'Clients not found', ['total' => 0, 'data' => []]);
+        }
+
+        $data = $clients->map(function ($client) {
+            return formatClient($client);
+        });
+
+        return formatApiResponse(
+            false,
+            'Clients retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
-
-
 
     public function verify_email(EmailVerificationRequest $request)
     {

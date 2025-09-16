@@ -13,7 +13,7 @@ class Item extends Model
         'unit_id',
         'title',
         'price',
-        'description'
+        'description',
     ];
 
     public function estimatesInvoices()

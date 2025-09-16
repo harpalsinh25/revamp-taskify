@@ -2,15 +2,14 @@
 
 namespace Plugins\SocialMediaManagement\Controllers;
 
-use Carbon\Carbon;
-use Illuminate\Support\Str;
-use FontLib\Table\Type\post;
-use Illuminate\Http\Request;
 use App\Services\DeletionService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Plugins\SocialMediaManagement\Models\SocialPost;
 use Plugins\SocialMediaManagement\Services\SocialMediaService;
 
@@ -56,18 +55,18 @@ class SocialMediaController extends Controller
                             'id' => $media->id,
                             'name' => $media->name,
                             'url' => $media->getFullUrl(),
-                            'type' => $media->mime_type
+                            'type' => $media->mime_type,
                         ];
                     }),
                     'response_logs' => $post->response_logs,
                     'successful_platforms' => $post->getSuccessfulPlatforms(),
-                    'failed_platforms' => $post->getFailedPlatforms()
-                ]
+                    'failed_platforms' => $post->getFailedPlatforms(),
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Post not found'
+                'message' => 'Post not found',
             ], 404);
         }
     }
@@ -76,8 +75,8 @@ class SocialMediaController extends Controller
     {
         $platformStatus = $this->getSocialPlatformsStatus();
         // Platforms that are NOT configured
-        $notConfigured = array_keys(array_filter($platformStatus, fn($v) => !$v));
-        if (!empty($notConfigured)) {
+        $notConfigured = array_keys(array_filter($platformStatus, fn ($v) => ! $v));
+        if (! empty($notConfigured)) {
             return response()->json([
                 'error' => true,
                 'message' => 'The following platforms are not properly configured: ' . implode(', ', $notConfigured),
@@ -91,13 +90,13 @@ class SocialMediaController extends Controller
             'platforms' => 'required|array|min:1',
             'platforms.*' => 'in:facebook,instagram,twitter,linkedin,pinterest',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,mov,avi|max:10240',
-            'post_type' => 'required|in:now,schedule'
+            'post_type' => 'required|in:now,schedule',
         ]);
 
         // Custom validation for scheduled posts
         $validator->after(function ($validator) use ($request) {
             if ($request->post_type === 'schedule') {
-                if (!$request->scheduled_at) {
+                if (! $request->scheduled_at) {
                     $validator->errors()->add('scheduled_at', 'Schedule date and time is required for scheduled posts.');
                     return;
                 }
@@ -131,13 +130,13 @@ class SocialMediaController extends Controller
                     // Platforms that don't support mixed media
                     $restrictedPlatforms = ['facebook', 'pinterest', 'linkedin'];
                     $conflictingPlatforms = array_intersect($platforms, $restrictedPlatforms);
-                    if (!empty($conflictingPlatforms)) {
+                    if (! empty($conflictingPlatforms)) {
                         $platformNames = [
                             'facebook' => 'Facebook',
                             'pinterest' => 'Pinterest',
-                            'linkedin' => 'LinkedIn'
+                            'linkedin' => 'LinkedIn',
                         ];
-                        $readableNames = array_map(fn($platform) => $platformNames[$platform], $conflictingPlatforms);
+                        $readableNames = array_map(fn ($platform) => $platformNames[$platform], $conflictingPlatforms);
                         $validator->errors()->add(
                             'media',
                             'Mixed media (images and videos together) is not supported on ' .
@@ -157,14 +156,14 @@ class SocialMediaController extends Controller
                 return response()->json([
                     'error' => true,
                     'message' => $mediaError,
-                    'errors' => $errors
+                    'errors' => $errors,
                 ], 422);
             }
             // For other validation errors, use the generic message
             return response()->json([
                 'error' => true,
                 'message' => 'Validation failed',
-                'errors' => $errors
+                'errors' => $errors,
             ], 422);
         }
 
@@ -199,10 +198,10 @@ class SocialMediaController extends Controller
             // If post now, publish immediately
             if ($validated['post_type'] === 'now') {
                 try {
-                    Log::info("=== CONTROLLER: STARTING IMMEDIATE PUBLISH ===", [
+                    Log::info('=== CONTROLLER: STARTING IMMEDIATE PUBLISH ===', [
                         'post_id' => $post->id,
                         'platforms' => $post->platforms,
-                        'media_count' => $post->getMedia('social-media')->count()
+                        'media_count' => $post->getMedia('social-media')->count(),
                     ]);
 
                     $responses = $this->publisher->publishPost($post);
@@ -210,11 +209,11 @@ class SocialMediaController extends Controller
                     // Refresh the post to get updated status and response_logs
                     $post = $post->fresh();
 
-                    Log::info("=== CONTROLLER: PUBLISH COMPLETED ===", [
+                    Log::info('=== CONTROLLER: PUBLISH COMPLETED ===', [
                         'post_id' => $post->id,
                         'final_status' => $post->status,
                         'successful_platforms' => $post->getSuccessfulPlatforms(),
-                        'failed_platforms' => $post->getFailedPlatforms()
+                        'failed_platforms' => $post->getFailedPlatforms(),
                     ]);
 
                     // Extract detailed error information from response_logs
@@ -232,29 +231,28 @@ class SocialMediaController extends Controller
                             'post_id' => $post->id,
                             'status' => $post->status,
                             'successful_platforms' => $post->getSuccessfulPlatforms(),
-                            'failed_platforms' => $post->getFailedPlatforms()
+                            'failed_platforms' => $post->getFailedPlatforms(),
                         ];
 
                         // Include error details if there were any failures (for partial publishing)
-                        if ($post->status === 'partially_published' && !empty($detailedErrors)) {
+                        if ($post->status === 'partially_published' && ! empty($detailedErrors)) {
                             $response['platform_errors'] = $detailedErrors;
                         }
 
                         return response()->json($response);
-                    } else {
-                        return response()->json([
-                            'error' => true,
-                            'message' => 'Failed to publish to any platform',
-                            'post_id' => $post->id,
-                            'status' => $post->status,
-                            'failed_platforms' => $post->getFailedPlatforms(),
-                            'platform_errors' => $detailedErrors,
-                            'exception' => config('app.debug') ? true : null,
-                            'debug_info' => config('app.debug') ? [
-                                'response_logs' => $post->response_logs
-                            ] : null
-                        ], 500);
                     }
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'Failed to publish to any platform',
+                        'post_id' => $post->id,
+                        'status' => $post->status,
+                        'failed_platforms' => $post->getFailedPlatforms(),
+                        'platform_errors' => $detailedErrors,
+                        'exception' => config('app.debug') ? true : null,
+                        'debug_info' => config('app.debug') ? [
+                            'response_logs' => $post->response_logs,
+                        ] : null,
+                    ], 500);
                 } catch (\Exception $e) {
                     // Update post status to failed if service throws exception
                     $errorDetails = [
@@ -268,14 +266,14 @@ class SocialMediaController extends Controller
                             'exception_details' => [
                                 'file' => $e->getFile(),
                                 'line' => $e->getLine(),
-                                'trace' => config('app.debug') ? $e->getTraceAsString() : null
-                            ]
-                        ]
+                                'trace' => config('app.debug') ? $e->getTraceAsString() : null,
+                            ],
+                        ],
                     ];
 
                     $post->update([
                         'status' => 'failed',
-                        'response_logs' => $errorDetails
+                        'response_logs' => $errorDetails,
                     ]);
 
                     Log::error('=== CONTROLLER: EXCEPTION DURING PUBLISH ===', [
@@ -283,7 +281,7 @@ class SocialMediaController extends Controller
                         'message' => $e->getMessage(),
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
-                        'trace' => $e->getTraceAsString()
+                        'trace' => $e->getTraceAsString(),
                     ]);
 
                     return response()->json([
@@ -295,12 +293,12 @@ class SocialMediaController extends Controller
                                 'error' => $e->getMessage(),
                                 'error_code' => 'SERVICE_EXCEPTION',
                                 'file' => config('app.debug') ? $e->getFile() : null,
-                                'line' => config('app.debug') ? $e->getLine() : null
-                            ]
+                                'line' => config('app.debug') ? $e->getLine() : null,
+                            ],
                         ],
                         'debug_info' => config('app.debug') ? [
-                            'exception_trace' => $e->getTraceAsString()
-                        ] : null
+                            'exception_trace' => $e->getTraceAsString(),
+                        ] : null,
                     ], 500);
                 }
             }
@@ -309,12 +307,12 @@ class SocialMediaController extends Controller
                 'error' => false,
                 'message' => 'Post scheduled successfully!',
                 'post_id' => $post->id,
-                'scheduled_for' => $post->scheduled_at->format('Y-m-d H:i:s')
+                'scheduled_for' => $post->scheduled_at->format('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
             Log::error('Error creating social post: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['media']) // Exclude media files from log
+                'request_data' => $request->except(['media']), // Exclude media files from log
             ]);
 
             return response()->json([
@@ -323,54 +321,25 @@ class SocialMediaController extends Controller
                 'error_details' => config('app.debug') ? [
                     'message' => $e->getMessage(),
                     'file' => $e->getFile(),
-                    'line' => $e->getLine()
-                ] : null
+                    'line' => $e->getLine(),
+                ] : null,
             ], 500);
         }
     }
 
-    /**
-     * Extract detailed error information from post response logs
-     */
-    private function extractDetailedErrors(SocialPost $post): array
-    {
-        $detailedErrors = [];
-        $responseLogs = $post->response_logs ?? [];
-
-        foreach ($responseLogs as $platform => $log) {
-            if (isset($log['success']) && !$log['success']) {
-                $detailedErrors[$platform] = [
-                    'error' => $log['error'] ?? 'Unknown error',
-                    'error_code' => $log['error_code'] ?? null,
-                    'status_code' => $log['status_code'] ?? null,
-                    'failed_at' => $log['failed_at'] ?? null,
-                    'api_response' => config('app.debug') ? ($log['api_response'] ?? null) : null
-                ];
-
-                // Remove null values to keep response clean
-                $detailedErrors[$platform] = array_filter($detailedErrors[$platform], function ($value) {
-                    return $value !== null;
-                });
-            }
-        }
-
-        return $detailedErrors;
-    }
-
-    function getSocialPlatformsStatus(): array
+    public function getSocialPlatformsStatus(): array
     {
         $socialSettings = get_settings('social_settings');
 
         return [
-            'facebook' => !empty($socialSettings['facebook_access_token']) && !empty($socialSettings['facebook_page_id']),
-            'instagram' => !empty($socialSettings['instagram_access_token']) && !empty($socialSettings['instagram_business_account_id']),
-            'linkedin' => !empty($socialSettings['linkedin_access_token']) && !empty($socialSettings['linkedin_person_id']),
-            'pinterest' => !empty($socialSettings['pinterest_app_id'])
-                && !empty($socialSettings['pinterest_app_secret'])
-                && !empty($socialSettings['pinterest_app_type']),
+            'facebook' => ! empty($socialSettings['facebook_access_token']) && ! empty($socialSettings['facebook_page_id']),
+            'instagram' => ! empty($socialSettings['instagram_access_token']) && ! empty($socialSettings['instagram_business_account_id']),
+            'linkedin' => ! empty($socialSettings['linkedin_access_token']) && ! empty($socialSettings['linkedin_person_id']),
+            'pinterest' => ! empty($socialSettings['pinterest_app_id'])
+                && ! empty($socialSettings['pinterest_app_secret'])
+                && ! empty($socialSettings['pinterest_app_type']),
         ];
     }
-
 
     public function list()
     {
@@ -388,8 +357,8 @@ class SocialMediaController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('caption', 'like', "%$search%")
-                    ->orWhere('status', 'like', "%$search%")
+                $q->where('caption', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%")
                     ->orWhereJsonContains('platforms', $search);
             });
         }
@@ -401,7 +370,6 @@ class SocialMediaController extends Controller
         if ($platform) {
             $query->whereJsonContains('platforms', $platform);
         }
-
 
         if ($startDate & $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
@@ -444,10 +412,6 @@ class SocialMediaController extends Controller
                 <i class="bx bx-show-alt text-info"></i>
             </button>';
 
-
-
-
-
             // Edit button (only for pending and scheduled posts)
             if ($canEdit && in_array($post->status, ['pending', 'scheduled'])) {
                 $actions .= '<a href="' . route('social.edit', $post->id) . '" class="edit-candidate-btn"
@@ -459,7 +423,6 @@ class SocialMediaController extends Controller
 
             // Format platforms display
             $platformsDisplay = collect($post->platforms)->map(function ($platform) {
-
                 $icon = $this->getPlatformIcon($platform);
                 $color = $this->getPlatformColor($platform);
 
@@ -495,19 +458,18 @@ class SocialMediaController extends Controller
                 'created_at' => format_date($post->created_at, false, 'Y-m-d H:i'),
                 'updated_at' => format_date($post->updated_at, false, 'Y-m-d H:i'),
                 // 'published_at' => $post->response_logs['published_at'] ? format_date($post->response_logs['published_at'], false, 'Y-m-d H:i') : '-',
-                'actions' => $actions
+                'actions' => $actions,
             ];
         });
 
         return response()->json([
             'total' => $total,
-            'rows' => $rows
+            'rows' => $rows,
         ]);
     }
 
     public function edit($id)
     {
-
         $post = SocialPost::findOrFail($id);
         return view('social-media-scheduler::social-media-scheduler.edit', compact('post'));
     }
@@ -517,10 +479,10 @@ class SocialMediaController extends Controller
         try {
             $post = SocialPost::findOrFail($id);
 
-            if (!in_array($post->status, ['pending', 'scheduled'])) {
+            if (! in_array($post->status, ['pending', 'scheduled'])) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Only pending and scheduled posts can be edited.'
+                    'message' => 'Only pending and scheduled posts can be edited.',
                 ], 400);
             }
 
@@ -529,14 +491,14 @@ class SocialMediaController extends Controller
                 'scheduled_at' => 'nullable|date|after:now',
                 'platforms' => 'required|array|min:1',
                 'platforms.*' => 'in:facebook,instagram,twitter,linkedin,pinterest',
-                'post_type' => 'required|in:now,schedule'
+                'post_type' => 'required|in:now,schedule',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'error' => true,
                     'message' => 'Validation failed',
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
@@ -564,14 +526,14 @@ class SocialMediaController extends Controller
             }
             return response()->json([
                 'error' => false,
-                'message' => 'Post updated successfully!'
+                'message' => 'Post updated successfully!',
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating post: ' . $e->getMessage());
 
             return response()->json([
                 'error' => true,
-                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred'
+                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',
             ], 500);
         }
     }
@@ -580,12 +542,11 @@ class SocialMediaController extends Controller
     {
         try {
             $post = SocialPost::findOrFail($id);
-            $response = DeletionService::delete(SocialPost::class, $post->id, 'Post');
-            return $response;
+            return DeletionService::delete(SocialPost::class, $post->id, 'Post');
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Post not found'
+                'message' => 'Post not found',
             ], 404);
         }
     }
@@ -594,7 +555,7 @@ class SocialMediaController extends Controller
     {
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:social_posts,id'
+            'ids.*' => 'exists:social_posts,id',
         ]);
 
         $ids = $validatedData['ids'];
@@ -617,19 +578,20 @@ class SocialMediaController extends Controller
         ]);
     }
 
-    public function destroyMedia($id){
+    public function destroyMedia($id)
+    {
         try {
             $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::findOrFail($id);
             $media->delete();
 
             return response()->json([
                 'error' => false,
-                'message' => 'Media deleted successfully!'
+                'message' => 'Media deleted successfully!',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Media not found'
+                'message' => 'Media not found',
             ], 404);
         }
     }
@@ -641,7 +603,7 @@ class SocialMediaController extends Controller
             'existingCaption' => 'nullable|string',
             'isCustomPrompt' => 'required|in:true,false,0,1,TRUE,FALSE',
             'platforms' => 'nullable|array',
-            'platforms.*' => 'in:facebook,instagram,linkedin,pinterest'
+            'platforms.*' => 'in:facebook,instagram,linkedin,pinterest',
         ]);
 
         try {
@@ -655,19 +617,19 @@ class SocialMediaController extends Controller
             $platformContext = '';
             $maxLength = 2000; // Default max length
 
-            if (!empty($platforms)) {
+            if (! empty($platforms)) {
                 $platformNames = [
                     'facebook' => 'Facebook',
                     'instagram' => 'Instagram',
                     'linkedin' => 'LinkedIn',
-                    'pinterest' => 'Pinterest'
+                    'pinterest' => 'Pinterest',
                 ];
 
                 $selectedPlatformNames = array_map(function ($platform) use ($platformNames) {
                     return $platformNames[$platform] ?? $platform;
                 }, $platforms);
 
-                $platformContext = "Target platforms: " . implode(', ', $selectedPlatformNames) . ".";
+                $platformContext = 'Target platforms: ' . implode(', ', $selectedPlatformNames) . '.';
 
                 // Set max length based on most restrictive platform
                 if (in_array('pinterest', $platforms)) {
@@ -684,7 +646,7 @@ class SocialMediaController extends Controller
                 if (empty(trim($userPrompt))) {
                     return response()->json([
                         'error' => true,
-                        'message' => 'Custom prompt is required when custom prompt mode is enabled.'
+                        'message' => 'Custom prompt is required when custom prompt mode is enabled.',
                     ], 422);
                 }
 
@@ -695,7 +657,7 @@ class SocialMediaController extends Controller
 User Request:
 {$userPrompt}
 
-" . ($existingCaption ? "Current Caption (to improve/replace):\n{$existingCaption}\n" : "No existing caption.") . "
+" . ($existingCaption ? "Current Caption (to improve/replace):\n{$existingCaption}\n" : 'No existing caption.') . "
 
 Instructions:
 - Create an engaging, platform-appropriate social media caption
@@ -708,13 +670,13 @@ Instructions:
 Output only the HTML caption content—no explanations or extra text.";
             } else {
                 // Auto-generate mode - improve existing or create new
-                $action = $existingCaption ? "enhance and improve" : "create";
+                $action = $existingCaption ? 'enhance and improve' : 'create';
 
                 $fullPrompt = "Create an engaging social media caption.
 
 {$platformContext}
 
-" . ($existingCaption ? "Current Caption:\n{$existingCaption}\n" : "No existing caption - create from scratch.") . "
+" . ($existingCaption ? "Current Caption:\n{$existingCaption}\n" : 'No existing caption - create from scratch.') . "
 
 Instructions:
 - {$action} a compelling social media caption
@@ -758,10 +720,9 @@ Output only the HTML caption content—no explanations or extra text.";
                 'message' => 'Caption generated successfully!',
                 'caption' => $generatedCaption,
                 'character_count' => strlen(strip_tags($generatedCaption)),
-                'platforms' => $platforms
+                'platforms' => $platforms,
             ]);
         } catch (\Exception $e) {
-
             // dd($e);
             // Log the error
             Log::error('Social Media Caption AI Generation Error', [
@@ -770,7 +731,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 'file' => $e->getFile(),
                 'user_id' => auth()->id(),
                 'prompt' => $userPrompt,
-                'platforms' => $platforms ?? []
+                'platforms' => $platforms ?? [],
             ]);
 
             return response()->json([
@@ -778,34 +739,6 @@ Output only the HTML caption content—no explanations or extra text.";
                 'message' => 'Failed to generate caption. Please try again or contact support if the issue persists.',
             ], 500);
         }
-    }
-
-    /**
-     * Helper method to truncate caption while preserving HTML structure
-     */
-    private function truncateCaption($html, $maxLength)
-    {
-        $text = strip_tags($html);
-        if (strlen($text) <= $maxLength) {
-            return $html;
-        }
-
-        // Find a good breaking point (sentence end, word boundary, etc.)
-        $truncated = substr($text, 0, $maxLength - 10); // Leave some buffer
-        $lastSpace = strrpos($truncated, ' ');
-        $lastSentence = strrpos($truncated, '.');
-
-        $breakPoint = max($lastSpace, $lastSentence);
-        if ($breakPoint > $maxLength * 0.8) { // Don't break too early
-            $truncated = substr($text, 0, $breakPoint + ($lastSentence === $breakPoint ? 1 : 0));
-        }
-
-        // Simple HTML preservation - wrap in paragraph if needed
-        if (!preg_match('/^<p/', trim($truncated))) {
-            $truncated = '<p>' . $truncated . '</p>';
-        }
-
-        return $truncated;
     }
 
     /**
@@ -829,10 +762,10 @@ Output only the HTML caption content—no explanations or extra text.";
 
             // DEBUG: Log timezone info
             Log::info('=== CALENDAR DEBUG ===', [
-                'user_timezone'   => $userTimezone,
+                'user_timezone' => $userTimezone,
                 'server_timezone' => config('app.timezone'),
-                'current_utc'     => now('UTC')->toDateTimeString(),
-                'current_user_tz' => now($userTimezone)->toDateTimeString()
+                'current_utc' => now('UTC')->toDateTimeString(),
+                'current_user_tz' => now($userTimezone)->toDateTimeString(),
             ]);
 
             // -------------------
@@ -840,22 +773,22 @@ Output only the HTML caption content—no explanations or extra text.";
             // -------------------
             if ($view === 'week') {
                 $startDate = $request->input('start_date');
-                $endDate   = $request->input('end_date');
+                $endDate = $request->input('end_date');
 
-                if (!$startDate || !$endDate) {
+                if (! $startDate || ! $endDate) {
                     return response()->json([
                         'error' => true,
-                        'message' => 'Start date and end date are required for week view'
+                        'message' => 'Start date and end date are required for week view',
                     ], 400);
                 }
 
                 // Parse in USER timezone and convert to UTC for DB query
                 $userStart = Carbon::createFromFormat('Y-m-d', $startDate, $userTimezone)->startOfDay();
-                $userEnd   = Carbon::createFromFormat('Y-m-d', $endDate, $userTimezone)->endOfDay();
+                $userEnd = Carbon::createFromFormat('Y-m-d', $endDate, $userTimezone)->endOfDay();
 
                 // Convert to UTC for DB query
                 $startDate = $userStart->copy()->utc();
-                $endDate   = $userEnd->copy()->utc();
+                $endDate = $userEnd->copy()->utc();
             }
 
             // -------------------
@@ -863,7 +796,7 @@ Output only the HTML caption content—no explanations or extra text.";
             // -------------------
             else {
                 $month = $request->input('month', now()->month);
-                $year  = $request->input('year', now()->year);
+                $year = $request->input('year', now()->year);
 
                 // Validate month/year
                 if ($month < 1 || $month > 12) {
@@ -884,15 +817,15 @@ Output only the HTML caption content—no explanations or extra text.";
 
                 // Convert to UTC for DB query
                 $startDate = $userStart->copy()->utc();
-                $endDate   = $userEnd->copy()->utc();
+                $endDate = $userEnd->copy()->utc();
             }
 
             // DEBUG: Log date ranges
             Log::info('=== DATE RANGES ===', [
-                'query_start_utc'    => $startDate->toDateTimeString(),
-                'query_end_utc'      => $endDate->toDateTimeString(),
-                'user_start'         => $userStart->setTimezone($userTimezone)->toDateTimeString(),
-                'user_end'           => $userEnd->setTimezone($userTimezone)->toDateTimeString()
+                'query_start_utc' => $startDate->toDateTimeString(),
+                'query_end_utc' => $endDate->toDateTimeString(),
+                'user_start' => $userStart->setTimezone($userTimezone)->toDateTimeString(),
+                'user_end' => $userEnd->setTimezone($userTimezone)->toDateTimeString(),
             ]);
 
             // Build query with eager loading
@@ -904,7 +837,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 });
 
             // Apply user permissions
-            if (!isAdminOrHasAllDataAccess()) {
+            if (! isAdminOrHasAllDataAccess()) {
                 $query->where('user_id', auth()->id());
             }
 
@@ -919,7 +852,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 'scheduled' => 0,
                 'failed' => 0,
                 'partially_published' => 0,
-                'pending' => 0
+                'pending' => 0,
             ];
 
             // -------------------
@@ -930,7 +863,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 $primaryDate = $post->scheduled_at ?: $post->created_at;
 
                 // FIXED: Ensure we have a Carbon instance and convert to user timezone ONCE
-                if (!$primaryDate instanceof Carbon) {
+                if (! $primaryDate instanceof Carbon) {
                     $primaryDate = Carbon::parse($primaryDate);
                 }
 
@@ -943,31 +876,31 @@ Output only the HTML caption content—no explanations or extra text.";
                 // DEBUG first few posts
                 if (count($calendarData) < 3) {
                     Log::info('=== POST DEBUG ===', [
-                        'post_id'                => $post->id,
-                        'scheduled_at_utc'       => $post->scheduled_at ? $post->scheduled_at->utc()->toDateTimeString() : null,
-                        'created_at_utc'         => $post->created_at->utc()->toDateTimeString(),
-                        'primary_date_utc'       => $primaryDate->utc()->toDateTimeString(),
-                        'post_date_user_tz'      => $postDateInUserTz->toDateTimeString(),
-                        'date_key'               => $dateKey,
-                        'user_timezone'          => $userTimezone
+                        'post_id' => $post->id,
+                        'scheduled_at_utc' => $post->scheduled_at ? $post->scheduled_at->utc()->toDateTimeString() : null,
+                        'created_at_utc' => $post->created_at->utc()->toDateTimeString(),
+                        'primary_date_utc' => $primaryDate->utc()->toDateTimeString(),
+                        'post_date_user_tz' => $postDateInUserTz->toDateTimeString(),
+                        'date_key' => $dateKey,
+                        'user_timezone' => $userTimezone,
                     ]);
                 }
 
                 // Initialize date bucket if not exists
-                if (!isset($calendarData[$dateKey])) {
+                if (! isset($calendarData[$dateKey])) {
                     $calendarData[$dateKey] = [];
                 }
 
                 // Get platform icons
                 $platforms = is_array($post->platforms) ? $post->platforms : json_decode($post->platforms, true) ?? [];
                 $iconsMap = [
-                    'facebook'  => 'bxl-facebook-circle',
+                    'facebook' => 'bxl-facebook-circle',
                     'instagram' => 'bxl-instagram',
-                    'twitter'   => 'bxl-twitter',
-                    'linkedin'  => 'bxl-linkedin',
-                    'pinterest' => 'bxl-pinterest'
+                    'twitter' => 'bxl-twitter',
+                    'linkedin' => 'bxl-linkedin',
+                    'pinterest' => 'bxl-pinterest',
                 ];
-                $platformIcons = array_map(fn($p) => $iconsMap[strtolower($p)] ?? 'bx-globe', $platforms);
+                $platformIcons = array_map(fn ($p) => $iconsMap[strtolower($p)] ?? 'bx-globe', $platforms);
 
                 // Update stats
                 if (isset($totalStats[$post->status])) {
@@ -992,52 +925,52 @@ Output only the HTML caption content—no explanations or extra text.";
 
                 // FIXED: All datetime conversions done consistently
                 $calendarData[$dateKey][] = [
-                    'id'                   => $post->id,
-                    'caption'              => $this->sanitizeCaption($post->caption),
-                    'status'               => $post->status,
-                    'time'                 => $postDateInUserTz->format('H:i'), // Time in user timezone
-                    'platforms'            => $platforms,
-                    'platform_icons'       => $platformIcons,
-                    'media_count'          => $mediaCount,
-                    'user'                 => $post->user->name ?? 'Unknown',
-                    'is_scheduled'         => $post->scheduled_at !== null,
+                    'id' => $post->id,
+                    'caption' => $this->sanitizeCaption($post->caption),
+                    'status' => $post->status,
+                    'time' => $postDateInUserTz->format('H:i'), // Time in user timezone
+                    'platforms' => $platforms,
+                    'platform_icons' => $platformIcons,
+                    'media_count' => $mediaCount,
+                    'user' => $post->user->name ?? 'Unknown',
+                    'is_scheduled' => $post->scheduled_at !== null,
                     'successful_platforms' => $successfulPlatforms,
-                    'failed_platforms'     => $failedPlatforms,
+                    'failed_platforms' => $failedPlatforms,
                     // FIXED: All dates converted consistently to user timezone
-                    'created_at'           => $post->created_at->copy()->setTimezone($userTimezone)->format('Y-m-d H:i:s'),
-                    'updated_at'           => $post->updated_at->copy()->setTimezone($userTimezone)->format('Y-m-d H:i:s'),
-                    'scheduled_at'         => $post->scheduled_at ? $post->scheduled_at->copy()->setTimezone($userTimezone)->format('Y-m-d H:i:s') : null,
+                    'created_at' => $post->created_at->copy()->setTimezone($userTimezone)->format('Y-m-d H:i:s'),
+                    'updated_at' => $post->updated_at->copy()->setTimezone($userTimezone)->format('Y-m-d H:i:s'),
+                    'scheduled_at' => $post->scheduled_at ? $post->scheduled_at->copy()->setTimezone($userTimezone)->format('Y-m-d H:i:s') : null,
                     // FIXED: Add the primary date used for grouping for frontend reference
-                    'display_date'         => $postDateInUserTz->format('Y-m-d H:i:s'),
-                    'display_date_iso'     => $postDateInUserTz->toISOString()
+                    'display_date' => $postDateInUserTz->format('Y-m-d H:i:s'),
+                    'display_date_iso' => $postDateInUserTz->toISOString(),
                 ];
             }
 
             // DEBUG: Log final keys and verify grouping
             Log::info('=== CALENDAR DATA SUMMARY ===', [
-                'calendar_dates'     => array_keys($calendarData),
-                'total_posts'        => $posts->count(),
-                'posts_per_date'     => array_map('count', $calendarData),
-                'user_timezone'      => $userTimezone,
-                'sample_post_dates'  => array_slice(array_keys($calendarData), 0, 5)
+                'calendar_dates' => array_keys($calendarData),
+                'total_posts' => $posts->count(),
+                'posts_per_date' => array_map('count', $calendarData),
+                'user_timezone' => $userTimezone,
+                'sample_post_dates' => array_slice(array_keys($calendarData), 0, 5),
             ]);
 
             // Response
             $responseData = [
-                'error'       => false,
-                'data'        => $calendarData,
-                'stats'       => $totalStats,
+                'error' => false,
+                'data' => $calendarData,
+                'stats' => $totalStats,
                 'total_posts' => $posts->count(),
-                'view'        => $view,
-                'timezone'    => $userTimezone
+                'view' => $view,
+                'timezone' => $userTimezone,
             ];
 
             if ($view === 'week') {
                 $responseData['start_date'] = Carbon::parse($request->input('start_date'))->format('Y-m-d');
-                $responseData['end_date']   = Carbon::parse($request->input('end_date'))->format('Y-m-d');
+                $responseData['end_date'] = Carbon::parse($request->input('end_date'))->format('Y-m-d');
             } else {
-                $responseData['month']      = $month ?? now()->month;
-                $responseData['year']       = $year ?? now()->year;
+                $responseData['month'] = $month ?? now()->month;
+                $responseData['year'] = $year ?? now()->year;
                 $responseData['month_name'] = Carbon::create($year ?? now()->year, $month ?? now()->month, 1)->format('F Y');
             }
 
@@ -1047,16 +980,15 @@ Output only the HTML caption content—no explanations or extra text.";
                 'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
                 'view' => $request->input('view'),
-                'request_data' => $request->all()
+                'request_data' => $request->all(),
             ]);
 
             return response()->json([
-                'error'   => true,
-                'message' => config('app.debug') ? $e->getMessage() : 'Failed to load calendar data'
+                'error' => true,
+                'message' => config('app.debug') ? $e->getMessage() : 'Failed to load calendar data',
             ], 500);
         }
     }
-
 
     /**
      * Get posts for a specific date (for daily view or detailed view)
@@ -1066,10 +998,10 @@ Output only the HTML caption content—no explanations or extra text.";
         try {
             $date = $request->input('date');
 
-            if (!$date) {
+            if (! $date) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Date parameter is required'
+                    'message' => 'Date parameter is required',
                 ], 400);
             }
 
@@ -1089,7 +1021,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 });
 
             // Apply user permissions
-            if (!isAdminOrHasAllDataAccess()) {
+            if (! isAdminOrHasAllDataAccess()) {
                 $query->where('user_id', auth()->id());
             }
 
@@ -1111,7 +1043,7 @@ Output only the HTML caption content—no explanations or extra text.";
                             'id' => $media->id,
                             'name' => $media->name,
                             'url' => $media->getFullUrl(),
-                            'type' => $media->mime_type
+                            'type' => $media->mime_type,
                         ];
                     });
                 }
@@ -1132,7 +1064,7 @@ Output only the HTML caption content—no explanations or extra text.";
                         : [],
                     'failed_platforms' => method_exists($post, 'getFailedPlatforms')
                         ? $post->getFailedPlatforms()
-                        : []
+                        : [],
                 ];
             });
 
@@ -1140,14 +1072,14 @@ Output only the HTML caption content—no explanations or extra text.";
                 'error' => false,
                 'data' => $postsData,
                 'date' => $date,
-                'total' => $posts->count()
+                'total' => $posts->count(),
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching posts by date: ' . $e->getMessage());
 
             return response()->json([
                 'error' => true,
-                'message' => 'Failed to load posts for the specified date'
+                'message' => 'Failed to load posts for the specified date',
             ], 500);
         }
     }
@@ -1167,7 +1099,7 @@ Output only the HTML caption content—no explanations or extra text.";
             $query = SocialPost::whereBetween('created_at', [$startDate, $endDate]);
 
             // Apply user permissions
-            if (!isAdminOrHasAllDataAccess()) {
+            if (! isAdminOrHasAllDataAccess()) {
                 $query->where('user_id', auth()->id());
             }
 
@@ -1198,32 +1130,16 @@ Output only the HTML caption content—no explanations or extra text.";
                 'stats' => $stats,
                 'platform_stats' => $platformStats,
                 'month' => $month,
-                'year' => $year
+                'year' => $year,
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching calendar stats: ' . $e->getMessage());
 
             return response()->json([
                 'error' => true,
-                'message' => 'Failed to load statistics'
+                'message' => 'Failed to load statistics',
             ], 500);
         }
-    }
-
-
-
-    /**
-     * Helper method to sanitize caption text
-     */
-    private function sanitizeCaption($caption)
-    {
-        if (!$caption) return '';
-
-        // Remove HTML tags and decode entities
-        $caption = html_entity_decode(strip_tags($caption));
-
-        // Limit length for display
-        return strlen($caption) > 100 ? substr($caption, 0, 100) . '...' : $caption;
     }
 
     /**
@@ -1278,7 +1194,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 'total_media_files' => $posts->sum(function ($post) {
                     return method_exists($post, 'getMedia') ? $post->getMedia('social-media')->count() : 0;
                 }),
-                'success_rate' => $totalPosts > 0 ? round(($successfulPosts / $totalPosts) * 100, 2) : 0
+                'success_rate' => $totalPosts > 0 ? round($successfulPosts / $totalPosts * 100, 2) : 0,
             ];
 
             // Platform Statistics
@@ -1310,7 +1226,7 @@ Output only the HTML caption content—no explanations or extra text.";
                     'successful' => $successfulCount,
                     'failed' => $failedCount,
                     'success_rate' => $platformPosts->count() > 0 ?
-                        round(($successfulCount / $platformPosts->count()) * 100, 2) : 0
+                        round($successfulCount / $platformPosts->count() * 100, 2) : 0,
                 ];
             }
 
@@ -1330,7 +1246,7 @@ Output only the HTML caption content—no explanations or extra text.";
                     'partially_published' => $dayPosts->where('status', 'partially_published')->count(),
                     'scheduled' => $dayPosts->where('status', 'scheduled')->count(),
                     'failed' => $dayPosts->where('status', 'failed')->count(),
-                    'pending' => $dayPosts->where('status', 'pending')->count()
+                    'pending' => $dayPosts->where('status', 'pending')->count(),
                 ];
             }
 
@@ -1340,7 +1256,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 ['status' => 'Partially Published', 'count' => $overallStats['partially_published'], 'color' => $this->getStatusColor('partially_published')],
                 ['status' => 'Scheduled', 'count' => $overallStats['scheduled'], 'color' => $this->getStatusColor('scheduled')],
                 ['status' => 'Failed', 'count' => $overallStats['failed'], 'color' => $this->getStatusColor('failed')],
-                ['status' => 'Pending', 'count' => $overallStats['pending'], 'color' => $this->getStatusColor('pending')]
+                ['status' => 'Pending', 'count' => $overallStats['pending'], 'color' => $this->getStatusColor('pending')],
             ];
 
             // Platform Distribution (for pie chart)
@@ -1350,7 +1266,7 @@ Output only the HTML caption content—no explanations or extra text.";
                     $platformDistribution[] = [
                         'platform' => ucfirst($platform),
                         'count' => $stats['total_posts'],
-                        'color' => $this->getPlatformColor($platform)
+                        'color' => $this->getPlatformColor($platform),
                     ];
                 }
             }
@@ -1366,7 +1282,7 @@ Output only the HTML caption content—no explanations or extra text.";
                         'platforms' => $post->platforms,
                         'created_at' => $post->created_at->format('M d, Y H:i'),
                         'scheduled_at' => $post->scheduled_at ? $post->scheduled_at->format('M d, Y H:i') : null,
-                        'media_count' => method_exists($post, 'getMedia') ? $post->getMedia('social-media')->count() : 0
+                        'media_count' => method_exists($post, 'getMedia') ? $post->getMedia('social-media')->count() : 0,
                     ];
                 })
                 ->values();
@@ -1382,14 +1298,14 @@ Output only the HTML caption content—no explanations or extra text.";
             for ($i = 0; $i < 24; $i++) {
                 $peakHours[] = [
                     'hour' => sprintf('%02d:00', $i),
-                    'count' => $hourlyStats[$i]
+                    'count' => $hourlyStats[$i],
                 ];
             }
 
             // Scheduled vs Immediate Posts
             $schedulingStats = [
                 'immediate' => $posts->whereNull('scheduled_at')->count(),
-                'scheduled' => $posts->whereNotNull('scheduled_at')->count()
+                'scheduled' => $posts->whereNotNull('scheduled_at')->count(),
             ];
 
             // Media Usage Statistics
@@ -1402,7 +1318,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 'posts_without_media' => $totalPosts - $postsWithMedia,
                 'total_media_files' => $overallStats['total_media_files'],
                 'avg_media_per_post' => $totalPosts > 0 ?
-                    round($overallStats['total_media_files'] / $totalPosts, 2) : 0
+                    round($overallStats['total_media_files'] / $totalPosts, 2) : 0,
             ];
 
             return response()->json([
@@ -1420,19 +1336,19 @@ Output only the HTML caption content—no explanations or extra text.";
                     'date_range' => [
                         'start' => $start->format('Y-m-d'),
                         'end' => $end->format('Y-m-d'),
-                        'days' => $start->diffInDays($end) + 1
-                    ]
-                ]
+                        'days' => $start->diffInDays($end) + 1,
+                    ],
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching analytics data: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'error' => true,
-                'message' => config('app.debug') ? $e->getMessage() : 'Failed to load analytics data'
+                'message' => config('app.debug') ? $e->getMessage() : 'Failed to load analytics data',
             ], 500);
         }
     }
@@ -1473,16 +1389,164 @@ Output only the HTML caption content—no explanations or extra text.";
 
             return response()->json([
                 'error' => false,
-                'data' => $trendsData
+                'data' => $trendsData,
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching trends data: ' . $e->getMessage());
 
             return response()->json([
                 'error' => true,
-                'message' => 'Failed to load trends data'
+                'message' => 'Failed to load trends data',
             ], 500);
         }
+    }
+
+    // Add this method to your SocialMediaController class
+
+    public function getPostDetail($id)
+    {
+        try {
+            $post = SocialPost::with(['user', 'media'])->findOrFail($id);
+
+            // Check if user has permission to view this post
+            $canView = (isAdminOrHasAllDataAccess() ||
+                auth()->user()->can('manage_posts'));
+
+            if (! $canView) {
+                abort(403, 'You do not have permission to view this post.');
+            }
+
+            // Get media files with proper URLs
+            $mediaFiles = $post->getMedia('social-media')->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'name' => $media->name,
+                    'file_name' => $media->file_name,
+                    'mime_type' => $media->mime_type,
+                    'size' => $media->size,
+                    'url' => $media->getUrl(),
+                    'is_image' => str_starts_with($media->mime_type, 'image/'),
+                    'is_video' => str_starts_with($media->mime_type, 'video/'),
+                    'human_readable_size' => $this->formatBytes($media->size),
+                ];
+            });
+
+            // Format platform information
+            $platformsInfo = collect($post->platforms)->map(function ($platform) use ($post) {
+                $platformData = [
+                    'name' => $platform,
+                    'display_name' => ucfirst($platform),
+                    'icon' => $this->getPlatformIcon($platform),
+                    'color' => $this->getPlatformColor($platform),
+                    'status' => 'pending', // default
+                ];
+
+                // Get platform-specific status from response_logs if available
+                if ($post->response_logs && isset($post->response_logs[$platform])) {
+                    $platformLog = $post->response_logs[$platform];
+                    $platformData['status'] = $platformLog['success'] ? 'published' : 'failed';
+                    $platformData['published_at'] = isset($platformLog['published_at'])
+                        ? \Carbon\Carbon::parse($platformLog['published_at'])
+                        : null;
+                    $platformData['post_url'] = $platformLog['post_url'] ?? null;
+                    $platformData['error'] = $platformLog['error'] ?? null;
+                }
+
+                return $platformData;
+            });
+
+            // Check permissions for actions
+            $canEdit = (isAdminOrHasAllDataAccess() || auth()->user()->can('edit_posts')) &&
+                in_array($post->status, ['pending', 'scheduled']);
+            $canDelete = (isAdminOrHasAllDataAccess() || auth()->user()->can('delete_posts'));
+
+            return view('social-media-scheduler::social-media-scheduler.post_info', compact(
+                'post',
+                'mediaFiles',
+                'platformsInfo',
+                'canEdit',
+                'canDelete'
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error loading post details: ' . $e->getMessage(), [
+                'post_id' => $id,
+                'user_id' => auth()->id(),
+            ]);
+
+            return redirect()->route('social.index')->with('error', 'Post not found or access denied.');
+        }
+    }
+
+    /**
+     * Extract detailed error information from post response logs
+     */
+    private function extractDetailedErrors(SocialPost $post): array
+    {
+        $detailedErrors = [];
+        $responseLogs = $post->response_logs ?? [];
+
+        foreach ($responseLogs as $platform => $log) {
+            if (isset($log['success']) && ! $log['success']) {
+                $detailedErrors[$platform] = [
+                    'error' => $log['error'] ?? 'Unknown error',
+                    'error_code' => $log['error_code'] ?? null,
+                    'status_code' => $log['status_code'] ?? null,
+                    'failed_at' => $log['failed_at'] ?? null,
+                    'api_response' => config('app.debug') ? ($log['api_response'] ?? null) : null,
+                ];
+
+                // Remove null values to keep response clean
+                $detailedErrors[$platform] = array_filter($detailedErrors[$platform], function ($value) {
+                    return $value !== null;
+                });
+            }
+        }
+
+        return $detailedErrors;
+    }
+
+    /**
+     * Helper method to truncate caption while preserving HTML structure
+     */
+    private function truncateCaption($html, $maxLength)
+    {
+        $text = strip_tags($html);
+        if (strlen($text) <= $maxLength) {
+            return $html;
+        }
+
+        // Find a good breaking point (sentence end, word boundary, etc.)
+        $truncated = substr($text, 0, $maxLength - 10); // Leave some buffer
+        $lastSpace = strrpos($truncated, ' ');
+        $lastSentence = strrpos($truncated, '.');
+
+        $breakPoint = max($lastSpace, $lastSentence);
+        if ($breakPoint > $maxLength * 0.8) { // Don't break too early
+            $truncated = substr($text, 0, $breakPoint + ($lastSentence === $breakPoint ? 1 : 0));
+        }
+
+        // Simple HTML preservation - wrap in paragraph if needed
+        if (! preg_match('/^<p/', trim($truncated))) {
+            $truncated = '<p>' . $truncated . '</p>';
+        }
+
+        return $truncated;
+    }
+
+    /**
+     * Helper method to sanitize caption text
+     */
+    private function sanitizeCaption($caption)
+    {
+        if (! $caption) {
+            return '';
+        }
+
+        // Remove HTML tags and decode entities
+        $caption = html_entity_decode(strip_tags($caption));
+
+        // Limit length for display
+        return strlen($caption) > 100 ? substr($caption, 0, 100) . '...' : $caption;
     }
 
     /**
@@ -1495,7 +1559,7 @@ Output only the HTML caption content—no explanations or extra text.";
             'instagram' => '#E4405F',
             'twitter' => '#1DA1F2',
             'linkedin' => '#0077B5',
-            'pinterest' => '#E60023'
+            'pinterest' => '#E60023',
         ];
 
         return $colors[strtolower($platform)] ?? '#6c757d';
@@ -1508,7 +1572,7 @@ Output only the HTML caption content—no explanations or extra text.";
             'instagram' => 'bxl-instagram',
             'twitter' => 'bxl-twitter',
             'linkedin' => 'bxl-linkedin',
-            'pinterest' => 'bxl-pinterest'
+            'pinterest' => 'bxl-pinterest',
         ];
 
         return $icons[strtolower($platform)] ?? 'bx-globe';
@@ -1524,13 +1588,11 @@ Output only the HTML caption content—no explanations or extra text.";
             'scheduled' => '#ffc107',      // warning
             'failed' => '#dc3545',         // danger
             'partially_published' => '#007bff', // primary
-            'pending' => '#6c757d'         // secondary
+            'pending' => '#6c757d',         // secondary
         ];
 
         return $colors[$status] ?? '#6c757d';
     }
-
-
 
     /**
      * Get daily trends data
@@ -1552,7 +1614,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 'partially_published' => $dayPosts->where('status', 'partially_published')->count(),
                 'scheduled' => $dayPosts->where('status', 'scheduled')->count(),
                 'failed' => $dayPosts->where('status', 'failed')->count(),
-                'pending' => $dayPosts->where('status', 'pending')->count()
+                'pending' => $dayPosts->where('status', 'pending')->count(),
             ];
         }
 
@@ -1585,7 +1647,7 @@ Output only the HTML caption content—no explanations or extra text.";
                 'partially_published' => $weekPosts->where('status', 'partially_published')->count(),
                 'scheduled' => $weekPosts->where('status', 'scheduled')->count(),
                 'failed' => $weekPosts->where('status', 'failed')->count(),
-                'pending' => $weekPosts->where('status', 'pending')->count()
+                'pending' => $weekPosts->where('status', 'pending')->count(),
             ];
 
             $current->addWeek();
@@ -1620,93 +1682,13 @@ Output only the HTML caption content—no explanations or extra text.";
                 'partially_published' => $monthPosts->where('status', 'partially_published')->count(),
                 'scheduled' => $monthPosts->where('status', 'scheduled')->count(),
                 'failed' => $monthPosts->where('status', 'failed')->count(),
-                'pending' => $monthPosts->where('status', 'pending')->count()
+                'pending' => $monthPosts->where('status', 'pending')->count(),
             ];
 
             $current->addMonth();
         }
 
         return $monthlyStats;
-    }
-
-
-
-
-
-    // Add this method to your SocialMediaController class
-
-    public function getPostDetail($id)
-    {
-        try {
-            $post = SocialPost::with(['user', 'media'])->findOrFail($id);
-
-            // Check if user has permission to view this post
-            $canView = (isAdminOrHasAllDataAccess() ||
-                auth()->user()->can('manage_posts'));
-
-            if (!$canView) {
-                abort(403, 'You do not have permission to view this post.');
-            }
-
-            // Get media files with proper URLs
-            $mediaFiles = $post->getMedia('social-media')->map(function ($media) {
-                return [
-                    'id' => $media->id,
-                    'name' => $media->name,
-                    'file_name' => $media->file_name,
-                    'mime_type' => $media->mime_type,
-                    'size' => $media->size,
-                    'url' => $media->getUrl(),
-                    'is_image' => str_starts_with($media->mime_type, 'image/'),
-                    'is_video' => str_starts_with($media->mime_type, 'video/'),
-                    'human_readable_size' => $this->formatBytes($media->size)
-                ];
-            });
-
-            // Format platform information
-            $platformsInfo = collect($post->platforms)->map(function ($platform) use ($post) {
-                $platformData = [
-                    'name' => $platform,
-                    'display_name' => ucfirst($platform),
-                    'icon' => $this->getPlatformIcon($platform),
-                    'color' => $this->getPlatformColor($platform),
-                    'status' => 'pending' // default
-                ];
-
-                // Get platform-specific status from response_logs if available
-                if ($post->response_logs && isset($post->response_logs[$platform])) {
-                    $platformLog = $post->response_logs[$platform];
-                    $platformData['status'] = $platformLog['success'] ? 'published' : 'failed';
-                    $platformData['published_at'] = isset($platformLog['published_at'])
-                        ? \Carbon\Carbon::parse($platformLog['published_at'])
-                        : null;
-                    $platformData['post_url'] = $platformLog['post_url'] ?? null;
-                    $platformData['error'] = $platformLog['error'] ?? null;
-                }
-
-                return $platformData;
-            });
-
-            // Check permissions for actions
-            $canEdit = (isAdminOrHasAllDataAccess() || auth()->user()->can('edit_posts')) &&
-                in_array($post->status, ['pending', 'scheduled']);
-            $canDelete = (isAdminOrHasAllDataAccess() || auth()->user()->can('delete_posts'));
-
-            return view('social-media-scheduler::social-media-scheduler.post_info', compact(
-                'post',
-                'mediaFiles',
-                'platformsInfo',
-                'canEdit',
-                'canDelete'
-            ));
-        } catch (\Exception $e) {
-            Log::error('Error loading post details: ' . $e->getMessage(), [
-                'post_id' => $id,
-                'user_id' => auth()->id()
-            ]);
-
-            return redirect()->route('social.index')->with('error', 'Post not found or access denied.');
-        }
     }
 
     private function formatBytes($size)
@@ -1719,5 +1701,4 @@ Output only the HTML caption content—no explanations or extra text.";
 
         return round($size, 2) . ' ' . $units[$i];
     }
-
 }

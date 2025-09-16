@@ -41,18 +41,18 @@ class FileValidationHelper
                 $mimeType = $file->getMimeType();
 
                 // Validate the file extension
-                if (!in_array('.' . $fileExtension, $allowedFileTypesArray)) {
+                if (! in_array('.' . $fileExtension, $allowedFileTypesArray)) {
                     return response()->json([
                         'error' => true,
-                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName()
+                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName(),
                     ], 422);
                 }
 
                 // Validate the MIME type
-                if (!in_array($mimeType, $allowedMimeTypes)) {
+                if (! in_array($mimeType, $allowedMimeTypes)) {
                     return response()->json([
                         'error' => true,
-                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName()
+                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName(),
                     ], 422);
                 }
             }
