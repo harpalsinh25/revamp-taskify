@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use Intervention\Image\Laravel\Facades\Image;
+
 
 class PwaSettingsController extends Controller
 {
@@ -28,7 +29,9 @@ class PwaSettingsController extends Controller
             'description' => 'required|string|max:500',
         ]);
 
-        try {
+
+        try{
+
             if ($request->hasFile('logo')) {
                 $logo = $request->file('logo');
                 $logoPath = $logo->storeAs('public/images/icons', 'logo-512x512.png');
@@ -49,16 +52,23 @@ class PwaSettingsController extends Controller
             \Illuminate\Support\Facades\Cache::forget('pwa_settings');
 
             return redirect()->back()->with('message', 'PWA settings updated successfully.');
-        } catch(ValidationException $e) {
+
+        }catch(ValidationException $e){
+
             $errors = $e->validator->errors()->all();
             $message = 'Validation failed:' . implode(',', $errors);
 
+
+
             return response()->json(['error' => true, 'message' => $message], 422);
-        } catch(\Exception $e) {
+        }catch(\Exception $e){
+
             return response()->json([
                 'error' => true,
                 'message' => config('app.debug') ? $e->getMessage() : 'An error occurred',
             ]);
         }
+
+
     }
 }

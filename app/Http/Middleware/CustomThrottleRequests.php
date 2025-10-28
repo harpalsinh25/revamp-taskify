@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
+use Illuminate\Cache\RateLimiter;
 
 class CustomThrottleRequests
 {
@@ -57,6 +57,7 @@ class CustomThrottleRequests
         return $response;
     }
 
+
     protected function resolveRequestSignature($request)
     {
         return $request->ip();
@@ -68,9 +69,10 @@ class CustomThrottleRequests
         $responseData = $response->getData(true);
 
         // Check if the request is to one of the login routes
-        return ($request->is('users/authenticate') || $request->is('users/login'))
+        return (
+            ($request->is('users/authenticate') || $request->is('users/login'))
             && $response->status() === 200
             && isset($responseData['error']) && $responseData['error'] === false
-        ;
+        );
     }
 }

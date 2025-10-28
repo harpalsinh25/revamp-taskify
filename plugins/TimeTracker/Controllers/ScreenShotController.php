@@ -48,7 +48,7 @@ class ScreenShotController extends Controller
                     'id' => $screenshot->id,
                     'user_name' => $screenshot->user->first_name .' '. $screenshot->user->last_name ?? 'N/A',
                     'image_url' => asset('storage/' . $screenshot->screenshot_path),
-                    'captured_at' => format_date($screenshot->captured_at, true),
+                    'captured_at' => $screenshot->captured_at->toISOString(),
                     'file_size_kb' => $screenshot->file_size ? round($screenshot->file_size / 1024, 2) . ' KB' : 'N/A',
                     'metadata' => $screenshot->metadata ? json_decode($screenshot->metadata, true) : [],
                 ];

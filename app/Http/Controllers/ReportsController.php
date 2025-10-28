@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Client;
+use App\Models\Status;
+use App\Models\Project;
+use App\Models\Priority;
+use App\Models\Workspace;
+use Illuminate\Support\Str;
+use App\Models\LeaveRequest;
+use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\EstimatesInvoice;
 use App\Models\Expense;
-use App\Models\User;
-use App\Models\Workspace;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ReportsController extends Controller
 {
@@ -67,8 +71,11 @@ class ReportsController extends Controller
             : null;
 
         if ($dateFilterFrom && $dateFilterTo) {
-            $query->where('start_date', '>=', $dateFilterFrom)
-                ->where('end_date', '<=', $dateFilterTo);
+            // Overlap detection: Find projects that overlap with the date range
+            $query->where(function ($q) use ($dateFilterFrom, $dateFilterTo) {
+                $q->where('start_date', '<=', $dateFilterTo)
+                    ->where('end_date', '>=', $dateFilterFrom);
+            });
         }
 
         if ($startDateFilter) {
@@ -138,7 +145,7 @@ class ReportsController extends Controller
         });
 
         $overdueProjectsPercentage = $totalProjects > 0
-            ? $overdueProjects->count() / $totalProjects * 100
+            ? ($overdueProjects->count() / $totalProjects) * 100
             : 0;
 
         // Average overdue days per project
@@ -153,7 +160,7 @@ class ReportsController extends Controller
 
         // Calculate due projects percentage
         $dueProjectsPercentage = $totalProjects > 0
-            ? $dueProjects->count() / $totalProjects * 100
+            ? ($dueProjects->count() / $totalProjects) * 100
             : 0;
         // Apply sorting
         $sort = $request->input('sort', 'id'); // Default sort column
@@ -195,7 +202,7 @@ class ReportsController extends Controller
             $now = now();
             $startDate = $project->start_date ? Carbon::parse($project->start_date) : null;
             $endDate = $project->end_date ? Carbon::parse($project->end_date) : null;
-            $totalProjectDays = $startDate && $endDate
+            $totalProjectDays = ($startDate && $endDate)
                 ? $startDate->diffInDays($endDate) + 1
                 : '-';
             $daysElapsed = $startDate
@@ -203,7 +210,7 @@ class ReportsController extends Controller
                 : '-';
 
             $daysRemaining = $endDate
-                ? ($endDate->isPast() && ! $endDate->isToday() ? 0 : $now->diffInDays($endDate) + ($endDate->isToday() ? 1 : 0))
+                ? ($endDate->isPast() && !$endDate->isToday() ? 0 : $now->diffInDays($endDate) + ($endDate->isToday() ? 1 : 0))
                 : '-';
             if ($endDate) {
                 if ($endDate < now()->toDateString()) {
@@ -214,6 +221,7 @@ class ReportsController extends Controller
                     $projectOverdueDays = 0;
                 }
             }
+
 
             $now = now()->toDateString(); // Get today's date without time
             $tasks = $project->tasks;
@@ -245,14 +253,14 @@ class ReportsController extends Controller
                 }
             }
 
-            $totalBudget = ! empty($project->budget) && $project->budget !== null ? format_currency($project->budget) : '-';
+            $totalBudget = !empty($project->budget) && $project->budget !== null ? format_currency($project->budget) : '-';
             // Format clients' HTML
             // Format clients' HTML
             $clientHtml = $project->clients->isEmpty()
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $project->clients->map(function ($client) {
-                    return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . ' ' . $client->last_name) . "'>
+                return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . " " . $client->last_name) . "'>
                     <a href='" . route('clients.profile', ['id' => $client->id]) . "' target='_blank' >
                         <img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' />
                     </a>
@@ -265,7 +273,7 @@ class ReportsController extends Controller
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $project->users->map(function ($user) {
-                    return "<li class='avatar avatar-sm pull-up' title='" . e($user->first_name . ' ' . $user->last_name) . "'>
+                return "<li class='avatar avatar-sm pull-up' title='" . e($user->first_name . " " . $user->last_name) . "'>
                     <a href='" . route('users.profile', ['id' => $user->id]) . "' target='_blank'>
                         <img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' class='rounded-circle' />
                     </a>
@@ -273,16 +281,17 @@ class ReportsController extends Controller
                 })->implode('') .
                 '</ul>';
 
+
             return [
                 'id' => $project->id,
                 'title' => $canManageProjects
-                    ? "<a href='" . route('projects.info', ['id' => $project->id]) . "' target='_blank'>" . $project->title . '</a>'
+                    ? "<a href='" . route('projects.info', ['id' => $project->id]) . "' target='_blank'>" . $project->title . "</a>"
                     : $project->title,
                 'description' => $project->description,
                 'start_date' => format_date($project->start_date),
                 'end_date' => format_date($project->end_date),
-                'status' => "<span class='badge bg-label-" . e($project->status->color) . "'>" . e($project->status->title) . '</span>',
-                'priority' => $project->priority ? "<span class='badge bg-label-" . e($project->priority->color) . "'>" . e($project->priority->title) . '</span>' : '-',
+                'status' => "<span class='badge bg-label-" . e($project->status->color) . "'>" . e($project->status->title) . "</span>",
+                'priority' => $project->priority ? "<span class='badge bg-label-" . e($project->priority->color) . "'>" . e($project->priority->title) . "</span>" : '-',
                 'budget' => [
                     'total' => $totalBudget,
                 ],
@@ -306,7 +315,7 @@ class ReportsController extends Controller
                             'tasks_assigned' => $user->tasks()->where('project_id', $project->id)->count(),
                         ];
                     }),
-                    'total_members' => $project->users->count(),
+                    'total_members' => $project->users->count()
                 ],
                 'users' => $userHtml,
                 'clients' => $clientHtml,
@@ -356,7 +365,8 @@ class ReportsController extends Controller
                 }) : 0;
             }), 2),
 
-            'total_tasks' => $totalTasks,
+
+            'total_tasks' => $totalTasks
 
         ];
 
@@ -421,8 +431,11 @@ class ReportsController extends Controller
             : null;
 
         if ($dateFilterFrom && $dateFilterTo) {
-            $query->where('start_date', '>=', $dateFilterFrom)
-                ->where('due_date', '<=', $dateFilterTo);
+            // Overlap detection: Find tasks that overlap with the date range
+            $query->where(function ($q) use ($dateFilterFrom, $dateFilterTo) {
+                $q->where('start_date', '<=', $dateFilterTo)
+                    ->where('due_date', '>=', $dateFilterFrom);
+            });
         }
 
         if ($startDateFilter) {
@@ -475,7 +488,7 @@ class ReportsController extends Controller
         });
 
         $overdueTasksPercentage = $totalTasks > 0
-            ? $overdueTasks->count() / $totalTasks * 100
+            ? ($overdueTasks->count() / $totalTasks) * 100
             : 0;
 
         $dueTasks = $allTasks->filter(function ($task) {
@@ -485,7 +498,7 @@ class ReportsController extends Controller
 
         // Calculate due projects percentage
         $dueTasksPercentage = $totalTasks > 0
-            ? $dueTasks->count() / $totalTasks * 100
+            ? ($dueTasks->count() / $totalTasks) * 100
             : 0;
 
         $averageTaskDuration = round(
@@ -508,7 +521,7 @@ class ReportsController extends Controller
         $urgentTasksCount = $urgentTasks->count();
 
         $urgentTasksPercentage = $totalTasks > 0
-            ? $urgentTasksCount / $totalTasks * 100
+            ? ($urgentTasksCount / $totalTasks) * 100
             : 0;
 
         // Apply sorting
@@ -532,7 +545,7 @@ class ReportsController extends Controller
             $now = now();
             $startDate = $task->start_date ? Carbon::parse($task->start_date) : null;
             $endDate = $task->due_date ? Carbon::parse($task->due_date) : null;
-            $totalTaskDays = $startDate && $endDate
+            $totalTaskDays = ($startDate && $endDate)
                 ? $startDate->diffInDays($endDate) + 1
                 : '-';
             $daysElapsed = $startDate
@@ -558,7 +571,7 @@ class ReportsController extends Controller
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $task->project->clients->map(function ($client) {
-                    return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . ' ' . $client->last_name) . "'>
+                return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . " " . $client->last_name) . "'>
                     <a href='" . route('clients.profile', ['id' => $client->id]) . "' target='_blank'>
                         <img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' />
                     </a>
@@ -571,7 +584,7 @@ class ReportsController extends Controller
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $task->users->map(function ($user) {
-                    return "<li class='avatar avatar-sm pull-up' title='" . e($user->first_name . ' ' . $user->last_name) . "'>
+                return "<li class='avatar avatar-sm pull-up' title='" . e($user->first_name . " " . $user->last_name) . "'>
                     <a href='" . route('users.profile', ['id' => $user->id]) . "' target='_blank'>
                         <img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' class='rounded-circle' />
                     </a>
@@ -579,18 +592,19 @@ class ReportsController extends Controller
                 })->implode('') .
                 '</ul>';
 
+
             return [
                 'id' => $task->id,
                 'title' => $canManageTasks
-                    ? "<a href='" . route('tasks.info', ['id' => $task->id]) . "'>" . $task->title . '</a>'
+                    ? "<a href='" . route('tasks.info', ['id' => $task->id]) . "'>" . $task->title . "</a>"
                     : $task->title,
                 'description' => $task->description,
                 'start_date' => format_date($task->start_date),
                 'due_date' => format_date($task->due_date),
-                'status' => "<span class='badge bg-label-" . e($task->status->color) . "'>" . e($task->status->title) . '</span>',
-                'priority' => $task->priority ? "<span class='badge bg-label-" . e($task->priority->color) . "'>" . e($task->priority->title) . '</span>' : '-',
+                'status' => "<span class='badge bg-label-" . e($task->status->color) . "'>" . e($task->status->title) . "</span>",
+                'priority' => $task->priority ? "<span class='badge bg-label-" . e($task->priority->color) . "'>" . e($task->priority->title) . "</span>" : '-',
                 'project' => $canManageProjects
-                    ? "<a href='" . route('projects.info', ['id' => $task->project->id]) . "' target='_blank'>" . $task->project->title . '</a>'
+                    ? "<a href='" . route('projects.info', ['id' => $task->project->id]) . "' target='_blank'>" . $task->project->title . "</a>"
                     : $task->project,
                 'assigned_to' => $task->assignedTo ? $task->assignedTo->first_name . ' ' . $task->assignedTo->last_name : '-',
                 'time' => [
@@ -618,7 +632,7 @@ class ReportsController extends Controller
             'overdue_tasks_percentage' => $overdueTasksPercentage,
             'urgent_tasks' => $urgentTasksCount,
             'urgent_tasks_percentage' => $urgentTasksPercentage,
-            'average_task_duration' => $averageTaskDuration,
+            'average_task_duration' => $averageTaskDuration
         ];
         return response()->json([
             'tasks' => $report,
@@ -626,6 +640,7 @@ class ReportsController extends Controller
             'summary' => $summary,
         ]);
     }
+
 
     public function exportTaskReport(Request $request)
     {
@@ -645,6 +660,8 @@ class ReportsController extends Controller
         ]);
     }
 
+
+
     /**
      * Get the Income vs Expense Statistics.
      *
@@ -652,7 +669,6 @@ class ReportsController extends Controller
      * The user must be authenticated to access this data.
      *
      * @authenticated
-     *
      * @group Income vs Expense
      *
      * @response 200 {
@@ -747,9 +763,10 @@ class ReportsController extends Controller
 
         // Apply date filters only if both start_date and end_date are provided
         if ($request->filled('start_date') && $request->filled('end_date')) {
+            // Overlap detection: Find invoices that overlap with the date range
             $invoicesQuery->where(function ($query) use ($request) {
-                $query->whereBetween('to_date', [$request->start_date, $request->end_date])
-                    ->orWhereBetween('from_date', [$request->start_date, $request->end_date]);
+                $query->where('from_date', '<=', $request->end_date)
+                    ->where('to_date', '>=', $request->start_date);
             });
         }
 
@@ -780,12 +797,13 @@ class ReportsController extends Controller
             'total_expenses' => format_currency($totalExpenses),
             'profit_or_loss' => format_currency($profitOrLoss),
             'invoices' => $invoices->map(function ($invoice) use ($isApi) {
+
                 return [
                     'id' => $invoice->id,
                     'view_route' => route('estimates-invoices.view', ['id' => $invoice->id]),
                     'amount' => format_currency($invoice->final_total),
                     'to_date' => $isApi ? format_date($invoice->to_date, to_format: 'Y-m-d') : format_date($invoice->to_date),
-                    'from_date' => $isApi ? format_date($invoice->from_date, to_format: 'Y-m-d') : format_date($invoice->from_date),
+                    'from_date' => $isApi ? format_date($invoice->from_date, to_format: 'Y-m-d') : format_date($invoice->from_date)
                 ];
             }),
             'expenses' => $expenses->map(function ($expense) use ($isApi) {
@@ -793,7 +811,7 @@ class ReportsController extends Controller
                     'id' => $expense->id,
                     'title' => $expense->title,
                     'amount' => format_currency($expense->amount),
-                    'expense_date' => $isApi ? format_date($expense->expense_date, to_format: 'Y-m-d') : format_date($expense->expense_date),
+                    'expense_date' => $isApi ? format_date($expense->expense_date, to_format: 'Y-m-d') : format_date($expense->expense_date)
                 ];
             }),
         ];
@@ -823,7 +841,7 @@ class ReportsController extends Controller
         $users = is_admin_or_leave_editor() ? $this->workspace->users() : $this->user;
 
         // If the user is not an admin or leave editor, merge their ID into the user_ids in the request
-        if (! is_admin_or_leave_editor()) {
+        if (!is_admin_or_leave_editor()) {
             $request->merge(['user_ids' => [$this->user->id]]);
         }
 
@@ -838,10 +856,13 @@ class ReportsController extends Controller
         $users = $users->with([
             'leave_requests' => function ($query) use ($dateFilterFrom, $dateFilterTo) {
                 if ($dateFilterFrom && $dateFilterTo) {
-                    $query->where('from_date', '>=', $dateFilterFrom)
-                        ->where('to_date', '<=', $dateFilterTo);
+                    // Overlap detection: Find leave requests that overlap with the date range
+                    $query->where(function ($q) use ($dateFilterFrom, $dateFilterTo) {
+                        $q->where('from_date', '<=', $dateFilterTo)
+                            ->where('to_date', '>=', $dateFilterFrom);
+                    });
                 }
-            },
+            }
         ])->get();
 
         // Apply search filter if provided
@@ -931,7 +952,7 @@ class ReportsController extends Controller
                 'formatted_partial_leaves' => $this->formatLeaveDuration($partialLeaves, '', round($partialHours, 2)),
                 'formatted_approved_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'approved')->count(), $approvedDays, $approvedHours),
                 'formatted_pending_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'pending')->count(), $pendingDays, $pendingHours),
-                'formatted_rejected_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'rejected')->count(), $rejectedDays, $rejectedHours),
+                'formatted_rejected_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'rejected')->count(), $rejectedDays, $rejectedHours)
             ];
         });
 
@@ -980,6 +1001,7 @@ class ReportsController extends Controller
         $summary['formatted_pending_leaves'] = $this->formatLeaveDuration($summary['total_pending_leaves'], $summary['total_pending_days'], $summary['total_pending_hours']);
         $summary['formatted_rejected_leaves'] = $this->formatLeaveDuration($summary['total_rejected_leaves'], $summary['total_rejected_days'], $summary['total_rejected_hours']);
 
+
         return response()->json([
             'users' => $paginatedReport->values(),
             'total' => $total,
@@ -995,7 +1017,7 @@ class ReportsController extends Controller
         $hoursLabel = get_label('hours', 'Hours');
 
         // If there are no days or hours, return just the total leaves
-        if ($days === 0 && $hours === 0) {
+        if ($days == 0 && $hours == 0) {
             return "{$totalLeaves}";
         }
 
@@ -1016,12 +1038,13 @@ class ReportsController extends Controller
         }
 
         // If we have any leave duration to display, append it inside parentheses
-        if (! empty($leaveDuration)) {
-            $formatted .= ' (' . implode(' and ', $leaveDuration) . ')';
+        if (!empty($leaveDuration)) {
+            $formatted .= " (" . implode(' and ', $leaveDuration) . ")";
         }
 
         return $formatted;
     }
+
 
     public function exportLeavesReport(Request $request)
     {
@@ -1044,7 +1067,7 @@ class ReportsController extends Controller
             'declined' => get_label('declined', 'Declined'),
             'expired' => get_label('expired', 'Expired'),
             'not_specified' => get_label('not_specified', 'Not Specified'),
-            'due' => get_label('due', 'Due'),
+            'due' => get_label('due', 'Due')
         ];
         return view('reports.invoices-report', compact('clients', 'invoice_statuses', ));
     }
@@ -1059,7 +1082,7 @@ class ReportsController extends Controller
             ->leftJoin('clients', 'estimates_invoices.client_id', '=', 'clients.id')
             ->where('estimates_invoices.workspace_id', $this->workspace->id);
 
-        if (! isAdminOrHasAllDataAccess()) {
+        if (!isAdminOrHasAllDataAccess()) {
             $query->where(function ($q) {
                 $q->where('estimates_invoices.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('estimates_invoices.client_id', $this->user->id);
@@ -1096,8 +1119,11 @@ class ReportsController extends Controller
             : null;
 
         if ($dateFilterFrom && $dateFilterTo) {
-            $query->where('estimates_invoices.from_date', '>=', $dateFilterFrom)
-                ->where('estimates_invoices.to_date', '<=', $dateFilterTo);
+            // Overlap detection: Find invoices/estimates that overlap with the date range
+            $query->where(function ($q) use ($dateFilterFrom, $dateFilterTo) {
+                $q->where('estimates_invoices.from_date', '<=', $dateFilterTo)
+                    ->where('estimates_invoices.to_date', '>=', $dateFilterFrom);
+            });
         }
 
         if ($startDateFilter) {
@@ -1120,6 +1146,7 @@ class ReportsController extends Controller
             });
         }
 
+
         // Apply sorting
         $sort = $request->input('sort', 'id');
         $order = $request->input('order', 'DESC');
@@ -1141,7 +1168,7 @@ class ReportsController extends Controller
         // Transform invoice data into the desired report format
         $report = $invoices->map(function ($invoice) {
             // Determine the prefix based on the invoice type
-            $prefix = $invoice->type === 'invoice' ? get_label('invoice_id_prefix', 'INVC-') : ($invoice->type === 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : '');
+            $prefix = $invoice->type == 'invoice' ? get_label('invoice_id_prefix', 'INVC-') : ($invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : '');
 
             return [
                 'id' => '<a href="' . route('estimates-invoices.view', ['id' => $invoice->id]) . '" target="_blank">' . $prefix . $invoice->id . '</a>',
@@ -1159,6 +1186,7 @@ class ReportsController extends Controller
             ];
         });
 
+
         // Generate summary data
         $summary = [
             'total_invoices' => $total,
@@ -1175,33 +1203,6 @@ class ReportsController extends Controller
         ]);
     }
 
-    public function exportInvoicesReport(Request $request)
-    {
-        $invoicesData = $this->getInvoicesReportData($request)->getData();
-
-        // Determine file name based on request type
-        $fileName = get_label('estimates_and_invoices_report', 'Estimates and Invoices Report') . '.pdf'; // Default if both 'estimate' and 'invoice'
-        $title = get_label('estimates_and_invoices_report', 'Estimates and Invoices Report');
-        $type = get_label('estimates_and_invoices', 'Estimates and Invoices');
-        if ($request->has('types')) {
-            $types = $request->input('types');
-            if (in_array('estimate', $types) && ! in_array('invoice', $types)) {
-                $fileName = get_label('estimates_report', 'Estimates Report') . '.pdf';
-                $title = get_label('estimates_report', 'Estimates Report');
-                $type = get_label('estimates', 'Estimates');
-            } elseif (in_array('invoice', $types) && ! in_array('estimate', $types)) {
-                $fileName = get_label('invoices_report', 'Invoices Report') . '.pdf';
-                $title = get_label('invoices_report', 'Invoices Report');
-                $type = get_label('invoices', 'Invoices');
-            }
-        }
-
-        $pdf = Pdf::loadView('reports.invoices-report-pdf', ['invoices' => $invoicesData->invoices, 'summary' => $invoicesData->summary, 'title' => $title, 'type' => $type])
-            ->setPaper([0, 0, 2000, 900], 'mm');
-
-        return $pdf->download($fileName);
-    }
-
     private function getStatusBadge($status)
     {
         // Generate status badge HTML based on status
@@ -1214,9 +1215,36 @@ class ReportsController extends Controller
             'declined' => 'bg-danger',
             'expired' => 'bg-warning',
             'not_specified' => 'bg-secondary',
-            'due' => 'bg-danger',
+            'due' => 'bg-danger'
         ];
 
         return isset($badges[$status]) ? '<span class="badge ' . $badges[$status] . '">' . get_label($status, ucfirst(str_replace('_', ' ', $status))) . '</span>' : '';
+    }
+
+    public function exportInvoicesReport(Request $request)
+    {
+        $invoicesData = $this->getInvoicesReportData($request)->getData();
+
+        // Determine file name based on request type
+        $fileName = get_label('estimates_and_invoices_report', 'Estimates and Invoices Report') . '.pdf'; // Default if both 'estimate' and 'invoice'
+        $title = get_label('estimates_and_invoices_report', 'Estimates and Invoices Report');
+        $type = get_label('estimates_and_invoices', 'Estimates and Invoices');
+        if ($request->has('types')) {
+            $types = $request->input('types');
+            if (in_array('estimate', $types) && !in_array('invoice', $types)) {
+                $fileName = get_label('estimates_report', 'Estimates Report') . '.pdf';
+                $title = get_label('estimates_report', 'Estimates Report');
+                $type = get_label('estimates', 'Estimates');
+            } elseif (in_array('invoice', $types) && !in_array('estimate', $types)) {
+                $fileName = get_label('invoices_report', 'Invoices Report') . '.pdf';
+                $title = get_label('invoices_report', 'Invoices Report');
+                $type = get_label('invoices', 'Invoices');
+            }
+        }
+
+        $pdf = Pdf::loadView('reports.invoices-report-pdf', ['invoices' => $invoicesData->invoices, 'summary' => $invoicesData->summary, 'title' => $title, 'type' => $type])
+            ->setPaper([0, 0, 2000, 900], 'mm');
+
+        return $pdf->download($fileName);
     }
 }

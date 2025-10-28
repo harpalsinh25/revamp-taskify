@@ -38,11 +38,11 @@ class Lead extends Model
         'is_converted',
         'converted_at',
         'custom_fields', // JSON field for custom form fields
-        'lead_form_id',
+        'lead_form_id'
     ];
 
     protected $casts = [
-        'custom_fields' => 'array',
+        'custom_fields' => 'array'
     ];
 
     // Relationships

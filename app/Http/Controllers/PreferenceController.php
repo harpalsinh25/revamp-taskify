@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 
 class PreferenceController extends Controller
@@ -15,7 +16,7 @@ class PreferenceController extends Controller
     {
         // Fetch the saved menu order for the authenticated user
         $menuOrder = json_decode(DB::table('menu_orders')
-            ->where(getGuardName() === 'web' ? 'user_id' : 'client_id', getAuthenticatedUser()->id)
+            ->where(getGuardName() == 'web' ? 'user_id' : 'client_id', getAuthenticatedUser()->id)
             ->value('menu_order'), true);
         $menus = getMenus();
         $pluginMenus = []; // Initialize safely
@@ -32,7 +33,7 @@ class PreferenceController extends Controller
                     $pluginData = json_decode(File::get($pluginJsonFile), true);
 
                     // Check if plugin is enabled
-                    if (! empty($pluginData['enabled'])) {
+                    if (!empty($pluginData['enabled'])) {
                         $menuFile = $pluginDir . '/menus.php';
 
                         if (File::exists($menuFile)) {
@@ -60,7 +61,7 @@ class PreferenceController extends Controller
                     $menu = collect($menus)->firstWhere('id', $order['id']);
                     if ($menu) {
                         // Sort submenus if present
-                        if (! empty($order['submenus']) && isset($menu['submenus'])) {
+                        if (!empty($order['submenus']) && isset($menu['submenus'])) {
                             $submenuIds = collect($order['submenus'])->pluck('id')->toArray();
                             $menu['submenus'] = collect($menu['submenus'])->sortBy(function ($submenu) use ($submenuIds) {
                                 return array_search($submenu['id'], $submenuIds);
@@ -76,7 +77,7 @@ class PreferenceController extends Controller
                 }
             }
             // Check if it has the nested category structure
-            elseif (isset($menuOrder[0]['category']) && isset($menuOrder[0]['menus'])) {
+            else if (isset($menuOrder[0]['category']) && isset($menuOrder[0]['menus'])) {
                 // This is the new hierarchical structure
                 foreach ($menuOrder as $categoryGroup) {
                     $category = $categoryGroup['category'] ?? 'other';
@@ -87,7 +88,7 @@ class PreferenceController extends Controller
                             $menu = collect($menus)->firstWhere('id', $order['id']);
                             if ($menu) {
                                 // Sort submenus if present
-                                if (! empty($order['submenus']) && isset($menu['submenus'])) {
+                                if (!empty($order['submenus']) && isset($menu['submenus'])) {
                                     $submenuIds = collect($order['submenus'])->pluck('id')->toArray();
                                     $menu['submenus'] = collect($menu['submenus'])->sortBy(function ($submenu) use ($submenuIds) {
                                         return array_search($submenu['id'], $submenuIds);
@@ -115,12 +116,15 @@ class PreferenceController extends Controller
         return view('settings.preferences', compact('groupedMenus'));
     }
 
+
+
+
     public function saveColumnVisibility(Request $request)
     {
         // Validate incoming request data
         $validator = Validator::make($request->all(), [
             'type' => 'required|string|max:255',
-            'visible_columns' => 'required|json', // assuming visible_columns is a JSON string
+            'visible_columns' => 'required|json' // assuming visible_columns is a JSON string
         ]);
 
         if ($validator->fails()) {
@@ -153,7 +157,7 @@ class PreferenceController extends Controller
         try {
             // Get the authenticated user's ID
             $userId = getAuthenticatedUser(true, true);
-            $enabledNotifications = $request->has('enabled_notifications') ? json_encode($request->input('enabled_notifications')) : null;
+            $enabledNotifications = $request->has('enabled_notifications') ? json_encode($request->input('enabled_notifications')) : NULL;
             DB::table('user_client_preferences')
                 ->updateOrInsert(
                     ['user_id' => $userId, 'table_name' => 'notification_preference'],
@@ -189,7 +193,7 @@ class PreferenceController extends Controller
 
         // Get the authenticated user's identifier
         $userId = getAuthenticatedUser()->id;
-        $guardColumn = getGuardName() === 'web' ? 'user_id' : 'client_id';
+        $guardColumn = getGuardName() == 'web' ? 'user_id' : 'client_id';
         try {
             // Update or create the menu order
             DB::table('menu_orders')->updateOrInsert(
@@ -208,7 +212,7 @@ class PreferenceController extends Controller
     {
         // Get the authenticated user's identifier
         $userId = getAuthenticatedUser()->id;
-        $guardColumn = getGuardName() === 'web' ? 'user_id' : 'client_id';
+        $guardColumn = getGuardName() == 'web' ? 'user_id' : 'client_id';
 
         try {
             // Delete the menu order record if it exists for the user/client

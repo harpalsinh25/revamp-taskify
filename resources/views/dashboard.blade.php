@@ -181,6 +181,8 @@
             </div>
         </div>
         <x-dashboard.statistics :statuses="[]" :todos="[]" :activities="[]" />
+
+        <x-dashboard.tabs />
         <!-- Dependencies -->
         <script src="{{ asset('assets/js/apexcharts.js') }}"></script>
         <script src="{{ asset('assets/js/Sortable.min.js') }}"></script>

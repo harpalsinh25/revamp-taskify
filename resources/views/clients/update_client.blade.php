@@ -125,7 +125,7 @@
                             <div class="button-wrapper">
                                 <div class="input-group d-flex">
                                     <input type="file" class="form-control" id="inputGroupFile02" name="profile">
-                                </div>                                
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -160,6 +160,21 @@
 
                     @endif
                     @endif
+
+                    @php
+                        $customFields = \App\Models\CustomField::where('module', 'client')->get();
+                        $customFieldValues = [];
+                        foreach ($client->customFieldValues as $fieldValue) {
+                            $customFieldValues[$fieldValue->custom_field_id] = $fieldValue->value;
+                        }
+                    @endphp
+
+                    @if($customFields->isNotEmpty())
+                        <div class="mb-3">
+                            <x-custom-fields :fields="$customFields" :values="$customFieldValues" :isEdit="true" />
+                        </div>
+                    @endif
+
                     <div class="mt-4">
                         <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>
                         <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>

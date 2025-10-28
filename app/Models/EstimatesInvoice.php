@@ -27,7 +27,7 @@ class EstimatesInvoice extends Model
         'total',
         'tax_amount',
         'final_total',
-        'created_by',
+        'created_by'
     ];
 
     public function items()

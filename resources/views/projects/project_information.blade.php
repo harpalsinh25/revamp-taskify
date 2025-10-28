@@ -283,7 +283,7 @@
 
                         <div class="card mt-4">
                         <div class="card-header">
-                            <h5 class="card-title mb-0">{{ get_label('custom_fields', 'Custom Fields') }}</h5>
+                            <h5 class="card-title mb-0">{{ get_label('additional_fields', 'Additional Fields') }}</h5>
                         </div>
                         <div class="card-body">
 

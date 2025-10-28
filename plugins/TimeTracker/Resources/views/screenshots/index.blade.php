@@ -3,6 +3,7 @@
 @section('title', get_label('screenshot_gallery','Screenshot Gallery'))
 
 @section('content')
+<link href="{{ asset('assets/css/timetracker/timetracker.css') }}" rel="stylesheet">
 <div class="container-fluid">
     <div class="d-flex justify-content-between mb-2 mt-4">
         <div>

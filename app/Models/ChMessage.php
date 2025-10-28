@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Chatify\Traits\UUID;
 use Illuminate\Database\Eloquent\Model;
+use Chatify\Traits\UUID;
 
 class ChMessage extends Model
 {

@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Client;
 use App\Models\Contract;
-use App\Models\ContractType;
-use App\Models\User;
 use App\Models\Workspace;
-use App\Services\DeletionService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\ContractType;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ContractsController extends Controller
 {
@@ -33,6 +35,7 @@ class ContractsController extends Controller
         $contracts = $contracts->count();
         return view('contracts.list', ['contracts' => $contracts]);
     }
+
 
     /**
      * Create a new contract.
@@ -117,21 +120,21 @@ class ContractsController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'start_date' => ['required', 'date'],
                 'end_date' => ['required', 'date', 'after_or_equal:start_date'],
                 'client_id' => ['required', 'exists:clients,id'],
                 'project_id' => ['required', 'exists:projects,id'],
                 'contract_type_id' => ['required', 'exists:contract_types,id'],
-                'description' => ['nullable'],
+                'description' => ['nullable']
             ], [
                 'client_id.required' => 'The client field is required.',
                 'project_id.required' => 'The project field is required.',
                 'contract_type_id.required' => 'The contract type field is required.',
                 'start_date.date' => 'The start date must be a valid date.',
                 'end_date.date' => 'The end date must be a valid date.',
-                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.'
             ]);
 
             // Format dates for storage
@@ -147,21 +150,22 @@ class ContractsController extends Controller
                         false,
                         'Contract created successfully.',
                         [
-                            'data' => formatContract($contract),
+                            'data' => formatContract($contract)
                         ],
                         200
                     );
                 }
                 return response()->json(['error' => false, 'message' => 'Contract created successfully.', 'id' => $contract->id]);
+            } else {
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Contract couldn\'t created.',
+                        []
+                    );
+                }
+                return response()->json(['error' => true, 'message' => 'Contract couldn\'t created.']);
             }
-            if ($isApi) {
-                return formatApiResponse(
-                    true,
-                    'Contract couldn\'t created.',
-                    []
-                );
-            }
-            return response()->json(['error' => true, 'message' => 'Contract couldn\'t created.']);
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -171,7 +175,7 @@ class ContractsController extends Controller
                         'error' => $e->getMessage(),
                         // 'trace' => $e->getTraceAsString(),
                         'file' => $e->getFile(),
-                    ],
+                    ]
                 ],
             );
         }
@@ -195,7 +199,7 @@ class ContractsController extends Controller
      * @bodyParam contract_type_id integer required The ID of the contract type. Must exist in the contract_types table. Example: 3
      * @bodyParam description string optional Description of the contract. Example: Updated full-stack web development project
      * @bodyParam signed_pdf file optional The signed PDF file. Must be a PDF file, max 10MB. No example required.
-     *
+
      * @bodyParam isApi boolean optional Set to true for API requests to handle date format properly. Example: true
      *
      * @response 200 {
@@ -263,7 +267,7 @@ class ContractsController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'start_date' => ['required', 'date'],
                 'end_date' => ['required', 'date', 'after_or_equal:start_date'],
@@ -271,7 +275,7 @@ class ContractsController extends Controller
                 'project_id' => ['required'],
                 'contract_type_id' => ['required'],
                 'description' => ['nullable'],
-                'signed_pdf' => ['nullable', 'file', 'mimes:pdf', 'mimetypes:application/pdf', 'max:10240'],
+                'signed_pdf' => ['nullable', 'file', 'mimes:pdf', 'mimetypes:application/pdf', 'max:10240']
             ], [
                 'client_id.required' => 'The client field is required.',
                 'project_id.required' => 'The project field is required.',
@@ -280,7 +284,7 @@ class ContractsController extends Controller
                 'signed_pdf.max' => 'The file size must be less than 10 MB.',
                 'start_date.date' => 'The start date must be a valid date.',
                 'end_date.date' => 'The end date must be a valid date.',
-                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.'
             ]);
 
             // Fetch the contract to update
@@ -311,7 +315,7 @@ class ContractsController extends Controller
                         false,
                         'Contract updated successfully.',
                         [
-                            'data' => formatContract($contract),
+                            'data' => formatContract($contract)
                         ],
                         200
                     );
@@ -320,14 +324,15 @@ class ContractsController extends Controller
                 return response()->json([
                     'error' => false,
                     'message' => 'Contract updated successfully.',
-                    'id' => $formFields['id'],
+                    'id' => $formFields['id']
                 ]);
-            }
-            if ($isApi) {
-                return formatApiResponse(true, 'Contract couldn\'t be updated.', [], 500);
-            }
+            } else {
+                if ($isApi) {
+                    return formatApiResponse(true, 'Contract couldn\'t be updated.', [], 500);
+                }
 
-            return response()->json(['error' => true, 'message' => 'Contract couldn\'t be updated.']);
+                return response()->json(['error' => true, 'message' => 'Contract couldn\'t be updated.']);
+            }
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -338,21 +343,22 @@ class ContractsController extends Controller
         }
     }
 
+
     public function list()
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
         $statuses = request('statuses', []);
         $type_ids = request('type_ids', []);
         $project_ids = request('project_ids', []);
         $client_ids = request('client_ids', []);
-        $date_between_from = request('date_between_from') ?: '';
-        $date_between_to = request('date_between_to') ?: '';
-        $start_date_from = request('start_date_from') ? request('start_date_from') : '';
-        $start_date_to = request('start_date_to') ? request('start_date_to') : '';
-        $end_date_from = request('end_date_from') ? request('end_date_from') : '';
-        $end_date_to = request('end_date_to') ? request('end_date_to') : '';
+        $date_between_from = request('date_between_from') ?: "";
+        $date_between_to = request('date_between_to') ?: "";
+        $start_date_from = (request('start_date_from')) ? request('start_date_from') : "";
+        $start_date_to = (request('start_date_to')) ? request('start_date_to') : "";
+        $end_date_from = (request('end_date_from')) ? request('end_date_from') : "";
+        $end_date_to = (request('end_date_to')) ? request('end_date_to') : "";
         $where = ['contracts.workspace_id' => $this->workspace->id];
 
         $contracts = Contract::select(
@@ -366,23 +372,24 @@ class ContractsController extends Controller
             ->leftJoin('contract_types', 'contracts.contract_type_id', '=', 'contract_types.id')
             ->leftJoin('projects', 'contracts.project_id', '=', 'projects.id');
 
-        if (! isAdminOrHasAllDataAccess()) {
+
+        if (!isAdminOrHasAllDataAccess()) {
             $contracts = $contracts->where(function ($query) {
                 $query->where('contracts.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('contracts.client_id', $this->user->id);
             });
         }
 
-        if (! empty($project_ids)) {
+        if (!empty($project_ids)) {
             $contracts = $contracts->whereIn('contracts.project_id', $project_ids);
         }
-        if (! empty($type_ids)) {
+        if (!empty($type_ids)) {
             $contracts = $contracts->whereIn('contracts.contract_type_id', $type_ids);
         }
-        if (! empty($client_ids)) {
+        if (!empty($client_ids)) {
             $contracts = $contracts->whereIn('contracts.client_id', $client_ids);
         }
-        if (! empty($statuses)) {
+        if (!empty($statuses)) {
             $contracts = $contracts->where(function ($query) use ($statuses) {
                 foreach ($statuses as $status) {
                     if ($status === 'partially_signed') {
@@ -411,14 +418,17 @@ class ContractsController extends Controller
             });
         }
         if ($date_between_from && $date_between_to) {
-            $contracts = $contracts->where('contracts.start_date', '>=', $date_between_from)
-                ->where('contracts.end_date', '<=', $date_between_to);
+            // Overlap detection: Find contracts that overlap with the date range
+            $contracts = $contracts->where(function ($q) use ($date_between_from, $date_between_to) {
+                $q->where('contracts.start_date', '<=', $date_between_to)
+                    ->where('contracts.end_date', '>=', $date_between_from);
+            });
         }
         if ($start_date_from && $start_date_to) {
             $contracts = $contracts->whereBetween('contracts.start_date', [$start_date_from, $start_date_to]);
         }
         if ($end_date_from && $end_date_to) {
-            $contracts = $contracts->whereBetween('contracts.end_date', [$end_date_from, $end_date_to]);
+            $contracts  = $contracts->whereBetween('contracts.end_date', [$end_date_from, $end_date_to]);
         }
         if ($search) {
             $contracts = $contracts->where(function ($query) use ($search) {
@@ -438,7 +448,7 @@ class ContractsController extends Controller
         $canDelete = checkPermission('delete_contracts');
 
         $contracts = $contracts->orderBy($sort, $order)
-            ->paginate(request('limit'))
+            ->paginate(request("limit"))
             ->through(function ($contract) use ($canEdit, $canDelete, $canCreate) {
                 // Format "from_date" and "to_date" with labels
                 $formattedDates = format_date($contract->start_date, false) . ' ' . get_label('to', 'To') . ' ' . format_date($contract->end_date, false);
@@ -448,12 +458,12 @@ class ContractsController extends Controller
 
                 $statusBadge = '';
 
-                $promisor_sign_status = ! is_null($promisorSign) ? '<span class="badge bg-success">' . get_label('signed', 'Signed') . '</span>' : '<span class="badge bg-danger">' . get_label('not_signed', 'Not signed') . '</span>';
-                $promisee_sign_status = ! is_null($promiseeSign) ? '<span class="badge bg-success">' . get_label('signed', 'Signed') . '</span>' : '<span class="badge bg-danger">' . get_label('not_signed', 'Not signed') . '</span>';
+            $promisor_sign_status = !is_null($promisorSign) ? '<span class="badge bg-success">' . get_label('signed', 'Signed') . '</span>' : '<span class="badge bg-danger">' . get_label('not_signed', 'Not signed') . '</span>';
+            $promisee_sign_status = !is_null($promiseeSign) ? '<span class="badge bg-success">' . get_label('signed', 'Signed') . '</span>' : '<span class="badge bg-danger">' . get_label('not_signed', 'Not signed') . '</span>';
 
-                if (! is_null($promisorSign) && ! is_null($promiseeSign)) {
+            if (!is_null($promisorSign) && !is_null($promiseeSign)) {
                     $statusBadge = '<span class="badge bg-success">' . get_label('signed', 'Signed') . '</span>';
-                } elseif (! is_null($promisorSign) || ! is_null($promiseeSign)) {
+            } elseif (!is_null($promisorSign) || !is_null($promiseeSign)) {
                     $statusBadge = '<span class="badge bg-warning">' . get_label('partially_signed', 'Partially signed') . '</span>';
                 } else {
                     $statusBadge = '<span class="badge bg-danger">' . get_label('not_signed', 'Not signed') . '</span>';
@@ -469,11 +479,11 @@ class ContractsController extends Controller
                 if ($canCreate) {
                     $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $contract->id . '" data-title="' . $contract->title . '" data-type="contracts" data-table="contracts_table" title=' . get_label('duplicate', 'Duplicate') . '><i class="bx bx-copy text-warning mx-2"></i></a>';
                 }
-                // Check if signed PDF exists
-                if (isset($contract->signed_pdf) && ! empty($contract->signed_pdf) && Storage::disk('public')->exists('contracts/' . $contract->signed_pdf)) {
+            // Check if signed PDF exists
+            if (isset($contract->signed_pdf) && !empty($contract->signed_pdf) && Storage::disk('public')->exists('contracts/' . $contract->signed_pdf)) {
                     $actions .= '<a href="' . Storage::url('contracts/' . $contract->signed_pdf) . '" title="' . get_label('contract_pdf', 'Contract PDF') . '" target="_blank"><i class="bx bx-file text-success ms-4"></i></a>';
                 }
-                $actions = $actions ? $actions : '-';
+            $actions = $actions ?: '-';
                 return [
                     'id' => $contract->id,
                     'title' => $contract->title,
@@ -482,7 +492,7 @@ class ContractsController extends Controller
                     'end_date' => format_date($contract->end_date),
                     'duration' => $formattedDates,
                     'client' => formatClientHtml($contract->client),
-                    'project' => "<a href='" . route('projects.info', ['id' => $contract->project_id]) . "' target='_blank'>{$contract->project_title}</a>",
+                'project' => "<a href='" . route('projects.info', ['id' => $contract->project_id]) . "' target='_blank'>{$contract->project_title}</a>",
                     'contract_type' => $contract->contract_type,
                     'description' => $contract->description,
                     'promisor_sign' => $promisor_sign_status,
@@ -491,13 +501,14 @@ class ContractsController extends Controller
                     'created_by' => strpos($contract->created_by, 'u_') === 0 ? formatUserHtml(User::find(substr($contract->created_by, 2))) : formatClientHtml(Client::find(substr($contract->created_by, 2))),
                     'created_at' => format_date($contract->created_at, true),
                     'updated_at' => format_date($contract->updated_at, true),
-                    'actions' => $actions,
+                'actions' => $actions
                 ];
             });
 
+
         return response()->json([
-            'rows' => $contracts->items(),
-            'total' => $total,
+            "rows" => $contracts->items(),
+            "total" => $total,
         ]);
     }
 
@@ -587,19 +598,19 @@ class ContractsController extends Controller
     {
         try {
             $search = request('search');
-            $sort = request('sort') ? request('sort') : 'id';
-            $order = request('order') ? request('order') : 'DESC';
-            $limit = request('limit') ? request('limit') : 10;
+            $sort = (request('sort')) ? request('sort') : "id";
+            $order = (request('order')) ? request('order') : "DESC";
+            $limit = (request('limit')) ? request('limit') : 10;
             $statuses = request('statuses', []);
             $type_ids = request('type_ids', []);
             $project_ids = request('project_ids', []);
             $client_ids = request('client_ids', []);
-            $date_between_from = request('date_between_from') ?: '';
-            $date_between_to = request('date_between_to') ?: '';
-            $start_date_from = request('start_date_from') ? request('start_date_from') : '';
-            $start_date_to = request('start_date_to') ? request('start_date_to') : '';
-            $end_date_from = request('end_date_from') ? request('end_date_from') : '';
-            $end_date_to = request('end_date_to') ? request('end_date_to') : '';
+            $date_between_from = request('date_between_from') ?: "";
+            $date_between_to = request('date_between_to') ?: "";
+            $start_date_from = (request('start_date_from')) ? request('start_date_from') : "";
+            $start_date_to = (request('start_date_to')) ? request('start_date_to') : "";
+            $end_date_from = (request('end_date_from')) ? request('end_date_from') : "";
+            $end_date_to = (request('end_date_to')) ? request('end_date_to') : "";
             $where = ['contracts.workspace_id' => $this->workspace->id];
 
             $contracts = Contract::select(
@@ -613,23 +624,23 @@ class ContractsController extends Controller
                 ->leftJoin('contract_types', 'contracts.contract_type_id', '=', 'contract_types.id')
                 ->leftJoin('projects', 'contracts.project_id', '=', 'projects.id');
 
-            if (! isAdminOrHasAllDataAccess()) {
+            if (!isAdminOrHasAllDataAccess()) {
                 $contracts = $contracts->where(function ($query) {
                     $query->where('contracts.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                         ->orWhere('contracts.client_id', $this->user->id);
                 });
             }
 
-            if (! empty($project_ids)) {
+            if (!empty($project_ids)) {
                 $contracts = $contracts->whereIn('contracts.project_id', $project_ids);
             }
-            if (! empty($type_ids)) {
+            if (!empty($type_ids)) {
                 $contracts = $contracts->whereIn('contracts.contract_type_id', $type_ids);
             }
-            if (! empty($client_ids)) {
+            if (!empty($client_ids)) {
                 $contracts = $contracts->whereIn('contracts.client_id', $client_ids);
             }
-            if (! empty($statuses)) {
+            if (!empty($statuses)) {
                 $contracts = $contracts->where(function ($query) use ($statuses) {
                     foreach ($statuses as $status) {
                         if ($status === 'partially_signed') {
@@ -684,9 +695,9 @@ class ContractsController extends Controller
                 ->take($limit)
                 ->get()
                 ->map(function ($contract) {
-                    $formattedDates = format_date($contract->start_date, to_format: 'Y-m-d') . ' ' . get_label('to', 'To') . ' ' . format_date($contract->end_date, to_format: 'Y-m-d');
-                    $data = formatContract($contract);
-                    $data['duration'] = $formattedDates;
+                $formattedDates = format_date($contract->start_date, to_format: 'Y-m-d') . ' ' . get_label('to', 'To') . ' ' . format_date($contract->end_date, to_format: 'Y-m-d');
+                $data = formatContract($contract);
+                $data['duration'] = $formattedDates;
                     return $data;
                 });
 
@@ -695,7 +706,7 @@ class ContractsController extends Controller
                 'Contracts retrieved successfully!',
                 [
                     'total' => $total,
-                    'data' => $contracts,
+                    'data' => $contracts
                 ],
                 200
             );
@@ -719,7 +730,6 @@ class ContractsController extends Controller
      * @group Contract Management
      *
      * @urlParam id integer required The ID of the contract to retrieve. Must exist in the contracts table. Example: 15
-     *
      * @queryParam isApi boolean optional Set to true for API requests. Example: true
      *
      * @response 200 {
@@ -787,6 +797,7 @@ class ContractsController extends Controller
     public function get($id)
     {
         try {
+
             $isApi = request()->get('isApi', false);
             $contract = Contract::with(['client', 'project', 'contract_type'])->findOrFail($id);
             $contract->value = format_currency($contract->value, false, false);
@@ -796,13 +807,14 @@ class ContractsController extends Controller
                     false,
                     'Contract retrieved successfully.',
                     [
-                        'data' => formatContract($contract),
+                        'data' => formatContract($contract)
                     ]
                 );
             }
 
             return response()->json(['error' => false, 'contract' => $contract]);
         } catch (ModelNotFoundException $e) {
+
             return formatApiResponse(true, 'Contract not found.', [], 404);
         } catch (\Exception $e) {
             return formatApiResponse(
@@ -817,10 +829,10 @@ class ContractsController extends Controller
     public function duplicate($id)
     {
         // Use the general duplicateRecord function
-        $title = request()->has('title') && ! empty(trim(request()->title)) ? request()->title : '';
+        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
         $duplicate = duplicateRecord(Contract::class, $id, [], $title);
 
-        if (! $duplicate) {
+        if (!$duplicate) {
             return response()->json(['error' => true, 'message' => 'Contract duplication failed.']);
         }
         return response()->json(['error' => false, 'id' => $id, 'message' => 'Contract duplicated successfully.']);
@@ -864,12 +876,13 @@ class ContractsController extends Controller
             }
         }
 
-        if (! isset($contract->creator)) {
+        if (!isset($contract->creator)) {
             $contract->creator = '-';
         }
 
         return view('contracts.sign', compact('contract'));
     }
+
 
     /**
      * Sign a contract with a base64 image.
@@ -882,7 +895,6 @@ class ContractsController extends Controller
      *
      * @bodyParam id integer required The ID of the contract to sign. Example: 12
      * @bodyParam signatureImage string required A base64-encoded PNG image string of the signature. Must include the data URI prefix (e.g., "data:image/png;base64,..."). Example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-     *
      * @queryParam isApi boolean optional If true, returns a formatted API response instead of a regular JSON response. Example: true
      *
      * @response 200 {
@@ -903,14 +915,17 @@ class ContractsController extends Controller
      * }
      */
 
+
     public function create_sign(Request $request)
     {
+
         try {
+
             $isApi = request()->get('isApi', false);
 
             $formFields = $request->validate([
                 'id' => 'required',
-                'signatureImage' => 'required',
+                'signatureImage' => 'required'
             ]);
             $contract = Contract::findOrFail($formFields['id']);
             $base64Data = $request->input('signatureImage');
@@ -919,10 +934,10 @@ class ContractsController extends Controller
             $filename = 'signature_' . uniqid() . '.png';
             Storage::put('public/signatures/' . $filename, $imageData);
             $signedAs = null;
-            if (($this->user->id === $contract->created_by || isAdminOrHasAllDataAccess()) && ! isClient()) {
+            if (($this->user->id == $contract->created_by || isAdminOrHasAllDataAccess()) && !isClient()) {
                 $contract->promisor_sign = $filename;
                 $signedAs = 'promisor';
-            } elseif (($this->user->id === $contract->client_id) && isClient()) {
+            } elseif (($this->user->id == $contract->client_id) && isClient()) {
                 $contract->promisee_sign = $filename;
                 $signedAs = 'promisee';
             }
@@ -934,21 +949,23 @@ class ContractsController extends Controller
                     trim($this->user->first_name) . ' ' . trim($this->user->last_name) . " signed contract {$contract->title} as {$signedAs}.",
                     [
                         'id' => $formFields['id'],
-                        'signed_as' => $signedAs,
+                        'signed_as' => $signedAs
                     ],
                     200
                 );
 
+
                 return response()->json(['error' => false, 'id' => $formFields['id'], 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' signed contract ' . trim($contract->title)]);
+            } else {
+
+                return formatApiResponse(
+                    true,
+                    'Signature couldn\'t created.',
+                    []
+                );
+
+                return response()->json(['error' => true, 'message' => 'Signature couldn\'t created.']);
             }
-
-            return formatApiResponse(
-                true,
-                'Signature couldn\'t created.',
-                []
-            );
-
-            return response()->json(['error' => true, 'message' => 'Signature couldn\'t created.']);
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -958,6 +975,7 @@ class ContractsController extends Controller
             );
         }
     }
+
 
     /**
      * Remove signature from a contract.
@@ -969,7 +987,6 @@ class ContractsController extends Controller
      * @group Contract Management
      *
      * @urlParam id integer required The ID of the contract to remove signature from. Must exist in the contracts table. Example: 15
-     *
      * @queryParam isApi boolean optional Set to true for API requests. Example: true
      *
      * @response 200 {
@@ -999,11 +1016,13 @@ class ContractsController extends Controller
 
     public function delete_sign($id)
     {
+
         try {
+
             $isApi = request()->get('isApi', false);
 
             $contract = Contract::findOrFail($id);
-            if (($this->user->id === str_replace('u_', '', $contract->created_by) || isAdminOrHasAllDataAccess()) && ! isClient()) {
+            if (($this->user->id == str_replace('u_', "", $contract->created_by) || isAdminOrHasAllDataAccess()) && !isClient()) {
                 Storage::delete('public/signatures/' . $contract->promisor_sign);
                 Contract::where('id', $id)->update(['promisor_sign' => null]);
                 Session::flash('message', 'Signature deleted successfully.');
@@ -1013,14 +1032,14 @@ class ContractsController extends Controller
                         false,
                         trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' unsigned contract ' . trim($contract->title),
                         [
-                            'id' => $id,
+                            'id' => $id
                         ]
+
                     );
                 }
 
                 return response()->json(['error' => false, 'id' => $id, 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' unsigned contract ' . trim($contract->title)]);
-            }
-            if ($this->user->id === $contract->client_id && isClient()) {
+            } elseif ($this->user->id == $contract->client_id && isClient()) {
                 Storage::delete('public/signatures/' . $contract->promisee_sign);
                 Contract::where('id', $id)->update(['promisee_sign' => null]);
                 Session::flash('message', 'Signature deleted successfully.');
@@ -1030,16 +1049,18 @@ class ContractsController extends Controller
                         false,
                         trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' unsigned contract ' . trim($contract->title),
                         [
-                            'id' => $id,
+                            'id' => $id
                         ]
                     );
                 }
 
                 return response()->json(['error' => false, 'id' => $id, 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' unsigned contract ' . trim($contract->title)]);
-            }
-            Session::flash('error', 'Un authorized access.');
+            } else {
+                Session::flash('error', 'Un authorized access.');
 
-            return response()->json(['error' => true]);
+
+                return response()->json(['error' => true]);
+            }
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -1080,9 +1101,12 @@ class ContractsController extends Controller
      * }
      */
 
+
     public function destroy($id)
     {
+
         try {
+
             $contract = Contract::findOrFail($id);
             if ($response = DeletionService::delete(Contract::class, $id, 'Contract')) {
                 Storage::delete('public/signatures/' . $contract->promisor_sign);
@@ -1108,7 +1132,7 @@ class ContractsController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:contracts,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:contracts,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -1136,10 +1160,12 @@ class ContractsController extends Controller
 
     public function contract_types(Request $request)
     {
+
         $contract_types = ContractType::forWorkspace($this->workspace->id);
         $contract_types = $contract_types->count();
         return view('contracts.contract_types', ['contract_types' => $contract_types]);
     }
+
 
     /**
      * Create a new contract type.
@@ -1182,8 +1208,12 @@ class ContractsController extends Controller
 
     public function store_contract_type(Request $request)
     {
+
         try {
+
             $isApi = request()->get('isApi', false);
+
+
 
             // Validate the request data
             $formFields = $request->validate([
@@ -1192,12 +1222,14 @@ class ContractsController extends Controller
             $formFields['workspace_id'] = $this->workspace->id;
 
             if ($ct = ContractType::create($formFields)) {
+
                 if ($isApi) {
+
                     return formatApiResponse(
                         false,
                         'Contract type created successfully.',
                         [
-                            'data' => formatContractType($ct),
+                            'data' => formatContractType($ct)
                         ],
                         200
                     );
@@ -1213,26 +1245,28 @@ class ContractsController extends Controller
                             'name' => $ct->type,
                         ],
                         'id' => $ct->id,
-                        'ct' => $ct,
+                        'ct' => $ct
                     ]
                 );
-            }
+            } else {
 
-            if ($isApi) {
-                return formatApiResponse(
-                    true,
-                    'Contract type couldn\'t created.',
-                    []
-                );
-            }
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Contract type couldn\'t created.',
+                        []
+                    );
+                }
 
-            return response()->json(['error' => true, 'message' => 'Contract type couldn\'t created.']);
+                return response()->json(['error' => true, 'message' => 'Contract type couldn\'t created.']);
+            }
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
                 config('app.debug') ? $e->getMessage() : 'An error occurred',
                 [],
                 500
+
             );
         }
     }
@@ -1240,8 +1274,8 @@ class ContractsController extends Controller
     public function contract_types_list()
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
         $contract_types = ContractType::forWorkspace($this->workspace->id);
         if ($search) {
             $contract_types = $contract_types->where(function ($query) use ($search) {
@@ -1254,7 +1288,7 @@ class ContractsController extends Controller
         $canEdit = checkPermission('edit_contract_types');
         $canDelete = checkPermission('delete_contract_types');
         $contract_types = $contract_types->orderBy($sort, $order)
-            ->paginate(request('limit'))
+            ->paginate(request("limit"))
             ->through(function ($contract_type) use ($canEdit, $canDelete) {
                 $actions = '';
 
@@ -1270,11 +1304,11 @@ class ContractsController extends Controller
                         '</button>';
                 }
 
-                $actions = $actions ? $actions : '-';
+            $actions = $actions ?: '-';
 
                 return [
                     'id' => $contract_type->id,
-                    'type' => $contract_type->type . ($contract_type->id === 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
+                'type' => $contract_type->type . ($contract_type->id == 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
                     'created_at' => format_date($contract_type->created_at, true),
                     'updated_at' => format_date($contract_type->updated_at, true),
                     'actions' => $actions,
@@ -1282,10 +1316,11 @@ class ContractsController extends Controller
             });
 
         return response()->json([
-            'rows' => $contract_types->items(),
-            'total' => $total,
+            "rows" => $contract_types->items(),
+            "total" => $total,
         ]);
     }
+
 
     /**
      * List contract types with filtering and pagination.
@@ -1347,10 +1382,11 @@ class ContractsController extends Controller
 
     public function contract_types_apiList()
     {
+
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
-        $limit = request('limit') ? request('limit') : 10;
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
+        $limit = (request('limit')) ? request('limit') : 10;
         $contract_types = ContractType::forWorkspace($this->workspace->id);
         if ($search) {
             $contract_types = $contract_types->where(function ($query) use ($search) {
@@ -1365,7 +1401,9 @@ class ContractsController extends Controller
             ->take($limit)
             ->get()
             ->map(function ($contract_type) {
-                return formatContractType($contract_type);
+
+
+            return formatContractType($contract_type);
             });
 
         return formatApiResponse(
@@ -1373,10 +1411,11 @@ class ContractsController extends Controller
             'Contract types retrieved successfully.',
             [
                 'total' => $total,
-                'data' => $contract_types,
+                'data' => $contract_types
             ]
         );
     }
+
 
     /**
      * Retrieve a single contract type by ID.
@@ -1388,7 +1427,6 @@ class ContractsController extends Controller
      * @group Contract Type Management
      *
      * @urlParam id integer required The ID of the contract type to retrieve. Must exist in the contract_types table. Example: 3
-     *
      * @queryParam isApi boolean optional Set to true for API requests. Example: true
      *
      * @response 200 {
@@ -1419,6 +1457,7 @@ class ContractsController extends Controller
     public function get_contract_type($id)
     {
         try {
+
             $isApi = request()->get('isApi', false);
 
             $ct = ContractType::findOrFail($id);
@@ -1428,7 +1467,7 @@ class ContractsController extends Controller
                     false,
                     'Contract type retrieved successfully.',
                     [
-                        'data' => formatContractType($ct),
+                        'data' => formatContractType($ct)
                     ],
                     200
                 );
@@ -1436,6 +1475,7 @@ class ContractsController extends Controller
 
             return response()->json(['ct' => $ct]);
         } catch (\Exception $e) {
+
             return formatApiResponse(
                 false,
                 config('app.debug') ? $e->getMessage() : 'An error occurred',
@@ -1493,7 +1533,9 @@ class ContractsController extends Controller
 
     public function update_contract_type(Request $request)
     {
+
         try {
+
             $isApi = request()->get('isApi', false);
 
             $formFields = $request->validate([
@@ -1502,29 +1544,31 @@ class ContractsController extends Controller
             ]);
             $ct = ContractType::findOrFail($request->id);
             if ($ct->update($formFields)) {
+
                 if ($isApi) {
                     return formatApiResponse(
                         false,
                         'Contract type updated successfully.',
                         [
-                            'data' => $ct,
+                            'data' => $ct
                         ],
                         200
                     );
                 }
 
                 return response()->json(['error' => false, 'message' => 'Contract type updated successfully.', 'id' => $ct->id, 'title' => $formFields['type'], 'type' => 'contract_type']);
-            }
+            } else {
 
-            if ($isApi) {
-                return formatApiResponse(
-                    true,
-                    'Contract type couldn\'t updated.',
-                    []
-                );
-            }
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Contract type couldn\'t updated.',
+                        []
+                    );
+                }
 
-            return response()->json(['error' => true, 'message' => 'Contract type couldn\'t updated.']);
+                return response()->json(['error' => true, 'message' => 'Contract type couldn\'t updated.']);
+            }
         } catch (\Exception $e) {
             formatApiResponse(
                 true,
@@ -1534,6 +1578,7 @@ class ContractsController extends Controller
             );
         }
     }
+
 
     /**
      * Delete a contract type.
@@ -1545,7 +1590,6 @@ class ContractsController extends Controller
      * @group Contract Type Management
      *
      * @urlParam id integer required The ID of the contract type to delete. Must exist in the contract_types table and cannot be the default type (ID: 0). Example: 5
-     *
      * @queryParam isApi boolean optional Set to true for API requests. Example: true
      *
      * @response 200 {
@@ -1585,7 +1629,9 @@ class ContractsController extends Controller
 
     public function delete_contract_type($id)
     {
+
         try {
+
             $isApi = request()->get('isApi', false);
 
             $ct = ContractType::findOrFail($id);
@@ -1593,6 +1639,7 @@ class ContractsController extends Controller
             $response = DeletionService::delete(ContractType::class, $id, 'Contract type');
             $data = $response->getData();
             if ($data->error) {
+
                 if ($isApi) {
                     return formatApiResponse(
                         true,
@@ -1602,20 +1649,22 @@ class ContractsController extends Controller
                 }
 
                 return response()->json(['error' => true, 'message' => $data->message]);
-            }
+            } else {
 
-            if ($isApi) {
-                return formatApiResponse(
-                    false,
-                    'Contract type deleted successfully.',
-                    [
-                        'data' => $ct,
-                    ],
-                    200
-                );
-            }
+                if ($isApi) {
+                    return formatApiResponse(
+                        false,
+                        'Contract type deleted successfully.',
+                        [
+                            'data' => $ct
+                        ],
+                        200
 
-            return response()->json(['error' => false, 'message' => 'Contract type deleted successfully.', 'id' => $id, 'title' => $ct->type, 'type' => 'contract_type']);
+                    );
+                }
+
+                return response()->json(['error' => false, 'message' => 'Contract type deleted successfully.', 'id' => $id, 'title' => $ct->type, 'type' => 'contract_type']);
+            }
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -1631,7 +1680,7 @@ class ContractsController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:contract_types,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:contract_types,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -1644,7 +1693,7 @@ class ContractsController extends Controller
         foreach ($ids as $id) {
             $ct = ContractType::findOrFail($id);
             if ($ct) {
-                if ($ct->id === 0) { // Assuming 0 is the ID for default contract type
+                if ($ct->id == 0) { // Assuming 0 is the ID for default contract type
                     $defaultContractTypeIds[] = $id;
                 } else {
                     $ct->contracts()->update(['contract_type_id' => 0]);
@@ -1657,11 +1706,13 @@ class ContractsController extends Controller
         }
 
         if (count($defaultContractTypeIds) > 0) {
-            if (count($ids) === 1) {
+            if (count($ids) == 1) {
                 return response()->json(['error' => true, 'message' => 'Default contract type cannot be deleted.']);
+            } else {
+                return response()->json(['error' => false, 'message' => 'Contract type(s) deleted successfully except default.', 'id' => $deletedContractTypes, 'titles' => $deletedContractTypeTitles, 'type' => 'contract_type']);
             }
-            return response()->json(['error' => false, 'message' => 'Contract type(s) deleted successfully except default.', 'id' => $deletedContractTypes, 'titles' => $deletedContractTypeTitles, 'type' => 'contract_type']);
+        } else {
+            return response()->json(['error' => false, 'message' => 'Contract type(s) deleted successfully.', 'id' => $deletedContractTypes, 'titles' => $deletedContractTypeTitles, 'type' => 'contract_type']);
         }
-        return response()->json(['error' => false, 'message' => 'Contract type(s) deleted successfully.', 'id' => $deletedContractTypes, 'titles' => $deletedContractTypeTitles, 'type' => 'contract_type']);
     }
 }

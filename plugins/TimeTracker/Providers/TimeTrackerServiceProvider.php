@@ -2,9 +2,10 @@
 
 namespace Plugins\TimeTracker\Providers;
 
-use Illuminate\Console\Scheduling\Schedule;
+use Plugins\TimeTracker\Middleware\IsDevice;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Console\Scheduling\Schedule;
 use Plugins\TimeTracker\Console\CleanupScreenshots;
 
 class TimeTrackerServiceProvider extends ServiceProvider
@@ -16,9 +17,19 @@ class TimeTrackerServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'timetracker');
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'timetracker');
+        // Register your plugin middleware alias
+        $this->app['router']->aliasMiddleware(
+            'isDevice',
+            IsDevice::class
+        );
+
 
         $this->publishes([
             __DIR__ . '/../public/js' => public_path('assets/js/timetracker-plugin'),
+        ], ['timetracker-assets', 'public']);
+
+        $this->publishes([
+            __DIR__ . '/../public/css' => public_path('assets/css/timetracker'),
         ], ['timetracker-assets', 'public']);
 
         $this->publishes([

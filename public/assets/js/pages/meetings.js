@@ -36,24 +36,28 @@ addDebouncedEventListener('#status_filter, #meeting_user_filter, #meeting_client
     }
 });
 
+// Initialize advanced date range filters with presets
 $(document).ready(function () {
-    $('#meeting_date_between').on('apply.daterangepicker', function (ev, picker) {
-        var startDate = picker.startDate.format('YYYY-MM-DD');
-        var endDate = picker.endDate.format('YYYY-MM-DD');
-        $('#meeting_date_between_from').val(startDate);
-        $('#meeting_date_between_to').val(endDate);
-        $('#meetings_table').bootstrapTable('refresh');
+    // Initialize date range filters with preset ranges
+    initAdvancedDateRangePicker({
+        selector: '#meeting_date_between',
+        hiddenFrom: '#meeting_date_between_from',
+        hiddenTo: '#meeting_date_between_to',
+        tableId: 'meetings_table'
     });
 
-    // Cancel event to clear values
-    $('#meeting_date_between').on('cancel.daterangepicker', function (ev, picker) {
-        $('#meeting_date_between_from').val('');
-        $('#meeting_date_between_to').val('');
-        $(this).val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $('#meetings_table').bootstrapTable('refresh');
+    initAdvancedDateRangePicker({
+        selector: '#meeting_start_date_between',
+        hiddenFrom: '#meeting_start_date_from',
+        hiddenTo: '#meeting_start_date_to',
+        tableId: 'meetings_table'
+    });
+
+    initAdvancedDateRangePicker({
+        selector: '#meeting_end_date_between',
+        hiddenFrom: '#meeting_end_date_from',
+        hiddenTo: '#meeting_end_date_to',
+        tableId: 'meetings_table'
     });
 });
 

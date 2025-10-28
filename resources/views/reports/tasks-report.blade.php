@@ -192,5 +192,46 @@
 <script>
     var tasks_report_export_url = "{{ route('reports.export-tasks-report') }}";
 </script>
-<script src="{{ asset('assets/js/pages/tasks-report.js') }}"></script>
+<script src="{{ asset('assets/js/pages/tasks-report.js') }}?v={{ time() }}"></script>
+<script>
+    // Force re-initialization of date filters with presets
+    $(window).on('load', function() {
+        setTimeout(function() {
+            // Destroy and reinitialize date filters
+            if ($('#filter_date_range').data('daterangepicker')) {
+                $('#filter_date_range').data('daterangepicker').remove();
+            }
+            if ($('#report_start_date_between').data('daterangepicker')) {
+                $('#report_start_date_between').data('daterangepicker').remove();
+            }
+            if ($('#report_end_date_between').data('daterangepicker')) {
+                $('#report_end_date_between').data('daterangepicker').remove();
+            }
+
+            // Reinitialize with advanced presets
+            if (typeof initAdvancedDateRangePicker === 'function') {
+                initAdvancedDateRangePicker({
+                    selector: '#filter_date_range',
+                    hiddenFrom: '#filter_date_range_from',
+                    hiddenTo: '#filter_date_range_to',
+                    tableId: 'tasks_report_table'
+                });
+
+                initAdvancedDateRangePicker({
+                    selector: '#report_start_date_between',
+                    hiddenFrom: '#filter_start_date_from',
+                    hiddenTo: '#filter_start_date_to',
+                    tableId: 'tasks_report_table'
+                });
+
+                initAdvancedDateRangePicker({
+                    selector: '#report_end_date_between',
+                    hiddenFrom: '#filter_end_date_from',
+                    hiddenTo: '#filter_end_date_to',
+                    tableId: 'tasks_report_table'
+                });
+            }
+        }, 500);
+    });
+</script>
 @endsection

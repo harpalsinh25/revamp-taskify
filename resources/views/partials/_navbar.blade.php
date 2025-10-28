@@ -50,7 +50,7 @@ if ($remainingUnreadNotificationsCount < 0) {
                 <li class="nav-item navbar-dropdown dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                         <i class='bx bx-bell bx-sm'></i>
-                        <span id="unreadNotificationsCount" class="badge rounded-pill badge-center h-px-20 w-px-20 bg-danger {{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}">{{ $unreadNotificationsCount }}</span>
+                        <span id="unreadNotificationsCount" class="badge badge-notifications bg-danger rounded-pill {{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}">{{ $unreadNotificationsCount }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end p-0">
                         <li class="dropdown-header dropdown-header-highlighted fixed-header">

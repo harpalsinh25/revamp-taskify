@@ -3,6 +3,7 @@
 namespace Plugins\TimeTracker\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use DateTimeInterface;
 
 class TimeTrackerActivityLog extends Model
 {
@@ -20,6 +21,20 @@ class TimeTrackerActivityLog extends Model
         'metadata' => 'json',  // Automatically cast metadata to JSON
         'timestamp' => 'datetime',  // Ensure timestamp is treated as a Carbon instance
     ];
+
+    /**
+     * Prepare a date for array / JSON serialization.
+     * Convert to configured timezone from general settings instead of UTC.
+     *
+     * @param  \DateTimeInterface  $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        $general_settings = get_settings('general_settings');
+        $timezone = $general_settings['timezone'] ?? 'UTC';
+        return $date->setTimezone($timezone)->format('Y-m-d H:i:s');
+    }
     public function user()
     {
         return $this->belongsTo('App\Models\User', 'user_id');

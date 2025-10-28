@@ -16,7 +16,7 @@ class Todo extends Model
         'creator_id',
         'creator_type',
         'is_completed',
-        'workspace_id',
+        'workspace_id'
     ];
     public function creator()
     {

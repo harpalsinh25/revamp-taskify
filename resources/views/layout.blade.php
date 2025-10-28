@@ -17,13 +17,13 @@
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
     <!-- Core CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}?v={{ rand() }}" class="template-customizer-core-css" />
 
     {{-- <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}"
         class="template-customizer-theme-css" /> --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}?v={{ rand() }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}?v={{ rand() }}" />
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}" />
@@ -243,6 +243,7 @@
 <!-- Date picker -->
 <script src="{{ asset('assets/js/moment.min.js') }}"></script>
 <script src="{{ asset('assets/js/daterangepicker.js') }}"></script>
+<script src="{{ asset('assets/js/advanced-daterange-filter.js') }}?v={{ time() }}"></script>
 <script src="{{ asset('assets/lightbox/lightbox.min.js') }}"></script>
 <script src="{{ asset('assets/js/dropzone.min.js') }}"></script>
 <script src="{{ asset('assets/js/extended-ui-perfect-scrollbar.js') }}"></script>
@@ -346,8 +347,22 @@
     var allowedMaxFilesizeFormatted = '<?= formatSize(1024 * 1024 * $allowedMaxUploadSize) ?>';
     var maxFilesAllowed = <?= $maxFilesAllowed ?>;
     var allowedFileTypes = '<?= $allowedFileTypes ?>';
+
+    // Advanced Date Range Filter Labels
+    window.label_today = '<?= get_label('today', 'Today') ?>';
+    window.label_yesterday = '<?= get_label('yesterday', 'Yesterday') ?>';
+    window.label_last_7_days = '<?= get_label('last_7_days', 'Last 7 Days') ?>';
+    window.label_last_30_days = '<?= get_label('last_30_days', 'Last 30 Days') ?>';
+    window.label_this_month = '<?= get_label('this_month', 'This Month') ?>';
+    window.label_last_month = '<?= get_label('last_month', 'Last Month') ?>';
+    window.label_this_year = '<?= get_label('this_year', 'This Year') ?>';
+    window.label_custom_range = '<?= get_label('custom_range', 'Custom Range') ?>';
+    window.label_apply = '<?= get_label('apply', 'Apply') ?>';
+    window.label_cancel = '<?= get_label('cancel', 'Cancel') ?>';
+    window.label_from = '<?= get_label('from', 'From') ?>';
+    window.label_to = '<?= get_label('to', 'To') ?>';
 </script>
-<script src="{{ asset('assets/js/custom.js') }}"></script>
+<script src="{{ asset('assets/js/custom.js') }}?v={{ rand() }}"></script>
 <script src="{{ asset('assets/js/dynamic_table_filter_manager.js') }}"></script>
 @yield('page_scripts')
 

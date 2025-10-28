@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Note;
 use App\Models\Workspace;
-use App\Services\DeletionService;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
+use App\Services\DeletionService;
 use Illuminate\Validation\ValidationException;
 
 class NotesController extends Controller
@@ -15,6 +16,7 @@ class NotesController extends Controller
     protected $user;
     public function __construct()
     {
+
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->workspace = Workspace::find(getWorkspaceId());
@@ -63,9 +65,23 @@ class NotesController extends Controller
      *   "error": true,
      *   "message": "Validation errors occurred",
      *   "errors": {
+     *     "title": [
+     *       "The title field is required."
+     *     ],
+     *     "color": [
+     *       "The color must be one of the following: info, warning, danger."
+     *     ]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "error": true,
+     *   "message": "An error occurred while creating the note."
+     * }
      */
     public function store(Request $request)
     {
+
         $isApi = request()->get('isApi', false);
         $rules = [
             'note_type' => 'required|in:text,drawing',
@@ -81,17 +97,20 @@ class NotesController extends Controller
             if ($isApi) {
                 $decodedSvg = base64_decode($drawingData);
             } else {
+
                 $decodedSvg = urldecode(base64_decode($drawingData));
             }
         } else {
             $decodedSvg = null;
         }
 
+
+
         try {
             $formFields = $request->validate($rules);
             $formFields['drawing_data'] = $decodedSvg;
             $formFields['workspace_id'] = $this->workspace->id;
-            $formFields['creator_id'] = getGuardName() === 'client' ? 'c_' . $this->user->id : 'u_' . $this->user->id;
+            $formFields['creator_id'] = getGuardName() == 'client' ? 'c_' . $this->user->id : 'u_' . $this->user->id;
             $note = Note::create($formFields);
             $createdNote = Note::find($note->id);
             // Session::flash('message', 'Note created successfully.');
@@ -100,7 +119,7 @@ class NotesController extends Controller
                 'Note created successfully.',
                 [
                     'id' => $note->id,
-                    'data' => formatNote($createdNote),
+                    'data' => formatNote($createdNote)
                 ]
             );
         } catch (ValidationException $e) {
@@ -110,10 +129,11 @@ class NotesController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the note.',
+                'message' => 'An error occurred while creating the note.'
             ], 500);
         }
     }
+
 
     /**
      * Update an existing note.
@@ -168,6 +188,8 @@ class NotesController extends Controller
      */
     public function update(Request $request)
     {
+
+
         $isApi = request()->get('isApi', false);
         $rules = [
             'note_type' => 'required|in:text,drawing',
@@ -184,6 +206,7 @@ class NotesController extends Controller
             if ($isApi) {
                 $decodedSvg = base64_decode($drawingData);
             } else {
+
                 $decodedSvg = urldecode(base64_decode($drawingData));
             }
         } else {
@@ -203,16 +226,17 @@ class NotesController extends Controller
                 'Note updated successfully.',
                 [
                     'id' => $note->id,
-                    'data' => formatNote($note),
+                    'data' => formatNote($note)
                 ]
             );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
+
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the note.',
+                'message' => 'An error occurred while updating the note.'
             ], 500);
         }
     }
@@ -283,13 +307,13 @@ class NotesController extends Controller
             if ($id) {
                 $note = Note::find($id);
 
-                if (! $note) {
+                if (!$note) {
                     return formatApiResponse(
                         false,
                         'Note not found.',
                         [
                             'total' => 0,
-                            'data' => [],
+                            'data' => []
                         ]
                     );
                 }
@@ -299,7 +323,7 @@ class NotesController extends Controller
                     'Note retrieved successfully.',
                     [
                         'total' => 1,
-                        'data' => formatNote($note),
+                        'data' => formatNote($note)
                     ]
                 );
             }
@@ -323,7 +347,7 @@ class NotesController extends Controller
                     'Notes not found.',
                     [
                         'total' => 0,
-                        'data' => [],
+                        'data' => []
                     ]
                 );
             }
@@ -337,16 +361,18 @@ class NotesController extends Controller
                 'Notes retrieved successfully.',
                 [
                     'total' => $total,
-                    'data' => $formattedNotes,
+                    'data' => $formattedNotes
                 ]
             );
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while retrieving the notes.',
+                'message' => 'An error occurred while retrieving the notes.'
             ], 500);
         }
     }
+
+
 
     /**
      * Remove the specified note.
@@ -379,9 +405,11 @@ class NotesController extends Controller
      * }
      */
 
+
     public function destroy($id)
     {
-        return DeletionService::delete(Note::class, $id, 'Note');
+        $response = DeletionService::delete(Note::class, $id, 'Note');
+        return $response;
     }
 
     public function destroy_multiple(Request $request)
@@ -389,7 +417,7 @@ class NotesController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:notes,id', // Ensure each ID in 'ids' is an integer and exists in the notes table
+            'ids.*' => 'integer|exists:notes,id' // Ensure each ID in 'ids' is an integer and exists in the notes table
         ]);
 
         $ids = $validatedData['ids'];
@@ -409,7 +437,7 @@ class NotesController extends Controller
             'error' => false,
             'message' => 'Note(s) deleted successfully.',
             'id' => $deletedIds,
-            'titles' => $deletedTitles,
+            'titles' => $deletedTitles
         ]);
     }
 }

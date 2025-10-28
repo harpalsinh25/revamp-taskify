@@ -1,4 +1,7 @@
-@php $auth_user = auth()->user(); @endphp
+@php
+$auth_user = auth()->user();
+$users = App\Models\Workspace::find(getWorkspaceId())->users()->where('status', 'active')->get();
+@endphp
 
 @if (!isClient() && ($auth_user->can('manage_users') &&
     (
@@ -7,8 +10,8 @@
         (!isset($general_settings['membersOnLeave']) || $general_settings['membersOnLeave'] == 1)
     )
 ))
-<div class="nav-align-top">
-    <ul class="nav nav-tabs" role="tablist">
+<div class="nav-align-top ">
+    <ul class="nav nav-tabs flex-wrap" role="tablist">
         @if (!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] == 1)
             <x-dashboard.tab-item
                 :active="true"
@@ -74,7 +77,7 @@
 </div>
 @endif
 
-@if ($auth_user->can('manage_projects') || $auth_user->can('manage_tasks'))
+{{-- @if ($auth_user->can('manage_projects') || $auth_user->can('manage_tasks'))
 <div class="nav-align-top {{ $auth_user->can('manage_users') && (
         (!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] == 1) ||
         (!isset($general_settings['upcomingWorkAnniversaries']) || $general_settings['upcomingWorkAnniversaries'] == 1) ||
@@ -123,4 +126,4 @@
         @endif
     </div>
 </div>
-@endif
+@endif --}}

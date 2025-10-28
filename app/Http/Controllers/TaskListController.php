@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TaskList;
-use App\Services\DeletionService;
 use Exception;
+use App\Models\TaskList;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
 
 class TaskListController extends Controller
 {
@@ -14,6 +14,7 @@ class TaskListController extends Controller
         $taskLists = TaskList::all();
         return view('task_lists.index', compact('taskLists'));
     }
+
 
     /**
      * Create a new task list.
@@ -24,7 +25,6 @@ class TaskListController extends Controller
      *
      * @bodyParam name string required The name of the task list. Max 255 characters. Example: UI Tasks
      * @bodyParam project_id integer required The ID of the project this task list belongs to. Must exist in the `projects` table. Example: 5
-     *
      * @queryParam isApi boolean optional Whether to return a JSON API response. Defaults to false. Example: true
      *
      * @response 200 {
@@ -59,6 +59,7 @@ class TaskListController extends Controller
 
     public function store(Request $request)
     {
+
         $isApi = request()->get('isApi');
 
         $validated = $request->validate([
@@ -78,13 +79,15 @@ class TaskListController extends Controller
                     false,
                     'Task list created successfully.',
                     [
-                        'data' => formatTaskList($taskList),
+                        'data' => formatTaskList($taskList)
                     ]
                 );
             }
 
+
             return response()->json(['error' => false, 'message' => 'Task list created successfully']);
         } catch (Exception $e) {
+
             if ($isApi) {
                 return formatApiResponse(
                     true,
@@ -105,7 +108,6 @@ class TaskListController extends Controller
      * @group Task List Management
      *
      * @urlParam id integer required The ID of the task list to retrieve. Must exist in the `task_lists` table. Example: 1
-     *
      * @queryParam isApi boolean optional Whether to return a JSON API response. Defaults to false. Example: true
      *
      * @response 200 {
@@ -133,13 +135,16 @@ class TaskListController extends Controller
      * }
      */
 
+
     public function get($id)
     {
         $isApi = request()->get('isApi', false);
 
         try {
+
             $task_list = TaskList::with('project')->find($id);
-            if (! $task_list) {
+            if (!$task_list) {
+
                 if ($isApi) {
                     return formatApiResponse(
                         true,
@@ -157,7 +162,7 @@ class TaskListController extends Controller
                     false,
                     'Task list retrieved successfully.',
                     [
-                        'data' => formatTaskList($task_list),
+                        'data' => formatTaskList($task_list)
                     ]
                 );
             }
@@ -181,7 +186,6 @@ class TaskListController extends Controller
      *
      * @bodyParam id integer required The ID of the task list to update. Must exist in the `task_lists` table. Example: 1
      * @bodyParam name string required The new name for the task list. Max 255 characters. Example: Backend Tasks
-     *
      * @queryParam isApi boolean optional Whether to return a JSON API response. Defaults to false. Example: true
      *
      * @response 200 {
@@ -220,8 +224,10 @@ class TaskListController extends Controller
      * }
      */
 
+
     public function update(Request $request)
     {
+
         $isApi = request()->get('isApi');
 
         $validatedData = $request->validate([
@@ -229,6 +235,7 @@ class TaskListController extends Controller
             'name' => 'required|string|max:255',
         ]);
         try {
+
             $taskList = TaskList::findOrFail($validatedData['id']);
             $taskList->update([
                 'name' => $validatedData['name'],
@@ -239,13 +246,14 @@ class TaskListController extends Controller
                     false,
                     'Task list updated successfully',
                     [
-                        'data' => formatTaskList($taskList),
+                        'data' => formatTaskList($taskList)
                     ]
                 );
             }
 
             return response()->json(['error' => false, 'message' => 'Task list updated successfully']);
         } catch (Exception $e) {
+
             if ($isApi) {
                 return formatApiResponse(
                     true,
@@ -259,6 +267,7 @@ class TaskListController extends Controller
         }
     }
 
+
     /**
      * Delete a task list.
      *
@@ -267,7 +276,6 @@ class TaskListController extends Controller
      * @group Task List Management
      *
      * @urlParam id integer required The ID of the task list to delete. Must exist in the `task_lists` table. Example: 1
-     *
      * @queryParam isApi boolean optional Whether to return a JSON API response. Defaults to false. Example: true
      *
      * @response 200 {
@@ -289,6 +297,7 @@ class TaskListController extends Controller
      * }
      */
 
+
     public function destroy($id)
     {
         $isApi = request()->get('isApi', false);
@@ -304,6 +313,7 @@ class TaskListController extends Controller
                     'Task list deleted successfully.',
                     [],
                     200
+
                 );
             }
 
@@ -320,11 +330,12 @@ class TaskListController extends Controller
     public function list()
     {
         $search = request('search');
-        $sort = request('sort', 'id');
-        $order = request('order', 'DESC');
+        $sort = request('sort', "id");
+        $order = request('order', "DESC");
         $limit = request('limit', 10);
 
         $task_lists = TaskList::orderBy($sort, $order);
+
 
         if ($search) {
             $task_lists->where(function ($query) use ($search) {
@@ -341,7 +352,7 @@ class TaskListController extends Controller
         $task_lists = $task_lists
             ->paginate($limit)
             ->through(
-                fn ($task_list) => [
+                fn($task_list) => [
                     'id' => $task_list->id,
                     'name' => ucwords($task_list->name),
                     'project' => ucwords($task_list->project->title),
@@ -352,10 +363,11 @@ class TaskListController extends Controller
             );
 
         return response()->json([
-            'rows' => $task_lists->items(),
-            'total' => $total,
+            "rows" => $task_lists->items(),
+            "total" => $total,
         ]);
     }
+
 
     /**
      * Get list of task lists (API format).
@@ -391,15 +403,19 @@ class TaskListController extends Controller
      * }
      */
 
+
     public function apiList()
     {
+
         try {
+
             $search = request('search');
-            $sort = request('sort', 'id');
-            $order = request('order', 'DESC');
+            $sort = request('sort', "id");
+            $order = request('order', "DESC");
             $limit = request('limit', 10);
 
             $task_lists = TaskList::orderBy($sort, $order);
+
 
             if ($search) {
                 $task_lists->where(function ($query) use ($search) {
@@ -425,7 +441,7 @@ class TaskListController extends Controller
                 'Task lists retrived successfully.',
                 [
                     'total' => $total,
-                    'data' => $task_lists,
+                    'data' => $task_lists
                 ]
             );
         } catch (\Exception $e) {
@@ -437,12 +453,37 @@ class TaskListController extends Controller
             );
         }
     }
+
+
+    private function getActions($task_list)
+    {
+        $actions = '';
+        $canEdit = true;  // Replace with your actual condition
+        $canDelete = true; // Replace with your actual condition
+
+
+        if ($canEdit) {
+            $actions .= '<a href="javascript:void(0);" class="edit-task-list" data-id="' . $task_list->id . '" title="' . get_label('update', 'Update') . '">' .
+                '<i class="bx bx-edit mx-1"></i>' .
+                '</a>';
+        }
+
+        if ($canDelete) {
+            $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $task_list->id . '" data-type="task-lists" data-table="table">' .
+                '<i class="bx bx-trash text-danger mx-1"></i>' .
+                '</button>';
+        }
+
+
+
+        return $actions ?: '-';
+    }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:task_lists,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:task_lists,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedIds = [];
@@ -457,6 +498,7 @@ class TaskListController extends Controller
         }
         return response()->json(['error' => false, 'message' => 'Task List(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
     }
+
 
     /**
      * Search task lists.
@@ -483,11 +525,13 @@ class TaskListController extends Controller
      * }
      */
 
+
     public function searchTaskLists(Request $request)
     {
         $isApi = request()->get('isApi', false);
 
         try {
+
             $search = $request->input('search', '');
             $projectId = $request->input('project_id');
             $taskListId = $request->input('id'); // Add ID parameter
@@ -505,13 +549,14 @@ class TaskListController extends Controller
                         false,
                         'Task list retrieved successfully.',
                         [
-                            'data' => formatTaskList($taskList),
+                            'data' => formatTaskList($taskList)
                         ]
                     );
                 }
 
                 return response()->json([$taskList]); // Wrap in an array
             }
+
 
             // Otherwise, return filtered results
             $taskListsQuery = TaskList::query()
@@ -525,12 +570,13 @@ class TaskListController extends Controller
                 ->get();
 
             if ($isApi) {
+
                 $taskListsQuery = $taskListsQuery->map(function ($taskList) {
                     return formatApiResponse(
                         false,
                         'Task lists retrived successfully',
                         [
-                            'data' => formatTaskList($taskList),
+                            'data' => formatTaskList($taskList)
                         ],
                         200
                     );
@@ -546,26 +592,5 @@ class TaskListController extends Controller
                 500
             );
         }
-    }
-
-    private function getActions($task_list)
-    {
-        $actions = '';
-        $canEdit = true;  // Replace with your actual condition
-        $canDelete = true; // Replace with your actual condition
-
-        if ($canEdit) {
-            $actions .= '<a href="javascript:void(0);" class="edit-task-list" data-id="' . $task_list->id . '" title="' . get_label('update', 'Update') . '">' .
-                '<i class="bx bx-edit mx-1"></i>' .
-                '</a>';
-        }
-
-        if ($canDelete) {
-            $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $task_list->id . '" data-type="task-lists" data-table="table">' .
-                '<i class="bx bx-trash text-danger mx-1"></i>' .
-                '</button>';
-        }
-
-        return $actions ? $actions : '-';
     }
 }

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class ProcessRecurringTasks extends Command
 {
+    protected $signature = 'recurring-tasks:generate';
+    protected $description = 'Generate new tasks for recurring tasks';
+
     private const FREQUENCY_HANDLERS = [
         'daily' => 'handleDailyFrequency',
         'weekly' => 'handleWeeklyFrequency',
@@ -27,8 +30,6 @@ class ProcessRecurringTasks extends Command
         6 => 'saturday',
         7 => 'sunday',
     ];
-    protected $signature = 'recurring-tasks:generate';
-    protected $description = 'Generate new tasks for recurring tasks';
 
     public function handle(): void
     {
@@ -60,13 +61,13 @@ class ProcessRecurringTasks extends Command
     protected function processRecurringTask(RecurringTask $recurringTask): void
     {
         try {
-            if (! $this->validateRecurringTask($recurringTask)) {
+            if (!$this->validateRecurringTask($recurringTask)) {
                 return;
             }
 
             $nextDate = $this->calculateNextOccurrence($recurringTask);
 
-            if (! $this->shouldCreateNewTask($recurringTask, $nextDate)) {
+            if (!$this->shouldCreateNewTask($recurringTask, $nextDate)) {
                 return;
             }
 
@@ -81,7 +82,7 @@ class ProcessRecurringTasks extends Command
 
     protected function validateRecurringTask(RecurringTask $recurringTask): bool
     {
-        if (! $recurringTask->task) {
+        if (!$recurringTask->task) {
             Log::warning("Parent task not found for recurring task {$recurringTask->id}");
             return false;
         }
@@ -107,7 +108,7 @@ class ProcessRecurringTasks extends Command
 
         $handler = self::FREQUENCY_HANDLERS[$recurringTask->frequency] ?? null;
 
-        if (! $handler || ! method_exists($this, $handler)) {
+        if (!$handler || !method_exists($this, $handler)) {
             throw new \InvalidArgumentException("Invalid frequency: {$recurringTask->frequency}");
         }
 
@@ -117,6 +118,7 @@ class ProcessRecurringTasks extends Command
     protected function shouldCreateNewTask(RecurringTask $recurringTask, Carbon $nextDate): bool
     {
         if ($recurringTask->last_created_at) {
+
             $lastCreated = Carbon::parse($recurringTask->last_created_at);
             if ($lastCreated->gte($nextDate)) {
                 Log::info("Task already created for date {$nextDate} for recurring task {$recurringTask->id}");
@@ -135,7 +137,7 @@ class ProcessRecurringTasks extends Command
         $newTask = $parentTask->replicate();
 
         // Calculate and set start and due dates if available
-        if (! empty($parentTask->start_date) && ! empty($parentTask->due_date)) {
+        if (!empty($parentTask->start_date) && !empty($parentTask->due_date)) {
             $startDate = Carbon::parse($parentTask->start_date);
             $dueDate = Carbon::parse($parentTask->due_date);
             $durationInDays = $startDate->diffInDays($dueDate);
@@ -161,6 +163,7 @@ class ProcessRecurringTasks extends Command
         Log::info("Created new task {$newTask->id} from recurring task {$recurringTask->id}");
     }
 
+
     protected function updateRecurringTask(RecurringTask $recurringTask, Carbon $nextDate): void
     {
         $recurringTask->update([
@@ -176,7 +179,7 @@ class ProcessRecurringTasks extends Command
 
     private function handleWeeklyFrequency(RecurringTask $recurringTask, Carbon $date): Carbon
     {
-        if (! $recurringTask->day_of_week) {
+        if (!$recurringTask->day_of_week) {
             return $date->copy()->addWeek();
         }
 

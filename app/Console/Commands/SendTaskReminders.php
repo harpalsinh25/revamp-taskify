@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Reminder;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Reminder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -112,12 +113,12 @@ class SendTaskReminders extends Command
         Log::info('Processing reminder ID: ' . $reminder->id . ' Type: ' . $reminder->frequency_type);
         $remindable = $reminder->remindable;
 
-        if (! $remindable) {
+        if (!$remindable) {
             Log::warning('Remindable not found for reminder ID: ' . $reminder->id);
             return;
         }
 
-        if (! method_exists($remindable, 'users')) {
+        if (!method_exists($remindable, 'users')) {
             Log::warning('Remindable does not have users relation. Reminder ID: ' . $reminder->id);
             return;
         }

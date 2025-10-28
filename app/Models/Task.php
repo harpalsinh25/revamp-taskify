@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use RyanChandler\Comments\Concerns\HasComments;
-use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use RyanChandler\Comments\Concerns\HasComments;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Task extends Model implements HasMedia
 {
@@ -29,10 +29,10 @@ class Task extends Model implements HasMedia
         'user_id',
         'workspace_id',
         'created_by',
-        'parent_id',
+        'parent_id' ,
         'billing_type',
         'completion_percentage',
-        'task_list_id',
+        'task_list_id'
     ];
 
     public function registerMediaCollections(): void
@@ -64,7 +64,7 @@ class Task extends Model implements HasMedia
 
     public function isSubtask(): bool
     {
-        return ! is_null($this->parent_id);
+        return !is_null($this->parent_id);
     }
 
     // Get all parent tasks for a specific project
@@ -153,6 +153,7 @@ class Task extends Model implements HasMedia
     {
         return $this->hasMany(TaskTimeEntry::class);
     }
+
 
     public function customFields()
     {

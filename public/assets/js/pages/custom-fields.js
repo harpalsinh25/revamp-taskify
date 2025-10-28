@@ -221,6 +221,11 @@ $(document).ready(function () {
         $("#exampleModalLabel1").text("Add Field");
     });
 
+    // Handle module filter change
+    $("#module_filter").on("change", function () {
+        $("#table").bootstrapTable("refresh");
+    });
+
 });
 
 function customFieldActionsFormatter(value, row, index) {
@@ -242,7 +247,8 @@ function queryParams(params) {
         sort: params.sort,
         order: params.order,
         limit: params.limit,
-        offset: params.offset
+        offset: params.offset,
+        module: $('#module_filter').val()
     };
 }
 

@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Status extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'title',
         'color',
-        'slug',
+        'slug'
     ];
 
     public function projects($considerWorkspace = true)
@@ -43,7 +44,7 @@ class Status extends Model
         return $this->belongsToMany(Task::class, 'task_user')
             ->where('tasks.workspace_id', getWorkspaceId());
     }
-
+    
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_status');

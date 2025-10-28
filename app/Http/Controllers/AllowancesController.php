@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Allowance;
 use App\Models\Workspace;
-use App\Services\DeletionService;
+
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Session;
 
 class AllowancesController extends Controller
 {
@@ -27,18 +30,17 @@ class AllowancesController extends Controller
         return view('allowances.list', ['allowances' => $allowances]);
     }
 
+
     /**
      * Create a new allowance.
      *
      * This endpoint creates a new allowance with the given title and amount. The user must be authenticated to perform this action. The request can be made via API or non-API calls, with an optional `isApi` parameter to format the response accordingly.
      *
      * @authenticated
-     *
      * @group Allowance Management
      *
      * @bodyParam title string required The title of the allowance. Must be unique. Example: Transport Allowance
      * @bodyParam amount string required The amount in currency format. Example: 1500.00
-     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -76,7 +78,9 @@ class AllowancesController extends Controller
 
     public function store(Request $request)
     {
+
         try {
+
             $isApi = request()->get('isApi', false);
 
             // Validate the request data
@@ -89,36 +93,39 @@ class AllowancesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
-                ],
+                    }
+                ]
             ]);
             $formFields['amount'] = str_replace(',', '', $request->input('amount'));
             $formFields['workspace_id'] = $this->workspace->id;
 
             if ($allowance = Allowance::create($formFields)) {
+
                 if ($isApi) {
                     return formatApiResponse(
                         false,
                         'Allowance created successfully.',
                         [
-                            'data' => formatAllowance($allowance),
+                            'data' => formatAllowance($allowance)
                         ],
                         200
                     );
                 }
 
                 return response()->json(['error' => false, 'message' => 'Allowance created successfully.', 'id' => $allowance->id, 'allowance' => $allowance]);
-            }
+            } else {
 
-            if ($isApi) {
-                return formatApiResponse(
-                    true,
-                    'Allowance couldn\'t created.',
-                    [],
-                );
-            }
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Allowance couldn\'t created.',
+                        [],
 
-            return response()->json(['error' => true, 'message' => 'Allowance couldn\'t created.']);
+                    );
+                }
+
+                return response()->json(['error' => true, 'message' => 'Allowance couldn\'t created.']);
+            }
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -132,8 +139,8 @@ class AllowancesController extends Controller
     public function list()
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
         $allowances = $this->workspace->allowances();
         if ($search) {
             $allowances = $allowances->where(function ($query) use ($search) {
@@ -147,7 +154,7 @@ class AllowancesController extends Controller
 
         $total = $allowances->count();
         $allowances = $allowances->orderBy($sort, $order)
-            ->paginate(request('limit'))
+            ->paginate(request("limit"))
             ->through(function ($allowance) use ($canEdit, $canDelete) {
                 $actions = '';
 
@@ -163,7 +170,7 @@ class AllowancesController extends Controller
                         '</button>';
                 }
 
-                $actions = $actions ? $actions : '-';
+                $actions = $actions ?: '-';
 
                 return [
                     'id' => $allowance->id,
@@ -176,8 +183,8 @@ class AllowancesController extends Controller
             });
 
         return response()->json([
-            'rows' => $allowances->items(),
-            'total' => $total,
+            "rows" => $allowances->items(),
+            "total" => $total,
         ]);
     }
 
@@ -187,11 +194,9 @@ class AllowancesController extends Controller
      * This endpoint fetches detailed information about a specific allowance by its ID. The user must be authenticated to perform this action. The request can be made via API or non-API calls, with an optional `isApi` parameter to format the response accordingly.
      *
      * @authenticated
-     *
      * @group Allowance Management
      *
      * @urlParam id integer required The ID of the allowance to retrieve. Must exist in the `allowances` table. Example: 5
-     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -219,9 +224,13 @@ class AllowancesController extends Controller
      * }
      */
 
+
+
     public function get($id)
     {
+
         try {
+
             $isApi = request()->get('isApi', false);
 
             $allowance = Allowance::findOrFail($id);
@@ -232,7 +241,7 @@ class AllowancesController extends Controller
                     false,
                     'Allowance retrieved successfully.',
                     [
-                        'data' => formatAllowance($allowance),
+                        'data' => formatAllowance($allowance)
                     ],
                     200
                 );
@@ -248,6 +257,7 @@ class AllowancesController extends Controller
         }
     }
 
+
     /**
      * Update an existing allowance.
      *
@@ -260,7 +270,6 @@ class AllowancesController extends Controller
      * @bodyParam id integer required The ID of the allowance to update. Must exist in the `allowances` table. Example: 5
      * @bodyParam title string required The title of the allowance. Must be unique in the `allowances` table. Example: Housing Allowance
      * @bodyParam amount string required The amount of the allowance. Must be a valid currency format. Example: 1200.00
-     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -306,9 +315,11 @@ class AllowancesController extends Controller
      * }
      */
 
+
     public function update(Request $request)
     {
         try {
+
             $isApi = request()->get('isApi', false);
 
             $formFields = $request->validate([
@@ -321,34 +332,36 @@ class AllowancesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
-                ],
+                    }
+                ]
             ]);
             $allowance = Allowance::findOrFail($request->id);
             $formFields['amount'] = str_replace(',', '', $request->input('amount'));
             if ($allowance->update($formFields)) {
+
                 if ($isApi) {
                     return formatApiResponse(
                         false,
                         'Allowance updated successfully.',
                         [
-                            'data' => formatAllowance($allowance),
+                            'data' => formatAllowance($allowance)
                         ]
                     );
                 }
 
                 return response()->json(['error' => false, 'message' => 'Allowance updated successfully.', 'id' => $allowance->id]);
-            }
+            } else {
 
-            if ($isApi) {
-                return formatApiResponse(
-                    true,
-                    'Allowance couldn\'t updated.',
-                    []
-                );
-            }
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Allowance couldn\'t updated.',
+                        []
+                    );
+                }
 
-            return response()->json(['error' => true, 'message' => 'Allowance couldn\'t updated.']);
+                return response()->json(['error' => true, 'message' => 'Allowance couldn\'t updated.']);
+            }
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -358,6 +371,7 @@ class AllowancesController extends Controller
             );
         }
     }
+
 
     /**
      * Delete an allowance.
@@ -389,12 +403,16 @@ class AllowancesController extends Controller
      * }
      */
 
+
     public function destroy($id)
     {
+
         try {
+
             $allowance = Allowance::findOrFail($id);
             $allowance->payslips()->detach();
-            return DeletionService::delete(Allowance::class, $id, 'Allowance');
+            $response = DeletionService::delete(Allowance::class, $id, 'Allowance');
+            return $response;
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -410,7 +428,7 @@ class AllowancesController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:allowances,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:allowances,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -427,6 +445,7 @@ class AllowancesController extends Controller
 
         return response()->json(['error' => false, 'message' => 'Allowance(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
     }
+
 
     /**
      * Get allowances list
@@ -473,9 +492,9 @@ class AllowancesController extends Controller
     public function apiList()
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
-        $limit = request('order') ? request('limit') : 10;
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
+        $limit = (request('order')) ? request('limit') : 10;
         $allowances = $this->workspace->allowances();
         if ($search) {
             $allowances = $allowances->where(function ($query) use ($search) {
@@ -490,6 +509,7 @@ class AllowancesController extends Controller
             ->take($limit)
             ->get()
             ->map(function ($allowance) {
+
                 return formatAllowance($allowance);
             });
 
@@ -498,7 +518,7 @@ class AllowancesController extends Controller
             'Allowances retrieved successfully.',
             [
                 'total' => $total,
-                'data' => $allowances,
+                'data' => $allowances
             ]
         );
     }

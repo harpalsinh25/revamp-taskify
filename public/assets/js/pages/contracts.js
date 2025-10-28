@@ -117,55 +117,28 @@ $(document).on('click', '.delete_contract_sign', function (e) {
         });
     });
 });
-$('#contract_start_date_between').on('apply.daterangepicker', function (ev, picker) {
-    var startDate = picker.startDate.format('YYYY-MM-DD');
-    var endDate = picker.endDate.format('YYYY-MM-DD');
-    $('#contract_start_date_from').val(startDate);
-    $('#contract_start_date_to').val(endDate);
-    $('#contracts_table').bootstrapTable('refresh');
-});
-$('#contract_start_date_between').on('cancel.daterangepicker', function (ev, picker) {
-    $('#contract_start_date_from').val('');
-    $('#contract_start_date_to').val('');
-    $('#contract_start_date_between').val('');
-    picker.setStartDate(moment());
-    picker.setEndDate(moment());
-    picker.updateElement();
-    $('#contracts_table').bootstrapTable('refresh');
-});
-$('#contract_end_date_between').on('apply.daterangepicker', function (ev, picker) {
-    var startDate = picker.startDate.format('YYYY-MM-DD');
-    var endDate = picker.endDate.format('YYYY-MM-DD');
-    $('#contract_end_date_from').val(startDate);
-    $('#contract_end_date_to').val(endDate);
-    $('#contracts_table').bootstrapTable('refresh');
-});
-$('#contract_end_date_between').on('cancel.daterangepicker', function (ev, picker) {
-    $('#contract_end_date_from').val('');
-    $('#contract_end_date_to').val('');
-    $('#contract_end_date_between').val('');
-    picker.setStartDate(moment());
-    picker.setEndDate(moment());
-    picker.updateElement();
-    $('#contracts_table').bootstrapTable('refresh');
-});
+// Initialize advanced date range filters with presets
 $(document).ready(function () {
-    $('#contract_date_between').on('apply.daterangepicker', function (ev, picker) {
-        var startDate = picker.startDate.format('YYYY-MM-DD');
-        var endDate = picker.endDate.format('YYYY-MM-DD');
-        $('#contract_date_between_from').val(startDate);
-        $('#contract_date_between_to').val(endDate);
-        $('#contracts_table').bootstrapTable('refresh');
+    // Initialize date range filters with preset ranges
+    initAdvancedDateRangePicker({
+        selector: '#contract_date_between',
+        hiddenFrom: '#contract_date_between_from',
+        hiddenTo: '#contract_date_between_to',
+        tableId: 'contracts_table'
     });
-    // Cancel event to clear values
-    $('#contract_date_between').on('cancel.daterangepicker', function (ev, picker) {
-        $('#contract_date_between_from').val('');
-        $('#contract_date_between_to').val('');
-        $(this).val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $('#contracts_table').bootstrapTable('refresh');
+
+    initAdvancedDateRangePicker({
+        selector: '#contract_start_date_between',
+        hiddenFrom: '#contract_start_date_from',
+        hiddenTo: '#contract_start_date_to',
+        tableId: 'contracts_table'
+    });
+
+    initAdvancedDateRangePicker({
+        selector: '#contract_end_date_between',
+        hiddenFrom: '#contract_end_date_from',
+        hiddenTo: '#contract_end_date_to',
+        tableId: 'contracts_table'
     });
 });
 addDebouncedEventListener('#status_filter, #client_filter, #project_filter, #type_filter', 'change', function (e, refreshTable) {

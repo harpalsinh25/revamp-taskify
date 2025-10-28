@@ -16,7 +16,7 @@ class VerifyReCaptcha
             'remoteip' => $request->ip(),
         ]);
 
-        if (! $response->json('success')) {
+        if (!$response->json('success')) {
             return back()->withErrors(['captcha' => 'reCAPTCHA verification failed. Please try again.']);
         }
 

@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use RyanChandler\Comments\Concerns\HasComments;
 use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use RyanChandler\Comments\Concerns\HasComments;
 
 class Project extends Model implements HasMedia
 {
@@ -30,7 +30,7 @@ class Project extends Model implements HasMedia
         'task_accessibility',
         'is_favorite',
         'created_by',
-        'enable_tasks_time_entries',
+        'enable_tasks_time_entries'
     ];
 
     public function registerMediaCollections(): void
@@ -82,6 +82,7 @@ class Project extends Model implements HasMedia
 
     public function getresult()
     {
+
         return substr($this->title, 0, 100);
     }
 
@@ -104,7 +105,7 @@ class Project extends Model implements HasMedia
     public function notificationsForProject()
     {
         return $this->hasMany(Notification::class, 'type_id')
-            ->whereIn('type', ['project', 'project_comment_mention']);
+        ->whereIn('type', ['project', 'project_comment_mention']);
     }
     public function favorites()
     {

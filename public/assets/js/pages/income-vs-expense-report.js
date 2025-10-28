@@ -83,22 +83,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Handle filter changes on apply or cancel
-    $('#filter_date_range').on('apply.daterangepicker', function (ev, picker) {
-        // Set the values in hidden inputs
-        $('#filter_date_range_from').val(picker.startDate.format('YYYY-MM-DD'));
-        $('#filter_date_range_to').val(picker.endDate.format('YYYY-MM-DD'));
-        updateReport(); // Update report when dates are applied
+    // Initialize advanced date range filter with preset ranges
+    initAdvancedDateRangePicker({
+        selector: '#filter_date_range',
+        hiddenFrom: '#filter_date_range_from',
+        hiddenTo: '#filter_date_range_to',
+        callback: function (start, end, label) {
+            updateReport(); // Update report when dates are applied
+        }
     });
 
-    $('#filter_date_range').on('cancel.daterangepicker', function (ev, picker) {
-        $(this).val('');
-        // Clear the hidden inputs
-        $('#filter_date_range_from').val('');
-        $('#filter_date_range_to').val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
+    // Also trigger update on cancel
+    $('#filter_date_range').on('daterange:cancelled', function () {
         updateReport(); // Update report when dates are cleared
     });
 

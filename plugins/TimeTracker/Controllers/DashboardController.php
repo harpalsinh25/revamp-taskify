@@ -514,4 +514,9 @@ class DashboardController extends Controller
             ->values()
             ->all();
     }
+
+    public function apiDashboard(Request $request)
+    {
+        return $this->calculateMetrics(null, null, [getAuthenticatedUser()->id]);
+    }
 }

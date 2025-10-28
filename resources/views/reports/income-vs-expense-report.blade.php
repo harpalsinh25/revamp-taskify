@@ -105,5 +105,30 @@
 <script>
     var export_income_vs_expense_url = "{{ route('reports.export-income-vs-expense-report') }}";
 </script>
-<script src="{{ asset('assets/js/pages/income-vs-expense-report.js') }}"></script>
+<script src="{{ asset('assets/js/pages/income-vs-expense-report.js') }}?v={{ time() }}"></script>
+<script>
+    // Force re-initialization of date filter with presets
+    $(window).on('load', function() {
+        setTimeout(function() {
+            // Destroy and reinitialize date filter
+            if ($('#filter_date_range').data('daterangepicker')) {
+                $('#filter_date_range').data('daterangepicker').remove();
+            }
+
+            // Reinitialize with advanced presets
+            if (typeof initAdvancedDateRangePicker === 'function') {
+                initAdvancedDateRangePicker({
+                    selector: '#filter_date_range',
+                    hiddenFrom: '#filter_date_range_from',
+                    hiddenTo: '#filter_date_range_to',
+                    callback: function(start, end, label) {
+                        if (typeof updateReport === 'function') {
+                            updateReport();
+                        }
+                    }
+                });
+            }
+        }, 500);
+    });
+</script>
 @endsection

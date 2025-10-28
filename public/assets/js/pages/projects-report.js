@@ -22,7 +22,31 @@ $(function () {
 
 
 });
+// Initialize advanced date range filters with preset ranges - FIRST before anything else
 $(document).ready(function () {
+    // Initialize advanced date range filters FIRST
+    initAdvancedDateRangePicker({
+        selector: '#filter_date_range',
+        hiddenFrom: '#filter_date_range_from',
+        hiddenTo: '#filter_date_range_to',
+        tableId: 'projects_report_table'
+    });
+
+    initAdvancedDateRangePicker({
+        selector: '#report_start_date_between',
+        hiddenFrom: '#filter_start_date_from',
+        hiddenTo: '#filter_start_date_to',
+        tableId: 'projects_report_table'
+    });
+
+    initAdvancedDateRangePicker({
+        selector: '#report_end_date_between',
+        hiddenFrom: '#filter_end_date_from',
+        hiddenTo: '#filter_end_date_to',
+        tableId: 'projects_report_table'
+    });
+
+    // Export button
     $('#export_button').click(function () {
         var $exportButton = $(this);
         $exportButton.attr('disabled', true);
@@ -33,62 +57,6 @@ $(document).ready(function () {
         // Open the export URL in a new tab or window
         $exportButton.attr('disabled', false);
         window.open(exportUrl, '_blank');
-    });
-    $('#filter_date_range').on('apply.daterangepicker', function (ev, picker) {
-        $('#filter_date_range_from').val(picker.startDate.format('YYYY-MM-DD'));
-        $('#filter_date_range_to').val(picker.endDate.format('YYYY-MM-DD'));
-        $('#projects_report_table').bootstrapTable('refresh');
-    });
-    $('#filter_date_range').on('cancel.daterangepicker', function (ev, picker) {
-        // Clear the input field and hidden fields
-        $(this).val('');
-        // Clear the hidden inputs
-        $('#filter_date_range_from').val('');
-        $('#filter_date_range_to').val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $('#projects_report_table').bootstrapTable('refresh');
-    });
-
-
-    $('#report_start_date_between').on('apply.daterangepicker', function (ev, picker) {
-        var startDate = picker.startDate.format('YYYY-MM-DD');
-        var endDate = picker.endDate.format('YYYY-MM-DD');
-
-        $('#filter_start_date_from').val(startDate);
-        $('#filter_start_date_to').val(endDate);
-
-        $('#projects_report_table').bootstrapTable('refresh');
-    });
-
-    $('#report_start_date_between').on('cancel.daterangepicker', function (ev, picker) {
-        $('#filter_start_date_from').val('');
-        $('#filter_start_date_to').val('');
-        $('#report_start_date_between').val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $('#projects_report_table').bootstrapTable('refresh');
-    });
-
-    $('#report_end_date_between').on('apply.daterangepicker', function (ev, picker) {
-        var startDate = picker.startDate.format('YYYY-MM-DD');
-        var endDate = picker.endDate.format('YYYY-MM-DD');
-
-        $('#filter_end_date_from').val(startDate);
-        $('#filter_end_date_to').val(endDate);
-
-        $('#projects_report_table').bootstrapTable('refresh');
-    });
-    $('#report_end_date_between').on('cancel.daterangepicker', function (ev, picker) {
-        $('#filter_end_date_from').val('');
-        $('#filter_end_date_to').val('');
-        $('#report_end_date_between').val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $('#projects_report_table').bootstrapTable('refresh');
     });
 });
 function project_report_query_params(p) {
@@ -138,8 +106,9 @@ $(document).on('click', '.clear-report-filters', function (e) {
     $('#priority_filter').val('').trigger('change', [0]);
     $('#projects_report_table').bootstrapTable('refresh');
 })
+// Initialize TableFilterSync AFTER daterangepickers are set up
 $(document).ready(function () {
-    // Initialize TableFilterSync for users
+    // Initialize TableFilterSync - this will use already initialized daterangepickers
     const projectReportFilterSync = new TableFilterSync({
         tableId: 'projects_report_table',
         dataType: 'report',

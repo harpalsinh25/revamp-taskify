@@ -2,10 +2,13 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\ActivityLog;
 use Closure;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ActivityLog;
+use App\Models\Project;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\EstimatesInvoice;
 
 class LogActivity
 {
@@ -61,13 +64,13 @@ class LogActivity
 
                 // Fetching type and operation from the controller and method
                 $segments = explode('\\', $controller);
-                $type = $responseData['type'] ?? Str::singular(strtolower(str_replace('Controller', '', end($segments))));
-                $operation = $responseData['operation'] ?? strtolower($method);
+                $type = isset($responseData['type']) ? $responseData['type'] : Str::singular(strtolower(str_replace('Controller', '', end($segments))));
+                $operation = isset($responseData['operation']) ? $responseData['operation'] : strtolower($method);
                 $operation = $this->convertOperation($operation);
 
                 $workspace_id = getWorkspaceId();
                 $actor_id = getAuthenticatedUser()->id;
-                $actor_type = getGuardName() === 'client' ? 'client' : 'user';
+                $actor_type = getGuardName() == 'client' ? 'client' : 'user';
                 $actorName = getAuthenticatedUser()->first_name . ' ' . getAuthenticatedUser()->last_name;
                 // Log the activity
                 if (is_array($responseData['id'])) {
@@ -76,8 +79,8 @@ class LogActivity
 
                     foreach ($ids as $key => $id) {
                         // Attempt to get the title from the response, fallback to fetching from the database
-                        $title = $responseData['titles'][$key] ?? $this->getTitleForType($type, $id);
-                        $message = $responseData['activity_message'] ?? trim($actorName) . ' ' . trim($operation) . ' ' . strtolower(trim(str_replace('_', ' ', $type))) . ' ' . trim($title);
+                        $title = isset($responseData['titles'][$key]) ? $responseData['titles'][$key] : $this->getTitleForType($type, $id);
+                        $message = isset($responseData['activity_message']) ? $responseData['activity_message'] : trim($actorName) . ' ' . trim($operation) . ' ' . strtolower(trim(str_replace('_', ' ', $type))) . ' ' . trim($title);
                         $logData = [
                             'workspace_id' => $workspace_id,
                             'actor_id' => $actor_id,
@@ -102,8 +105,8 @@ class LogActivity
                 } else {
                     // Log the activity for a single $type_id
                     // Attempt to get the title from the response, fallback to fetching from the database
-                    $title = $responseData['title'] ?? $this->getTitleForType($type, $responseData['id']);
-                    $message = $responseData['activity_message'] ?? trim($actorName) . ' ' . trim($operation) . ' ' . strtolower(trim(str_replace('_', ' ', $type))) . ' ' . trim($title);
+                    $title = isset($responseData['title']) ? $responseData['title'] : $this->getTitleForType($type, $responseData['id']);
+                    $message = isset($responseData['activity_message']) ? $responseData['activity_message'] : trim($actorName) . ' ' . trim($operation) . ' ' . strtolower(trim(str_replace('_', ' ', $type))) . ' ' . trim($title);
 
                     $logData = [
                         'workspace_id' => $workspace_id,
@@ -134,6 +137,7 @@ class LogActivity
 
     protected function convertOperation($operation)
     {
+
         return $this->operationMap[$operation] ?? $operation;
     }
 
@@ -146,13 +150,13 @@ class LogActivity
             default => 'App\\Models\\' . str_replace('_', '', ucwords($type, '_')),
         };
 
-        if (! class_exists($model)) {
+        if (!class_exists($model)) {
             return ''; // Invalid model
         }
 
         $record = $model::find($id);
 
-        if (! $record) {
+        if (!$record) {
             return ''; // Record not found
         }
 

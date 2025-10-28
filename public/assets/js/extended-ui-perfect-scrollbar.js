@@ -1,84 +1,94 @@
-/**
- * Perfect Scrollbar
- */
-'use strict';
-
 document.addEventListener('DOMContentLoaded', function () {
     (function () {
-        const verticalExample = document.getElementById('vertical-example'),
-            taskStatistics = document.getElementById('task-statistics'),
-            projectStatistics = document.getElementById('project-statistics'),
-            todoStatistics = document.getElementById('todos-statistics'),
-            languageDropdown = document.getElementById('languageDropdown'),
-            unreadNotificationsContainer = document.getElementById('unreadNotificationsContainer'),
-            horizontalExample = document.getElementById('horizontal-example'),
-            recentActivity = document.getElementById('recent-activity'),
-            horizVertExample = document.getElementById('both-scrollbars-example');
+        const dashboard = document.getElementById('dashboard'); // Parent dashboard container
+        const verticalExample = document.getElementById('vertical-example');
+        const taskStatistics = document.getElementById('task-statistics');
+        const projectStatistics = document.getElementById('project-statistics');
+        const todoStatistics = document.getElementById('todos-statistics');
+        const languageDropdown = document.getElementById('languageDropdown');
+        const unreadNotificationsContainer = document.getElementById('unreadNotificationsContainer');
+        const horizontalExample = document.getElementById('horizontal-example');
+        const recentActivity = document.getElementById('recent-activity');
+        const horizVertExample = document.getElementById('both-scrollbars-example');
 
-        // Vertical Example
-        // --------------------------------------------------------------------
-        if (verticalExample) {
-            new PerfectScrollbar(verticalExample, {
-                wheelPropagation: false
-            });
-        }
+        // Initialize Perfect Scrollbar for all scrollable elements
+        const scrollableElements = [
+            { element: verticalExample, options: { wheelPropagation: true } },
+            { element: taskStatistics, options: { wheelPropagation: true } },
+            { element: projectStatistics, options: { wheelPropagation: true } },
+            { element: todoStatistics, options: { wheelPropagation: true } },
+            { element: recentActivity, options: { wheelPropagation: true } },
+            { element: languageDropdown, options: { wheelPropagation: true } },
+            { element: unreadNotificationsContainer, options: { wheelPropagation: true } },
+            { element: horizontalExample, options: { wheelPropagation: true, suppressScrollY: true } },
+            { element: horizVertExample, options: { wheelPropagation: true } }
+        ].filter(item => item.element); // Filter out null elements
 
-        // Horizontal Example
-        // --------------------------------------------------------------------
-        if (horizontalExample) {
-            new PerfectScrollbar(horizontalExample, {
-                wheelPropagation: false,
-                suppressScrollY: true
-            });
-        }
+        const psInstances = scrollableElements.map(item => {
+            return new PerfectScrollbar(item.element, item.options);
+        });
 
-        // Both vertical and Horizontal Example
-        // --------------------------------------------------------------------
-        if (horizVertExample) {
-            new PerfectScrollbar(horizVertExample, {
-                wheelPropagation: false
-            });
-        }
-        if (recentActivity) {
-            new PerfectScrollbar(recentActivity, {
-                wheelPropagation: false
-            });
-        }
+        // Handle dashboard and card scrolling
+        const cardElements = [taskStatistics, projectStatistics, todoStatistics, recentActivity].filter(Boolean);
+        const cardPsInstances = psInstances.filter((_, index) =>
+            scrollableElements[index].element === taskStatistics ||
+            scrollableElements[index].element === projectStatistics ||
+            scrollableElements[index].element === todoStatistics ||
+            scrollableElements[index].element === recentActivity
+        );
 
-        if (taskStatistics) {
-            new PerfectScrollbar(taskStatistics, {
-                wheelPropagation: false
+        if (dashboard && cardElements.length > 0) {
+            // Initially allow card scrolling
+            cardElements.forEach(card => {
+                card.style.overflowY = 'auto';
             });
-        }
 
-        if (projectStatistics) {
-            new PerfectScrollbar(projectStatistics, {
-                wheelPropagation: false
+            dashboard.addEventListener('wheel', (e) => {
+                const atTop = dashboard.scrollTop <= 0 && e.deltaY < 0;
+                const atBottom = dashboard.scrollHeight - dashboard.scrollTop <= dashboard.clientHeight + 1 && e.deltaY > 0;
+
+                if (!atTop && !atBottom) {
+                    // Dashboard can scroll, disable card scrolling
+                    cardPsInstances.forEach(ps => {
+                        ps.element.style.overflowY = 'hidden';
+                        ps.update();
+                    });
+                } else {
+                    // Dashboard can't scroll, enable card scrolling
+                    cardPsInstances.forEach(ps => {
+                        ps.element.style.overflowY = 'auto';
+                        ps.update();
+                    });
+                }
             });
-        }
 
-        if (todoStatistics) {
-            new PerfectScrollbar(todoStatistics, {
-                wheelPropagation: false
-            });
-        }
-
-            if (languageDropdown) {
-                new PerfectScrollbar(languageDropdown, {
-                    wheelPropagation: false
+            // Re-enable card scrolling on mouse enter
+            cardElements.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    cardPsInstances.forEach(ps => {
+                        ps.element.style.overflowY = 'auto';
+                        ps.update();
+                    });
                 });
-            }
-        if (unreadNotificationsContainer) {
-            new PerfectScrollbar(unreadNotificationsContainer, {
-                wheelPropagation: false
+                card.addEventListener('mouseleave', () => {
+                    const atTop = dashboard.scrollTop <= 0;
+                    const atBottom = dashboard.scrollHeight - dashboard.scrollTop <= dashboard.clientHeight + 1;
+                    if (!atTop && !atBottom) {
+                        cardPsInstances.forEach(ps => {
+                            ps.element.style.overflowY = 'hidden';
+                            ps.update();
+                        });
+                    }
+                });
             });
         }
+
+        // Handle .statisticsDiv elements
         const statisticsDivs = document.querySelectorAll('.statisticsDiv');
         statisticsDivs.forEach(div => {
             new PerfectScrollbar(div, {
-                wheelPropagation: false
+                wheelPropagation: true
             });
         });
-
     })();
 });

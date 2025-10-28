@@ -132,6 +132,21 @@
                         </div>
                     </div>
                     @endif
+
+                    @php
+                        $customFields = \App\Models\CustomField::where('module', 'user')->get();
+                        $customFieldValues = [];
+                        foreach ($user->customFieldValues as $fieldValue) {
+                            $customFieldValues[$fieldValue->custom_field_id] = $fieldValue->value;
+                        }
+                    @endphp
+
+                    @if($customFields->isNotEmpty())
+                        <div class="mb-3">
+                            <x-custom-fields :fields="$customFields" :values="$customFieldValues" :isEdit="true" />
+                        </div>
+                    @endif
+
                     <div class="mt-4">
                         <button type="submit" id="submit_btn" class="btn btn-primary me-2"><?= get_label('update', 'Update') ?></button>
                         <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>

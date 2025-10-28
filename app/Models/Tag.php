@@ -12,7 +12,7 @@ class Tag extends Model
     protected $fillable = [
         'title',
         'color',
-        'slug',
+        'slug'
     ];
 
     public function projects()

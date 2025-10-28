@@ -21,6 +21,10 @@ class LeaveRequest extends Model
         'status',
         'visible_to_all',
         'action_by',
+        'total_days',
+        'paid_days',
+        'unpaid_days',
+        'is_paid'
     ];
 
     public function visibleToUsers()

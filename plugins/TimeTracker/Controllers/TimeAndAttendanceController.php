@@ -83,10 +83,17 @@ class TimeAndAttendanceController extends Controller
     public function timeline(Request $request)
     {
         $userId = $request->get('user_id');
-        $date = $request->get('date');
+        $dateInput = $request->get('date');
 
-        $date = Carbon::createFromFormat(app('php_date_format'), $date);
-        $date = format_date($date, to_format: 'Y-m-d');
+        // Try to parse the date - handle multiple formats
+        try {
+            $date = Carbon::parse($dateInput)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Invalid date format',
+                'date_received' => $dateInput
+            ], 400);
+        }
 
         $logs = TimeTrackerActivityLog::where('user_id', $userId)
             ->whereBetween('timestamp', [
@@ -95,6 +102,10 @@ class TimeAndAttendanceController extends Controller
             ])
             ->orderBy('timestamp')
             ->get();
+
+        // Get timezone dynamically from general settings
+        $general_settings = get_settings('general_settings');
+        $timezone = $general_settings['timezone'] ?? 'UTC';
 
         $intervals = [];
         $currentState = null;
@@ -132,8 +143,8 @@ class TimeAndAttendanceController extends Controller
             } elseif ($action === 'clock-out') {
                 if ($activeStart) {
                     $intervals[] = [
-                        'start' => $activeStart->toDateTimeString(),
-                        'end' => $timestamp->toDateTimeString(),
+                        'start' => $activeStart->copy()->setTimezone($timezone)->toIso8601String(),
+                        'end' => $timestamp->copy()->setTimezone($timezone)->toIso8601String(),
                         'type' => 'active',
                     ];
                     $activeStart = null;
@@ -142,8 +153,8 @@ class TimeAndAttendanceController extends Controller
                 // If active was running, close it
                 if ($activeStart) {
                     $intervals[] = [
-                        'start' => $activeStart->toDateTimeString(),
-                        'end' => $timestamp->toDateTimeString(),
+                        'start' => $activeStart->copy()->setTimezone($timezone)->toIso8601String(),
+                        'end' => $timestamp->copy()->setTimezone($timezone)->toIso8601String(),
                         'type' => 'active',
                     ];
                     $activeStart = null;
@@ -154,8 +165,8 @@ class TimeAndAttendanceController extends Controller
                 $currentStart = $timestamp;
             } elseif ($isStop && $type === $currentState && $currentStart) {
                 $intervals[] = [
-                    'start' => $currentStart->toDateTimeString(),
-                    'end' => $timestamp->toDateTimeString(),
+                    'start' => $currentStart->copy()->setTimezone($timezone)->toIso8601String(),
+                    'end' => $timestamp->copy()->setTimezone($timezone)->toIso8601String(),
                     'type' => $currentState,
                 ];
                 $currentState = null;
@@ -172,7 +183,10 @@ class TimeAndAttendanceController extends Controller
             ->values()
             ->toArray();
 
-        return response()->json(['sessions' => $intervals]);
+        return response()->json([
+            'sessions' => $intervals,
+            'timezone' => $timezone
+        ]);
     }
 
     private function processDay($user, $date, $logs)
@@ -268,6 +282,14 @@ class TimeAndAttendanceController extends Controller
             }
         }
 
+        // Handle unclosed activities (break, idle, manual, pending_manual)
+        $now = now();
+        foreach ($activityStarts as $activityType => $startTime) {
+            $duration = $startTime->diffInSeconds($now);
+            $activityKey = $activityType === 'pending_manual' ? 'pending_manual_time' : $activityType . '_time';
+            $activities[$activityKey] += $duration;
+        }
+
         // Handle unclosed session
         if ($currentSession && ! isset($currentSession['end'])) {
             $currentSession['end'] = $clockOut ?? now();
@@ -291,12 +313,33 @@ class TimeAndAttendanceController extends Controller
         // Calculate utilization
         $utilization = $totalWorkTime > 0 ? round($productiveTime / $totalWorkTime * 100, 1) : 0;
 
+        // Get timezone from general settings for proper conversion
+        $general_settings = get_settings('general_settings');
+        $timezone = $general_settings['timezone'] ?? 'UTC';
+
+        // Convert clock_in and clock_out to user's timezone using format_date
+        $clockInFormatted = '--';
+        $clockOutFormatted = '--';
+
+        if ($clockIn) {
+            // Clone the Carbon instance to avoid modifying the original
+            $clockInTz = $clockIn->copy()->setTimezone($timezone);
+            $clockInFormatted = $clockInTz->format('h:i A');
+        }
+
+        if ($clockOut) {
+            // Clone the Carbon instance to avoid modifying the original
+            $clockOutTz = $clockOut->copy()->setTimezone($timezone);
+            $clockOutFormatted = $clockOutTz->format('h:i A');
+        }
+
         return [
             'employee' => trim($user->first_name . ' ' . $user->last_name),
             'user_id' => $user->id,
-            'date' => format_date($date),
-            'clock_in' => $clockIn ? $clockIn->format('h:i A') : '--',
-            'clock_out' => $clockOut ? $clockOut->format('h:i A') : '--',
+            'date' => $date, // Use Y-m-d format for valid HTML IDs and consistent date handling
+            'date_formatted' => format_date($date), // Keep formatted date for display if needed
+            'clock_in' => $clockInFormatted,
+            'clock_out' => $clockOutFormatted,
             'work_time' => $this->formatTime($totalWorkTime),
             'active_time' => $this->formatTime($activeTime),
             'manual_time' => $this->formatTime($activities['manual_time']),

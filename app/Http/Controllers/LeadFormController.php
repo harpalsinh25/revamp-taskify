@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lead;
-use App\Models\LeadForm;
-use App\Models\LeadFormField;
-use App\Models\LeadSource;
-use App\Models\LeadStage;
 use App\Models\User;
+use App\Models\LeadForm;
+use App\Models\LeadStage;
 use App\Models\Workspace;
-use App\Services\DeletionService;
+use App\Models\LeadSource;
 use Illuminate\Http\Request;
+use App\Models\LeadFormField;
+use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -211,7 +211,7 @@ class LeadFormController extends Controller
         if ($request->has('fields')) {
             foreach ($request->fields as $index => $field) {
                 // Only include fields that have at least a label or type
-                if (! empty($field['label']) || ! empty($field['type'])) {
+                if (!empty($field['label']) || !empty($field['type'])) {
                     $cleanedFields[$index] = $field;
                 }
             }
@@ -267,7 +267,7 @@ class LeadFormController extends Controller
             if ($request->has('fields')) {
                 foreach ($request->fields as $index => $field) {
                     if (in_array($field['type'] ?? '', ['select', 'radio', 'checkbox'])) {
-                        if (empty($field['options']) || ! is_array($field['options']) || count(array_filter($field['options'])) === 0) {
+                        if (empty($field['options']) || !is_array($field['options']) || count(array_filter($field['options'])) === 0) {
                             $validator->errors()->add(
                                 "fields.{$index}.options",
                                 "At least one option is required for {$field['type']} fields."
@@ -281,12 +281,13 @@ class LeadFormController extends Controller
         if ($validator->fails()) {
             if ($isApi) {
                 return formatApiValidationError($isApi, $validator->errors());
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
             }
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
         }
 
         DB::beginTransaction();
@@ -311,11 +312,11 @@ class LeadFormController extends Controller
             foreach ($request->fields as $index => $fieldData) {
                 // Clean options array - remove empty values
                 $options = null;
-                if (! empty($fieldData['options']) && is_array($fieldData['options'])) {
+                if (!empty($fieldData['options']) && is_array($fieldData['options'])) {
                     $cleanOptions = array_filter($fieldData['options'], function ($option) {
-                        return ! empty(trim($option));
+                        return !empty(trim($option));
                     });
-                    if (! empty($cleanOptions)) {
+                    if (!empty($cleanOptions)) {
                         $options = json_encode(array_values($cleanOptions));
                     }
                 }
@@ -346,23 +347,24 @@ class LeadFormController extends Controller
                             'id' => $form->id,
                             'form' => formatLeadForm($form),
 
-                        ],
+                        ]
                     ]
                 );
-            }
+            } else {
 
-            return response()->json([
-                'error' => false,
-                'message' => 'Lead form created successfully!',
-                'form' => $form->load('leadFormFields'),
-                'public_url' => $form->public_url ?? null,
-                'embed_code' => $form->embed_code ?? null,
-            ]);
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Lead form created successfully!',
+                    'form' => $form->load('leadFormFields'),
+                    'public_url' => $form->public_url ?? null,
+                    'embed_code' => $form->embed_code ?? null
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Lead form creation failed: ' . $e->getMessage(), [
                 'request_data' => $request->all(),
-                'exception' => $e,
+                'exception' => $e
             ]);
             if ($isApi) {
                 return formatApiResponse(
@@ -372,39 +374,41 @@ class LeadFormController extends Controller
                         'data' => [
                             'error' => $e->getMessage(),
                             'line' => $e->getLine(),
-                            'file' => $e->getFile(),
-                        ],
+                            'file' => $e->getFile()
+                        ]
                     ]
                 );
-            }
+            } else {
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create form: ' . $e->getMessage(),
-            ], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create form: ' . $e->getMessage()
+                ], 500);
+            }
         }
     }
 
     public function show(LeadForm $leadForm)
     {
-        $form = $leadForm->load(['leadFormFields' => function ($query) {
+        $form =  $leadForm->load(['leadFormFields' => function ($query) {
             $query->orderBy('order');
-        }, 'leadSource', 'leadStage', 'assignedUser',
-        ]);
+        }, 'leadSource', 'leadStage', 'assignedUser']);
 
         return view('lead_form.public_form', compact('form'));
     }
 
     public function edit($id)
     {
+
         $leadForm = LeadForm::with(['leadFormFields' => function ($query) {
             $query->orderBy('order');
-        },
-        ])->findOrFail($id);
+        }])->findOrFail($id);
+
 
         $sources = LeadSource::where('workspace_id', auth()->user()->workspace_id)->get();
         $stages = LeadStage::where('workspace_id', auth()->user()->workspace_id)->get();
         $users = User::all();
+
 
         return view('lead_form.edit', compact('leadForm', 'sources', 'stages', 'users'));
     }
@@ -556,12 +560,13 @@ class LeadFormController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors(),
+                'errors' => $validator->errors()
             ], 422);
         }
 
         DB::beginTransaction();
         try {
+
             $leadForm = LeadForm::findOrFail($id);
             $leadForm->update([
                 'title' => $request->title,
@@ -576,6 +581,7 @@ class LeadFormController extends Controller
             $leadForm->leadFormFields()->delete();
 
             foreach ($request->fields as $index => $fieldData) {
+
                 LeadFormField::create([
                     'form_id' => $leadForm->id,
                     'label' => $fieldData['label'],
@@ -583,7 +589,7 @@ class LeadFormController extends Controller
                     'type' => $fieldData['type'],
                     'is_required' => $fieldData['is_required'] ?? false,
                     'is_mapped' => $fieldData['is_mapped'] ?? false,
-                    'options' => ! empty($fieldData['options']) ? json_encode($fieldData['options']) : null,
+                    'options' => !empty($fieldData['options']) ? json_encode($fieldData['options']) : null,
                     'placeholder' => $fieldData['placeholder'] ?? null,
                     'order' => $index + 1,
                     'validation_rules' => $this->generateValidationRules($fieldData),
@@ -598,16 +604,17 @@ class LeadFormController extends Controller
                     [
                         'data' => [
                             'id' => $leadForm->id,
-                            'form' => formatLeadForm($leadForm),
-                        ],
+                            'form' => formatLeadForm($leadForm)
+                        ]
                     ]
                 );
-            }
+            } else {
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Lead form updated successfully!',
-            ]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lead form updated successfully!'
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollback();
             if ($isApi) {
@@ -618,15 +625,16 @@ class LeadFormController extends Controller
                         'data' => [
                             'error' => $e->getMessage(),
                             'line' => $e->getLine(),
-                        ],
+                        ]
                     ]
                 );
-            }
+            } else {
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update form: ' . $e->getMessage(),
-            ], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update form: ' . $e->getMessage()
+                ], 500);
+            }
         }
     }
     /**
@@ -663,15 +671,20 @@ class LeadFormController extends Controller
     {
         $leadForm = LeadForm::findOrFail($id);
 
-        return DeletionService::delete(LeadForm::class, $leadForm->id, 'Lead Form');
+        $response = DeletionService::delete(LeadForm::class, $leadForm->id, 'Lead Form');
+
+        return $response;
     }
 
     public function destroy_multiple(Request $request)
     {
+
         $validatedData = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:lead_forms,id',
+            'ids.*' => 'exists:lead_forms,id'
         ]);
+
+
 
         $ids = $validatedData['ids'];
         $deletedIds = [];
@@ -718,14 +731,14 @@ class LeadFormController extends Controller
             ->map(function ($leadForm) use ($canDelete, $canEdit) {
                 $actions = '';
 
-                if ($leadForm->leadStage) {
-                    $stage = '<span class="badge bg-' . $leadForm->leadStage->color . '">' . $leadForm->leadStage->name . '</span>';
-                } else {
-                    $stage = '-';
-                }
+            if ($leadForm->leadStage) {
+                $stage = '<span class="badge bg-' . $leadForm->leadStage->color . '">' . $leadForm->leadStage->name . '</span>';
+            } else {
+                $stage = "-";
+            }
 
-                if ($canEdit) {
-                    $actions .= '
+            if ($canEdit) {
+                $actions .= '
                     <a href="' . route('lead-forms.edit', $leadForm->id) . '"
                        class="mx-1"
                        title="' . get_label('update', 'Update') . '">
@@ -736,10 +749,10 @@ class LeadFormController extends Controller
                        title="' . get_label('embed_code', 'Embed Code') . '">
                         <i class="bx bx-code-alt text-info"></i>
                     </a>';
-                }
+            }
 
                 if ($canDelete) {
-                    $actions .= '
+                $actions .= '
                     <a href="javascript:void(0);"
                        class="delete"
                        data-id="' . $leadForm->id . '"
@@ -749,7 +762,7 @@ class LeadFormController extends Controller
                     </a>';
                 }
 
-                $responses = '<div class="text-center">
+            $responses = '<div class="text-center">
                 <a href="' . route('lead-forms.responses', $leadForm->id) . '"
                    class="get-embed-code-btn"
                    title="' . $leadForm->leads_count . ' ' . get_label('responses', 'Responses') . '">
@@ -757,27 +770,70 @@ class LeadFormController extends Controller
                 </a>
             </div>';
 
-                return [
+            return [
                     'id' => $leadForm->id,
                     'title' => $leadForm->title,
-                    'description' => $leadForm->description ? (strlen($leadForm->description) > 50 ? substr($leadForm->description, 0, 50) . '...' : $leadForm->description) : '-',
+                'description' => $leadForm->description ? (strlen($leadForm->description) > 50 ? substr($leadForm->description, 0, 50) . '...' : $leadForm->description) : '-',
                     'source' => $leadForm->leadSource->name ?? '-',
                     'stage' => $leadForm->leadStage->name ?? '-',
-                    'stage' => $stage ?? '-',
-                    // 'assigned_to' => $leadForm->assignedUser ? ($leadForm->assignedUser->first_name . ' ' . $leadForm->assignedUser->last_name) : '-',
-                    'assigned_to' => formatUserHtml($leadForm->assignedUser) ?? 'N/A',
-                    'public_url' => '<a href="' . $leadForm->public_url . '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bx bx-link-external"></i> View</a>',
-                    'responses' => $responses,
+                'stage' => $stage ?? '-',
+                // 'assigned_to' => $leadForm->assignedUser ? ($leadForm->assignedUser->first_name . ' ' . $leadForm->assignedUser->last_name) : '-',
+                'assigned_to' =>  formatUserHtml($leadForm->assignedUser) ?? 'N/A',
+                'public_url' => '<a href="' . $leadForm->public_url . '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bx bx-link-external"></i> View</a>',
+                'responses' => $responses,
                     'created_at' => $leadForm->created_at->format('Y-m-d'),
-                    'updated_at' => $leadForm->updated_at->format('Y-m-d'),
-                    'actions' => $actions,
+                'updated_at' => $leadForm->updated_at->format('Y-m-d'),
+                    'actions' => $actions
                 ];
             });
 
         return response()->json([
             'rows' => $leadForms,
-            'total' => $total,
+            'total' => $total
         ]);
+    }
+
+    private function validateRequiredFields($fields)
+    {
+        $requiredFieldNames = LeadFormField::REQUIRED_FIELDS;
+        $providedMappedFields = collect($fields)
+            ->where('is_mapped', true)
+            ->pluck('name')
+            ->toArray();
+
+        $missingFields = array_diff($requiredFieldNames, $providedMappedFields);
+
+        if (!empty($missingFields)) {
+            throw new \Exception('Missing required fields: ' . implode(', ', $missingFields));
+        }
+    }
+
+    private function generateValidationRules($fieldData)
+    {
+        $rules = [];
+        if ($fieldData['is_required'] ?? false) {
+            $rules[] = 'required';
+        }
+
+        switch ($fieldData['type']) {
+            case 'email':
+                $rules[] = 'email';
+                break;
+            case 'tel':
+                $rules[] = 'regex:/^[\+]?[1-9][\d]{0,15}$/';
+                break;
+            case 'url':
+                $rules[] = 'url';
+                break;
+            case 'number':
+                $rules[] = 'numeric';
+                break;
+            case 'date':
+                $rules[] = 'date';
+                break;
+        }
+
+        return implode('|', $rules);
     }
     /**
      * Toggle lead form active/inactive status.
@@ -810,11 +866,11 @@ class LeadFormController extends Controller
 
     public function toggleStatus(LeadForm $leadForm)
     {
-        $leadForm->update(['is_active' => ! $leadForm->is_active]);
+        $leadForm->update(['is_active' => !$leadForm->is_active]);
         return response()->json([
             'success' => true,
             'message' => 'Form status updated successfully!',
-            'status' => $leadForm->is_active,
+            'status' => $leadForm->is_active
         ]);
     }
 
@@ -830,6 +886,7 @@ class LeadFormController extends Controller
         return view('lead_form.responses', compact('leadForm'));
     }
 
+
     public function responseList(Request $request, $id)
     {
         $leadForm = LeadForm::findOrFail($id);
@@ -844,10 +901,10 @@ class LeadFormController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('company', 'like', "%{$search}%");
+                $q->where('first_name', 'like', "%$search%")
+                    ->orWhere('last_name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('company', 'like', "%$search%");
             });
         }
 
@@ -864,7 +921,7 @@ class LeadFormController extends Controller
                     'email' => $lead->email,
                     'phone' => $lead->phone,
                     'company' => $lead->company ?? '-',
-                    'submitted_at' => format_date($lead->created_at, to_format: 'Y-m-d'),
+                    'submitted_at' => format_date($lead->created_at, to_format: "Y-m-d"),
                     'actions' => '<a href="' . route('leads.show', $lead->id) . '" class="btn btn-sm btn-outline-primary">View</a>',
                 ];
             });
@@ -954,13 +1011,13 @@ class LeadFormController extends Controller
             if ($id) {
                 $leadForm = $leadFormsQuery->find($id);
 
-                if (! $leadForm) {
+                if (!$leadForm) {
                     return formatApiResponse(
                         false,
                         'Lead form not found.',
                         [
                             'total' => 0,
-                            'data' => [],
+                            'data' => []
                         ],
                         404
                     );
@@ -971,43 +1028,44 @@ class LeadFormController extends Controller
                     'Lead form retrieved successfully.',
                     [
                         'total' => 1,
-                        'data' => formatLeadForm($leadForm),
+                        'data' => formatLeadForm($leadForm)
+                    ],
+                    200
+                );
+            } else {
+                $leadForms = $leadFormsQuery->orderBy($sort, $order)
+                    ->skip($offset)
+                    ->take($limit)
+                    ->get();
+
+                if ($leadForms->isEmpty()) {
+                    return formatApiResponse(
+                        false,
+                        'Lead forms not found.',
+                        [
+                            'total' => 0,
+                            'data' => []
+                        ],
+                        404
+                    );
+                }
+
+                $data = $leadForms->map(fn($leadForm) => formatLeadForm($leadForm));
+
+                return formatApiResponse(
+                    false,
+                    'Lead forms retrieved successfully.',
+                    [
+                        'total' => $total,
+                        'data' => $data,
+                        'permissions' => [
+                            'can_edit' => checkPermission('manage_leads'),
+                            'can_delete' => checkPermission('manage_leads'),
+                        ],
                     ],
                     200
                 );
             }
-            $leadForms = $leadFormsQuery->orderBy($sort, $order)
-                ->skip($offset)
-                ->take($limit)
-                ->get();
-
-            if ($leadForms->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Lead forms not found.',
-                    [
-                        'total' => 0,
-                        'data' => [],
-                    ],
-                    404
-                );
-            }
-
-            $data = $leadForms->map(fn ($leadForm) => formatLeadForm($leadForm));
-
-            return formatApiResponse(
-                false,
-                'Lead forms retrieved successfully.',
-                [
-                    'total' => $total,
-                    'data' => $data,
-                    'permissions' => [
-                        'can_edit' => checkPermission('manage_leads'),
-                        'can_delete' => checkPermission('manage_leads'),
-                    ],
-                ],
-                200
-            );
         } catch (\Exception $e) {
             Log::error('Lead Forms API List Error: ' . $e->getMessage(), [
                 'exception' => $e,
@@ -1033,7 +1091,6 @@ class LeadFormController extends Controller
      * @group Lead Form Management
      *
      * @urlParam id integer required The ID of the lead form for which to retrieve responses. Example: 1
-     *
      * @queryParam search string optional Filters responses by first name, last name, email, or company. Example: John
      * @queryParam sort string optional The column to sort by (id, first_name, last_name, email, created_at). Defaults to id. Example: created_at
      * @queryParam order string optional The sort order (ASC, DESC). Defaults to DESC. Example: ASC
@@ -1084,10 +1141,10 @@ class LeadFormController extends Controller
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('company', 'like', "%{$search}%");
+                    $q->where('first_name', 'like', "%$search%")
+                        ->orWhere('last_name', 'like', "%$search%")
+                        ->orWhere('email', 'like', "%$search%")
+                        ->orWhere('company', 'like', "%$search%");
                 });
             }
 
@@ -1104,7 +1161,7 @@ class LeadFormController extends Controller
                     'Lead form responses not found.',
                     [
                         'total' => 0,
-                        'data' => [],
+                        'data' => []
                     ],
                     404
                 );
@@ -1119,7 +1176,7 @@ class LeadFormController extends Controller
                 'Lead form responses retrieved successfully.',
                 [
                     'total' => $total,
-                    'data' => $data,
+                    'data' => $data
                 ],
                 200
             );
@@ -1135,48 +1192,5 @@ class LeadFormController extends Controller
                 500
             );
         }
-    }
-
-    private function validateRequiredFields($fields)
-    {
-        $requiredFieldNames = LeadFormField::REQUIRED_FIELDS;
-        $providedMappedFields = collect($fields)
-            ->where('is_mapped', true)
-            ->pluck('name')
-            ->toArray();
-
-        $missingFields = array_diff($requiredFieldNames, $providedMappedFields);
-
-        if (! empty($missingFields)) {
-            throw new \Exception('Missing required fields: ' . implode(', ', $missingFields));
-        }
-    }
-
-    private function generateValidationRules($fieldData)
-    {
-        $rules = [];
-        if ($fieldData['is_required'] ?? false) {
-            $rules[] = 'required';
-        }
-
-        switch ($fieldData['type']) {
-            case 'email':
-                $rules[] = 'email';
-                break;
-            case 'tel':
-                $rules[] = 'regex:/^[\+]?[1-9][\d]{0,15}$/';
-                break;
-            case 'url':
-                $rules[] = 'url';
-                break;
-            case 'number':
-                $rules[] = 'numeric';
-                break;
-            case 'date':
-                $rules[] = 'date';
-                break;
-        }
-
-        return implode('|', $rules);
     }
 }

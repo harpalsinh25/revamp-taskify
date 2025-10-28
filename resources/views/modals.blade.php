@@ -4415,6 +4415,8 @@
         </div>
     </div>
 </div>
+@if (Request::is('task-lists'))
+
 <div class="modal fade" id="edit_task_list_modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -4505,6 +4507,8 @@
         </form>
     </div>
 </div>
+@endif
+
 <!-- Global Search Modal -->
 <!-- Enhanced Global Search Modal -->
 <div class="modal fade" id="globalSearchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -5113,6 +5117,8 @@
                                     <option value="">Select Module</option>
                                     <option value="project">Project</option>
                                     <option value="task">Task</option>
+                                    <option value="client">Client</option>
+                                    <option value="user">User</option>
                                 </select>
                             </div>
                         </div>

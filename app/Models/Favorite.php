@@ -12,7 +12,7 @@ class Favorite extends Model
         'user_id',
         'client_id',
         'favoritable_type',
-        'favoritable_id',
+        'favoritable_id'
     ];
 
     public function favoritable()

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class LeadSource extends Model
 {
@@ -14,10 +14,6 @@ class LeadSource extends Model
         'workspace_id',
         'name',
     ];
-    public function leads()
-    {
-        return $this->hasMany(Lead::class, 'source_id');
-    }
     protected static function booted(): void
     {
         static::addGlobalScope('defaultOrWorkspace', function (Builder $builder) {
@@ -29,5 +25,9 @@ class LeadSource extends Model
                 })->orWhere('workspace_id', $workspaceId);
             });
         });
+    }
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'source_id');
     }
 }

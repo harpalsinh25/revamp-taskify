@@ -3788,6 +3788,7 @@
                                 {!! create_label('task_lists', 'Task Lists', Session::get('locale')) !!}
                                 {!! create_label('create_task_list', 'Create Task List', Session::get('locale')) !!}
                                 {!! create_label('HRMS', 'HRMS', Session::get('locale')) !!}
+                                 {!! create_label('additional_fields', 'Additional Fields', Session::get('locale')) !!}
                             </div>
                              {{-- Plugin Labels --}}
                             @php

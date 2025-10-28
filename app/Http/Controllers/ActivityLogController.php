@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ActivityLog;
-use App\Models\Client;
+use Carbon\Carbon;
 use App\Models\User;
-use App\Models\UserClientPreference;
+use App\Models\Client;
 use App\Models\Workspace;
-use App\Services\DeletionService;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\UserClientPreference;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class ActivityLogController extends Controller
 {
@@ -87,19 +91,20 @@ class ActivityLogController extends Controller
 
     public function list($id = null)
     {
+
         // dd(request());
         $isApi = request()->get('isApi', false);
         $search = request('search', '');
         $sort = request('sort', 'id');
         $order = request('order', 'DESC');
-        $date_from = request('date_from') ? request('date_from') : '';
-        $date_to = request('date_to') ? request('date_to') : '';
+        $date_from = (request('date_from')) ? request('date_from') : "";
+        $date_to = (request('date_to')) ? request('date_to') : "";
         $user_ids = request('user_ids');
         $client_ids = request('client_ids');
         $activities = request('activities');
         $types = request('types');
-        $type = request('type') ? request('type') : '';
-        $type_id = request('type_id') ? request('type_id') : '';
+        $type = (request('type')) ? request('type') : "";
+        $type_id = (request('type_id')) ? request('type_id') : "";
         $where = ['activity_logs.workspace_id' => $this->workspace->id];
         $date_from = $date_from ? date('Y-m-d H:i:s', strtotime($date_from . ' 00:00:00')) : null;
         $date_to = $date_to ? date('Y-m-d H:i:s', strtotime($date_to . ' 23:59:59')) : null;
@@ -320,12 +325,12 @@ END AS parent_type_title,
         //     $where['activity_logs.actor_type'] = 'user';
         // }
 
-        if (! empty($activities)) {
+        if (!empty($activities)) {
             // Handle multi-select activity filter
             $activity_log_query->whereIn('activity_logs.activity', $activities);
         }
 
-        if (! empty($user_ids)) {
+        if (!empty($user_ids)) {
             // Handle multi-select user_id filter
             $activity_log_query->where(function ($query) use ($user_ids) {
                 $query->whereIn('activity_logs.actor_id', $user_ids)
@@ -333,7 +338,7 @@ END AS parent_type_title,
             });
         }
 
-        if (! empty($client_ids)) {
+        if (!empty($client_ids)) {
             // Handle multi-select client_id filter
             $activity_log_query->where(function ($query) use ($client_ids) {
                 $query->whereIn('activity_logs.actor_id', $client_ids)
@@ -351,7 +356,7 @@ END AS parent_type_title,
                         ->orWhere('activity_logs.parent_type_id', $type_id);
                 });
         }
-        if (! empty($types)) {
+        if (!empty($types)) {
             $activity_log_query->whereIn('activity_logs.type', $types);
         }
 
@@ -383,7 +388,7 @@ END AS parent_type_title,
             $activity_log = $activity_log_query->find($id);
 
             if ($activity_log) {
-                $user = $activity_log->actor_type === 'user' ? User::find($activity_log->actor_id) : Client::find($activity_log->actor_id);
+                $user = $activity_log->actor_type == 'user' ? User::find($activity_log->actor_id) : Client::find($activity_log->actor_id);
                 $activity_log_data = [
                     'id' => $activity_log->id,
                     'actor_id' => $activity_log->actor_id,
@@ -403,9 +408,9 @@ END AS parent_type_title,
                         : format_date($activity_log->created_at, true),
                     'updated_at' => $isApi
                         ? format_date($activity_log->updated_at, to_format: 'Y-m-d')
-                        : format_date($activity_log->updated_at, true),
+                        : format_date($activity_log->updated_at, true)
                 ];
-                if (! $isApi) {
+                if (!$isApi) {
                     $activity_log_data['actions'] = $canDelete ? '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $activity_log->id . '" data-type="activity-log" data-table="activity_log_table">' .
                         '<i class="bx bx-trash text-danger mx-1"></i>' .
                         '</button>' : '-';
@@ -414,26 +419,26 @@ END AS parent_type_title,
                 if ($isApi) {
                     // For API response
                     return response()->json([
-                        'error' => false,
-                        'message' => 'Activity log retrieved successfully',
-                        'data' => array_map(function ($value) {
+                        "error" => false,
+                        "message" => "Activity log retrieved successfully",
+                        "data" => array_map(function ($value) {
                             return $value === '-' ? '' : $value;
-                        }, $activity_log_data),
+                        }, $activity_log_data)
                     ]);
                 }
 
                 return response()->json([
-                    'row' => $activity_log_data,
+                    "row" => $activity_log_data
                 ]);
             }
 
             return $isApi ? response()->json([
-                'error' => false,
-                'message' => 'Activity log not found',
-                'data' => [],
+                "error" => false,
+                "message" => "Activity log not found",
+                "data" => []
             ]) : response()->json([
-                'error' => 'Activity log not found',
-            ]);
+                            "error" => "Activity log not found"
+                        ]);
         }
 
         // For paginated results
@@ -446,25 +451,26 @@ END AS parent_type_title,
 
         // Fetch the results with the specified offset and limit
         $activity_log = $activity_log_query->get()->map(function ($activity_log) use ($canDelete, $isApi) {
-            if ($activity_log->type === 'payslip') {
-                $activity_log->type_title = get_label('payslip_id_prefix', 'PSL-') . $activity_log->type_id;
+            if ($activity_log->type == 'payslip') {
+                $activity_log->type_title = get_label("payslip_id_prefix", "PSL-") . $activity_log->type_id;
             }
-            if ($activity_log->type === 'estimate') {
-                $activity_log->type_title = get_label('estimate_id_prefix', 'ESTMT-') . $activity_log->type_id;
+            if ($activity_log->type == 'estimate') {
+                $activity_log->type_title = get_label("estimate_id_prefix", "ESTMT-") . $activity_log->type_id;
             }
-            if ($activity_log->type === 'invoice') {
-                $activity_log->type_title = get_label('invoice_id_prefix', 'INVC-') . $activity_log->type_id;
+            if ($activity_log->type == 'invoice') {
+                $activity_log->type_title = get_label("invoice_id_prefix", "INVC-") . $activity_log->type_id;
             }
-            if ($activity_log->type === 'payment') {
-                $activity_log->type_title = get_label('payment_id', 'Payment ID') . ' ' . $activity_log->type_id;
+            if ($activity_log->type == 'payment') {
+                $activity_log->type_title = get_label("payment_id", "Payment ID") . ' ' . $activity_log->type_id;
             }
-            $user = $activity_log->actor_type === 'user' ? User::find($activity_log->actor_id) : Client::find($activity_log->actor_id);
+            $user = $activity_log->actor_type == 'user' ? User::find($activity_log->actor_id) : Client::find($activity_log->actor_id);
             $activity_log_data = [
                 'id' => $activity_log->id,
                 'actor_id' => $activity_log->actor_id,
                 'actor_name' => $isApi
                     ? $activity_log->actor_name
-                    : ($activity_log->actor_type === 'user' && $this->user->can('manage_users') && $user
+                    : (
+                        ($activity_log->actor_type == 'user' && $this->user->can('manage_users') && $user)
                         ? '<div class="d-flex align-items-center">
                 <div class="avatar avatar-sm pull-up" title="' . $activity_log->actor_name . '">
                     <a href="' . route('users.profile', ['id' => $user->id]) . '" target="_blank">
@@ -475,7 +481,8 @@ END AS parent_type_title,
                     <h6 class="mb-1">' . $activity_log->actor_name . '</h6>
                 </div>
             </div>'
-                        : ($activity_log->actor_type === 'client' && $this->user->can('manage_clients') && $user
+                        : (
+                            ($activity_log->actor_type == 'client' && $this->user->can('manage_clients') && $user)
                             ? '<div class="d-flex align-items-center">
                     <div class="avatar avatar-sm pull-up" title="' . $activity_log->actor_name . '">
                         <a href="' . route('clients.profile', ['id' => $user->id]) . '" target="_blank">
@@ -486,7 +493,9 @@ END AS parent_type_title,
                         <h6 class="mb-1">' . $activity_log->actor_name . '</h6>
                     </div>
                 </div>'
-                            : $activity_log->actor_name)),
+                            : $activity_log->actor_name
+                        )
+                    ),
 
                 'actor_type' => ucfirst($activity_log->actor_type),
                 'actor_profile' => $user ? ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) : null,
@@ -503,10 +512,10 @@ END AS parent_type_title,
                     : format_date($activity_log->created_at, true),
                 'updated_at' => $isApi
                     ? format_date($activity_log->updated_at, to_format: 'Y-m-d')
-                    : format_date($activity_log->updated_at, true),
+                    : format_date($activity_log->updated_at, true)
             ];
 
-            if (! $isApi) {
+            if (!$isApi) {
                 $activity_log_data['actions'] = $canDelete ? '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $activity_log->id . '" data-type="activity-log" data-table="activity_log_table"><i class="bx bx-trash text-danger mx-1"></i></button>' : '-';
             }
 
@@ -514,20 +523,20 @@ END AS parent_type_title,
         });
         if ($isApi) {
             return response()->json([
-                'error' => false,
-                'message' => $activity_log->isEmpty() ? 'Activity logs not found' : 'Activity logs retrieved successfully',
-                'total' => $total,
-                'data' => array_map(function ($log) {
+                "error" => false,
+                "message" => $activity_log->isEmpty() ? "Activity logs not found" : "Activity logs retrieved successfully",
+                "total" => $total,
+                "data" => array_map(function ($log) {
                     return array_map(function ($value) {
                         return $value === '-' ? '' : $value;
                     }, $log);
-                }, $activity_log->toArray()),
+                }, $activity_log->toArray())
             ]);
         }
 
         return response()->json([
-            'rows' => $activity_log,
-            'total' => $total,
+            "rows" => $activity_log,
+            "total" => $total,
         ]);
     }
 
@@ -563,7 +572,8 @@ END AS parent_type_title,
 
     public function destroy($id)
     {
-        return DeletionService::delete(ActivityLog::class, $id, 'Record');
+        $response = DeletionService::delete(ActivityLog::class, $id, 'Record');
+        return $response;
     }
 
     public function destroy_multiple(Request $request)
@@ -571,7 +581,7 @@ END AS parent_type_title,
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:activity_logs,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:activity_logs,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -589,6 +599,7 @@ END AS parent_type_title,
 
     public function get_calendar_data(Request $request)
     {
+
         $activity_logs = $this->list(); // Adjust limit dynamically
         $activity_logs = $activity_logs->original['rows'];
         // Define color codes for different activity types
@@ -614,8 +625,9 @@ END AS parent_type_title,
                 $carbonDate = \Carbon\Carbon::createFromFormat($format, $activity['created_at'])
                     ->toIso8601String();
             } catch (\Exception $e) {
-                dd('Error parsing date:', $activity['created_at'], $e->getMessage());
+                dd("Error parsing date:", $activity['created_at'], $e->getMessage());
             }
+
 
             $url = generateActivityUrl($activity);
             $calendarData[] = [
@@ -632,8 +644,12 @@ END AS parent_type_title,
             ];
         }
 
+
+
         return response()->json($calendarData);
     }
+
+
 
     public function saveViewPreference(Request $request)
     {
@@ -646,7 +662,8 @@ END AS parent_type_title,
             )
         ) {
             return response()->json(['error' => false, 'message' => 'Default View Set Successfully.']);
+        } else {
+            return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
         }
-        return response()->json(['error' => true, 'message' => 'Something Went Wrong.']);
     }
 }

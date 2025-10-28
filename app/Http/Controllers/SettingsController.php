@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use App\Models\User;
 use App\Models\Setting;
 use App\Models\Template;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
 
 class SettingsController extends Controller
@@ -58,10 +61,12 @@ class SettingsController extends Controller
 
     public function google_calendar()
     {
+
         return view('settings.google_calendar_settings');
     }
     public function store_general_settings(Request $request)
     {
+
         $request->validate([
             'company_title' => ['required'],
             'site_url' => ['required'],
@@ -86,7 +91,7 @@ class SettingsController extends Controller
             ? $request->file('full_logo')->store('logos', 'public')
             : ($settings['full_logo'] ?? '');
 
-        if ($request->hasFile('full_logo') && ! empty($settings['full_logo'])) {
+        if ($request->hasFile('full_logo') && !empty($settings['full_logo'])) {
             Storage::disk('public')->delete($settings['full_logo']);
         }
 
@@ -94,7 +99,7 @@ class SettingsController extends Controller
             ? $request->file('half_logo')->store('logos', 'public')
             : ($settings['half_logo'] ?? '');
 
-        if ($request->hasFile('half_logo') && ! empty($settings['half_logo'])) {
+        if ($request->hasFile('half_logo') && !empty($settings['half_logo'])) {
             Storage::disk('public')->delete($settings['half_logo']);
         }
 
@@ -102,15 +107,15 @@ class SettingsController extends Controller
             ? $request->file('favicon')->store('logos', 'public')
             : ($settings['favicon'] ?? '');
 
-        if ($request->hasFile('favicon') && ! empty($settings['favicon'])) {
+        if ($request->hasFile('favicon') && !empty($settings['favicon'])) {
             Storage::disk('public')->delete($settings['favicon']);
         }
 
         $form_val['toast_time_out'] = $request->filled('toast_time_out') ? $request->input('toast_time_out') : 5;
-        $form_val['priLangAsAuth'] = $request->has('priLangAsAuth') && $request->input('priLangAsAuth') === 'on' ? 1 : 0;
-        $form_val['upcomingBirthdays'] = $request->has('upcomingBirthdays') && $request->input('upcomingBirthdays') === 'on' ? 1 : 0;
-        $form_val['upcomingWorkAnniversaries'] = $request->has('upcomingWorkAnniversaries') && $request->input('upcomingWorkAnniversaries') === 'on' ? 1 : 0;
-        $form_val['membersOnLeave'] = $request->has('membersOnLeave') && $request->input('membersOnLeave') === 'on' ? 1 : 0;
+        $form_val['priLangAsAuth'] = $request->has('priLangAsAuth') && $request->input('priLangAsAuth') == 'on' ? 1 : 0;
+        $form_val['upcomingBirthdays'] = $request->has('upcomingBirthdays') && $request->input('upcomingBirthdays') == 'on' ? 1 : 0;
+        $form_val['upcomingWorkAnniversaries'] = $request->has('upcomingWorkAnniversaries') && $request->input('upcomingWorkAnniversaries') == 'on' ? 1 : 0;
+        $form_val['membersOnLeave'] = $request->has('membersOnLeave') && $request->input('membersOnLeave') == 'on' ? 1 : 0;
 
         // Merge new settings with existing settings
         $merged_settings = array_merge($settings, $form_val);
@@ -134,6 +139,7 @@ class SettingsController extends Controller
         return response()->json(['error' => false]);
     }
 
+
     public function store_security_settings(Request $request)
     {
         // Validate security settings
@@ -147,14 +153,14 @@ class SettingsController extends Controller
         // Extract relevant request data
         $form_val = $request->except('_token', '_method', 'dnr');
 
-        $form_val['recaptcha_enabled'] = $request->has('recaptcha_enabled') && $request->input('recaptcha_enabled') === 'on' ? 1 : 0;
+        $form_val['recaptcha_enabled'] = $request->has('recaptcha_enabled') && $request->input('recaptcha_enabled') == 'on' ? 1 : 0;
         $form_val['recaptcha_site_key'] = $request->input('recaptcha_site_key', '');
         $form_val['recaptcha_secret_key'] = $request->input('recaptcha_secret_key', '');
 
         // Retrieve existing general settings
         $generalSettingsArray = get_settings('general_settings');
 
-        $form_val['allowSignup'] = $request->has('allowSignup') && $request->input('allowSignup') === 'on' ? 1 : 0;
+        $form_val['allowSignup'] = $request->has('allowSignup') && $request->input('allowSignup') == 'on' ? 1 : 0;
 
         // Define valid file type extensions
         $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'ico', 'psd', 'heic'];
@@ -187,16 +193,16 @@ class SettingsController extends Controller
         $invalidExtensions = [];
         foreach ($adminExtensions as $extension) {
             $extension = ltrim($extension, '.'); // Remove leading period
-            if (! in_array($extension, $validExtensions)) {
+            if (!in_array($extension, $validExtensions)) {
                 $invalidExtensions[] = $extension; // Collect invalid extensions
             }
         }
 
         // If invalid extensions found, return an error
-        if (! empty($invalidExtensions)) {
+        if (!empty($invalidExtensions)) {
             return response()->json([
                 'error' => true,
-                'message' => 'Invalid file extensions: ' . implode(', ', $invalidExtensions),
+                'message' => 'Invalid file extensions: ' . implode(', ', $invalidExtensions)
             ]);
         }
 
@@ -216,6 +222,7 @@ class SettingsController extends Controller
             'value' => json_encode($generalSettingsArray),
         ];
 
+
         // Check if general settings exist, then update or create
         $fetched_data = Setting::where('variable', 'general_settings')->first();
         if ($fetched_data === null) {
@@ -227,13 +234,14 @@ class SettingsController extends Controller
         return response()->json(['error' => false, 'message' => 'Settings saved successfully.']);
     }
 
+
     public function store_pusher_settings(Request $request)
     {
         $request->validate([
             'pusher_app_id' => ['required'],
             'pusher_app_key' => ['required'],
             'pusher_app_secret' => ['required'],
-            'pusher_app_cluster' => ['required'],
+            'pusher_app_cluster' => ['required']
         ]);
         $fetched_data = Setting::where('variable', 'pusher_settings')->first();
         $form_val = $request->except('_token', '_method', 'dnr');
@@ -242,7 +250,7 @@ class SettingsController extends Controller
             'value' => json_encode($form_val),
         ];
 
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             Setting::create($data);
         } else {
             Setting::where('variable', 'pusher_settings')->update($data);
@@ -260,7 +268,7 @@ class SettingsController extends Controller
             'smtp_host' => ['required'],
             'smtp_port' => ['required'],
             'email_content_type' => ['required'],
-            'smtp_encryption' => ['required'],
+            'smtp_encryption' => ['required']
         ]);
         $fetched_data = Setting::where('variable', 'email_settings')->first();
         $form_val = $request->except('_token', '_method', 'dnr');
@@ -269,7 +277,7 @@ class SettingsController extends Controller
             'value' => json_encode($form_val),
         ];
 
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             Setting::create($data);
         } else {
             Setting::where('variable', 'email_settings')->update($data);
@@ -293,7 +301,7 @@ class SettingsController extends Controller
             'value' => json_encode($form_val),
         ];
 
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             Setting::create($data);
         } else {
             Setting::where('variable', 'media_storage_settings')->update($data);
@@ -324,6 +332,7 @@ class SettingsController extends Controller
             'params_data' => $request->params_key && $request->params_value ? array_combine($request->params_key, $request->params_value) : [],
             'text_format_data' => $request->text_format_data,
         ];
+
 
         // Convert data to JSON
         $jsonData = json_encode($data);
@@ -408,6 +417,7 @@ class SettingsController extends Controller
 
     public function store_template(Request $request)
     {
+
         $formFields = $request->validate([
             'type' => 'required',
             'name' => 'required',
@@ -429,24 +439,24 @@ class SettingsController extends Controller
         ], [
             'type.required' => 'The type field is required.',
             'name.required' => 'The name field is required.',
-            'status.required' => 'The status field is required.',
+            'status.required' => 'The status field is required.'
         ]);
 
         $type = $request->input('type');
         $name = $request->input('name');
-        $formFields['content'] = base64_decode($formFields['content']);
+        $formFields['content'] =  base64_decode($formFields['content']);
 
         $fetched_data = Template::where('type', $type)
             ->where('name', $name)
             ->first();
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             // When creating a new record, provide a default value for the status field
             Template::create($formFields);
         } else {
             // Use an array of conditions for the update query
             Template::where([
                 ['type', '=', $type],
-                ['name', '=', $name],
+                ['name', '=', $name]
             ])->update($formFields);
         }
         return response()->json(['error' => false, 'message' => 'Saved successfully.']);
@@ -479,7 +489,7 @@ class SettingsController extends Controller
         ];
 
         // If no existing settings found, create new; otherwise, update existing
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             Setting::create($data);
         } else {
             $fetched_data->update($data);
@@ -487,7 +497,7 @@ class SettingsController extends Controller
 
         return response()->json([
             'error' => false,
-            'message' => ucfirst(str_replace('_', ' ', $request->variable)) . ' Saved Successfully!',
+            'message' => ucfirst(str_replace('_', ' ', $request->variable)) . ' Saved Successfully!'
         ]);
     }
 
@@ -503,7 +513,7 @@ class SettingsController extends Controller
             'value' => json_encode($form_val),
         ];
 
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             Setting::create($data);
         } else {
             Setting::where('variable', 'company_information')->update($data);
@@ -511,6 +521,9 @@ class SettingsController extends Controller
 
         return response()->json(['error' => false, 'message' => 'Company information saved successfully.']);
     }
+
+
+
 
     public function get_default_template(Request $request)
     {
@@ -715,77 +728,77 @@ class SettingsController extends Controller
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*New Project Assigned:* {PROJECT_TITLE}, ID: #{PROJECT_ID}. By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} You can find the project here :{PROJECT_URL}',
+                            'content' => '*New Project Assigned:* {PROJECT_TITLE}, ID: #{PROJECT_ID}. By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} You can find the project here :{PROJECT_URL}'
                         ]);
                         break;
                     case 'project_status_updation':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*Project Status Updated:* By {UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} , {PROJECT_TITLE}, ID: #{PROJECT_ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`. You can find the project here :{PROJECT_URL}',
+                            'content' => '*Project Status Updated:* By {UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} , {PROJECT_TITLE}, ID: #{PROJECT_ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`. You can find the project here :{PROJECT_URL}'
                         ]);
                         break;
                     case 'task_assignment':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*New Task Assigned:* {TASK_TITLE}, ID: #{TASK_ID}. By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} You can find the task here : {TASK_URL}',
+                            'content' => '*New Task Assigned:* {TASK_TITLE}, ID: #{TASK_ID}. By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} You can find the task here : {TASK_URL}'
                         ]);
                         break;
                     case 'task_status_updation':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*Task Status Updated:* By {UPDATER_FIRST_NAME} {UPDATER_LAST_NAME},  {TASK_TITLE}, ID: #{TASK_ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`. You can find the Task here : {TASK_URL}',
+                            'content' => '*Task Status Updated:* By {UPDATER_FIRST_NAME} {UPDATER_LAST_NAME},  {TASK_TITLE}, ID: #{TASK_ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`. You can find the Task here : {TASK_URL}'
                         ]);
                         break;
                     case 'workspace_assignment':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*New Workspace Added:* By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME},   {WORKSPACE_TITLE}, ID: #{WORKSPACE_ID}. You can find the Workspace here : {WORKSPACE_URL}',
+                            'content' => '*New Workspace Added:* By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME},   {WORKSPACE_TITLE}, ID: #{WORKSPACE_ID}. You can find the Workspace here : {WORKSPACE_URL}'
                         ]);
                         break;
                     case 'meeting_assignment':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*New Meeting Scheduled:* By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME},  {MEETING_TITLE}, ID: #{MEETING_ID}. You can find the Meeting here : {MEETING_URL}',
+                            'content' => '*New Meeting Scheduled:* By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME},  {MEETING_TITLE}, ID: #{MEETING_ID}. You can find the Meeting here : {MEETING_URL}'
                         ]);
                         break;
                     case 'leave_request_creation':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*New {TYPE} Leave Request Created:* ID: #{ID} By {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} for {REASON}.  From ( {FROM} ) -  To ( {TO} ).',
+                            'content' => '*New {TYPE} Leave Request Created:* ID: #{ID} By {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} for {REASON}.  From ( {FROM} ) -  To ( {TO} ).'
                         ]);
                         break;
                     case 'leave_request_status_updation':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*Leave Request Status Updated:* For {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME},  ID: #{ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`.',
+                            'content' => '*Leave Request Status Updated:* For {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME},  ID: #{ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`.'
                         ]);
                         break;
                     case 'team_member_on_leave_alert':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '*Team Member Leave Alert:* {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.',
+                            'content' => '*Team Member Leave Alert:* {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.'
                         ]);
                         break;
                     case 'birthday_wish':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => 'Hello *{FIRST_NAME} {LAST_NAME}*, {COMPANY_TITLE} wishes you a very Happy Birthday!',
+                            'content' => 'Hello *{FIRST_NAME} {LAST_NAME}*, {COMPANY_TITLE} wishes you a very Happy Birthday!'
                         ]);
                         break;
                     case 'work_anniversary_wish':
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => 'Hello *{FIRST_NAME} {LAST_NAME}*, {COMPANY_TITLE} wishes you a very happy work anniversary!',
+                            'content' => 'Hello *{FIRST_NAME} {LAST_NAME}*, {COMPANY_TITLE} wishes you a very happy work anniversary!'
                         ]);
                         break;
 
@@ -800,7 +813,7 @@ class SettingsController extends Controller
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.',
+                            'content' => '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.'
                         ]);
                         break;
 
@@ -808,16 +821,16 @@ class SettingsController extends Controller
                         return response()->json([
                             'error' => false,
                             'message' => 'Reset to default successfully.',
-                            'content' => '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of your interview (ID: #{INTERVIEW_ID}) for {CANDIDATE_NAME} from "{OLD_STATUS}" to "{NEW_STATUS}".',
+                            'content' => '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of your interview (ID: #{INTERVIEW_ID}) for {CANDIDATE_NAME} from "{OLD_STATUS}" to "{NEW_STATUS}".'
                         ]);
                         break;
                 }
 
-                // no break
             default:
                 return response()->json(['error' => true, 'message' => 'Unknown template type.']);
                 break;
         }
+
 
         // Construct the default template path
         $defaultTemplatePath = resource_path($directory);
@@ -829,9 +842,10 @@ class SettingsController extends Controller
 
             // Return the default template content as a response
             return response()->json(['error' => false, 'message' => 'Reset to default successfully.', 'content' => $defaultTemplateContent]);
+        } else {
+            // If the default template file does not exist, return an error response
+            return response()->json(['error' => true, 'message' => 'Default template not found.']);
         }
-        // If the default template file does not exist, return an error response
-        return response()->json(['error' => true, 'message' => 'Default template not found.']);
     }
     public function testNotificationSettings(Request $request)
     {
@@ -839,15 +853,15 @@ class SettingsController extends Controller
         $recipientCountryCode = $request->input('recipientCountryCode');
         $message = $request->input('message');
         $type = $request->input('type');
-        if ($type === 'slack') {
+        if ($type == 'slack') {
             $recipient = (object) [
                 'email' => $request->input('recipientEmail'),
-                'country_code' => $recipientCountryCode,
+                'country_code' => $recipientCountryCode
             ];
         } else {
             $recipient = (object) [
                 'phone' => $recipientNumber,
-                'country_code' => $recipientCountryCode,
+                'country_code' => $recipientCountryCode
             ];
         }
 
@@ -915,9 +929,10 @@ class SettingsController extends Controller
      */
     public function show(Request $request, $variable)
     {
+
         $settings = get_settings($variable);
         // dd($settings);
-        if ($variable === 'security_settings') {
+        if ($variable == 'security_settings') {
             $settings = get_settings('general_settings');
         }
 
@@ -925,7 +940,7 @@ class SettingsController extends Controller
             $url_keys = ['full_logo', 'half_logo', 'favicon'];
             $settings['timezones'] = get_timezone_array();
             foreach ($url_keys as $key) {
-                if (isset($settings[$key]) && ! empty($settings[$key])) {
+                if (isset($settings[$key]) && !empty($settings[$key])) {
                     // Generate the URL for assets in storage
                     $settings[$key] = asset('storage/' . $settings[$key]);
                 } else {
@@ -940,6 +955,7 @@ class SettingsController extends Controller
             'variable' => $variable,
             'settings' => $settings ? $settings : [],
         ]);
+
     }
 
     /**
@@ -976,6 +992,7 @@ class SettingsController extends Controller
      */
     public function store_settings_api(Request $request)
     {
+
         // dd($request);
         // Validate the request to ensure the variable key is present
         $request->validate([
@@ -1075,13 +1092,14 @@ class SettingsController extends Controller
             // Retrieve existing settings
             $fetched_data = Setting::where('variable', $variable)->first();
 
-            if ($variable === 'general_settings') {
+            if ($variable == 'general_settings') {
+
                 // Retrieve existing settings
                 $existingSettings = $settings ?? [];
 
                 // Handle Full Logo
                 if ($request->hasFile('full_logo')) {
-                    if (! empty($existingSettings['full_logo'])) {
+                    if (!empty($existingSettings['full_logo'])) {
                         Storage::disk('public')->delete($existingSettings['full_logo']); // Delete old file
                     }
                     $form_val['full_logo'] = $request->file('full_logo')->store('logos', 'public');
@@ -1091,7 +1109,7 @@ class SettingsController extends Controller
 
                 // Handle Half Logo
                 if ($request->hasFile('half_logo')) {
-                    if (! empty($existingSettings['half_logo'])) {
+                    if (!empty($existingSettings['half_logo'])) {
                         Storage::disk('public')->delete($existingSettings['half_logo']); // Delete old file
                     }
                     $form_val['half_logo'] = $request->file('half_logo')->store('logos', 'public');
@@ -1101,7 +1119,7 @@ class SettingsController extends Controller
 
                 // Handle Favicon
                 if ($request->hasFile('favicon')) {
-                    if (! empty($existingSettings['favicon'])) {
+                    if (!empty($existingSettings['favicon'])) {
                         Storage::disk('public')->delete($existingSettings['favicon']); // Delete old file
                     }
                     $form_val['favicon'] = $request->file('favicon')->store('logos', 'public');
@@ -1109,10 +1127,10 @@ class SettingsController extends Controller
                     $form_val['favicon'] = $existingSettings['favicon'] ?? '';
                 }
             }
-            if ($variable === 'security_settings') {
+            if ($variable == 'security_settings') {
                 $fetched_data = Setting::where('variable', 'general_settings')->first();
                 $existing_settings = $fetched_data ? json_decode($fetched_data->value, true) : [];
-                $form_val['allowSignup'] = $request->has('allowSignup') && $request->input('allowSignup') === 'on' ? 1 : 0;
+                $form_val['allowSignup'] = $request->has('allowSignup') && $request->input('allowSignup') == 'on' ? 1 : 0;
 
                 // Define valid file type extensions
                 $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'ico', 'psd', 'heic'];
@@ -1143,22 +1161,23 @@ class SettingsController extends Controller
                 $adminInput = $request->input('allowed_file_types', ''); // Get the input or default to an empty string
                 $adminExtensions = array_filter(
                     explode(',', str_replace(' ', '', $adminInput)),
-                    fn ($ext) => ! empty($ext) // Remove empty values
+                    fn($ext) => !empty($ext) // Remove empty values
                 );
+
 
                 $invalidExtensions = [];
                 foreach ($adminExtensions as $extension) {
                     $extension = ltrim($extension, '.'); // Remove leading period
-                    if (! in_array($extension, $validExtensions)) {
+                    if (!in_array($extension, $validExtensions)) {
                         $invalidExtensions[] = $extension; // Collect invalid extensions
                     }
                 }
 
                 // If invalid extensions found, return an error
-                if (! empty($invalidExtensions)) {
+                if (!empty($invalidExtensions)) {
                     return response()->json([
                         'error' => true,
-                        'message' => 'Invalid file extensions: ' . implode(', ', $invalidExtensions),
+                        'message' => 'Invalid file extensions: ' . implode(', ', $invalidExtensions)
                     ]);
                 }
 
@@ -1181,6 +1200,7 @@ class SettingsController extends Controller
                     'value' => json_encode($existing_settings),
                 ];
 
+
                 if ($fetched_data) {
                     $fetched_data->update($data);
                 } else {
@@ -1200,7 +1220,7 @@ class SettingsController extends Controller
                 'value' => json_encode($merged_settings),
             ];
             // return response()->json(['storing_data' => $data, 'formData' => $form_val]);
-            if ($variable === 'privacy_policy' || $variable === 'about_us' || $variable === 'terms_conditions') {
+            if ($variable == 'privacy_policy' || $variable == 'about_us' || $variable == 'terms_conditions') {
                 $data = [
                     'variable' => $request->variable,
                     'value' => json_encode([$request->variable => $request->value]), // Store as {"variable": "value"}
@@ -1234,7 +1254,7 @@ class SettingsController extends Controller
             'value' => json_encode($form_val),
         ];
 
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             Setting::create($data);
         } else {
             Setting::where('variable', 'google_calendar_settings')->update($data);
@@ -1328,7 +1348,7 @@ class SettingsController extends Controller
             'default_prompt_suffix',
             'max_prompt_length',
             'enable_fallback',
-            'fallback_provider',
+            'fallback_provider'
         ]);
 
         // Set default values if not provided
@@ -1370,7 +1390,7 @@ class SettingsController extends Controller
         ];
 
         // Check if the settings already exist, and create or update accordingly
-        if ($fetched_data === null) {
+        if ($fetched_data == null) {
             Setting::create($data);
         } else {
             $fetched_data->update($data);
@@ -1378,7 +1398,7 @@ class SettingsController extends Controller
 
         return response()->json([
             'error' => false,
-            'message' => 'AI model settings saved successfully.',
+            'message' => 'AI model settings saved successfully.'
         ]);
     }
 }

@@ -2,23 +2,15 @@
 
 namespace App\Models;
 
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class ScheduledEmail extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
-
-    protected $fillable = ['email_template_id', 'to_email', 'subject', 'body', 'placeholders', 'scheduled_at', 'status', 'attachments','user_id','workspace_id'];
-
-    protected $casts = [
-        'placeholders' => 'array',
-        'scheduled_at' => 'datetime',
-        'attachments' => 'array',
-    ];
 
     public function registerMediaCollections(): void
     {
@@ -30,13 +22,20 @@ class ScheduledEmail extends Model implements HasMedia
             $this->addMediaCollection('email-media')->useDisk('public');
         }
     }
+
+    protected $fillable = ['email_template_id', 'to_email', 'subject', 'body', 'placeholders', 'scheduled_at', 'status', 'attachments','user_id','workspace_id'];
+
+    protected $casts = [
+        'placeholders' => 'array',
+        'scheduled_at' => 'datetime',
+        'attachments' => 'array',
+    ];
     public function template()
     {
         return $this->belongsTo(EmailTemplate::class);
     }
 
-    public function user()
-    {
+    public function user(){
         return $this->belongsTo(User::class);
     }
 }

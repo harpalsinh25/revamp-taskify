@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
 class CheckAccess
@@ -12,7 +13,6 @@ class CheckAccess
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     *
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function handle($request, Closure $next, $typeModel, $typeKey, $parameterName, $redirect = null)
@@ -38,10 +38,12 @@ class CheckAccess
         // Check if $user->$typeKey is a relationship or a collection
         if ($user->$typeKey() instanceof Illuminate\Database\Eloquent\Relations\Relation) {
             return $user->$typeKey->contains($typeModel::find($itemId));
+        } else {
+            if ($typeKey == 'tasks' || $typeKey == 'payslips' || $typeKey == 'projects' || $typeKey == 'workspaces' || $typeKey == 'meetings' || $typeKey == 'expenses' || $typeKey == 'estimates_invoices') {
+                return $user->$typeKey()->get()->contains($typeModel::find($itemId));
+            } else {
+                return $user->$typeKey()->contains($typeModel::find($itemId));
+            }
         }
-        if ($typeKey === 'tasks' || $typeKey === 'payslips' || $typeKey === 'projects' || $typeKey === 'workspaces' || $typeKey === 'meetings' || $typeKey === 'expenses' || $typeKey === 'estimates_invoices') {
-            return $user->$typeKey()->get()->contains($typeModel::find($itemId));
-        }
-        return $user->$typeKey()->contains($typeModel::find($itemId));
     }
 }

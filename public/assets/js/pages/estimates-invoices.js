@@ -43,55 +43,28 @@ $(document).on('click', '.clear-estimates-invoices-filters', function (e) {
     $('#type_filter').val('').trigger('change', [0]);
     $('#table').bootstrapTable('refresh');
 })
-$('#start_date_between').on('apply.daterangepicker', function (ev, picker) {
-    var startDate = picker.startDate.format('YYYY-MM-DD');
-    var endDate = picker.endDate.format('YYYY-MM-DD');
-    $('#start_date_from').val(startDate);
-    $('#start_date_to').val(endDate);
-    $('#table').bootstrapTable('refresh');
-});
-$('#start_date_between').on('cancel.daterangepicker', function (ev, picker) {
-    $('#start_date_from').val('');
-    $('#start_date_to').val('');
-    $('#start_date_between').val('');
-    picker.setStartDate(moment());
-    picker.setEndDate(moment());
-    picker.updateElement();
-    $('#table').bootstrapTable('refresh');
-});
-$('#end_date_between').on('apply.daterangepicker', function (ev, picker) {
-    var startDate = picker.startDate.format('YYYY-MM-DD');
-    var endDate = picker.endDate.format('YYYY-MM-DD');
-    $('#end_date_from').val(startDate);
-    $('#end_date_to').val(endDate);
-    $('#table').bootstrapTable('refresh');
-});
-$('#end_date_between').on('cancel.daterangepicker', function (ev, picker) {
-    $('#end_date_from').val('');
-    $('#end_date_to').val('');
-    $('#end_date_between').val('');
-    picker.setStartDate(moment());
-    picker.setEndDate(moment());
-    picker.updateElement();
-    $('#table').bootstrapTable('refresh');
-});
+// Initialize advanced date range filters with presets
 $(document).ready(function () {
-    $('#ie_date_between').on('apply.daterangepicker', function (ev, picker) {
-        var startDate = picker.startDate.format('YYYY-MM-DD');
-        var endDate = picker.endDate.format('YYYY-MM-DD');
-        $('#date_between_from').val(startDate);
-        $('#date_between_to').val(endDate);
-        $('#table').bootstrapTable('refresh');
+    // Initialize date range filters with preset ranges
+    initAdvancedDateRangePicker({
+        selector: '#ie_date_between',
+        hiddenFrom: '#date_between_from',
+        hiddenTo: '#date_between_to',
+        tableId: 'table'
     });
-    // Cancel event to clear values
-    $('#ie_date_between').on('cancel.daterangepicker', function (ev, picker) {
-        $('#date_between_from').val('');
-        $('#date_between_to').val('');
-        $(this).val('');
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $('#table').bootstrapTable('refresh');
+
+    initAdvancedDateRangePicker({
+        selector: '#start_date_between',
+        hiddenFrom: '#start_date_from',
+        hiddenTo: '#start_date_to',
+        tableId: 'table'
+    });
+
+    initAdvancedDateRangePicker({
+        selector: '#end_date_between',
+        hiddenFrom: '#end_date_from',
+        hiddenTo: '#end_date_to',
+        tableId: 'table'
     });
 });
 window.icons = {

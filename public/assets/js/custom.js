@@ -5335,11 +5335,13 @@ $(document).ready(function () {
 $(document).ready(function () {
     // Function to load users for a specific project
     function loadProjectUsers(projectId) {
+
         var usersSelect = $("#create_task_offcanvas").find(
             'select[name="user_id[]"]'
         );
         usersSelect.empty(); // Clear any previous options
         if (projectId) {
+
             $.ajax({
                 url: baseUrl + "/projects/get/" + projectId, // Endpoint to get users based on project
                 type: "GET",
@@ -5384,8 +5386,11 @@ $(document).ready(function () {
     }
     // Check if the project is set via a hidden input (when project is not selectable)
     var projectInput = $('input[name="project"]'); // Cache the selector
+
     if (projectInput.length) {
         var projectId = projectInput.val();
+
+        console.log(projectInput);
         if (projectId) {
             loadProjectUsers(projectId); // Load users if the project is pre-selected and not selectable
         }
@@ -6734,10 +6739,11 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                     // Check if option already exists
                     if (selector.find(`option[value="${result.data.id}"]`).length === 0) {
                         let newOption = new Option(result.data.name, result.data.id, true, true);
+
                         // Attach color data to the option
-                        if (result.priority.color) {
-                            $(newOption).data('color', result.priority.color);
-                            $(newOption).attr('data-color', result.priority.colorr); // Ensure data attribute is set
+                        if (result.priority?.color || result.status?.color) {
+                            $(newOption).data('color', result.priority?.color || result.status?.color);
+                            $(newOption).attr('data-color', result.priority?.color || result.status?.color); // Ensure data attribute is set
                         }
                         selector.append(newOption);
                     } else {

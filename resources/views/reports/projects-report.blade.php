@@ -205,5 +205,57 @@
 <script>
     var projects_report_export_url = "{{ route('reports.export-projects-report') }}";
 </script>
-<script src="{{ asset('assets/js/pages/projects-report.js') }}"></script>
+<script src="{{ asset('assets/js/pages/projects-report.js') }}?v={{ time() }}"></script>
+<script>
+    // Debug: Log when page loads
+    console.log('Projects Report Page Loaded');
+    console.log('initAdvancedDateRangePicker available?', typeof initAdvancedDateRangePicker);
+    console.log('filter_date_range exists?', $('#filter_date_range').length);
+
+    // Ensure initialization happens after everything is loaded
+    $(window).on('load', function() {
+        setTimeout(function() {
+            console.log('Forcing re-initialization of date filters...');
+
+            // Force destroy and reinitialize
+            if ($('#filter_date_range').data('daterangepicker')) {
+                $('#filter_date_range').data('daterangepicker').remove();
+            }
+            if ($('#report_start_date_between').data('daterangepicker')) {
+                $('#report_start_date_between').data('daterangepicker').remove();
+            }
+            if ($('#report_end_date_between').data('daterangepicker')) {
+                $('#report_end_date_between').data('daterangepicker').remove();
+            }
+
+            // Reinitialize with presets
+            if (typeof initAdvancedDateRangePicker === 'function') {
+                initAdvancedDateRangePicker({
+                    selector: '#filter_date_range',
+                    hiddenFrom: '#filter_date_range_from',
+                    hiddenTo: '#filter_date_range_to',
+                    tableId: 'projects_report_table'
+                });
+
+                initAdvancedDateRangePicker({
+                    selector: '#report_start_date_between',
+                    hiddenFrom: '#filter_start_date_from',
+                    hiddenTo: '#filter_start_date_to',
+                    tableId: 'projects_report_table'
+                });
+
+                initAdvancedDateRangePicker({
+                    selector: '#report_end_date_between',
+                    hiddenFrom: '#filter_end_date_from',
+                    hiddenTo: '#filter_end_date_to',
+                    tableId: 'projects_report_table'
+                });
+
+                console.log('Date filters re-initialized successfully!');
+            } else {
+                console.error('initAdvancedDateRangePicker function not found!');
+            }
+        }, 500);
+    });
+</script>
 @endsection

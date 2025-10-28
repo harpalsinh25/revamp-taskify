@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\DeletionService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\QueryException;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Session;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\RoleAlreadyExists;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class RolesController extends Controller
 {
@@ -33,6 +35,7 @@ class RolesController extends Controller
      */
     public function create()
     {
+
         $projects = Permission::where('name', 'like', '%projects%')->get()->sortBy('name');
         $tasks = Permission::where('name', 'like', '%tasks%')->get()->sortBy('name');
         $users = Permission::where('name', 'like', '%users%')->get()->sortBy('name');
@@ -44,21 +47,24 @@ class RolesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     *
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
+
         try {
+
             $formFields = $request->validate([
-                'name' => ['required'],
+                'name' => ['required']
             ]);
 
             $formFields['guard_name'] = 'web';
 
+
+
             $role = Role::create($formFields);
             $filteredPermissions = array_filter($request->input('permissions'), function ($permission) {
-                return $permission !== 0;
+                return $permission != 0;
             });
             $role->permissions()->sync($filteredPermissions);
             Artisan::call('cache:clear');
@@ -78,7 +84,6 @@ class RolesController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
 
@@ -86,14 +91,14 @@ class RolesController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
+
         $role = Role::findOrFail($id);
         $role_permissions = $role->permissions;
-        $guard = $role->guard_name === 'client' ? 'client' : 'web';
+        $guard = $role->guard_name == 'client' ? 'client' : 'web';
         return view('roles.edit_role', ['role' => $role, 'role_permissions' => $role_permissions, 'guard' => $guard, 'user' => getAuthenticatedUser()]);
     }
 
@@ -102,13 +107,12 @@ class RolesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
         $formFields = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255']
         ]);
 
         try {
@@ -117,7 +121,7 @@ class RolesController extends Controller
             $role->save();
 
             $filteredPermissions = array_filter($request->input('permissions'), function ($permission) {
-                return $permission !== 0;
+                return $permission != 0;
             });
             $role->permissions()->sync($filteredPermissions);
 
@@ -126,7 +130,7 @@ class RolesController extends Controller
             Session::flash('message', 'Role updated successfully.');
             return response()->json(['error' => false]);
         } catch (QueryException $e) {
-            if ($e->errorInfo[1] === 1062) {
+            if ($e->errorInfo[1] == 1062) {
                 // Unique constraint violation
                 return response()->json(['error' => true, 'message' => 'A role `' . $formFields['name'] . '` already exists.']);
             }
@@ -140,7 +144,6 @@ class RolesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
 
@@ -150,10 +153,10 @@ class RolesController extends Controller
         $role = Role::find($id);
 
         // Check if role exists
-        if (! $role) {
+        if (!$role) {
             return response()->json([
                 'error' => true,
-                'message' => 'Role not found.',
+                'message' => 'Role not found.'
             ], 404);
         }
 
@@ -164,7 +167,7 @@ class RolesController extends Controller
         if (in_array(strtolower($role->name), $protectedRoles)) {
             return response()->json([
                 'error' => true,
-                'message' => 'Cannot delete default system roles (admin, client, member).',
+                'message' => 'Cannot delete default system roles (admin, client, member).'
             ], 403);
         }
 
@@ -172,12 +175,13 @@ class RolesController extends Controller
         if ($role->users()->count() > 0) {
             return response()->json([
                 'error' => true,
-                'message' => 'Cannot delete role that has users assigned to it. Please reassign users first.',
+                'message' => 'Cannot delete role that has users assigned to it. Please reassign users first.'
             ], 400);
         }
 
         // Proceed with deletion if all checks pass
-        return DeletionService::delete(Role::class, $id, 'Role');
+        $response = DeletionService::delete(Role::class, $id, 'Role');
+        return $response;
     }
 
     public function create_permission()
@@ -241,13 +245,13 @@ class RolesController extends Controller
             if ($id) {
                 $role = Role::find($id, ['id', 'name', 'guard_name', 'created_at', 'updated_at']);
 
-                if (! $role) {
+                if (!$role) {
                     return formatApiResponse(
                         false,
                         'Role not found.',
                         [
                             'total' => 0,
-                            'data' => [],
+                            'data' => []
                         ]
                     );
                 }
@@ -257,7 +261,7 @@ class RolesController extends Controller
                     'Role retrieved successfully.',
                     [
                         'total' => 1,
-                        'data' => formatNote($role),
+                        'data' => formatNote($role)
                     ]
                 );
             }
@@ -272,9 +276,9 @@ class RolesController extends Controller
             // Build the query
             $query = Role::when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
-                    $q->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('guard_name', 'LIKE', "%{$search}%")
-                        ->orWhere('id', 'LIKE', "%{$search}%");
+                    $q->where('name', 'LIKE', "%$search%")
+                        ->orWhere('guard_name', 'LIKE', "%$search%")
+                        ->orWhere('id', 'LIKE', "%$search%");
                 });
             });
 
@@ -295,7 +299,7 @@ class RolesController extends Controller
                     'Roles not found',
                     [
                         'total' => 0,
-                        'data' => [],
+                        'data' => []
                     ]
                 );
             }
@@ -309,13 +313,13 @@ class RolesController extends Controller
                 'Roles retrieved successfully.',
                 [
                     'total' => $total,
-                    'data' => $formattedRoles,
+                    'data' => $formattedRoles
                 ]
             );
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while retrieving the roles.',
+                'message' => 'An error occurred while retrieving the roles.'
             ], 500);
         }
     }
@@ -336,153 +340,153 @@ class RolesController extends Controller
      * Activity Log:
      * - manage_activity_log
      * - delete_activity_log
-     *
+
      * Allowances:
      * - create_allowances
      * - manage_allowances
      * - edit_allowances
      * - delete_allowances
-     *
+
      * Clients:
      * - create_clients
      * - manage_clients
      * - edit_clients
      * - delete_clients
-     *
+
      * Contract Types:
      * - create_contract_types
      * - manage_contract_types
      * - edit_contract_types
      * - delete_contract_types
-     *
+
      * Contracts:
      * - create_contracts
      * - manage_contracts
      * - edit_contracts
      * - delete_contracts
-     *
+
      * Deductions:
      * - create_deductions
      * - manage_deductions
      * - edit_deductions
      * - delete_deductions
-     *
+
      * Estimates/Invoices:
      * - create_estimates_invoices
      * - manage_estimates_invoices
      * - edit_estimates_invoices
      * - delete_estimates_invoices
-     *
+
      * Expense Types:
      * - create_expense_types
      * - manage_expense_types
      * - edit_expense_types
      * - delete_expense_types
-     *
+
      * Expenses:
      * - create_expenses
      * - manage_expenses
      * - edit_expenses
      * - delete_expenses
-     *
+
      * Items:
      * - create_items
      * - manage_items
      * - edit_items
      * - delete_items
-     *
+
      * Media:
      * - create_media
      * - manage_media
      * - delete_media
-     *
+
      * Meetings:
      * - create_meetings
      * - manage_meetings
      * - edit_meetings
      * - delete_meetings
-     *
+
      * Milestones:
      * - create_milestones
      * - manage_milestones
      * - edit_milestones
      * - delete_milestones
-     *
+
      * Payment Methods:
      * - create_payment_methods
      * - manage_payment_methods
      * - edit_payment_methods
      * - delete_payment_methods
-     *
+
      * Payments:
      * - create_payments
      * - manage_payments
      * - edit_payments
      * - delete_payments
-     *
+
      * Payslips:
      * - create_payslips
      * - manage_payslips
      * - edit_payslips
      * - delete_payslips
-     *
+
      * Priorities:
      * - create_priorities
      * - manage_priorities
      * - edit_priorities
      * - delete_priorities
-     *
+
      * Projects:
      * - create_projects
      * - manage_projects
      * - edit_projects
      * - delete_projects
-     *
+
      * Statuses:
      * - create_statuses
      * - manage_statuses
      * - edit_statuses
      * - delete_statuses
-     *
+
      * System Notifications:
      * - manage_system_notifications
      * - delete_system_notifications
-     *
+
      * Tags:
      * - create_tags
      * - manage_tags
      * - edit_tags
      * - delete_tags
-     *
+
      * Tasks:
      * - create_tasks
      * - manage_tasks
      * - edit_tasks
      * - delete_tasks
-     *
+
      * Taxes:
      * - create_taxes
      * - manage_taxes
      * - edit_taxes
      * - delete_taxes
-     *
+
      * Timesheet:
      * - create_timesheet
      * - manage_timesheet
      * - delete_timesheet
-     *
+
      * Units:
      * - create_units
      * - manage_units
      * - edit_units
      * - delete_units
-     *
+
      * Users:
      * - create_users
      * - manage_users
      * - edit_users
      * - delete_users
-     *
+
      * Workspaces:
      * - create_workspaces
      * - manage_workspaces
@@ -509,15 +513,18 @@ class RolesController extends Controller
      *     "error": true,
      *     "message": "An error occurred while checking the permission."
      * }
+     *
      */
 
     public function checkPermissions($specificPermission = null)
     {
         try {
             $user = getAuthenticatedUser();
-            if (! $user) {
+            if (!$user) {
                 return response()->json(['error' => true, 'message' => 'User not authenticated'], 401);
             }
+
+
 
             $permissionResults = [];
             if ($specificPermission) {
@@ -532,15 +539,16 @@ class RolesController extends Controller
             return response()->json([
                 'error' => false,
                 'message' => 'Permission check completed.',
-                'data' => ['permissions' => $permissionResults],
+                'data' => ['permissions' => $permissionResults]
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while checking the permissions.',
+                'message' => 'An error occurred while checking the permissions.'
             ], 500);
         }
     }
+
 
     /**
      * Create a new role.
@@ -585,15 +593,17 @@ class RolesController extends Controller
 
     public function store_api(Request $request)
     {
+
         try {
             // Validate input
             $formFields = $request->validate([
                 'name' => ['required', 'string', 'unique:roles,name'],
                 'permissions' => ['array'],
-                'permissions.*' => ['integer', 'exists:permissions,id'],
+                'permissions.*' => ['integer', 'exists:permissions,id']
             ]);
 
             $formFields['guard_name'] = 'web';
+
 
             // Create role
             $role = Role::create($formFields);
@@ -601,7 +611,7 @@ class RolesController extends Controller
             // Assign permissions
             if ($request->has('permissions')) {
                 $filteredPermissions = array_filter($request->permissions, function ($permission) {
-                    return $permission !== 0;
+                    return $permission != 0;
                 });
                 $role->syncPermissions($filteredPermissions);
             }
@@ -615,13 +625,13 @@ class RolesController extends Controller
                 'role' => [
                     'id' => $role->id,
                     'name' => $role->name,
-                    'permissions' => $role->permissions->pluck('name'),
-                ],
+                    'permissions' => $role->permissions->pluck('name')
+                ]
             ]);
         } catch (RoleAlreadyExists $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'A role `' . $request->name . '` already exists.',
+                'message' => 'A role `' . $request->name . '` already exists.'
             ], 409);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
@@ -629,7 +639,7 @@ class RolesController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the role.',
+                'message' => 'An error occurred while creating the role.'
             ], 500);
         }
     }
@@ -644,7 +654,6 @@ class RolesController extends Controller
      * @group Role/Permission Management
      *
      * @urlParam id int required The ID of the role to update. Example: 5
-     *
      * @bodyParam name string required The updated name of the role. Example: "Supervisor"
      * @bodyParam permissions array optional A list of permission IDs to assign to the role. Example: [1, 2, 3]
      *
@@ -684,7 +693,7 @@ class RolesController extends Controller
             $formFields = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'permissions' => ['array'],
-                'permissions.*' => ['integer', 'exists:permissions,id'],
+                'permissions.*' => ['integer', 'exists:permissions,id']
             ]);
 
             // Find the role
@@ -694,7 +703,7 @@ class RolesController extends Controller
             if (Role::where('name', $formFields['name'])->where('id', '!=', $id)->exists()) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'A role `' . $formFields['name'] . '` already exists.',
+                    'message' => 'A role `' . $formFields['name'] . '` already exists.'
                 ], 409);
             }
 
@@ -705,7 +714,7 @@ class RolesController extends Controller
             // Assign permissions
             if ($request->has('permissions')) {
                 $filteredPermissions = array_filter($request->permissions, function ($permission) {
-                    return $permission !== 0;
+                    return $permission != 0;
                 });
                 $role->syncPermissions($filteredPermissions);
             }
@@ -719,13 +728,14 @@ class RolesController extends Controller
                 [
                     'id' => $role->id,
                     'name' => $role->name,
-                    'permissions' => $role->permissions->pluck('name'),
+                    'permissions' => $role->permissions->pluck('name')
                 ]
+
             );
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Role not found.',
+                'message' => 'Role not found.'
             ], 404);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
@@ -733,7 +743,7 @@ class RolesController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the role.',
+                'message' => 'An error occurred while updating the role.'
             ], 500);
         }
     }
@@ -782,12 +792,12 @@ class RolesController extends Controller
             // Parse the permission name (e.g., "create_project")
             $parts = explode('_', $permission->name, 2);
 
-            if (count($parts) === 2) {
+            if (count($parts) == 2) {
                 $action = $parts[0]; // "create"
                 $model = ucfirst($parts[1]); // "project" -> "Project"
 
                 // Make it plural if not already
-                if (! str_ends_with($model, 's')) {
+                if (!str_ends_with($model, 's')) {
                     $model .= 's'; // "Project" -> "Projects"
                 }
 
@@ -804,23 +814,23 @@ class RolesController extends Controller
                         $category['permissions_assigned'][] = [
                             'action' => $action,
                             'id' => $permission->id,
-                            'isAssigned' => $isAssigned,
+                            'isAssigned' => $isAssigned
                         ];
                         break;
                     }
                 }
 
                 // If category doesn't exist, create a new one
-                if (! $categoryExists) {
+                if (!$categoryExists) {
                     $structuredPermissions[] = [
                         'category' => $model,
                         'permissions_assigned' => [
                             [
                                 'action' => $action,
                                 'id' => $permission->id,
-                                'isAssigned' => $isAssigned,
-                            ],
-                        ],
+                                'isAssigned' => $isAssigned
+                            ]
+                        ]
                     ];
                 }
             }
@@ -832,10 +842,11 @@ class RolesController extends Controller
             [
                 'id' => $role->id,
                 'name' => $role->name,
-                'permissions' => $structuredPermissions,
+                'permissions' => $structuredPermissions
             ]
         );
     }
+
 
     /**
      * Delete a role.
@@ -878,7 +889,7 @@ class RolesController extends Controller
             if ($role->users()->count() > 0) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Cannot delete this role because it is assigned to users.',
+                    'message' => 'Cannot delete this role because it is assigned to users.'
                 ], 409);
             }
 
@@ -889,23 +900,23 @@ class RolesController extends Controller
             if ($data->error) {
                 return response()->json([
                     'error' => true,
-                    'message' => $data->message,
+                    'message' => $data->message
                 ]);
             }
 
             return response()->json([
                 'error' => false,
-                'message' => 'Role deleted successfully.',
+                'message' => 'Role deleted successfully.'
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Role not found.',
+                'message' => 'Role not found.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while deleting the role.',
+                'message' => 'An error occurred while deleting the role.'
             ], 500);
         }
     }
@@ -962,12 +973,12 @@ class RolesController extends Controller
                 // Parse the permission name (e.g., "create_project")
                 $parts = explode('_', $permission->name, 2);
 
-                if (count($parts) === 2) {
+                if (count($parts) == 2) {
                     $action = $parts[0]; // "create"
                     $model = ucfirst($parts[1]); // "project" -> "Project"
 
                     // Make it plural if not already
-                    if (! str_ends_with($model, 's')) {
+                    if (!str_ends_with($model, 's')) {
                         $model .= 's'; // "Project" -> "Projects"
                     }
 
@@ -984,23 +995,23 @@ class RolesController extends Controller
                             $category['permissions_assigned'][] = [
                                 'action' => $action,
                                 'id' => $permission->id,
-                                'isAssigned' => $isAssigned,
+                                'isAssigned' => $isAssigned
                             ];
                             break;
                         }
                     }
 
                     // If category doesn't exist, create a new one
-                    if (! $categoryExists) {
+                    if (!$categoryExists) {
                         $structuredPermissions[] = [
                             'category' => $model,
                             'permissions_assigned' => [
                                 [
                                     'action' => $action,
                                     'id' => $permission->id,
-                                    'isAssigned' => $isAssigned,
-                                ],
-                            ],
+                                    'isAssigned' => $isAssigned
+                                ]
+                            ]
                         ];
                     }
                 }
@@ -1009,12 +1020,12 @@ class RolesController extends Controller
                 'error' => false,
                 'message' => 'Permissions retrieved successfully.',
                 'total' => count($structuredPermissions),
-                'permissions' => $structuredPermissions,
+                'permissions' => $structuredPermissions
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while retrieving the permissions.',
+                'message' => 'An error occurred while retrieving the permissions.'
             ], 500);
         }
     }

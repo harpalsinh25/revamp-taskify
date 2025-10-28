@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Status;
-use App\Models\User;
-use App\Models\Workspace;
 use Carbon\Carbon;
+use App\Models\Task;
+use App\Models\User;
+use App\Models\Client;
+use App\Models\Status;
+use App\Models\Project;
+use App\Models\Workspace;
+use App\Models\CustomField;
+use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class HomeController extends Controller
 {
@@ -84,7 +91,7 @@ class HomeController extends Controller
                 $tasksQuery = $this->workspace->tasks()->where($taskOverlapQuery);
                 $meetingsQuery = $this->workspace->meetings()->whereBetween('created_at', $dateRangeWithTime);
 
-                if (! isAdminOrHasAllDataAccess()) {
+                if (!isAdminOrHasAllDataAccess()) {
                     // For non-admins, filter by user-specific relationships
                     $projectsQuery = $this->user && method_exists($this->user, 'projects')
                         ? $this->user->projects()->where($projectOverlapQuery)
@@ -98,15 +105,15 @@ class HomeController extends Controller
                 }
 
                 // Apply user_ids filter if provided
-                if (! empty($userIds)) {
-                    $projectsQuery->whereHas('users', fn ($q) => $q->whereIn('users.id', $userIds));
-                    $tasksQuery->whereHas('users', fn ($q) => $q->whereIn('users.id', $userIds));
-                    $meetingsQuery->whereHas('users', fn ($q) => $q->whereIn('users.id', $userIds)); // Adjust field if different
+                if (!empty($userIds)) {
+                    $projectsQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
+                    $tasksQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
+                    $meetingsQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds)); // Adjust field if different
                 }
 
                 $projectsCount = $projectsQuery->count();
                 $tasksCount = $tasksQuery->count();
-                $usersCount = $this->workspace->users()->when($userIds, fn ($query) => $query->whereIn('users.id', $userIds))->count();
+                $usersCount = $this->workspace->users()->when($userIds, fn($query) => $query->whereIn('users.id', $userIds))->count();
                 $clientsCount = $this->workspace->clients()->whereBetween('created_at', $dateRangeWithTime)->count();
                 $meetingsCount = $meetingsQuery->count();
             }
@@ -114,16 +121,16 @@ class HomeController extends Controller
             if ($this->workspace && method_exists($this->workspace, 'todos')) {
                 $todosCount = $this->workspace->todos()
                     ->whereBetween('created_at', $dateRangeWithTime)
-                    ->when($userIds, fn ($query) => $query->whereIn('creator_id', $userIds))
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
                     ->count();
             }
 
             // Todos
             $todos = collect();
-            if ($this->workspace && method_exists($this->workspace, 'todos')) {
-                $todos = $this->workspace->todos()
+            if ($this->user && method_exists($this->user, 'todos')) {
+                $todos = $this->user->todos()
                     ->whereBetween('created_at', $dateRangeWithTime)
-                    ->when($userIds, fn ($query) => $query->whereIn('creator_id', $userIds))
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
                     ->orderBy('is_completed', 'asc')
                     ->orderBy('created_at', 'desc')
                     ->get()
@@ -132,7 +139,7 @@ class HomeController extends Controller
                             'id' => $todo->id,
                             'title' => ucfirst($todo->title),
                             'is_completed' => $todo->is_completed,
-                            'created_at' => format_date($todo->created_at, true),
+                        'created_at' => format_date($todo->created_at, true)
                         ];
                     });
             }
@@ -142,7 +149,7 @@ class HomeController extends Controller
             if ($this->workspace && method_exists($this->workspace, 'activity_logs')) {
                 $activities = $this->workspace->activity_logs()
                     ->whereBetween('created_at', $dateRangeWithTime)
-                    ->when($userIds, fn ($query) => $query->whereIn('actor_id', $userIds))
+                    ->when($userIds, fn($query) => $query->whereIn('actor_id', $userIds))
                     ->orderBy('id', 'desc')
                     ->limit(10)
                     ->get()
@@ -153,7 +160,7 @@ class HomeController extends Controller
                             'activity' => $activity->activity,
                             'created_at' => $activity->created_at->toIso8601String(),
                             'created_at_diff' => $activity->created_at->diffForHumans(),
-                            'created_at_formatted' => format_date($activity->created_at, true),
+                        'created_at_formatted' => format_date($activity->created_at, true)
                         ];
                     });
             }
@@ -179,7 +186,7 @@ class HomeController extends Controller
                 $projectStatusQuery = $this->workspace->projects()->where('status_id', $status->id)->where($projectOverlapQuery);
                 $taskStatusQuery = $this->workspace->tasks()->where('status_id', $status->id)->where($taskOverlapQuery);
 
-                if (! isAdminOrHasAllDataAccess()) {
+                if (!isAdminOrHasAllDataAccess()) {
                     $projectStatusQuery = $this->user && method_exists($this->user, 'projects')
                         ? $this->user->projects()->where('status_id', $status->id)->where($projectOverlapQuery)
                         : $this->workspace->projects()->whereRaw('1=0');
@@ -188,9 +195,9 @@ class HomeController extends Controller
                         : $this->workspace->tasks()->whereRaw('1=0');
                 }
 
-                if (! empty($userIds)) {
-                    $projectStatusQuery->whereHas('users', fn ($q) => $q->whereIn('users.id', $userIds));
-                    $taskStatusQuery->whereHas('users', fn ($q) => $q->whereIn('users.id', $userIds));
+                if (!empty($userIds)) {
+                    $projectStatusQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
+                    $taskStatusQuery->whereHas('users', fn($q) => $q->whereIn('users.id', $userIds));
                 }
 
                 $projectCount = $projectStatusQuery->count();
@@ -207,18 +214,18 @@ class HomeController extends Controller
             $todoData = [
                 $this->workspace && method_exists($this->workspace, 'todos')
                     ? $this->workspace->todos()
-                        ->whereBetween('created_at', $dateRangeWithTime)
-                        ->when($userIds, fn ($query) => $query->whereIn('creator_id', $userIds))
-                        ->where('is_completed', true)
-                        ->count()
+                    ->whereBetween('created_at', $dateRangeWithTime)
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
+                    ->where('is_completed', true)
+                    ->count()
                     : 0,
                 $this->workspace && method_exists($this->workspace, 'todos')
                     ? $this->workspace->todos()
-                        ->whereBetween('created_at', $dateRangeWithTime)
-                        ->when($userIds, fn ($query) => $query->whereIn('creator_id', $userIds))
-                        ->where('is_completed', false)
-                        ->count()
-                    : 0,
+                    ->whereBetween('created_at', $dateRangeWithTime)
+                    ->when($userIds, fn($query) => $query->whereIn('creator_id', $userIds))
+                    ->where('is_completed', false)
+                    ->count()
+                    : 0
             ];
 
             return response()->json([
@@ -235,11 +242,11 @@ class HomeController extends Controller
                 'bg_colors' => $bgColors,
                 'todos' => $todos,
                 'activities' => $activities,
-                'statuses' => $statuses->map(fn ($status) => ['id' => $status->id, 'title' => $status->title, 'color' => $status->color]),
+                'statuses' => $statuses->map(fn($status) => ['id' => $status->id, 'title' => $status->title, 'color' => $status->color]),
                 'project_status_counts' => $projectStatusCounts,
                 'task_status_counts' => $taskStatusCounts,
                 'total_projects' => array_sum($projectData),
-                'total_tasks' => array_sum($taskData),
+                'total_tasks' => array_sum($taskData)
             ]);
         } catch (\Exception $e) {
             Log::error('Dashboard data error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
@@ -253,8 +260,8 @@ class HomeController extends Controller
 
         $users = $this->workspace->users()
             ? ($this->workspace->users()
-                ->when($search, fn ($query) => $query->where('name', 'like', "%{$search}%"))
-                ->when($ids, fn ($query) => $query->whereIn('id', $ids))
+            ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+            ->when($ids, fn($query) => $query->whereIn('id', $ids))
                 ->get(['id', 'name']))
             : collect();
 
@@ -265,7 +272,7 @@ class HomeController extends Controller
         $search = request('search');
         $sort = request('sort', 'dob');
         $order = request('order', 'ASC');
-        $upcoming_days = (int) request('upcoming_days', 30); // Cast to integer, default to 30 if not provided
+        $upcoming_days = (int)request('upcoming_days', 30); // Cast to integer, default to 30 if not provided
         $user_ids = request('user_ids');
         $client_ids = request('client_ids');
         $page = request('page', 1);  // Get current page, default to 1
@@ -312,34 +319,34 @@ class HomeController extends Controller
         // Search by full name (first name + last name)
         if ($search) {
             $users->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('users.id', 'LIKE', "%{$search}%")
-                    ->orWhere('dob', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('users.id', 'LIKE', "%$search%")
+                    ->orWhere('dob', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
             $clients->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('clients.id', 'LIKE', "%{$search}%")
-                    ->orWhere('dob', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('clients.id', 'LIKE', "%$search%")
+                    ->orWhere('dob', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
         }
         // Check if both user_ids and client_ids are provided
-        if (! empty($user_ids) && ! empty($client_ids)) {
+        if (!empty($user_ids) && !empty($client_ids)) {
             // Filter users and clients based on the provided ids
             $users->whereIn('users.id', $user_ids);
             $clients->whereIn('clients.id', $client_ids);
         } else {
             // Filter by user_ids if provided
-            if (! empty($user_ids)) {
+            if (!empty($user_ids)) {
                 $users->whereIn('users.id', $user_ids);
                 // Clear client records if user_ids are provided
                 $clients->whereIn('clients.id', []);  // No clients if user_ids are present
             }
             // Filter by client_ids if provided
-            if (! empty($client_ids)) {
+            if (!empty($client_ids)) {
                 $clients->whereIn('clients.id', $client_ids);
                 // Clear user records if client_ids are provided
                 $users->whereIn('users.id', []);  // No users if client_ids are present
@@ -367,14 +374,15 @@ class HomeController extends Controller
         $limit = request('limit', 10); // Default limit
         $total = $mergedCollection->count();
         $paginated = $mergedCollection
-            ->sortBy(function ($item) use ($currentDate) {
+            ->sortBy(function ($item) use ($currentDate, $currentYear) {
                 $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['dob']);
-                $birthdayDate->year = $currentDate->year;
+            $birthdayDate->year = $currentDate->year;
                 if ($birthdayDate->lt($currentDate)) {
                     $birthdayDate->year = $currentDate->year + 1;
-                }
-                return $currentDate->diffInDays($birthdayDate); // Sort by days left for upcoming birthdays
-            })
+            }
+            $daysLeft = $currentDate->diffInDays($birthdayDate);
+            return $daysLeft; // Sort by days left for upcoming birthdays
+        })
             ->forPage($page, $limit);
         $formattedResults = $paginated->map(function ($item) use ($currentDate, $currentYear) {
             $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['dob']);
@@ -411,7 +419,7 @@ class HomeController extends Controller
         });
         return response()->json([
             'rows' => $formattedResults->values(),
-            'total' => $total,
+            "total" => $total,
         ]);
     }
     /**
@@ -456,11 +464,11 @@ class HomeController extends Controller
     {
         $search = $request->input('search');
         $order = $request->input('order', 'ASC');
-        $upcoming_days = (int) $request->input('upcoming_days', 30);
-        $user_ids = (array) $request->input('user_ids', []);
-        $client_ids = (array) $request->input('client_ids', []);
-        $limit = (int) $request->input('limit', 15);
-        $offset = (int) $request->input('offset', 0);
+        $upcoming_days = (int)$request->input('upcoming_days', 30);
+        $user_ids = (array)$request->input('user_ids', []);
+        $client_ids = (array)$request->input('client_ids', []);
+        $limit = (int)$request->input('limit', 15);
+        $offset = (int)$request->input('offset', 0);
         $users = $this->workspace->users();
         $clients = $this->workspace->clients();
         $currentDate = today();
@@ -480,28 +488,28 @@ class HomeController extends Controller
         $clients->whereRaw($birthdayWhereRaw, $bindings);
         if ($search) {
             $users->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('users.id', 'LIKE', "%{$search}%")
-                    ->orWhere('dob', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('users.id', 'LIKE', "%$search%")
+                    ->orWhere('dob', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
             $clients->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('clients.id', 'LIKE', "%{$search}%")
-                    ->orWhere('dob', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('clients.id', 'LIKE', "%$search%")
+                    ->orWhere('dob', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
         }
         // Filters based on user_ids and client_ids
-        if (! empty($user_ids) && ! empty($client_ids)) {
+        if (!empty($user_ids) && !empty($client_ids)) {
             $users->whereIn('users.id', $user_ids);
             $clients->whereIn('clients.id', $client_ids);
-        } elseif (! empty($user_ids)) {
+        } elseif (!empty($user_ids)) {
             $users->whereIn('users.id', $user_ids);
             $clients->whereIn('clients.id', []); // Clear clients
-        } elseif (! empty($client_ids)) {
+        } elseif (!empty($client_ids)) {
             $clients->whereIn('clients.id', $client_ids);
             $users->whereIn('users.id', []); // Clear users
         }
@@ -521,7 +529,7 @@ class HomeController extends Controller
                 ['data' => []]
             );
         }
-        $sorted = $merged->sortBy(function ($item) use ($currentDate) {
+        $sorted = $merged->sortBy(function ($item) use ($currentDate, $order) {
             $birthdayDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item->dob);
             $birthdayDate->year = $currentDate->year;
             if ($birthdayDate->lt($currentDate)) {
@@ -576,7 +584,7 @@ class HomeController extends Controller
         $search = request('search');
         $sort = request('sort', 'doj');
         $order = request('order', 'ASC');
-        $upcoming_days = (int) request('upcoming_days', 30);
+        $upcoming_days = (int)request('upcoming_days', 30);
         $user_ids = request('user_ids', []);
         $client_ids = request('client_ids', []);
         $page = request('page', 1);
@@ -614,25 +622,25 @@ class HomeController extends Controller
         // Search
         if ($search) {
             $users->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('users.id', 'LIKE', "%{$search}%")
-                    ->orWhere('doj', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('users.id', 'LIKE', "%$search%")
+                    ->orWhere('doj', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
             $clients->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('clients.id', 'LIKE', "%{$search}%")
-                    ->orWhere('doj', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('clients.id', 'LIKE', "%$search%")
+                    ->orWhere('doj', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
         }
         // ID filtering
-        if (! empty($user_ids)) {
+        if (!empty($user_ids)) {
             $users->whereIn('users.id', $user_ids);
         }
-        if (! empty($client_ids)) {
+        if (!empty($client_ids)) {
             $clients->whereIn('clients.id', $client_ids);
         }
         // Distinct enforcement before get
@@ -652,10 +660,10 @@ class HomeController extends Controller
         $paginated = $mergedCollection
             ->sortBy(function ($item) use ($currentDate) {
                 $anniversaryDate = \Carbon\Carbon::createFromFormat('Y-m-d', $item['doj']);
-                $anniversaryDate->year = $currentDate->year;
+            $anniversaryDate->year = $currentDate->year;
                 if ($anniversaryDate->lt($currentDate)) {
                     $anniversaryDate->year = $currentDate->year + 1;
-                }
+            }
                 return $currentDate->diffInDays($anniversaryDate);
             })
             ->forPage($page, $limit);
@@ -679,7 +687,7 @@ class HomeController extends Controller
             }
             return [
                 'id' => $item['id'],
-                'member' => $item['type'] === 'user' ? formatUserHtml((object) $item) : formatClientHtml((object) $item),
+                'member' => $item['type'] === 'user' ? formatUserHtml((object)$item) : formatClientHtml((object)$item),
                 'days_left' => $daysLeft,
                 'wa_date' => $anniversaryDate->format('D, M d, Y') . ' ' . $label,
                 'type' => $item['type'] === 'user'
@@ -734,11 +742,11 @@ class HomeController extends Controller
     {
         $search = $request->input('search');
         $order = $request->input('order', 'ASC');
-        $upcoming_days = (int) $request->input('upcoming_days', 30);
-        $user_ids = (array) $request->input('user_ids', []);
-        $client_ids = (array) $request->input('client_ids', []);
-        $limit = (int) $request->input('limit', 15);
-        $offset = (int) $request->input('offset', 0);
+        $upcoming_days = (int)$request->input('upcoming_days', 30);
+        $user_ids = (array)$request->input('user_ids', []);
+        $client_ids = (array)$request->input('client_ids', []);
+        $limit = (int)$request->input('limit', 15);
+        $offset = (int)$request->input('offset', 0);
         $users = $this->workspace->users();
         $clients = $this->workspace->clients();
         $currentDate = today();
@@ -758,27 +766,27 @@ class HomeController extends Controller
         $clients->whereRaw($whereRaw, $bindings);
         if ($search) {
             $users->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('users.id', 'LIKE', "%{$search}%")
-                    ->orWhere('doj', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('users.id', 'LIKE', "%$search%")
+                    ->orWhere('doj', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
             $clients->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('clients.id', 'LIKE', "%{$search}%")
-                    ->orWhere('doj', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('clients.id', 'LIKE', "%$search%")
+                    ->orWhere('doj', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
         }
-        if (! empty($user_ids) && ! empty($client_ids)) {
+        if (!empty($user_ids) && !empty($client_ids)) {
             $users->whereIn('users.id', $user_ids);
             $clients->whereIn('clients.id', $client_ids);
-        } elseif (! empty($user_ids)) {
+        } elseif (!empty($user_ids)) {
             $users->whereIn('users.id', $user_ids);
             $clients->whereIn('clients.id', []); // Clear clients
-        } elseif (! empty($client_ids)) {
+        } elseif (!empty($client_ids)) {
             $clients->whereIn('clients.id', $client_ids);
             $users->whereIn('users.id', []); // Clear users
         }
@@ -853,7 +861,7 @@ class HomeController extends Controller
         $search = request('search');
         $sort = request('sort', 'from_date');
         $order = request('order', 'ASC');
-        $upcoming_days = (int) request('upcoming_days', 30);
+        $upcoming_days = (int)request('upcoming_days', 30);
         $user_ids = request('user_ids', []);
         $limit = request('limit', 10);
         $page = request('page', 1);
@@ -879,7 +887,7 @@ class HomeController extends Controller
                 $q->where('from_date', '<=', $upcomingDate)
                     ->where('to_date', '>=', $currentDate);
             });
-        if (! is_admin_or_leave_editor()) {
+        if (!is_admin_or_leave_editor()) {
             $leaveUsers->where(function ($query) {
                 $query->where('leave_requests.user_id', '=', $this->user->id)
                     ->orWhere('leave_request_visibility.user_id', '=', $this->user->id)
@@ -888,13 +896,13 @@ class HomeController extends Controller
         }
         if ($search) {
             $leaveUsers->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('users.id', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('users.id', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
         }
-        if (! empty($user_ids)) {
+        if (!empty($user_ids)) {
             $leaveUsers->whereIn('leave_requests.user_id', $user_ids);
         }
         $leaveUsers = $leaveUsers->groupBy('leave_requests.user_id');
@@ -912,7 +920,7 @@ class HomeController extends Controller
             $label = '';
             if ($daysLeft === 0 && $hasPartial) {
                 $label = ' <span class="badge bg-label-info">' . get_label('on_partial_leave', 'On Partial Leave') . '</span>';
-            } elseif ($daysLeft === 0 && ! $hasPartial) {
+            } elseif ($daysLeft === 0 && !$hasPartial) {
                 $label = ' <span class="badge bg-label-success">' . get_label('on_leave', 'On Leave') . '</span>';
             } elseif ($daysLeft === 1) {
                 $label = ' <span class="badge bg-label-primary">' . get_label('on_leave_tomorrow', 'On Leave From Tomorrow') . '</span>';
@@ -993,12 +1001,12 @@ class HomeController extends Controller
     public function membersOnLeaveApi(Request $request)
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'from_date';
-        $order = request('order') ? request('order') : 'ASC';
-        $upcoming_days = request('upcoming_days') ? request('upcoming_days') : 30;
+        $sort = (request('sort')) ? request('sort') : "from_date";
+        $order = (request('order')) ? request('order') : "ASC";
+        $upcoming_days = (request('upcoming_days')) ? request('upcoming_days') : 30;
         $user_ids = request('user_ids', []);
-        $limit = (int) $request->input('limit', 15); // Cast to integer, default to 15 if not provided
-        $offset = (int) $request->input('offset', 0); // Cast to integer, default to 0 if not provided
+        $limit = (int)$request->input('limit', 15); // Cast to integer, default to 15 if not provided
+        $offset = (int)$request->input('offset', 0); // Cast to integer, default to 0 if not provided
         // Calculate the current date
         $currentDate = today();
         // Calculate the range for upcoming work anniversaries (e.g., 30 days from today)
@@ -1014,7 +1022,7 @@ class HomeController extends Controller
             })
             ->where('leave_requests.status', '=', 'approved')
             ->where('workspace_id', '=', $this->workspace->id);
-        if (! is_admin_or_leave_editor()) {
+        if (!is_admin_or_leave_editor()) {
             $leaveUsers->where(function ($query) {
                 $query->where('leave_requests.user_id', '=', $this->user->id)
                     ->orWhere('leave_request_visibility.user_id', '=', $this->user->id)
@@ -1022,19 +1030,19 @@ class HomeController extends Controller
             });
         }
         // Search by full name (first name + last name)
-        if (! empty($search)) {
+        if (!empty($search)) {
             $leaveUsers->where(function ($query) use ($search) {
-                $query->where('first_name', 'LIKE', "%{$search}%")
-                    ->orWhere('last_name', 'LIKE', "%{$search}%")
-                    ->orWhere('users.id', 'LIKE', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                $query->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere('users.id', 'LIKE', "%$search%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
         }
-        if (! empty($user_ids)) {
-            $leaveUsers->whereIn('leave_requests.user_id', (array) $user_ids);
+        if (!empty($user_ids)) {
+            $leaveUsers->whereIn('leave_requests.user_id', (array)$user_ids);
         }
         $total = $leaveUsers->count();
-        if ($total === 0) {
+        if ($total == 0) {
             return formatApiResponse(
                 false,
                 'Members on leave not found',
@@ -1046,14 +1054,14 @@ class HomeController extends Controller
             ->offset($offset)
             ->get()
             ->map(function ($user) use ($currentDate) {
-                $fromDate = \Carbon\Carbon::createFromFormat('Y-m-d', $user->from_date);
-                // Set the year to the current year
-                $fromDate->year = $currentDate->year;
+            $fromDate = \Carbon\Carbon::createFromFormat('Y-m-d', $user->from_date);
+            // Set the year to the current year
+            $fromDate->year = $currentDate->year;
                 // Calculate days left until the user's return from leave
                 $daysLeft = $currentDate->diffInDays($fromDate);
                 if ($fromDate->lt($currentDate)) {
                     $daysLeft = 0;
-                }
+            }
                 $fromDate = Carbon::parse($user->from_date);
                 $toDate = Carbon::parse($user->to_date);
                 if ($user->from_time && $user->to_time) {
@@ -1062,11 +1070,11 @@ class HomeController extends Controller
                     while ($fromDate->lessThanOrEqualTo($toDate)) {
                         // Create Carbon instances for the start and end times of the leave request for the current day
                         $fromDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $user->from_time);
-                        $toDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $user->to_time);
+                    $toDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $user->to_time);
                     // Calculate the duration for the current day and add it to the total duration
-                        $duration += $fromDateTime->diffInMinutes($toDateTime) / 60; // Duration in hours
+                    $duration += $fromDateTime->diffInMinutes($toDateTime) / 60; // Duration in hours
                     // Move to the next day
-                        $fromDate->addDay();
+                    $fromDate->addDay();
                     }
                 } else {
                     // Calculate the inclusive duration in days
@@ -1078,9 +1086,9 @@ class HomeController extends Controller
                     'id' => $user->UserId,
                     'member' => $user->first_name . ' ' . $user->last_name,
                     'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg'),
-                    'from_date' => format_date($user->from_date, to_format: 'Y-m-d'),
+                'from_date' =>  format_date($user->from_date, to_format: 'Y-m-d'),
                     'from_time' => $user->from_time ? Carbon::parse($user->from_time)->format('h:i A') : '',
-                    'to_date' => format_date($user->to_date, to_format: 'Y-m-d'),
+                'to_date' =>  format_date($user->to_date, to_format: 'Y-m-d'),
                     'to_time' => $user->to_time ? Carbon::parse($user->to_time)->format('h:i A') : '',
                     'type' => $user->from_time && $user->to_time ? get_label('partial', 'Partial') : get_label('full', 'Full'),
                     'duration' => $user->from_time && $user->to_time ? $duration . ' hour' . ($duration > 1 ? 's' : '') : $duration . ' day' . ($duration > 1 ? 's' : ''),
@@ -1108,7 +1116,7 @@ class HomeController extends Controller
         $calculateBirthdays = function ($entities, $type, $color) use ($startDate, $endDate, $currentDate) {
             $entityEvents = [];
             foreach ($entities as $entity) {
-                if (! empty($entity->dob)) {
+                if (!empty($entity->dob)) {
                     $birthday = \Carbon\Carbon::createFromFormat('Y-m-d', $entity->dob);
                     $birthdayDateYear = $birthday->year;
                     $yearDifference = $startDate->year - $birthdayDateYear;
@@ -1160,7 +1168,7 @@ class HomeController extends Controller
         $calculateEvents = function ($entities, $type, $color) use ($startDate, $endDate, $currentDate) {
             $entityEvents = [];
             foreach ($entities as $entity) {
-                if (! empty($entity->doj)) {
+                if (!empty($entity->doj)) {
                     $doj = \Carbon\Carbon::createFromFormat('Y-m-d', $entity->doj);
                     $dojYear = $doj->year;
                     $yearDifference = $startDate->year - $dojYear;
@@ -1222,7 +1230,7 @@ class HomeController extends Controller
                     });
             });
         // Add condition to restrict results based on user roles
-        if (! is_admin_or_leave_editor()) {
+        if (!is_admin_or_leave_editor()) {
             $leaveRequests->where(function ($query) {
                 $query->where('leave_requests.user_id', '=', $this->user->id)
                     ->orWhere('leave_request_visibility.user_id', '=', $this->user->id);
@@ -1243,7 +1251,7 @@ class HomeController extends Controller
             } else {
                 // If only dates are present, show just the formatted date
                 $title .= ' : ' . format_date($leave->from_date);
-                if ($leave->to_date !== $leave->from_date) {
+                if ($leave->to_date != $leave->from_date) {
                     $title .= ' ' . get_label('to', 'to') . ' ' . format_date($leave->to_date);
                 }
                 $backgroundColor = '#007bff';
@@ -1257,7 +1265,7 @@ class HomeController extends Controller
                 'endTime' => $leave->to_time,
                 'backgroundColor' => $backgroundColor,
                 'borderColor' => $backgroundColor,
-                'textColor' => '#ffffff',
+                'textColor' => '#ffffff'
             ];
         });
         return response()->json($events);
@@ -1416,7 +1424,7 @@ class HomeController extends Controller
                 '#FF0000',
                 '#00CCFF',
                 '#000000',
-                '#FFFFFF',
+                '#FFFFFF'
             ];
             // Initialize response data
             $statusCountsProjects = [];
@@ -1464,10 +1472,10 @@ class HomeController extends Controller
                         'color' => $status->color,
                         'chart_color' => '0Xff' . strtoupper(ltrim($colors[array_rand($colors)], '#')),
                         // Assign random chart color
-                        'total_projects' => $projectCount,
+                        'total_projects' => $projectCount
                     ];
                 }
-                usort($statusCountsProjects, fn ($a, $b) => $b['total_projects'] <=> $a['total_projects']);
+                usort($statusCountsProjects, fn($a, $b) => $b['total_projects'] <=> $a['total_projects']);
             }
             // Assign colors to status-wise tasks
             if ($this->user->can('manage_tasks')) {
@@ -1478,10 +1486,10 @@ class HomeController extends Controller
                         'title' => $status->title,
                         'color' => $status->color,
                         'chart_color' => '0Xff' . strtoupper(ltrim($colors[array_rand($colors)], '#')),    // Assign random chart color
-                        'total_tasks' => $taskCount,
+                        'total_tasks' => $taskCount
                     ];
                 }
-                usort($statusCountsTasks, fn ($a, $b) => $b['total_tasks'] <=> $a['total_tasks']);
+                usort($statusCountsTasks, fn($a, $b) => $b['total_tasks'] <=> $a['total_tasks']);
             }
             // Return response
             return formatApiResponse(
@@ -1498,8 +1506,8 @@ class HomeController extends Controller
                         'completed_todos' => $total_completed_todos_count,
                         'pending_todos' => $total_pending_todos_count,
                         'status_wise_projects' => $statusCountsProjects,
-                        'status_wise_tasks' => $statusCountsTasks,
-                    ],
+                        'status_wise_tasks' => $statusCountsTasks
+                    ]
                 ]
             );
         } catch (\Exception $e) {

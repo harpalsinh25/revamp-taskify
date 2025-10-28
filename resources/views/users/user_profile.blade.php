@@ -94,10 +94,80 @@
                             </div>
                         </div>
                     </div>
+                @if(isset($customFields) && $customFields->isNotEmpty())
+                <hr class="mt-4 my-0 mb-2" />
+                <h5 class="card-title mb-2">{{ get_label('additional_fields', 'Additional Fields') }}</h5>
+
+                 @php
+                $hasValues = false;
+                foreach ($customFields as $field) {
+                    if ($user->getCustomFieldValue($field->id)) {
+                        $hasValues = true;
+                        break;
+                    }
+                }
+            @endphp
+            <div class="row">
+            @if ($hasValues)
+                <div class="col-md-6 mb-4">
+                    @foreach ($customFields as $field)
+                        @php
+                            $fieldValue = $user->getCustomFieldValue($field->id);
+                        @endphp
+                        @if ($fieldValue)
+                                <div class="mb-3">
+                                <label class="form-label">{{ $field->field_label }}</label>
+
+                                @switch($field->field_type)
+                                    @case('text')
+                                    @case('number')
+                                        <div class="form-control">{{ $fieldValue }}</div>
+                                    @break
+
+                                    @case('textarea')
+                                        <div class="form-control">{{ $fieldValue }}</div>
+                                    @break
+
+                                    @case('date')
+                                        <div class="form-control">{{ format_date($fieldValue) }}</div>
+                                    @break
+
+                                    @case('select')
+                                    @case('radio')
+                                        <div class="badge bg-primary">{{ $fieldValue }}</div>
+                                    @break
+
+                                    @case('checkbox')
+                                        @php
+                                            $checkboxValues = json_decode($fieldValue, true) ?? [];
+                                        @endphp
+                                        <div>
+                                            @foreach($checkboxValues as $value)
+                                                <span class="badge bg-primary me-1">{{ $value }}</span>
+                                            @endforeach
+                                        </div>
+                                    @break
+                                @endswitch
+                            </div>
+                        @endif
+                    @endforeach
                 </div>
-            </div>
+            @else
+                <p class="text-muted mb-0">
+                    <i class='bx bx-info-circle me-1'></i>
+                    {{ get_label('no_custom_fields', 'No custom fields for this user') }}
+                </p>
+            @endif
+        </div>
+        </div>
+        @endif
+                </div>
+
         </div>
     </div>
+
+
+
     <!-- Tabs -->
     @if ($auth_user->can('manage_projects') || $auth_user->can('manage_tasks'))
     <div class="nav-align-top">

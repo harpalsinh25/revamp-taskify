@@ -1,15 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Unit;
 use App\Models\Workspace;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Models\Unit;
+use Illuminate\Support\Facades\Session;
 use App\Services\DeletionService;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-
 class UnitsController extends Controller
 {
     protected $workspace;
@@ -95,11 +96,12 @@ class UnitsController extends Controller
                             'description' => $res->description,
                             'created_at' => format_date($res->created_at, true, to_format: 'Y-m-d'),
                             'updated_at' => format_date($res->updated_at, true, to_format: 'Y-m-d'),
-                        ],
+                        ]
                     ]
                 );
+            } else {
+                return response()->json(['error' => false, 'message' => 'Unit created successfully.', 'id' => $res->id]);
             }
-            return response()->json(['error' => false, 'message' => 'Unit created successfully.', 'id' => $res->id]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -108,15 +110,16 @@ class UnitsController extends Controller
                     true,
                     'Unit couldn\'t created',
                 );
+            } else {
+                return response()->json(['error' => true, 'message' => 'Unit couldn\'t created.']);
             }
-            return response()->json(['error' => true, 'message' => 'Unit couldn\'t created.']);
         }
     }
     public function list()
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
         $units = $this->workspace->units();
         if ($search) {
             $units = $units->where(function ($query) use ($search) {
@@ -129,20 +132,20 @@ class UnitsController extends Controller
         $canDelete = checkPermission('delete_units');
         $total = $units->count();
         $units = $units->orderBy($sort, $order)
-            ->paginate(request('limit'))
+            ->paginate(request("limit"))
             ->through(function ($unit) use ($canEdit, $canDelete) {
-                $actions = '';
+            $actions = '';
                 if ($canEdit) {
                     $actions .= '<a href="javascript:void(0);" class="edit-unit" data-id="' . $unit->id . '" title="' . get_label('update', 'Update') . '">' .
                         '<i class="bx bx-edit mx-1"></i>' .
                         '</a>';
-                }
+            }
                 if ($canDelete) {
                     $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $unit->id . '" data-type="units">' .
                         '<i class="bx bx-trash text-danger mx-1"></i>' .
                         '</button>';
-                }
-                $actions = $actions ? $actions : '-';
+            }
+            $actions = $actions ?: '-';
                 return [
                     'id' => $unit->id,
                     'title' => $unit->title,
@@ -153,8 +156,8 @@ class UnitsController extends Controller
                 ];
             });
         return response()->json([
-            'rows' => $units->items(),
-            'total' => $total,
+            "rows" => $units->items(),
+            "total" => $total,
         ]);
     }
     public function get($id)
@@ -211,6 +214,7 @@ class UnitsController extends Controller
     public function update(Request $request)
     {
         try {
+
             $isApi = $request->get('isApi', false);
             // Validate the request data
             $formFields = $request->validate([
@@ -232,12 +236,13 @@ class UnitsController extends Controller
                             'title' => $unit->title,
                             'description' => $unit->description,
                             'created_at' => format_date($unit->created_at, true, to_format: 'Y-m-d'),
-                            'updated_at' => format_date($unit->updated_at, true, to_format: 'Y-m-d'),
-                        ],
+                            'updated_at' => format_date($unit->updated_at, true, to_format: 'Y-m-d')
+                        ]
                     ]
                 );
+            } else {
+                return response()->json(['error' => false, 'message' => 'Unit updated successfully.', 'id' => $unit->id]);
             }
-            return response()->json(['error' => false, 'message' => 'Unit updated successfully.', 'id' => $unit->id]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
@@ -247,8 +252,9 @@ class UnitsController extends Controller
                     'Unit couldn\'t updated ' . $e->getMessage(),
                     []
                 );
+            } else {
+                return response()->json(['error' => true, 'message' => 'Unit couldn\'t updated ' . $e->getMessage()]);
             }
-            return response()->json(['error' => true, 'message' => 'Unit couldn\'t updated ' . $e->getMessage()]);
         }
     }
     /**
@@ -289,14 +295,15 @@ class UnitsController extends Controller
         DB::table('items')
             ->where('unit_id', $unit->id)
             ->update(['unit_id' => null]);
-        return DeletionService::delete(Unit::class, $id, 'Unit');
+        $response = DeletionService::delete(Unit::class, $id, 'Unit');
+        return $response;
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:units,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:units,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedIds = [];
@@ -339,12 +346,12 @@ class UnitsController extends Controller
      *   "total": 1,
      *   "data": [
      *     {
-     * "id": 1,
-     * "title": "title",
-     * "description" : "unit description",
-     * "created_at": "2025-04-16 09:41:57",
-     * "updated_at": "2025-04-16 09:41:57"
-     * }
+            "id": 1,
+            "title": "title",
+            "description" : "unit description",
+            "created_at": "2025-04-16 09:41:57",
+            "updated_at": "2025-04-16 09:41:57"
+           }
      *   ]
      * }
      *
@@ -365,8 +372,8 @@ class UnitsController extends Controller
     public function apiList()
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
         $id = request('id', null);
         $limit = request('limit', 10);
         $offset = request('offset', 0);
@@ -383,13 +390,13 @@ class UnitsController extends Controller
         $total = $units->count();
         if ($id) {
             $unit = $units->find($id);
-            if (! $unit) {
+            if (!$unit) {
                 return formatApiResponse(
                     false,
                     'Unit Not Found',
                     [
                         'total' => 0,
-                        'data' => [],
+                        'data' => []
                     ]
                 );
             }
@@ -403,38 +410,39 @@ class UnitsController extends Controller
                         'title' => $unit->title,
                         'description' => $unit->description,
                         'created_at' => format_date($unit->created_at, true, to_format: 'Y-m-d'),
-                        'updated_at' => format_date($unit->updated_at, true, to_format: 'Y-m-d'),
-                    ],
+                        'updated_at' => format_date($unit->updated_at, true, to_format: 'Y-m-d')
+                    ]
                 ]
             );
-        }
-        $units = $units->orderBy($sort, $order)->skip($offset)->take($limit)->get();
-        if ($units->isEmpty()) {
+        } else {
+            $units = $units->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+            if ($units->isEmpty()) {
+                return formatApiResponse(
+                    false,
+                    'Units not found',
+                    [
+                        'total' => 0,
+                        'data' => []
+                    ]
+                );
+            }
+            $data = $units->map(function ($unit) {
+                return [
+                    'id' => $unit->id,
+                    'title' => $unit->title,
+                    'description' => $unit->description,
+                    'created_at' => format_date($unit->created_at, true, to_format: 'Y-m-d'),
+                    'updated_at' => format_date($unit->updated_at, true, to_format: 'Y-m-d')
+                ];
+            });
             return formatApiResponse(
                 false,
-                'Units not found',
+                'Units Retrived Successfully',
                 [
-                    'total' => 0,
-                    'data' => [],
+                    'total' => $total,
+                    'data' => $data
                 ]
             );
         }
-        $data = $units->map(function ($unit) {
-            return [
-                'id' => $unit->id,
-                'title' => $unit->title,
-                'description' => $unit->description,
-                'created_at' => format_date($unit->created_at, true, to_format: 'Y-m-d'),
-                'updated_at' => format_date($unit->updated_at, true, to_format: 'Y-m-d'),
-            ];
-        });
-        return formatApiResponse(
-            false,
-            'Units Retrived Successfully',
-            [
-                'total' => $total,
-                'data' => $data,
-            ]
-        );
     }
 }

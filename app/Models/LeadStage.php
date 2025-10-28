@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 class LeadStage extends Model
 {
@@ -14,25 +15,8 @@ class LeadStage extends Model
         'name',
         'order',
         'color',
-        'slug',
+        'slug'
     ];
-
-    public function leads()
-    {
-        return $this->hasMany(Lead::class, 'stage_id');
-    }
-
-    public static function getNextOrderForWorkspace($workspaceId)
-    {
-        // dd($workspaceId, LeadStage::where('workspace_id', $workspaceId)->get());
-        $workspaceMax = self::where('workspace_id', $workspaceId)->max('order');
-        $defaultMax = self::whereNull('workspace_id')->where('is_default', 1)->max('order');
-
-        // Prevent null issues (if no record exists yet)
-        $maxOrder = max([$workspaceMax ?? 0, $defaultMax ?? 0]);
-
-        return $maxOrder + 1;
-    }
 
     protected static function booted(): void
     {
@@ -45,5 +29,23 @@ class LeadStage extends Model
                 })->orWhere('workspace_id', $workspaceId);
             });
         });
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'stage_id');
+    }
+
+    public static function getNextOrderForWorkspace($workspaceId)
+    {
+
+        // dd($workspaceId, LeadStage::where('workspace_id', $workspaceId)->get());
+        $workspaceMax = self::where('workspace_id', $workspaceId)->max('order');
+        $defaultMax = self::whereNull('workspace_id')->where('is_default', 1)->max('order');
+
+        // Prevent null issues (if no record exists yet)
+        $maxOrder = max([$workspaceMax ?? 0, $defaultMax ?? 0]);
+
+        return $maxOrder + 1;
     }
 }

@@ -103,9 +103,9 @@
                             <div class="todo-add-wrapper mt-3">
                                 <div class="todo-add-item d-flex align-items-center border-light bg-light hover-shadow-sm rounded border border-2 p-2"
                                     data-list="incomplete">
-                                    <div class="todo-drag-handle text-muted me-2">
+                                    {{-- <div class="todo-drag-handle text-muted me-2">
                                         <i class="bx bx-menu fs-5"></i>
-                                    </div>
+                                    </div> --}}
                                     <div class="todo-check me-3"></div>
                                     <div class="flex-grow-1">
                                         <input type="text"
@@ -182,9 +182,9 @@
                             <div class="todo-add-wrapper mt-3">
                                 <div class="todo-add-item d-flex align-items-center border-light bg-light hover-shadow-sm rounded border border-2 p-2"
                                     data-list="complete">
-                                    <div class="todo-drag-handle text-muted me-2">
+                                    {{-- <div class="todo-drag-handle text-muted me-2">
                                         <i class="bx bx-menu fs-5"></i>
-                                    </div>
+                                    </div> --}}
                                     <div class="todo-check me-3"></div>
                                     <div class="flex-grow-1">
                                         <input type="text"

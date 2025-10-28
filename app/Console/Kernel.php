@@ -11,7 +11,6 @@ class Kernel extends ConsoleKernel
      * Define the application's command schedule.
      *
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     *
      * @return void
      */
     protected function schedule(Schedule $schedule)
@@ -24,7 +23,7 @@ class Kernel extends ConsoleKernel
 
         // Remider Task
 
-        $schedule->command('reminders:send')->everyMinute();
+         $schedule->command('reminders:send')->everyMinute();
         // Recursion Task
 
         $schedule->command('recurring-tasks:generate')->daily()->at('00:00')->withoutOverlapping();

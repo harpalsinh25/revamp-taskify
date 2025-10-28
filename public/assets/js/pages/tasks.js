@@ -96,24 +96,28 @@ $("#viewAssignedModal").on("hidden.bs.modal", function (e) {
     $(".clear-tasks-filters").trigger("click");
 });
 
+// Initialize advanced date range filters with presets
 $(document).ready(function () {
-    $("#task_date_between").on("apply.daterangepicker", function (ev, picker) {
-        var startDate = picker.startDate.format("YYYY-MM-DD");
-        var endDate = picker.endDate.format("YYYY-MM-DD");
-        $("#task_date_between_from").val(startDate);
-        $("#task_date_between_to").val(endDate);
-        $("#task_table").bootstrapTable("refresh");
+    // Initialize date range filters with preset ranges
+    initAdvancedDateRangePicker({
+        selector: '#task_date_between',
+        hiddenFrom: '#task_date_between_from',
+        hiddenTo: '#task_date_between_to',
+        tableId: 'task_table'
     });
 
-    // Cancel event to clear values
-    $("#task_date_between").on("cancel.daterangepicker", function (ev, picker) {
-        $("#task_date_between_from").val("");
-        $("#task_date_between_to").val("");
-        $(this).val("");
-        picker.setStartDate(moment());
-        picker.setEndDate(moment());
-        picker.updateElement();
-        $("#task_table").bootstrapTable("refresh");
+    initAdvancedDateRangePicker({
+        selector: '#task_start_date_between',
+        hiddenFrom: '#task_start_date_from',
+        hiddenTo: '#task_start_date_to',
+        tableId: 'task_table'
+    });
+
+    initAdvancedDateRangePicker({
+        selector: '#task_end_date_between',
+        hiddenFrom: '#task_end_date_from',
+        hiddenTo: '#task_end_date_to',
+        tableId: 'task_table'
     });
 });
 

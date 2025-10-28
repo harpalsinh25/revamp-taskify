@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class LeadForm extends Model
 {
@@ -21,12 +21,22 @@ class LeadForm extends Model
         'slug',
         'is_active',
         'success_message',
-        'redirect_url',
+        'redirect_url'
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active' => 'boolean'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($leadForm) {
+            if (empty($leadForm->slug)) {
+                $leadForm->slug = Str::uuid()->toString();
+            }
+        });
+    }
 
     public function leadFormFields()
     {
@@ -85,16 +95,7 @@ class LeadForm extends Model
 
     public function getEmbedCodeAttribute()
     {
-        return '<iframe src="' . $this->public_url . '" frameborder="0" scrolling="yes" style="display:block; width:100%; height:60vh;"></iframe>';
-    }
 
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($leadForm) {
-            if (empty($leadForm->slug)) {
-                $leadForm->slug = Str::uuid()->toString();
-            }
-        });
+        return '<iframe src="' . $this->public_url . '" frameborder="0" scrolling="yes" style="display:block; width:100%; height:60vh;"></iframe>';
     }
 }

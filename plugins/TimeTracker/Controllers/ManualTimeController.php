@@ -90,6 +90,10 @@ class ManualTimeController extends Controller
 
         $data = [];
 
+        // Get timezone from general settings for display
+        $general_settings = get_settings('general_settings');
+        $userTimezone = $general_settings['timezone'] ?? 'UTC';
+
         foreach ($grouped as $items) {
             $user = $items->first()->user;
             $date = Carbon::parse($items->first()->timestamp)->toDateString();
@@ -100,8 +104,9 @@ class ManualTimeController extends Controller
                 if (in_array($item->action, ['manual-start', 'manual-processing-start'])) {
                     $pendingStart = $item;
                 } elseif (in_array($item->action, ['manual-stop', 'manual-processing-stop']) && $pendingStart) {
-                    $startTime = Carbon::parse($pendingStart->timestamp);
-                    $endTime = Carbon::parse($item->timestamp);
+                    // Timestamps are stored in UTC, convert to user timezone for display
+                    $startTime = Carbon::parse($pendingStart->timestamp)->setTimezone($userTimezone);
+                    $endTime = Carbon::parse($item->timestamp)->setTimezone($userTimezone);
 
                     if ($endTime->lessThan($startTime)) {
                         [$startTime, $endTime] = [$endTime, $startTime];
@@ -131,6 +136,12 @@ class ManualTimeController extends Controller
                         </button>';
                     }
 
+                    // Convert approved_at from UTC to user timezone for display
+                    $approvedAtDisplay = 'N/A';
+                    if ($approvedAt) {
+                        $approvedAtDisplay = Carbon::parse($approvedAt)->setTimezone($userTimezone)->format('d M Y h:i A');
+                    }
+
                     $data[] = [
                         'id' => $pendingStart->id,
                         'employee_name' => ucwords($user->first_name . ' ' . $user->last_name),
@@ -139,7 +150,7 @@ class ManualTimeController extends Controller
                         'end_time' => $endTime->format('h:i A'),
                         'duration' => $durationFormatted,
                         'status' => ucfirst($approvalStatus),
-                        'approved_at' => $approvedAt ? Carbon::parse($approvedAt)->format('d M Y h:i A') : 'N/A',
+                        'approved_at' => $approvedAtDisplay,
                         'approver' => $approverName,
                         'reason' => $metadata['reason'] ?? 'N/A',
                         'remarks' => $metadata['remarks'] ?? 'N/A',
@@ -184,10 +195,16 @@ class ManualTimeController extends Controller
         } else {
             $user_id = getAuthenticatedUser()->id;
         }
-        $startDateTime = Carbon::parse($request->date . ' ' . $request->start_time);
-        $endDateTime = Carbon::parse($request->date . ' ' . $request->end_time);
 
-        // Insert manual_processing_start
+        // Get timezone from general settings
+        $general_settings = get_settings('general_settings');
+        $userTimezone = $general_settings['timezone'] ?? 'UTC';
+
+        // Parse times in user's timezone and convert to UTC for storage (consistent with regular logs)
+        $startDateTime = Carbon::parse($request->date . ' ' . $request->start_time, $userTimezone)->setTimezone('UTC');
+        $endDateTime = Carbon::parse($request->date . ' ' . $request->end_time, $userTimezone)->setTimezone('UTC');
+
+        // Insert manual_processing_start (stored in UTC)
         TimeTrackerActivityLog::create([
             'user_id' => $user_id,
             'action' => 'manual-processing-start',
@@ -195,7 +212,7 @@ class ManualTimeController extends Controller
             'metadata' => json_encode(['reason' => $request->reason]),
         ]);
 
-        // Insert manual_processing_stop
+        // Insert manual_processing_stop (stored in UTC)
         TimeTrackerActivityLog::create([
             'user_id' => $user_id,
             'action' => 'manual-processing-stop',
@@ -314,12 +331,20 @@ class ManualTimeController extends Controller
         $user = $startLog->user;
         $reason = json_decode($startLog->metadata, true)['reason'] ?? '';
 
+        // Get timezone from general settings for display
+        $general_settings = get_settings('general_settings');
+        $userTimezone = $general_settings['timezone'] ?? 'UTC';
+
+        // Convert timestamps from UTC to user timezone for display
+        $startTimeDisplay = Carbon::parse($startLog->timestamp)->setTimezone($userTimezone);
+        $endTimeDisplay = $stopLog ? Carbon::parse($stopLog->timestamp)->setTimezone($userTimezone) : null;
+
         return response()->json([
             'id' => $startLog->id,
             'employee_name' => ucwords($user->first_name . ' ' . $user->last_name),
-            'date' => Carbon::parse($startLog->timestamp)->toDateString(),
-            'start_time' => Carbon::parse($startLog->timestamp)->format('H:i'),
-            'end_time' => $stopLog ? Carbon::parse($stopLog->timestamp)->format('H:i') : '',
+            'date' => $startTimeDisplay->toDateString(),
+            'start_time' => $startTimeDisplay->format('H:i'),
+            'end_time' => $endTimeDisplay ? $endTimeDisplay->format('H:i') : '',
             'reason' => $reason,
         ]);
     }

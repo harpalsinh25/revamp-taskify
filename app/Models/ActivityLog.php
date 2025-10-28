@@ -17,6 +17,6 @@ class ActivityLog extends Model
         'parent_type_id',
         'parent_type',
         'activity',
-        'message',
+        'message'
     ];
 }

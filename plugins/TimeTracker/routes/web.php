@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Plugins\TimeTracker\Controllers\AppDownloadController;
 use Plugins\TimeTracker\Controllers\DashboardController;
 use Plugins\TimeTracker\Controllers\ManualTimeController;
 use Plugins\TimeTracker\Controllers\ScreenShotController;
@@ -46,5 +47,13 @@ Route::middleware(['web', 'auth'])->prefix('timetracker')->group(function () {
         \Plugins\TimeTracker\Models\TimeTrackerActivityLog::truncate();
 
         return response()->json(['status' => 'success', 'message' => 'TimeTracker data cleared.']);
+    });
+
+    Route::prefix('downloads')->group(function () {
+        Route::get('/', [AppDownloadController::class, 'index'])->name('timetracker.downloads.index');
+        Route::get('/upload', [AppDownloadController::class, 'uploadForm'])->middleware(['customRole:admin'])->name('timetracker.downloads.upload');
+        Route::post('/upload', [AppDownloadController::class, 'store'])->middleware(['customRole:admin'])->name('timetracker.downloads.store');
+        Route::get('/{id}/download', [AppDownloadController::class, 'download'])->name('downloads.download');
+        Route::delete('/destroy/{id}', [AppDownloadController::class, 'destroy'])->middleware(['customRole:admin'])->name('timetracker.downloads.destroy');
     });
 });

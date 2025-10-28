@@ -11,7 +11,7 @@ class ContractType extends Model
 
     protected $fillable = [
         'type',
-        'workspace_id',
+        'workspace_id'
     ];
 
     public function contracts()

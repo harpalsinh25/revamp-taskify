@@ -17,7 +17,7 @@ return [
         'class' => 'menu-item' . (request()->is('timetracker*') ? ' active open' : ''),
         'category' => 'team_monitoring_and_productivity_tracker',
         'badge' => '<span class="badge rounded-pill bg-label-info text-uppercase ms-2">' . get_label('plugin', 'Plugin') . '</span>',
-        'show' => isAdminOrHasAllDataAccess() ? 1 : 0,
+        'show' =>  1,
         'submenus' => [
             [
                 'id' => 'productivity_dashboard',
@@ -38,14 +38,14 @@ return [
                 'label' => get_label('time_and_attendance', 'Time And Attendance'),
                 'url' => route('time_and_attendance.index'),
                 'class' => 'menu-item' . (request()->is('timetracker/time-and-attendance*') ? ' active open' : ''),
-                'show' => isAdminOrHasAllDataAccess() ? 1 : 0,
+                'show' => isUser() ?  1 : 0,
             ],
             [
                 'id' => 'manual_time',
                 'label' => get_label('manual_time', 'Manual Time'),
                 'url' => route('timetracker.manual_time.index'),
                 'class' => 'menu-item' . (request()->is('timetracker/manual-time*') ? ' active open' : ''),
-                'show' => isAdminOrHasAllDataAccess() ? 1 : 0,
+                'show' => isUser() ? 1 : 0,
             ],
             [
                 'id' => 'configuration',
@@ -54,6 +54,13 @@ return [
                 'class' => 'menu-item' . (request()->is('timetracker/configuration') ? ' active open' : ''),
                 'show' => isAdminOrHasAllDataAccess() ? 1 : 0,
             ],
+            [
+                'id' => 'downloads',
+                'label' => get_label('downloads', 'Downloads'),
+                'url' => route('timetracker.downloads.index'),
+                'class' => 'menu-item' . (request()->is('timetracker/downloads*') ? 'active open' : ''),
+                'show' => 1
+            ]
         ],
     ],
 ];

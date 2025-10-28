@@ -228,6 +228,7 @@
                                 <th>{{ get_label('work_time','Work Time') }}</th>
                                 <th>{{ get_label('active_time','Active Time') }}</th>
                                 <th>{{ get_label('manual_time','Manual Time') }}</th>
+                                <th>{{ get_label('pending_manual_time','Pending Manual Time') }}</th>
                                 <th>{{ get_label('break_time','Break Time') }}</th>
                                 <th>{{ get_label('idle_time','Idle Time') }}</th>
                                 <th>{{ get_label('utilization','Utilization') }}</th>

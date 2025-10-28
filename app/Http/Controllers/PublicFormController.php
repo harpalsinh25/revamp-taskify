@@ -15,19 +15,18 @@ class PublicFormController extends Controller
     {
         $form = LeadForm::with(['leadFormFields' => function ($query) {
             $query->orderBy('order');
-        },
-        ])->where('slug', $slug)->firstOrFail();
+        }])->where('slug', $slug)->firstOrFail();
 
         return view('lead_form.public_form', compact('form'));
     }
 
     public function submit(Request $request, $slug)
     {
+
         // dd($request->input('country_code'));
         $form = LeadForm::with(['leadFormFields' => function ($query) {
             $query->orderBy('order');
-        },
-        ])->where('slug', $slug)->firstOrFail();
+        }])->where('slug', $slug)->firstOrFail();
 
         $rules = [];
         $messages = [];
@@ -36,13 +35,13 @@ class PublicFormController extends Controller
             $fieldName = $field->name ?: 'field_' . $field->id;
             $fieldRules = $field->validation_rules ? explode('|', $field->validation_rules) : [];
 
-            if ($field->is_required && ! in_array('required', $fieldRules)) {
+            if ($field->is_required && !in_array('required', $fieldRules)) {
                 $fieldRules[] = 'required';
             }
 
             if ($field->name === 'phone') {
                 $fieldRules = array_filter($fieldRules, function ($rule) {
-                    return ! str_starts_with($rule, 'regex:');
+                    return !str_starts_with($rule, 'regex:');
                 });
                 $fieldRules[] = 'regex:/^[\+]?[0-9\-\(\)\s]{7,20}$/';
             }
@@ -70,12 +69,12 @@ class PublicFormController extends Controller
                     $messages[$fieldName . '.regex'] = $field->label . ' must be alphanumeric and may include "+" or "-".';
                     break;
             }
-            if (! empty($fieldRules)) {
+            if (!empty($fieldRules)) {
                 $rules[$fieldName] = $fieldRules;
                 $messages[$fieldName . '.required'] = $field->label . ' is required.';
 
                 // Fix: only add fallback if no custom message set
-                if (! isset($messages[$fieldName . '.max'])) {
+                if (!isset($messages[$fieldName . '.max'])) {
                     $messages[$fieldName . '.max'] = $field->label . ' may not be greater than the allowed length.';
                 }
 
@@ -88,10 +87,11 @@ class PublicFormController extends Controller
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Please fix the errors below.',
-                'errors' => $validator->errors(),
+                'errors' => $validator->errors()
             ], 422);
         }
 
@@ -116,7 +116,7 @@ class PublicFormController extends Controller
 
                 if ($field->is_mapped && $field->name) {
                     $leadData[$field->name] = $value;
-                } elseif (! $field->is_mapped && $value !== null) {
+                } elseif (!$field->is_mapped && $value !== null) {
                     $leadData['custom_fields'][$field->label] = [
                         'value' => $value,
                         'type' => $field->type,
@@ -139,13 +139,14 @@ class PublicFormController extends Controller
 
             // return redirect()->route('lead_form.submitted');
 
+
             return response()->json(['error' => false, 'message' => 'Form Submitted Successfully', 'redirect_url' => route('lead_form.submitted')]);
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to submit form: ' . $e->getMessage(),
-                'error' => $e->getMessage(),
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -154,8 +155,7 @@ class PublicFormController extends Controller
     {
         $form = LeadForm::with(['leadFormFields' => function ($query) {
             $query->orderBy('order');
-        },
-        ])->where('slug', $slug)->where('is_active', true)->firstOrFail();
+        }])->where('slug', $slug)->where('is_active', true)->firstOrFail();
 
         return response()->json([
             'id' => $form->id,
@@ -169,9 +169,9 @@ class PublicFormController extends Controller
                     'type' => $field->type,
                     'is_required' => $field->is_required,
                     'placeholder' => $field->placeholder,
-                    'options' => $field->options,
+                    'options' => $field->options
                 ];
-            }),
+            })
         ]);
     }
 }

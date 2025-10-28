@@ -12,6 +12,7 @@ class AIController extends Controller
      */
     public function index()
     {
+        //
     }
 
     /**
@@ -19,6 +20,7 @@ class AIController extends Controller
      */
     public function create()
     {
+        //
     }
 
     /**
@@ -26,6 +28,7 @@ class AIController extends Controller
      */
     public function store(Request $request)
     {
+        //
     }
 
     /**
@@ -33,6 +36,7 @@ class AIController extends Controller
      */
     public function show(string $id)
     {
+        //
     }
 
     /**
@@ -40,6 +44,7 @@ class AIController extends Controller
      */
     public function edit(string $id)
     {
+        //
     }
 
     /**
@@ -47,6 +52,7 @@ class AIController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        //
     }
 
     /**
@@ -54,6 +60,7 @@ class AIController extends Controller
      */
     public function destroy(string $id)
     {
+        //
     }
 
     public function generateDescription(Request $request)
@@ -63,7 +70,7 @@ class AIController extends Controller
         $request->validate([
             'prompt' => 'required|string|max:255',
             'existingDescription' => 'nullable|string',
-            'isCustomPrompt' => 'required|in:true,false,0,1,TRUE,FALSE',
+            'isCustomPrompt' => 'required|in:true,false,0,1,TRUE,FALSE'
         ]);
 
         try {
@@ -73,10 +80,10 @@ class AIController extends Controller
             $currentLocale = session('my_locale');
 
             if ($isCustomPrompt) {
-                $fullPrompt = 'Generate a professional content.
+                $fullPrompt = "Generate a professional content.
 
             Existing Description:
-            ' . ($existingDescription ? $existingDescription : 'No existing description.') . "
+            " . ($existingDescription ?: "No existing description.") . "
 
             User Request:
             {$userPrompt}
@@ -97,7 +104,7 @@ class AIController extends Controller
             Title:
             {$userPrompt}
 
-            " . ($existingDescription ? "Current Description:\n{$existingDescription}" : 'No existing description.') . "
+            " . ($existingDescription ? "Current Description:\n{$existingDescription}" : "No existing description.") . "
 
             Instructions:
             - Write a clear, value-driven HTML description.
@@ -109,6 +116,7 @@ class AIController extends Controller
             Return HTML only—no extra explanations.";
             }
 
+
             // Replace this with your actual AI helper integration
             $description = generate_description($fullPrompt);
 
@@ -116,7 +124,7 @@ class AIController extends Controller
                 // dd($description);
                 return response()->json([
                     'error' => true,
-                    'message' => $description['message'],
+                    'message' =>  $description['message'],
                 ], 200);
             }
 
@@ -126,7 +134,7 @@ class AIController extends Controller
                 'description' => preg_replace(
                     '/^```html\s*|```$/m',
                     '',
-                    trim($description['data'])
+                    trim(($description['data']))
                 ),
             ]);
         } catch (\Throwable $e) {

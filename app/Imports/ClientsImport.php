@@ -3,33 +3,36 @@
 namespace App\Imports;
 
 use App\Models\Client;
+use App\Notifications\VerifyEmail;
 use App\Models\Template;
 use App\Models\Workspace;
 use App\Notifications\AccountCreation;
-use App\Notifications\VerifyEmail;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Throwable;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+use Maatwebsite\Excel\Validators\Failure;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\BeforeImport;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Throwable;
 
 class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure, WithEvents
 {
     use SkipsFailures;
-    // To store validation errors
-    public $validationErrors = [];
-    public static $manualValidationErrors = [];
     private $workspaceId;
     private $authenticatedUser;
     private $isAdminOrHasAllDataAccess;
+    // To store validation errors
+    public $validationErrors = [];
+    public static $manualValidationErrors = [];
 
     public function __construct()
     {
@@ -38,7 +41,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     }
     public function model(array $row)
     {
-        if (! empty(self::$manualValidationErrors)) {
+        if (!empty(self::$manualValidationErrors)) {
             return;
         }
         $row = $this->sanitizeAndTrim($row);
@@ -48,7 +51,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             'last_name' => $row['last_name'],
             'email' => $row['email'],
             'internal_purpose' => $row['is_for_internal_purpose'],
-            'password' => $row['is_for_internal_purpose'] === 0 && $row['password'] ? bcrypt($row['password']) : null,
+            'password' => $row['is_for_internal_purpose'] == 0 && $row['password'] ? bcrypt($row['password']) : null,
             'phone' => $row['phone'] ?? null,
             'country_code' => $row['country_code'] ?? null,
             'country_iso_code' => $row['country_iso_code'] ?? null,
@@ -58,12 +61,12 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             'state' => $row['state'] ?? null,
             'country' => $row['country'] ?? null,
             'zip' => $row['zip_code'] ?? null,
-            'dob' => $row['dob'] ?? null,
-            'doj' => $row['doj'] ?? null,
+            'dob' => isset($row['dob']) ? $row['dob'] : null,
+            'doj' => isset($row['doj']) ? $row['doj'] : null
         ];
-        $require_ev = $this->isAdminOrHasAllDataAccess && $row['require_email_verification'] === 0 ? 0 : 1;
-        $status = $data['internal_purpose'] === 0 && $this->isAdminOrHasAllDataAccess && $row['status'] && $row['status'] === 1 ? 1 : 0;
-        $data['email_verified_at'] = $require_ev === 0 ? now()->tz(config('app.timezone')) : null;
+        $require_ev = $this->isAdminOrHasAllDataAccess && $row['require_email_verification'] == 0 ? 0 : 1;
+        $status = $data['internal_purpose'] == 0 && $this->isAdminOrHasAllDataAccess && $row['status'] && $row['status'] == 1 ? 1 : 0;
+        $data['email_verified_at'] = $require_ev == 0 ? now()->tz(config('app.timezone')) : null;
         $data['status'] = $status;
         $role_id = Role::where('guard_name', 'client')->first()->id;
         // Create the client
@@ -73,7 +76,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             $client->assignRole($role_id);
 
             // Notify the client if email verification is required
-            if ($data['internal_purpose'] === 0 && $require_ev === 1) {
+            if ($data['internal_purpose'] == 0 && $require_ev == 1) {
                 $client->notify(new VerifyEmail($client));
                 $client->update(['email_verification_mail_sent' => 1]);
             } else {
@@ -85,11 +88,11 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             $workspace->clients()->attach($client->id);
 
             // Send account creation notification if email is configured
-            if ($data['internal_purpose'] === 0 && isEmailConfigured()) {
+            if ($data['internal_purpose'] == 0 && isEmailConfigured()) {
                 $account_creation_template = Template::where('type', 'email')
                     ->where('name', 'account_creation')
                     ->first();
-                if (! $account_creation_template || ($account_creation_template->status !== 0)) {
+                if (!$account_creation_template || ($account_creation_template->status !== 0)) {
                     $client->notify(new AccountCreation($client, $row['password']));
                     $client->update(['acct_create_mail_sent' => 1]);
                 } else {
@@ -115,6 +118,24 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         }
     }
 
+    private function sanitizeAndTrim(array $row): array
+    {
+        $allowedTags = '
+            <a><abbr><acronym><address><b><bdo><blockquote><br><caption><cite>
+            <code><col><colgroup><dd><del><dfn><div><dl><dt><em><h1><h2><h3><h4>
+            <h5><h6><hr><i><img><ins><kbd><label><legend><li><object><ol><p>
+            <pre><q><s><samp><small><span><strike><strong><sub><sup><table>
+            <tbody><td><tfoot><th><thead><tr><tt><u><ul><var>';
+
+        return Arr::map($row, function ($value) use ($allowedTags) {
+            // Only sanitize and trim strings
+            if (is_string($value)) {
+                return trim(strip_tags($value, $allowedTags));
+            }
+            return $value;
+        });
+    }
+
     public function rules(): array
     {
         return [
@@ -127,7 +148,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             'doj' => 'nullable|date_format:Y-m-d',
             'status' => 'nullable|boolean',
             'require_email_verification' => 'nullable|boolean',
-            'is_for_internal_purpose' => 'required|boolean',
+            'is_for_internal_purpose' => 'required|boolean'
         ];
     }
 
@@ -148,6 +169,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             }
         }
     }
+
 
     public static function beforeImport(BeforeImport $event)
     {
@@ -212,34 +234,34 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             }
 
             // Validation: Password and Password Confirmation are required if "Is for internal purpose" is 0
-            if ($isForInternalPurpose === 0) {
-                if (! $password || ! $password_confirmation) {
-                    $manualValidationErrors[] = "Password and password confirmation are required when 'Is for internal purpose' is 0 at Row " . $rowIndex . '.';
+            if ($isForInternalPurpose == 0) {
+                if (!$password || !$password_confirmation) {
+                    $manualValidationErrors[] = "Password and password confirmation are required when 'Is for internal purpose' is 0 at Row " . ($rowIndex) . ".";
                 }
                 // Validation: Status and Require email verification are required if "Is for internal purpose" is 0
-                if (! isset($status) || ($status !== 0 && $status !== 1)) {
-                    $manualValidationErrors[] = "Status is required when 'Is for internal purpose' is 0 at Row " . $rowIndex . '.';
+                if (!isset($status) || ($status != 0 && $status != 1)) {
+                    $manualValidationErrors[] = "Status is required when 'Is for internal purpose' is 0 at Row " . ($rowIndex) . ".";
                 }
-                if (! isset($requireEmailVerification) || ($requireEmailVerification !== 0 && $requireEmailVerification !== 1)) {
-                    $manualValidationErrors[] = "Require email verification is required when 'Is for internal purpose' is 0 at Row " . $rowIndex . '.';
+                if (!isset($requireEmailVerification) || ($requireEmailVerification != 0 && $requireEmailVerification != 1)) {
+                    $manualValidationErrors[] = "Require email verification is required when 'Is for internal purpose' is 0 at Row " . ($rowIndex) . ".";
                 }
             }
 
             // Validation: Password and Password Confirmation must match
             if ($password && $password_confirmation && $password !== $password_confirmation) {
-                $manualValidationErrors[] = 'Password and password confirmation must match at Row ' . $rowIndex . '.';
+                $manualValidationErrors[] = "Password and password confirmation must match at Row " . ($rowIndex) . ".";
             }
 
             // Validation: Phone and Country Code dependencies
-            if ($phone && ! $country_code) {
-                $manualValidationErrors[] = 'Country code is required if phone is provided at Row ' . $rowIndex;
-            } elseif ($country_code && ! $phone) {
-                $manualValidationErrors[] = 'Phone is required if country code is provided at Row ' . $rowIndex;
+            if ($phone && !$country_code) {
+                $manualValidationErrors[] = "Country code is required if phone is provided at Row " . ($rowIndex);
+            } elseif ($country_code && !$phone) {
+                $manualValidationErrors[] = "Phone is required if country code is provided at Row " . ($rowIndex);
             }
 
             // Validation: Country ISO Code required with Country Code
-            if ($country_code && ! $country_iso_code) {
-                $manualValidationErrors[] = 'Country ISO code is required if country code is provided at Row ' . $rowIndex;
+            if ($country_code && !$country_iso_code) {
+                $manualValidationErrors[] = "Country ISO code is required if country code is provided at Row " . ($rowIndex);
             }
 
             // Check for duplicate phone and country_code combination in the sheet itself
@@ -247,7 +269,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
                 $phoneCountryKey = $phone . '-' . $country_code;
 
                 if (in_array($phoneCountryKey, $seenPhoneCountryCombinations)) {
-                    $manualValidationErrors[] = 'The combination of phone and country code is duplicated in the sheet at Row ' . $rowIndex;
+                    $manualValidationErrors[] = "The combination of phone and country code is duplicated in the sheet at Row " . ($rowIndex);
                 } else {
                     $seenPhoneCountryCombinations[] = $phoneCountryKey;
                 }
@@ -261,14 +283,14 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
                     ->exists();
 
                 if ($exists) {
-                    $manualValidationErrors[] = 'The combination of phone and country code has already been taken at Row ' . $rowIndex;
+                    $manualValidationErrors[] = "The combination of phone and country code has already been taken at Row " . ($rowIndex);
                 }
             }
 
             // Check for duplicate emails in the sheet
             if ($email) {
                 if (in_array($email, $seenEmails)) {
-                    $manualValidationErrors[] = 'The email is duplicated in the sheet at Row ' . $rowIndex . '.';
+                    $manualValidationErrors[] = "The email is duplicated in the sheet at Row " . ($rowIndex) . ".";
                 } else {
                     $seenEmails[] = $email;
                 }
@@ -279,7 +301,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
                 $emailPasswordKey = $email . '-' . $password;
 
                 if (in_array($emailPasswordKey, $seenEmailPasswordCombinations)) {
-                    $manualValidationErrors[] = 'The combination of email and password is duplicated in the sheet at Row ' . $rowIndex . '.';
+                    $manualValidationErrors[] = "The combination of email and password is duplicated in the sheet at Row " . ($rowIndex) . ".";
                 } else {
                     $seenEmailPasswordCombinations[] = $emailPasswordKey;
                 }
@@ -288,13 +310,13 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             // Validation: Unique email in the database
             $client = DB::table('clients')->where('email', $email)->first();
             if ($client) {
-                $manualValidationErrors[] = 'The email has already been taken at Row ' . $rowIndex . '. Please try a different email.';
+                $manualValidationErrors[] = "The email has already been taken at Row " . ($rowIndex) . ". Please try a different email.";
             }
 
             // Validation: Unique email and password combination in the database
             $user = DB::table('users')->where('email', $email)->first();
             if ($user && Hash::check($password, $user->password)) {
-                $manualValidationErrors[] = 'The combination of this email and password is already in use at Row ' . $rowIndex . '. Please try a different email or password.';
+                $manualValidationErrors[] = "The combination of this email and password is already in use at Row " . ($rowIndex) . ". Please try a different email or password.";
             }
         }
 
@@ -302,41 +324,12 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         self::$manualValidationErrors = $manualValidationErrors;
     }
 
+
     public function registerEvents(): array
     {
         return [
             BeforeImport::class => [self::class, 'beforeImport'],
         ];
-    }
-    // Method to fetch all validation errors (including manual errors)
-    public function getValidationErrors()
-    {
-        // Merge validation errors with the flattened manual validation errors
-        return array_merge($this->validationErrors, self::$manualValidationErrors);
-    }
-
-    // Method to get manual validation errors
-    public function getManualValidationErrors()
-    {
-        return self::$manualValidationErrors;
-    }
-
-    private function sanitizeAndTrim(array $row): array
-    {
-        $allowedTags = '
-            <a><abbr><acronym><address><b><bdo><blockquote><br><caption><cite>
-            <code><col><colgroup><dd><del><dfn><div><dl><dt><em><h1><h2><h3><h4>
-            <h5><h6><hr><i><img><ins><kbd><label><legend><li><object><ol><p>
-            <pre><q><s><samp><small><span><strike><strong><sub><sup><table>
-            <tbody><td><tfoot><th><thead><tr><tt><u><ul><var>';
-
-        return Arr::map($row, function ($value) use ($allowedTags) {
-            // Only sanitize and trim strings
-            if (is_string($value)) {
-                return trim(strip_tags($value, $allowedTags));
-            }
-            return $value;
-        });
     }
 
     private function formatErrorMessage($field, $error, $rowNumber, $value = null)
@@ -403,5 +396,19 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         }
         // Default fallback for other cases
         return null;
+    }
+    // Method to fetch all validation errors (including manual errors)
+    public function getValidationErrors()
+    {
+        // Merge validation errors with the flattened manual validation errors
+        $mergedErrors = array_merge($this->validationErrors, self::$manualValidationErrors);
+
+        return $mergedErrors;
+    }
+
+    // Method to get manual validation errors
+    public function getManualValidationErrors()
+    {
+        return self::$manualValidationErrors;
     }
 }

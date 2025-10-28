@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-12">
             <label class="form-label fw-semibold mb-2 fs-5">
-                <?= get_label('custom_fields', 'Custom Fields') ?>
+                <?= get_label('additional_fields', 'Additional Fields') ?>
             </label>
 
             <div class="row row-cols-1 row-cols-md-2 g-3">

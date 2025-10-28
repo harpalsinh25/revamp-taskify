@@ -12,6 +12,6 @@ class TaskUser extends Model
     public $table = 'task_user';
 
     protected $fillable = [
-        'task_id', 'user_id',
+        'task_id', 'user_id'
     ];
 }

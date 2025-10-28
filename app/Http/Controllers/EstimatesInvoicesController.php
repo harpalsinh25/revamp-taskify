@@ -2,21 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
-use App\Models\EstimatesInvoice;
-use App\Models\User;
-use App\Models\Workspace;
-use App\Services\DeletionService;
 use Exception;
+use App\Models\User;
+use App\Models\Client;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\EstimatesInvoice;
+use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
+use LaravelDaily\Invoices\Invoice;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
+use LaravelDaily\Invoices\Classes\Party;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
-use LaravelDaily\Invoices\Classes\Party;
-use LaravelDaily\Invoices\Invoice;
+
+
+
 
 class EstimatesInvoicesController extends Controller
 {
@@ -147,7 +151,7 @@ class EstimatesInvoicesController extends Controller
                     function ($attribute, $value, $fail) use ($isApi) {
                         $endDate = request()->input('from_date');
                         $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                        if (! empty($errors['from_date'])) {
+                        if (!empty($errors['from_date'])) {
                             foreach ($errors['from_date'] as $error) {
                                 $fail($error);
                             }
@@ -159,7 +163,7 @@ class EstimatesInvoicesController extends Controller
                     function ($attribute, $value, $fail) use ($isApi) {
                         $endDate = request()->input('to_date');
                         $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                        if (! empty($errors['to_date'])) {
+                        if (!empty($errors['to_date'])) {
                             foreach ($errors['to_date'] as $error) {
                                 $fail($error);
                             }
@@ -174,7 +178,7 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'tax_amount' => [
                     'nullable',
@@ -183,7 +187,7 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'final_total' => [
                     'required',
@@ -192,17 +196,17 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
             ];
 
             $messages = [
-                'client_id.required' => 'The client field is required.',
+                'client_id.required' => 'The client field is required.'
             ];
 
             // Handle 'status' field before validation
             $status = $request->input('status', ''); // Get status from request, default to empty string if not present
-            if ($status === '') {
+            if ($status == '') {
                 // If status is empty, set it to 'na'
                 $status = 'not_specified';
             }
@@ -232,7 +236,7 @@ class EstimatesInvoicesController extends Controller
             $messages = [
                 'rate.*.required' => 'The rate field is required for each item.',
                 'amount.*.required' => 'The amount field is required for each item.',
-                'quantity.*.required' => 'The quantity field is required for each item.',
+                'quantity.*.required' => 'The quantity field is required for each item.'
             ];
 
             $validator = Validator::make($request->all(), [
@@ -246,7 +250,7 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'tax.*' => 'nullable',
                 'amount.*' => [
@@ -257,20 +261,20 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
-                ],
+                    }
+                ]
             ], $messages, $customAttributes);
 
             $item_ids = $request->input('item_ids') ?? [];
-            if (! empty($item_ids)) {
+            if (!empty($item_ids)) {
                 $type = $request->input('type');
                 $from_date = $request->input('from_date');
                 $to_date = $request->input('to_date');
                 $from_date = Carbon::parse($from_date);
                 $to_date = Carbon::parse($to_date);
 
-                $formFields['from_date'] = format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-                $formFields['to_date'] = format_date($to_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+                $formFields['from_date'] =  format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+                $formFields['to_date'] =  format_date($to_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
                 $formFields['total'] = str_replace(',', '', $request->input('total'));
                 $taxInput = str_replace(',', '', $request->input('tax_amount'));
                 $formFields['tax_amount'] = $taxInput !== '' ? $taxInput : 0; // or null if your DB allows
@@ -282,9 +286,9 @@ class EstimatesInvoicesController extends Controller
 
                 if ($res = EstimatesInvoice::create($formFields)) {
                     foreach ($request->input('item') as $key => $item_id) {
-                        $quantity = (int) $request->input('quantity')[$key];
-                        $unit_id = (int) $request->input('unit')[$key];
-                        $rate = (int) str_replace(',', '', $request->input('rate')[$key]);
+                        $quantity = (int)$request->input('quantity')[$key];
+                        $unit_id = (int)$request->input('unit')[$key];
+                        $rate = (int)str_replace(',', '', $request->input('rate')[$key]);
                         $tax_id = (int) $request->input('tax')[$key];
                         $amount = (int) str_replace(',', '', $request->input('amount')[$key]);
 
@@ -293,33 +297,39 @@ class EstimatesInvoicesController extends Controller
                     }
 
                     if ($isApi) {
+
                         return formatApiResponse(
                             false,
                             ucfirst($type) . 'Created Successfully.',
                             [
                                 'id' => $res->id,
                                 'type' => $res->type,
-                                'data' => formatEstimateInvoice($res),
+                                'data' => formatEstimateInvoice($res)
                             ]
                         );
+                    } else {
+
+                        Session::flash('message', ucfirst($type) . ' created successfully.');
+                        return response()->json(['error' => false, 'id' => $res->id, 'type' => $type]);
                     }
+                } else {
+                    if ($isApi) {
+                        return formatApiResponse(
+                            true,
+                            ucfirst($type) . 'couldn\'t created.'
+                        );
+                    } else {
+                        return response()->json(['error' => true, 'message' => ucfirst($type) . ' couldn\'t created.']);
+                    }
+                }
+            } else {
 
-                    Session::flash('message', ucfirst($type) . ' created successfully.');
-                    return response()->json(['error' => false, 'id' => $res->id, 'type' => $type]);
-                }
-                if ($isApi) {
-                    return formatApiResponse(
-                        true,
-                        ucfirst($type) . 'couldn\'t created.'
-                    );
-                }
-                return response()->json(['error' => true, 'message' => ucfirst($type) . ' couldn\'t created.']);
+                return response()->json(['error' => true, 'message' => 'Please add at least one item.']);
             }
-
-            return response()->json(['error' => true, 'message' => 'Please add at least one item.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
+
             if ($isApi) {
                 return formatApiResponse(
                     true,
@@ -327,35 +337,36 @@ class EstimatesInvoicesController extends Controller
                     [
                         'error' => $e->getMessage(),
                         'line' => $e->getLine(),
-                        'file' => $e->getFile(),
+                        'file' => $e->getFile()
 
                     ],
                     500
                 );
+            } else {
+                return response()->json(['error' => true, 'message' => ucfirst($request->type) . ' couldn\'t created.']);
             }
-            return response()->json(['error' => true, 'message' => ucfirst($request->type) . ' couldn\'t created.']);
         }
     }
 
     public function list()
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
-        $status = request('status') ? request('status') : '';
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
+        $status = (request('status')) ? request('status') : "";
         $types = request('types', []);
         $client_ids = request('client_ids', []);
         $created_by_user_ids = request('created_by_user_ids', []);
         $created_by_client_ids = request('created_by_client_ids', []);
-        $date_between_from = request('date_between_from') ?: '';
-        $date_between_to = request('date_between_to') ?: '';
-        $start_date_from = request('start_date_from') ? request('start_date_from') : '';
-        $start_date_to = request('start_date_to') ? request('start_date_to') : '';
-        $end_date_from = request('end_date_from') ? request('end_date_from') : '';
-        $end_date_to = request('end_date_to') ? request('end_date_to') : '';
+        $date_between_from = request('date_between_from') ?: "";
+        $date_between_to = request('date_between_to') ?: "";
+        $start_date_from = (request('start_date_from')) ? request('start_date_from') : "";
+        $start_date_to = (request('start_date_to')) ? request('start_date_to') : "";
+        $end_date_from = (request('end_date_from')) ? request('end_date_from') : "";
+        $end_date_to = (request('end_date_to')) ? request('end_date_to') : "";
         $where = ['estimates_invoices.workspace_id' => $this->workspace->id];
 
-        if ($status !== '') {
+        if ($status != '') {
             $where['estimates_invoices.status'] = $status;
         }
 
@@ -365,43 +376,47 @@ class EstimatesInvoicesController extends Controller
         )
             ->leftJoin('clients', 'estimates_invoices.client_id', '=', 'clients.id');
 
-        if (! isAdminOrHasAllDataAccess()) {
+
+        if (!isAdminOrHasAllDataAccess()) {
             $estimates_invoices = $estimates_invoices->where(function ($query) {
                 $query->where('estimates_invoices.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('estimates_invoices.client_id', $this->user->id);
             });
         }
 
-        if (! empty($types)) {
+        if (!empty($types)) {
             $estimates_invoices->whereIn('type', $types);
         }
 
-        if (! empty($client_ids)) {
+        if (!empty($client_ids)) {
             $estimates_invoices->whereIn('client_id', $client_ids);
         }
 
-        if (! empty($created_by_user_ids)) {
+        if (!empty($created_by_user_ids)) {
             $estimates_invoices->whereIn('estimates_invoices.created_by', array_map(function ($id) {
                 return 'u_' . $id;
             }, $created_by_user_ids));
         }
 
-        if (! empty($created_by_client_ids)) {
+        if (!empty($created_by_client_ids)) {
             $estimates_invoices->whereIn('estimates_invoices.created_by', array_map(function ($id) {
                 return 'c_' . $id;
             }, $created_by_client_ids));
         }
 
         if ($date_between_from && $date_between_to) {
-            $estimates_invoices = $estimates_invoices->where('estimates_invoices.from_date', '>=', $date_between_from)
-                ->where('estimates_invoices.to_date', '<=', $date_between_to);
+            // Overlap detection: Find estimates/invoices that overlap with the date range
+            $estimates_invoices = $estimates_invoices->where(function ($q) use ($date_between_from, $date_between_to) {
+                $q->where('estimates_invoices.from_date', '<=', $date_between_to)
+                    ->where('estimates_invoices.to_date', '>=', $date_between_from);
+            });
         }
 
         if ($start_date_from && $start_date_to) {
             $estimates_invoices = $estimates_invoices->whereBetween('estimates_invoices.from_date', [$start_date_from, $start_date_to]);
         }
         if ($end_date_from && $end_date_to) {
-            $estimates_invoices = $estimates_invoices->whereBetween('estimates_invoices.to_date', [$end_date_from, $end_date_to]);
+            $estimates_invoices  = $estimates_invoices->whereBetween('estimates_invoices.to_date', [$end_date_from, $end_date_to]);
         }
         if ($search) {
             $estimates_invoices = $estimates_invoices->where(function ($query) use ($search) {
@@ -420,36 +435,37 @@ class EstimatesInvoicesController extends Controller
         $canDelete = checkPermission('delete_estimates_invoices');
 
         $estimates_invoices = $estimates_invoices->orderBy($sort, $order)
-            ->paginate(request('limit'))
+            ->paginate(request("limit"))
             ->through(function ($estimates_invoice) use ($canEdit, $canDelete, $canCreate) {
-                $statusBadge = '';
 
-                if ($estimates_invoice->status === 'sent') {
+            $statusBadge = '';
+
+            if ($estimates_invoice->status == 'sent') {
                     $statusBadge = '<span class="badge bg-primary">' . get_label('sent', 'Sent') . '</span>';
-                } elseif ($estimates_invoice->status === 'accepted') {
+            } elseif ($estimates_invoice->status == 'accepted') {
                     $statusBadge = '<span class="badge bg-success">' . get_label('accepted', 'Accepted') . '</span>';
-                } elseif ($estimates_invoice->status === 'partially_paid') {
+            } elseif ($estimates_invoice->status == 'partially_paid') {
                     $statusBadge = '<span class="badge bg-warning">' . get_label('partially_paid', 'Partially paid') . '</span>';
-                } elseif ($estimates_invoice->status === 'fully_paid') {
+            } elseif ($estimates_invoice->status == 'fully_paid') {
                     $statusBadge = '<span class="badge bg-success">' . get_label('fully_paid', 'Fully paid') . '</span>';
-                } elseif ($estimates_invoice->status === 'draft') {
+            } elseif ($estimates_invoice->status == 'draft') {
                     $statusBadge = '<span class="badge bg-secondary">' . get_label('draft', 'Draft') . '</span>';
-                } elseif ($estimates_invoice->status === 'declined') {
+            } elseif ($estimates_invoice->status == 'declined') {
                     $statusBadge = '<span class="badge bg-danger">' . get_label('declined', 'Declined') . '</span>';
-                } elseif ($estimates_invoice->status === 'cancelled') {
+            } elseif ($estimates_invoice->status == 'cancelled') {
                     $statusBadge = '<span class="badge bg-danger">' . get_label('cancelled', 'Cancelled') . '</span>';
-                } elseif ($estimates_invoice->status === 'expired') {
-                    $statusBadge = '<span class="badge bg-warning">' . get_label('expired', 'Expired') . '</span>';
-                } elseif ($estimates_invoice->status === 'not_specified') {
+            } elseif ($estimates_invoice->status == 'expired') {
+                $statusBadge = '<span class="badge bg-warning">' . get_label('expired', 'Expired') . '</span>';
+            } elseif ($estimates_invoice->status == 'not_specified') {
                     $statusBadge = '<span class="badge bg-secondary">' . get_label('not_specified', 'Not specified') . '</span>';
-                } elseif ($estimates_invoice->status === 'due') {
+            } elseif ($estimates_invoice->status == 'due') {
                     $statusBadge = '<span class="badge bg-danger">' . get_label('due', 'Due') . '</span>';
                 }
 
                 $actions = '';
 
                 if ($canEdit) {
-                    $actions .= '<a href="' . url("/estimates-invoices/edit/{$estimates_invoice->id}") . '" target="_blank" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
+                $actions .= '<a href="' . url("/estimates-invoices/edit/{$estimates_invoice->id}") . '" target="_blank" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
                 }
 
                 if ($canDelete) {
@@ -464,9 +480,9 @@ class EstimatesInvoicesController extends Controller
                         '</a>';
                 }
 
-                $actions .= '<a href="' . url("/estimates-invoices/pdf/{$estimates_invoice->id}") . '" target="_blank" title="PDF">' .
-                        '<i class="bx bxs-file-pdf text-secondary mx-2"></i>' .
-                        '</a>';
+            $actions .= '<a href="' . url("/estimates-invoices/pdf/{$estimates_invoice->id}") . '" target="_blank" title="PDF">' .
+                '<i class="bx bxs-file-pdf text-secondary mx-2"></i>' .
+                '</a>';
 
                 return [
                     'id' => $estimates_invoice->id,
@@ -481,13 +497,14 @@ class EstimatesInvoicesController extends Controller
                     'created_by' => strpos($estimates_invoice->created_by, 'u_') === 0 ? formatUserHtml(User::find(substr($estimates_invoice->created_by, 2))) : formatClientHtml(Client::find(substr($estimates_invoice->created_by, 2))),
                     'created_at' => format_date($estimates_invoice->created_at, true),
                     'updated_at' => format_date($estimates_invoice->updated_at, true),
-                    'actions' => $actions,
+                'actions' => $actions
                 ];
             });
 
+
         return response()->json([
-            'rows' => $estimates_invoices->items(),
-            'total' => $total,
+            "rows" => $estimates_invoices->items(),
+            "total" => $total,
         ]);
     }
 
@@ -588,7 +605,7 @@ class EstimatesInvoicesController extends Controller
                     function ($attribute, $value, $fail) use ($isApi) {
                         $endDate = request()->input('from_date');
                         $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                        if (! empty($errors['from_date'])) {
+                        if (!empty($errors['from_date'])) {
                             foreach ($errors['from_date'] as $error) {
                                 $fail($error);
                             }
@@ -600,7 +617,7 @@ class EstimatesInvoicesController extends Controller
                     function ($attribute, $value, $fail) use ($isApi) {
                         $endDate = request()->input('to_date');
                         $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                        if (! empty($errors['to_date'])) {
+                        if (!empty($errors['to_date'])) {
                             foreach ($errors['to_date'] as $error) {
                                 $fail($error);
                             }
@@ -615,7 +632,7 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'tax_amount' => [
                     'nullable',
@@ -624,7 +641,7 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'final_total' => [
                     'required',
@@ -633,17 +650,17 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
-                ],
+                    }
+                ]
             ];
 
             $messages = [
-                'client_id.required' => 'The client field is required.',
+                'client_id.required' => 'The client field is required.'
             ];
 
             // Handle 'status' field before validation
             $status = $request->input('status', ''); // Get status from request, default to empty string if not present
-            if ($status === '') {
+            if ($status == '') {
                 // If status is empty, set it to 'na'
                 $status = 'not_specified';
             }
@@ -672,7 +689,7 @@ class EstimatesInvoicesController extends Controller
             $messages = [
                 'rate.*.required' => 'The rate field is required for each item.',
                 'amount.*.required' => 'The amount field is required for each item.',
-                'quantity.*.required' => 'The quantity field is required for each item.',
+                'quantity.*.required' => 'The quantity field is required for each item.'
             ];
 
             $validator = Validator::make($request->all(), [
@@ -686,7 +703,7 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
+                    }
                 ],
                 'tax.*' => 'nullable',
                 'amount.*' => [
@@ -697,8 +714,8 @@ class EstimatesInvoicesController extends Controller
                         if ($error) {
                             $fail($error);
                         }
-                    },
-                ],
+                    }
+                ]
             ], $messages, $customAttributes);
 
             // Check if validation fails
@@ -707,16 +724,17 @@ class EstimatesInvoicesController extends Controller
                 return response()->json(['error' => true, 'message' => $validator->errors()->first()]);
             }
 
+
             $estimate_invoice = EstimatesInvoice::findOrFail($request->input('id'));
             $itemPivotData = [];
             $items = $request->input('item') ?? [];
-            if (! empty($items)) {
+            if (!empty($items)) {
                 $type = $request->input('type');
                 $from_date = $request->input('from_date');
                 $to_date = $request->input('to_date');
 
                 // dd('here');
-                $formFields['from_date'] = format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+                $formFields['from_date'] =  format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
                 $formFields['to_date'] = format_date($to_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
                 $formFields['total'] = str_replace(',', '', $request->input('total'));
                 $formFields['tax_amount'] = str_replace(',', '', $request->input('tax_amount'));
@@ -744,23 +762,28 @@ class EstimatesInvoicesController extends Controller
                                 'data' => formatEstimateInvoice($estimate_invoice),
                             ]
                         );
-                    }
+                    } else {
 
-                    Session::flash('message', ucfirst($type) . ' updated successfully.');
-                    return response()->json(['error' => false, 'id' => $request->input('id'), 'type' => $type]);
+                        Session::flash('message', ucfirst($type) . ' updated successfully.');
+                        return response()->json(['error' => false, 'id' => $request->input('id'), 'type' => $type]);
+                    }
+                } else {
+                    if ($isApi) {
+                        return formatApiResponse(
+                            false,
+                            ucfirst($type) . 'couldn\'t updated',
+                        );
+                    } else {
+                        return response()->json(['error' => true, 'message' => ucfirst($type) . ' couldn\'t updated.']);
+                    }
                 }
-                if ($isApi) {
-                    return formatApiResponse(
-                        false,
-                        ucfirst($type) . 'couldn\'t updated',
-                    );
-                }
-                return response()->json(['error' => true, 'message' => ucfirst($type) . ' couldn\'t updated.']);
+            } else {
+                return response()->json(['error' => true, 'message' => 'Please add at least one item.']);
             }
-            return response()->json(['error' => true, 'message' => 'Please add at least one item.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
+
             if ($isApi) {
                 return formatApiResponse(
                     true,
@@ -768,18 +791,20 @@ class EstimatesInvoicesController extends Controller
                     [
                         'data' => [
                             'message' => $e->getMessage(),
-                            'line' => $e->getLine(),
-                        ],
+                            'line' => $e->getLine()
+                        ]
                     ]
                 );
+            } else {
+                return response()->json(['error' => true, 'message' => ucfirst($type) . ' couldn\'t updated.']);
             }
-            return response()->json(['error' => true, 'message' => ucfirst($type) . ' couldn\'t updated.']);
         }
     }
 
     public function view(Request $request, $id)
     {
         $estimate_invoice = EstimatesInvoice::findOrFail($id);
+
 
         // The ID corresponds to a user
         $creator = User::find(substr($estimate_invoice->created_by, 2)); // Remove the 'u_' prefix
@@ -793,25 +818,27 @@ class EstimatesInvoicesController extends Controller
 
         $statusBadge = '';
 
-        if ($estimate_invoice->status === 'sent') {
+        if ($estimate_invoice->status == 'sent') {
             $statusBadge = '<span class="badge bg-primary">' . get_label('sent', 'Sent') . '</span>';
-        } elseif ($estimate_invoice->status === 'accepted') {
+        } elseif ($estimate_invoice->status == 'accepted') {
             $statusBadge = '<span class="badge bg-success">' . get_label('accepted', 'Accepted') . '</span>';
-        } elseif ($estimate_invoice->status === 'partially_paid') {
+        } elseif ($estimate_invoice->status == 'partially_paid') {
             $statusBadge = '<span class="badge bg-warning">' . get_label('partially_paid', 'Partially paid') . '</span>';
-        } elseif ($estimate_invoice->status === 'fully_paid') {
+        } elseif ($estimate_invoice->status == 'fully_paid') {
             $statusBadge = '<span class="badge bg-success">' . get_label('fully_paid', 'Fully paid') . '</span>';
-        } elseif ($estimate_invoice->status === 'draft') {
+        } elseif ($estimate_invoice->status == 'draft') {
             $statusBadge = '<span class="badge bg-secondary">' . get_label('draft', 'Draft') . '</span>';
-        } elseif ($estimate_invoice->status === 'declined') {
+        } elseif ($estimate_invoice->status == 'declined') {
             $statusBadge = '<span class="badge bg-danger">' . get_label('declined', 'Declined') . '</span>';
-        } elseif ($estimate_invoice->status === 'expired') {
+        } elseif ($estimate_invoice->status == 'expired') {
             $statusBadge = '<span class="badge bg-warning">' . get_label('expired', 'Expired') . '</span>';
-        } elseif ($estimate_invoice->status === 'not_specified') {
+        } elseif ($estimate_invoice->status == 'not_specified') {
             $statusBadge = '<span class="badge bg-secondary">' . get_label('not_specified', 'Not specified') . '</span>';
-        } elseif ($estimate_invoice->status === 'due') {
+        } elseif ($estimate_invoice->status == 'due') {
             $statusBadge = '<span class="badge bg-danger">' . get_label('due', 'Due') . '</span>';
         }
+
+
 
         $estimate_invoice->status = $statusBadge;
         return view('estimates-invoices.view', compact('estimate_invoice'));
@@ -822,7 +849,7 @@ class EstimatesInvoicesController extends Controller
         $estimate_invoice = EstimatesInvoice::findOrFail($id);
         $general_settings = get_settings('general_settings');
 
-        $logo = ! isset($general_settings['full_logo']) || empty($general_settings['full_logo']) ? 'storage/logos/default_full_logo.png' : 'storage/' . $general_settings['full_logo'];
+        $logo = !isset($general_settings['full_logo']) || empty($general_settings['full_logo']) ? 'storage/logos/default_full_logo.png' : 'storage/' . $general_settings['full_logo'];
         $company_title = $general_settings['company_title'] ?? 'Taskify';
         $addressParts = [
             $estimate_invoice->city ?? '',
@@ -841,10 +868,11 @@ class EstimatesInvoicesController extends Controller
             'phone' => $estimate_invoice->phone ?? '',
         ]);
 
+
         $customer = new Party([
-            'name' => 'Ashley Medina',
-            'address' => 'The Green Street 12',
-            'code' => '#22663214',
+            'name'          => 'Ashley Medina',
+            'address'       => 'The Green Street 12',
+            'code'          => '#22663214',
             'custom_fields' => [
                 'order number' => '> 654321 <',
             ],
@@ -881,9 +909,10 @@ class EstimatesInvoicesController extends Controller
             'additional notes',
             'in regards of delivery or something else',
         ];
-        $notes = implode('<br>', $notes);
+        $notes = implode("<br>", $notes);
 
-        $invoice = Invoice::make(($estimate_invoice->type === 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-')) . $estimate_invoice->id . ' - ' . $company_title)
+
+        $invoice = Invoice::make(($estimate_invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-')) . $estimate_invoice->id . ' - ' . $company_title)
             ->series('BIG')
             ->status(get_label($estimate_invoice->status, ucfirst(str_replace('_', ' ', $estimate_invoice->status))))
             ->sequence(667)
@@ -898,7 +927,7 @@ class EstimatesInvoicesController extends Controller
             ->currencyFormat('{SYMBOL}{VALUE}')
             ->currencyThousandsSeparator('.')
             ->currencyDecimalPoint(',')
-            ->filename(($estimate_invoice->type === 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-')) . $estimate_invoice->id . ' - ' . $company_title)
+            ->filename(($estimate_invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-')) . $estimate_invoice->id . ' - ' . $company_title)
             ->addItems($items)
             ->notes($notes)
             ->logo($logo)
@@ -947,12 +976,12 @@ class EstimatesInvoicesController extends Controller
         $estimate_invoice = EstimatesInvoice::findOrFail($id);
         $type = ucfirst($estimate_invoice->type);
         // If the type is 'invoice', delete related payments
-        if ($estimate_invoice->type === 'invoice') {
+        if ($estimate_invoice->type == 'invoice') {
             $estimate_invoice->payments()->delete();
         }
         $estimate_invoice->items()->detach();
         DeletionService::delete(EstimatesInvoice::class, $id, $type);
-        return response()->json(['error' => false, 'message' => $type . ' deleted successfully.', 'id' => $id, 'title' => $estimate_invoice->type === 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') . $id : get_label('invoice_id_prefix', 'INVC-') . $id, 'type' => $estimate_invoice->type]);
+        return response()->json(['error' => false, 'message' => $type . ' deleted successfully.', 'id' => $id, 'title' => $estimate_invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') . $id : get_label('invoice_id_prefix', 'INVC-') . $id, 'type' => $estimate_invoice->type]);
     }
 
     public function destroy_multiple(Request $request)
@@ -960,7 +989,7 @@ class EstimatesInvoicesController extends Controller
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:estimates_invoices,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:estimates_invoices,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -972,11 +1001,11 @@ class EstimatesInvoicesController extends Controller
             $res = EstimatesInvoice::findOrFail($id);
             if ($res) {
                 // If the type is 'invoice', delete related payments
-                if ($res->type === 'invoice') {
+                if ($res->type == 'invoice') {
                     $res->payments()->delete();
                 }
                 $deletedIds[] = $id;
-                $deletedTitles[] = ($res->type === 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-')) . $id;
+                $deletedTitles[] = ($res->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-')) . $id;
                 $res->items()->detach();
                 DeletionService::delete(EstimatesInvoice::class, $id, ucfirst($res->type));
             }
@@ -991,7 +1020,7 @@ class EstimatesInvoicesController extends Controller
         // Use the general duplicateRecord function
         $duplicate = duplicateRecord(EstimatesInvoice::class, $id, $relatedTables);
 
-        if (! $duplicate) {
+        if (!$duplicate) {
             return response()->json(['error' => true, 'message' => ucfirst($res->type) . ' duplication failed.']);
         }
         if (request()->has('reload') && request()->input('reload') === 'true') {
@@ -1056,25 +1085,25 @@ class EstimatesInvoicesController extends Controller
     public function apiList(Request $request)
     {
         $search = request('search');
-        $sort = request('sort') ? request('sort') : 'id';
-        $order = request('order') ? request('order') : 'DESC';
-        $status = request('status') ? request('status') : '';
+        $sort = (request('sort')) ? request('sort') : "id";
+        $order = (request('order')) ? request('order') : "DESC";
+        $status = (request('status')) ? request('status') : "";
         $types = request('types', []);
         $client_ids = request('client_ids', []);
         $created_by_user_ids = request('created_by_user_ids', []);
         $created_by_client_ids = request('created_by_client_ids', []);
-        $date_between_from = request('date_between_from') ?: '';
-        $date_between_to = request('date_between_to') ?: '';
-        $start_date_from = request('start_date_from') ? request('start_date_from') : '';
-        $start_date_to = request('start_date_to') ? request('start_date_to') : '';
-        $end_date_from = request('end_date_from') ? request('end_date_from') : '';
-        $end_date_to = request('end_date_to') ? request('end_date_to') : '';
-        $id = request('id', null);
-        $limit = request('limit', 10);
-        $offset = request('offset', 0);
+        $date_between_from = request('date_between_from') ?: "";
+        $date_between_to = request('date_between_to') ?: "";
+        $start_date_from = (request('start_date_from')) ? request('start_date_from') : "";
+        $start_date_to = (request('start_date_to')) ? request('start_date_to') : "";
+        $end_date_from = (request('end_date_from')) ? request('end_date_from') : "";
+        $end_date_to = (request('end_date_to')) ? request('end_date_to') : "";
+        $id = request("id", null);
+        $limit = request("limit", 10);
+        $offset = request("offset", 0);
         $where = ['estimates_invoices.workspace_id' => $this->workspace->id];
 
-        if ($status !== '') {
+        if ($status != '') {
             $where['estimates_invoices.status'] = $status;
         }
 
@@ -1084,43 +1113,47 @@ class EstimatesInvoicesController extends Controller
         )
             ->leftJoin('clients', 'estimates_invoices.client_id', '=', 'clients.id');
 
-        if (! isAdminOrHasAllDataAccess()) {
+
+        if (!isAdminOrHasAllDataAccess()) {
             $estimates_invoices = $estimates_invoices->where(function ($query) {
                 $query->where('estimates_invoices.created_by', isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id)
                     ->orWhere('estimates_invoices.client_id', $this->user->id);
             });
         }
 
-        if (! empty($types)) {
+        if (!empty($types)) {
             $estimates_invoices->whereIn('type', $types);
         }
 
-        if (! empty($client_ids)) {
+        if (!empty($client_ids)) {
             $estimates_invoices->whereIn('client_id', $client_ids);
         }
 
-        if (! empty($created_by_user_ids)) {
+        if (!empty($created_by_user_ids)) {
             $estimates_invoices->whereIn('estimates_invoices.created_by', array_map(function ($id) {
                 return 'u_' . $id;
             }, $created_by_user_ids));
         }
 
-        if (! empty($created_by_client_ids)) {
+        if (!empty($created_by_client_ids)) {
             $estimates_invoices->whereIn('estimates_invoices.created_by', array_map(function ($id) {
                 return 'c_' . $id;
             }, $created_by_client_ids));
         }
 
         if ($date_between_from && $date_between_to) {
-            $estimates_invoices = $estimates_invoices->where('estimates_invoices.from_date', '>=', $date_between_from)
-                ->where('estimates_invoices.to_date', '<=', $date_between_to);
+            // Overlap detection: Find estimates/invoices that overlap with the date range
+            $estimates_invoices = $estimates_invoices->where(function ($q) use ($date_between_from, $date_between_to) {
+                $q->where('estimates_invoices.from_date', '<=', $date_between_to)
+                    ->where('estimates_invoices.to_date', '>=', $date_between_from);
+            });
         }
 
         if ($start_date_from && $start_date_to) {
             $estimates_invoices = $estimates_invoices->whereBetween('estimates_invoices.from_date', [$start_date_from, $start_date_to]);
         }
         if ($end_date_from && $end_date_to) {
-            $estimates_invoices = $estimates_invoices->whereBetween('estimates_invoices.to_date', [$end_date_from, $end_date_to]);
+            $estimates_invoices  = $estimates_invoices->whereBetween('estimates_invoices.to_date', [$end_date_from, $end_date_to]);
         }
         if ($search) {
             $estimates_invoices = $estimates_invoices->where(function ($query) use ($search) {
@@ -1137,9 +1170,10 @@ class EstimatesInvoicesController extends Controller
         if ($id) {
             $invoice = $estimates_invoices->find($id);
 
-            if (! $invoice) {
+            if (!$invoice) {
                 return formatApiResponse(false, 'Estimate Invoice not found', ['total' => 0, 'data' => []]);
             }
+
 
             return formatApiResponse(
                 false,
@@ -1161,6 +1195,7 @@ class EstimatesInvoicesController extends Controller
         }
 
         $data = $invoices->map(function ($invoice) {
+
             return formatEstimateInvoice($invoice);
         });
 
@@ -1169,7 +1204,7 @@ class EstimatesInvoicesController extends Controller
             'Estimates Invoices retrieved successfully',
             [
                 'total' => $total,
-                'data' => $data,
+                'data' => $data
             ]
         );
     }

@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Tag;
-use App\Services\DeletionService;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class TagsController extends Controller
@@ -58,11 +60,12 @@ class TagsController extends Controller
      */
     public function store(Request $request)
     {
+
         $isApi = $request->get('isApi', false);
         try {
             $formFields = $request->validate([
                 'title' => ['required'],
-                'color' => ['required'],
+                'color' => ['required']
             ]);
             $slug = generateUniqueSlug($request->title, Tag::class);
             $formFields['slug'] = $slug;
@@ -71,6 +74,7 @@ class TagsController extends Controller
                 return formatApiResponse(
                     false,
                     'Tag created successfully',
+
                     [
                         'id' => $tag->id,
                         'data' => [
@@ -79,7 +83,7 @@ class TagsController extends Controller
                             'color' => $tag->color,
                             'created_at' => format_date($tag->created_at, to_format: 'Y-m-d'),
                             'updated_at' => format_date($tag->updated_at, to_format: 'Y-m-d'),
-                        ],
+                        ]
 
                     ]
                 );
@@ -114,20 +118,20 @@ class TagsController extends Controller
         $canEdit = checkPermission('edit_tags');
         $canDelete = checkPermission('delete_tags');
         $tags = $tags
-            ->paginate(request('limit'))
+            ->paginate(request("limit"))
             ->through(function ($tag) use ($canEdit, $canDelete) {
-                $actions = '';
+            $actions = '';
                 if ($canEdit) {
                     $actions .= '<a href="javascript:void(0);" class="edit-tag" data-bs-toggle="modal" data-bs-target="#edit_tag_modal" data-id="' . $tag->id . '" title="' . get_label('update', 'Update') . '">' .
                         '<i class="bx bx-edit mx-1"></i>' .
                         '</a>';
-                }
+            }
                 if ($canDelete) {
                     $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $tag->id . '" data-type="tags">' .
                         '<i class="bx bx-trash text-danger mx-1"></i>' .
                         '</button>';
                 }
-                $actions = $actions ? $actions : '-';
+                $actions = $actions ?: '-';
                 return [
                     'id' => $tag->id,
                     'title' => $tag->title,
@@ -138,8 +142,8 @@ class TagsController extends Controller
                 ];
             });
         return response()->json([
-            'rows' => $tags->items(),
-            'total' => $total,
+            "rows" => $tags->items(),
+            "total" => $total,
         ]);
     }
     /**
@@ -205,13 +209,13 @@ class TagsController extends Controller
         }
         if ($id) {
             $tag = $tagsQuery->find($id);
-            if (! $tag) {
+            if (!$tag) {
                 return formatApiResponse(
                     false,
                     'Tag not found',
                     [
                         'total' => 0,
-                        'data' => [],
+                        'data' => []
                     ]
                 );
             }
@@ -227,43 +231,44 @@ class TagsController extends Controller
                             'color' => $tag->color,
                             'created_at' => format_date($tag->created_at, to_format: 'Y-m-d'),
                             'updated_at' => format_date($tag->updated_at, to_format: 'Y-m-d'),
-                        ],
-                    ],
+                        ]
+                    ]
                 ]
             );
-        }
-        $total = $tagsQuery->count(); // Get total count before applying offset and limit
-        $tags = $tagsQuery->orderBy($sort, $order)
-            ->skip($offset)
-            ->take($limit)
-            ->get();
-        if ($tags->isEmpty()) {
+        } else {
+            $total = $tagsQuery->count(); // Get total count before applying offset and limit
+            $tags = $tagsQuery->orderBy($sort, $order)
+                ->skip($offset)
+                ->take($limit)
+                ->get();
+            if ($tags->isEmpty()) {
+                return formatApiResponse(
+                    false,
+                    'Tags not found',
+                    [
+                        'total' => 0,
+                        'data' => []
+                    ]
+                );
+            }
+            $data = $tags->map(function ($tag) {
+                return [
+                    'id' => $tag->id,
+                    'title' => $tag->title,
+                    'color' => $tag->color,
+                    'created_at' => format_date($tag->created_at, to_format: 'Y-m-d'),
+                    'updated_at' => format_date($tag->updated_at, to_format: 'Y-m-d'),
+                ];
+            });
             return formatApiResponse(
                 false,
-                'Tags not found',
+                'Tags retrieved successfully',
                 [
-                    'total' => 0,
-                    'data' => [],
+                    'total' => $total,
+                    'data' => $data
                 ]
             );
         }
-        $data = $tags->map(function ($tag) {
-            return [
-                'id' => $tag->id,
-                'title' => $tag->title,
-                'color' => $tag->color,
-                'created_at' => format_date($tag->created_at, to_format: 'Y-m-d'),
-                'updated_at' => format_date($tag->updated_at, to_format: 'Y-m-d'),
-            ];
-        });
-        return formatApiResponse(
-            false,
-            'Tags retrieved successfully',
-            [
-                'total' => $total,
-                'data' => $data,
-            ]
-        );
     }
     public function get($id)
     {
@@ -327,7 +332,7 @@ class TagsController extends Controller
             $formFields = $request->validate([
                 'id' => ['required'],
                 'title' => ['required'],
-                'color' => ['required'],
+                'color' => ['required']
             ]);
             $slug = generateUniqueSlug($request->title, Tag::class, $request->id);
             $formFields['slug'] = $slug;
@@ -345,22 +350,25 @@ class TagsController extends Controller
                                 'color' => $tag->color,
                                 'created_at' => format_date($tag->created_at, to_format: 'Y-m-d'),
                                 'updated_at' => format_date($tag->updated_at, to_format: 'Y-m-d'),
-                            ],
+                            ]
 
                         ]
                     );
+                } else {
+                    return response()->json(['error' => false, 'message' => 'Tag updated successfully.', 'id' => $tag->id]);
                 }
-                return response()->json(['error' => false, 'message' => 'Tag updated successfully.', 'id' => $tag->id]);
+            } else {
+                if ($isApi) {
+                    return formatApiResponse(
+                        true,
+                        'Tag couldn\'t be updated',
+                        [],
+                        500
+                    );
+                } else {
+                    return response()->json(['error' => true, 'message' => 'Tag couldn\'t updated.']);
+                }
             }
-            if ($isApi) {
-                return formatApiResponse(
-                    true,
-                    'Tag couldn\'t be updated',
-                    [],
-                    500
-                );
-            }
-            return response()->json(['error' => true, 'message' => 'Tag couldn\'t updated.']);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
@@ -407,14 +415,15 @@ class TagsController extends Controller
      */
     public function destroy($id)
     {
-        return DeletionService::delete(Tag::class, $id, 'Tag');
+        $response = DeletionService::delete(Tag::class, $id, 'Tag');
+        return $response;
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:tags,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:tags,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
         $ids = $validatedData['ids'];
         $deletedIds = [];

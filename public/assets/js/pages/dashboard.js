@@ -115,7 +115,7 @@ class DashboardManager {
     }
     init() {
         this.initFilters();
-        this.initSortable();
+        // this.initSortable();
         this.initTooltips();
         this.updateDashboard();
     }
@@ -246,10 +246,10 @@ class DashboardManager {
                         <td class="border-0 py-2">
                             <div class="d-flex align-items-center">
                                 <div class="legend-dot bg-${status.color} me-2" style="width: 12px; height: 12px; border-radius: 50%;"></div>
-                                <a href="${type === 'projects' ? '/projects/list' : '/tasks/list'}?status=${status.id}"
-                                   class="text-decoration-none text-dark fw-medium">
-                                    ${status.title}
-                                </a>
+                                <a href="${type === 'projects' ? '/projects/list' : '/tasks'}?status=${status.id}&status_ids[]=${status.id}"
+   class="text-decoration-none text-dark fw-medium">
+   ${status.title}
+</a>
                             </div>
                         </td>
                         <td class="border-0 py-2 text-end">

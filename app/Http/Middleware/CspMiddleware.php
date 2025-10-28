@@ -13,7 +13,7 @@ class CspMiddleware
         $response = $next($request);
 
         // Set CSP header with dynamic domain
-        $response->header('Content-Security-Policy', "connect-src 'self' {$domain}");
+        $response->header('Content-Security-Policy', "connect-src 'self' $domain");
         return $response;
     }
 }

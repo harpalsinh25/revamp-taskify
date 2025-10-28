@@ -3,7 +3,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\RoleMiddleware as SpatieRoleMiddleware;
+
 
 class CustomRoleMiddleware extends SpatieRoleMiddleware
 {
@@ -12,7 +16,6 @@ class CustomRoleMiddleware extends SpatieRoleMiddleware
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     *
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function handle($request, Closure $next, $role, $guard = null)
@@ -20,7 +23,7 @@ class CustomRoleMiddleware extends SpatieRoleMiddleware
         // dd($guard);
         $guard = getGuardName();
         // dd($guard);
-        if (! $guard) {
+        if (!$guard) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => true, 'message' => get_label('please login', 'Please login')]);
             }
@@ -31,7 +34,7 @@ class CustomRoleMiddleware extends SpatieRoleMiddleware
             ? $role
             : explode('|', $role);
 
-        if (! getAuthenticatedUser()->hasAnyRole($roles)) {
+        if (!getAuthenticatedUser()->hasAnyRole($roles)) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => true, 'message' => get_label('un_authorized_action', 'Un authorized action!')]);
             }

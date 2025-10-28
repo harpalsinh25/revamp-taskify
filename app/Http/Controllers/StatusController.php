@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Status;
-use App\Services\DeletionService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class StatusController extends Controller
 {
@@ -70,6 +72,7 @@ class StatusController extends Controller
      * }
      */
 
+
     public function store(Request $request)
     {
         try {
@@ -77,7 +80,7 @@ class StatusController extends Controller
                 'title' => ['required', 'string', 'max:255'],
                 'color' => ['required', 'string'],
                 'role_ids' => ['nullable', 'array'],
-                'role_ids.*' => ['integer', 'exists:roles,id'],
+                'role_ids.*' => ['integer', 'exists:roles,id']
             ]);
 
             $formFields['slug'] = generateUniqueSlug($request->title, Status::class);
@@ -85,7 +88,7 @@ class StatusController extends Controller
             $status = Status::create($formFields);
 
             if ($status) {
-                if (! empty($request->role_ids)) {
+                if (!empty($request->role_ids)) {
                     $status->roles()->attach($request->role_ids);
                 }
 
@@ -99,13 +102,13 @@ class StatusController extends Controller
                     ],
                     // Keep your existing response structure for backward compatibility
                     'id' => $status->id,
-                    'status' => $status,
+                    'status' => $status
                 ]);
             }
 
             return response()->json([
                 'error' => true,
-                'message' => "Status couldn't be created.",
+                'message' => "Status couldn't be created."
             ], 500);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
@@ -113,7 +116,7 @@ class StatusController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => "Status couldn't be created.",
+                'message' => "Status couldn't be created."
             ], 500);
         }
     }
@@ -138,7 +141,7 @@ class StatusController extends Controller
         $canDelete = checkPermission('delete_statuses');
 
         $status = $status
-            ->paginate(request('limit'))
+            ->paginate(request("limit"))
             ->through(function ($status) use ($canEdit, $canDelete) {
                 $roles = $status->roles->pluck('name')->map(function ($roleName) {
                     return ucfirst($roleName);
@@ -157,11 +160,11 @@ class StatusController extends Controller
                         '<i class="bx bx-trash text-danger mx-1"></i>' .
                         '</button>';
                 }
-                $actions = $actions ? $actions : '-';
+                $actions = $actions ?: '-';
                 return [
                     'id' => $status->id,
-                    'title' => $status->title . ($status->id === 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
-                    'roles_has_access' => $roles ? $roles : ' - ',
+                    'title' => $status->title . ($status->id == 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
+                    'roles_has_access' => $roles ?: ' - ',
                     'color' => '<span class="badge bg-' . $status->color . '">' . $status->title . '</span>',
                     'created_at' => format_date($status->created_at, true),
                     'updated_at' => format_date($status->updated_at, true),
@@ -170,8 +173,8 @@ class StatusController extends Controller
             });
 
         return response()->json([
-            'rows' => $status->items(),
-            'total' => $total,
+            "rows" => $status->items(),
+            "total" => $total,
         ]);
     }
 
@@ -241,24 +244,24 @@ class StatusController extends Controller
 
         if ($id) {
             $status = $statusQuery->find($id);
-            if (! $status) {
+            if (!$status) {
                 return formatApiResponse(
                     false,
                     'Status not found',
                     [
                         'total' => 0,
-                        'data' => [],
+                        'data' => []
                     ]
                 );
             }
 
-            if (! canSetStatus($status)) {
+            if (!canSetStatus($status)) {
                 return formatApiResponse(
                     false,
                     'Access denied for the specified status',
                     [
                         'total' => 0,
-                        'data' => [],
+                        'data' => []
                     ]
                 );
             }
@@ -275,58 +278,61 @@ class StatusController extends Controller
                             'color' => $status->color,
                             'roles' => [
                                 'ids' => $status->roles()->pluck('id')->toArray(),
-                                'names' => $status->roles()->pluck('name')->toArray(),
+                                'names' => $status->roles()->pluck('name')->toArray()
                             ],
                             'created_at' => format_date($status->created_at, to_format: 'Y-m-d'),
                             'updated_at' => format_date($status->updated_at, to_format: 'Y-m-d'),
-                        ],
-                    ],
+                        ]
+                    ]
                 ]
             );
-        }
-        $statuses = $statusQuery->get()->filter(function ($status) {
-            return canSetStatus($status);
-        });
+        } else {
+            $statuses = $statusQuery->get()->filter(function ($status) {
+                return canSetStatus($status);
+            });
 
-        $total = $statuses->count(); // Count only accessible statuses
+            $total = $statuses->count(); // Count only accessible statuses
 
-        $statuses = $statuses->sortBy($sort, $order === 'DESC' ? SORT_DESC : SORT_ASC)
-            ->slice($offset, $limit);
+            $statuses = $statuses->sortBy($sort, $order === 'DESC' ? SORT_DESC : SORT_ASC)
+                ->slice($offset, $limit);
 
-        if ($statuses->isEmpty()) {
+            if ($statuses->isEmpty()) {
+                return formatApiResponse(
+                    false,
+                    'Statuses not found',
+                    [
+                        'total' => 0,
+                        'data' => []
+                    ]
+                );
+            }
+
+            $data = $statuses->map(function ($status) {
+                return [
+                    'id' => $status->id,
+                    'title' => $status->title,
+                    'color' => $status->color,
+                    'roles' => [
+                        'ids' => $status->roles()->pluck('id')->toArray(),
+                        'names' => $status->roles()->pluck('name')->toArray()
+                    ],
+                    'created_at' => format_date($status->created_at, to_format: 'Y-m-d'),
+                    'updated_at' => format_date($status->updated_at, to_format: 'Y-m-d'),
+                ];
+            });
+
             return formatApiResponse(
                 false,
-                'Statuses not found',
+                'Statuses retrieved successfully',
                 [
-                    'total' => 0,
-                    'data' => [],
+                    'total' => $total,
+                    'data' => $data->values() // Ensure proper reindexing
                 ]
             );
         }
-
-        $data = $statuses->map(function ($status) {
-            return [
-                'id' => $status->id,
-                'title' => $status->title,
-                'color' => $status->color,
-                'roles' => [
-                    'ids' => $status->roles()->pluck('id')->toArray(),
-                    'names' => $status->roles()->pluck('name')->toArray(),
-                ],
-                'created_at' => format_date($status->created_at, to_format: 'Y-m-d'),
-                'updated_at' => format_date($status->updated_at, to_format: 'Y-m-d'),
-            ];
-        });
-
-        return formatApiResponse(
-            false,
-            'Statuses retrieved successfully',
-            [
-                'total' => $total,
-                'data' => $data->values(), // Ensure proper reindexing
-            ]
-        );
     }
+
+
 
     /**
      * Get details of a specific status.
@@ -372,30 +378,31 @@ class StatusController extends Controller
                 'error' => false,
                 'message' => 'Status retrieved successfully.',
                 'status' => $status,
-                'roles' => $roles,
+                'roles' => $roles
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Status not found.',
+                'message' => 'Status not found.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Could not retrieve status.',
+                'message' => 'Could not retrieve status.'
             ], 500);
         }
     }
+
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
+        //
     }
 
     /**
@@ -447,7 +454,7 @@ class StatusController extends Controller
                 'title' => ['required', 'string', 'max:255'],
                 'color' => ['required', 'string'],
                 'role_ids' => ['nullable', 'array'],
-                'role_ids.*' => ['integer', 'exists:roles,id'],
+                'role_ids.*' => ['integer', 'exists:roles,id']
             ]);
 
             $status = Status::findOrFail($request->id);
@@ -461,13 +468,13 @@ class StatusController extends Controller
                 return response()->json([
                     'error' => false,
                     'message' => 'Status updated successfully.',
-                    'id' => $status->id,
+                    'id' => $status->id
                 ]);
             }
 
             return response()->json([
                 'error' => true,
-                'message' => "Status couldn't be updated.",
+                'message' => "Status couldn't be updated."
             ], 500);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
@@ -475,15 +482,16 @@ class StatusController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Status not found.',
+                'message' => 'Status not found.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => "Status couldn't be updated.",
+                'message' => "Status couldn't be updated."
             ], 500);
         }
     }
+
 
     /**
      * Delete a status.
@@ -531,7 +539,7 @@ class StatusController extends Controller
             if ($data->error) {
                 return response()->json([
                     'error' => true,
-                    'message' => $data->message,
+                    'message' => $data->message
                 ]);
             }
 
@@ -539,27 +547,28 @@ class StatusController extends Controller
                 'error' => false,
                 'message' => 'Status deleted successfully.',
                 'id' => $id,
-                'title' => $status->title,
+                'title' => $status->title
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Status not found.',
+                'message' => 'Status not found.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => "Status couldn't be deleted.",
+                'message' => "Status couldn't be deleted."
             ], 500);
         }
     }
+
 
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:statuses,id', // Ensure each ID in 'ids' is an integer and exists in the table
+            'ids.*' => 'integer|exists:statuses,id' // Ensure each ID in 'ids' is an integer and exists in the table
         ]);
 
         $ids = $validatedData['ids'];
@@ -572,7 +581,7 @@ class StatusController extends Controller
         foreach ($ids as $id) {
             $status = Status::findOrFail($id);
             if ($status) {
-                if ($status->id === 0) {
+                if ($status->id == 0) {
                     $defaultStatusIds[] = $id;
                 } else {
                     $status->projects(false)->update(['status_id' => 0]);
@@ -586,11 +595,13 @@ class StatusController extends Controller
         }
 
         if (count($defaultStatusIds) > 0) {
-            if (count($ids) === 1) {
+            if (count($ids) == 1) {
                 return response()->json(['error' => true, 'message' => 'Default status cannot be deleted.']);
+            } else {
+                return response()->json(['error' => false, 'message' => 'Status(es) deleted successfully except default.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
             }
-            return response()->json(['error' => false, 'message' => 'Status(es) deleted successfully except default.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
+        } else {
+            return response()->json(['error' => false, 'message' => 'Status(es) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
         }
-        return response()->json(['error' => false, 'message' => 'Status(es) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles]);
     }
 }

@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Candidate;
 use App\Models\Interview;
-use App\Models\User;
-use App\Services\DeletionService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use App\Services\DeletionService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InterviewController extends Controller
 {
-    public function index()
-    {
+
+    public function index(){
+
         $interviews = Interview::all();
         $candidates = Candidate::all();
         $users = User::all();
@@ -23,6 +24,8 @@ class InterviewController extends Controller
 
         return view('interviews.index', compact('interviews', 'candidates', 'users'));
     }
+
+
 
     // Method: store
     /**
@@ -41,7 +44,6 @@ class InterviewController extends Controller
      * @bodyParam mode string required The mode of the interview (e.g., Online, In-Person). Maximum length is 255 characters. Example: Online
      * @bodyParam location string nullable The location of the interview (if applicable). Maximum length is 255 characters. Example: Zoom
      * @bodyParam status string required The status of the interview. Must be one of: scheduled, completed, cancelled. Example: scheduled
-     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 201 {
@@ -72,24 +74,28 @@ class InterviewController extends Controller
      * }
      */
 
-    public function store(Request $request)
-    {
+
+    public function store(Request $request){
+
         $isApi = request('isApi', false);
-        $form_fields = $request->validate([
+        $form_fields =  $request->validate([
             'candidate_id' => 'required|exists:candidates,id',
             'interviewer_id' => 'required|exists:users,id',
             'round' => 'required|string|max:255',
             'scheduled_at' => 'required|date',
             'mode' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
-            'status' => 'required|string|max:255|in:scheduled,completed,cancelled',
+            'status' => 'required|string|max:255|in:scheduled,completed,cancelled'
         ]);
+
+
 
         $interview = Interview::create($form_fields);
         // trigger notification
 
         $candidate = Candidate::find($request->candidate_id);
         $interviewer = User::find($request->interviewer_id);
+
 
         $data = [
             'type' => 'interview_assignment',
@@ -102,18 +108,19 @@ class InterviewController extends Controller
             'interviewer_first_name' => $interviewer->first_name,
             'interviewer_last_name' => $interviewer->last_name,
             'access_url' => 'interviews.index',
-            'action' => 'update',
+            'action' => 'update'
         ];
 
-        $recipients = ['u_' . $interviewer->id, 'ca' . $candidate->id];
+        $recipients =['u_' . $interviewer->id, 'ca' . $candidate->id];
         processNotifications($data, $recipients);
+
 
         if ($isApi) {
             return formatApiResponse(
                 false,
                 'Interview Created Successfully!',
                 [
-                    'data' => formatInterview($interview),
+                    'data' => formatInterview($interview)
                 ],
                 200
             );
@@ -122,9 +129,13 @@ class InterviewController extends Controller
         return response()->json([
             'error' => false,
             'message' => 'Interview Created Successfully!',
-            'interview' => $interview,
+            'interview' => $interview
         ]);
+
+
     }
+
+
 
     // Method: update
     /**
@@ -137,7 +148,6 @@ class InterviewController extends Controller
      * @group Interview Management
      *
      * @urlParam id integer required The ID of the interview to update. Must exist in the `interviews` table. Example: 1
-     *
      * @bodyParam candidate_id integer required The ID of the candidate for the interview. Must exist in the `candidates` table. Example: 101
      * @bodyParam interviewer_id integer required The ID of the interviewer. Must exist in the `users` table. Example: 7
      * @bodyParam round string required The interview round (e.g., Technical, HR). Maximum length is 255 characters. Example: Technical
@@ -145,7 +155,6 @@ class InterviewController extends Controller
      * @bodyParam mode string required The mode of the interview (e.g., Online, In-Person). Maximum length is 255 characters. Example: Online
      * @bodyParam location string nullable The location of the interview (if applicable). Maximum length is 255 characters. Example: Zoom
      * @bodyParam status string required The status of the interview. Must be one of: scheduled, completed, cancelled. Example: completed
-     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -181,8 +190,10 @@ class InterviewController extends Controller
      * }
      */
 
+
     public function update(Request $request, $id)
     {
+
         $isApi = request('isApi', false);
         $request->validate([
             'candidate_id' => 'required|exists:candidates,id',
@@ -191,7 +202,7 @@ class InterviewController extends Controller
             'scheduled_at' => 'required|date',
             'mode' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
-            'status' => 'required|string|max:255|in:scheduled,completed,cancelled',
+            'status' => 'required|string|max:255|in:scheduled,completed,cancelled'
         ]);
 
         $interview = Interview::findOrFail($id);
@@ -200,7 +211,7 @@ class InterviewController extends Controller
 
         // trigger notification if status has changed
 
-        if ($oldStatus !== $request->status) {
+        if($oldStatus !== $request->status) {
             $candidate = Candidate::find($request->candidate_id);
             $interviewer = User::find($request->interviewer_id);
 
@@ -210,7 +221,7 @@ class InterviewController extends Controller
                 'candidate_name' => $candidate->name,
                 'round' => $interview->round,
                 'scheduled_at' => $interview->scheduled_at,
-                'mode' => $interview->mode,
+                'mode' =>$interview->mode,
                 'location' => $interview->location,
                 'interviewer_first_name' => $interviewer->first_name,
                 'interviewer_last_name' => $interviewer->last_name,
@@ -219,19 +230,20 @@ class InterviewController extends Controller
                 'updater_first_name' => getAuthenticatedUser()->first_name,
                 'updater_last_name' => getAuthenticatedUser()->last_name,
                 'access_url' => 'interviews',
-                'action' => 'update',
+                'action' => 'update'
             ];
 
             $recipients = ['u_' . $interviewer->id, 'ca' . $candidate->id];
             processNotifications($data, $recipients);
         }
 
+
         if ($isApi) {
             return formatApiResponse(
                 false,
                 'Interview Updated Successfully!',
                 [
-                    'data' => formatInterview($interview),
+                    'data' => formatInterview($interview)
                 ],
                 200
             );
@@ -240,12 +252,12 @@ class InterviewController extends Controller
         return response()->json([
             'error' => false,
             'message' => 'Interview Updated Successfully!',
-            'interview' => $interview,
+            'interview' => $interview
         ]);
     }
 
-    public function destroy_multiple(Request $request)
-    {
+    public function destroy_multiple(Request $request) {
+
         $validatedData = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:interviews,id',
@@ -254,7 +266,7 @@ class InterviewController extends Controller
         $ids = $validatedData['ids'];
         $deletedIds = [];
 
-        foreach ($ids as $id) {
+        foreach($ids as $id) {
             $interview = Interview::findOrFail($id);
             $deletedIds[] = $id;
 
@@ -264,9 +276,10 @@ class InterviewController extends Controller
         return response()->json([
             'error' => false,
             'message' => 'Interviews Deleted Successfully!',
-            'deleted_ids' => $deletedIds,
+            'deleted_ids' => $deletedIds
         ]);
     }
+
 
     // Method: destroy
     /**
@@ -297,13 +310,19 @@ class InterviewController extends Controller
      * }
      */
 
-    public function destroy($id)
-    {
+
+    public function destroy($id) {
+
         try {
+
             $interview = Interview::findOrFail($id);
 
-            return DeletionService::delete(Interview::class, $interview->id, 'Interview');
+
+            $response = DeletionService::delete(Interview::class, $interview->id, 'Interview');
+
+            return $response;
         } catch (ModelNotFoundException $e) {
+
             return formatApiResponse(
                 false,
                 'Interview not found',
@@ -317,7 +336,7 @@ class InterviewController extends Controller
     {
         $search = request('search');
         $order = request('order', 'DESC');
-        $limit = request('limit', 10);
+        $limit = request('limit',10);
         $offset = request('offset');
         $sort = request('sort', 'id');
         $interviewStatus = request('status');
@@ -348,6 +367,8 @@ class InterviewController extends Controller
                 break;
         }
 
+
+
         // dd($interviewStatus);
 
         $query = Interview::query();
@@ -356,22 +377,22 @@ class InterviewController extends Controller
         if ($search) {
             $query->where(function ($query) use ($search) {
                 $query->whereHas('candidate', function ($q) use ($search) {
-                    $q->where('candidates.id', 'like', "%{$search}%")
-                        ->orWhere('candidates.name', 'like', "%{$search}%");
+                    $q->where('candidates.id', 'like', "%$search%")
+                        ->orWhere('candidates.name', 'like', "%$search%");
                 })
                     ->orWhereHas('interviewer', function ($q) use ($search) {
-                        $q->where('users.id', 'like', "%{$search}%")
-                            ->orWhere('users.first_name', 'like', "%{$search}%")
-                            ->orWhere('users.last_name', 'like', "%{$search}%");
+                        $q->where('users.id', 'like', "%$search%")
+                            ->orWhere('users.first_name', 'like', "%$search%")
+                            ->orWhere('users.last_name', 'like', "%$search%");
                     })
-                    ->orWhere('round', 'like', "%{$search}%")
-                    ->orWhere('status', 'like', "%{$search}%")
-                    ->orWhere('location', 'like', "%{$search}%")
-                    ->orWhere('mode', 'like', "%{$search}%");
+                    ->orWhere('round', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhere('location', 'like', "%$search%")
+                    ->orWhere('mode', 'like', "%$search%");
             });
         }
 
-        if ($interviewStatus) {
+        if($interviewStatus) {
             $query->where('status', $interviewStatus);
         }
 
@@ -391,6 +412,7 @@ class InterviewController extends Controller
             ->take($limit)
             ->get()
             ->map(function ($interview) use ($canDelete, $canEdit) {
+
                 $actions = '';
 
                 if ($canEdit) {
@@ -423,7 +445,7 @@ class InterviewController extends Controller
                     'status' => ucwords($interview->status),
                     'created_at' => format_date($interview->created_at),
                     'updated_at' => format_date($interview->updated_at),
-                    'actions' => $actions,
+                    'actions' => $actions
                 ];
             });
 
@@ -433,6 +455,8 @@ class InterviewController extends Controller
             'total' => $total,
         ]);
     }
+
+
 
     // Method: apiList
     /**
@@ -445,7 +469,6 @@ class InterviewController extends Controller
      * @group Interview Management
      *
      * @urlParam id integer optional The ID of the interview to retrieve. If provided, returns a single interview. Must exist in the `interviews` table. Example: 1
-     *
      * @queryParam search string optional Filters interviews by candidate name, interviewer name, round, status, location, or mode. Example: Technical
      * @queryParam sort string optional The field to sort by (id, newest, oldest, recently-updated, earliest-updated). Defaults to id. Example: newest
      * @queryParam limit integer optional The number of interviews per page (1-100). Defaults to 10. Example: 20
@@ -501,9 +524,11 @@ class InterviewController extends Controller
      * }
      */
 
+
     public function apiList(Request $request, $id = null)
     {
         try {
+
             // Validate query parameters
             $validated = $request->validate([
                 'search' => 'nullable|string|max:255',
@@ -516,7 +541,7 @@ class InterviewController extends Controller
             ]);
 
             // Validate ID if provided
-            if ($id !== null && (! is_numeric($id) || $id <= 0)) {
+            if ($id !== null && (!is_numeric($id) || $id <= 0)) {
                 throw new \InvalidArgumentException('Invalid candidate ID.');
             }
 
@@ -558,10 +583,11 @@ class InterviewController extends Controller
             $query = Interview::query()->with('candidate', 'interviewer');
 
             if ($id) {
+
                 $interview = $query->find($id);
 
                 // If interview is not found
-                if (! $interview) {
+                if (!$interview) {
                     return formatApiResponse(
                         true,
                         'Interview not found',
@@ -569,6 +595,7 @@ class InterviewController extends Controller
                         404
                     );
                 }
+
 
                 $data = formatInterview($interview);
                 $data['can_delete'] = checkPermission('delete_interview');
@@ -598,18 +625,18 @@ class InterviewController extends Controller
             if ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->whereHas('candidate', function ($q) use ($search) {
-                        $q->where('candidates.id', 'like', "%{$search}%")
-                            ->orWhere('candidates.name', 'like', "%{$search}%");
+                        $q->where('candidates.id', 'like', "%$search%")
+                            ->orWhere('candidates.name', 'like', "%$search%");
                     })
                         ->orWhereHas('interviewer', function ($q) use ($search) {
-                            $q->where('users.id', 'like', "%{$search}%")
-                                ->orWhere('users.first_name', 'like', "%{$search}%")
-                                ->orWhere('users.last_name', 'like', "%{$search}%");
+                            $q->where('users.id', 'like', "%$search%")
+                                ->orWhere('users.first_name', 'like', "%$search%")
+                                ->orWhere('users.last_name', 'like', "%$search%");
                         })
-                        ->orWhere('round', 'like', "%{$search}%")
-                        ->orWhere('status', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%")
-                        ->orWhere('mode', 'like', "%{$search}%");
+                        ->orWhere('round', 'like', "%$search%")
+                        ->orWhere('status', 'like', "%$search%")
+                        ->orWhere('location', 'like', "%$search%")
+                        ->orWhere('mode', 'like', "%$search%");
                 });
             }
 
@@ -662,7 +689,7 @@ class InterviewController extends Controller
                     'permissions' => [
                         'can_edit' => $canEdit,
                         'can_delete' => $canDelete,
-                    ],
+                    ]
                 ],
                 200
             );

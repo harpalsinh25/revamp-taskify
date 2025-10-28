@@ -148,6 +148,17 @@
                         </div>
                     </div>
                     @endif
+
+                    @php
+                        $customFields = \App\Models\CustomField::where('module', 'user')->get();
+                    @endphp
+
+                    @if($customFields->isNotEmpty())
+                        <div class="mb-3">
+                            <x-custom-fields :fields="$customFields" :values="[]" :isEdit="false" />
+                        </div>
+                    @endif
+
                     <div class="mt-4">
                         <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('create', 'Create') ?></button>
                         <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>

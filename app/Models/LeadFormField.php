@@ -9,7 +9,26 @@ class LeadFormField extends Model
 {
     use HasFactory;
 
-    public const FIELD_TYPES = [
+    protected $fillable = [
+        'form_id',
+        'label',
+        'name',
+        'type',
+        'is_required',
+        'is_mapped',
+        'options',
+        'placeholder',
+        'order',
+        'validation_rules'
+    ];
+
+    protected $casts = [
+        'is_required' => 'boolean',
+        'is_mapped' => 'boolean',
+        'options' => 'array'
+    ];
+
+    const FIELD_TYPES = [
         'text' => 'Text',
         'email' => 'Email',
         'tel' => 'Phone',
@@ -19,10 +38,10 @@ class LeadFormField extends Model
         'radio' => 'Radio Button',
         'date' => 'Date',
         'number' => 'Number',
-        'url' => 'URL',
+        'url' => 'URL'
     ];
 
-    public const MAPPABLE_FIELDS = [
+    const MAPPABLE_FIELDS = [
         'first_name' => 'First Name',
         'last_name' => 'Last Name',
         'email' => 'Email',
@@ -43,31 +62,12 @@ class LeadFormField extends Model
         'country_iso_code' => 'Country ISO Code',
     ];
 
-    public const REQUIRED_FIELDS = [
+    const REQUIRED_FIELDS = [
         'first_name',
         'last_name',
         'email',
         'phone',
-        'company',
-    ];
-
-    protected $fillable = [
-        'form_id',
-        'label',
-        'name',
-        'type',
-        'is_required',
-        'is_mapped',
-        'options',
-        'placeholder',
-        'order',
-        'validation_rules',
-    ];
-
-    protected $casts = [
-        'is_required' => 'boolean',
-        'is_mapped' => 'boolean',
-        'options' => 'array',
+        'company'
     ];
 
     public function leadForm()
@@ -77,6 +77,6 @@ class LeadFormField extends Model
 
     public function getValidationRulesAttribute($value)
     {
-        return $value ? $value : 'nullable';
+        return $value ?: 'nullable';
     }
 }

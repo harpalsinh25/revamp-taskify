@@ -13,6 +13,6 @@ class Template extends Model
         'name',
         'subject',
         'content',
-        'status',
+        'status'
     ];
 }

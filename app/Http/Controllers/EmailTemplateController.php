@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\EmailTemplate;
 use App\Services\DeletionService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EmailTemplateController extends Controller
 {
@@ -20,6 +20,23 @@ class EmailTemplateController extends Controller
         $templates = EmailTemplate::all();
         return view('email-templates.index', compact('templates'));
     }
+
+    /**
+     * Extract dynamic placeholders from email body.
+     * Excludes system-wide constants like COMPANY_LOGO, SUBJECT, etc.
+     */
+    private function extractPlaceholders($body)
+    {
+        preg_match_all('/\{(.*?)\}/', $body, $matches);
+        $placeholders = array_unique($matches[0]);
+
+        $exclude = ['{COMPANY_LOGO}', '{SUBJECT}', '{CURRENT_YEAR}', '{COMPANY_TITLE}'];
+
+        return array_values(array_filter($placeholders, function ($ph) use ($exclude) {
+            return !in_array($ph, $exclude);
+        }));
+    }
+
 
     // Method: store
     /**
@@ -36,7 +53,6 @@ class EmailTemplateController extends Controller
      * @bodyParam body string nullable The body of the email template, optionally base64-encoded. Example: <p>Hello USER_NAME!</p>
      * @bodyParam is_encoded string optional Indicates if the body is base64-encoded (value: '1'). Defaults to false. Example: 1
      * @bodyParam content string optional The base64-encoded body content, used if is_encoded is '1'. Example: PGh0bWw+PHA+SGVsbG8ge1VTRVJfTkFNRX0hPC9wPjwvaHRtbD4=
-     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 201 {
@@ -73,15 +89,16 @@ class EmailTemplateController extends Controller
     public function store(Request $request)
     {
         $isApi = $request->get('isApi', false);
-        if ($request->has('is_encoded') && $request->is_encoded === '1') {
+        if ($request->has('is_encoded') && $request->is_encoded == '1') {
             $decodedContent = base64_decode($request->content);
             $request->merge(['body' => $decodedContent]);
         }
         try {
+
             $rule = $request->validate([
                 'name' => 'required|string|max:255',
                 'subject' => 'required|string|max:255',
-                'body' => 'nullable',
+                'body' => 'nullable'
             ]);
             $rule['workspace_id'] = getWorkspaceId();
             $rule['placeholders'] = $this->extractPlaceholders($rule['body']);
@@ -93,15 +110,16 @@ class EmailTemplateController extends Controller
                     false,
                     'Email Template Created Successfully!',
                     [
-                        'data' => formatEmailTemplate($email_templates),
+                        'data' => formatEmailTemplate($email_templates)
                     ]
                 );
+            } else {
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Email Template Created Successfully!',
+                    'email_templates' => $email_templates
+                ]);
             }
-            return response()->json([
-                'error' => false,
-                'message' => 'Email Template Created Successfully!',
-                'email_templates' => $email_templates,
-            ]);
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -111,12 +129,12 @@ class EmailTemplateController extends Controller
                     'code' => $e->getCode(),
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString(),
+                    'trace' => $e->getTraceAsString()
                 ],
-                500
-            );
+                500);
         }
     }
+
 
     // Method: update
     /**
@@ -129,13 +147,11 @@ class EmailTemplateController extends Controller
      * @group Email Template Management
      *
      * @urlParam id integer required The ID of the email template to update. Must exist in the `email_templates` table. Example: 1
-     *
      * @bodyParam name string required The name of the email template. Maximum length is 255 characters. Example: Welcome Template
      * @bodyParam subject string required The subject of the email template. Maximum length is 255 characters. Example: Welcome to Our Company
      * @bodyParam body string required The body of the email template, optionally base64-encoded. Example: <p>Hello USER_NAME!</p>
      * @bodyParam is_encoded string optional Indicates if the body is base64-encoded (value: '1'). Defaults to false. Example: 1
      * @bodyParam content string optional The base64-encoded body content, used if is_encoded is '1'. Example: PGh0bWw+PHA+SGVsbG8ge1VTRVJfTkFNRX0hPC9wPjwvaHRtbD4=
-     *
      * @queryParam isApi boolean optional Indicates if the response should be formatted for API use. Defaults to false. Example: true
      *
      * @response 200 {
@@ -169,18 +185,20 @@ class EmailTemplateController extends Controller
      * }
      */
 
+
     public function update(Request $request, $id)
     {
         $isApi = $request->get('isApi', false);
-        if ($request->has('is_encoded') && $request->is_encoded === '1') {
+        if ($request->has('is_encoded') && $request->is_encoded == '1') {
             $decodedContent = base64_decode($request->content);
             $request->merge(['body' => $decodedContent]);
         }
         try {
+
             $rule = $request->validate([
                 'name' => 'required|string|max:255',
                 'subject' => 'required|string|max:255',
-                'body' => 'required',
+                'body' => 'required'
             ]);
 
             $rule['placeholders'] = $this->extractPlaceholders($rule['body']);
@@ -193,20 +211,23 @@ class EmailTemplateController extends Controller
                     false,
                     'Email Template Created Successfully!',
                     [
-                        'data' => formatEmailTemplate($email_templates),
+                        'data' => formatEmailTemplate($email_templates)
                     ]
                 );
+            } else {
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Email Template Updated Successfully!',
+                    'email_templates' => $email_templates
+                ]);
             }
-            return response()->json([
-                'error' => false,
-                'message' => 'Email Template Updated Successfully!',
-                'email_templates' => $email_templates,
-            ]);
         } catch (\Exception $e) {
             Log::error('Failed to update email template', ['error' => $e->getMessage()]);
             return Response::json(['error' => true, 'message' => 'Something went wrong.'], 500);
         }
     }
+
+
 
     // Method: destroy
     /**
@@ -235,6 +256,7 @@ class EmailTemplateController extends Controller
      *   "message": "Something went wrong."
      * }
      */
+
 
     public function destroy(Request $request, $id)
     {
@@ -274,7 +296,7 @@ class EmailTemplateController extends Controller
             return response()->json([
                 'error' => false,
                 'message' => 'Email Template(s) deleted successfully.',
-                'id' => $deletedIds,
+                'id' => $deletedIds
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to delete multiple email templates', ['error' => $e->getMessage()]);
@@ -298,9 +320,9 @@ class EmailTemplateController extends Controller
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('subject', 'like', "%{$search}%")
-                        ->orWhere('body', 'like', "%{$search}%");
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('subject', 'like', "%$search%")
+                        ->orWhere('body', 'like', "%$search%");
                 });
             }
 
@@ -345,19 +367,22 @@ class EmailTemplateController extends Controller
                             : '',
                         'created_at' => format_date($template->created_at),
                         'updated_at' => format_date($template->updated_at),
-                        'actions' => $actions ? $actions : '-',
+                        'actions' => $actions ?: '-',
                     ];
                 });
 
             return response()->json([
                 'rows' => $templates,
-                'total' => $total,
+                'total' => $total
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to fetch email templates list', ['error' => $e->getMessage()]);
             return Response::json(['error' => true, 'message' => 'Something went wrong.'], 500);
         }
     }
+
+
+
 
     // Method: apiList
     /**
@@ -370,7 +395,6 @@ class EmailTemplateController extends Controller
      * @group Email Template Management
      *
      * @urlParam id integer optional The ID of the email template to retrieve. If provided, returns a single template. Must exist in the `email_templates` table. Example: 1
-     *
      * @queryParam search string optional Filters templates by name, subject, or body. Example: Welcome
      * @queryParam sort string optional The field to sort by (id, name, subject, created_at, updated_at). Defaults to id. Example: name
      * @queryParam order string optional The sort order (ASC, DESC). Defaults to DESC. Example: ASC
@@ -435,7 +459,7 @@ class EmailTemplateController extends Controller
             ]);
 
             // Validate ID if provided
-            if ($id !== null && (! is_numeric($id) || $id <= 0)) {
+            if ($id !== null && (!is_numeric($id) || $id <= 0)) {
                 throw new \InvalidArgumentException('Invalid email template ID.');
             }
 
@@ -556,21 +580,5 @@ class EmailTemplateController extends Controller
                 500
             );
         }
-    }
-
-    /**
-     * Extract dynamic placeholders from email body.
-     * Excludes system-wide constants like COMPANY_LOGO, SUBJECT, etc.
-     */
-    private function extractPlaceholders($body)
-    {
-        preg_match_all('/\{(.*?)\}/', $body, $matches);
-        $placeholders = array_unique($matches[0]);
-
-        $exclude = ['{COMPANY_LOGO}', '{SUBJECT}', '{CURRENT_YEAR}', '{COMPANY_TITLE}'];
-
-        return array_values(array_filter($placeholders, function ($ph) use ($exclude) {
-            return ! in_array($ph, $exclude);
-        }));
     }
 }

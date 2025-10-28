@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use PDO;
+use PDOException;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use PDO;
-use PDOException;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Session;
 
 class InstallerController extends Controller
 {
@@ -32,6 +35,18 @@ class InstallerController extends Controller
         } else {
             return redirect('/');
         }
+    }
+
+    private function clearAndReturnToInstallView()
+    {
+        // Clear cache
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+
+        // Return install view
+        return view('install');
     }
 
     public function config_db(Request $request)
@@ -58,7 +73,7 @@ class InstallerController extends Controller
             file_put_contents($envFilePath, $envContent);
             return response()->json(['error' => false, 'message' => 'Connected to the database successfully.']);
         } catch (PDOException $e) {
-            return response()->json(['error' => true, 'message' => 'Connection failed: ' . $e->getMessage()]);
+            return response()->json(['error' => true, 'message' => "Connection failed: " . $e->getMessage()]);
         }
     }
 
@@ -71,7 +86,7 @@ class InstallerController extends Controller
             'first_name' => ['required'],
             'last_name' => ['required'],
             'email' => ['required', 'email'],
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:6|confirmed'
         ]);
 
         // Hash the password
@@ -99,6 +114,7 @@ class InstallerController extends Controller
             $sql = file_get_contents($sqlDumpPath);
             DB::unprepared($sql);
 
+
             $user = User::create($userFields);
             if ($user) {
                 $user->assignRole(1);
@@ -106,7 +122,7 @@ class InstallerController extends Controller
                 $workspaceFields = [
                     'user_id' => $user->id,
                     'title' => 'Default Workspace',
-                    'is_primary' => 1,
+                    'is_primary' => 1
                 ];
 
                 $new_workspace = Workspace::create($workspaceFields);
@@ -124,21 +140,11 @@ class InstallerController extends Controller
                 Artisan::call('view:clear');
 
                 return response()->json(['error' => false, 'message' => 'Congratulations! Installation completed successfully.']);
+            } else {
+                return response()->json(['error' => true, 'message' => 'Oops! Installation failed. Please try again.']);
             }
-            return response()->json(['error' => true, 'message' => 'Oops! Installation failed. Please try again.']);
+        } else {
+            return response()->json(['error' => true, 'message' => 'Oops! Installation couldn\'t process.']);
         }
-        return response()->json(['error' => true, 'message' => 'Oops! Installation couldn\'t process.']);
-    }
-
-    private function clearAndReturnToInstallView()
-    {
-        // Clear cache
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
-        Artisan::call('route:clear');
-        Artisan::call('view:clear');
-
-        // Return install view
-        return view('install');
     }
 }

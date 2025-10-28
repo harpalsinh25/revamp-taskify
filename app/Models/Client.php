@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Auth\Passwords\CanResetPassword;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasPermissions;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasPermissions;
-use Spatie\Permission\Traits\HasRoles;
+
 
 class Client extends Authenticatable implements MustVerifyEmail
 {
@@ -36,7 +38,7 @@ class Client extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'acct_create_mail_sent',
         'email_verification_mail_sent',
-        'internal_purpose',
+        'internal_purpose'
     ];
 
     /**
@@ -77,7 +79,7 @@ class Client extends Authenticatable implements MustVerifyEmail
 
     public function getresult()
     {
-        return str($this->first_name . ' ' . $this->last_name);
+        return str($this->first_name . " " . $this->last_name);
     }
 
     public function todos($status = null, $search = '')
@@ -163,13 +165,14 @@ class Client extends Authenticatable implements MustVerifyEmail
                 ->orWhere('client_id', $this->getKey()); // Include orWhere for client_id
         })
             ->where('workspace_id', getWorkspaceId()) // Apply workspace_id filter
-            ->when($status !== '', function ($query) use ($status) {
+            ->when($status != '', function ($query) use ($status) {
                 $query->where('status', $status);
             })
-            ->when($type !== '', function ($query) use ($type) {
+            ->when($type != '', function ($query) use ($type) {
                 $query->where('type', $type);
             });
     }
+
 
     public function expenses()
     {
@@ -246,5 +249,27 @@ class Client extends Authenticatable implements MustVerifyEmail
     public function pinnedTasks()
     {
         return $this->pinned()->where('pinnable_type', Task::class);
+    }
+
+    /**
+     * Get custom field values (polymorphic relationship)
+     */
+    public function customFieldValues()
+    {
+        return $this->morphMany('App\Models\CustomFieldable', 'custom_fieldable');
+    }
+
+    /**
+     * Get a specific custom field value by field ID
+     *
+     * @param int $fieldId
+     * @return string|null
+     */
+    public function getCustomFieldValue($fieldId)
+    {
+        $customFieldValue = $this->customFieldValues()
+            ->where('custom_field_id', $fieldId)
+            ->first();
+        return $customFieldValue ? $customFieldValue->value : null;
     }
 }

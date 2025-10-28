@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 
 class ValidateUploadMedia
 {
@@ -38,18 +39,18 @@ class ValidateUploadMedia
                 $mimeType = $file->getMimeType();
 
                 // Validate the file extension
-                if (! in_array('.' . $fileExtension, $allowedFileTypesArray)) {
+                if (!in_array('.' . $fileExtension, $allowedFileTypesArray)) {
                     return response()->json([
                         'error' => true,
-                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName(),
+                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName()
                     ], 400);
                 }
 
                 // Validate the MIME type
-                if (! in_array($mimeType, $allowedMimeTypes)) {
+                if (!in_array($mimeType, $allowedMimeTypes)) {
                     return response()->json([
                         'error' => true,
-                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName(),
+                        'message' => get_label('file_type_not_allowed', 'File type not allowed') . ': ' . $file->getClientOriginalName()
                     ], 400);
                 }
             }

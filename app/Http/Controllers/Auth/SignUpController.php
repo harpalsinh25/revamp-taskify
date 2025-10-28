@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Models\Client;
-use App\Models\Template;
+use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Workspace;
-use App\Notifications\AccountCreation;
 use App\Notifications\VerifyEmail;
-use App\Rules\UniqueEmailPassword;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Models\Role;
+use App\Models\Template;
+use App\Notifications\AccountCreation;
+use Illuminate\Support\Facades\Session;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Throwable;
+use Illuminate\Validation\ValidationException;
+use App\Rules\UniqueEmailPassword;
+use Illuminate\Support\Facades\Validator;
 
 class SignUpController extends Controller
 {
@@ -41,7 +43,6 @@ class SignUpController extends Controller
      * This endpoint allows a new user to sign up by providing necessary details.
      *
      * @group User Authentication
-     *
      * @bodyParam type string required The type of account ('member' for team member, 'client' for client). Example: member
      * @bodyParam first_name string required The first name of the user. Example: John
      * @bodyParam last_name string required The last name of the user. Example: Doe
@@ -96,7 +97,6 @@ class SignUpController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  bool  $isApi
-     *
      * @return \Illuminate\Http\Response
      */
 
@@ -116,7 +116,7 @@ class SignUpController extends Controller
 
         $settings = get_settings('general_settings');
 
-        if (! empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'] && ! $isApi) {
+        if (!empty($settings['recaptcha_enabled']) && $settings['recaptcha_enabled'] && !$isApi) {
             $rules['g-recaptcha-response'] = 'required|captcha';
         }
 
@@ -130,14 +130,15 @@ class SignUpController extends Controller
             $formFields = $request->validate($rules);
 
             $uniqueEmailPasswordRule = new UniqueEmailPassword($isTeamMember ? 'user' : 'client');
-            if (! $uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
+            if (!$uniqueEmailPasswordRule->passes('password', $request->input('password'))) {
                 return formatApiValidationError($isApi, ['email' => [$uniqueEmailPasswordRule->message()]]);
             }
             $primaryWorkspaceId = hasPrimaryWorkspace();
-            if (! $primaryWorkspaceId) {
+            if (!$primaryWorkspaceId) {
                 return response()->json(['error' => true, 'message' => 'Primary workspace is not set, which is required for signup. Please contact the admin for assistance.']);
+            } else {
+                $workspace = Workspace::find($primaryWorkspaceId);
             }
-            $workspace = Workspace::find($primaryWorkspaceId);
 
             $password = $request->input('password');
             $formFields['password'] = bcrypt($password);
@@ -157,7 +158,7 @@ class SignUpController extends Controller
             try {
                 $user->notify(new VerifyEmail($user));
                 $isTeamMember ? $workspace->users()->attach($user->id) : $workspace->clients()->attach($user->id);
-                if (! $isTeamMember) {
+                if (!$isTeamMember) {
                     $user->update(['email_verification_mail_sent' => 1]);
                 }
 
@@ -165,7 +166,7 @@ class SignUpController extends Controller
                     $account_creation_template = Template::where('type', 'email')
                         ->where('name', 'account_creation')
                         ->first();
-                    if (! $account_creation_template || ($account_creation_template->status !== 0)) {
+                    if (!$account_creation_template || ($account_creation_template->status !== 0)) {
                         $user->notify(new AccountCreation($user, $password));
                         $user->update(['acct_create_mail_sent' => 1]);
                     }
@@ -178,6 +179,7 @@ class SignUpController extends Controller
                     ['data' => $isTeamMember ? formatUser($user, true) : formatClient($user, true)]
                 );
             } catch (TransportExceptionInterface $e) {
+
                 $user = $isTeamMember ? User::findOrFail($user->id) : Client::findOrFail($user->id);
                 $user->delete();
                 return response()->json(['error' => true, 'message' => 'Account couldn\'t be created. An error occurred while sending the verification email. Please contact the admin for assistance.']);

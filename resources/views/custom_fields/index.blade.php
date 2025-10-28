@@ -35,6 +35,18 @@
                 <div class="card">
 
                     <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ get_label('module', 'Module') }}</label>
+                                <select class="form-select" id="module_filter">
+                                    <option value="">{{ get_label('all', 'All') }}</option>
+                                    <option value="project">{{ get_label('projects', 'Projects') }}</option>
+                                    <option value="task">{{ get_label('tasks', 'Tasks') }}</option>
+                                    <option value="client">{{ get_label('clients', 'Clients') }}</option>
+                                    <option value="user">{{ get_label('users', 'Users') }}</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="table-responsive text-nowrap">
                             <input type="hidden" id="data_type" value="settings/custom-fields">
                             <input type="hidden" id="data_table" value="table">

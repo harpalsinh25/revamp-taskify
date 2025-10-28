@@ -439,6 +439,7 @@ Route::middleware(['multiguard', 'custom-verified', 'has_workspace'])->name('api
 
     Route::post('/custom-fields', [CustomFieldController::class, 'store']);
     Route::get('/custom-fields/list', [CustomFieldController::class, 'apiList']);
+    Route::get('/custom-fields/module/{module}', [CustomFieldController::class, 'getByModule']);
 
     Route::get('/custom-fields/{id}/edit', [CustomFieldController::class, 'edit']);
     Route::post('/custom-fields/update/{id}', [CustomFieldController::class, 'update']);

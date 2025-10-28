@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
-use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Candidate extends Model implements HasMedia
 {
     use HasFactory;
     use Notifiable;
     use InteractsWithMedia;
-
-    protected $fillable = ['name','email','phone','position','source','status_id'];
 
     public function registerMediaCollections(): void
     {
@@ -27,18 +25,20 @@ class Candidate extends Model implements HasMedia
         }
     }
 
-    public function status()
-    {
+    protected $fillable = ['name','email','phone','position','source','status_id',];
+
+    public function status(){
         return $this->belongsTo(CandidateStatus::class, 'status_id');
     }
 
-    public function interviews()
-    {
+    public function interviews(){
         return $this->hasMany(Interview::class);
     }
 
     public function notifications()
     {
-        return $this->belongsToMany(Notification::class, 'candidate_notification')->where('notifications.workspace_id', getWorkspaceId())->withPivot('read_at', 'is_system', 'is_push');
+        return $this->belongsToMany(Notification::class,'candidate_notification')->where('notifications.workspace_id', getWorkspaceId())->withPivot('read_at', 'is_system', 'is_push');
     }
+
+
 }

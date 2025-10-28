@@ -3,6 +3,7 @@
 namespace Plugins\TimeTracker\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use DateTimeInterface;
 
 class Screenshot extends Model
 {
@@ -19,6 +20,20 @@ class Screenshot extends Model
         'captured_at' => 'datetime',
         'metadata' => 'array', // Automatically cast metadata to array
     ];
+
+    /**
+     * Prepare a date for array / JSON serialization.
+     * Convert to configured timezone from general settings instead of UTC.
+     *
+     * @param  \DateTimeInterface  $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        $general_settings = get_settings('general_settings');
+        $timezone = $general_settings['timezone'] ?? 'UTC';
+        return $date->setTimezone($timezone)->format('Y-m-d H:i:s');
+    }
     public function user()
     {
         return $this->belongsTo('App\Models\User', 'user_id');

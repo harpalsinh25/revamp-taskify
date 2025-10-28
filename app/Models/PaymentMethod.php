@@ -10,7 +10,7 @@ class PaymentMethod extends Model
     use HasFactory;
     protected $fillable = [
         'workspace_id',
-        'title',
+        'title'
     ];
 
     public function payslips()

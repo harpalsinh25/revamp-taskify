@@ -12,7 +12,7 @@ class ExpenseType extends Model
     protected $fillable = [
         'workspace_id',
         'title',
-        'description',
+        'description'
     ];
 
     public function expenses()

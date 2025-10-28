@@ -12,7 +12,7 @@ class CustomFieldable extends Model
         'custom_field_id',
         'custom_fieldable_id',
         'custom_fieldable_type',
-        'value',
+        'value'
     ];
 
     /**
