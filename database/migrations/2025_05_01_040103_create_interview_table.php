@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('interviews', 'id')) {
         Schema::create('interviews', function (Blueprint $table) {
             $table->id();
             $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
@@ -22,6 +23,7 @@ return new class extends Migration
             $table->enum('status',['scheduled', 'completed', 'cancelled'])->default('scheduled');
             $table->timestamps();
         });
+        }
     }
 
     /**

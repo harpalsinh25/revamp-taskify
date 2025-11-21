@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('custom_fields', 'id')) {
         Schema::create('custom_fields', function (Blueprint $table) {
             $table->id();
             $table->string('module');
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->string('visibility')->nullable();
             $table->timestamps();
         });
+        }
     }
 
     /**

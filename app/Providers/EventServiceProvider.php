@@ -17,6 +17,15 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        \App\Events\LeaveRequestApproved::class => [
+            \App\Listeners\UpdateLeaveBalanceOnApproval::class,
+        ],
+        \App\Events\LeaveRequestRejected::class => [
+            \App\Listeners\RestoreLeaveBalanceOnRejection::class,
+        ],
+        \App\Events\LeaveRequestCancelled::class => [
+            \App\Listeners\RestoreLeaveBalanceOnCancellation::class,
+        ],
     ];
 
     /**

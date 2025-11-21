@@ -10,7 +10,13 @@ use Illuminate\Support\Str;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use App\Services\DeletionService;
+use App\Services\LeaveCalculationService;
+use App\Services\LeaveRequestValidator;
+use App\Services\LeaveBalanceEngine;
+use App\Events\LeaveRequestCreated;
+use App\Events\LeaveRequestApproved;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\UserClientPreference;
 use Illuminate\Support\Facades\Session;
@@ -113,36 +119,15 @@ class LeaveRequestController extends Controller
     public function store(Request $request)
     {
         $isApi = request()->get('isApi', false);
+        $calculationService = app(LeaveCalculationService::class);
+        $validator = app(LeaveRequestValidator::class);
+        $balanceEngine = app(LeaveBalanceEngine::class);
+
+        // Basic validation rules
         $rules = [
             'reason' => ['required'],
-            'from_date' => [
-                'required',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $endDate = request()->input('to_date');
-                    $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null, 'from date', startDateKey: 'from_date');
-
-                    // Check and handle errors for from_date specifically
-                    if (!empty($errors['from_date'])) {
-                        foreach ($errors['from_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'to_date' => [
-                'required',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $startDate = request()->input('from_date');
-                    $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'to date', endDateKey: 'to_date');
-
-                    // Check and handle errors for to_date specifically
-                    if (!empty($errors['to_date'])) {
-                        foreach ($errors['to_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
+            'from_date' => ['required'],
+            'to_date' => ['required'],
             'from_time' => ['required_if:partialLeave,on'],
             'to_time' => ['required_if:partialLeave,on'],
             'status' => ['nullable'],
@@ -155,184 +140,328 @@ class LeaveRequestController extends Controller
             'to_time.required_if' => 'The to time field is required when partial leave is checked.',
         ];
 
+        DB::beginTransaction();
         try {
+            // [Validate Dates/Times] - Flow 1
             $formFields = $request->validate($rules, $messages);
-            if (!$this->user->hasRole('admin') && $request->input('status') && $request->filled('status') && $request->input('status') == 'approved') {
-                return response()->json(['error' => true, 'message' => 'You cannot approve your own leave request.']);
-            }
 
             $from_date = $request->input('from_date');
             $to_date = $request->input('to_date');
+
+            // Validate dates BEFORE conversion to catch format errors early
+            $dateValidation = $validator->validateDates(
+                $from_date,
+                $to_date,
+                $request->input('from_time'),
+                $request->input('to_time'),
+                $isApi
+            );
+
+            if (!$dateValidation['valid']) {
+                DB::rollBack();
+                return formatApiValidationError($isApi, $dateValidation['errors']);
+            }
+
+            // Convert to database format AFTER validation passes
             $formFields['from_date'] = format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
             $formFields['to_date'] = format_date($to_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
 
-            if (is_admin_or_leave_editor() && $request->input('status') && $request->filled('status') && $request->input('status') != 'pending') {
-                $formFields['action_by'] = $this->user->id;
+            // Determine user and workspace
+            $formFields['workspace_id'] = $this->workspace->id;
+            $formFields['user_id'] = is_admin_or_leave_editor() && $request->filled('user_id')
+                ? $request->input('user_id')
+                : $this->user->id;
+
+            $userId = $formFields['user_id'];
+            $workspaceId = $formFields['workspace_id'];
+
+            // [Calculate total_days] - Flow 1
+            $totalDays = $calculationService->calculateLeaveDays(
+                $formFields['from_date'],
+                $formFields['to_date'],
+                $request->input('from_time'),
+                $request->input('to_time')
+            );
+            $formFields['total_days'] = $totalDays;
+
+            // [Check if Admin/Approved] - Flow 1
+            $isAdmin = is_admin_or_leave_editor();
+            $status = $request->input('status', 'pending');
+            $isApproved = $status === 'approved' && $isAdmin;
+
+            // Validate status transition
+            if ($isApproved) {
+                $statusValidation = $validator->validateStatusTransition('pending', 'approved', $isAdmin);
+                if (!$statusValidation['valid']) {
+                    DB::rollBack();
+                    return response()->json(['error' => true, 'message' => $statusValidation['error']], 422);
+                }
             }
 
-            $formFields['workspace_id'] = $this->workspace->id;
-            $formFields['user_id'] = is_admin_or_leave_editor() && $request->filled('user_id') ? $request->input('user_id') : $this->user->id;
-            $formFields['comment'] = is_admin_or_leave_editor() && $request->filled('comment') ? $request->input('comment') : NULL;
+            // [Validate Overlap] - Critical validation
+            $overlapCheck = $validator->validateLeaveOverlap(
+                $userId,
+                $workspaceId,
+                $formFields['from_date'],
+                $formFields['to_date'],
+                $request->input('from_time'),
+                $request->input('to_time')
+            );
+
+            if ($overlapCheck['has_overlap']) {
+                // Log overlap
+                $validator->logOverlap(0, $overlapCheck, 'warned', $this->user->id);
+
+                // For now, warn but allow (can be changed to block)
+                // Uncomment to block overlapping leaves:
+                // DB::rollBack();
+                // return response()->json([
+                //     'error' => true,
+                //     'message' => 'This leave overlaps with existing approved leaves.',
+                //     'overlapping_leaves' => $overlapCheck['overlapping_leaves']
+                // ], 422);
+            }
+
+            // [Calculate Paid/Unpaid] - Flow 1 (only if approved)
+            if ($isApproved) {
+                // Check if admin wants to mark as paid
+                $isPaidToggle = $request->has('is_paid') && $request->input('is_paid') == '1';
+
+                if ($isPaidToggle) {
+                    // [Check Balance] - Flow 1
+                    $balanceCheck = $validator->checkBalanceSufficiency(
+                        $userId,
+                        $workspaceId,
+                        $totalDays
+                    );
+
+                    // [Calculate Paid/Unpaid] based on balance
+                    $paidUnpaidDays = $calculationService->calculatePaidUnpaidDays(
+                        $userId,
+                        $workspaceId,
+                        $totalDays
+                    );
+
+                    $formFields['paid_days'] = $paidUnpaidDays['paid_days'];
+                    $formFields['unpaid_days'] = $paidUnpaidDays['unpaid_days'];
+                    $formFields['is_paid'] = $paidUnpaidDays['paid_days'] > 0;
+                } else {
+                    // Admin marked as unpaid
+                    $formFields['paid_days'] = 0;
+                    $formFields['unpaid_days'] = $totalDays;
+                    $formFields['is_paid'] = false;
+                }
+            } else {
+                // Pending leave - no paid/unpaid calculation yet
+                $formFields['paid_days'] = 0;
+                $formFields['unpaid_days'] = 0;
+                $formFields['is_paid'] = false;
+            }
+
+            // Set other fields
+            $formFields['status'] = $status;
+            if ($isAdmin && $status != 'pending') {
+                $formFields['action_by'] = $this->user->id;
+            }
+            $formFields['comment'] = $isAdmin && $request->filled('comment')
+                ? $request->input('comment')
+                : NULL;
+
             $leaveVisibleToAll = $request->input('leaveVisibleToAll') && $request->filled('leaveVisibleToAll') && $request->input('leaveVisibleToAll') == 'on' ? 1 : 0;
             $formFields['visible_to_all'] = $leaveVisibleToAll;
-            if ($lr = LeaveRequest::create($formFields)) {
-                if ($leaveVisibleToAll == 0) {
-                    $visibleToUsers = $request->input('visible_to_ids', []);
-                    $lr->visibleToUsers()->sync($visibleToUsers);
-                }
-                $lr = LeaveRequest::find($lr->id);
-                $fromDate = Carbon::parse($lr->from_date);
-                $toDate = Carbon::parse($lr->to_date);
 
-                $fromDateDayOfWeek = $fromDate->format('D');
-                $toDateDayOfWeek = $toDate->format('D');
-                if ($lr->from_time && $lr->to_time) {
-                    $duration = 0;
-                    // Loop through each day
-                    while ($fromDate->lessThanOrEqualTo($toDate)) {
-                        // Create Carbon instances for the start and end times of the leave request for the current day
-                        $fromDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $lr->from_time);
-                        $toDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $lr->to_time);
+            // [Create Leave Request] - Flow 1
+            $lr = LeaveRequest::create($formFields);
 
-                        // Calculate the duration for the current day and add it to the total duration
-                        $duration += $fromDateTime->diffInMinutes($toDateTime) / 60; // Duration in hours
+            if (!$lr) {
+                DB::rollBack();
+                return response()->json(['error' => true, 'message' => 'Leave request couldn\'t be created.']);
+            }
 
-                        // Move to the next day
-                        $fromDate->addDay();
-                    }
+            // Sync visibility
+            if ($leaveVisibleToAll == 0) {
+                $visibleToUsers = $request->input('visible_to_ids', []);
+                $lr->visibleToUsers()->sync($visibleToUsers);
+            }
+
+            // [Update Balance] - Flow 1 (if approved)
+            if ($lr->status == 'approved' && $lr->is_paid && $lr->paid_days > 0) {
+                $balanceEngine->updateBalance($userId, $workspaceId, $lr);
+            }
+
+            // [Send Notifications] - Flow 1
+            $this->sendLeaveRequestNotifications($lr, 'created');
+
+            // Fire event
+            event(new LeaveRequestCreated($lr));
+            if ($lr->status === 'approved') {
+                event(new LeaveRequestApproved($lr, 'pending'));
+            }
+
+            DB::commit();
+
+            $leaveRequest = $lr->fresh();
+            return formatApiResponse(
+                false,
+                'Leave request created successfully.',
+                [
+                    'id' => $lr->id,
+                    'type' => 'leave_request',
+                    'data' => formatLeaveRequest($leaveRequest)
+                ]
+            );
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return formatApiValidationError($isApi, $e->errors());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Leave request creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while creating the leave request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Send notifications for leave request
+     *
+     * @param LeaveRequest $leaveRequest
+     * @param string $action 'created' or 'updated'
+     * @return void
+     */
+    protected function sendLeaveRequestNotifications(LeaveRequest $leaveRequest, string $action = 'created', ?string $oldStatus = null): void
+    {
+        $fromDate = Carbon::parse($leaveRequest->from_date);
+        $toDate = Carbon::parse($leaveRequest->to_date);
+        $fromDateDayOfWeek = $fromDate->format('D');
+        $toDateDayOfWeek = $toDate->format('D');
+
+        $calculationService = app(LeaveCalculationService::class);
+        $totalDays = $calculationService->calculateLeaveDays(
+            $leaveRequest->from_date,
+            $leaveRequest->to_date,
+            $leaveRequest->from_time,
+            $leaveRequest->to_time
+        );
+
+        $leaveType = $leaveRequest->isPartialLeave()
+            ? get_label('partial', 'Partial')
+            : get_label('full', 'Full');
+
+        $from = $fromDateDayOfWeek . ', ' . ($leaveRequest->from_time
+            ? format_date($leaveRequest->from_date . ' ' . $leaveRequest->from_time, true, null, null, false)
+            : format_date($leaveRequest->from_date));
+        $to = $toDateDayOfWeek . ', ' . ($leaveRequest->to_time
+            ? format_date($leaveRequest->to_date . ' ' . $leaveRequest->to_time, true, null, null, false)
+            : format_date($leaveRequest->to_date));
+
+        $duration = $leaveRequest->isPartialLeave()
+            ? number_format($totalDays * 8, 2) . ' hour' . ($totalDays * 8 > 1 ? 's' : '')
+            : $totalDays . ' day' . ($totalDays > 1 ? 's' : '');
+
+        $user = User::find($leaveRequest->user_id);
+        $workspaceUsers = $this->workspace->users->pluck('id')->toArray();
+
+        // Determine recipients (admins and leave editors)
+        $adminModelIds = DB::table('model_has_roles')
+            ->select('model_id')
+            ->where('role_id', 1)
+            ->pluck('model_id')
+            ->toArray();
+
+        $leaveEditorIds = DB::table('leave_editors')
+            ->pluck('user_id')
+            ->toArray();
+
+        $adminInWorkspace = array_intersect($adminModelIds, $workspaceUsers);
+        $leaveEditorsInWorkspace = array_intersect($leaveEditorIds, $workspaceUsers);
+
+        $adminIds = array_map(function ($modelId) {
+            return 'u_' . $modelId;
+        }, $adminInWorkspace);
+
+        $leaveEditorIdsWithPrefix = array_map(function ($leaveEditorId) {
+            return 'u_' . $leaveEditorId;
+        }, $leaveEditorsInWorkspace);
+
+        $recipients = array_merge($adminIds, $leaveEditorIdsWithPrefix);
+
+        // Send creation/update notification
+        $notificationData = [
+            'type' => $action === 'created' ? 'leave_request_creation' : 'leave_request_status_updation',
+            'type_id' => $leaveRequest->id,
+            'team_member_first_name' => $user->first_name,
+            'team_member_last_name' => $user->last_name,
+            'leave_type' => $leaveType,
+            'from' => $from,
+            'to' => $to,
+            'duration' => $duration,
+            'reason' => $leaveRequest->reason,
+            'comment' => $leaveRequest->comment ?? '-',
+            'status' => ucfirst($leaveRequest->status),
+            'action' => $action
+        ];
+
+        if ($action === 'updated') {
+            $notificationData['updater_first_name'] = $this->user->first_name;
+            $notificationData['updater_last_name'] = $this->user->last_name;
+            // Add old_status and new_status for status update notifications
+            // getTitle() expects these to be capitalized (e.g., "Pending", "Approved")
+            $notificationData['old_status'] = $oldStatus ? ucfirst($oldStatus) : ucfirst($leaveRequest->status);
+            $notificationData['new_status'] = ucfirst($leaveRequest->status);
+        }
+
+        // Add requester to recipients for status updates
+        if ($action === 'updated') {
+            $recipients[] = 'u_' . $leaveRequest->user_id;
+        }
+
+        processNotifications($notificationData, $recipients);
+
+        // Send team member on leave alert if approved and not ended
+        if ($leaveRequest->status == 'approved') {
+            $appTimezone = config('app.timezone');
+            $currentDateTime = new \DateTime('now', new \DateTimeZone($appTimezone));
+            $leaveEndDate = new \DateTime($leaveRequest->to_date, new \DateTimeZone($appTimezone));
+
+            if ($leaveRequest->to_time) {
+                $leaveEndDate->setTime((int) substr($leaveRequest->to_time, 0, 2), (int) substr($leaveRequest->to_time, 3, 2));
+            } else {
+                $leaveEndDate->setTime(23, 59, 59);
+            }
+            $leaveEndDate->setTimezone(new \DateTimeZone($appTimezone));
+
+            if ($currentDateTime < $leaveEndDate) {
+                if ($leaveRequest->visible_to_all == 1) {
+                    $recipientTeamMembers = $workspaceUsers;
                 } else {
-                    // Calculate the inclusive duration in days
-                    $duration = $fromDate->diffInDays($toDate) + 1;
+                    $recipientTeamMembers = $leaveRequest->visibleToUsers->pluck('id')->toArray();
+                    $recipientTeamMembers = array_merge($adminInWorkspace, $leaveEditorsInWorkspace, $recipientTeamMembers);
                 }
 
-                $leaveType = $lr->from_time && $lr->to_time ? get_label('partial', 'Partial') : get_label('full', 'Full');
-                $from = $fromDateDayOfWeek . ', ' . ($lr->from_time ? format_date($lr->from_date . ' ' . $lr->from_time, true, null, null, false) : format_date($lr->from_date));
-                $to = $toDateDayOfWeek . ', ' . ($lr->to_time ? format_date($lr->to_date . ' ' . $lr->to_time, true, null, null, false) : format_date($lr->to_date));
-                $duration = $lr->from_time && $lr->to_time ? $duration . ' hour' . ($duration > 1 ? 's' : '') : $duration . ' day' . ($duration > 1 ? 's' : '');
-                // Fetch user details based on the user_id in the leave request
-                $user = User::find($lr->user_id);
+                $recipientTeamMembers = array_diff($recipientTeamMembers, [$leaveRequest->user_id]);
+                $recipientTeamMemberIds = array_map(function ($userId) {
+                    return 'u_' . $userId;
+                }, $recipientTeamMembers);
 
-                // Prepare notification data
                 $notificationData = [
-                    'type' => 'leave_request_creation',
-                    'type_id' => $lr->id,
+                    'type' => 'team_member_on_leave_alert',
+                    'type_id' => $leaveRequest->id,
                     'team_member_first_name' => $user->first_name,
                     'team_member_last_name' => $user->last_name,
                     'leave_type' => $leaveType,
                     'from' => $from,
                     'to' => $to,
                     'duration' => $duration,
-                    'reason' => $lr->reason,
-                    'comment' => $lr->comment ?? '-',
-                    'status' => ucfirst($lr->status),
-                    'action' => 'created'
+                    'reason' => $leaveRequest->reason,
+                    'action' => 'team_member_on_leave_alert'
                 ];
-
-                $workspaceUsers = $this->workspace->users->pluck('id')->toArray();
-
-                // Determine recipients
-                $adminModelIds = DB::table('model_has_roles')
-                    ->select('model_id')
-                    ->where('role_id', 1)
-                    ->pluck('model_id')
-                    ->toArray();
-
-                $leaveEditorIds = DB::table('leave_editors')
-                    ->pluck('user_id')
-                    ->toArray();
-
-                $adminInWorkspace = array_intersect($adminModelIds, $workspaceUsers);
-                $leaveEditorsInWorkspace = array_intersect($leaveEditorIds, $workspaceUsers);
-
-                // Combine admin model_ids and leave_editor_ids
-                $adminIds = array_map(function ($modelId) {
-                    return 'u_' . $modelId;
-                }, $adminInWorkspace);
-
-                $leaveEditorIdsWithPrefix = array_map(function ($leaveEditorId) {
-                    return 'u_' . $leaveEditorId;
-                }, $leaveEditorsInWorkspace);
-
-                // Combine admin and leave editor ids
-                $recipients = array_merge($adminIds, $leaveEditorIdsWithPrefix);
-
-                processNotifications($notificationData, $recipients);
-
-                if ($lr->status == 'approved') {
-                    // Get the timezone from the application configuration
-                    $appTimezone = config('app.timezone');
-
-                    // Get current date and time with the application's timezone
-                    $currentDateTime = new \DateTime('now', new \DateTimeZone($appTimezone));
-
-                    // Combine to_date and to_time into a single DateTime object with the application's timezone
-                    $leaveEndDate = new \DateTime($lr->to_date, new \DateTimeZone($appTimezone));
-                    if ($lr->to_time) {
-                        // If to_time is available, set the time part of the DateTime object
-                        $leaveEndDate->setTime((int) substr($lr->to_time, 0, 2), (int) substr($lr->to_time, 3, 2));
-                    } else {
-                        // If to_time is not available, set the end of the day
-                        $leaveEndDate->setTime(23, 59, 59);
-                    }
-
-                    // Ensure both DateTime objects are in the same timezone
-                    $leaveEndDate->setTimezone(new \DateTimeZone($appTimezone));
-
-                    // Check if the leave end date and time have not passed
-                    if ($currentDateTime < $leaveEndDate) {
-                        if ($lr->visible_to_all == 1) {
-                            $recipientTeamMembers = $this->workspace->users->pluck('id')->toArray();
-                        } else {
-                            $recipientTeamMembers = $lr->visibleToUsers->pluck('id')->toArray();
-                            $recipientTeamMembers = array_merge($adminInWorkspace, $leaveEditorsInWorkspace, $recipientTeamMembers);
-                        }
-
-                        //Exclude requestee from alert
-                        $recipientTeamMembers = array_diff($recipientTeamMembers, [$lr->user_id]);
-
-                        $recipientTeamMemberIds = array_map(function ($userId) {
-                            return 'u_' . $userId;
-                        }, $recipientTeamMembers);
-
-                        $notificationData = [
-                            'type' => 'team_member_on_leave_alert',
-                            'type_id' => $lr->id,
-                            'team_member_first_name' => $user->first_name,
-                            'team_member_last_name' => $user->last_name,
-                            'leave_type' => $leaveType,
-                            'from' => $from,
-                            'to' => $to,
-                            'duration' => $duration,
-                            'reason' => $lr->reason,
-                            'action' => 'team_member_on_leave_alert'
-                        ];
-                        processNotifications($notificationData, $recipientTeamMemberIds);
-                    }
-                }
-                $leaveRequest = LeaveRequest::find($lr->id);
-                $partialLeave = $request->input('partialLeave') && $request->filled('partialLeave') && $request->input('partialLeave') == 'on' ? 'on' : 'off';
-                $leaveRequest->$leaveVisibleToAll = $leaveVisibleToAll ? 'on' : 'off';
-                $leaveRequest->$partialLeave = $partialLeave;
-                return formatApiResponse(
-                    false,
-                    'Leave request created successfully.',
-                    [
-                        'id' => $lr->id,
-                        'type' => 'leave_request',
-                        'data' => formatLeaveRequest($leaveRequest)
-                    ]
-                );
-            } else {
-                return response()->json(['error' => true, 'message' => 'Leave request couldn\'t be created.']);
+                processNotifications($notificationData, $recipientTeamMemberIds);
             }
-        } catch (ValidationException $e) {
-            return formatApiValidationError($isApi, $e->errors());
-        } catch (\Exception $e) {
-            // Handle any unexpected errors
-            return response()->json([
-                'error' => true,
-                'message' => 'An error occurred while creating the leave request.'
-            ], 500);
         }
     }
 
@@ -770,252 +899,289 @@ class LeaveRequestController extends Controller
     {
         $isApi = request()->get('isApi', false);
         $isAdminOrLe = is_admin_or_leave_editor();
+        $calculationService = app(LeaveCalculationService::class);
+        $validator = app(LeaveRequestValidator::class);
+        $balanceEngine = app(LeaveBalanceEngine::class);
+
         $rules = [
-            'id' => 'required|exists:leave_requests,id', // Ensure the leave request exists
+            'id' => 'required|exists:leave_requests,id',
             'reason' => ['required'],
-            'from_date' => [
-                'required',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $endDate = request()->input('to_date');
-                    $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null, 'from date', startDateKey: 'from_date');
-
-                    // Check and handle errors for from_date specifically
-                    if (!empty($errors['from_date'])) {
-                        foreach ($errors['from_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'to_date' => [
-                'required',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $startDate = request()->input('from_date');
-                    $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'to date', endDateKey: 'to_date');
-
-                    // Check and handle errors for to_date specifically
-                    if (!empty($errors['to_date'])) {
-                        foreach ($errors['to_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
+            'from_date' => ['required'],
+            'to_date' => ['required'],
             'from_time' => ['required_if:partialLeave,on'],
             'to_time' => ['required_if:partialLeave,on'],
             'status' => $isAdminOrLe ? 'required|in:pending,approved,rejected' : 'nullable|in:pending,approved,rejected',
             'visible_to_ids.*' => 'exists:users,id',
-            'comment' => ['nullable']
+            'comment' => ['nullable'],
+            'is_paid' => ['nullable', 'boolean']
         ];
         $messages = [
             'from_time.required_if' => 'The from time field is required when partial leave is checked.',
             'to_time.required_if' => 'The to time field is required when partial leave is checked.',
         ];
+
+        DB::beginTransaction();
         try {
             $validatedData = $request->validate($rules, $messages);
 
-            // Find the leave request by its ID
+            // Find the leave request
             $leaveRequest = LeaveRequest::findOrFail($validatedData['id']);
             $currentStatus = $leaveRequest->status;
             $newStatus = $validatedData['status'] ?? $currentStatus;
 
+            // Permission checks
             if (!is_null($leaveRequest->action_by) && !$this->user->hasRole('admin')) {
+                DB::rollBack();
                 return response()->json([
                     'error' => true,
                     'message' => 'Once actioned only admin can update leave request.',
-                ]);
+                ], 403);
             }
 
-            if ($leaveRequest->user_id == $this->user->id && !$this->user->hasRole('admin') && $request->input('status') && $request->filled('status') && $request->input('status') == 'approved') {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'You can not approve own leave request.',
-                ]);
-            }
-
-            if (in_array($currentStatus, ['approved', 'rejected']) && $newStatus == 'pending') {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'You cannot set the status to pending if it has already been approved or rejected.',
-                ]);
-            }
-
+            // [Validate Dates/Times] - Flow 1
+            // Validate dates BEFORE conversion to catch format errors early
             $from_date = $request->input('from_date');
             $to_date = $request->input('to_date');
+
+            Log::info('[LeaveRequest Update] Validating dates', [
+                'leave_id' => $validatedData['id'],
+                'from_date_raw' => $from_date,
+                'to_date_raw' => $to_date,
+                'is_api' => $isApi,
+                'php_date_format' => $isApi ? 'Y-m-d' : app('php_date_format'),
+            ]);
+
+            // Validate the request dates in their original format
+            $dateValidation = $validator->validateDates(
+                $from_date,
+                $to_date,
+                $request->input('from_time'),
+                $request->input('to_time'),
+                $isApi
+            );
+
+            if (!$dateValidation['valid']) {
+                Log::warning('[LeaveRequest Update] Date validation failed', [
+                    'leave_id' => $validatedData['id'],
+                    'errors' => $dateValidation['errors'],
+                ]);
+                DB::rollBack();
+                return formatApiValidationError($isApi, $dateValidation['errors']);
+            }
+
+            // Convert to database format AFTER validation passes
             $validatedData['from_date'] = format_date($from_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
             $validatedData['to_date'] = format_date($to_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
+
+            Log::info('[LeaveRequest Update] Dates converted to database format', [
+                'leave_id' => $validatedData['id'],
+                'from_date_converted' => $validatedData['from_date'],
+                'to_date_converted' => $validatedData['to_date'],
+            ]);
+
+            if (!$dateValidation['valid']) {
+                DB::rollBack();
+                return formatApiValidationError($isApi, $dateValidation['errors']);
+            }
+
+            // [Validate Status Transition] - Flow 1
+            $statusValidation = $validator->validateStatusTransition($currentStatus, $newStatus, $this->user->hasRole('admin'));
+            if (!$statusValidation['valid']) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => true,
+                    'message' => $statusValidation['error'],
+                ], 422);
+            }
+
+            // [Calculate total_days] - Flow 1
+            $totalDays = $calculationService->calculateLeaveDays(
+                $validatedData['from_date'],
+                $validatedData['to_date'],
+                $request->input('from_time'),
+                $request->input('to_time')
+            );
+            $validatedData['total_days'] = $totalDays;
+
+            // [Validate Overlap] - Flow 1 (exclude current leave)
+            $overlapCheck = $validator->validateLeaveOverlap(
+                $leaveRequest->user_id,
+                $leaveRequest->workspace_id,
+                $validatedData['from_date'],
+                $validatedData['to_date'],
+                $request->input('from_time'),
+                $request->input('to_time'),
+                $leaveRequest->id
+            );
+
+            if ($overlapCheck['has_overlap']) {
+                $validator->logOverlap($leaveRequest->id, $overlapCheck, 'warned', $this->user->id);
+            }
+
+            // [Check if Admin/Approved] - Flow 1
+            $isApproved = $newStatus === 'approved' && $isAdminOrLe;
+
+            // [Calculate Paid/Unpaid] - Flow 1 (only if approved)
+            if ($isApproved) {
+                // Check if admin wants to mark as paid
+                $isPaidToggle = $request->has('is_paid') && $request->input('is_paid') == '1';
+
+                // If editing approved leave and toggle not provided, use existing value
+                if ($currentStatus === 'approved' && !$request->has('is_paid')) {
+                    $isPaidToggle = $leaveRequest->is_paid ?? false;
+                }
+
+                if ($isPaidToggle) {
+                    // [Check Balance] - Flow 1 (exclude current leave for edit scenario)
+                    $balanceCheck = $validator->checkBalanceSufficiency(
+                        $leaveRequest->user_id,
+                        $leaveRequest->workspace_id,
+                        $totalDays,
+                        null,
+                        $leaveRequest->id
+                    );
+
+                    // [Calculate Paid/Unpaid] based on balance
+                    $paidUnpaidDays = $calculationService->calculatePaidUnpaidDays(
+                        $leaveRequest->user_id,
+                        $leaveRequest->workspace_id,
+                        $totalDays,
+                        null,
+                        null
+                    );
+
+                    $validatedData['paid_days'] = $paidUnpaidDays['paid_days'];
+                    $validatedData['unpaid_days'] = $paidUnpaidDays['unpaid_days'];
+                    $validatedData['is_paid'] = $paidUnpaidDays['paid_days'] > 0;
+                } else {
+                    // Admin marked as unpaid
+                    $validatedData['paid_days'] = 0;
+                    $validatedData['unpaid_days'] = $totalDays;
+                    $validatedData['is_paid'] = false;
+                }
+            } elseif ($newStatus === 'rejected' && $currentStatus === 'approved') {
+                // Restore balance if changing from approved to rejected
+                $balanceEngine->restoreBalance(
+                    $leaveRequest->user_id,
+                    $leaveRequest->workspace_id,
+                    $leaveRequest
+                );
+            }
+
+            // Set other fields
             if ($newStatus != $currentStatus) {
                 $validatedData['action_by'] = $this->user->id;
             }
             $leaveVisibleToAll = $request->input('leaveVisibleToAll') && $request->filled('leaveVisibleToAll') && $request->input('leaveVisibleToAll') == 'on' ? 1 : 0;
             $validatedData['visible_to_all'] = $leaveVisibleToAll;
-            $validatedData['comment'] = is_admin_or_leave_editor() && $request->filled('comment') ? $request->input('comment') : NULL;
-            // Update the status of the leave request
-            if ($leaveRequest->update($validatedData)) {
-                $leaveRequest = $leaveRequest->fresh();
-                if ($leaveVisibleToAll == 0) {
-                    // Sync the visibleToUsers with the provided visible_to_ids
-                    $visibleToUsers = $request->input('visible_to_ids', []);
-                    $leaveRequest->visibleToUsers()->sync($visibleToUsers);
-                } else {
-                    // Detach all users from the visibleToUsers relationship
-                    $leaveRequest->visibleToUsers()->detach();
-                }
-                if ($newStatus != $currentStatus) {
-                    $fromDate = Carbon::parse($leaveRequest->from_date);
-                    $toDate = Carbon::parse($leaveRequest->to_date);
+            $validatedData['comment'] = $isAdminOrLe && $request->filled('comment') ? $request->input('comment') : NULL;
 
-                    $fromDateDayOfWeek = $fromDate->format('D');
-                    $toDateDayOfWeek = $toDate->format('D');
-                    if ($leaveRequest->from_time && $leaveRequest->to_time) {
-                        $duration = 0;
-                        // Loop through each day
-                        while ($fromDate->lessThanOrEqualTo($toDate)) {
-                            // Create Carbon instances for the start and end times of the leave request for the current day
-                            $fromDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $leaveRequest->from_time);
-                            $toDateTime = Carbon::parse($fromDate->toDateString() . ' ' . $leaveRequest->to_time);
+            // [Update Leave Request] - Flow 1
+            Log::info('[LeaveRequest Update] Updating leave request', [
+                'leave_id' => $leaveRequest->id,
+                'current_status' => $currentStatus,
+                'new_status' => $newStatus,
+                'is_paid' => $validatedData['is_paid'] ?? null,
+                'paid_days' => $validatedData['paid_days'] ?? null,
+                'unpaid_days' => $validatedData['unpaid_days'] ?? null,
+            ]);
 
-                            // Calculate the duration for the current day and add it to the total duration
-                            $duration += $fromDateTime->diffInMinutes($toDateTime) / 60; // Duration in hours
+            $leaveRequest->update($validatedData);
+            $leaveRequest = $leaveRequest->fresh();
 
-                            // Move to the next day
-                            $fromDate->addDay();
-                        }
-                    } else {
-                        // Calculate the inclusive duration in days
-                        $duration = $fromDate->diffInDays($toDate) + 1;
-                    }
+            Log::info('[LeaveRequest Update] Leave request updated successfully', [
+                'leave_id' => $leaveRequest->id,
+                'status' => $leaveRequest->status,
+                'is_paid' => $leaveRequest->is_paid,
+                'paid_days' => $leaveRequest->paid_days,
+                'unpaid_days' => $leaveRequest->unpaid_days,
+            ]);
 
-                    $leaveType = $leaveRequest->from_time && $leaveRequest->to_time ? get_label('partial', 'Partial') : get_label('full', 'Full');
-                    $from = $fromDateDayOfWeek . ', ' . ($leaveRequest->from_time ? format_date($leaveRequest->from_date . ' ' . $leaveRequest->from_time, true, null, null, false) : format_date($leaveRequest->from_date));
-                    $to = $toDateDayOfWeek . ', ' . ($leaveRequest->to_time ? format_date($leaveRequest->to_date . ' ' . $leaveRequest->to_time, true, null, null, false) : format_date($leaveRequest->to_date));
-                    $duration = $leaveRequest->from_time && $leaveRequest->to_time ? $duration . ' hour' . ($duration > 1 ? 's' : '') : $duration . ' day' . ($duration > 1 ? 's' : '');
-                    // Fetch user details based on the user_id in the leave request
-                    $user = User::find($leaveRequest->user_id);
-
-                    // Prepare notification data
-                    $notificationData = [
-                        'type' => 'leave_request_status_updation',
-                        'type_id' => $leaveRequest->id,
-                        'team_member_first_name' => $user->first_name,
-                        'team_member_last_name' => $user->last_name,
-                        'updater_first_name' => $this->user->first_name,
-                        'updater_last_name' => $this->user->last_name,
-                        'leave_type' => $leaveType,
-                        'from' => $from,
-                        'to' => $to,
-                        'duration' => $duration,
-                        'reason' => $leaveRequest->reason,
-                        'comment' => $leaveRequest->comment ?? '-',
-                        'old_status' => ucfirst($currentStatus),
-                        'new_status' => ucfirst($newStatus),
-                        'action' => 'status_updated'
-                    ];
-                    $workspaceUsers = $this->workspace->users->pluck('id')->toArray();
-                    // Determine recipients
-                    $adminModelIds = DB::table('model_has_roles')
-                        ->select('model_id')
-                        ->where('role_id', 1)
-                        ->pluck('model_id')
-                        ->toArray();
-
-                    $leaveEditorIds = DB::table('leave_editors')
-                        ->pluck('user_id')
-                        ->toArray();
-
-                    $adminInWorkspace = array_intersect($adminModelIds, $workspaceUsers);
-                    $leaveEditorsInWorkspace = array_intersect($leaveEditorIds, $workspaceUsers);
-
-                    // Combine admin model_ids and leave_editor_ids
-                    $adminIds = array_map(function ($modelId) {
-                        return 'u_' . $modelId;
-                    }, $adminInWorkspace);
-
-                    $leaveEditorIdsWithPrefix = array_map(function ($leaveEditorId) {
-                        return 'u_' . $leaveEditorId;
-                    }, $leaveEditorsInWorkspace);
-
-                    $userWithPrefix = 'u_' . $leaveRequest->user_id;
-
-                    // Combine admin and leave editor ids
-                    $recipients = array_merge($adminIds, $leaveEditorIdsWithPrefix, [$userWithPrefix]);
-                    processNotifications($notificationData, $recipients);
-
-                    if ($newStatus == 'approved') {
-                        // Get the timezone from the application configuration
-                        $appTimezone = config('app.timezone');
-
-                        // Get current date and time with the application's timezone
-                        $currentDateTime = new \DateTime('now', new \DateTimeZone($appTimezone));
-
-                        // Combine to_date and to_time into a single DateTime object with the application's timezone
-                        $leaveEndDate = new \DateTime($leaveRequest->to_date, new \DateTimeZone($appTimezone));
-                        if ($leaveRequest->to_time) {
-                            // If to_time is available, set the time part of the DateTime object
-                            $leaveEndDate->setTime((int) substr($leaveRequest->to_time, 0, 2), (int) substr($leaveRequest->to_time, 3, 2));
-                        } else {
-                            // If to_time is not available, set the end of the day
-                            $leaveEndDate->setTime(23, 59, 59);
-                        }
-
-                        // Ensure both DateTime objects are in the same timezone
-                        $leaveEndDate->setTimezone(new \DateTimeZone($appTimezone));
-
-                        // Check if the leave end date and time have not passed
-                        if ($currentDateTime < $leaveEndDate) {
-                            if ($leaveRequest->visible_to_all == 1) {
-                                $recipientTeamMembers = $this->workspace->users->pluck('id')->toArray();
-                            } else {
-                                $recipientTeamMembers = $leaveRequest->visibleToUsers->pluck('id')->toArray();
-                                $recipientTeamMembers = array_merge($adminInWorkspace, $leaveEditorsInWorkspace, $recipientTeamMembers);
-                            }
-
-                            //Exclude requestee from alert
-                            $recipientTeamMembers = array_diff($recipientTeamMembers, [$leaveRequest->user_id]);
-
-                            $recipientTeamMemberIds = array_map(function ($userId) {
-                                return 'u_' . $userId;
-                            }, $recipientTeamMembers);
-
-                            $notificationData = [
-                                'type' => 'team_member_on_leave_alert',
-                                'type_id' => $leaveRequest->id,
-                                'team_member_first_name' => $user->first_name,
-                                'team_member_last_name' => $user->last_name,
-                                'leave_type' => $leaveType,
-                                'from' => $from,
-                                'to' => $to,
-                                'duration' => $duration,
-                                'reason' => $leaveRequest->reason,
-                                'action' => 'team_member_on_leave_alert'
-                            ];
-                            processNotifications($notificationData, $recipientTeamMemberIds);
-                        }
-                    }
-                }
-
-                return formatApiResponse(
-                    false,
-                    'Leave request updated successfully.',
-                    [
-                        'id' => $leaveRequest->id,
-                        'type' => 'leave_request',
-                        'data' => formatLeaveRequest($leaveRequest)
-                    ]
-                );
+            // Sync visibility
+            if ($leaveVisibleToAll == 0) {
+                $visibleToUsers = $request->input('visible_to_ids', []);
+                $leaveRequest->visibleToUsers()->sync($visibleToUsers);
             } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Leave request couldn\'t updated.'
+                $leaveRequest->visibleToUsers()->detach();
+            }
+
+            // [Update Balance] - Flow 1 (if approved)
+            // NOTE: Balance update is handled by LeaveRequestApproved event listener
+            // We do NOT update balance directly here to avoid double updates
+            // The event listener (UpdateLeaveBalanceOnApproval) will handle the balance update
+            if ($leaveRequest->status == 'approved' && $leaveRequest->is_paid && $leaveRequest->paid_days > 0) {
+                Log::info('[LeaveRequest Update] Leave is approved and paid - balance will be updated via event', [
+                    'leave_id' => $leaveRequest->id,
+                    'user_id' => $leaveRequest->user_id,
+                    'workspace_id' => $leaveRequest->workspace_id,
+                    'paid_days' => $leaveRequest->paid_days,
                 ]);
             }
+
+            // [Send Notifications] - Flow 1
+            if ($newStatus != $currentStatus) {
+                Log::info('[LeaveRequest Update] Status changed - sending notifications and firing events', [
+                    'leave_id' => $leaveRequest->id,
+                    'old_status' => $currentStatus,
+                    'new_status' => $newStatus,
+                ]);
+
+                $this->sendLeaveRequestNotifications($leaveRequest, 'updated', $currentStatus);
+
+                // Fire events
+                if ($newStatus === 'approved') {
+                    Log::info('[LeaveRequest Update] Firing LeaveRequestApproved event', [
+                        'leave_id' => $leaveRequest->id,
+                        'user_id' => $leaveRequest->user_id,
+                        'workspace_id' => $leaveRequest->workspace_id,
+                        'previous_status' => $currentStatus,
+                    ]);
+                    event(new LeaveRequestApproved($leaveRequest, $currentStatus));
+                    Log::info('[LeaveRequest Update] LeaveRequestApproved event fired', [
+                        'leave_id' => $leaveRequest->id,
+                    ]);
+                } elseif ($newStatus === 'rejected' && $currentStatus === 'approved') {
+                    Log::info('[LeaveRequest Update] Firing LeaveRequestRejected event', [
+                        'leave_id' => $leaveRequest->id,
+                        'previous_status' => $currentStatus,
+                    ]);
+                    event(new \App\Events\LeaveRequestRejected($leaveRequest, $currentStatus));
+                }
+            }
+
+            DB::commit();
+
+            return formatApiResponse(
+                false,
+                'Leave request updated successfully.',
+                [
+                    'id' => $leaveRequest->id,
+                    'type' => 'leave_request',
+                    'data' => formatLeaveRequest($leaveRequest)
+                ]
+            );
         } catch (ValidationException $e) {
+            DB::rollBack();
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            DB::rollBack();
+            Log::error('[LeaveRequest Update] Exception occurred', [
+                'leave_request_id' => $request->input('id'),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'error_code' => $e->getCode(),
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString(),
+                'previous_exception' => $e->getPrevious() ? [
+                    'message' => $e->getPrevious()->getMessage(),
+                    'file' => $e->getPrevious()->getFile(),
+                    'line' => $e->getPrevious()->getLine(),
+                ] : null,
+            ]);
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating the leave request.'
+                'message' => 'An error occurred while updating the leave request: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -1074,15 +1240,47 @@ class LeaveRequestController extends Controller
      */
     public function destroy($id)
     {
-        $LeaveRequest = LeaveRequest::find($id);
-        if ($LeaveRequest) {
+        DB::beginTransaction();
+        try {
+            $leaveRequest = LeaveRequest::find($id);
+            if (!$leaveRequest) {
+                DB::rollBack();
+                return formatApiResponse(
+                    true,
+                    'Leave request not found.',
+                    []
+                );
+            }
+
+            // Fire cancellation event before deletion
+            if ($leaveRequest->status === 'approved') {
+                event(new \App\Events\LeaveRequestCancelled($leaveRequest));
+            }
+
+            // Restore balance if the leave was approved and paid
+            if ($leaveRequest->status === 'approved' && $leaveRequest->is_paid && $leaveRequest->paid_days > 0) {
+                $balanceEngine = app(LeaveBalanceEngine::class);
+                $balanceEngine->restoreBalance(
+                    $leaveRequest->user_id,
+                    $leaveRequest->workspace_id,
+                    $leaveRequest
+                );
+            }
+
+            // Delete notifications
+            $leaveRequest->notificationsForLeaveRequest()->delete();
+
+            // Delete leave request
             $response = DeletionService::delete(LeaveRequest::class, $id, 'Leave request');
             $responseData = json_decode($response->getContent(), true);
+
             if ($responseData['error']) {
-                // Handle error response
+                DB::rollBack();
                 return response()->json($responseData);
             }
-            $LeaveRequest->notificationsForLeaveRequest()->delete();
+
+            DB::commit();
+
             return formatApiResponse(
                 false,
                 'Leave request deleted successfully.',
@@ -1092,12 +1290,16 @@ class LeaveRequestController extends Controller
                     'data' => []
                 ]
             );
-        } else {
-            return formatApiResponse(
-                true,
-                'Leave request not found.',
-                []
-            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Leave request deletion failed', [
+                'leave_request_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while deleting the leave request.'
+            ], 500);
         }
     }
 
@@ -1111,10 +1313,26 @@ class LeaveRequestController extends Controller
 
         $ids = $validatedData['ids'];
         $deletedIds = [];
+        $balanceEngine = app(LeaveBalanceEngine::class);
+
         // Perform deletion using validated IDs
         foreach ($ids as $id) {
             $LeaveRequest = LeaveRequest::find($id);
             if ($LeaveRequest) {
+                // Fire cancellation event before deletion
+                if ($LeaveRequest->status === 'approved') {
+                    event(new \App\Events\LeaveRequestCancelled($LeaveRequest));
+                }
+
+                // Restore balance if the leave was approved and paid
+                if ($LeaveRequest->status === 'approved' && $LeaveRequest->is_paid && $LeaveRequest->paid_days > 0) {
+                    $balanceEngine->restoreBalance(
+                        $LeaveRequest->user_id,
+                        $LeaveRequest->workspace_id,
+                        $LeaveRequest
+                    );
+                }
+
                 $deletedIds[] = $id;
                 $LeaveRequest->notificationsForLeaveRequest()->delete();
                 DeletionService::delete(LeaveRequest::class, $id, 'Leave request');
@@ -1215,5 +1433,32 @@ class LeaveRequestController extends Controller
         });
 
         return response()->json($events);
+    }
+
+    /**
+     * Get user leave balance
+     * Optionally exclude a specific leave ID (useful when editing)
+     */
+    public function getUserLeaveBalance(Request $request)
+    {
+        $userId = $request->input('user_id', $this->user->id);
+        $year = $request->input('year', get_current_company_year()); // Use company year
+        $excludeLeaveId = $request->input('exclude_leave_id', null); // Exclude current leave when editing
+
+        // Check if requesting user has permission to view this user's balance
+        if ($userId != $this->user->id && !is_admin_or_leave_editor()) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Unauthorized access'
+            ], 403);
+        }
+
+        $balanceEngine = app(LeaveBalanceEngine::class);
+        $balanceSummary = $balanceEngine->getBalanceSummary($userId, $this->workspace->id, $year, $excludeLeaveId);
+
+        return response()->json([
+            'error' => false,
+            'balance' => $balanceSummary
+        ]);
     }
 }

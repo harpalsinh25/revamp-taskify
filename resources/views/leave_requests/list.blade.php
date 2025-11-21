@@ -29,7 +29,18 @@
                             data-view="list"><?= get_label('set_as_default_view', 'Set as Default View') ?></span></a>
                 @endif
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-1">
+                @if ($auth_user->hasRole('admin') || is_admin_or_leave_editor())
+                    <a href="{{ url('leave-balances') }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip"
+                        data-bs-placement="bottom" data-bs-original-title="<?= get_label('view_leave_balances', 'View leave balance dashboard') ?>">
+                        <i class='bx bx-bar-chart'></i>
+                    </a>
+                @endif
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                    data-bs-target="#paidLeaveWorkflowModal"
+                    title="<?= get_label('view_paid_leave_flow', 'View paid leave flow') ?>">
+                    <i class='bx bx-info-circle'></i>
+                </button>
                 <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_leave_request_modal"><button
                         type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-original-title=" <?= get_label('create_leave_request', 'Create leave request') ?>"><i
@@ -42,7 +53,196 @@
         </div>
         @php
             $isLeaveEditor = \App\Models\LeaveEditor::where('user_id', $auth_user->id)->exists();
+            $leaveBalanceService = new \App\Services\LeaveBalanceService();
+            $leaveBalance = $leaveBalanceService->getBalanceSummary($auth_user->id, getWorkspaceId());
+            $companyYearText = format_company_year(null, true); // e.g., "Apr 2024 - Mar 2025"
         @endphp
+
+        @php
+            $formatLeaveNumber = static function ($value) {
+                return rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
+            };
+        @endphp
+
+        <!-- Leave Balance Widget -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card leave-balance-card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="leave-balance-header mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="card-title mb-0 d-flex align-items-center gap-2"><i class='bx bx-wallet'></i><?= get_label('my_leave_balance', 'My Leave Balance') ?></h5>
+                                <span class="badge bg-label-info rounded-pill px-3 py-2 fw-semibold">{{ $companyYearText }}</span>
+                            </div>
+                            <p class="text-muted mb-0 small">{{ get_label('leave_balance_subheadline', 'Track your annual paid leave at a glance.') }}</p>
+                        </div>
+
+                        <div class="row g-3 leave-balance-metrics">
+                            <div class="col-12 col-sm-6 col-xl">
+                                <div class="border-2 card h-100 shadow-none">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted text-uppercase small mb-2 fw-semibold"><?= get_label('total_annual_leaves', 'Total Annual Leaves') ?></p>
+                                                <h3 class="mb-0 fw-bold">{{ $formatLeaveNumber($leaveBalance['total_annual_leaves']) }}</h3>
+                                                @if(isset($leaveBalance['accrued_leaves']))
+                                                    <p class="text-info small mb-0 mt-2"><?= get_label('accrued', 'Accrued') ?>: {{ $formatLeaveNumber($leaveBalance['accrued_leaves']) }}</p>
+                                                @endif
+                                            </div>
+                                            <div class="avatar flex-shrink-0">
+                                                <span class="avatar-initial rounded bg-label-primary">
+                                                    <i class='bx bx-calendar-check fs-3 text-primary'></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl">
+                                <div class="border-2 card h-100 shadow-none">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted text-uppercase small mb-2 fw-semibold"><?= get_label('used_paid_leaves', 'Used Paid Leaves') ?></p>
+                                                <h3 class="mb-0 fw-bold d-flex align-items-baseline gap-1">
+                                                    <span>{{ $formatLeaveNumber($leaveBalance['used_paid_leaves']) }}</span>
+                                                    <small class="text-muted fs-5 fw-normal">/ {{ $formatLeaveNumber($leaveBalance['total_annual_leaves']) }}</small>
+                                                </h3>
+                                                @if(isset($leaveBalance['accrued_leaves']))
+                                                    <p class="text-muted small mb-0 mt-2"><?= get_label('accrued_to_date', 'Accrued to date') ?>: {{ $formatLeaveNumber($leaveBalance['accrued_leaves']) }}</p>
+                                                @endif
+                                                @if(isset($leaveBalance['advanced_paid_leaves']) && $leaveBalance['advanced_paid_leaves'] > 0)
+                                                    <p class="text-info small mb-0 mt-1">
+                                                        <i class="bx bx-info-circle"></i>
+                                                        <?= get_label('includes_advance', 'Includes') ?> {{ $formatLeaveNumber($leaveBalance['advanced_paid_leaves']) }} <?= get_label('advanced_paid_leaves', 'Advanced Paid Leaves') ?>
+                                                    </p>
+                                                @endif
+                                            </div>
+                                            <div class="avatar flex-shrink-0">
+                                                <span class="avatar-initial rounded bg-label-warning">
+                                                    <i class='bx bx-time-five fs-3 text-warning'></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl">
+                                @php
+                                    $remainingPaidLeaves = $leaveBalance['remaining_paid_leaves'] ?? 0;
+                                    $totalAnnualLeaves = $leaveBalance['total_annual_leaves'] ?? 0;
+                                    $accruedLeaves = $leaveBalance['accrued_leaves'] ?? null;
+                                    $advancedPaidLeaves = $leaveBalance['advanced_paid_leaves'] ?? 0;
+                                    // Use display_remaining_paid_leaves if available (can be negative), otherwise calculate
+                                    $displayRemaining = $leaveBalance['display_remaining_paid_leaves'] ?? ($remainingPaidLeaves - $advancedPaidLeaves);
+                                    $annualRemaining = max($totalAnnualLeaves - ($leaveBalance['used_paid_leaves'] ?? 0), 0);
+                                @endphp
+                                <div class="border-2 card h-100 shadow-none">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <x-leave.remaining-leaves-pill
+                                                    :remaining="$displayRemaining"
+                                                    :total="$totalAnnualLeaves"
+                                                    :accrued="$accruedLeaves"
+                                                    :advanced_paid_leaves="$advancedPaidLeaves"
+                                                    :annual="$totalAnnualLeaves"
+                                                    :annual-remaining="$annualRemaining"
+                                                    heading="{{ get_label('remaining_paid_leaves', 'Remaining Paid Leaves') }}"
+                                                />
+                                            </div>
+                                            <div class="avatar flex-shrink-0">
+                                                <span class="avatar-initial rounded bg-label-success">
+                                                    <i class='bx bx-check-circle fs-3 text-success'></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl">
+                                <div class="border-2 card h-100 shadow-none">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted text-uppercase small mb-2 fw-semibold"><?= get_label('unpaid_leaves_taken', 'Unpaid Leaves Taken') ?></p>
+                                                <h3 class="mb-0 fw-bold">{{ $formatLeaveNumber($leaveBalance['unpaid_leaves_taken']) }}</h3>
+                                            </div>
+                                            <div class="avatar flex-shrink-0">
+                                                <span class="avatar-initial rounded bg-label-danger">
+                                                    <i class='bx bx-x-circle fs-3 text-danger'></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl">
+                                @php
+                                    $totalLeavesTaken = ($leaveBalance['used_paid_leaves'] ?? 0) + ($leaveBalance['unpaid_leaves_taken'] ?? 0);
+                                @endphp
+                                <div class="border-2 card h-100 shadow-none">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted text-uppercase small mb-2 fw-semibold"><?= get_label('total_leaves_taken', 'Total Leaves Taken') ?></p>
+                                                <h3 class="mb-0 fw-bold d-flex align-items-baseline gap-1">
+                                                    <span>{{ $formatLeaveNumber($totalLeavesTaken) }}</span>
+                                                </h3>
+                                                <p class="text-muted small mb-0 mt-2">
+                                                    <?= get_label('paid', 'Paid') ?>: {{ $formatLeaveNumber($leaveBalance['used_paid_leaves'] ?? 0) }} ·
+                                                    <?= get_label('unpaid', 'Unpaid') ?>: {{ $formatLeaveNumber($leaveBalance['unpaid_leaves_taken'] ?? 0) }}
+                                                </p>
+                                            </div>
+                                            <div class="avatar flex-shrink-0">
+                                                <span class="avatar-initial rounded bg-label-secondary">
+                                                    <i class='bx bx-calendar fs-3 text-secondary'></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if(isset($leaveBalance['monthly_accrual_rate']))
+                            <div class="alert alert-info leave-accrual-banner d-flex align-items-start gap-3 mt-4" role="alert">
+                                <div class="leave-accrual-icon text-info">
+                                    <i class='bx bx-info-circle'></i>
+                                </div>
+                                <div>
+                                    <h6 class="alert-title mb-1"><?= get_label('monthly_accrual_info', 'Monthly Accrual System') ?></h6>
+                                    <p class="mb-0 small text-info">
+                                        <?= get_label('you_earn', 'You earn') ?> <strong>{{ $leaveBalance['monthly_accrual_rate'] }}</strong> <?= get_label('days_per_month', 'days per month') ?>.
+                                        <?= get_label('worked_months', 'Worked') ?>: <strong>{{ $leaveBalance['months_worked'] }} <?= get_label('months', 'months') ?></strong>.
+                                        <?= get_label('accrued_so_far', 'Accrued so far') ?>: <strong>{{ $formatLeaveNumber($leaveBalance['accrued_leaves']) }} <?= get_label('days', 'days') ?></strong>.
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="mt-4">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small">{{ get_label('leave_utilization', 'Leave utilization') }}</span>
+                                <span class="text-muted small fw-semibold">{{ number_format($leaveBalance['utilization_percentage'], 1) }}%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                    style="width: {{ number_format($leaveBalance['utilization_percentage'], 1) }}%;"
+                                    aria-valuenow="{{ $leaveBalance['utilization_percentage'] }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             @if ($auth_user->hasRole('admin'))
                 <form action="{{ url('leave-requests/update-editors') }}" class="form-submit-event" method="POST">
@@ -224,6 +424,7 @@
         var label_update = '<?= get_label('update', 'Update') ?>';
         var label_delete = '<?= get_label('delete', 'Delete') ?>';
         var isAdminOrLe = '<?= is_admin_or_leave_editor() ?>';
+        var authUserId = {{ $auth_user->id }}; // Logged-in user ID for balance fetching
     </script>
     <script src="{{ asset('assets/js/pages/leave-requests.js') }}"></script>
 @endsection

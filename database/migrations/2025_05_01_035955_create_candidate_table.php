@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('candidates', 'id')) {
         Schema::create('candidates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -22,6 +23,7 @@ return new class extends Migration
             // add workspaceID here
             $table->timestamps();
         });
+        }
     }
 
     /**

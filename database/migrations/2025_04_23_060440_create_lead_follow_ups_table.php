@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('lead_follow_ups', 'id')) {
         Schema::create('lead_follow_ups', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('lead_id');
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->foreign('lead_id')->references('id')->on('leads')->onDelete('cascade');
             $table->foreign('assigned_to')->references('id')->on('users')->onDelete('set null');
         });
+        }
     }
 
     /**

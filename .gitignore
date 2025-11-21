@@ -39,3 +39,4 @@ vite.config.ts
 /.scribe/
 public/docs/
 vendor/
+/plugins/

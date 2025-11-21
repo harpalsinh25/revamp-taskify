@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->enum('billing_type', ['none', 'billable', 'non-billable'])->default('none')->after('description');
+            if (!Schema::hasColumn('tasks', 'billing_type')) {
+                $table->enum('billing_type', ['none', 'billable', 'non-billable'])->default('none')->after('description');
+            }
         });
     }
 

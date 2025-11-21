@@ -11,21 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('custom_fieldables', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('custom_field_id');
-            $table->unsignedBigInteger('custom_fieldable_id');
-            $table->string('custom_fieldable_type');
-            $table->text('value')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('custom_fieldables')) {
+            Schema::create('custom_fieldables', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('custom_field_id');
+                $table->unsignedBigInteger('custom_fieldable_id');
+                $table->string('custom_fieldable_type');
+                $table->text('value')->nullable();
+                $table->timestamps();
 
-            $table->foreign('custom_field_id')
-                ->references('id')
-                ->on('custom_fields')
-                ->onDelete('cascade');
+                $table->foreign('custom_field_id')
+                    ->references('id')
+                    ->on('custom_fields')
+                    ->onDelete('cascade');
 
-            $table->index(['custom_fieldable_id', 'custom_fieldable_type']);
-        });
+                $table->index(['custom_fieldable_id', 'custom_fieldable_type']);
+            });
+        }
     }
 
     /**

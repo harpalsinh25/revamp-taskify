@@ -81,6 +81,15 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
             $workspace = Workspace::find($this->workspaceId);
             $workspace->users()->attach($user->id);
 
+            // Initialize leave balances for the new user
+            try {
+                $leaveBalanceService = new \App\Services\LeaveBalanceService();
+                $leaveBalanceService->getOrCreateBalance($user->id, $this->workspaceId);
+            } catch (\Exception $e) {
+                // Log error but don't fail user creation
+                \Log::error('Failed to initialize leave balance for user ' . $user->id . ': ' . $e->getMessage());
+            }
+
             // Send account creation notification if email is configured
             if (isEmailConfigured()) {
                 $account_creation_template = Template::where('type', 'email')
@@ -314,7 +323,7 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
     }
 
     private function formatErrorMessage($field, $error, $rowNumber, $value = null)
-    {        
+    {
         switch ($field) {
             case 'first_name':
             case 'last_name':

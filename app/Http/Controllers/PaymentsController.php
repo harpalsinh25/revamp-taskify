@@ -131,7 +131,7 @@ class PaymentsController extends Controller
             if (!empty($formFields['invoice_id'])) {
                 // Check if the total paid amount exceeds the total amount from the estimates_invoices table
                 $totalPaidAmount = Payment::where('invoice_id', $formFields['invoice_id'])->sum('amount');
-                $totalInvoiceAmount = EstimatesInvoice::findOrFail($formFields['invoice_id'])->total;
+                $totalInvoiceAmount = EstimatesInvoice::findOrFail($formFields['invoice_id'])->final_total;
                 if ($totalPaidAmount + $formFields['amount'] > $totalInvoiceAmount) {
                     return response()->json(['error' => true, 'message' => 'Total paid amount exceeds the total invoice amount.']);
                 }
@@ -370,7 +370,7 @@ class PaymentsController extends Controller
                 $totalPaidAmount = Payment::where('invoice_id', $formFields['invoice_id'])
                     ->where('id', '!=', $formFields['id']) // Exclude the current payment being updated
                     ->sum('amount');
-                $totalInvoiceAmount = EstimatesInvoice::findOrFail($formFields['invoice_id'])->total;
+                $totalInvoiceAmount = EstimatesInvoice::findOrFail($formFields['invoice_id'])->final_total;
 
                 if ($totalPaidAmount + $formFields['amount'] > $totalInvoiceAmount) {
                     return response()->json(['error' => true, 'message' => 'Total paid amount exceeds the total invoice amount.']);

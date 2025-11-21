@@ -60,6 +60,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'dob' => 'date',
+        'doj' => 'date',
     ];
 
     public function scopeFilter($query, array $filters)
@@ -332,6 +334,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function scheduledEmails()
     {
         return $this->hasMany(ScheduledEmail::class, 'user_id')->where('workspace_id', getWorkspaceId());
+    }
+
+    public function leaveBalances()
+    {
+        return $this->hasMany(UserLeaveBalance::class, 'user_id');
     }
 
     /**

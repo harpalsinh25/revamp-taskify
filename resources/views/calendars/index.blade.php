@@ -35,7 +35,7 @@
                     <strong class="legend-title">{{ get_label('event_type', 'Event Type') }}:</strong>
                     <div class="legend-container">
                         <div class="legend-item">
-                            <span class="legend-box" style="background-color: #696cff;"></span>
+                            <span class="legend-box bg-primary" ></span>
                             <span>{{ $google_calendar_settings['calendar_name'] ?? get_label('public_holidays', 'Public Holidays') }}</span>
                         </div>
                         <div class="legend-item">

@@ -30,6 +30,42 @@
                 <input type="hidden" name="id" id="payslip_id" value="{{$payslip->id}}">
                 @csrf
                 <div class="row">
+                    <div class="mb-3 col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="auto_from_leave_toggle">
+                            <label class="form-check-label" for="auto_from_leave_toggle"><?= get_label('auto_calculate_from_leave', 'Auto-calculate from leave') ?></label>
+                        </div>
+                        <input type="hidden" name="auto_from_leave" id="auto_from_leave" value="0">
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="recalc_from_leave_btn"><?= get_label('recalculate_from_leave', 'Recalculate from leave') ?></button>
+                    </div>
+                    <div class="mb-3 col-md-12">
+                        <div id="leave-summary" class="bg-white border rounded-3 p-3">
+                            <div class="d-flex flex-wrap gap-3 align-items-center small">
+                                <span><strong><?= get_label('total_annual_leaves', 'Total Annual Leaves') ?>:</strong> <span class="annual-total-leaves">0</span>
+                                    <span class="text-muted">(<?= get_label('accrued', 'Accrued') ?>: <span class="annual-accrued-leaves">0</span>)</span>
+                                </span>
+
+                                <span><strong><?= get_label('used_paid_leaves', 'Used Paid Leaves') ?>:</strong> <span id="annual_used_paid_leaves">0</span>/<span class="annual-total-leaves">0</span></span>
+
+                                <span><strong><?= get_label('remaining_paid_leaves', 'Remaining Paid Leaves') ?>:</strong> <span id="annual_remaining_paid_leaves">0</span>/<span class="annual-total-leaves">0</span></span>
+
+                                <span><strong><?= get_label('unpaid_leaves_taken', 'Unpaid Leaves Taken') ?>:</strong> <span id="annual_unpaid_leaves">0</span></span>
+
+                                <span><strong><?= get_label('total_leaves_taken', 'Total Taken') ?>:</strong> <span id="annual_total_leaves_taken">0</span>
+                                    <span class="text-muted">(<?= get_label('paid', 'Paid') ?>: <span id="annual_used_paid_leaves_breakdown">0</span>, <?= get_label('unpaid', 'Unpaid') ?>: <span id="annual_unpaid_leaves_breakdown">0</span>)</span>
+                                </span>
+
+                                <span><strong><?= get_label('paid_leave_days', 'Paid Leave Days') ?>:</strong> <span id="monthly_paid_leave_days">0</span></span>
+
+                                <span><strong><?= get_label('lop_days', 'LOP Days') ?>:</strong> <span id="monthly_lop_days">0</span></span>
+
+                                <span><strong><?= get_label('working_days', 'Working Days') ?>:</strong> <span id="monthly_working_days">0</span></span>
+
+                                <span><strong><?= get_label('paid_days', 'Paid Days') ?>:</strong> <span id="monthly_paid_days_display">0</span></span>
+                            </div>
+                            <input type="hidden" id="total_leave_days_value" value="0">
+                        </div>
+                    </div>
                     <div class="mb-3 col-md-4">
                         <label class="form-label" for="user_id"><?= get_label('select_user', 'Select user') ?> <span class="asterisk">*</span></label>
                         <select class="form-select users_select" name="user_id" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false">
@@ -53,7 +89,7 @@
                     </div>
                     <div class="mb-3 col-md-4">
                         <label class="form-label" for="lop_days"><?= get_label('lop_days', 'Loss of pay days') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="number" id="lop_days" name="lop_days" step="0.5" min="0" placeholder="<?= get_label('please_enter_lop_days', 'Please enter loss of pay days') ?>" value="{{ old('lop_days', $payslip->lop_days) ?? 0 }}">
+                        <input class="form-control" type="number" id="lop_days" name="lop_days" step="0.25" min="0" placeholder="<?= get_label('please_enter_lop_days', 'Please enter loss of pay days') ?>" value="{{ old('lop_days', $payslip->lop_days) ?? 0 }}">
                     </div>
                     <div class="mb-3 col-md-4">
                         <label class="form-label" for="paid_days"><?= get_label('paid_days', 'Paid days') ?> <span class="asterisk">*</span></label>
@@ -274,6 +310,53 @@
         </div>
     </div>
 </div>
+
+<!-- Override Confirmation Modal -->
+<div class="modal fade" id="overrideConfirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><?= get_label('override_confirmation_required', 'Override Confirmation Required') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bx bx-info-circle"></i>
+                    <strong><?= get_label('insufficient_balance', 'Insufficient Balance') ?></strong>
+                </div>
+                <p><?= get_label('override_confirmation_message', 'You are attempting to grant more paid leaves than available. This will result in advance/negative balance.') ?></p>
+                <div class="mb-3">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong><?= get_label('available_balance', 'Available Balance') ?>:</strong></td>
+                            <td><span id="override_available_balance">0</span> <?= get_label('days', 'days') ?></td>
+                        </tr>
+                        <tr>
+                            <td><strong><?= get_label('requested_paid_leaves', 'Requested Paid Leaves') ?>:</strong></td>
+                            <td><span id="override_delta_paid_leave">0</span> <?= get_label('days', 'days') ?></td>
+                        </tr>
+                        <tr>
+                            <td><strong><?= get_label('excess_paid_leaves', 'Excess Paid Leaves') ?>:</strong></td>
+                            <td class="text-danger"><span id="override_excess_paid_leave">0</span> <?= get_label('days', 'days') ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <p class="text-muted small">
+                    <?= get_label('override_confirmation_note', 'Do you want to proceed with granting advance paid leaves?') ?>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <?= get_label('cancel', 'Cancel') ?>
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmOverride">
+                    <?= get_label('yes_proceed', 'Yes, Proceed') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     var allowance_count = '<?= isset($payslip) && isset($payslip->allowances) && count($payslip->allowances) > 0 ? count($payslip->allowances) : 0 ?>';
     var deduction_count = '<?= isset($payslip) && isset($payslip->deductions) && count($payslip->deductions) > 0 ? count($payslip->deductions) : 0 ?>';

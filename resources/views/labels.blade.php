@@ -126,6 +126,34 @@
     var label_no_todos_found = "{{ get_label('no_todos_found', 'No todos found') }}";
     var label_no_activities_found = "{{ get_label('no_activities_found', 'No activities found') }}";
     var label_drag_to_reorder = "{{ get_label('drag_to_reorder', 'Drag to reorder') }}";
+    // Leaves report specific labels
+    var label_paid_leaves = "{{ get_label('paid_leaves', 'Paid Leaves') }}";
+    var label_unpaid_leaves = "{{ get_label('unpaid_leaves', 'Unpaid Leaves') }}";
+    var label_utilization_percent = "{{ get_label('utilization', 'Utilization %') }}";
+    var label_users = "{{ get_label('users', 'Users') }}";
+    var label_days = "{{ get_label('days', 'Days') }}";
+    var label_members_text = "{{ get_label('members', 'Members') }}";
+    var label_leaves_taken = "{{ get_label('leaves_taken', 'Leaves Taken') }}";
+    var label_months = "{{ get_label('months', 'Months') }}";
+    var label_number_of_days = "{{ get_label('number_of_days', 'Number of Days') }}";
+    // Paid leave management specific labels
+    var label_available = "{{ get_label('available', 'Available:') }}";
+    var label_of_text = "{{ get_label('of_text', 'of') }}";
+    var label_no_balance = "{{ get_label('no_balance', 'No balance') }}";
+    var label_marked_unpaid_if_approved = "{{ get_label('marked_unpaid_if_approved', 'Will be marked as unpaid if approved') }}";
+    var label_marked_unpaid = "{{ get_label('marked_unpaid', 'Will be marked as unpaid') }}";
+    var label_low_balance = "{{ get_label('low_balance', 'Low balance') }}";
+    var label_accrued = "{{ get_label('accrued', 'Accrued') }}";
+    var label_earning = "{{ get_label('earning', 'Earning') }}";
+    var label_days_per_month = "{{ get_label('days_per_month', 'days/month') }}";
+    var label_months_worked = "{{ get_label('months_worked', 'months worked') }}";
+    var label_annual = "{{ get_label('annual', 'Annual') }}";
+    var label_remaining_leaves = "{{ get_label('remaining_leaves', 'Remaining Leaves') }}";
+    var label_remaining_leaves_exhausted_hint = "{{ get_label('remaining_leaves_exhausted_hint', 'No paid days left. Approvals convert to unpaid automatically.') }}";
+    var label_remaining_leaves_low_hint = "{{ get_label('remaining_leaves_low_hint', 'Low balance — double-check before approving as paid.') }}";
+    var label_remaining_leaves_good_hint = "{{ get_label('remaining_leaves_good_hint', 'Plenty of paid days available.') }}";
+    var label_balance_snapshot = "{{ get_label('balance_snapshot', 'Balance snapshot') }}";
+    var label_no_recent_leave_activity = "{{ get_label('no_recent_leave_activity', 'No leave decisions recorded yet.') }}";
     var dashboardDataEndpoint = "{{ url('/dashboard/data') }}"; // Hardcoded for now, use route if dynamic
     var invoicesReportEndpoint = "{{ url('/reports/invoices-report-data') }}"; // Hardcoded for now
     var usersListEndpoint = "{{ url('/users/list') }}"; // Hardcoded for now

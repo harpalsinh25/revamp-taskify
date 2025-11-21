@@ -77,6 +77,9 @@ class SettingsController extends Controller
             'date_format' => ['required'],
             'toast_time_out' => ['nullable', 'numeric', 'min:0.1'],
             'allowed_max_upload_size' => ['nullable', 'numeric', 'min:1'],
+            'total_paid_leaves_per_year' => ['required', 'numeric', 'min:0'],
+            'company_year_start' => ['required', 'regex:/^\d{2}-\d{2}$/'],
+            'company_year_end' => ['required', 'regex:/^\d{2}-\d{2}$/'],
         ]);
 
         // Retrieve existing settings
@@ -85,6 +88,22 @@ class SettingsController extends Controller
 
         // Extract form values
         $form_val = $request->except('_token', '_method', 'redirect_url');
+
+        // Parse company year start (MM-DD format)
+        if ($request->filled('company_year_start')) {
+            $startParts = explode('-', $request->input('company_year_start'));
+            $form_val['company_year_start_month'] = (int)$startParts[0];
+            $form_val['company_year_start_day'] = (int)$startParts[1];
+            unset($form_val['company_year_start']); // Remove the combined field
+        }
+
+        // Parse company year end (MM-DD format)
+        if ($request->filled('company_year_end')) {
+            $endParts = explode('-', $request->input('company_year_end'));
+            $form_val['company_year_end_month'] = (int)$endParts[0];
+            $form_val['company_year_end_day'] = (int)$endParts[1];
+            unset($form_val['company_year_end']); // Remove the combined field
+        }
 
         // Handle logo uploads
         $form_val['full_logo'] = $request->hasFile('full_logo')
@@ -139,6 +158,105 @@ class SettingsController extends Controller
         return response()->json(['error' => false]);
     }
 
+    /**
+     * Initialize leave balances for all users
+     */
+    public function initializeLeaveBalances(Request $request)
+    {
+        try {
+            // Use LeaveBalanceEngine for proper recalculation that includes adjustments
+            $balanceEngine = app(\App\Services\LeaveBalanceEngine::class);
+            $leaveBalanceService = new \App\Services\LeaveBalanceService();
+            $calculationService = app(\App\Services\LeaveCalculationService::class);
+            $currentYear = get_current_company_year(); // Use company year instead of calendar year
+
+            // First, fix any existing adjustment records with incorrect delta_paid values
+            $adjustmentsFixed = 0;
+            $adjustments = \App\Models\LeaveBalanceAdjustment::where('delta_paid', 0)
+                ->where('delta_advance', '>', 0)
+                ->get();
+
+            foreach ($adjustments as $adjustment) {
+                $payslip = $adjustment->payslip;
+                if (!$payslip) {
+                    continue;
+                }
+
+                // Calculate what deltaPaidLeave should have been
+                $baseline = $calculationService->calculateBaselineLOP(
+                    $adjustment->user_id,
+                    $adjustment->workspace_id,
+                    \Carbon\Carbon::parse($payslip->month)->format('Y-m')
+                );
+
+                $baselineLop = (float) ($baseline['lop_days'] ?? 0);
+                $submittedLop = (float) $payslip->lop_days;
+                $deltaLop = $submittedLop - $baselineLop;
+                $deltaPaidLeave = -$deltaLop; // Inverse relationship
+
+                if ($deltaPaidLeave > 0) {
+                    $adjustment->delta_paid = $deltaPaidLeave;
+                    $adjustment->save();
+                    $adjustmentsFixed++;
+                }
+            }
+
+            $workspaces = \App\Models\Workspace::all();
+            $totalUsers = 0;
+            $initialized = 0;
+            $recalculated = 0;
+
+            foreach ($workspaces as $workspace) {
+                $users = $workspace->users;
+
+                foreach ($users as $user) {
+                    $totalUsers++;
+
+                    // Get or create balance using LeaveBalanceEngine
+                    $balance = $balanceEngine->getOrCreateBalance(
+                        $user->id,
+                        $workspace->id,
+                        $currentYear
+                    );
+
+                    // Check if it was just created (used_paid_leaves will be 0)
+                    if (!$balance->wasRecentlyCreated) {
+                        // Get current total annual leaves from settings (may have changed!)
+                        $currentTotalAnnualLeaves = $leaveBalanceService->getTotalAnnualLeaves();
+
+                        // Update total_annual_leaves if settings changed
+                        $balance->total_annual_leaves = $currentTotalAnnualLeaves;
+                        $balance->save();
+
+                        // Recalculate balance using LeaveBalanceEngine
+                        // This will include adjustments from LeaveBalanceAdjustment records
+                        $balance = $balanceEngine->recalculateBalance($balance);
+
+                        $recalculated++;
+                    } else {
+                        $initialized++;
+                    }
+                }
+            }
+
+            return response()->json([
+                'error' => false,
+                'message' => "Leave balances processed successfully!",
+                'summary' => [
+                    'workspaces' => $workspaces->count(),
+                    'total_users' => $totalUsers,
+                    'newly_initialized' => $initialized,
+                    'recalculated' => $recalculated,
+                    'adjustments_fixed' => $adjustmentsFixed
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Error processing leave balances: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function store_security_settings(Request $request)
     {

@@ -6,20 +6,35 @@ use App\Models\User;
 use App\Models\Client;
 use App\Models\Payslip;
 use App\Models\Workspace;
+use App\Models\Template;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Services\DeletionService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use App\Models\LeaveRequest;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\File;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\LeaveBalanceService;
+use App\Services\LeaveBalanceSyncService;
+use App\Services\LeaveCalculationService;
+use App\Services\LeaveBalanceEngine;
 
 class PayslipsController extends Controller
 {
     protected $workspace;
     protected $user;
-    public function __construct()
+    protected LeaveBalanceService $leaveBalanceService;
+    protected LeaveCalculationService $calculationService;
+    protected LeaveBalanceEngine $balanceEngine;
+
+    public function __construct(LeaveBalanceService $leaveBalanceService)
     {
+        $this->leaveBalanceService = $leaveBalanceService;
+        $this->calculationService = app(LeaveCalculationService::class);
+        $this->balanceEngine = app(LeaveBalanceEngine::class);
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->workspace = Workspace::find(getWorkspaceId());
@@ -151,7 +166,8 @@ class PayslipsController extends Controller
                 'payment_method_id' => ['nullable', 'required_if:status,1'],
                 'payment_date' => ['nullable', 'required_if:status,1'],
                 'status' => ['required'],
-                'note' => ['nullable']
+                'note' => ['nullable'],
+                'auto_from_leave' => ['nullable']
             ], [
                 'user_id.required' => 'The user field is required.',
                 'payment_date.required_if' => 'The payment date is required when status is paid.',
@@ -184,30 +200,173 @@ class PayslipsController extends Controller
             $formFields['created_by'] = isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id;
             $allowance_ids = $request->input('allowances') ?? [];
             $deduction_ids = $request->input('deductions') ?? [];
+
+            // Debug data collection
+            $debugData = [];
+            $isDebugMode = $request->boolean('debug', false) || config('app.debug', false);
+
+            // If auto_from_leave is on, recalculate leave-related fields server-side
+            if ($request->boolean('auto_from_leave')) {
+                $summary = $this->calculateLeaveSummary(
+                    (int)$formFields['user_id'],
+                    $formFields['month'],
+                    (float)$formFields['basic_salary']
+                );
+
+                $baselineLop = (float) $summary['lop_days'];
+                $submittedLop = (float) $request->input('lop_days', $baselineLop);
+                $workingDays = (float) $summary['working_days'];
+
+                // Store debug info
+                if ($isDebugMode) {
+                    $debugData['auto_from_leave'] = true;
+                    $debugData['baseline_lop'] = $baselineLop;
+                    $debugData['submitted_lop'] = $submittedLop;
+                    $debugData['baseline_paid_days'] = $summary['paid_days'];
+                    $debugData['baseline_leave_deduction'] = $summary['leave_deduction'];
+                }
+
+                // If submitted LOP differs from baseline, it's a manual adjustment
+                // Use a small tolerance (0.01) for floating point comparison
+                if (abs($submittedLop - $baselineLop) > 0.01) {
+                    // Preserve manual adjustment
+                    $formFields['working_days'] = $workingDays;
+                    $formFields['lop_days'] = $submittedLop;
+                    $formFields['paid_days'] = max(0, $workingDays - $submittedLop);
+
+                    // Recalculate leave deduction based on manual LOP
+                    $perDaySalary = $workingDays > 0 ? ((float)$formFields['basic_salary'] / $workingDays) : 0;
+                    $formFields['leave_deduction'] = round($perDaySalary * $submittedLop, 2);
+
+                    if ($isDebugMode) {
+                        $debugData['manual_adjustment'] = true;
+                        $debugData['delta_lop'] = $submittedLop - $baselineLop;
+                        $debugData['delta_paid_leave'] = - ($submittedLop - $baselineLop);
+                        $debugData['final_lop'] = $submittedLop;
+                        $debugData['final_paid_days'] = $formFields['paid_days'];
+                        $debugData['final_leave_deduction'] = $formFields['leave_deduction'];
+                    }
+
+                    \Log::info('Payslip manual LOP adjustment detected', [
+                        'user_id' => $formFields['user_id'],
+                        'month' => $formFields['month'],
+                        'baseline_lop' => $baselineLop,
+                        'submitted_lop' => $submittedLop,
+                        'delta' => $submittedLop - $baselineLop
+                    ]);
+                } else {
+                    // Use calculated values (no manual adjustment)
+                    $formFields['working_days'] = $summary['working_days'];
+                    $formFields['lop_days'] = $summary['lop_days'];
+                    $formFields['paid_days'] = $summary['paid_days'];
+                    $formFields['leave_deduction'] = $summary['leave_deduction'];
+
+                    if ($isDebugMode) {
+                        $debugData['manual_adjustment'] = false;
+                        $debugData['final_lop'] = $summary['lop_days'];
+                        $debugData['final_paid_days'] = $summary['paid_days'];
+                        $debugData['final_leave_deduction'] = $summary['leave_deduction'];
+                    }
+                }
+
+                // Recompute totals consistent with client logic
+                $formFields['total_earnings'] = (float)$formFields['basic_salary'] + (float)$formFields['bonus'] + (float)$formFields['incentives'] + (float)$formFields['ot_payment'];
+                $formFields['net_pay'] = (float)$formFields['total_earnings'] + (float)$formFields['total_allowance'] - ((float)$formFields['total_deductions'] + (float)$formFields['leave_deduction']);
+            } else {
+                if ($isDebugMode) {
+                    $debugData['auto_from_leave'] = false;
+                    $debugData['final_lop'] = (float) $formFields['lop_days'];
+                }
+            }
+
+            // Pre-check override requirement BEFORE creating payslip
+            // Create a temporary payslip object to check override requirement
+            $tempPayslip = new Payslip($formFields);
+            $syncService = app(LeaveBalanceSyncService::class);
+            $overrideCheck = $syncService->checkOverrideRequired($tempPayslip);
+
+            // If override is required and not confirmed, return special response
+            if ($overrideCheck['override_required'] && !$request->boolean('override_confirmed', false)) {
+                return response()->json([
+                    'error' => false,
+                    'override_required' => true,
+                    'message' => 'Override confirmation required',
+                    'override_data' => [
+                        'delta_paid_leave' => $overrideCheck['delta_paid_leave'],
+                        'available_balance' => $overrideCheck['available_balance'],
+                        'excess_paid_leave' => $overrideCheck['excess_paid_leave'],
+                        'baseline_lop' => $overrideCheck['baseline_lop'],
+                        'submitted_lop' => $overrideCheck['submitted_lop'],
+                    ]
+                ], 200);
+            }
+
             if ($payslip = Payslip::create($formFields)) {
                 $payslip->allowances()->attach($allowance_ids);
                 $payslip->deductions()->attach($deduction_ids);
 
+                // Sync leave balance after payslip creation
+                $syncResult = null;
+                try {
+                    $syncService = app(LeaveBalanceSyncService::class);
+                    $syncResult = $syncService->syncFromPayslip($payslip, [
+                        'override_confirmed' => $request->boolean('override_confirmed', false)
+                    ]);
 
+                    if ($isDebugMode) {
+                        $debugData['sync_result'] = $syncResult;
+                    }
+
+                    \Log::info('Payslip balance sync completed', [
+                        'payslip_id' => $payslip->id,
+                        'user_id' => $payslip->user_id,
+                        'month' => $payslip->month,
+                        'sync_success' => $syncResult['success'] ?? false,
+                        'balance_updated' => $syncResult['balance_updated'] ?? false,
+                        'delta_paid_leave' => $syncResult['delta_paid_leave'] ?? 0,
+                        'delta_lop' => $syncResult['delta_lop'] ?? 0
+                    ]);
+                } catch (\Exception $e) {
+                    // Log error but don't fail payslip creation
+                    \Log::error('Leave balance sync failed during payslip creation', [
+                        'payslip_id' => $payslip->id,
+                        'user_id' => $payslip->user_id,
+                        'month' => $payslip->month,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+
+                    if ($isDebugMode) {
+                        $debugData['sync_error'] = [
+                            'message' => $e->getMessage(),
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine()
+                        ];
+                    }
+                }
 
                 if ($isApi) {
+                    $responseData = ['data' => formatPayslip($payslip)];
+                    if ($isDebugMode && !empty($debugData)) {
+                        $responseData['debug'] = $debugData;
+                    }
 
                     return formatApiResponse(
                         false,
                         'Payslip created successfully.',
-                        [
-                            'data' => formatPayslip($payslip)
-                        ],
+                        $responseData,
                         200
                     );
                 }
 
                 Session::flash('message', 'Payslip created successfully.');
 
+                $response = ['error' => false, 'id' => $payslip->id];
+                if ($isDebugMode && !empty($debugData)) {
+                    $response['debug'] = $debugData;
+                }
 
-
-
-                return response()->json(['error' => false, 'id' => $payslip->id]);
+                return response()->json($response);
             } else {
                 return response()->json(['error' => true, 'message' => 'Payslip couldn\'t created.']);
             }
@@ -503,7 +662,8 @@ class PayslipsController extends Controller
                 'payment_method_id' => ['nullable', 'required_if:status,1'],
                 'payment_date' => ['nullable', 'required_if:status,1'],
                 'status' => ['required'],
-                'note' => ['nullable']
+                'note' => ['nullable'],
+                'auto_from_leave' => ['nullable']
             ], [
                 'user_id.required' => 'The user field is required.',
                 'payment_date.required_if' => 'The payment date is required when status is paid.',
@@ -539,6 +699,117 @@ class PayslipsController extends Controller
             // Find the Payslip by its ID
             $payslip = Payslip::findOrFail($request->input('id'));
 
+            // Reverse old adjustment before updating (to restore balance to baseline)
+            try {
+                $syncService = app(LeaveBalanceSyncService::class);
+                $syncService->reverseAdjustment($payslip);
+            } catch (\Exception $e) {
+                // Log error but don't fail payslip update
+                \Log::error('Leave balance reversal failed during payslip update: ' . $e->getMessage());
+            }
+
+            // Debug data collection
+            $debugData = [];
+            $isDebugMode = $request->boolean('debug', false) || config('app.debug', false);
+
+            // If auto_from_leave is on, recalculate leave-related fields server-side
+            if ($request->boolean('auto_from_leave')) {
+                $summary = $this->calculateLeaveSummary(
+                    (int)$formFields['user_id'],
+                    $formFields['month'],
+                    (float)$formFields['basic_salary']
+                );
+
+                $baselineLop = (float) $summary['lop_days'];
+                $submittedLop = (float) $request->input('lop_days', $baselineLop);
+                $workingDays = (float) $summary['working_days'];
+
+                // Store debug info
+                if ($isDebugMode) {
+                    $debugData['auto_from_leave'] = true;
+                    $debugData['baseline_lop'] = $baselineLop;
+                    $debugData['submitted_lop'] = $submittedLop;
+                    $debugData['baseline_paid_days'] = $summary['paid_days'];
+                    $debugData['baseline_leave_deduction'] = $summary['leave_deduction'];
+                }
+
+                // If submitted LOP differs from baseline, it's a manual adjustment
+                // Use a small tolerance (0.01) for floating point comparison
+                if (abs($submittedLop - $baselineLop) > 0.01) {
+                    // Preserve manual adjustment
+                    $formFields['working_days'] = $workingDays;
+                    $formFields['lop_days'] = $submittedLop;
+                    $formFields['paid_days'] = max(0, $workingDays - $submittedLop);
+
+                    // Recalculate leave deduction based on manual LOP
+                    $perDaySalary = $workingDays > 0 ? ((float)$formFields['basic_salary'] / $workingDays) : 0;
+                    $formFields['leave_deduction'] = round($perDaySalary * $submittedLop, 2);
+
+                    if ($isDebugMode) {
+                        $debugData['manual_adjustment'] = true;
+                        $debugData['delta_lop'] = $submittedLop - $baselineLop;
+                        $debugData['delta_paid_leave'] = - ($submittedLop - $baselineLop);
+                        $debugData['final_lop'] = $submittedLop;
+                        $debugData['final_paid_days'] = $formFields['paid_days'];
+                        $debugData['final_leave_deduction'] = $formFields['leave_deduction'];
+                    }
+
+                    \Log::info('Payslip manual LOP adjustment detected (update)', [
+                        'payslip_id' => $payslip->id,
+                        'user_id' => $formFields['user_id'],
+                        'month' => $formFields['month'],
+                        'baseline_lop' => $baselineLop,
+                        'submitted_lop' => $submittedLop,
+                        'delta' => $submittedLop - $baselineLop
+                    ]);
+                } else {
+                    // Use calculated values (no manual adjustment)
+                    $formFields['working_days'] = $summary['working_days'];
+                    $formFields['lop_days'] = $summary['lop_days'];
+                    $formFields['paid_days'] = $summary['paid_days'];
+                    $formFields['leave_deduction'] = $summary['leave_deduction'];
+
+                    if ($isDebugMode) {
+                        $debugData['manual_adjustment'] = false;
+                        $debugData['final_lop'] = $summary['lop_days'];
+                        $debugData['final_paid_days'] = $summary['paid_days'];
+                        $debugData['final_leave_deduction'] = $summary['leave_deduction'];
+                    }
+                }
+
+                // Recompute totals consistent with client logic
+                $formFields['total_earnings'] = (float)$formFields['basic_salary'] + (float)$formFields['bonus'] + (float)$formFields['incentives'] + (float)$formFields['ot_payment'];
+                $formFields['net_pay'] = (float)$formFields['total_earnings'] + (float)$formFields['total_allowance'] - ((float)$formFields['total_deductions'] + (float)$formFields['leave_deduction']);
+            } else {
+                if ($isDebugMode) {
+                    $debugData['auto_from_leave'] = false;
+                    $debugData['final_lop'] = (float) $formFields['lop_days'];
+                }
+            }
+
+            // Pre-check override requirement BEFORE updating payslip
+            // Create a temporary payslip object with new values to check override requirement
+            $tempPayslip = new Payslip($formFields);
+            $tempPayslip->id = $payslip->id; // Preserve ID for checkOverrideRequired
+            $syncService = app(LeaveBalanceSyncService::class);
+            $overrideCheck = $syncService->checkOverrideRequired($tempPayslip);
+
+            // If override is required and not confirmed, return special response
+            if ($overrideCheck['override_required'] && !$request->boolean('override_confirmed', false)) {
+                return response()->json([
+                    'error' => false,
+                    'override_required' => true,
+                    'message' => 'Override confirmation required',
+                    'override_data' => [
+                        'delta_paid_leave' => $overrideCheck['delta_paid_leave'],
+                        'available_balance' => $overrideCheck['available_balance'],
+                        'excess_paid_leave' => $overrideCheck['excess_paid_leave'],
+                        'baseline_lop' => $overrideCheck['baseline_lop'],
+                        'submitted_lop' => $overrideCheck['submitted_lop'],
+                    ]
+                ], 200);
+            }
+
             // Update the Payslip attributes
             $payslip->update($formFields);
 
@@ -550,19 +821,69 @@ class PayslipsController extends Controller
                 $payslip->deductions()->sync($deduction_ids);
             }
 
+            // Apply new adjustment after update
+            $syncResult = null;
+            try {
+                $syncService = app(LeaveBalanceSyncService::class);
+                $syncResult = $syncService->syncFromPayslip($payslip, [
+                    'is_update' => true,
+                    'override_confirmed' => $request->boolean('override_confirmed', false)
+                ]);
+
+                if ($isDebugMode) {
+                    $debugData['sync_result'] = $syncResult;
+                }
+
+                \Log::info('Payslip balance sync completed (update)', [
+                    'payslip_id' => $payslip->id,
+                    'user_id' => $payslip->user_id,
+                    'month' => $payslip->month,
+                    'sync_success' => $syncResult['success'] ?? false,
+                    'balance_updated' => $syncResult['balance_updated'] ?? false,
+                    'delta_paid_leave' => $syncResult['delta_paid_leave'] ?? 0,
+                    'delta_lop' => $syncResult['delta_lop'] ?? 0
+                ]);
+            } catch (\Exception $e) {
+                // Log error but don't fail payslip update
+                \Log::error('Leave balance sync failed during payslip update', [
+                    'payslip_id' => $payslip->id,
+                    'user_id' => $payslip->user_id,
+                    'month' => $payslip->month,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+
+                if ($isDebugMode) {
+                    $debugData['sync_error'] = [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ];
+                }
+            }
+
             if ($isApi) {
+                $responseData = ['data' => formatPayslip($payslip)];
+                if ($isDebugMode && !empty($debugData)) {
+                    $responseData['debug'] = $debugData;
+                }
+
                 return formatApiResponse(
                     false,
                     'Payslips updated successfully.',
-                    [
-                        'data' => formatPayslip($payslip)
-                    ],
+                    $responseData,
                     200
                 );
             }
 
             Session::flash('message', 'Payslip updated successfully.');
-            return response()->json(['error' => false, 'id' => $payslip->id]);
+
+            $response = ['error' => false, 'id' => $payslip->id];
+            if ($isDebugMode && !empty($debugData)) {
+                $response['debug'] = $debugData;
+            }
+
+            return response()->json($response);
         } catch (\Exception $e) {
             return formatApiResponse(
                 true,
@@ -573,17 +894,212 @@ class PayslipsController extends Controller
         }
     }
 
+    // Compute leave summary for a user-month and basic salary
+    /**
+     * Calculate leave summary for payslip
+     *
+     * Implements Flow 3: [Calculate Baseline LOP] using LeaveCalculationService
+     *
+     * @param int $userId
+     * @param string $month YYYY-MM format
+     * @param float $basicSalary
+     * @return array
+     */
+    private function calculateLeaveSummary(int $userId, string $month, float $basicSalary): array
+    {
+        $workspaceId = $this->workspace->id;
+        $monthStart = Carbon::parse($month . '-01')->startOfMonth();
+        $workingDays = (float)$monthStart->daysInMonth;
+
+        // [Calculate Baseline LOP] - Flow 3: Use LeaveCalculationService
+        $baseline = $this->calculationService->calculateBaselineLOP(
+            $userId,
+            $workspaceId,
+            $month
+        );
+
+        $paidLeaveDays = (float)($baseline['paid_leave_days'] ?? 0);
+        $unpaidLeaveDays = (float)($baseline['unpaid_leave_days'] ?? 0);
+        $lopDays = (float)($baseline['lop_days'] ?? 0);
+
+        // Calculate paid days (working days - LOP)
+        $paidDaysOut = max($workingDays - $lopDays, 0.0);
+
+        // Calculate leave deduction
+        $perDay = $workingDays > 0 ? ($basicSalary / $workingDays) : 0.0;
+        $leaveDeduction = $perDay * $lopDays;
+
+        return [
+            'working_days' => $workingDays,
+            'paid_days' => $paidDaysOut,
+            'lop_days' => $lopDays,
+            'leave_deduction' => round($leaveDeduction, 2),
+            'breakdown' => [
+                'paid_leave_days' => $paidLeaveDays,
+                'unpaid_leave_days' => $unpaidLeaveDays,
+                'total_leave_days' => (float)($baseline['total_leave_days'] ?? 0),
+            ],
+        ];
+    }
+
+    // API for JS to fetch summary
+    public function leaveSummary(Request $request)
+    {
+        $request->validate([
+            'user_id' => ['required', 'integer'],
+            'month' => ['required', 'string'], // YYYY-MM
+            'basic_salary' => ['required', 'regex:/^\d+(\.\d+)?$/'],
+        ]);
+        $userId = (int)$request->user_id;
+        $month = $request->month;
+        $basicSalary = (float)$request->basic_salary;
+
+        $summary = $this->calculateLeaveSummary($userId, $month, $basicSalary);
+
+        $year = get_current_company_year();
+        $annualSummary = $this->balanceEngine->getBalanceSummary(
+            $userId,
+            $this->workspace->id,
+            $year
+        );
+
+        $summary['annual_summary'] = [
+            'total_annual_leaves' => (float)($annualSummary['total_annual_leaves'] ?? 0),
+            'accrued_leaves' => isset($annualSummary['accrued_leaves'])
+                ? (float)$annualSummary['accrued_leaves']
+                : null,
+            'used_paid_leaves' => (float)($annualSummary['used_paid_leaves'] ?? 0),
+            'remaining_paid_leaves' => (float)($annualSummary['remaining_paid_leaves'] ?? 0),
+            'unpaid_leaves_taken' => (float)($annualSummary['unpaid_leaves_taken'] ?? 0),
+            'utilization_percentage' => (float)($annualSummary['utilization_percentage'] ?? 0),
+            'accrual_utilization_percentage' => isset($annualSummary['accrual_utilization_percentage'])
+                ? (float)$annualSummary['accrual_utilization_percentage']
+                : null,
+        ];
+
+        return response()->json(['error' => false, 'data' => $summary]);
+    }
+
+    // Generate PDF for a payslip
+    public function pdf($id)
+    {
+        $payslip = Payslip::with(['user', 'allowances', 'deductions', 'paymentMethod'])->findOrFail($id);
+
+        // Convert logo to base64 for PDF
+        $logoBase64 = '';
+        $general_settings = get_settings('general_settings');
+        if (!empty($general_settings['full_logo'])) {
+            $logoPath = public_path('storage/' . $general_settings['full_logo']);
+            if (file_exists($logoPath)) {
+                $imageData = file_get_contents($logoPath);
+                $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imageData);
+            }
+        }
+
+        $data = ['payslip' => $payslip, 'logo_base64' => $logoBase64];
+        $pdf = Pdf::loadView('payslips.pdf', $data);
+        return $pdf->download(get_label('payslip_id_prefix', 'PSL-') . $payslip->id . '.pdf');
+    }
+
+    // Send payslip PDF via email
+    public function sendEmail(Request $request, $id)
+    {
+        $payslip = Payslip::with(['user', 'allowances', 'deductions', 'paymentMethod'])->findOrFail($id);
+        $to = $request->input('to', $payslip->user->email ?? null);
+        $cc = $request->input('cc');
+
+        if (!$to) {
+            return response()->json(['error' => true, 'message' => 'Recipient email not found.'], 422);
+        }
+
+        // Get template similar to AssignmentNotification
+        $general_settings = get_settings('general_settings');
+        $company_title = $general_settings['company_title'] ?? 'Taskify';
+        $fetched_data = Template::where('type', 'email')
+            ->where('name', 'payslip')
+            ->first();
+
+        // Get subject
+        $subject = $request->input('subject');
+        if (empty($subject)) {
+            if ($fetched_data && !empty($fetched_data->subject)) {
+                $subject = $fetched_data->subject;
+            } else {
+                $subject = get_label('payslip', 'Payslip') . ' ' . get_label('payslip_id_prefix', 'PSL-') . $payslip->id;
+            }
+        }
+
+        // Get content
+        $content = $request->input('body');
+        if (empty($content)) {
+            if ($fetched_data && !empty($fetched_data->content)) {
+                $templateContent = $fetched_data->content;
+            } else {
+                $defaultTemplatePath = resource_path('views/mail/default_templates/payslip.blade.php');
+                $templateContent = File::get($defaultTemplatePath);
+            }
+        } else {
+            $templateContent = $content;
+        }
+
+        // Prepare placeholders
+        $monthYear = Carbon::parse($payslip->month)->format('F, Y');
+        $contentPlaceholders = [
+            '{FIRST_NAME}' => $payslip->user->first_name ?? '',
+            '{LAST_NAME}' => $payslip->user->last_name ?? '',
+            '{PAYSLIP_ID}' => get_label('payslip_id_prefix', 'PSL-') . $payslip->id,
+            '{MONTH_YEAR}' => $monthYear,
+            '{COMPANY_TITLE}' => $company_title,
+            '{CURRENT_YEAR}' => date('Y'),
+        ];
+
+        // Replace placeholders
+        $finalContent = str_replace(array_keys($contentPlaceholders), array_values($contentPlaceholders), $templateContent);
+
+        // Get logo
+        $full_logo_path = !isset($general_settings['full_logo']) || empty($general_settings['full_logo'])
+            ? 'logos/default_full_logo.png'
+            : $general_settings['full_logo'];
+        $full_logo_url = asset('storage/' . $full_logo_path);
+
+        // Convert logo to base64 for PDF
+        $logoBase64 = '';
+        if (!empty($general_settings['full_logo'])) {
+            $logoPath = public_path('storage/' . $general_settings['full_logo']);
+            if (file_exists($logoPath)) {
+                $imageData = file_get_contents($logoPath);
+                $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imageData);
+            }
+        }
+
+        $pdf = Pdf::loadView('payslips.pdf', ['payslip' => $payslip, 'logo_base64' => $logoBase64]);
+        $filename = get_label('payslip_id_prefix', 'PSL-') . $payslip->id . '.pdf';
+
+        // Parse CC emails
+        $ccEmails = [];
+        if (!empty($cc)) {
+            $ccEmails = array_filter(array_map('trim', explode(',', $cc)));
+        }
+
+        Mail::send('mail.html', ['content' => $finalContent, 'logo_url' => $full_logo_url], function ($message) use ($to, $ccEmails, $subject, $pdf, $filename) {
+            $message->to($to)->subject($subject);
+            if (!empty($ccEmails)) {
+                $message->cc($ccEmails);
+            }
+            $message->attachData($pdf->output(), $filename, ['mime' => 'application/pdf']);
+        });
+
+        return response()->json(['error' => false, 'message' => 'Payslip emailed successfully.']);
+    }
+
     public function view(Request $request, $id)
     {
-        $payslip = Payslip::select(
-            'payslips.*',
-            DB::raw('CONCAT(users.first_name, " ", users.last_name) AS user_name'),
-            'users.email as user_email',
-            'payment_methods.title as payment_method'
-        )->where('payslips.id', '=', $id)
-            ->leftJoin('users', 'payslips.user_id', '=', 'users.id')
-            ->leftJoin('payment_methods', 'payslips.payment_method_id', '=', 'payment_methods.id')->first();
+        $payslip = Payslip::with(['user', 'allowances', 'deductions', 'paymentMethod'])->findOrFail($id);
 
+        // Add helper properties for view compatibility
+        $payslip->user_name = $payslip->user ? ($payslip->user->first_name . ' ' . $payslip->user->last_name) : '';
+        $payslip->user_email = $payslip->user->email ?? '';
+        $payslip->payment_method = $payslip->paymentMethod->title ?? '';
 
         // The ID corresponds to a user
         $creator = User::find(substr($payslip->created_by, 2)); // Remove the 'u_' prefix
@@ -634,6 +1150,16 @@ class PayslipsController extends Controller
 
         try {
             $payslip = Payslip::findOrFail($id);
+
+            // Reverse leave balance adjustment before deletion
+            try {
+                $syncService = app(LeaveBalanceSyncService::class);
+                $syncService->reverseAdjustment($payslip);
+            } catch (\Exception $e) {
+                // Log error but don't fail payslip deletion
+                \Log::error('Leave balance reversal failed during payslip deletion: ' . $e->getMessage());
+            }
+
             $payslip->allowances()->detach();
             $payslip->deductions()->detach();
             $response = DeletionService::delete(Payslip::class, $id, 'Payslip');
@@ -661,9 +1187,18 @@ class PayslipsController extends Controller
         $deletedPayslipTitles = [];
 
         // Perform deletion using validated IDs
+        $syncService = app(LeaveBalanceSyncService::class);
         foreach ($ids as $id) {
             $payslip = Payslip::findOrFail($id);
             if ($payslip) {
+                // Reverse leave balance adjustment before deletion
+                try {
+                    $syncService->reverseAdjustment($payslip);
+                } catch (\Exception $e) {
+                    // Log error but don't fail payslip deletion
+                    \Log::error('Leave balance reversal failed during payslip deletion (ID: ' . $id . '): ' . $e->getMessage());
+                }
+
                 $deletedPayslips[] = $id;
                 $deletedPayslipTitles[] = get_label('payslip_id_prefix', 'PSL-') . $id;
                 $payslip->allowances()->detach();

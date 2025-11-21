@@ -8,6 +8,91 @@ toastr.options = {
     progressBar: true,
     closeButton: true,
 };
+
+function renderRemainingLeavesSummary(balance, options) {
+    if (!balance) {
+        return '';
+    }
+
+    var settings = $.extend(
+        {
+            heading: label_remaining_leaves,
+            lowThreshold: 3,
+            includeAccrualMeta: true,
+            includeWarnings: true,
+        },
+        options || {}
+    );
+
+    var remaining = parseFloat(balance.remaining_paid_leaves || 0);
+    var effectiveTotal = balance.accrued_leaves && balance.accrued_leaves > 0
+        ? parseFloat(balance.accrued_leaves)
+        : parseFloat(balance.total_annual_leaves || 0);
+
+    function formatNumber(value) {
+        return (value % 1 === 0) ? value.toString() : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+    }
+
+    var status = 'healthy';
+    if (remaining <= 0) {
+        status = 'exhausted';
+    } else if (remaining < settings.lowThreshold) {
+        status = 'low';
+    }
+
+    var badgeClasses = {
+        healthy: 'bg-label-success text-success',
+        low: 'bg-label-warning text-warning',
+        exhausted: 'bg-label-danger text-danger'
+    };
+
+    var iconClasses = {
+        healthy: 'bx bx-check-circle',
+        low: 'bx bx-bell',
+        exhausted: 'bx bx-error-circle'
+    };
+
+    var hintTexts = {
+        healthy: label_remaining_leaves_good_hint,
+        low: label_remaining_leaves_low_hint,
+        exhausted: label_remaining_leaves_exhausted_hint
+    };
+
+    var html = '<div class="d-flex flex-column gap-1 leave-remaining-pill">';
+
+    if (settings.heading) {
+        html += '<small class="text-muted">' + settings.heading + '</small>';
+    }
+
+    html += '<span class="badge d-inline-flex align-items-center gap-2 ' + badgeClasses[status] + '">';
+    html += '<i class="' + iconClasses[status] + '"></i>';
+    html += '<span class="text-body">' + label_remaining_leaves + ':</span>';
+    html += '<strong>' + formatNumber(remaining) + '</strong>';
+    html += '</span>';
+
+    html += '<small class="text-muted">' + label_of_text + ' ' + formatNumber(effectiveTotal) + ' ' + label_days + '</small>';
+
+    if (settings.includeWarnings) {
+        var hintClass = status === 'healthy' ? 'text-muted' : (status === 'low' ? 'text-warning' : 'text-danger');
+        html += '<small class="' + hintClass + '">' + hintTexts[status] + '</small>';
+    }
+
+    if (settings.includeAccrualMeta && balance.accrued_leaves && balance.monthly_accrual_rate) {
+        html += '<small class="text-muted">' + label_earning + ' ' + balance.monthly_accrual_rate + ' ' + label_days_per_month + ' · ' + balance.months_worked + ' ' + label_months_worked + ' · ' + label_annual + ': ' + balance.total_annual_leaves + '</small>';
+    }
+
+    if (status === 'exhausted') {
+        html += '<small class="text-danger">⚠️ ' + label_marked_unpaid_if_approved + '</small>';
+    } else if (status === 'low') {
+        html += '<small class="text-warning">⚠️ ' + label_marked_unpaid + '</small>';
+    }
+
+    html += '</div>';
+
+    return html;
+}
+
+window.renderRemainingLeavesSummary = renderRemainingLeavesSummary;
 $(document).on("click", ".delete", function (e) {
     e.preventDefault();
     var id = $(this).data("id");
@@ -578,6 +663,53 @@ $(document).on("click", ".edit-leave-request", function () {
                 "checked",
                 true
             );
+
+            // Set the "Mark as Paid Leave" toggle based on database value
+            var isPaidToggle = $("#edit_leave_request_modal").find("#is_paid_toggle");
+            console.log('is_paid value from DB:', response.lr.is_paid);
+
+            // Remove any disabled attribute to ensure it's clickable
+            isPaidToggle.prop('disabled', false);
+
+            if (response.lr.is_paid === true || response.lr.is_paid === 1) {
+                isPaidToggle.prop("checked", true);
+                console.log('Toggle set to ON (paid)');
+            } else if (response.lr.is_paid === false || response.lr.is_paid === 0) {
+                isPaidToggle.prop("checked", false);
+                console.log('Toggle set to OFF (unpaid)');
+            } else {
+                // If null/undefined, default to ON
+                isPaidToggle.prop("checked", true);
+                console.log('Toggle set to ON (default - is_paid is null)');
+            }
+
+            // Fetch and display leave balance
+            if (response.lr.user && response.lr.user.id) {
+                console.log('Fetching balance for user:', response.lr.user.id, 'excluding leave:', response.lr.id);
+                $.ajax({
+                    url: baseUrl + '/leave-requests/get-user-balance',
+                    method: 'GET',
+                    data: {
+                        user_id: response.lr.user.id,
+                        exclude_leave_id: response.lr.id
+                    },
+                    success: function (balanceResponse) {
+                        console.log('Balance response:', balanceResponse);
+                        if (!balanceResponse.error && balanceResponse.balance) {
+                            var balance = balanceResponse.balance;
+
+                            var balanceHtml = renderRemainingLeavesSummary(balance, {
+                                heading: label_balance_snapshot,
+                                includeAccrualMeta: true
+                            });
+                            $('#leave_balance_info').html(balanceHtml);
+                        }
+                    },
+                    error: function () {
+                        $('#leave_balance_info').html('<span class="text-danger">' + label_err_try_again + '</span>');
+                    }
+                });
+            }
         },
     });
 });
@@ -1559,6 +1691,56 @@ $(document).on("submit", ".form-submit-event", function (e) {
         success: function (result) {
             submit_btn.html(button_text);
             submit_btn.attr("disabled", false);
+
+            // Check if override confirmation is required (for payslip forms)
+            if (result["override_required"] === true) {
+                console.log('[Override Check] Override required detected', result.override_data);
+
+                // Check for function in global scope or window object
+                var showModalFunc = typeof showOverrideConfirmationModal !== 'undefined'
+                    ? showOverrideConfirmationModal
+                    : (typeof window.showOverrideConfirmationModal !== 'undefined'
+                        ? window.showOverrideConfirmationModal
+                        : null);
+
+                console.log('[Override Check] Function check:', {
+                    'showOverrideConfirmationModal exists': typeof showOverrideConfirmationModal,
+                    'window.showOverrideConfirmationModal exists': typeof window.showOverrideConfirmationModal,
+                    'showModalFunc found': showModalFunc !== null,
+                    'showModalFunc is function': showModalFunc && typeof showModalFunc === 'function'
+                });
+
+                if (showModalFunc && typeof showModalFunc === 'function') {
+                    try {
+                        // Show override confirmation modal
+                        var formData = new FormData(currentForm[0]);
+                        console.log('[Override Check] Calling showOverrideConfirmationModal');
+                        showModalFunc(result.override_data, currentForm, formData);
+                        console.log('[Override Check] Modal should be shown now');
+                        return; // Don't proceed with normal success handling
+                    } catch (error) {
+                        console.error('[Override Check] Error showing modal:', error);
+                        // Fallback: show alert
+                        alert('Override Required!\n\n' +
+                            'Available Balance: ' + (result.override_data?.available_balance || 0) + '\n' +
+                            'Excess Paid Leave: ' + (result.override_data?.excess_paid_leave || 0) + '\n' +
+                            'Delta Paid Leave: ' + (result.override_data?.delta_paid_leave || 0));
+                        return; // Don't proceed with normal success handling
+                    }
+                } else {
+                    // Function not found - this shouldn't happen, but log for debugging
+                    console.error('[Override Check] showOverrideConfirmationModal function not found. Override required but modal cannot be shown.');
+                    console.log('[Override Check] Override data:', result.override_data);
+                    // Fallback: show alert
+                    alert('Override Required!\n\n' +
+                        'Available Balance: ' + (result.override_data?.available_balance || 0) + '\n' +
+                        'Excess Paid Leave: ' + (result.override_data?.excess_paid_leave || 0) + '\n' +
+                        'Delta Paid Leave: ' + (result.override_data?.delta_paid_leave || 0) + '\n\n' +
+                        'Please refresh the page and try again.');
+                    return; // Don't proceed with normal success handling
+                }
+            }
+
             if (result["error"] == true) {
                 toastr.error(result["message"]);
             } else {

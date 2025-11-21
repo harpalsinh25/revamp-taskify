@@ -34,6 +34,9 @@ use App\Rules\UniqueEmailPassword;
 use Illuminate\Support\Facades\DB;
 use App\Imports\UsersImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\LeaveBalanceService;
+use App\Models\UserLeaveBalance;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -262,6 +265,24 @@ class UserController extends Controller
                 // Attach user to the workspace
                 $workspace = Workspace::find(getWorkspaceId());
                 $workspace->users()->attach($user->id);
+
+                // Refresh workspace to ensure relationship is loaded
+                $workspace->refresh();
+
+                // Initialize leave balances for the new user
+                try {
+                    $leaveBalanceService = new LeaveBalanceService();
+                    $balance = $leaveBalanceService->getOrCreateBalance($user->id, $workspace->id);
+                    // Verify balance was created
+                    if (!$balance) {
+                        Log::warning('Leave balance creation returned null for user ' . $user->id . ' in workspace ' . $workspace->id);
+                    }
+                } catch (\Exception $e) {
+                    // Log error but don't fail user creation
+                    Log::error('Failed to initialize leave balance for user ' . $user->id . ' in workspace ' . $workspace->id . ': ' . $e->getMessage(), [
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
 
                 // Send account creation notification if email is configured
                 if (isEmailConfigured()) {
@@ -625,10 +646,43 @@ class UserController extends Controller
             }
             $status = isAdminOrHasAllDataAccess() && $request->has('status') ? $request->input('status') : $user->status;
             $formFields['status'] = $status;
+
+            // Store original DOJ to check if it changed
+            $originalDoj = $user->doj;
+            $dojChanged = false;
+
+            // Check if DOJ is being updated
+            if ($request->has('doj') && isset($formFields['doj'])) {
+                $newDoj = $formFields['doj'];
+                $dojChanged = ($originalDoj != $newDoj);
+            }
+
             // Update the user
             $user->update($formFields);
+            // Refresh user to get latest DOJ value before recalculating leave balances
+            $user->refresh();
+
             $roleName = Role::findById($request->input('role'))->name;
             $user->syncRoles($roleName);
+
+            // Recalculate leave balances if DOJ changed or if balance doesn't exist
+            $leaveBalanceService = new LeaveBalanceService();
+            $workspaceId = getWorkspaceId();
+            $leaveBalanceService->getOrCreateBalance($user->id, $workspaceId);
+
+            // If DOJ was updated, recalculate accrued leaves for all existing balances
+            if ($dojChanged) {
+                $currentYear = get_current_company_year();
+                $balance = UserLeaveBalance::where('user_id', $user->id)
+                    ->where('workspace_id', $workspaceId)
+                    ->where('year', $currentYear)
+                    ->first();
+
+                if ($balance) {
+                    // Force recalculation by updating accrued leaves (will use fresh DOJ from refreshed user)
+                    $leaveBalanceService->updateAccruedLeaves($balance);
+                }
+            }
 
             // Update custom fields
             if ($request->has('custom_fields')) {

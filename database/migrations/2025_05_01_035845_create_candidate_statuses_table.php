@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('candidate_statuses', 'id')) {
         Schema::create('candidate_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -18,6 +19,7 @@ return new class extends Migration
             $table->string('color')->default('primary');
             $table->timestamps();
         });
+        }
     }
 
     /**s

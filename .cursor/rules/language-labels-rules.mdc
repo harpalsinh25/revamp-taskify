@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+We are using the get_label() function for translation , always use this when creating the new labels or display text. Also add respective new label in the settings/language.blade.php for proper sync, and if we want to use this label in the JS. add it to labels.blade.php or pass through the blade file

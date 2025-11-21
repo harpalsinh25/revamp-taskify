@@ -26,6 +26,7 @@ use App\Http\Controllers\LeadFormController;
 use App\Http\Controllers\LeadImportController;
 use App\Http\Controllers\LeadSourceController;
 use App\Http\Controllers\LeadStageController;
+use App\Http\Controllers\LeaveBalanceController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\MeetingsController;
 use App\Http\Controllers\NotesController;
@@ -57,8 +58,11 @@ use App\Http\Controllers\UnitsController;
 use App\Http\Controllers\UpdaterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspacesController;
+use App\Http\Controllers\MigrationController;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -93,9 +97,17 @@ Route::get('/generate-api-doc', function () {
     Artisan::call('scribe:generate');
     return response()->json(['message' => 'API Documentation generated successfully!']);
 });
-Route::get('/migrate', function () {
-    Artisan::call('migrate', ['--path' => 'database/migrations/2025_06_13_102308_add_custom_fields_to_leads_table.php']);
-    return redirect('/home')->with('message', 'Database Migrated Successfully.');
+// Migration Management Routes (Admin Only)
+Route::middleware(['customRole:admin'])->group(function () {
+    Route::get('/migrate', [MigrationController::class, 'index'])->name('migrations.index');
+    Route::get('/migrate/list', [MigrationController::class, 'index'])->name('migrations.list');
+    Route::get('/migrate/file/{filename}', [MigrationController::class, 'runSingle'])->where('filename', '[^/]+\.php')->name('migrations.run-single');
+    Route::get('/migrate/status', [MigrationController::class, 'getStatus'])->name('migrations.status');
+    Route::post('/migrate/run-all', [MigrationController::class, 'runAll'])->name('migrations.run-all');
+    Route::get('/migrate/check-sequence', [MigrationController::class, 'checkSequence'])->name('migrations.check-sequence');
+    Route::post('/migrate/validate', [MigrationController::class, 'validateMigrations'])->name('migrations.validate');
+    Route::post('/migrate/fix-issues', [MigrationController::class, 'fixIssues'])->name('migrations.fix-issues');
+    Route::post('/migrate/rollback-failed', [MigrationController::class, 'rollbackFailed'])->name('migrations.rollback-failed');
 });
 
 Route::get('/clear-cache', function () {
@@ -590,6 +602,8 @@ Route::middleware(['CheckInstallation'])->group(function () {
 
             Route::put('/settings/store_general', [SettingsController::class, 'store_general_settings'])->middleware(['demo_restriction']);
 
+            Route::post('/settings/initialize-leave-balances', [SettingsController::class, 'initializeLeaveBalances'])->middleware(['demo_restriction']);
+
             Route::get('/settings/security', [SettingsController::class, 'security']);
 
             Route::put('/settings/store_security', [SettingsController::class, 'store_security_settings'])->middleware(['demo_restriction']);
@@ -705,6 +719,11 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::put('/save-leave-requests-view-preference', [LeaveRequestController::class, 'saveViewPreference'])->name('leave_requests.save_view_preference');
                 Route::get('/leave-requests/calendar-view', [LeaveRequestController::class, 'calendar_view'])->name('leave-requests.calendar');
                 Route::get('/leave-requests/get-calendar-data', [LeaveRequestController::class, 'get_calendar_data'])->name('leave-requests.get_calendar_data');
+                Route::get('/leave-requests/get-user-balance', [LeaveRequestController::class, 'getUserLeaveBalance'])->name('leave_requests.get_user_balance');
+                Route::middleware(['admin_or_leave_editor'])->group(function () {
+                    Route::get('/leave-balances', [LeaveBalanceController::class, 'index'])->name('leave_balances.index');
+                    Route::get('/leave-balances/list', [LeaveBalanceController::class, 'list'])->name('leave_balances.list');
+                });
                 Route::get('/reports/leaves', [ReportsController::class, 'showLeavesReport'])->name('reports.leaves');
                 Route::get('/reports/leaves-report-data', [ReportsController::class, 'getLeavesReportData'])->name('reports.leaves-report-data');
                 Route::get('/reports/export-leaves-report', [ReportsController::class, 'exportLeavesReport'])->name('reports.export-leaves-report');
@@ -742,6 +761,9 @@ Route::middleware(['CheckInstallation'])->group(function () {
                 Route::get('/payslips/edit/{id}', [PayslipsController::class, 'edit'])->middleware(['customcan:edit_payslips', 'checkAccess:App\Models\Payslip,payslips,id,payslips']);
                 Route::post('/payslips/update', [PayslipsController::class, 'update'])->middleware(['customcan:edit_payslips', 'log.activity']);
                 Route::get('/payslips/view/{id}', [PayslipsController::class, 'view'])->middleware(['checkAccess:App\Models\Payslip,payslips,id,payslips']);
+                Route::get('/payslips/leave-summary', [PayslipsController::class, 'leaveSummary']);
+                Route::get('/payslips/pdf/{id}', [PayslipsController::class, 'pdf'])->name('payslips.pdf')->middleware(['checkAccess:App\Models\Payslip,payslips,id,payslips']);
+                Route::post('/payslips/{id}/send-email', [PayslipsController::class, 'sendEmail'])->name('payslips.send-email')->middleware(['checkAccess:App\Models\Payslip,payslips,id,payslips', 'log.activity']);
             });
             Route::middleware(['customcan:manage_allowances'])->group(function () {
                 Route::get('/allowances', [AllowancesController::class, 'index'])->name('allowances.index');

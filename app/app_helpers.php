@@ -468,6 +468,10 @@ if (!function_exists('get_php_date_time_format')) {
     function get_php_date_time_format($timeFormat = false)
     {
         $general_settings = get_settings('general_settings');
+        // Ensure $general_settings is an array to avoid errors when accessing array keys
+        if (!is_array($general_settings)) {
+            $general_settings = [];
+        }
         if ($timeFormat) {
             return $general_settings['time_format'] ?? 'H:i:s';
         } else {
@@ -3694,6 +3698,15 @@ if (!function_exists('getMenus')) {
                 'show' => Auth::guard('web')->check() ? 1 : 0,
                 'category' => 'utilities',
             ],
+            // [
+            //     'id' => 'leave_balances',
+            //     'label' => get_label('leave_balances', 'Leave balances'),
+            //     'url' => url('leave-balances'),
+            //     'icon' => 'bx bx-doughnut-chart',
+            //     'class' => 'menu-item' . (Request::is('leave-balances') || Request::is('leave-balances/*') ? ' active' : ''),
+            //     'show' => is_admin_or_leave_editor() ? 1 : 0,
+            //     'category' => 'utilities',
+            // ],
             [
                 'id' => 'activity_log',
                 'label' => get_label('activity_log', 'Activity log'),
@@ -5411,5 +5424,222 @@ if (!function_exists('formatLeadFormResponse')) {
             'sent_time' => $lead->created_at->diffForHumans(),
             'custom_fields' => $lead->custom_fields ?? [], // if you store custom fields for each lead form response
         ];
+    }
+}
+
+/**
+ * Calculate leave days from date range, handling partial leaves (0.5 for half day)
+ */
+if (!function_exists('calculate_leave_days')) {
+    function calculate_leave_days($fromDate, $toDate, $fromTime = null, $toTime = null)
+    {
+        $fromDate = \Carbon\Carbon::parse($fromDate);
+        $toDate = \Carbon\Carbon::parse($toDate);
+
+        // If times are specified, it's a partial leave
+        if ($fromTime && $toTime) {
+            $duration = 0;
+            // Loop through each day
+            while ($fromDate->lessThanOrEqualTo($toDate)) {
+                // Create Carbon instances for the start and end times of the leave request for the current day
+                $fromDateTime = \Carbon\Carbon::parse($fromDate->toDateString() . ' ' . $fromTime);
+                $toDateTime = \Carbon\Carbon::parse($fromDate->toDateString() . ' ' . $toTime);
+
+                // Calculate the duration for the current day and add it to the total duration
+                $duration += $fromDateTime->diffInMinutes($toDateTime) / 60; // Duration in hours
+
+                // Move to the next day
+                $fromDate->addDay();
+            }
+
+            // Convert hours to days (assuming 8 hours = 1 day, or use 0.5 for half day)
+            // If duration is less than 8 hours, count as 0.5 day
+            return $duration < 8 ? 0.5 : round($duration / 8, 2);
+        } else {
+            // Calculate the inclusive duration in days
+            return $fromDate->diffInDays($toDate) + 1;
+        }
+    }
+}
+
+/**
+ * Get user's leave balance for a specific workspace and year
+ */
+if (!function_exists('get_user_leave_balance')) {
+    function get_user_leave_balance($userId, $workspaceId, $year = null)
+    {
+        if ($year === null) {
+            $year = date('Y');
+        }
+
+        $balance = \App\Models\UserLeaveBalance::where('user_id', $userId)
+            ->where('workspace_id', $workspaceId)
+            ->where('year', $year)
+            ->first();
+
+        if (!$balance) {
+            // Return default structure if no balance record exists
+            $totalAnnualLeaves = get_settings('general_settings')['total_paid_leaves_per_year'] ?? 0;
+            return [
+                'total_annual_leaves' => $totalAnnualLeaves,
+                'used_paid_leaves' => 0,
+                'remaining_paid_leaves' => $totalAnnualLeaves,
+            ];
+        }
+
+        return [
+            'id' => $balance->id,
+            'total_annual_leaves' => $balance->total_annual_leaves,
+            'used_paid_leaves' => $balance->used_paid_leaves,
+            'remaining_paid_leaves' => $balance->remaining_paid_leaves,
+        ];
+    }
+}
+
+/**
+ * Get the current company year based on company year start settings
+ * Returns the year identifier (e.g., if company year is Apr 2024 - Mar 2025, returns 2024)
+ */
+if (!function_exists('get_current_company_year')) {
+    function get_current_company_year()
+    {
+        $settings = get_settings('general_settings');
+        $startMonth = $settings['company_year_start_month'] ?? 1;
+        $startDay = $settings['company_year_start_day'] ?? 1;
+
+        $today = \Carbon\Carbon::now();
+        $currentYear = $today->year;
+
+        // Create the company year start date for this calendar year
+        $companyYearStart = \Carbon\Carbon::create($currentYear, $startMonth, $startDay);
+
+        // If today is before the company year start, we're still in the previous company year
+        if ($today->lt($companyYearStart)) {
+            return $currentYear - 1;
+        }
+
+        return $currentYear;
+    }
+}
+
+/**
+ * Get company year start and end dates
+ * @param int $companyYear The company year identifier
+ * @return array ['start' => Carbon, 'end' => Carbon]
+ */
+if (!function_exists('get_company_year_dates')) {
+    function get_company_year_dates($companyYear = null)
+    {
+        if ($companyYear === null) {
+            $companyYear = get_current_company_year();
+        }
+
+        $settings = get_settings('general_settings');
+        $startMonth = $settings['company_year_start_month'] ?? 1;
+        $startDay = $settings['company_year_start_day'] ?? 1;
+
+        $start = \Carbon\Carbon::create($companyYear, $startMonth, $startDay)->startOfDay();
+        $end = $start->copy()->addYear()->subDay()->endOfDay();
+
+        return [
+            'start' => $start,
+            'end' => $end,
+            'year' => $companyYear,
+        ];
+    }
+}
+
+/**
+ * Format company year for display
+ * @param int $companyYear
+ * @return string e.g., "2024-2025" or "Apr 2024 - Mar 2025"
+ */
+if (!function_exists('format_company_year')) {
+    function format_company_year($companyYear = null, $detailed = false)
+    {
+        $dates = get_company_year_dates($companyYear);
+
+        if ($detailed) {
+            return $dates['start']->format('M Y') . ' - ' . $dates['end']->format('M Y');
+        }
+
+        return $dates['start']->year . '-' . $dates['end']->year;
+    }
+}
+
+if (!function_exists('number_to_words')) {
+    function number_to_words($number)
+    {
+        // Handle zero case
+        if ($number == 0) {
+            return 'Zero';
+        }
+
+        $ones = array(
+            0 => '',
+            1 => 'One',
+            2 => 'Two',
+            3 => 'Three',
+            4 => 'Four',
+            5 => 'Five',
+            6 => 'Six',
+            7 => 'Seven',
+            8 => 'Eight',
+            9 => 'Nine',
+            10 => 'Ten',
+            11 => 'Eleven',
+            12 => 'Twelve',
+            13 => 'Thirteen',
+            14 => 'Fourteen',
+            15 => 'Fifteen',
+            16 => 'Sixteen',
+            17 => 'Seventeen',
+            18 => 'Eighteen',
+            19 => 'Nineteen'
+        );
+
+        $tens = array(
+            2 => 'Twenty',
+            3 => 'Thirty',
+            4 => 'Forty',
+            5 => 'Fifty',
+            6 => 'Sixty',
+            7 => 'Seventy',
+            8 => 'Eighty',
+            9 => 'Ninety'
+        );
+
+        // Handle decimal numbers
+        $original_number = $number;
+        $number = (string)$number;
+        if (strpos($number, '.') !== false) {
+            list($number, $decimal) = explode('.', $number);
+        }
+
+        $number = (int)$number;
+
+        if ($number < 20) {
+            return $ones[$number];
+        } elseif ($number < 100) {
+            $tens_digit = floor($number / 10);
+            $ones_digit = $number % 10;
+            return $tens[$tens_digit] . ($ones_digit > 0 ? ' ' . $ones[$ones_digit] : '');
+        } elseif ($number < 1000) {
+            $hundreds_digit = floor($number / 100);
+            $remainder = $number % 100;
+            return $ones[$hundreds_digit] . ' Hundred' . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
+        } elseif ($number < 100000) {
+            $thousands_digit = floor($number / 1000);
+            $remainder = $number % 1000;
+            return number_to_words($thousands_digit) . ' Thousand' . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
+        } elseif ($number < 10000000) {
+            $lakhs_digit = floor($number / 100000);
+            $remainder = $number % 100000;
+            return number_to_words($lakhs_digit) . ' Lakh' . ($lakhs_digit > 1 ? 's' : '') . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
+        } else {
+            $crores_digit = floor($number / 10000000);
+            $remainder = $number % 10000000;
+            return number_to_words($crores_digit) . ' Crore' . ($crores_digit > 1 ? 's' : '') . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
+        }
     }
 }

@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('scheduled_emails', 'id')) {
         Schema::create('scheduled_emails', function (Blueprint $table) {
             $table->id();
             $table->foreignId('workspace_id')->constrained()->onDelete('cascade'); // Added
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'sent', 'failed'])->default('pending'); // Status tracking
             $table->timestamps();
         });
+        }
     }
 
     /**

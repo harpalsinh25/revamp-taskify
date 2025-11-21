@@ -836,6 +836,7 @@ class ReportsController extends Controller
     public function getLeavesReportData(Request $request)
     {
         $search = $request->input('search', '');
+        $companyYear = $request->input('company_year');
 
         // Determine the users to fetch based on the user's role
         $users = is_admin_or_leave_editor() ? $this->workspace->users() : $this->user;
@@ -850,8 +851,15 @@ class ReportsController extends Controller
             $users = $users->whereIn('users.id', $request->user_ids);
         }
 
+        // Handle company year filtering
         $dateFilterFrom = $request->input('date_between_from');
         $dateFilterTo = $request->input('date_between_to');
+
+        if ($companyYear) {
+            $yearDates = get_company_year_dates($companyYear);
+            $dateFilterFrom = $yearDates['start']->format('Y-m-d');
+            $dateFilterTo = $yearDates['end']->format('Y-m-d');
+        }
 
         $users = $users->with([
             'leave_requests' => function ($query) use ($dateFilterFrom, $dateFilterTo) {
@@ -873,7 +881,7 @@ class ReportsController extends Controller
             });
         }
 
-        $report = $users->map(function ($user) use ($request) {
+        $report = $users->map(function ($user) use ($request, $companyYear) {
             $leaveRequests = $user->leave_requests;
 
             // Apply status filter if provided
@@ -890,6 +898,14 @@ class ReportsController extends Controller
             $rejectedHours = 0;
             $rejectedDays = 0;
             $partialHours = 0;
+
+            // Paid/Unpaid tracking
+            $paidDays = 0;
+            $paidHours = 0;
+            $unpaidDays = 0;
+            $unpaidHours = 0;
+            $approvedPaidDays = 0;
+            $approvedUnpaidDays = 0;
 
             foreach ($leaveRequests as $leave_request) {
                 $fromDate = Carbon::parse($leave_request->from_date);
@@ -912,6 +928,29 @@ class ReportsController extends Controller
                         $rejectedHours += $hours;
                     }
                     $partialHours += $hours;
+
+                    // Track paid/unpaid for partial leaves (for approved ones)
+                    if ($leave_request->status === 'approved') {
+                        // Use stored paid_days/unpaid_days if available, otherwise use is_paid flag
+                        if ($leave_request->paid_days !== null && $leave_request->paid_days > 0) {
+                            // Convert days to hours (assuming 8 hours per day)
+                            $paidHours += ($leave_request->paid_days * 8);
+                        }
+                        if ($leave_request->unpaid_days !== null && $leave_request->unpaid_days > 0) {
+                            // Convert days to hours (assuming 8 hours per day)
+                            $unpaidHours += ($leave_request->unpaid_days * 8);
+                        }
+                        // If paid_days and unpaid_days are not set, fallback to is_paid flag
+                        if (($leave_request->paid_days === null || $leave_request->paid_days == 0) &&
+                            ($leave_request->unpaid_days === null || $leave_request->unpaid_days == 0)
+                        ) {
+                            if ($leave_request->is_paid) {
+                                $paidHours += $hours;
+                            } else {
+                                $unpaidHours += $hours;
+                            }
+                        }
+                    }
                 } else {
                     // Handle full day leave requests
                     $days = $fromDate->diffInDays($toDate) + 1;
@@ -925,7 +964,80 @@ class ReportsController extends Controller
                     }
 
                     $fullLeaves++;
+
+                    // Track paid/unpaid for full leaves - use stored paid_days/unpaid_days directly
+                    // Check for paid_days regardless of is_paid flag
+                    if ($leave_request->paid_days !== null && $leave_request->paid_days > 0) {
+                        $paidDays += $leave_request->paid_days;
+                        if ($leave_request->status === 'approved') {
+                            $approvedPaidDays += $leave_request->paid_days;
+                        }
+                    }
+                    // Check for unpaid_days
+                    if ($leave_request->unpaid_days !== null && $leave_request->unpaid_days > 0) {
+                        $unpaidDays += $leave_request->unpaid_days;
+                        if ($leave_request->status === 'approved') {
+                            $approvedUnpaidDays += $leave_request->unpaid_days;
+                        }
+                    }
+                    // If neither paid_days nor unpaid_days are set, but we have approved leaves, treat as unpaid by default
+                    // This handles legacy data where these fields might be null
+                    if (
+                        $leave_request->status === 'approved' &&
+                        ($leave_request->paid_days === null || $leave_request->paid_days == 0) &&
+                        ($leave_request->unpaid_days === null || $leave_request->unpaid_days == 0)
+                    ) {
+                        $unpaidDays += $days;
+                        $approvedUnpaidDays += $days;
+                    }
                 }
+            }
+
+            // Get balance information using LeaveBalanceService
+            $balanceInfo = [];
+            $paidBreakdown = [];
+
+            try {
+                $leaveBalanceService = new \App\Services\LeaveBalanceService();
+                $year = $companyYear ?: get_current_company_year();
+                $balanceSummary = $leaveBalanceService->getBalanceSummary($user->id, $this->workspace->id, $year);
+
+                $balanceInfo = [
+                    'total_annual_leaves' => $balanceSummary['total_annual_leaves'],
+                    'used_paid_leaves' => $balanceSummary['used_paid_leaves'],
+                    'remaining_paid_leaves' => $balanceSummary['remaining_paid_leaves'],
+                    'unpaid_leaves_taken' => $balanceSummary['unpaid_leaves_taken'],
+                    'utilization_percentage' => $balanceSummary['utilization_percentage'],
+                ];
+
+                // Format paid/unpaid breakdown
+                $paidBreakdown = $this->formatPaidUnpaidDuration($paidDays, $paidHours, $unpaidDays, $unpaidHours);
+                $paidBreakdown['paid_days'] = round($paidDays, 2);
+                $paidBreakdown['paid_hours'] = round($paidHours, 2);
+                $paidBreakdown['unpaid_days'] = round($unpaidDays, 2);
+                $paidBreakdown['unpaid_hours'] = round($unpaidHours, 2);
+                // Add formatted keys for JavaScript compatibility
+                $paidBreakdown['formatted_paid'] = $paidBreakdown['paid'];
+                $paidBreakdown['formatted_unpaid'] = $paidBreakdown['unpaid'];
+            } catch (\Exception $e) {
+                // If balance service fails, set defaults
+                $balanceInfo = [
+                    'total_annual_leaves' => 0,
+                    'used_paid_leaves' => 0,
+                    'remaining_paid_leaves' => 0,
+                    'unpaid_leaves_taken' => 0,
+                    'utilization_percentage' => 0,
+                ];
+                $paidBreakdown = [
+                    'paid_days' => 0,
+                    'paid_hours' => 0,
+                    'unpaid_days' => 0,
+                    'unpaid_hours' => 0,
+                    'paid' => '0',
+                    'unpaid' => '0',
+                    'formatted_paid' => '0',
+                    'formatted_unpaid' => '0',
+                ];
             }
 
             return [
@@ -952,7 +1064,13 @@ class ReportsController extends Controller
                 'formatted_partial_leaves' => $this->formatLeaveDuration($partialLeaves, '', round($partialHours, 2)),
                 'formatted_approved_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'approved')->count(), $approvedDays, $approvedHours),
                 'formatted_pending_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'pending')->count(), $pendingDays, $pendingHours),
-                'formatted_rejected_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'rejected')->count(), $rejectedDays, $rejectedHours)
+                'formatted_rejected_leaves' => $this->formatLeaveDuration($leaveRequests->where('status', 'rejected')->count(), $rejectedDays, $rejectedHours),
+
+                // New paid/unpaid metrics
+                'balance_info' => $balanceInfo,
+                'paid_breakdown' => $paidBreakdown,
+                'approved_paid_days' => round($approvedPaidDays, 2),
+                'approved_unpaid_days' => round($approvedUnpaidDays, 2),
             ];
         });
 
@@ -977,6 +1095,49 @@ class ReportsController extends Controller
 
         $paginatedReport = $report->forPage($page, $perPage);
 
+        // Calculate monthly trends - use all approved leaves regardless of date filter
+        // Fetch all approved leaves for trend calculation
+        $usersForTrendsQuery = is_admin_or_leave_editor() ? $this->workspace->users() : $this->workspace->users()->where('users.id', $this->user->id);
+        if ($request->filled('user_ids')) {
+            $usersForTrendsQuery = $usersForTrendsQuery->whereIn('users.id', $request->user_ids);
+        }
+        $usersForTrends = $usersForTrendsQuery->with([
+            'leave_requests' => function ($query) {
+                $query->where('status', 'approved')
+                    ->whereNotNull('total_days')
+                    ->where('total_days', '>', 0);
+            }
+        ])->get();
+
+        $monthlyTrends = $this->calculateMonthlyTrends($usersForTrends, $dateFilterFrom, $dateFilterTo);
+
+        // Calculate paid/unpaid totals
+        $totalPaidDays = $report->sum(function ($item) {
+            return $item['paid_breakdown']['paid_days'] ?? 0;
+        });
+        $totalPaidHours = $report->sum(function ($item) {
+            return $item['paid_breakdown']['paid_hours'] ?? 0;
+        });
+        $totalUnpaidDays = $report->sum(function ($item) {
+            return $item['paid_breakdown']['unpaid_days'] ?? 0;
+        });
+        $totalUnpaidHours = $report->sum(function ($item) {
+            return $item['paid_breakdown']['unpaid_hours'] ?? 0;
+        });
+
+        // Calculate average utilization
+        $avgUtilization = 0;
+        $usersWithBalance = 0;
+        foreach ($report as $item) {
+            if (isset($item['balance_info']['total_annual_leaves']) && $item['balance_info']['total_annual_leaves'] > 0) {
+                $avgUtilization += $item['balance_info']['utilization_percentage'];
+                $usersWithBalance++;
+            }
+        }
+        if ($usersWithBalance > 0) {
+            $avgUtilization = round($avgUtilization / $usersWithBalance, 2);
+        }
+
         $summary = [
             'total_leaves' => $report->sum('total_leaves'),
             'total_approved_leaves' => $report->sum('approved_leaves'),
@@ -992,6 +1153,11 @@ class ReportsController extends Controller
             'total_rejected_days' => $report->sum('rejected_days'),
             'total_hours' => round($report->sum('approved_hours') + $report->sum('pending_hours') + $report->sum('rejected_hours'), 2),
             'total_days' => $report->sum('approved_days') + $report->sum('pending_days') + $report->sum('rejected_days'),
+            'total_paid_days' => round($totalPaidDays, 2),
+            'total_paid_hours' => round($totalPaidHours, 2),
+            'total_unpaid_days' => round($totalUnpaidDays, 2),
+            'total_unpaid_hours' => round($totalUnpaidHours, 2),
+            'avg_utilization_percentage' => $avgUtilization,
         ];
 
         // Formatting the duration data before sending it
@@ -1001,12 +1167,118 @@ class ReportsController extends Controller
         $summary['formatted_pending_leaves'] = $this->formatLeaveDuration($summary['total_pending_leaves'], $summary['total_pending_days'], $summary['total_pending_hours']);
         $summary['formatted_rejected_leaves'] = $this->formatLeaveDuration($summary['total_rejected_leaves'], $summary['total_rejected_days'], $summary['total_rejected_hours']);
 
+        // Format paid/unpaid leaves
+        $paidBreakdown = $this->formatPaidUnpaidDuration($totalPaidDays, $totalPaidHours, $totalUnpaidDays, $totalUnpaidHours);
+        $summary['formatted_paid_leaves'] = $paidBreakdown['paid'];
+        $summary['formatted_unpaid_leaves'] = $paidBreakdown['unpaid'];
+
 
         return response()->json([
             'users' => $paginatedReport->values(),
             'total' => $total,
             'summary' => $summary,
+            'monthly_trends' => $monthlyTrends,
         ]);
+    }
+
+    private function calculateMonthlyTrends($users, $dateFrom, $dateTo)
+    {
+        // First, find the actual date range from all approved leaves
+        $minDate = null;
+        $maxDate = null;
+
+        foreach ($users as $user) {
+            foreach ($user->leave_requests as $leaveRequest) {
+                if ($leaveRequest->status === 'approved') {
+                    $fromDate = Carbon::parse($leaveRequest->from_date);
+                    $toDate = Carbon::parse($leaveRequest->to_date);
+
+                    if ($minDate === null || $fromDate < $minDate) {
+                        $minDate = $fromDate->copy();
+                    }
+                    if ($maxDate === null || $toDate > $maxDate) {
+                        $maxDate = $toDate->copy();
+                    }
+                }
+            }
+        }
+
+        // Determine the date range to use for generating months
+        $rangeStart = null;
+        $rangeEnd = null;
+
+        if ($minDate !== null && $maxDate !== null) {
+            // Use the actual date range from leaves, but extend to show full months
+            $rangeStart = $minDate->copy()->startOfMonth();
+            $rangeEnd = $maxDate->copy()->endOfMonth();
+
+            // If date filter was provided, expand range to include both filter and actual leaves
+            if ($dateFrom && $dateTo) {
+                $filterFrom = Carbon::parse($dateFrom);
+                $filterTo = Carbon::parse($dateTo);
+                // Start from the earlier of filter start or first leave month
+                if ($filterFrom->startOfMonth() < $rangeStart) {
+                    $rangeStart = $filterFrom->copy()->startOfMonth();
+                }
+                // End at the later of filter end or last leave month
+                if ($filterTo->endOfMonth() > $rangeEnd) {
+                    $rangeEnd = $filterTo->copy()->endOfMonth();
+                }
+            }
+        } else {
+            // If no leaves found, use provided date range or default to last 6 months
+            if (!$dateFrom || !$dateTo) {
+                $rangeEnd = Carbon::now();
+                $rangeStart = Carbon::now()->subMonths(6);
+            } else {
+                $rangeStart = Carbon::parse($dateFrom)->startOfMonth();
+                $rangeEnd = Carbon::parse($dateTo)->endOfMonth();
+            }
+        }
+
+        $months = [];
+        $monthlyData = [];
+
+        // Generate month labels from the determined date range
+        $current = $rangeStart->copy();
+        while ($current <= $rangeEnd) {
+            $monthLabel = $current->format('M Y');
+            $months[] = $monthLabel;
+            $monthlyData[$monthLabel] = 0;
+            $current->addMonth();
+        }
+
+        // Count approved leaves per month - count all days, not just within filter
+        foreach ($users as $user) {
+            foreach ($user->leave_requests as $leaveRequest) {
+                if ($leaveRequest->status === 'approved') {
+                    $fromDate = Carbon::parse($leaveRequest->from_date);
+                    $toDate = Carbon::parse($leaveRequest->to_date);
+                    $totalDays = $leaveRequest->total_days ?? 0;
+
+                    if ($totalDays <= 0) {
+                        continue;
+                    }
+
+                    // Count each day within the month
+                    $currentDate = $fromDate->copy();
+                    $leaveEndDate = $toDate->copy();
+
+                    while ($currentDate <= $leaveEndDate) {
+                        $monthLabel = $currentDate->format('M Y');
+                        if (isset($monthlyData[$monthLabel])) {
+                            $monthlyData[$monthLabel] += 1; // Count one day
+                        }
+                        $currentDate->addDay();
+                    }
+                }
+            }
+        }
+
+        return [
+            'labels' => $months,
+            'data' => array_values($monthlyData),
+        ];
     }
 
     public function formatLeaveDuration($totalLeaves, $days, $hours)
@@ -1045,6 +1317,25 @@ class ReportsController extends Controller
         return $formatted;
     }
 
+    public function formatPaidUnpaidDuration($paidDays, $paidHours, $unpaidDays, $unpaidHours)
+    {
+        $paid = $this->formatLeaveDuration(
+            $paidDays + ($paidHours > 0 ? 1 : 0),
+            $paidDays,
+            $paidHours
+        );
+
+        $unpaid = $this->formatLeaveDuration(
+            $unpaidDays + ($unpaidHours > 0 ? 1 : 0),
+            $unpaidDays,
+            $unpaidHours
+        );
+
+        return [
+            'paid' => $paid,
+            'unpaid' => $unpaid,
+        ];
+    }
 
     public function exportLeavesReport(Request $request)
     {

@@ -745,6 +745,152 @@
                                 {!! create_label('from_date_between', 'From date between', Session::get('locale')) !!}
                             </div>
                             <div class="row">
+                                {!! create_label('view_paid_leave_flow', 'View paid leave flow', Session::get('locale')) !!}
+                                {!! create_label('how_paid_leave_works', 'How Paid Leave Works', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_modal_intro', 'Follow this tour to see how balance checks, requests, approvals, and tracking stay in sync.', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_step_balance_title', 'Check your balance', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_step_request_title', 'Submit your request', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_step_review_title', 'Review & approve', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('advanced_paid_leaves', 'Advanced Paid Leaves', Session::get('locale')) !!}
+                                {!! create_label('override_confirmation_required', 'Override Confirmation Required', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('includes_advance', 'Includes', Session::get('locale')) !!}
+                                {!! create_label('will_recover_on_accrual', 'Will recover on next accrual', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('insufficient_balance', 'Insufficient Balance', Session::get('locale')) !!}
+                                {!! create_label('override_confirmation_message', 'You are attempting to grant more paid leaves than available. This will result in advance/negative balance.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('available_balance', 'Available Balance', Session::get('locale')) !!}
+                                {!! create_label('requested_paid_leaves', 'Requested Paid Leaves', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('excess_paid_leaves', 'Excess Paid Leaves', Session::get('locale')) !!}
+                                {!! create_label('override_confirmation_note', 'Do you want to proceed with granting advance paid leaves?', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('yes_proceed', 'Yes, Proceed', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_step_track_title', 'Track balances & history', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_for_team_members', 'Team members', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_for_admins', 'Admins & approvers', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_step_balance_member_point', 'Open the balance widget to confirm totals and remaining days before choosing dates.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_step_balance_admin_point', 'Balance snapshots inside review modals confirm availability before toggling paid status.', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_step_request_member_point', 'Add dates, times, and reasons while the balance preview stays visible.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_step_request_admin_point', 'Pending requests show duration, paid preference, and visibility for full context.', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_step_review_member_point', 'Members are notified instantly when a leave is approved or rejected with paid status.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_step_review_admin_point', 'Use the Mark as Paid toggle and let the system split paid versus unpaid days.', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_step_track_member_point', 'Monitor remaining paid days from the dashboard widget or request modal.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('paid_leave_step_track_admin_point', 'Use reports and the leave balance dashboard to follow up on low balances.', Session::get('locale')) !!}
+                                {!! create_label('previous', 'Previous', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('next', 'Next', Session::get('locale')) !!}
+                                {!! create_label('finish', 'Finish', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_annual_leaves', 'Total Annual Leaves', Session::get('locale')) !!}
+                                {!! create_label('used_paid_leaves', 'Used Paid Leaves', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('remaining_paid_leaves', 'Remaining Paid Leaves', Session::get('locale')) !!}
+                                {!! create_label('unpaid_leaves_taken', 'Unpaid Leaves Taken', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_leaves_taken', 'Total Leaves Taken', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('monthly_accrual_info', 'Monthly Accrual System', Session::get('locale')) !!}
+                                {!! create_label('you_earn', 'You earn', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('worked_months', 'Worked', Session::get('locale')) !!}
+                                {!! create_label('accrued_so_far', 'Accrued so far', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('accrued_leaves', 'Accrued Leaves', Session::get('locale')) !!}
+                                {!! create_label('remaining_leaves', 'Remaining Leaves', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('remaining_leaves_exhausted_hint', 'No paid days left. Approvals convert to unpaid automatically.', Session::get('locale')) !!}
+                                {!! create_label('remaining_leaves_low_hint', 'Low balance — double-check before approving as paid.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('remaining_leaves_good_hint', 'Plenty of paid days available.', Session::get('locale')) !!}
+                                {!! create_label('balance_status', 'Balance Status', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('balance_status_all', 'All balance states', Session::get('locale')) !!}
+                                {!! create_label('balance_status_healthy', 'Healthy', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('balance_status_low', 'Low', Session::get('locale')) !!}
+                                {!! create_label('balance_status_exhausted', 'Exhausted', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('leave_balances', 'Leave Balances', Session::get('locale')) !!}
+                                {!! create_label('leave_balance_overview', 'Leave Balance Overview', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('leave_balance_summary', 'Workspace leave summary', Session::get('locale')) !!}
+                                {!! create_label('total_members', 'Total Members', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_allocation', 'Total allocation', Session::get('locale')) !!}
+                                {!! create_label('total_used_leaves', 'Paid days used', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_remaining_leaves', 'Remaining paid days', Session::get('locale')) !!}
+                                {!! create_label('overall_utilization', 'Overall utilization', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_remaining_tooltip', 'Shows how many paid days are still available this year. The main number reflects accrued-to-date availability, while the fraction compares it with the annual balance remaining for the year.', Session::get('locale')) !!}
+                                {!! create_label('total_used_leaves_tooltip', 'Total approved paid leave deducted from this year\'s allocation. When monthly accrual is on, the fraction compares usage with the accrued allocation to date; otherwise it uses the annual allocation.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_allocation_tooltip', 'The full annual paid-leave allocation for everyone in the workspace. When monthly accrual is on, the fraction highlights how much has accrued so far versus the yearly allocation.', Session::get('locale')) !!}
+                                {!! create_label('accrued_available_label', 'Accrued availability now', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('accrued_allocation_used_label', 'Accrued allocation to date', Session::get('locale')) !!}
+                                {!! create_label('annual_allocation_label', 'Annual allocation', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('members_low_balance', 'Members with low balance', Session::get('locale')) !!}
+                                {!! create_label('members_exhausted_balance', 'Members with no paid days', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('recent_leave_activity', 'Recent leave activity', Session::get('locale')) !!}
+                                {!! create_label('no_recent_leave_activity', 'No leave decisions recorded yet.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('latest_leave', 'Latest leave', Session::get('locale')) !!}
+                                {!! create_label('balance_snapshot', 'Balance snapshot', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('balance_impact', 'Balance impact', Session::get('locale')) !!}
+                                {!! create_label('filter_year', 'Filter by year', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
                                 {!! create_label('to_date_between', 'To date between', Session::get('locale')) !!}
                                 {!! create_label('contracts', 'Contracts', Session::get('locale')) !!}
                             </div>
@@ -807,6 +953,40 @@
                             <div class="row">
                                 {!! create_label('create_payslip', 'Create payslip', Session::get('locale')) !!}
                                 {!! create_label('payslip_month', 'Payslip month', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('employee_name', 'Employee name', Session::get('locale')) !!}
+                                {!! create_label('designation', 'Designation', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('department', 'Department', Session::get('locale')) !!}
+                                {!! create_label('earnings', 'Earnings', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('employer_signature', 'Employer Signature', Session::get('locale')) !!}
+                                {!! create_label('employee_signature', 'Employee Signature', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('system_generated_payslip', 'This is system generated payslip', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('employee_details', 'Employee details', Session::get('locale')) !!}
+                                {!! create_label('payslip_details', 'Payslip details', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('payslip_for_month', 'Payslip For the Month', Session::get('locale')) !!}
+                                {!! create_label('employee_summary', 'Employee Summary', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('employee_id', 'Employee ID', Session::get('locale')) !!}
+                                {!! create_label('total_net_pay', 'Total Net Pay', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('gross_earnings', 'Gross Earnings', Session::get('locale')) !!}
+                                {!! create_label('total_net_payable', 'TOTAL NET PAYABLE', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('amount_in_words', 'Amount In Words', Session::get('locale')) !!}
                             </div>
                             <div class="row">
                                 {!! create_label('working_days', 'Working days', Session::get('locale')) !!}
@@ -907,6 +1087,38 @@
                             <div class="row">
                                 {!! create_label('no_allowances_found_payslip', 'No allowances found for this payslip.', Session::get('locale')) !!}
                                 {!! create_label('total_earnings', 'Total earnings', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('auto_calculate_from_leave', 'Auto-calculate from leave', Session::get('locale')) !!}
+                                {!! create_label('recalculate_from_leave', 'Recalculate from leave', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('leave_breakdown', 'Leave breakdown', Session::get('locale')) !!}
+                                {!! create_label('paid_leave_days', 'Paid leave days', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('unpaid_leave_days', 'Unpaid leave days', Session::get('locale')) !!}
+                                {!! create_label('total_leave_days', 'Total leave days', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('download_pdf', 'Download PDF', Session::get('locale')) !!}
+                                {!! create_label('send_via_email', 'Send via email', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('email_to', 'Email to', Session::get('locale')) !!}
+                                {!! create_label('email_cc', 'CC', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('email_subject', 'Subject', Session::get('locale')) !!}
+                                {!! create_label('email_body', 'Body', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('send', 'Send', Session::get('locale')) !!}
+                                {!! create_label('please_find_attached_payslip', 'Please find the attached payslip.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('email_to_required', 'Email is required', Session::get('locale')) !!}
+                                {!! create_label('payslip_email_sent', 'Payslip emailed successfully', Session::get('locale')) !!}
                             </div>
                             <div class="row">
                                 {!! create_label('select_team_member', 'Select team member', Session::get('locale')) !!}
@@ -3249,6 +3461,66 @@
                                 {!! create_label('export_leaves_report', 'Export Leaves Report', Session::get('locale')) !!}
                             </div>
                             <div class="row">
+                                {!! create_label('paid_leaves', 'Paid Leaves', Session::get('locale')) !!}
+                                {!! create_label('unpaid_leaves', 'Unpaid Leaves', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('avg_utilization', 'Avg. Utilization', Session::get('locale')) !!}
+                                {!! create_label('company_year', 'Company Year', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('all_years', 'All Years', Session::get('locale')) !!}
+                                {!! create_label('view_charts', 'View Charts', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('leave_analytics_charts', 'Leave Analytics Dashboard', Session::get('locale')) !!}
+                                {!! create_label('annual_balance', 'Annual Balance', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('used', 'Used', Session::get('locale')) !!}
+                                {!! create_label('remaining', 'Remaining', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('utilization', 'Utilization %', Session::get('locale')) !!}
+                                {!! create_label('team_utilization', 'Team Utilization', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('leave_distribution', 'Leave Distribution', Session::get('locale')) !!}
+                                {!! create_label('paid_vs_unpaid_overview', 'Paid vs Unpaid Leaves Overview', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('insight', 'Insight:', Session::get('locale')) !!}
+                                {!! create_label('total_paid_leaves', 'Total Paid Leaves', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_unpaid_leaves', 'Total Unpaid Leaves', Session::get('locale')) !!}
+                                {!! create_label('total_users', 'Total Users', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('top_users_by_utilization', 'Top users by leave utilization rate', Session::get('locale')) !!}
+                                {!! create_label('legend', 'Legend:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('safe_zone', 'Safe Zone', Session::get('locale')) !!}
+                                {!! create_label('warning_zone', 'Warning Zone', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('critical_zone', 'Critical Zone', Session::get('locale')) !!}
+                                {!! create_label('monthly_trends', 'Monthly Trends', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('approved_leaves_over_time', 'Approved leaves consumption over time', Session::get('locale')) !!}
+                                {!! create_label('export_charts_report', 'Export Report', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('no_leave_data_available_yet', 'No leave data available yet.', Session::get('locale')) !!}
+                                {!! create_label('analyzing_leave_patterns_and_trends', 'Analyzing leave patterns and trends...', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('leaves_taken', 'Leaves Taken', Session::get('locale')) !!}
+                                {!! create_label('number_of_days', 'Number of Days', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
                                 {!! create_label('projects_report', 'Projects Report', Session::get('locale')) !!}
                                 {!! create_label('total_team_members', 'Total Team Members', Session::get('locale')) !!}
                             </div>
@@ -3283,6 +3555,29 @@
                             <div class="row">
                                 {!! create_label('tasks_report', 'Tasks Report', Session::get('locale')) !!}
                                 {!! create_label('overdue_tasks', 'Overdue Tasks', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('available', 'Available:', Session::get('locale')) !!}
+                                {!! create_label('of_text', 'of', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('no_balance', 'No balance', Session::get('locale')) !!}
+                                {!! create_label('marked_unpaid_if_approved', 'Will be marked as unpaid if approved', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('marked_unpaid', 'Will be marked as unpaid', Session::get('locale')) !!}
+                                {!! create_label('low_balance', 'Low balance', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('accrued', 'Accrued', Session::get('locale')) !!}
+                                {!! create_label('earning', 'Earning', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('days_per_month', 'days/month', Session::get('locale')) !!}
+                                {!! create_label('months_worked', 'months worked', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('annual', 'Annual', Session::get('locale')) !!}
                             </div>
                             <div class="row">
                                 {!! create_label('average_task_completion_days', 'Avg. Task Completion Days', Session::get('locale')) !!}
@@ -3757,6 +4052,130 @@
                                 {!! create_label('candidate_status', 'Candidates Status', Session::get('locale')) !!}
                             </div>
                             <div class="row">
+                                {!! create_label('migrations', 'Migrations', Session::get('locale')) !!}
+                                {!! create_label('migration_status', 'Migration Status', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('pending_migrations', 'Pending Migrations', Session::get('locale')) !!}
+                                {!! create_label('ran_migrations', 'Ran Migrations', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('run_all_migrations', 'Run All Migrations', Session::get('locale')) !!}
+                                {!! create_label('fix_migration_issues', 'Fix Migration Issues', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('validate_migrations', 'Validate Migrations', Session::get('locale')) !!}
+                                {!! create_label('check_migration_sequence', 'Check Migration Sequence', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_sequence_valid', 'Migration Sequence Valid', Session::get('locale')) !!}
+                                {!! create_label('migration_sequence_invalid', 'Migration Sequence Invalid', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_out_of_order', 'Migration Out of Order', Session::get('locale')) !!}
+                                {!! create_label('migration_dependency_error', 'Migration Dependency Error', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('rollback_failed', 'Rollback Failed', Session::get('locale')) !!}
+                                {!! create_label('migration_fixed', 'Migration Fixed', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_failed', 'Migration Failed', Session::get('locale')) !!}
+                                {!! create_label('no_pending_migrations', 'No Pending Migrations', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_valid', 'Migration Valid', Session::get('locale')) !!}
+                                {!! create_label('migration_invalid', 'Migration Invalid', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_migrations', 'Total Migrations', Session::get('locale')) !!}
+                                {!! create_label('migration_file', 'Migration File', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('timestamp', 'Timestamp', Session::get('locale')) !!}
+                                {!! create_label('run', 'Run', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('run_this_migration', 'Run this migration?', Session::get('locale')) !!}
+                                {!! create_label('file_not_found', 'File Not Found', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('pending', 'Pending', Session::get('locale')) !!}
+                                {!! create_label('ran', 'Ran', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('refresh', 'Refresh', Session::get('locale')) !!}
+                                {!! create_label('migrations_run_successfully', 'Migrations run successfully.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_run_successfully', 'Migration run successfully:', Session::get('locale')) !!}
+                                {!! create_label('invalid_migration_format', 'Invalid migration file format', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_file_not_found', 'Migration file not found:', Session::get('locale')) !!}
+                                {!! create_label('migration_sequence_status', 'Migration Sequence Status', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('no_ran_migrations', 'No ran migrations found.', Session::get('locale')) !!}
+                                {!! create_label('fix_out_of_order_migrations', 'Consider rolling back and re-running migrations in correct order.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('fix_dependency_errors', 'Review migration dependencies and ensure tables are created before being modified.', Session::get('locale')) !!}
+                                {!! create_label('syntax_error_in_migration', 'Syntax error in migration:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_issues_checked', 'Migration issues checked.', Session::get('locale')) !!}
+                                {!! create_label('invalid_migration_filename', 'Invalid migration filename format:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('invalid_migration_structure', 'Invalid migration structure in:', Session::get('locale')) !!}
+                                {!! create_label('missing_up_method', 'Missing up() method in:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('database_connection_failed', 'Database connection failed:', Session::get('locale')) !!}
+                                {!! create_label('migrations_rolled_back', 'Migrations rolled back successfully.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('table_already_exists_message', 'Table', Session::get('locale')) !!}
+                                {!! create_label('already_exists_but_migration_not_recorded', 'already exists but migration is not recorded as run.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('table_exists_issues_found', 'Found migrations where tables already exist. Enable auto-fix to mark them as run.', Session::get('locale')) !!}
+                                {!! create_label('migration_marked_as_run', 'Migration marked as run:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('table_already_exists_error', 'Table already exists error detected.', Session::get('locale')) !!}
+                                {!! create_label('migration_fixed_and_ran', 'Migration issues fixed and migrations run successfully.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_fixed_but_retry_failed', 'Migration issues fixed but retry failed:', Session::get('locale')) !!}
+                                {!! create_label('table_already_exists_for_migration', 'Table already exists for this migration. Use "Fix Issues" with auto-fix enabled to mark it as run.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('migration_fixed_and_marked_as_run', 'Migration issue fixed and marked as run:', Session::get('locale')) !!}
+                                {!! create_label('auto_fix_enabled', 'Auto Fix Enabled', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('table_does_not_exist_error', 'Table does not exist.', Session::get('locale')) !!}
+                                {!! create_label('required_dependency', 'Required dependency:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('run_dependency_first', 'Please run the dependency migration first.', Session::get('locale')) !!}
+                                {!! create_label('dependency_information', 'Dependency Information:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('required_table', 'Required Table:', Session::get('locale')) !!}
+                                {!! create_label('dependency_migration', 'Dependency Migration:', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('dependency_not_run', 'Dependency migration has not been run yet.', Session::get('locale')) !!}
+                                {!! create_label('run_dependency', 'Run Dependency', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('table_requires_dependency', 'This migration requires table', Session::get('locale')) !!}
+                                {!! create_label('which_is_created_in', 'which is created in', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
                                 {!! create_label('interviews', 'Interviews', Session::get('locale')) !!}
                                 {!! create_label('source', 'Source', Session::get('locale')) !!}
                             </div>
@@ -3789,6 +4208,10 @@
                                 {!! create_label('create_task_list', 'Create Task List', Session::get('locale')) !!}
                                 {!! create_label('HRMS', 'HRMS', Session::get('locale')) !!}
                                  {!! create_label('additional_fields', 'Additional Fields', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('send_email', 'Send Email', Session::get('locale')) !!}
+                                 {!! create_label('email_template', 'Email Template', Session::get('locale')) !!}
                             </div>
                              {{-- Plugin Labels --}}
                             @php

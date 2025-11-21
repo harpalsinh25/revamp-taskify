@@ -777,6 +777,222 @@
     </div>
 </div>
 @if (Request::is('leave-requests') || Request::is('leave-requests/*'))
+
+    <div class="modal fade" id="paidLeaveWorkflowModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title mb-1">
+                            <i class='bx bx-walk me-2 text-primary'></i><?= get_label('how_paid_leave_works', 'How Paid Leave Works') ?>
+                        </h5>
+                        <p class="text-muted mb-0 small">
+                            <?= get_label('paid_leave_modal_intro', 'Follow this quick tour to understand how paid leave requests move from submission to approval and balance updates for everyone involved.') ?>
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="<?= get_label('close', 'Close') ?>"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4 align-items-stretch paid-leave-layout">
+                        <div class="col-lg-4">
+                            <div class="paid-leave-timeline list-group flex-lg-column flex-row mb-3 mb-lg-0" id="paidLeaveStepperNav">
+                                <button type="button" class="list-group-item list-group-item-action active mb-3" data-step-nav="1">
+                                    <span class="timeline-index">1</span>
+                                    <div>
+                                        <h6 class="mb-1"><?= get_label('paid_leave_step_balance_title', 'Check your balance') ?></h6>
+                                        <small class="text-muted"><?= get_label('paid_leave_step_balance_summary', 'Start with clarity on how many paid days are left.') ?></small>
+                                    </div>
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action mb-3" data-step-nav="2">
+                                    <span class="timeline-index">2</span>
+                                    <div>
+                                        <h6 class="mb-1"><?= get_label('paid_leave_step_request_title', 'Submit your request') ?></h6>
+                                        <small class="text-muted"><?= get_label('paid_leave_step_request_summary', 'Capture dates, reason, and who can view the request.') ?></small>
+                                    </div>
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action mb-3" data-step-nav="3">
+                                    <span class="timeline-index">3</span>
+                                    <div>
+                                        <h6 class="mb-1"><?= get_label('paid_leave_step_review_title', 'Review & approve') ?></h6>
+                                        <small class="text-muted"><?= get_label('paid_leave_step_review_summary', 'Approvers confirm balances and mark paid or unpaid.') ?></small>
+                                    </div>
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action mb-3" data-step-nav="4">
+                                    <span class="timeline-index">4</span>
+                                    <div>
+                                        <h6 class="mb-1"><?= get_label('paid_leave_step_track_title', 'Track balances & history') ?></h6>
+                                        <small class="text-muted"><?= get_label('paid_leave_step_track_summary', 'Everyone stays aligned on balances and recent decisions.') ?></small>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="paid-leave-callout mt-3 mt-lg-4">
+                                <h6 class="text-uppercase text-muted small mb-2"><i class='bx bx-bulb me-2 text-warning'></i><?= get_label('paid_leave_pro_tip', 'Pro tip') ?></h6>
+                                <p class="mb-2 small text-muted"><?= get_label('paid_leave_pro_tip_body', 'Balances update instantly when requests are approved or reverted, so always refresh the leave widget before confirming a decision.') ?></p>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li><?= get_label('paid_leave_tip_balances', 'Monthly accrual workspaces see available-to-use versus annual allocation.') ?></li>
+                                    <li><?= get_label('paid_leave_tip_visibility', 'Visibility rules control who sees upcoming absences.') ?></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="paid-leave-content-wrapper">
+                                <div class="paid-leave-step" data-step="1">
+                                    <div class="card border-0 shadow-sm mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start gap-3 mb-3">
+                                                <span class="paid-leave-step-icon bg-soft-primary text-primary"><i class='bx bx-calendar'></i></span>
+                                                <div>
+                                                    <h5 class="mb-1"><?= get_label('paid_leave_step_balance_title', 'Check your balance') ?></h5>
+                                                    <p class="text-muted mb-0 small"><?= get_label('paid_leave_step_balance_intro', 'Always start by confirming how many paid days are available for the year and how many are usable right now.') ?></p>
+                                                </div>
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-primary"><i class='bx bx-user-circle me-2'></i><?= get_label('paid_leave_for_team_members', 'Team members') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_balance_member_point', 'Use the balance widget and modal preview to see how many paid leaves you still have before selecting dates.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_balance_member_point_two', 'Hover over Remaining Leaves to view accrued versus annual allocation details.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-info"><i class='bx bx-shield-quarter me-2'></i><?= get_label('paid_leave_for_admins', 'Admins & approvers') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_balance_admin_point', 'Balance snapshots appear in approval modals, so you always know if days are available before marking a leave as paid.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_balance_admin_point_two', 'Low-balance warnings help decide whether to approve as paid or convert to unpaid.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="paid-leave-step d-none" data-step="2">
+                                    <div class="card border-0 shadow-sm mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start gap-3 mb-3">
+                                                <span class="paid-leave-step-icon bg-soft-primary text-primary"><i class='bx bx-edit'></i></span>
+                                                <div>
+                                                    <h5 class="mb-1"><?= get_label('paid_leave_step_request_title', 'Submit your request') ?></h5>
+                                                    <p class="text-muted mb-0 small"><?= get_label('paid_leave_step_request_intro', 'Capture all the context approvers need: dates, times, reason, visibility, and whether the request should be paid.') ?></p>
+                                                </div>
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-primary"><i class='bx bx-user-plus me-2'></i><?= get_label('paid_leave_for_team_members', 'Team members') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_request_member_point', 'Open the create leave modal, add dates or times, share a reason, and submit. Your balance snapshot stays visible as you fill the form.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_request_member_point_two', 'Choose who can see the leave or make it visible to everyone for transparency.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-info"><i class='bx bx-shield-plus me-2'></i><?= get_label('paid_leave_for_admins', 'Admins & approvers') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_request_admin_point', 'Pending requests show duration, paid/unpaid preference, and visibility so you can focus on context before taking action.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_request_admin_point_two', 'Use filters to review requests by team members, status, or timeframe before approving.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="paid-leave-step d-none" data-step="3">
+                                    <div class="card border-0 shadow-sm mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start gap-3 mb-3">
+                                                <span class="paid-leave-step-icon bg-soft-primary text-primary"><i class='bx bx-badge-check'></i></span>
+                                                <div>
+                                                    <h5 class="mb-1"><?= get_label('paid_leave_step_review_title', 'Review & approve') ?></h5>
+                                                    <p class="text-muted mb-0 small"><?= get_label('paid_leave_step_review_intro', 'Approvers finalise whether the leave is paid or unpaid; team members get notified immediately.') ?></p>
+                                                </div>
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-primary"><i class='bx bx-user-check me-2'></i><?= get_label('paid_leave_for_team_members', 'Team members') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_review_member_point', 'You will be notified when an approver updates the status so you know whether the leave is paid or unpaid right away.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_review_member_point_two', 'If details change, edit or withdraw the request so balances stay accurate.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-info"><i class='bx bx-shield-check me-2'></i><?= get_label('paid_leave_for_admins', 'Admins & approvers') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_review_admin_point', 'Use the paid/unpaid toggle while approving. The system automatically allocates available paid days and records any unpaid remainder.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_review_admin_point_two', 'Leave balances recalculate instantly, so you can approve multiple requests confidently.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="paid-leave-step d-none" data-step="4">
+                                    <div class="card border-0 shadow-sm mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start gap-3 mb-3">
+                                                <span class="paid-leave-step-icon bg-soft-primary text-primary"><i class='bx bx-bar-chart-alt-2'></i></span>
+                                                <div>
+                                                    <h5 class="mb-1"><?= get_label('paid_leave_step_track_title', 'Track balances & history') ?></h5>
+                                                    <p class="text-muted mb-0 small"><?= get_label('paid_leave_step_track_intro', 'Dashboards and widgets highlight low balances, upcoming absences, and recent approvals so the team can plan ahead.') ?></p>
+                                                </div>
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-primary"><i class='bx bx-user-voice me-2'></i><?= get_label('paid_leave_for_team_members', 'Team members') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_track_member_point', 'Monitor your remaining paid days from the dashboard widget or leave modal, and plan future time off with confidence.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_track_member_point_two', 'Download history if you need to share balances with HR or finance.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="paid-leave-role-card">
+                                                        <div class="paid-leave-role-header text-info"><i class='bx bx-bar-chart-alt-2 me-2'></i><?= get_label('paid_leave_for_admins', 'Admins & approvers') ?></div>
+                                                        <ul class="small mb-0 text-muted ps-3">
+                                                            <li><?= get_label('paid_leave_step_track_admin_point', 'Use the leave reports and upcoming balance dashboard to spot low balances, recent trends, and follow up with the team if needed.') ?></li>
+                                                            <li><?= get_label('paid_leave_step_track_admin_point_two', 'Export summaries before payroll runs to double-check paid versus unpaid days.') ?></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary paid-leave-prev" disabled>
+                        <i class='bx bx-chevron-left me-1'></i><?= get_label('previous', 'Previous') ?>
+                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary paid-leave-next">
+                            <?= get_label('next', 'Next') ?> <i class='bx bx-chevron-right ms-1'></i>
+                        </button>
+                        <button type="button" class="btn btn-success d-none paid-leave-finish" data-bs-dismiss="modal">
+                            <i class='bx bx-check-circle me-1'></i><?= get_label('finish', 'Finish') ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="create_leave_request_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form class="modal-content form-submit-event" action="{{ url('leave-requests/store') }}" method="POST">
@@ -871,6 +1087,15 @@
                             <textarea class="form-control" name="comment"
                                 placeholder="<?= get_label('optional_comment_placeholder', 'Please Enter Comment, if Any') ?>"></textarea>
                         </div>
+                        <div class="col-12 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="create_is_paid_toggle" name="is_paid" value="1">
+                                <label class="form-check-label" for="create_is_paid_toggle">
+                                    <?= get_label('mark_as_paid_leave', 'Mark as Paid Leave') ?>
+                                </label>
+                            </div>
+                            <div class="mt-1" id="create_leave_balance_info"></div>
+                        </div>
                     @endif
                     @if (is_admin_or_leave_editor())
                         <div class="row">
@@ -903,6 +1128,75 @@
             </form>
         </div>
     </div>
+
+    <script>
+    // Inline script for create modal balance display (fallback)
+    $(document).ready(function() {
+        $('#create_leave_request_modal').on('shown.bs.modal', function () {
+            console.log('[INLINE] Create modal shown event fired');
+
+            // Set toggle to ON by default
+            $('#create_is_paid_toggle').prop('checked', true);
+            console.log('[INLINE] Toggle set to ON');
+
+            // Use PHP auth user ID
+            var userId = {{ $auth_user->id ?? 'null' }};
+            console.log('[INLINE] Auth user ID:', userId);
+
+            if (userId) {
+                $('#create_leave_balance_info').html('<i class="bx bx-loader-alt bx-spin"></i> <?= get_label('please_wait', 'Please wait...') ?>');
+
+                $.ajax({
+                    url: '{{ url("/leave-requests/get-user-balance") }}',
+                    method: 'GET',
+                    data: { user_id: userId },
+                    success: function(response) {
+                        console.log('[INLINE] Balance response:', response);
+
+                        if (response.balance) {
+                            var summaryHtml = renderRemainingLeavesSummary(response.balance, {
+                                heading: label_balance_snapshot,
+                                includeAccrualMeta: true
+                            });
+                            $('#create_leave_balance_info').html(summaryHtml);
+                            console.log('[INLINE] Balance displayed successfully');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('[INLINE] Error:', xhr.status, xhr.responseText);
+                        $('#create_leave_balance_info').html('<span class="text-danger">Error loading balance</span>');
+                    }
+                });
+            }
+        });
+
+        // Update when user changes
+        $(document).on('change', '.users_select[name="user_id"]', function() {
+            var newUserId = $(this).val();
+            console.log('[INLINE] User changed to:', newUserId);
+
+            if (newUserId) {
+                $('#create_leave_balance_info').html('<i class="bx bx-loader-alt bx-spin"></i> <?= get_label('please_wait', 'Please wait...') ?>');
+
+                $.ajax({
+                    url: '{{ url("/leave-requests/get-user-balance") }}',
+                    method: 'GET',
+                    data: { user_id: newUserId },
+                    success: function(response) {
+                        if (response.balance) {
+                            var summaryHtml = renderRemainingLeavesSummary(response.balance, {
+                                heading: label_balance_snapshot,
+                                includeAccrualMeta: true
+                            });
+                            $('#create_leave_balance_info').html(summaryHtml);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    </script>
+
     <div class="modal fade" id="edit_leave_request_modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form class="modal-content form-submit-event" action="{{ url('leave-requests/update') }}"
@@ -990,6 +1284,15 @@
                                     class="form-label"><?= get_label('comment', 'Comment') ?></label>
                                 <textarea class="form-control" name="comment"
                                     placeholder="<?= get_label('optional_comment_placeholder', 'Please Enter Comment, if Any') ?>"></textarea>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_paid_toggle" name="is_paid" value="1">
+                                    <label class="form-check-label" for="is_paid_toggle">
+                                        <?= get_label('mark_as_paid_leave', 'Mark as Paid Leave') ?>
+                                    </label>
+                                </div>
+                                <div class="mt-2" id="leave_balance_info"></div>
                             </div>
                         @endif
                         @php

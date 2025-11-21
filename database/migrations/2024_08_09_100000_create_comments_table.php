@@ -13,20 +13,22 @@ class CreateCommentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('comments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade');
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
-            $table->string('commentable_type');
-            $table->unsignedBigInteger('commentable_id');
-            $table->longText('content');
-            $table->timestamps();
-            $table->softDeletes();
+        if (!Schema::hasColumn('comments', 'id')) {
+            Schema::create('comments', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade');
+                $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+                $table->string('commentable_type');
+                $table->unsignedBigInteger('commentable_id');
+                $table->longText('content');
+                $table->timestamps();
+                $table->softDeletes();
 
-            $table->index(['commentable_type', 'commentable_id']);
-            $table->index('parent_id');
-            $table->index('user_id');
-        });
+                $table->index(['commentable_type', 'commentable_id']);
+                $table->index('parent_id');
+                $table->index('user_id');
+            });
+        }
     }
 
     /**

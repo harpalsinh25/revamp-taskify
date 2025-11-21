@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('candidate_notification', 'id')) {
         Schema::create('candidate_notification', function (Blueprint $table) {
             $table->id();
             $table->foreignId('candidate_id')->constrained()->onDelete('cascade');
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->boolean('is_push')->default(false);
             $table->timestamps();
         });
+        }
     }
 
     /**

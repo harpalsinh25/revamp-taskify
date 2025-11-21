@@ -1108,8 +1108,21 @@ class HomeController extends Controller
     {
         $users = $this->workspace->users()->get();
         $clients = $this->workspace->clients()->get();
-        $startDate = \Carbon\Carbon::parse($request->startDate);
-        $endDate = \Carbon\Carbon::parse($request->endDate);
+        // Parse ISO 8601 dates from FullCalendar (handles timezone offset)
+        // Try multiple formats to handle different scenarios
+        try {
+            $startDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i:sP', $request->startDate)->startOfDay();
+        } catch (\Exception $e) {
+            // Fallback to regular parse if format doesn't match
+            $startDate = \Carbon\Carbon::parse($request->startDate)->startOfDay();
+        }
+
+        try {
+            $endDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i:sP', $request->endDate)->startOfDay();
+        } catch (\Exception $e) {
+            // Fallback to regular parse if format doesn't match
+            $endDate = \Carbon\Carbon::parse($request->endDate)->startOfDay();
+        }
         $currentDate = today();  // Today's date
         $events = [];
         // Helper function to calculate birthdays for users/clients
@@ -1117,7 +1130,13 @@ class HomeController extends Controller
             $entityEvents = [];
             foreach ($entities as $entity) {
                 if (!empty($entity->dob)) {
-                    $birthday = \Carbon\Carbon::createFromFormat('Y-m-d', $entity->dob);
+                    // Parse dob flexibly - handle both date and datetime formats
+                    try {
+                        $birthday = \Carbon\Carbon::parse(trim($entity->dob));
+                    } catch (\Exception $e) {
+                        // Skip this entity if date parsing fails
+                        continue;
+                    }
                     $birthdayDateYear = $birthday->year;
                     $yearDifference = $startDate->year - $birthdayDateYear;
                     $ordinalSuffix = getOrdinalSuffix($yearDifference);

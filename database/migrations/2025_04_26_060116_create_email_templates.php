@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('email_templates', 'id')) {
         Schema::create('email_templates', function (Blueprint $table) {
             $table->id();
             $table->foreignId('workspace_id')->constrained()->onDelete('cascade'); // Added
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->json('placeholders')->nullable();
             $table->timestamps();
         });
+    }
     }
 
     /**

@@ -427,6 +427,20 @@
                         <div class="summary-value">{{ $summary->formatted_rejected_leaves }}</div>
                     </td>
                 </tr>
+                <tr>
+                    <td class="summary-item">
+                        <div class="summary-label">{{ get_label('paid', 'Paid') }}</div>
+                        <div class="summary-value">{{ $summary->formatted_paid_leaves ?? '0' }}</div>
+                    </td>
+                    <td class="summary-item">
+                        <div class="summary-label">{{ get_label('unpaid', 'Unpaid') }}</div>
+                        <div class="summary-value">{{ $summary->formatted_unpaid_leaves ?? '0' }}</div>
+                    </td>
+                    <td class="summary-item">
+                        <div class="summary-label">{{ get_label('avg_utilization', 'Avg. Utilization') }}</div>
+                        <div class="summary-value">{{ $summary->avg_utilization_percentage ?? 0 }}%</div>
+                    </td>
+                </tr>
             </table>
             <div class="section mt-20">
                 <h2 class="section-title">{{ get_label('leave_details', 'Leaves Details') }}</h2>
@@ -441,13 +455,15 @@
                             <th>{{ get_label('approved', 'Approved') }}</th>
                             <th>{{ get_label('pending', 'Pending') }}</th>
                             <th>{{ get_label('rejected', 'Rejected') }}</th>
+                            <th>{{ get_label('paid', 'Paid') }}</th>
+                            <th>{{ get_label('unpaid', 'Unpaid') }}</th>
                         </tr>
 
                     </thead>
                     <tbody>
                         @if (empty($users))
                         <tr>
-                            <td colspan="6" class="text-center">{{get_label('no_data_available','No data available')}}</td>
+                            <td colspan="10" class="text-center">{{get_label('no_data_available','No data available')}}</td>
                         </tr>
                         @else
                         @foreach ($users as $user)
@@ -460,11 +476,46 @@
                             <td>{{ $user->formatted_approved_leaves }}</td>
                             <td>{{ $user->formatted_pending_leaves }}</td>
                             <td>{{ $user->formatted_rejected_leaves }}</td>
+                            <td>{{ $user->paid_breakdown->formatted_paid ?? '0' }}</td>
+                            <td>{{ $user->paid_breakdown->formatted_unpaid ?? '0' }}</td>
                         </tr>
                         @endforeach
                         @endif
                     </tbody>
 
+                </table>
+            </div>
+            <div class="section mt-20">
+                <h2 class="section-title">{{ get_label('balance_summary', 'Balance Summary by User') }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ get_label('user', 'User') }}</th>
+                            <th>{{ get_label('annual_leave', 'Annual Leave') }}</th>
+                            <th>{{ get_label('used_paid', 'Used Paid') }}</th>
+                            <th>{{ get_label('remaining', 'Remaining') }}</th>
+                            <th>{{ get_label('unpaid_taken', 'Unpaid Taken') }}</th>
+                            <th>{{ get_label('utilization', 'Utilization %') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (empty($users))
+                        <tr>
+                            <td colspan="6" class="text-center">{{get_label('no_data_available','No data available')}}</td>
+                        </tr>
+                        @else
+                        @foreach ($users as $user)
+                        <tr>
+                            <td>{!! $user->user_name !!}</td>
+                            <td>{{ $user->balance_info->total_annual_leaves ?? 0 }}</td>
+                            <td>{{ $user->balance_info->used_paid_leaves ?? 0 }}</td>
+                            <td>{{ $user->balance_info->remaining_paid_leaves ?? 0 }}</td>
+                            <td>{{ $user->balance_info->unpaid_leaves_taken ?? 0 }}</td>
+                            <td>{{ $user->balance_info->utilization_percentage ?? 0 }}%</td>
+                        </tr>
+                        @endforeach
+                        @endif
+                    </tbody>
                 </table>
             </div>
             <div class="section mt-20">
