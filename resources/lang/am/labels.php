@@ -10,6 +10,8 @@
 'total_clients' => 'ጠቅላላ ደንበኞች',
 'projects' => 'ፕሮጀክቶች',
 'tasks' => 'ተግባራት',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'ሁሉም ውጤቶች አልፎበትም',
 'log_in' => 'ግባ',
 'search_results' => 'የፍለጋ ውጤቶች',

@@ -10,6 +10,8 @@
 'total_clients' => 'Jumlah Klien',
 'projects' => 'Proyek',
 'tasks' => 'Tugas',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'Sesi berakhir',
 'log_in' => 'Gabung',
 'search_results' => 'Hasil Pencarian',

@@ -10,6 +10,8 @@
 'total_clients' => '총 클라이언트',
 'projects' => '프로젝트',
 'tasks' => '작업',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => '세션이 만료되었습니다',
 'log_in' => '로그인',
 'search_results' => '검색 결과',

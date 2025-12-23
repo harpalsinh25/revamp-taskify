@@ -10,6 +10,8 @@
 'total_clients' => 'Toplam Müşteriler',
 'projects' => 'Projeler',
 'tasks' => 'Görevler',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'Oturum süresi doldu',
 'log_in' => 'Giriş yapmak',
 'search_results' => 'Arama Sonuçları',

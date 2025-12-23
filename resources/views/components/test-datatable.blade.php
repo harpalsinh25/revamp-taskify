@@ -141,7 +141,8 @@
                         text: '<i class="bx bx-plus me-1"></i><span class="d-none d-lg-inline-block">Add New</span>',
                         className: 'btn btn-primary',
                         action: function() {
-                            alert('Add new action triggered!');
+                            var label_add_new_action_triggered = "{{ get_label('add_new_action_triggered', 'Add new action triggered!') }}";
+                            alert(label_add_new_action_triggered);
                         }
                     }
                 ],

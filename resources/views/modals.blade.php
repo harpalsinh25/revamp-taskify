@@ -724,14 +724,14 @@
                         <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                 class="asterisk">*</span></label>
                         <input type="text" class="form-control" name="name"
-                            placeholder="For Example: English" />
+                            placeholder="<?= get_label('for_example_english', 'For Example: English') ?>" />
                     </div>
                 </div>
                 <div class="row">
                     <div class="col mb-3">
                         <label for="nameBasic" class="form-label"><?= get_label('code', 'Code') ?> <span
                                 class="asterisk">*</span></label>
-                        <input type="text" class="form-control" name="code" placeholder="For Example: en" />
+                        <input type="text" class="form-control" name="code" placeholder="<?= get_label('for_example_en', 'For Example: en') ?>" />
                     </div>
                 </div>
             </div>
@@ -762,7 +762,7 @@
                         <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                 class="asterisk">*</span></label>
                         <input type="text" class="form-control" name="name" id="language_title"
-                            placeholder="For Example: English" />
+                            placeholder="<?= get_label('for_example_english', 'For Example: English') ?>" />
                     </div>
                 </div>
             </div>
@@ -1131,6 +1131,7 @@
 
     <script>
     // Inline script for create modal balance display (fallback)
+    var label_error_loading_balance = "{{ get_label('error_loading_balance', 'Error loading balance') }}";
     $(document).ready(function() {
         $('#create_leave_request_modal').on('shown.bs.modal', function () {
             console.log('[INLINE] Create modal shown event fired');
@@ -1164,7 +1165,7 @@
                     },
                     error: function(xhr) {
                         console.error('[INLINE] Error:', xhr.status, xhr.responseText);
-                        $('#create_leave_balance_info').html('<span class="text-danger">Error loading balance</span>');
+                        $('#create_leave_balance_info').html('<span class="text-danger">' + label_error_loading_balance + '</span>');
                     }
                 });
             }
@@ -4820,15 +4821,17 @@
             <!-- Header -->
             <div class="modal-header border-0 px-4 pt-4 pb-2">
                 <h5 class="modal-title text-body-emphasis fw-semibold mb-0" id="searchModalLabel">
-                    <i class="bx bx-search text-primary me-2"></i>Search Everything
+                    <i class="bx bx-search text-primary me-2"></i>{{ get_label('search_everything', 'Search Everything') }}
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ get_label('close', 'Close') }}"></button>
             </div>
             <!-- Search Input -->
             <div class="px-4 pb-3">
                 <div class="position-relative">
                     <input type="text" class="form-control form-control-lg rounded-3 ps-5 pe-5" id="modalSearchInput"
-                        placeholder="Search projects, tasks, users, and more..." autocomplete="off" aria-label="Global Search Input">
+                        placeholder="{{ get_label('search_everything_placeholder', 'Search projects, tasks, users, and more...') }}"
+                        autocomplete="off"
+                        aria-label="{{ get_label('global_search_input', 'Global Search Input') }}">
                     {{-- <i class="bx bx-search position-absolute top-50 translate-middle-y fs-5 text-muted ms-3"></i> --}}
                     <kbd class="position-absolute top-50 translate-middle-y bg-dark text-muted small end-0 me-3 rounded border px-2 py-1">
                         Esc
@@ -4841,43 +4844,43 @@
                     <ul class="nav nav-pills nav-fill bg-light rounded-3 p-1" role="tablist">
                         <li class="nav-item">
                             <button class="nav-link active rounded-2 fw-medium" data-tab="all" role="tab" aria-selected="true">
-                                <span class="d-none d-sm-inline">All Results</span>
-                                <span class="d-sm-none">All</span>
+                                <span class="d-none d-sm-inline">{{ get_label('all_results', 'All Results') }}</span>
+                                <span class="d-sm-none">{{ get_label('all', 'All') }}</span>
                                 <span class="badge bg-primary ms-2" id="allCount">0</span>
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link rounded-2 fw-medium" data-tab="projects" role="tab" aria-selected="false">
                                 <i class="bx bx-briefcase-alt-2 d-sm-none"></i>
-                                <span class="d-none d-sm-inline">Projects</span>
+                                <span class="d-none d-sm-inline">{{ get_label('projects', 'Projects') }}</span>
                                 <span class="badge bg-light text-dark ms-1" id="projectsCount">0</span>
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link rounded-2 fw-medium" data-tab="tasks" role="tab" aria-selected="false">
                                 <i class="bx bx-task d-sm-none"></i>
-                                <span class="d-none d-sm-inline">Tasks</span>
+                                <span class="d-none d-sm-inline">{{ get_label('tasks', 'Tasks') }}</span>
                                 <span class="badge bg-light text-dark ms-1" id="tasksCount">0</span>
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link rounded-2 fw-medium" data-tab="workspaces" role="tab" aria-selected="false">
                                 <i class="bx bx-check-square d-sm-none"></i>
-                                <span class="d-none d-sm-inline">Workspaces</span>
+                                <span class="d-none d-sm-inline">{{ get_label('workspaces', 'Workspaces') }}</span>
                                 <span class="badge bg-light text-dark ms-1" id="workspacesCount">0</span>
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link rounded-2 fw-medium" data-tab="meetings" role="tab" aria-selected="false">
                                 <i class="bx bx-shape-polygon d-sm-none"></i>
-                                <span class="d-none d-sm-inline">Meetings</span>
+                                <span class="d-none d-sm-inline">{{ get_label('meetings', 'Meetings') }}</span>
                                 <span class="badge bg-light text-dark ms-1" id="meetingsCount">0</span>
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link rounded-2 fw-medium" data-tab="users" role="tab" aria-selected="false">
                                 <i class="bx bx-group d-sm-none"></i>
-                                <span class="d-none d-sm-inline">Users</span>
+                                <span class="d-none d-sm-inline">{{ get_label('users', 'Users') }}</span>
                                 <span class="badge bg-light text-dark ms-1" id="usersCount">0</span>
                             </button>
                         </li>

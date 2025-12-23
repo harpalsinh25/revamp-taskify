@@ -517,7 +517,7 @@ function sendMessage() {
             error: () => {
                 // message card error status
                 errorMessageCard(tempID);
-                alert('Failed sending the message! Please, try again.');
+                alert(APP_LABELS && APP_LABELS['failed_sending_message_try_again'] ? APP_LABELS['failed_sending_message_try_again'] : 'Failed sending the message! Please, try again.');
                 const tempMsgCardElement = messagesContainer.find(
                     `.message-card[data-id=${data.tempID}]`
                 );
@@ -1112,7 +1112,7 @@ function deleteConversation(id, typeId, type) {
             IDinfo(id);
 
             if (!data.deleted)
-                return alert("Error occurred, messages can not be deleted!");
+                return alert(APP_LABELS && APP_LABELS['error_messages_cannot_be_deleted'] ? APP_LABELS['error_messages_cannot_be_deleted'] : "Error occurred, messages can not be deleted!");
 
             // Hide waiting alert modal
             app_modal({
@@ -1459,13 +1459,13 @@ $(document).ready(function () {
                 fileExtension.toString().toLowerCase()
             )
         ) {
-            alert("file type not allowed");
+            alert(APP_LABELS && APP_LABELS['file_type_not_allowed'] ? APP_LABELS['file_type_not_allowed'] : "file type not allowed");
             fileElement.val("");
             return false;
         }
         // Validate file size.
         if (fileSize > chatify.maxUploadSize) {
-            alert("File is too large!");
+            alert(APP_LABELS && APP_LABELS['file_is_too_large'] ? APP_LABELS['file_is_too_large'] : "File is too large!");
             return false;
         }
         return true;

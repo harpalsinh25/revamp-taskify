@@ -21,6 +21,22 @@ use Illuminate\Http\Request;
 use App\Models\RecurringTask;
 use App\Models\CommentAttachment;
 use App\Services\DeletionService;
+use App\Services\TaskQueryService;
+use App\Services\TaskService;
+use App\Services\TaskMediaService;
+use App\Services\ProjectCommentService;
+use App\Services\TaskCalendarService;
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Requests\UpdateTaskDatesRequest;
+use App\Http\Requests\UpdateTaskStatusRequest;
+use App\Http\Requests\UpdateTaskPriorityRequest;
+use App\Http\Requests\UpdateTaskFavoriteRequest;
+use App\Http\Requests\UpdateTaskPinnedRequest;
+use App\Http\Requests\DeleteMultipleTasksRequest;
+use App\Http\Requests\StoreCommentRequest;
+use App\Http\Requests\UpdateCommentRequest;
+use App\Http\Requests\DeleteMultipleMediaRequest;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Models\UserClientPreference;
@@ -31,6 +47,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -41,8 +58,24 @@ class TasksController extends Controller
     protected $workspace;
     protected $user;
     protected $guard;
-    public function __construct()
-    {
+    protected TaskQueryService $taskQueryService;
+    protected TaskService $taskService;
+    protected TaskMediaService $taskMediaService;
+    protected ProjectCommentService $commentService;
+    protected TaskCalendarService $taskCalendarService;
+
+    public function __construct(
+        TaskQueryService $taskQueryService,
+        TaskService $taskService,
+        TaskMediaService $taskMediaService,
+        ProjectCommentService $commentService,
+        TaskCalendarService $taskCalendarService
+    ) {
+        $this->taskQueryService = $taskQueryService;
+        $this->taskService = $taskService;
+        $this->taskMediaService = $taskMediaService;
+        $this->commentService = $commentService;
+        $this->taskCalendarService = $taskCalendarService;
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->workspace = Workspace::find(getWorkspaceId());
@@ -152,185 +185,51 @@ class TasksController extends Controller
      *  "message": "An error occurred while creating the task."
      * }
      */
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
-            $request->merge(['priority_id' => null]);
-        }
-        $rules = [
-            'title' => 'required',
-            'status_id' => 'required|exists:statuses,id',
-            'priority_id' => 'nullable|exists:priorities,id',
-            'start_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $endDate = request()->input('due_date');
-                    $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
-                        foreach ($errors['start_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'due_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $startDate = request()->input('start_date');
-                    $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateKey: 'due_date');
-                    if (!empty($errors['due_date'])) {
-                        foreach ($errors['due_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'description' => 'nullable|string',
-            'project' => 'required|exists:projects,id',
-            'note' => 'nullable|string',
-            'user_id' => 'nullable|array',
-            'user_id.*' => 'exists:users,id', // Validate that each user_id exists in the users table
-            // Validation for reminder toggle
-            'enable_reminder' => 'nullable|in:on',
-            'frequency_type' => 'nullable|in:daily,weekly,monthly',
-            'day_of_week' => 'nullable|integer|between:1,7',
-            'day_of_month' => 'nullable|integer|between:1,31',
-            'time_of_day' => 'nullable|date_format:H:i',
-            // Validation for recurring task
-            'enable_recurring_task' => 'nullable|in:on',
-            'recurrence_frequency' => 'nullable|in:daily,weekly,monthly,yearly',
-            'recurrence_day_of_week' => 'nullable|integer|min:1|max:7',
-            'recurrence_day_of_month' => 'nullable|integer|min:1|max:31',
-            'recurrence_month_of_year' => 'nullable|integer|min:1|max:12',
-            'recurrence_starts_from' => 'nullable|date|after_or_equal:today',
-            'recurrence_occurrences' => 'nullable|integer|min:1',
-            'parent_id' => 'nullable',
-            'billing_type' => 'nullable|in:none,billable,non-billable',
-            'completion_percentage' => ['nullable', 'integer', 'min:0', 'max:100', 'in:0,10,20,30,40,50,60,70,80,90,100'],
-            'task_list_id' => 'nullable|exists:task_lists,id',
-        ];
-        $messages = [
-            'status_id.required' => 'The status field is required.'
-        ];
         try {
-            $formFields = $request->validate($rules, $messages);
             $status = Status::findOrFail($request->input('status_id'));
-            if (canSetStatus($status)) {
-                $project_id = $request->input('project');
-                $start_date = $request->input('start_date');
-                $due_date = $request->input('due_date');
-                if ($start_date) {
-                    $formFields['start_date'] = format_date($start_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-                }
-                if ($due_date) {
-                    $formFields['due_date'] = format_date($due_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-                }
-                $formFields['workspace_id'] = getWorkspaceId();
-                $formFields['created_by'] = $this->user->id;
-                $formFields['project_id'] = $project_id;
-                $userIds = $request->input('user_id', []);
-                unset($formFields['user_id']);
-                $clientCanDiscuss = isAdminOrHasAllDataAccess() && $request->filled('clientCanDiscuss') && $request->input('clientCanDiscuss') == 'on' ? 1 : 0;
-                $formFields['client_can_discuss'] = $clientCanDiscuss;
-                $new_task = Task::create($formFields);
-                $task_id = $new_task->id;
-                $task = Task::find($task_id);
-                $task->statusTimelines()->create([
-                    'status' => $status->title,
-                    'new_color' => $status->color,
-                    'previous_status' => '-',
-                    'changed_at' => now(),
-                ]);
-                // Set creator as a participant automatically if !isAdminOrHasAllDataAccess
-                if (!isAdminOrHasAllDataAccess()) {
-                    if ($this->guard == 'web' && !in_array($this->user->id, $userIds)) {
-                        array_splice($userIds, 0, 0, $this->user->id);
-                    }
-                }
-                $task->users()->attach($userIds);
-                if ($request->has('is_favorite') && $request->input('is_favorite') == 1) {
-                    $this->user->favorites()->create([
-                        'favoritable_type' => Task::class,
-                        'favoritable_id' => $task_id,
-                    ]);
-                }
-                // Check Task Reminder is On than add the reminder
-                if (isset($formFields['enable_reminder']) && $formFields['enable_reminder'] == 'on') {
-                    $task->reminders()->create([
-                        'frequency_type' => $formFields['frequency_type'],
-                        'day_of_week' => $formFields['day_of_week'],
-                        'day_of_month' => $formFields['day_of_month'],
-                        'time_of_day' => $formFields['time_of_day'],
-                    ]);
-                }
-                // Check Task Recurring Task is On than add the recurring task
-                if (isset($formFields['enable_recurring_task']) && $formFields['enable_recurring_task'] == 'on') {
-                    $task->recurringTask()->create([
-                        'frequency' => $formFields['recurrence_frequency'],
-                        'day_of_week' => $formFields['recurrence_day_of_week'],
-                        'day_of_month' => $formFields['recurrence_day_of_month'],
-                        'month_of_year' => $formFields['recurrence_month_of_year'],
-                        'starts_from' => $formFields['recurrence_starts_from'],
-                        'number_of_occurrences' => $formFields['recurrence_occurrences'],
-                    ]);
-                }
-
-                if ($request->has('custom_fields')) {
-                    foreach ($request->input('custom_fields') as $fieldId => $value) {
-                        // Handle checkbox arrays
-                        if (is_array($value)) {
-                            $value = json_encode($value);
-                        }
-
-                        $task->customFields()->create([
-                            'custom_field_id' => $fieldId,
-                            'value' => $value
-                        ]);
-                    }
-                }
-
-
-                $notification_data = [
-                    'type' => 'task',
-                    'type_id' => $task_id,
-                    'type_title' => $task->title,
-                    'access_url' => 'tasks/information/' . $task->id,
-                    'action' => 'assigned'
-                ];
-                // $clientIds = $project->clients()->pluck('clients.id')->toArray();
-                // $recipients = array_merge(
-                //     array_map(function ($userId) {
-                //         return 'u_' . $userId;
-                //     }, $userIds),
-                //     array_map(function ($clientId) {
-                //         return 'c_' . $clientId;
-                //     }, $clientIds)
-                // );
-                $recipients = array_map(function ($userId) {
-                    return 'u_' . $userId;
-                }, $userIds);
-                processNotifications($notification_data, $recipients);
-                return formatApiResponse(
-                    false,
-                    'Task created successfully.',
-                    [
-                        'id' => $new_task->id,
-                        'parent_id' => $project_id,
-                        'parent_type' => 'project',
-                        'data' => formatTask($task)
-                    ]
-                );
-            } else {
+            if (!canSetStatus($status)) {
                 return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
+
+            $formFields = $request->validated();
+            $projectId = $request->input('project');
+            $userIds = $request->input('user_id') ?? [];
+            $isFavorite = $request->has('is_favorite') && $request->input('is_favorite') == 1;
+            $customFields = $request->has('custom_fields') ? $request->input('custom_fields') : [];
+
+            // Add project_id to formFields
+            $formFields['project_id'] = $projectId;
+
+            $task = $this->taskService->createTask(
+                $this->workspace,
+                $this->user,
+                $formFields,
+                $userIds,
+                $isFavorite,
+                $customFields,
+                $isApi
+            );
+
+            return formatApiResponse(
+                false,
+                'Task created successfully.',
+                [
+                    'id' => $task->id,
+                    'parent_id' => $projectId,
+                    'parent_type' => 'project',
+                    'data' => formatTask($task)
+                ]
+            );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Task creation error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the task.' . $e->getMessage()
+                'message' => 'An error occurred while creating the task.'
             ], 500);
         }
     }
@@ -490,240 +389,31 @@ class TasksController extends Controller
      *  "message": "An error occurred while updating the task."
      * }
      */
-    public function update(Request $request)
+    public function update(UpdateTaskRequest $request)
     {
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
-            $request->merge(['priority_id' => null]);
-        }
-        $rules = [
-            'id' => 'required|exists:tasks,id',
-            'title' => 'required',
-            'status_id' => 'required|exists:statuses,id',
-            'priority_id' => 'nullable|exists:priorities,id',
-            'start_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $endDate = request()->input('due_date');
-                    $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
-                        foreach ($errors['start_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'due_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $startDate = request()->input('start_date');
-                    $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null, endDateKey: 'due_date');
-                    if (!empty($errors['due_date'])) {
-                        foreach ($errors['due_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'description' => 'nullable|string',
-            'note' => 'nullable|string',
-            'user_id' => 'nullable|array',
-            'user_id.*' => 'exists:users,id',
-            // Remider Tasks
-            'enable_reminder' => 'nullable|in:on', // Validation for reminder toggle
-            'frequency_type' => 'nullable|in:daily,weekly,monthly',
-            'day_of_week' => 'nullable|integer|between:1,7',
-            'day_of_month' => 'nullable|integer|between:1,31',
-            'time_of_day' => 'nullable|date_format:H:i',
-            // Recurring task validation rules
-            'enable_recurring_task' => 'nullable|in:on,off',
-            'recurrence_frequency' => 'nullable|in:daily,weekly,monthly,yearly',
-            'recurrence_day_of_week' => 'nullable|integer|min:1|max:7',
-            'recurrence_day_of_month' => 'nullable|integer|min:1|max:31',
-            'recurrence_month_of_year' => 'nullable|integer|min:1|max:12',
-            'recurrence_starts_from' => 'nullable|date|after_or_equal:today',
-            'recurrence_occurrences' => 'nullable|integer|min:1',
-            'billing_type' => 'nullable|in:none,billable,non-billable',
-            'completion_percentage' => ['nullable', 'integer', 'min:0', 'max:100', 'in:0,10,20,30,40,50,60,70,80,90,100'],
-            'task_list_id' => 'nullable|exists:task_lists,id',
-        ];
-        $messages = [
-            'status_id.required' => 'The status field is required.'
-        ];
         try {
-            $request->validate($rules, $messages);
             $status = Status::findOrFail($request->input('status_id'));
-            $id = $request->input('id');
-            $task = Task::findOrFail($id);
-            $currentStatusId = $task->status_id;
-            // Check if the status has changed
-            if ($currentStatusId != $request->input('status_id')) {
-                $status = Status::findOrFail($request->input('status_id'));
-                if (!canSetStatus($status)) {
-                    return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
-                }
-                $oldStatus = Status::findOrFail($currentStatusId);
-                $task->statusTimelines()->create([
-                    'status' => $status->title,
-                    'new_color' => $status->color,
-                    'previous_status' => $oldStatus->title,
-                    'old_color' => $oldStatus->color,
-                    'changed_at' => now()
-                ]);
-            }
-            $formFieldsToUpdate = [
-                'title' => $request->input('title'),
-                'status_id' => $request->input('status_id'),
-                'priority_id' => $request->input('priority_id'),
-                'description' => $request->input('description'),
-                'note' => $request->input('note'),
-                'billing_type' => $request->input('billing_type', 'non-billable'),
-                'completion_percentage' => $request->input('completion_percentage', 0),
-                'task_list_id' => $request->input('task_list_id'),
-            ];
-            // Handle start_date
-            if ($request->filled('start_date')) {
-                $formFieldsToUpdate['start_date'] = format_date($request->input('start_date'), false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            } else {
-                $formFieldsToUpdate['start_date'] = null;
-            }
-            // Handle due_date
-            if ($request->filled('due_date')) {
-                $formFieldsToUpdate['due_date'] = format_date($request->input('due_date'), false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            } else {
-                $formFieldsToUpdate['due_date'] = null;
-            }
-            $clientCanDiscuss = isAdminOrHasAllDataAccess()
-                ? ($request->input('clientCanDiscuss') == 'on' ? 1 : 0)
-                : $task->client_can_discuss;
-            $formFieldsToUpdate['client_can_discuss'] = $clientCanDiscuss;
-            $userIds = $request->input('user_id', []);
-            $task->update($formFieldsToUpdate);
-            // Check Task Reminder is On than add the reminder
-            if ($request->input('enable_reminder') === 'on') {
-                // Check if reminder exists
-                $reminder = $task->reminders()->first();
-                if ($reminder) {
-                    // Update existing reminder
-                    $reminder->update([
-                        'frequency_type' => $request->input('frequency_type'),
-                        'day_of_week' => $request->input('frequency_type') === 'weekly' ? $request->input('day_of_week') : null,
-                        'day_of_month' => $request->input('frequency_type') === 'monthly' ? $request->input('day_of_month') : null,
-                        'time_of_day' => $request->input('time_of_day'),
-                        'is_active' => 1,
-                        "last_sent_at" => null,
-                    ]);
-                } else {
-                    // Create new reminder
-                    $task->reminders()->create([
-                        'frequency_type' => $request->input('frequency_type'),
-                        'day_of_week' => $request->input('frequency_type') === 'weekly' ? $request->input('day_of_week') : null,
-                        'day_of_month' => $request->input('frequency_type') === 'monthly' ? $request->input('day_of_month') : null,
-                        'time_of_day' => $request->input('time_of_day'),
-                        'is_active' => 1
-                    ]);
-                }
-            } else {
-                // If reminder is turned off, either delete or deactivate the reminder
-                $reminder = $task->reminders()->first();
-                if ($reminder) {
-                    // Deactivate the reminder
-                    $reminder->update(['is_active' => 0]);
-                }
-            }
-            // Handle Recurring Task
-            $enableRecurringTask = $request->input('enable_recurring_task') === 'on';
-            $recurringTaskData = [
-                'frequency' => $request->input('recurrence_frequency'),
-                'day_of_week' => $request->input('recurrence_day_of_week'),
-                'day_of_month' => $request->input('recurrence_day_of_month'),
-                'month_of_year' => $request->input('recurrence_month_of_year'),
-                'starts_from' => $request->input('recurrence_starts_from'),
-                'number_of_occurrences' => $request->input('recurrence_occurrences'),
-            ];
-            // Update or create recurring task
-            if ($enableRecurringTask) {
-                if ($task->recurringTask) {
-                    $task->recurringTask->update($recurringTaskData);
-                } else {
-                    $task->recurringTask()->create($recurringTaskData);
-                }
-            } elseif ($task->recurringTask) {
-                // Delete existing recurring task if disabled
-                $task->recurringTask->delete();
-            }
-            // Get the current users associated with the task
-            $currentUsers = $task->users->pluck('id')->toArray();
-            $currentClients = $task->project->clients->pluck('id')->toArray();
-            // Sync the users for the task
-            $task->users()->sync($userIds);
-            // Get the new users associated with the task
-            $newUsers = array_diff($userIds, $currentUsers);
-            // Prepare notification data for new users
+            $task = Task::findOrFail($request->input('id'));
 
-
-            if ($request->has('custom_fields')) {
-                foreach ($request->custom_fields as $field_id => $value) {
-                    // Handle checkboxes (arrays)
-                    if (is_array($value)) {
-                        $value = json_encode($value);
-                    }
-
-                    // Find existing custom field value or create new
-                    $fieldValue = $task->customFields()
-                        ->where('custom_field_id', $field_id)
-                        ->first();
-
-                    if ($fieldValue) {
-                        $fieldValue->update(['value' => $value]);
-                    } else {
-                        $task->customFields()->create([
-                            'custom_field_id' => $field_id,
-                            'value' => $value
-                        ]);
-                    }
-                }
+            // Check authorization for status change
+            if ($task->status_id != $request->input('status_id') && !canSetStatus($status)) {
+                return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
 
+            $formFields = $request->validated();
+            $userIds = $request->input('user_id') ?? [];
+            $customFields = $request->has('custom_fields') ? $request->input('custom_fields') : [];
 
-            $notification_data = [
-                'type' => 'task',
-                'type_id' => $id,
-                'type_title' => $task->title,
-                'access_url' => 'tasks/information/' . $task->id,
-                'action' => 'assigned'
-            ];
-            // Notify only the new users
-            $recipients = array_map(function ($userId) {
-                return 'u_' . $userId;
-            }, $newUsers);
-            // Process notifications for new users
-            processNotifications($notification_data, $recipients);
-            if ($currentStatusId != $request->input('status_id')) {
-                $currentStatus = Status::findOrFail($currentStatusId);
-                $newStatus = Status::findOrFail($request->input('status_id'));
-                $notification_data = [
-                    'type' => 'task_status_updation',
-                    'type_id' => $id,
-                    'type_title' => $task->title,
-                    'updater_first_name' => $this->user->first_name,
-                    'updater_last_name' => $this->user->last_name,
-                    'old_status' => $currentStatus->title,
-                    'new_status' => $newStatus->title,
-                    'access_url' => 'tasks/information/' . $id,
-                    'action' => 'status_updated'
-                ];
-                $currentRecipients = array_merge(
-                    array_map(function ($userId) {
-                        return 'u_' . $userId;
-                    }, $currentUsers),
-                    array_map(function ($clientId) {
-                        return 'c_' . $clientId;
-                    }, $currentClients)
-                );
-                processNotifications($notification_data, $currentRecipients);
-            }
-            $task = $task->fresh();
+            $task = $this->taskService->updateTask(
+                $task,
+                $this->user,
+                $formFields,
+                $userIds,
+                $customFields,
+                $isApi
+            );
+
             return formatApiResponse(
                 false,
                 'Task updated successfully.',
@@ -737,54 +427,24 @@ class TasksController extends Controller
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Task update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while creating the task.' . $e->getMessage()
+                'message' => 'An error occurred while updating the task.'
             ], 500);
         }
     }
-    public function updateTaskDates(Request $request)
+    public function updateTaskDates(UpdateTaskDatesRequest $request)
     {
         $isApi = $request->get('isApi', false);
-        // Validation rules for start and end dates
-        $rules = [
-            'id' => 'required|exists:tasks,id',
-            'start_date' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    $endDate = request()->input('due_date');
-                    $errors = validate_date_format_and_order($value, $endDate);
-                    if (!empty($errors['start_date'])) {
-                        foreach ($errors['start_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'due_date' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    $startDate = request()->input('start_date');
-                    $errors = validate_date_format_and_order($startDate, $value, endDateKey: 'due_date');
-                    if (!empty($errors['due_date'])) {
-                        foreach ($errors['due_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-        ];
         try {
-            // Validate the request data
-            $request->validate($rules);
-            // Find the task to be updated
             $task = Task::findOrFail($request->input('id'));
-            // Update start and due dates
-            $task->start_date = format_date($request->input('start_date'), false, app('php_date_format'), 'Y-m-d');
-            $task->due_date = format_date($request->input('due_date'), false, app('php_date_format'), 'Y-m-d');
-            // Save the updated task
-            $task->save();
+            $task = $this->taskService->updateTaskDates(
+                $task,
+                $request->input('start_date'),
+                $request->input('due_date'),
+                $isApi
+            );
             return formatApiResponse(
                 false,
                 'Updated successfully.',
@@ -796,10 +456,9 @@ class TasksController extends Controller
                 ]
             );
         } catch (ValidationException $e) {
-            // Handle validation errors
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle unexpected errors
+            Log::error('Task dates update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while updating task dates.',
@@ -840,166 +499,89 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-        $task = Task::with('comments.attachments')->find($id);
-        if ($task) {
-            $response = DeletionService::delete(Task::class, $id, 'Task');
-            $responseData = json_decode($response->getContent(), true);
-            if ($responseData['error']) {
-                // Handle error response
-                return response()->json($responseData);
+        try {
+            $task = Task::with('comments.attachments')->find($id);
+            if (!$task) {
+                return formatApiResponse(
+                    true,
+                    'Task not found.',
+                    []
+                );
             }
-            // Get all comments before deletion
-            $comments = $task->comments;
-            // Delete all files using public disk
-            $comments->each(function ($comment) {
-                $comment->attachments->each(function ($attachment) {
-                    Storage::disk('public')->delete($attachment->file_path);
-                    $attachment->delete();
-                });
-            });
-            $task->favorites()->delete();
-            // Delete all pinned records associated with this task
-            $task->pinned()->delete();
-            // Delete comments
-            $task->comments()->forceDelete();
-            $task->notificationsForTask()->delete();
+
+            $result = $this->taskService->deleteTask($task);
+
+            if ($result['error']) {
+                return response()->json($result);
+            }
+
             return formatApiResponse(
                 false,
-                'Task deleted successfully.',
+                $result['message'],
                 [
-                    'id' => $id,
-                    'title' => $task->title,
-                    'parent_id' => $task->project_id,
-                    'parent_type' => 'project',
-                    'data' => []
+                    'id' => $result['id'],
+                    'title' => $result['title'],
+                    'parent_id' => $result['parent_id'],
+                    'parent_type' => $result['parent_type'],
+                    'data' => $result['data']
                 ]
             );
-        } else {
-            return formatApiResponse(
-                true,
-                'Task not found.',
-                []
-            );
+        } catch (\Exception $e) {
+            Log::error('Task deletion error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while deleting the task.'
+            ], 500);
         }
     }
-    public function destroy_multiple(Request $request)
+    public function destroy_multiple(DeleteMultipleTasksRequest $request)
     {
-        // Validate the incoming request
-        $validatedData = $request->validate([
-            'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:tasks,id' // Ensure each ID in 'ids' is an integer and exists in the table
-        ]);
-        $ids = $validatedData['ids'];
-        $deletedTasks = [];
-        $deletedTaskTitles = [];
-        $parentIds = [];
-        // Perform deletion using validated IDs
-        foreach ($ids as $id) {
-            $task = Task::find($id);
-            if ($task) {
-                $deletedTaskTitles[] = $task->title;
-                $comments = $task->comments()->with('attachments')->get();
-                $comments->each(function ($comment) {
-                    $comment->attachments->each(function ($attachment) {
-                        Storage::disk('public')->delete($attachment->file_path);
-                        $attachment->delete();
-                    });
-                });
-                $task->favorites()->delete();
-                // Delete all pinned records associated with this task
-                $task->pinned()->delete();
-                $task->comments()->forceDelete();
-                $task->notificationsForTask()->delete();
-                DeletionService::delete(Task::class, $id, 'Task');
-                $deletedTasks[] = $id;
-                $parentIds[] = $task->project_id;
-            }
+        try {
+            $result = $this->taskService->deleteMultipleTasks($request->ids);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error('Multiple task deletion error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while deleting tasks.'
+            ], 500);
         }
-        return response()->json(['error' => false, 'message' => 'Task(s) deleted successfully.', 'id' => $deletedTasks, 'titles' => $deletedTaskTitles, 'parent_id' => $parentIds, 'parent_type' => 'project']);
     }
     public function list(Request $request, $id = '')
     {
-        // Input parameters
-        $search = request('search');
-        $sort = request('sort', 'id');
-        $order = request('order', 'DESC');
-        $status_ids = request('status_ids', []);
-        $priority_ids = request('priority_ids', []);
-        $user_ids = request('user_ids', []);
-        $client_ids = request('client_ids', []);
-        $project_ids = request('project_ids', []);
-        $date_between_from = request('task_date_between_from', '');
-        $date_between_to = request('task_date_between_to', '');
-        $start_date_from = request('task_start_date_from', '');
-        $start_date_to = request('task_start_date_to', '');
-        $end_date_from = request('task_end_date_from', '');
-        $end_date_to = request('task_end_date_to', '');
-        $is_favorites = request('is_favorites', '');
-        $task_parent_id = request('task_parent_id', '');
+        // Prepare filters array
+        $filters = [
+            'search' => request('search'),
+            'sort' => request('sort', 'id'),
+            'order' => request('order', 'DESC'),
+            'status_ids' => request('status_ids', []),
+            'priority_ids' => request('priority_ids', []),
+            'user_ids' => request('user_ids', []),
+            'client_ids' => request('client_ids', []),
+            'project_ids' => request('project_ids', []),
+            'date_between_from' => request('task_date_between_from', ''),
+            'date_between_to' => request('task_date_between_to', ''),
+            'start_date_from' => request('task_start_date_from', ''),
+            'start_date_to' => request('task_start_date_to', ''),
+            'end_date_from' => request('task_end_date_from', ''),
+            'end_date_to' => request('task_end_date_to', ''),
+            'is_favorites' => request('is_favorites', ''),
+            'task_parent_id' => request('task_parent_id', ''),
+            'belongs_to' => null,
+            'belongs_to_id' => null,
+            'limit' => request('limit', 10),
+        ];
 
-        // Initialize query
-        $where = [];
+        // Parse id parameter if provided
         if ($id) {
-            [$belongs_to, $belongs_to_id] = explode('_', $id);
-            if ($belongs_to == 'project') {
-                $project = Project::find($belongs_to_id);
-                $tasks = $project->tasks();
-            } else {
-                $userOrClient = $belongs_to == 'user' ? User::find($belongs_to_id) : Client::find($belongs_to_id);
-                $tasks = isAdminOrHasAllDataAccess($belongs_to, $belongs_to_id) ? $this->workspace->tasks() : $userOrClient->tasks();
-            }
-        } else {
-            $tasks = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
+            $idParts = explode('_', $id);
+            $filters['belongs_to'] = $idParts[0];
+            $filters['belongs_to_id'] = (int)$idParts[1];
         }
 
-        // Apply filters
-        if (!empty($user_ids)) {
-            $tasks->whereHas('users', fn($query) => $query->whereIn('users.id', $user_ids));
-        }
-        if (!empty($client_ids)) {
-            $tasks->whereHas('project', fn($query) => $query->whereHas('clients', fn($query) => $query->whereIn('clients.id', $client_ids)));
-        }
-        if (!empty($project_ids)) {
-            $tasks->whereIn('project_id', $project_ids);
-        }
-        if (!empty($status_ids)) {
-            $tasks->whereIn('status_id', $status_ids);
-        }
-        if (!empty($priority_ids)) {
-            $tasks->whereIn('priority_id', $priority_ids);
-        }
-        if ($date_between_from && $date_between_to) {
-            // Overlap detection: Find tasks that overlap with the date range
-            $tasks->where(function ($q) use ($date_between_from, $date_between_to) {
-                $q->where('start_date', '<=', $date_between_to)
-                    ->where('due_date', '>=', $date_between_from);
-            });
-        }
-        if ($start_date_from && $start_date_to) {
-            $tasks->whereBetween('start_date', [$start_date_from, $start_date_to]);
-        }
-        if ($end_date_from && $end_date_to) {
-            $tasks->whereBetween('due_date', [$end_date_from, $end_date_to]);
-        }
-        if ($is_favorites) {
-            $favoriteTaskIds = $this->user->favoriteTasks()->pluck('favoritable_id')->toArray();
-            $tasks->whereIn('tasks.id', $favoriteTaskIds);
-        }
-        if ($search) {
-            $tasks->where(fn($query) => $query->where('title', 'like', '%' . $search . '%')
-                ->orWhere('tasks.id', 'like', '%' . $search . '%'));
-        }
-        if ($task_parent_id === '') {
-            $tasks->whereNull('parent_id');
-        } else {
-            $tasks->where('parent_id', $task_parent_id);
-        }
-
-        // Apply where clause
-        $tasks->where($where);
-
-        // Count total tasks
-        $totaltasks = $tasks->count();
+        // Build query using service
+        $tasksQuery = $this->taskQueryService->getTaskListQuery($this->workspace, $this->user, $filters);
+        $totaltasks = $tasksQuery->count();
 
         // Permissions and data
         $canCreate = checkPermission('create_tasks');
@@ -1017,13 +599,8 @@ class TasksController extends Controller
             return $field;
         });
 
-        // Paginate and format tasks
-        $tasks = $tasks->leftJoin('pinned', fn($join) => $join->on('pinned.pinnable_id', '=', 'tasks.id')
-            ->where('pinned.pinnable_type', '=', Task::class))
-            ->select('tasks.*', 'pinned.id as pinned_id')
-            ->orderByDesc('pinned.id')
-            ->orderBy($sort, $order)
-            ->paginate(request('limit'))
+        // Paginate and format tasks (query already has sorting and pinned join applied)
+        $tasks = $tasksQuery->paginate($filters['limit'])
             ->through(function ($task) use ($statuses, $priorities, $canEdit, $canDelete, $canCreate, $isHome, $webGuard, $canManageProjects, $customFields) {
                 // Status options
                 $statusOptions = '';
@@ -1245,25 +822,9 @@ class TasksController extends Controller
         if ($validator->fails()) {
             return formatApiValidationError($request->is('api/*'), $validator->errors());
         }
-        $search = $request->input('search');
-        $sort = $request->input('sort', 'id');
-        $order = $request->input('order', 'DESC');
-        $status_ids = $request->input('status_ids', []);
-        $priority_ids = $request->input('priority_ids', []);
-        $user_ids = $request->input('user_ids', []);
-        $client_ids = $request->input('client_ids', []);
-        $project_ids = $request->input('project_ids', []);
-        $start_date_from = $request->input('task_start_date_from', '');
-        $start_date_to = $request->input('task_start_date_to', '');
-        $end_date_from = $request->input('task_end_date_from', '');
-        $end_date_to = $request->input('task_end_date_to', '');
-        $is_favorites = $request->input('is_favorites', '');
-        $limit = $request->input('limit', 10);
-        $offset = $request->input('offset', 0);
-        $task_parent_id = (request('task_parent_id')) ? request('task_parent_id') : "";
+        // Handle single task retrieval
         if ($id) {
             $task = Task::with('reminders', 'recurringTask')->find($id);
-
             if (!$task) {
                 return formatApiResponse(
                     false,
@@ -1273,101 +834,67 @@ class TasksController extends Controller
                         'data' => []
                     ]
                 );
-            } else {
-                return formatApiResponse(
-                    false,
-                    'Task retrieved successfully',
-                    [
-                        'total' => 1,
-                        'data' => [formatTask($task)]
-                    ]
-                );
             }
-        } else {
-            $tasksQuery = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
-
-            // Multi-select filters
-            if (!empty($user_ids)) {
-                $taskIds = DB::table('task_user')->whereIn('user_id', $user_ids)->pluck('task_id')->toArray();
-                $tasksQuery = $tasksQuery->whereIn('tasks.id', $taskIds);
-            }
-            if (!empty($client_ids)) {
-                $projectIds = DB::table('client_project')->whereIn('client_id', $client_ids)->pluck('project_id')->toArray();
-                $tasksQuery = $tasksQuery->whereIn('project_id', $projectIds);
-            }
-            if (!empty($project_ids)) {
-                $tasksQuery->whereIn('project_id', $project_ids);
-            }
-            if (!empty($status_ids)) {
-                $tasksQuery->whereIn('status_id', $status_ids);
-            }
-            if (!empty($priority_ids)) {
-                $tasksQuery->whereIn('priority_id', $priority_ids);
-            }
-            if ($start_date_from && $start_date_to) {
-                $tasksQuery->whereBetween('start_date', [$start_date_from, $start_date_to]);
-            }
-            if ($end_date_from && $end_date_to) {
-                $tasksQuery->whereBetween('due_date', [$end_date_from, $end_date_to]);
-            }
-            if ($start_date_from) {
-                $tasksQuery->where('start_date', '>=', $start_date_from);
-            }
-            if ($end_date_to) {
-                $tasksQuery->where('due_date', '<=', $end_date_to);
-            }
-            if ($is_favorites) {
-                $favoriteTaskIds = $this->user->favorites()
-                    ->where('favoritable_type', \App\Models\Task::class)
-                    ->pluck('favoritable_id')
-                    ->toArray();
-                $tasksQuery->whereIn('tasks.id', $favoriteTaskIds);
-            }
-            if ($search) {
-                $tasksQuery->where(function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%')
-                        ->orWhere('tasks.id', 'like', '%' . $search . '%');
-                });
-            }
-            if ($task_parent_id === "") {
-                // Add whereNull condition for parent_id to get only parent tasks
-                $tasksQuery->whereNull('parent_id');
-            } else {
-                $tasksQuery->where('parent_id', $task_parent_id);
-            }
-            $total = $tasksQuery->count(); // Get total count before applying offset and limit
-            $tasks = $tasksQuery->leftJoin('pinned', function ($join) {
-                $join->on('pinned.pinnable_id', '=', 'tasks.id')
-                    ->where('pinned.pinnable_type', '=', Task::class);
-            })
-                ->select('tasks.*', 'pinned.id as pinned_id')  // Select tasks and alias pinned.id as pinned_id
-                ->orderByDesc('pinned.id')  // Tasks that are pinned will appear first
-                ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
-                ->skip($offset)  // Apply the offset
-                ->take($limit)  // Apply the limit
-                ->get();
-            if ($tasks->isEmpty()) {
-                return formatApiResponse(
-                    false,
-                    'Tasks not found',
-                    [
-                        'total' => 0,
-                        'data' => []
-                    ]
-                );
-            }
-            $data = $tasks->map(function ($task) {
-                return formatTask($task);
-            });
             return formatApiResponse(
                 false,
-                'Tasks retrieved successfully',
+                'Task retrieved successfully',
                 [
-                    'total' => $total,
-                    'data' => $data,
+                    'total' => 1,
+                    'data' => [formatTask($task)]
                 ]
             );
         }
+
+        // Prepare filters array
+        $filters = [
+            'search' => $request->input('search'),
+            'sort' => $request->input('sort', 'id'),
+            'order' => $request->input('order', 'DESC'),
+            'status_ids' => $request->input('status_ids', []),
+            'priority_ids' => $request->input('priority_ids', []),
+            'user_ids' => $request->input('user_ids', []),
+            'client_ids' => $request->input('client_ids', []),
+            'project_ids' => $request->input('project_ids', []),
+            'start_date_from' => $request->input('task_start_date_from', ''),
+            'start_date_to' => $request->input('task_start_date_to', ''),
+            'end_date_from' => $request->input('task_end_date_from', ''),
+            'end_date_to' => $request->input('task_end_date_to', ''),
+            'is_favorites' => $request->input('is_favorites', ''),
+            'task_parent_id' => $request->input('task_parent_id', ''),
+            'limit' => $request->input('limit', 10),
+            'offset' => $request->input('offset', 0),
+        ];
+
+        // Build query using service
+        $tasksQuery = $this->taskQueryService->getTaskApiListQuery($this->workspace, $this->user, $filters);
+        $total = $tasksQuery->count();
+
+        // Apply offset and limit
+        $tasks = $tasksQuery->skip($filters['offset'])->take($filters['limit'])->get();
+
+        if ($tasks->isEmpty()) {
+            return formatApiResponse(
+                false,
+                'Tasks not found',
+                [
+                    'total' => 0,
+                    'data' => []
+                ]
+            );
+        }
+
+        $data = $tasks->map(function ($task) {
+            return formatTask($task);
+        });
+
+        return formatApiResponse(
+            false,
+            'Tasks retrieved successfully',
+            [
+                'total' => $total,
+                'data' => $data,
+            ]
+        );
     }
     public function dragula(Request $request, $id = '')
     {
@@ -1434,42 +961,30 @@ class TasksController extends Controller
 
     public function updateStatus($id, $newStatus)
     {
-        $status = Status::findOrFail($newStatus);
-        if (canSetStatus($status)) {
-            $task = Task::findOrFail($id);
-            $current_status = $task->status->title;
-            $task->status_id = $newStatus;
-            if ($task->save()) {
-                $task->refresh();
-                $new_status = $task->status->title;
-                $notification_data = [
-                    'type' => 'task_status_updation',
-                    'type_id' => $id,
-                    'type_title' => $task->title,
-                    'updater_first_name' => $this->user->first_name,
-                    'updater_last_name' => $this->user->last_name,
-                    'old_status' => $current_status,
-                    'new_status' => $new_status,
-                    'access_url' => 'tasks/information/' . $id,
-                    'action' => 'status_updated'
-                ];
-                $userIds = $task->users->pluck('id')->toArray();
-                $clientIds = $task->project->clients->pluck('id')->toArray();
-                $recipients = array_merge(
-                    array_map(function ($userId) {
-                        return 'u_' . $userId;
-                    }, $userIds),
-                    array_map(function ($clientId) {
-                        return 'c_' . $clientId;
-                    }, $clientIds)
-                );
-                processNotifications($notification_data, $recipients);
-                return response()->json(['error' => false, 'message' => 'Task status updated successfully.', 'id' => $id, 'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task status from ' . trim($current_status) . ' to ' . trim($new_status)]);
-            } else {
-                return response()->json(['error' => true, 'message' => 'Task status couldn\'t updated.']);
+        try {
+            $status = Status::findOrFail($newStatus);
+            if (!canSetStatus($status)) {
+                return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
-        } else {
-            return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
+
+            $task = Task::findOrFail($id);
+            $oldStatus = $task->status;
+            $task = $this->taskService->updateStatus($task, $status, $this->user);
+
+            $activityMessage = trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task status from ' . trim($oldStatus->title) . ' to ' . trim($status->title);
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Task status updated successfully.',
+                'id' => $id,
+                'activity_message' => $activityMessage
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Task status update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while updating task status.'
+            ], 500);
         }
     }
     /**
@@ -1550,85 +1065,49 @@ class TasksController extends Controller
      * }
      */
     //For status change from dropdown
-    public function update_status(Request $request, $id = null)
+    public function update_status(UpdateTaskStatusRequest $request, $id = null)
     {
         $isApi = request()->get('isApi', false);
-        if ($id) {
-            $request->merge(['id' => $id]);
-        }
-        $rules = [
-            'id' => 'required|exists:tasks,id',
-            'statusId' => 'required|exists:statuses,id'
-        ];
         try {
-            $request->validate($rules);
-            $id = $request->id;
-            $statusId = $request->statusId;
-            $status = Status::findOrFail($statusId);
-            if (canSetStatus($status)) {
-                $task = Task::findOrFail($id);
-                if ($task->status->id != $statusId) {
-                    $currentStatus = $task->status->title;
-                    $oldStatus = $task->status_id;
-                    $task->status_id = $statusId;
-                    $task->note = $request->note;
-                    $oldStatus = Status::findOrFail($oldStatus);
-                    $newStatus = Status::findOrFail($statusId);
-                    $task->statusTimelines()->create([
-                        'status' => $newStatus->title,
-                        'new_color' => $newStatus->color,
-                        'previous_status' => $oldStatus->title,
-                        'old_color' => $oldStatus->color,
-                        'changed_at' => now(),
-                    ]);
-                    if ($task->save()) {
-                        $task = $task->fresh();
-                        $newStatus = $task->status->title;
-                        $notification_data = [
-                            'type' => 'task_status_updation',
-                            'type_id' => $id,
-                            'type_title' => $task->title,
-                            'updater_first_name' => $this->user->first_name,
-                            'updater_last_name' => $this->user->last_name,
-                            'old_status' => $currentStatus,
-                            'new_status' => $newStatus,
-                            'access_url' => 'tasks/information/' . $id,
-                            'action' => 'status_updated'
-                        ];
-                        $userIds = $task->users->pluck('id')->toArray();
-                        $clientIds = $task->project->clients->pluck('id')->toArray();
-                        $recipients = array_merge(
-                            array_map(function ($userId) {
-                                return 'u_' . $userId;
-                            }, $userIds),
-                            array_map(function ($clientId) {
-                                return 'c_' . $clientId;
-                            }, $clientIds)
-                        );
-                        processNotifications($notification_data, $recipients);
-                        return formatApiResponse(
-                            false,
-                            'Status updated successfully.',
-                            [
-                                'id' => $id,
-                                'type' => 'task',
-                                'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task status from ' . trim($currentStatus) . ' to ' . trim($newStatus),
-                                'data' => formatTask($task)
-                            ]
-                        );
-                    } else {
-                        return response()->json(['error' => true, 'message' => 'Status couldn\'t updated.']);
-                    }
-                } else {
-                    return response()->json(['error' => true, 'message' => 'No status change detected.']);
-                }
-            } else {
+            if ($id) {
+                $request->merge(['id' => $id]);
+            }
+
+            $task = Task::findOrFail($request->id);
+            $status = Status::findOrFail($request->statusId);
+
+            if (!canSetStatus($status)) {
                 return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
+
+            if ($task->status_id == $request->statusId) {
+                return response()->json(['error' => true, 'message' => 'No status change detected.']);
+            }
+
+            $oldStatus = $task->status;
+            $task = $this->taskService->updateStatus($task, $status, $this->user);
+
+            // Update note if provided
+            if ($request->has('note')) {
+                $task->update(['note' => $request->note]);
+            }
+
+            $activityMessage = trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task status from ' . trim($oldStatus->title) . ' to ' . trim($status->title);
+
+            return formatApiResponse(
+                false,
+                'Status updated successfully.',
+                [
+                    'id' => $task->id,
+                    'type' => 'task',
+                    'activity_message' => $activityMessage,
+                    'data' => formatTask($task)
+                ]
+            );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Task status update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'Status couldn\'t be updated.'
@@ -1637,18 +1116,28 @@ class TasksController extends Controller
     }
     public function duplicate($id)
     {
-        // Define the related tables for this meeting
-        $relatedTables = ['users']; // Include related tables as needed
-        // Use the general duplicateRecord function
-        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
-        $duplicate = duplicateRecord(Task::class, $id, $relatedTables, $title);
-        if (!$duplicate) {
-            return response()->json(['error' => true, 'message' => 'Task duplication failed.']);
+        try {
+            $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : null;
+            $duplicate = $this->taskService->duplicateTask($id, $title);
+
+            if (!$duplicate) {
+                return response()->json(['error' => true, 'message' => 'Task duplication failed.']);
+            }
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Task duplicated successfully.',
+                'id' => $id,
+                'parent_id' => $duplicate->project->id,
+                'parent_type' => 'project'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Task duplication error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while duplicating the task.'
+            ], 500);
         }
-        if (request()->has('reload') && request()->input('reload') === 'true') {
-            Session::flash('message', 'Task duplicated successfully.');
-        }
-        return response()->json(['error' => false, 'message' => 'Task duplicated successfully.', 'id' => $id, 'parent_id' => $duplicate->project->id, 'parent_type' => 'project']);
     }
     /**
      * Upload media files for a task.
@@ -1689,7 +1178,7 @@ class TasksController extends Controller
     public function upload_media(Request $request)
     {
         $maxFileSizeBytes = config('media-library.max_file_size');
-        $maxFileSizeKb = (int) ($maxFileSizeBytes / 1024); // Convert bytes to KB
+        $maxFileSizeKb = (int) ($maxFileSizeBytes / 1024);
 
         try {
             $validatedData = $request->validate([
@@ -1697,118 +1186,60 @@ class TasksController extends Controller
                 'media_files.*' => 'required|file|max:' . $maxFileSizeKb
             ]);
 
-            $mediaIds = [];
-
-            if ($request->hasFile('media_files')) {
-                $task = Task::findOrFail($validatedData['id']);
-                $mediaFiles = $request->file('media_files');
-
-                foreach ($mediaFiles as $mediaFile) {
-                    $mediaItem = $task->addMedia($mediaFile)
-                        ->sanitizingFileName(function ($fileName) {
-                            $sanitizedFileName = strtolower(str_replace(['#', '/', '\\', ' '], '-', $fileName));
-                            $uniqueId = time() . '_' . mt_rand(1000, 9999);
-                            $extension = pathinfo($sanitizedFileName, PATHINFO_EXTENSION);
-                            $baseName = pathinfo($sanitizedFileName, PATHINFO_FILENAME);
-                            return "{$baseName}-{$uniqueId}.{$extension}";
-                        })
-                        ->toMediaCollection('task-media');
-
-                    $mediaIds[] = $mediaItem->id;
-                }
-
-                return response()->json([
-                    'error' => false,
-                    'message' => 'File(s) uploaded successfully.',
-                    'id' => $mediaIds,
-                    'type' => 'media',
-                    'parent_type' => 'task',
-                    'parent_id' => $task->id
-                ]);
-            } else {
+            if (!$request->hasFile('media_files')) {
                 return response()->json([
                     'error' => true,
                     'message' => 'No file(s) chosen.'
                 ]);
             }
+
+            $task = Task::findOrFail($validatedData['id']);
+            $mediaFiles = $request->file('media_files');
+            $mediaIds = $this->taskMediaService->uploadMedia($task, $mediaFiles);
+
+            return response()->json([
+                'error' => false,
+                'message' => 'File(s) uploaded successfully.',
+                'id' => $mediaIds,
+                'type' => 'media',
+                'parent_type' => 'task',
+                'parent_id' => $task->id
+            ]);
         } catch (ValidationException $e) {
             $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
+            Log::error('Task media upload error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred during file upload: ' . $e->getMessage()
+                'message' => 'An error occurred during file upload.'
             ], 500);
         }
     }
 
     public function get_media($id)
     {
-        $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
-        $task = Task::findOrFail($id);
-        $media = $task->getMedia('task-media');
-        if ($search) {
-            $media = $media->filter(function ($mediaItem) use ($search) {
-                return (
-                    // Check if ID contains the search query
-                    stripos($mediaItem->id, $search) !== false ||
-                    // Check if file name contains the search query
-                    stripos($mediaItem->file_name, $search) !== false ||
-                    // Check if date created contains the search query
-                    stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                );
-            });
+        try {
+            $task = Task::findOrFail($id);
+            $search = request('search');
+            $sort = request('sort', 'id');
+            $order = request('order', 'DESC');
+            $canDelete = checkPermission('delete_media');
+
+            $media = $this->taskMediaService->getMedia($task, $search, $sort, $order);
+            $formattedMedia = $this->taskMediaService->formatMediaForWeb($media, $canDelete);
+
+            return response()->json([
+                'rows' => $formattedMedia->values()->toArray(),
+                'total' => $formattedMedia->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Task media retrieval error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'Could not retrieve media files.'
+            ], 500);
         }
-        $canDelete = checkPermission('delete_media');
-        $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
-            // Check if the disk is public
-            $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
-            // Generate file URL based on disk visibility
-            $fileUrl = $isPublicDisk
-                ? asset('storage/task-media/' . $mediaItem->file_name)
-                : $mediaItem->getFullUrl();
-            $fileExtension = pathinfo($fileUrl, PATHINFO_EXTENSION);
-            // Check if file extension corresponds to an image type
-            $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-            $isImage = in_array(strtolower($fileExtension), $imageExtensions);
-            if ($isImage) {
-                $html = '<a href="' . $fileUrl . '" data-lightbox="task-media">';
-                $html .= '<img src="' . $fileUrl . '" alt="' . $mediaItem->file_name . '" width="50">';
-                $html .= '</a>';
-            } else {
-                $html = '<a href="' . $fileUrl . '" title=' . get_label('download', 'Download') . '>' . $mediaItem->file_name . '</a>';
-            }
-            $actions = '';
-            $actions .= '<a href="' . $fileUrl . '" title="' . get_label('download', 'Download') . '" download>' .
-                '<i class="bx bx-download bx-sm"></i>' .
-                '</a>';
-            if ($canDelete) {
-                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $mediaItem->id . '" data-type="task-media" data-table="task_media_table">' .
-                    '<i class="bx bx-trash text-danger"></i>' .
-                    '</button>';
-            }
-            $actions = $actions ?: '-';
-            return [
-                'id' => $mediaItem->id,
-                'file' => $html,
-                'file_name' => $mediaItem->file_name,
-                'file_size' => formatSize($mediaItem->size),
-                'created_at' => format_date($mediaItem->created_at, true),
-                'updated_at' => format_date($mediaItem->updated_at, true),
-                'actions' => $actions,
-            ];
-        });
-        if ($order == 'asc') {
-            $formattedMedia = $formattedMedia->sortBy($sort);
-        } else {
-            $formattedMedia = $formattedMedia->sortByDesc($sort);
-        }
-        return response()->json([
-            'rows' => $formattedMedia->values()->toArray(),
-            'total' => $formattedMedia->count(),
-        ]);
     }
 
     /**
@@ -1855,43 +1286,14 @@ class TasksController extends Controller
     public function get_media_api($id)
     {
         try {
+            $task = Task::findOrFail($id);
             $search = request('search');
             $sort = request('sort', 'id');
             $order = request('order', 'DESC');
-            $task = Task::findOrFail($id);
-            $media = $task->getMedia('task-media');
-            if ($search) {
-                $media = $media->filter(function ($mediaItem) use ($search) {
-                    return (
-                        stripos($mediaItem->id, $search) !== false ||
-                        stripos($mediaItem->file_name, $search) !== false ||
-                        stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                    );
-                });
-            }
             $canDelete = checkPermission('delete_media');
-            $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
-                $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
-                $fileUrl = $isPublicDisk
-                    ? asset('storage/task-media/' . $mediaItem->file_name)
-                    : $mediaItem->getFullUrl();
-                $fileExtension = pathinfo($fileUrl, PATHINFO_EXTENSION);
-                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-                $isImage = in_array(strtolower($fileExtension), $imageExtensions);
-                $previewUrl = $isImage ? $fileUrl : asset('storage/file-icon.png');
 
-                return [
-                    'id' => $mediaItem->id,
-                    'file' => $fileUrl,
-                    'preview' => $previewUrl,
-                    'file_name' => $mediaItem->file_name,
-                    'file_size' => formatSize($mediaItem->size),
-                    'created_at' => format_date($mediaItem->created_at, to_format: 'Y-m-d'),
-                    'updated_at' => format_date($mediaItem->updated_at, to_format: 'Y-m-d'),
-                    'can_delete' => $canDelete,
-
-                ];
-            });
+            $media = $this->taskMediaService->getMedia($task, $search, $sort, $order);
+            $formattedMedia = $this->taskMediaService->formatMediaForApi($media, $canDelete);
             $formattedMedia = $order === 'asc'
                 ? $formattedMedia->sortBy($sort)
                 : $formattedMedia->sortByDesc($sort);
@@ -1949,7 +1351,6 @@ class TasksController extends Controller
     {
         try {
             $mediaItem = Media::find($mediaId);
-
             if (!$mediaItem) {
                 return response()->json([
                     'error' => true,
@@ -1957,8 +1358,7 @@ class TasksController extends Controller
                 ], 404);
             }
 
-            // Delete the media file from storage
-            $mediaItem->delete();
+            $this->taskMediaService->deleteMedia($mediaItem);
 
             return response()->json([
                 'error' => false,
@@ -1970,6 +1370,7 @@ class TasksController extends Controller
                 'parent_type' => 'task'
             ]);
         } catch (\Exception $e) {
+            Log::error('Task media deletion error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while deleting the file.'
@@ -1977,28 +1378,26 @@ class TasksController extends Controller
         }
     }
 
-    public function delete_multiple_media(Request $request)
+    public function delete_multiple_media(DeleteMultipleMediaRequest $request)
     {
-        // Validate the incoming request
-        $validatedData = $request->validate([
-            'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:media,id' // Ensure each ID in 'ids' is an integer and exists in the table
-        ]);
-        $ids = $validatedData['ids'];
-        $deletedIds = [];
-        $deletedTitles = [];
-        $parentIds = [];
-        // Perform deletion using validated IDs
-        foreach ($ids as $id) {
-            $media = Media::find($id);
-            if ($media) {
-                $deletedIds[] = $id;
-                $deletedTitles[] = $media->file_name;
-                $parentIds[] = $media->model_id;
-                $media->delete();
-            }
+        try {
+            $result = $this->taskMediaService->deleteMultipleMedia($request->ids);
+            return response()->json([
+                'error' => false,
+                'message' => 'Files(s) deleted successfully.',
+                'id' => $result['deleted_ids'],
+                'titles' => $result['deleted_titles'],
+                'parent_id' => $result['parent_ids'],
+                'type' => 'media',
+                'parent_type' => 'task'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Task multiple media deletion error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while deleting files.'
+            ], 500);
         }
-        return response()->json(['error' => false, 'message' => 'Files(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles, 'parent_id' => $parentIds, 'type' => 'media', 'parent_type' => 'task']);
     }
     /**
      * Update the priority of a task.
@@ -2071,52 +1470,39 @@ class TasksController extends Controller
      *   "message": "Priority couldn't be updated."
      * }
      */
-    public function update_priority(Request $request, $id = null)
+    public function update_priority(UpdateTaskPriorityRequest $request, $id = null)
     {
         $isApi = request()->get('isApi', false);
-        if ($id) {
-            $request->merge(['id' => $id]);
-        }
-        if ($request->input('priorityId') == 0) {
-            $request->merge(['priorityId' => null]);
-        }
-        $rules = [
-            'id' => 'required|exists:tasks,id',
-            'priorityId' => 'nullable|exists:priorities,id'
-        ];
         try {
-            $request->validate($rules);
-            $id = $request->id;
-            $priorityId = $request->priorityId;
-            $task = Task::findOrFail($id);
-            if ($task->priority_id != $priorityId) {
-                $currentPriority = $task->priority ? $task->priority->title : '-';
-                $task->priority_id = $priorityId;
-                if ($task->save()) {
-                    // Reload the task to get updated priority information
-                    $task = $task->fresh();
-                    $newPriority = $task->priority ? $task->priority->title : '-';
-                    $message = trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task priority from ' . trim($currentPriority) . ' to ' . trim($newPriority);
-                    return formatApiResponse(
-                        false,
-                        'Priority updated successfully.',
-                        [
-                            'id' => $id,
-                            'type' => 'task',
-                            'activity_message' => $message,
-                            'data' => formatTask($task)
-                        ]
-                    );
-                } else {
-                    return response()->json(['error' => true, 'message' => 'Priority couldn\'t updated.']);
-                }
-            } else {
+            if ($id) {
+                $request->merge(['id' => $id]);
+            }
+
+            $task = Task::findOrFail($request->id);
+            $currentPriority = $task->priority ? $task->priority->title : '-';
+
+            if ($task->priority_id == $request->priorityId) {
                 return response()->json(['error' => true, 'message' => 'No priority change detected.']);
             }
+
+            $task = $this->taskService->updatePriority($task, $request->priorityId);
+            $newPriority = $task->priority ? $task->priority->title : '-';
+            $message = trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated task priority from ' . trim($currentPriority) . ' to ' . trim($newPriority);
+
+            return formatApiResponse(
+                false,
+                'Priority updated successfully.',
+                [
+                    'id' => $task->id,
+                    'type' => 'task',
+                    'activity_message' => $message,
+                    'data' => formatTask($task)
+                ]
+            );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Task priority update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'Priority couldn\'t be updated.'
@@ -2145,86 +1531,29 @@ class TasksController extends Controller
     }
     public function get_calendar_data(Request $request)
     {
-        $start = $request->query('start');
-        $end = $request->query('end');
-        $projectId = $request->query('projectId');
-        $is_favorites = (request('is_favorites')) ? request('is_favorites') : "";
-        if ($projectId) {
-            $project = Project::find($projectId);
-            if ($project) {
-                // Fetch project-specific tasks
-                $tasksQuery = isAdminOrHasAllDataAccess() ? $project->tasks() : $this->user->project_tasks($projectId);
-            } else {
-                // Fallback to workspace or user tasks if the project is not found
-                $tasksQuery = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
-            }
-        } else {
-            // If no projectId, fetch workspace or user tasks
-            $tasksQuery = isAdminOrHasAllDataAccess() ? $this->workspace->tasks() : $this->user->tasks();
+        try {
+            $start = $request->query('start');
+            $end = $request->query('end');
+            $projectId = $request->query('projectId');
+            $isFavorites = (bool) request('is_favorites');
+
+            $events = $this->taskCalendarService->getCalendarEvents(
+                $this->workspace,
+                $this->user,
+                $start,
+                $end,
+                $projectId ? (int)$projectId : null,
+                $isFavorites
+            );
+
+            return response()->json($events);
+        } catch (\Exception $e) {
+            Log::error('Task calendar data error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'Could not retrieve calendar data.'
+            ], 500);
         }
-        // Apply date range filter with grouping
-        $tasksQuery->where(function ($query) use ($start, $end) {
-            $query->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('due_date', [$start, $end]);
-        });
-        // Retrieve the tasks
-        $tasks = $tasksQuery->get();
-        if ($is_favorites) {
-            $favoriteTaskIds = $this->user->favoriteTasks() // Use the favoriteTasks method in the User model
-                ->pluck('favoritable_id') // Get the list of favorite task IDs
-                ->toArray();
-            $tasks->whereIn('tasks.id', $favoriteTaskIds); // Filter tasks to include only the favorite ones
-        }
-        // Format the tasks for FullCalendar
-        $events = $tasks->map(function ($task) {
-            $backgroundColor = '#007bff';
-            // Set the background color based on the task status
-            switch ($task->status->color) {
-                case 'primary':
-                    $backgroundColor = '#9bafff'; // Lighter primary blue
-                    break;
-                case 'success':
-                    $backgroundColor = '#a0e4a3'; // Lighter green
-                    break;
-                case 'danger':
-                    $backgroundColor = '#ff6b5c'; // Lighter red
-                    break;
-                case 'warning':
-                    $backgroundColor = '#ffca66'; // Lighter yellow
-                    break;
-                case 'info':
-                    $backgroundColor = '#6ed4f0'; // Lighter blue
-                    break;
-                case 'secondary':
-                    $backgroundColor = '#aab0b8'; // Lighter grey
-                    break;
-                case 'dark':
-                    $backgroundColor = '#4f5b67'; // Lighter dark grey
-                    break;
-                case 'light':
-                    $backgroundColor = '#ffffff'; // Already light
-                    break;
-                default:
-                    $backgroundColor = '#5ab0ff'; // Lighter default blue
-            }
-            $title = $task->title . ' : ' . format_date($task->start_date);
-            if ($task->due_date != $task->start_date) {
-                $title .= ' ' . get_label('to', 'to') . ' ' . format_date($task->due_date);
-            }
-            return [
-                'id' => $task->id,
-                'tasks_info_url' => route('tasks.info', ['id' => $task->id]),
-                'title' => $title,
-                'start' => $task->start_date,
-                'status_id' => $task->status_id,
-                'priority_id' => $task->priority_id,
-                'end' => $task->due_date,
-                'backgroundColor' => $backgroundColor,
-                'borderColor' => '#ffffff',
-                'textColor' => '#000000',
-            ];
-        });
-        return response()->json($events);
     }
     /**
      * Add a comment with attachments.
@@ -2281,63 +1610,45 @@ class TasksController extends Controller
      *   "message": "Comment could not be added."
      * }
      */
-    public function comments(Request $request)
+    public function comments(StoreCommentRequest $request)
     {
+        $isApi = request()->get('isApi', false);
         try {
-            $maxFileSizeBytes = config('media-library.max_file_size');
-            $maxFileSizeKb = (int) ($maxFileSizeBytes / 1024);
-            $request->validate([
-                'model_type' => 'required|string',
-                'model_id' => 'required|integer',
-                'content' => 'required|string',
-                'parent_id' => 'nullable|integer|exists:comments,id',
-                'attachments.*' => "file|max:$maxFileSizeKb"
-            ], [
-                'content.required' => 'Please enter a comment'
-            ]);
             $fileValidationResponse = FileValidationHelper::validateFileUpload($request, 'attachments');
             if ($fileValidationResponse !== true) {
                 return $fileValidationResponse;
             }
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
-            $comment = Comment::create([
-                'commentable_type' => $request->model_type,
-                'commentable_id' => $request->model_id,
-                'content' => $processedContent,
-                'commenter_id' => $this->user->id,
-                'commenter_type' => get_class($this->user),
-                'parent_id' => $request->parent_id,
-            ]);
-            // Create directory if it does not exist
-            $directoryPath = storage_path('app/public/comment_attachments');
-            if (!is_dir($directoryPath)) {
-                mkdir($directoryPath, 0755, true);
-            }
-            // Save attachments
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $path = str_replace('public/', '', $file->store('public/comment_attachments'));
-                    CommentAttachment::create([
-                        'comment_id' => $comment->id,
-                        'file_name' => $file->getClientOriginalName(),
-                        'file_path' => $path,
-                        'file_type' => $file->getClientMimeType(),
-                    ]);
-                }
-            }
-            sendMentionNotification($comment, $mentionedUserIds, $this->workspace->id, $this->user->id, $mentionedClientIds);
+
+            $attachments = $request->hasFile('attachments') ? $request->file('attachments') : [];
+            $result = $this->commentService->createComment(
+                $request->model_type,
+                $request->model_id,
+                $this->user,
+                $request->content,
+                $request->parent_id,
+                $attachments
+            );
+
+            $comment = $result['comment'];
+            sendMentionNotification(
+                $comment,
+                $result['mentioned_user_ids'],
+                $this->workspace->id,
+                $this->user->id,
+                $result['mentioned_client_ids']
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Comment Added Successfully',
-                'comment' => $comment->load('attachments'),
+                'comment' => $comment,
                 'user' => $comment->commenter,
                 'created_at' => $comment->created_at->diffForHumans()
             ]);
         } catch (ValidationException $e) {
-            $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-
+            Log::error('Comment creation error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Comment could not be added.'
@@ -2446,41 +1757,36 @@ class TasksController extends Controller
      *   "message": "Comment couldn't be updated."
      * }
      */
-    public function update_comment(Request $request)
+    public function update_comment(UpdateCommentRequest $request)
     {
+        $isApi = request()->get('isApi', false);
         try {
-            $request->validate([
-                'comment_id' => ['required', 'integer', 'exists:comments,id'],
-                'content' => ['required', 'string'],
-            ], [
-                'content.required' => 'Please enter a comment'
-            ]);
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
             $comment = Comment::findOrFail($request->comment_id);
-            $comment->content = $processedContent;
-            if ($comment->save()) {
-                sendMentionNotification($comment, $mentionedUserIds, $this->workspace->id, $this->user->id, $mentionedClientIds);
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Comment updated successfully.',
-                    'id' => $comment->id,
-                    'type' => 'task'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be updated.'
-                ]);
-            }
+            $result = $this->commentService->updateComment($comment, $request->content);
+
+            sendMentionNotification(
+                $result['comment'],
+                $result['mentioned_user_ids'],
+                $this->workspace->id,
+                $this->user->id,
+                $result['mentioned_client_ids']
+            );
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Comment updated successfully.',
+                'id' => $comment->id,
+                'type' => 'task'
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "error" => true,
                 "message" => "Comment not found."
             ], 404);
         } catch (ValidationException $e) {
-            $isApi = request()->get('isApi', false);
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
+            Log::error('Comment update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 "error" => true,
                 "message" => "Comment couldn't be updated."
@@ -2531,26 +1837,14 @@ class TasksController extends Controller
                 'comment_id' => ['required', 'integer', 'exists:comments,id'],
             ]);
             $comment = Comment::findOrFail($request->comment_id);
-            $attachments = $comment->attachments;
-            // Delete attachments from storage
-            foreach ($attachments as $attachment) {
-                Storage::disk('public')->delete($attachment->file_path);
-                $attachment->delete();
-            }
-            // Permanently delete the comment
-            if ($comment->forceDelete()) {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Comment deleted successfully.',
-                    'id' => $comment->id,
-                    'type' => 'task'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be deleted.'
-                ]);
-            }
+            $this->commentService->deleteComment($comment);
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Comment deleted successfully.',
+                'id' => $comment->id,
+                'type' => 'task'
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "error" => true,
@@ -2563,6 +1857,7 @@ class TasksController extends Controller
                 "errors" => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Comment deletion error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 "error" => true,
                 "message" => "Comment couldn't be deleted."
@@ -2599,12 +1894,9 @@ class TasksController extends Controller
      */
     public function destroy_comment_attachment($id)
     {
-
         try {
             $attachment = CommentAttachment::findOrFail($id);
-
-            Storage::disk('public')->delete($attachment->file_path);
-            $attachment->delete();
+            $this->commentService->deleteCommentAttachment($attachment);
 
             return response()->json([
                 'error' => false,
@@ -2616,6 +1908,7 @@ class TasksController extends Controller
                 'message' => 'Attachment not found.',
             ], 404);
         } catch (\Exception $e) {
+            Log::error('Comment attachment deletion error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'Something went wrong.',
@@ -2654,26 +1947,21 @@ class TasksController extends Controller
      */
     public function get_project_comments_api($id)
     {
-        $limit = request('limit', 10);
-        $offset = request('offset', 0);
-        $search = request('search');
-
         try {
-            $project = Task::findOrFail($id);
+            $task = Task::findOrFail($id);
+            $limit = request('limit', 10);
+            $offset = request('offset', 0);
+            $search = request('search');
 
-            $commentsQuery = $project->comments()
-                ->whereNull('parent_id') // Only get parent comments, not child comments
+            $commentsQuery = $task->comments()
+                ->whereNull('parent_id')
                 ->when($search, function ($query, $search) {
                     $query->where('content', 'LIKE', '%' . $search . '%');
                 })
                 ->orderBy('created_at', 'desc');
+
             $total = $commentsQuery->count();
-
-
-            $comments = $commentsQuery
-                ->skip($offset)
-                ->take($limit)
-                ->get();
+            $comments = $commentsQuery->skip($offset)->take($limit)->get();
 
             $result = $comments->map(function ($comment) {
                 return formatComment($comment);
@@ -2687,10 +1975,10 @@ class TasksController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Project not found.'
+                'message' => 'Task not found.'
             ], 404);
         } catch (\Exception $e) {
-
+            Log::error('Task comments API retrieval error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'Could not retrieve comments.'
@@ -2741,46 +2029,18 @@ class TasksController extends Controller
      *   "message": "An error occurred while updating the favorite status."
      * }
      */
-    public function update_favorite(Request $request, $id)
+    public function update_favorite(UpdateTaskFavoriteRequest $request, $id)
     {
         $isApi = request()->get('isApi', false);
         try {
-            // Validate the request data
-            $request->validate([
-                'is_favorite' => 'required|integer|in:0,1',
-            ]);
-            // Get the authenticated user (could be either User or Client)
-            $authUser = getAuthenticatedUser();
-            // Find the task by ID
             $task = Task::find($id);
-            // If the task is not found, return an error response
             if (!$task) {
-                return formatApiResponse(
-                    true,
-                    'Task not found',
-                    []
-                );
+                return formatApiResponse(true, 'Task not found', []);
             }
-            $isFavorite = $request->input('is_favorite');
-            // Check if the task is already favorited by the authenticated user/client
-            $favorite = $authUser->favorites()->where('favoritable_type', Task::class)
-                ->where('favoritable_id', $id)
-                ->first();
-            if ($isFavorite) {
-                // If no existing favorite, create a new one
-                if (!$favorite) {
-                    $authUser->favorites()->create([
-                        'favoritable_type' => Task::class,
-                        'favoritable_id' => $id,
-                    ]);
-                }
-            } else {
-                // If unfavoriting, delete the record
-                if ($favorite) {
-                    $favorite->delete();
-                }
-            }
-            // Return a successful response with the updated task
+
+            $isFavorite = (bool) $request->input('is_favorite');
+            $this->taskService->updateFavorite($task, $this->user, $isFavorite);
+
             return formatApiResponse(
                 false,
                 'Task favorite status updated successfully',
@@ -2789,7 +2049,7 @@ class TasksController extends Controller
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Task favorite update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while updating the task favorite status.'
@@ -2839,52 +2099,20 @@ class TasksController extends Controller
      *   "message": "An error occurred while updating the pinned status."
      * }
      */
-    public function update_pinned(Request $request, $id)
+    public function update_pinned(UpdateTaskPinnedRequest $request, $id)
     {
         $isApi = request()->get('isApi', false);
         try {
-            // Validate the request data
-            $request->validate([
-                'is_pinned' => 'required|integer|in:0,1',
-            ]);
-            // Get the authenticated user
-            $authUser = getAuthenticatedUser();
-            // Find the task by ID
             $task = Task::find($id);
-            // If the task is not found, return an error response
             if (!$task) {
-                return formatApiResponse(
-                    true,
-                    'Task not found',
-                    []
-                );
+                return formatApiResponse(true, 'Task not found', []);
             }
-            $isPinned = $request->input('is_pinned');
-            // Check if the task is already pinned by the authenticated user
-            $pinned = $authUser->pinnedTasks()
-                ->where('pinnable_id', $id)
-                ->first();
-            if ($isPinned) {
-                // If no existing pinned item, create a new one
-                if (!$pinned) {
-                    $authUser->pinnedTasks()->create([
-                        'pinnable_type' => Task::class,
-                        'pinnable_id' => $id,
-                    ]);
-                    $message = 'Pinned Successfully.'; // Success message for pinning
-                } else {
-                    $message = 'Already pinned.'; // In case it's already pinned
-                }
-            } else {
-                // If unpinning, delete the record
-                if ($pinned) {
-                    $pinned->delete();
-                    $message = 'Unpinned Successfully.'; // Success message for unpinning
-                } else {
-                    $message = 'Already unpinned.'; // In case it's not pinned to begin with
-                }
-            }
-            // Return a successful response with the updated task
+
+            $isPinned = (bool) $request->input('is_pinned');
+            $this->taskService->updatePinned($task, $this->user, $isPinned);
+
+            $message = $isPinned ? 'Pinned Successfully.' : 'Unpinned Successfully.';
+
             return formatApiResponse(
                 false,
                 $message,
@@ -2893,7 +2121,7 @@ class TasksController extends Controller
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Task pinned update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while updating the task pinned status.'

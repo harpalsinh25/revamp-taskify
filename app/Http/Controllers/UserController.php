@@ -156,7 +156,7 @@ class UserController extends Controller
             return response()->json(
                 [
                     'error' => true,
-                    'message' => 'Email settings are not configured. Please configure email settings to enable email verification.'
+                    'message' => get_label('email_settings_not_configured_for_verification', 'Email settings are not configured. Please configure email settings to enable email verification.')
                 ]
             );
         }
@@ -322,12 +322,12 @@ class UserController extends Controller
             } catch (TransportExceptionInterface $e) {
                 // Rollback user creation on email transport failure
                 $user->delete();
-                return response()->json(['error' => true, 'message' => 'User couldn\'t be created, please make sure email settings are operational.'], 500);
+                return response()->json(['error' => true, 'message' => get_label('user_not_created_email_settings_operational', "User couldn't be created, please make sure email settings are operational.")], 500);
             } catch (Throwable $e) {
                 // Rollback user creation on other errors
                 $user->delete();
 
-                return response()->json(['error' => true, 'message' => 'User couldn\'t be created, please try again later.'], 500);
+                return response()->json(['error' => true, 'message' => get_label('user_not_created_try_again_later', "User couldn't be created, please try again later.")], 500);
             }
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
@@ -369,7 +369,7 @@ class UserController extends Controller
                 // Return validation errors if any
                 return response()->json([
                     'error' => true,
-                    'message' => 'Validation errors occurred.',
+                    'message' => get_label('validation_errors_occurred', 'Validation errors occurred.'),
                     'validation_errors' => $validationErrors
                 ], 400);
             }
@@ -377,7 +377,7 @@ class UserController extends Controller
             // If no validation errors, return success message
             return response()->json([
                 'error' => false,
-                'message' => 'Users imported successfully.'
+                'message' => get_label('users_imported_successfully', 'Users imported successfully.')
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -541,7 +541,7 @@ class UserController extends Controller
         if ($id) {
             $user = User::find($id);
             if (!$user) {
-                return response()->json(['error' => true, 'message' => 'User not found.']);
+                return response()->json(['error' => true, 'message' => get_label('user_not_found', 'User not found.')]);
             }
 
             // Determine status
@@ -716,7 +716,7 @@ class UserController extends Controller
             // Handle any unexpected errors
             return response()->json([
                 'error' => true,
-                'message' => 'User couldn\'t be updated.'
+                'message' => get_label('user_could_not_be_updated', "User couldn't be updated.")
             ], 500);
         }
     }
@@ -773,7 +773,7 @@ class UserController extends Controller
         if ($user && $user->id == getMainAdminId()) {
             return response()->json([
                 'error' => true,
-                'message' => 'The main admin account cannot be deleted.'
+                'message' => get_label('main_admin_cannot_be_deleted', 'The main admin account cannot be deleted.')
             ]);
         }
         $response = DeletionService::delete(User::class, $id, 'User');
@@ -824,12 +824,12 @@ class UserController extends Controller
         if (count($ids) == 1 && $mainAdminInSelection) {
             return response()->json([
                 'error' => true,
-                'message' => 'The main admin account cannot be deleted.'
+                'message' => get_label('main_admin_cannot_be_deleted', 'The main admin account cannot be deleted.')
             ]);
         } elseif ($mainAdminInSelection) {
             return response()->json([
                 'error' => false,
-                'message' => 'Users deleted successfully except the main admin.',
+                'message' => get_label('users_deleted_except_main_admin', 'Users deleted successfully except the main admin.'),
                 'id' => $deletedUsers,
                 'titles' => $deletedUserNames
             ]);
@@ -837,7 +837,7 @@ class UserController extends Controller
 
         return response()->json([
             'error' => false,
-            'message' => 'User(s) deleted successfully.',
+            'message' => get_label('users_deleted_successfully', 'User(s) deleted successfully.'),
             'id' => $deletedUsers,
             'titles' => $deletedUserNames
         ]);
@@ -1504,7 +1504,7 @@ class UserController extends Controller
             dd($e);
             return response()->json([
                 'error' => true,
-                'message' => 'An unexpected error occurred. Please try again later.',
+                'message' => get_label('unexpected_error_try_again_later', 'An unexpected error occurred. Please try again later.'),
             ], 500);
         }
     }
@@ -1550,7 +1550,7 @@ class UserController extends Controller
                 break;
 
             default:
-                return response()->json(['error' => 'Invalid mention_type'], 400);
+                return response()->json(['error' => get_label('invalid_mention_type', 'Invalid mention_type')], 400);
         }
 
         // Apply search filters for both users and clients

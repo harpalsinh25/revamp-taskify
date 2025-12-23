@@ -861,7 +861,7 @@ function showInfo(message) {
 $('#quickViewModal').on('hidden.bs.modal', function () {
     // Reset modal content
     $('#quickViewContent').html('');
-    $('#quickViewModalLabel').text('Post Publishing Details');
+    $('#quickViewModalLabel').text(APP_LABELS && APP_LABELS['post_publishing_details'] ? APP_LABELS['post_publishing_details'] : 'Post Publishing Details');
 
     // Show action buttons
     $('#editPostBtn').show();

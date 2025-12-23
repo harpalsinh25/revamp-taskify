@@ -10,6 +10,8 @@
 'total_clients' => 'Ukupno klijenata',
 'projects' => 'Projekti',
 'tasks' => 'Zadaci',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'Vrijeme isteklo',
 'log_in' => 'Prijaviti se',
 'search_results' => 'Rezultati pretraživanja',

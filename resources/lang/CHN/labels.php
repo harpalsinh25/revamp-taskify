@@ -10,6 +10,8 @@
 'total_clients' => '客户总数',
 'projects' => '项目',
 'tasks' => '任务',
+'projects_and_task_management' => 'Projects and task management',
+'utilities' => 'Utilities',
 'session_expired' => '会话已过期',
 'log_in' => '登录',
 'search_results' => '搜索结果',

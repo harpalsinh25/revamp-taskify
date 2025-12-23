@@ -10,6 +10,8 @@
 'total_clients' => 'Totaal aantal klanten',
 'projects' => 'Projecten',
 'tasks' => 'Taken',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'Sessie verlopen',
 'log_in' => 'Log in',
 'search_results' => 'Zoekresultaten',

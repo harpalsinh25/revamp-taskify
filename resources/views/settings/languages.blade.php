@@ -89,8 +89,54 @@
                         <div class="mb-3 mt-2">
                             <div class="row">
                                 {!! create_label('dashboard', 'Dashboard', Session::get('locale', Session::get('locale'))) !!}
-                                {!! create_label('total_projects', 'Total projects', Session::get('locale', Session::get('locale'))) !!}
+                                {!! create_label('analytics_dashboard', 'Analytics Dashboard', Session::get('locale')) !!}
                             </div>
+                            <div class="row">
+                                {!! create_label('monitor_projects_and_tasks_insights', 'Monitor Projects ,Tasks and more insights.', Session::get('locale')) !!}
+                                {!! create_label('dashboard_insights', 'This dashboard displays counts and trends for projects, tasks, todos, and activities, filtered by date range and team members (for admins). Data reflects active and ongoing records, including those without specific start or end dates.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('select_period', 'Select Period', Session::get('locale')) !!}
+                                {!! create_label('select_date_range', 'Select date range', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('date_range_filter', 'Select a date range to filter data. Projects and tasks are included if their start/end dates overlap with the range or are undefined (ongoing). Other data (clients, meetings, todos, activities) is filtered by creation date. Defaults to the last 7 days.', Session::get('locale')) !!}
+                                {!! create_label('date_picker', 'Click to select a custom date range for filtering dashboard data.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('quick_select', 'Quick select', Session::get('locale')) !!}
+                                {!! create_label('today', 'Today', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('today_filter', 'Show data for today only, based on creation dates or overlapping project/task dates.', Session::get('locale')) !!}
+                                {!! create_label('yesterday', 'Yesterday', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('yesterday_filter', 'Show data for yesterday only, based on creation dates or overlapping project/task dates.', Session::get('locale')) !!}
+                                {!! create_label('last_7_days', 'Last 7 days', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('last_7_days_filter', 'Show data for the last 7 days, including projects/tasks active during this period or without defined dates.', Session::get('locale')) !!}
+                                {!! create_label('last_30_days', 'Last 30 days', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('last_30_days_filter', 'Show data for the last 30 days, including projects/tasks active during this period or without defined dates.', Session::get('locale')) !!}
+                                {!! create_label('current_month', 'Current Month', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('current_month_filter', 'Show data for the current month, including projects/tasks active during this period or without defined dates.', Session::get('locale')) !!}
+                                {!! create_label('select_team_members', 'Select Team Member(s)', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('user_filter', 'Filter todos and activities by specific team members (based on creator_id or actor_id). Leave empty to include all team members in the workspace.', Session::get('locale')) !!}
+                                {!! create_label('user_select', 'Start typing to select team members for filtering dashboard data.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('loading_team_members', 'Loading team members...', Session::get('locale')) !!}
+                                {!! create_label('clear', 'Clear', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('total_projects', 'Total projects', Session::get('locale', Session::get('locale'))) !!}
                             <div class="row">
                                 {!! create_label('total_tasks', 'Total tasks', Session::get('locale')) !!}
                                 {!! create_label('total_users', 'Total users', Session::get('locale')) !!}
@@ -101,14 +147,38 @@
                             </div>
                             <div class="row">
                                 {!! create_label('tasks', 'Tasks', Session::get('locale')) !!}
+                                {!! create_label('projects_and_task_management', 'Projects and task management', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('team', 'Team', Session::get('locale')) !!}
+                                {!! create_label('finance', 'Finance', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('utilities', 'Utilities', Session::get('locale')) !!}
+                                {!! create_label('settings', 'Settings', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
                                 {!! create_label('session_expired', 'Session expired', Session::get('locale')) !!}
-                            </div>
-                            <div class="row">
                                 {!! create_label('log_in', 'Log in', Session::get('locale')) !!}
-                                {!! create_label('search_results', 'Search results', Session::get('locale')) !!}
+                                {!! create_label('register', 'Register', Session::get('locale')) !!}
                             </div>
                             <div class="row">
+                                {!! create_label('you_must_log_in_or_register', 'You must', Session::get('locale')) !!}
+                                {!! create_label('to_access', 'to access', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('search_results', 'Search results', Session::get('locale')) !!}
                                 {!! create_label('no_results_found', 'No Results Found!', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('search_everything', 'Search Everything', Session::get('locale')) !!}
+                                {!! create_label('search_everything_placeholder', 'Search projects, tasks, users, and more...', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('global_search_input', 'Global Search Input', Session::get('locale')) !!}
+                                {!! create_label('all_results', 'All Results', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
                                 {!! create_label('create_project', 'Create project', Session::get('locale')) !!}
                             </div>
                             <div class="row">
@@ -282,6 +352,10 @@
                             <div class="row">
                                 {!! create_label('todo', 'Todo', Session::get('locale')) !!}
                                 {!! create_label('delete_todo_warning', 'Are you sure you want to delete this todo?', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('no_incomplete_todos', 'No incomplete todos', Session::get('locale')) !!}
+                                {!! create_label('no_completed_todos', 'No completed todos', Session::get('locale')) !!}
                             </div>
                             <div class="row">
                             </div>
@@ -546,7 +620,11 @@
                             </div>
                             <div class="row">
                                 {!! create_label('data_does_not_exists', 'Data does not exists', Session::get('locale')) !!}
+                                {!! create_label('oops_data_doesnt_exist', "Oops! 😖 Data doesn't exists.", Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
                                 {!! create_label('create_now', 'Create now', Session::get('locale')) !!}
+                                {!! create_label('error_loading_balance', 'Error loading balance', Session::get('locale')) !!}
                             </div>
                             <div class="row">
                                 {!! create_label('select_project', 'Select project', Session::get('locale')) !!}
@@ -1241,6 +1319,66 @@
                                 {!! create_label('something_went_wrong', 'Something went wrong.', Session::get('locale')) !!}
                             </div>
                             <div class="row">
+                                {!! create_label('version_already_updated_try_another_one', 'Oops!. This version is already updated into your system. Try another one.', Session::get('locale')) !!}
+                                {!! create_label('update_must_be_performed_in_sequence', 'Oops!. Update must performed in sequence.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('override_required', 'Override Required!', Session::get('locale')) !!}
+                                {!! create_label('failed_sending_message_try_again', 'Failed sending the message! Please, try again.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('error_messages_cannot_be_deleted', 'Error occurred, messages can not be deleted!', Session::get('locale')) !!}
+                                {!! create_label('file_type_not_allowed', 'File type not allowed', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('file_is_too_large', 'File is too large!', Session::get('locale')) !!}
+                                {!! create_label('candidate_data_is_missing', 'Candidate data is missing.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('failed_to_load_candidate_profile', 'Failed to load candidate profile.', Session::get('locale')) !!}
+                                {!! create_label('no_leave_data_available_yet', 'No leave data available yet.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('na_text', 'N/A', Session::get('locale')) !!}
+                                {!! create_label('post_publishing_details', 'Post Publishing Details', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('this_field_is_required', 'This field is required.', Session::get('locale')) !!}
+                                {!! create_label('error_prefix', 'Error: ', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('edit_field', 'Edit Field', Session::get('locale')) !!}
+                                {!! create_label('add_field', 'Add Field', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('add_candidate_status', 'Add Candidate Status', Session::get('locale')) !!}
+                                {!! create_label('add_new_action_triggered', 'Add new action triggered!', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('email_settings_not_configured_for_verification', 'Email settings are not configured. Please configure email settings to enable email verification.', Session::get('locale')) !!}
+                                {!! create_label('user_not_created_email_settings_operational', "User couldn't be created, please make sure email settings are operational.", Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('user_not_created_try_again_later', "User couldn't be created, please try again later.", Session::get('locale')) !!}
+                                {!! create_label('validation_errors_occurred', 'Validation errors occurred.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('users_imported_successfully', 'Users imported successfully.', Session::get('locale')) !!}
+                                {!! create_label('user_not_found', 'User not found.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('user_could_not_be_updated', "User couldn't be updated.", Session::get('locale')) !!}
+                                {!! create_label('main_admin_cannot_be_deleted', 'The main admin account cannot be deleted.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('users_deleted_except_main_admin', 'Users deleted successfully except the main admin.', Session::get('locale')) !!}
+                                {!! create_label('users_deleted_successfully', 'User(s) deleted successfully.', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('unexpected_error_try_again_later', 'An unexpected error occurred. Please try again later.', Session::get('locale')) !!}
+                                {!! create_label('invalid_mention_type', 'Invalid mention_type', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
                                 {!! create_label('please_correct_errors', 'Please correct errors.', Session::get('locale')) !!}
                                 {!! create_label(
                                     'removed_from_favorite_successfully',
@@ -1711,6 +1849,10 @@
                             <div class="row">
                                 {!! create_label('admin', 'Admin', Session::get('locale')) !!}
                                 {!! create_label('manage_languages', 'Manage languages', Session::get('locale')) !!}
+                                {!! create_label('for_example_english', 'For Example: English', Session::get('locale')) !!}
+                            </div>
+                            <div class="row">
+                                {!! create_label('for_example_en', 'For Example: en', Session::get('locale')) !!}
                             </div>
                             <div class="row">
                                 {!! create_label('code', 'Code', Session::get('locale')) !!}

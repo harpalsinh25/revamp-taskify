@@ -1721,7 +1721,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                     } catch (error) {
                         console.error('[Override Check] Error showing modal:', error);
                         // Fallback: show alert
-                        alert('Override Required!\n\n' +
+                        alert((APP_LABELS && APP_LABELS['override_required'] ? APP_LABELS['override_required'] : 'Override Required!') + '\n\n' +
                             'Available Balance: ' + (result.override_data?.available_balance || 0) + '\n' +
                             'Excess Paid Leave: ' + (result.override_data?.excess_paid_leave || 0) + '\n' +
                             'Delta Paid Leave: ' + (result.override_data?.delta_paid_leave || 0));
@@ -1732,7 +1732,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                     console.error('[Override Check] showOverrideConfirmationModal function not found. Override required but modal cannot be shown.');
                     console.log('[Override Check] Override data:', result.override_data);
                     // Fallback: show alert
-                    alert('Override Required!\n\n' +
+                    alert((APP_LABELS && APP_LABELS['override_required'] ? APP_LABELS['override_required'] : 'Override Required!') + '\n\n' +
                         'Available Balance: ' + (result.override_data?.available_balance || 0) + '\n' +
                         'Excess Paid Leave: ' + (result.override_data?.excess_paid_leave || 0) + '\n' +
                         'Delta Paid Leave: ' + (result.override_data?.delta_paid_leave || 0) + '\n\n' +
@@ -2141,7 +2141,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                         }
                         // If there is a validation error message for this field, display it
                         if (errors[fieldName][0].includes("required")) {
-                            errorMessageElement.text("This field is required.");
+                            errorMessageElement.text(APP_LABELS && APP_LABELS['this_field_is_required'] ? APP_LABELS['this_field_is_required'] : "This field is required.");
                         } else {
                             errorMessageElement.text(errors[fieldName]);
                         }
@@ -5059,7 +5059,7 @@ $("#testSmsSettingsForm").on("submit", function (event) {
                 .prop("disabled", false)
                 .html(label_submit);
             $("#smsTestResponse").removeClass("d-none");
-            $("#smsResponseText").text("Error: " + xhr.responseText);
+            $("#smsResponseText").text((APP_LABELS && APP_LABELS['error_prefix'] ? APP_LABELS['error_prefix'] : "Error: ") + xhr.responseText);
         },
     });
 });
@@ -5109,7 +5109,7 @@ $("#testWhatsappSettingsForm").on("submit", function (event) {
                 .prop("disabled", false)
                 .html(label_submit);
             $("#whatsappTestResponse").removeClass("d-none");
-            $("#whatsappResponseText").text("Error: " + xhr.responseText);
+            $("#whatsappResponseText").text((APP_LABELS && APP_LABELS['error_prefix'] ? APP_LABELS['error_prefix'] : "Error: ") + xhr.responseText);
         },
     });
 });
@@ -5157,7 +5157,7 @@ $("#testSlackSettingsForm").on("submit", function (event) {
                 .prop("disabled", false)
                 .html(label_submit);
             $("#slackTestResponse").removeClass("d-none");
-            $("#slackResponseText").text("Error: " + xhr.responseText);
+            $("#slackResponseText").text((APP_LABELS && APP_LABELS['error_prefix'] ? APP_LABELS['error_prefix'] : "Error: ") + xhr.responseText);
         },
     });
 });

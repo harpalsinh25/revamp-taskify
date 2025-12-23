@@ -270,6 +270,15 @@ class LeaveRequestController extends Controller
             $leaveVisibleToAll = $request->input('leaveVisibleToAll') && $request->filled('leaveVisibleToAll') && $request->input('leaveVisibleToAll') == 'on' ? 1 : 0;
             $formFields['visible_to_all'] = $leaveVisibleToAll;
 
+            // Add from_time and to_time for partial leave
+            if ($request->has('partialLeave') && $request->input('partialLeave') == 'on') {
+                $formFields['from_time'] = $request->input('from_time');
+                $formFields['to_time'] = $request->input('to_time');
+            } else {
+                $formFields['from_time'] = null;
+                $formFields['to_time'] = null;
+            }
+
             // [Create Leave Request] - Flow 1
             $lr = LeaveRequest::create($formFields);
 
@@ -352,11 +361,19 @@ class LeaveRequestController extends Controller
             ? get_label('partial', 'Partial')
             : get_label('full', 'Full');
 
-        $from = $fromDateDayOfWeek . ', ' . ($leaveRequest->from_time
-            ? format_date($leaveRequest->from_date . ' ' . $leaveRequest->from_time, true, null, null, false)
+        // Normalize time format - ensure it has seconds for format_date
+        $fromTimeFormatted = $leaveRequest->from_time
+            ? (strlen($leaveRequest->from_time) == 5 ? $leaveRequest->from_time . ':00' : $leaveRequest->from_time)
+            : null;
+        $toTimeFormatted = $leaveRequest->to_time
+            ? (strlen($leaveRequest->to_time) == 5 ? $leaveRequest->to_time . ':00' : $leaveRequest->to_time)
+            : null;
+
+        $from = $fromDateDayOfWeek . ', ' . ($fromTimeFormatted
+            ? format_date($leaveRequest->from_date . ' ' . $fromTimeFormatted, true, null, null, false)
             : format_date($leaveRequest->from_date));
-        $to = $toDateDayOfWeek . ', ' . ($leaveRequest->to_time
-            ? format_date($leaveRequest->to_date . ' ' . $leaveRequest->to_time, true, null, null, false)
+        $to = $toDateDayOfWeek . ', ' . ($toTimeFormatted
+            ? format_date($leaveRequest->to_date . ' ' . $toTimeFormatted, true, null, null, false)
             : format_date($leaveRequest->to_date));
 
         $duration = $leaveRequest->isPartialLeave()
@@ -475,12 +492,12 @@ class LeaveRequestController extends Controller
         $action_by_ids = request('action_by_ids');
         $types = request('types');
         $statuses = request('statuses');
-        $date_between_from = request('date_between_from') ?: "";
-        $date_between_to = request('date_between_to') ?: "";
-        $start_date_from = (request('start_date_from')) ? request('start_date_from') : "";
-        $start_date_to = (request('start_date_to')) ? request('start_date_to') : "";
-        $end_date_from = (request('end_date_from')) ? request('end_date_from') : "";
-        $end_date_to = (request('end_date_to')) ? request('end_date_to') : "";
+        $date_between_from = request('lr_date_between_from') ?: (request('date_between_from') ?: "");
+        $date_between_to = request('lr_date_between_to') ?: (request('date_between_to') ?: "");
+        $start_date_from = request('lr_start_date_from') ?: (request('start_date_from') ?: "");
+        $start_date_to = request('lr_start_date_to') ?: (request('start_date_to') ?: "");
+        $end_date_from = request('lr_end_date_from') ?: (request('end_date_from') ?: "");
+        $end_date_to = request('lr_end_date_to') ?: (request('end_date_to') ?: "");
         $where = ['workspace_id' => $this->workspace->id];
 
         if (!is_admin_or_leave_editor()) {
@@ -711,10 +728,12 @@ class LeaveRequestController extends Controller
         $status = $request->input('status', '');
         $user_id = $request->input('user_id', '');
         $action_by_id = $request->input('action_by_id', '');
-        $start_date_from = $request->input('start_date_from', '');
-        $start_date_to = $request->input('start_date_to', '');
-        $end_date_from = $request->input('end_date_from', '');
-        $end_date_to = $request->input('end_date_to', '');
+        $date_between_from = $request->input('lr_date_between_from') ?: $request->input('date_between_from', '');
+        $date_between_to = $request->input('lr_date_between_to') ?: $request->input('date_between_to', '');
+        $start_date_from = $request->input('lr_start_date_from') ?: $request->input('start_date_from', '');
+        $start_date_to = $request->input('lr_start_date_to') ?: $request->input('start_date_to', '');
+        $end_date_from = $request->input('lr_end_date_from') ?: $request->input('end_date_from', '');
+        $end_date_to = $request->input('lr_end_date_to') ?: $request->input('end_date_to', '');
         $type = $request->input('type', '');
         $limit = $request->input('limit', 10); // default limit
         $offset = $request->input('offset', 0); // default offset
@@ -756,6 +775,12 @@ class LeaveRequestController extends Controller
         }
         if ($action_by_id) {
             $leaveRequestsQuery->where('leave_requests.action_by', $action_by_id);
+        }
+        if ($date_between_from && $date_between_to) {
+            $leaveRequestsQuery->where(function ($q) use ($date_between_from, $date_between_to) {
+                $q->where('from_date', '<=', $date_between_to)
+                    ->where('to_date', '>=', $date_between_from);
+            });
         }
         if ($start_date_from && $start_date_to) {
             $leaveRequestsQuery->whereBetween('leave_requests.from_date', [$start_date_from, $start_date_to]);
@@ -1165,6 +1190,7 @@ class LeaveRequestController extends Controller
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
             DB::rollBack();
+            dd($e->getMessage(), $e->getTraceAsString(), $e->getLine(), $e->getFile(), $e->getCode(), $e->getPrevious());
             Log::error('[LeaveRequest Update] Exception occurred', [
                 'leave_request_id' => $request->input('id'),
                 'error_message' => $e->getMessage(),

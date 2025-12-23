@@ -148,7 +148,7 @@ $(document).ready(function () {
                 success: function (data) {
                     console.log(data);
                     if (!data?.candidate) {
-                        alert('Candidate data is missing.');
+                        alert(APP_LABELS && APP_LABELS['candidate_data_is_missing'] ? APP_LABELS['candidate_data_is_missing'] : 'Candidate data is missing.');
                         return;
                     }
 
@@ -226,7 +226,7 @@ $(document).ready(function () {
                 },
                 error: function (xhr, status, error) {
                     console.error('Ajax error:', error);
-                    alert('Failed to load candidate profile.');
+                    alert(APP_LABELS && APP_LABELS['failed_to_load_candidate_profile'] ? APP_LABELS['failed_to_load_candidate_profile'] : 'Failed to load candidate profile.');
                 }
             });
         });

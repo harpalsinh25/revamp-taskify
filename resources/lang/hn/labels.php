@@ -10,6 +10,8 @@
 'total_clients' => 'कुल ग्राहक',
 'projects' => 'परियोजनाओं',
 'tasks' => 'कार्य',
+'projects_and_task_management' => 'Projects and task management',
+'utilities' => 'Utilities',
 'session_expired' => 'सत्र समाप्त हुआ',
 'log_in' => 'लॉग इन करें',
 'search_results' => 'खोज के परिणाम',

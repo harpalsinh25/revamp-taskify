@@ -360,7 +360,7 @@ function renderCharts(data, monthlyTrends, summary) {
         }
         $('#chart-insight-distribution').html(insight + '<strong>' + recommendation + '</strong>');
     } else {
-        $('#chart-insight-distribution').text('No leave data available yet.');
+        $('#chart-insight-distribution').text(APP_LABELS && APP_LABELS['no_leave_data_available_yet'] ? APP_LABELS['no_leave_data_available_yet'] : 'No leave data available yet.');
     }
 
     const pieChartOptions = {
@@ -563,7 +563,7 @@ function renderCharts(data, monthlyTrends, summary) {
         $('#chart-trend-months').text(trendLabels.length + ' Months');
     } else {
         $('#chart-insight-trends').html('Insufficient data for trend analysis.');
-        $('#chart-trend-months').text('N/A');
+        $('#chart-trend-months').text(APP_LABELS && APP_LABELS['na_text'] ? APP_LABELS['na_text'] : 'N/A');
     }
 
     const lineChartOptions = {

@@ -73,7 +73,7 @@
         var baseUrl = "{{ url('/') }}";
         var currencySymbol = "{{ $general_settings['currency_symbol'] ?? '' }}";
     </script>
-
+ @yield('page_styles')
 
     <!-- PWA Manifest -->
     @laravelPWA

@@ -207,13 +207,17 @@ if (!function_exists('get_label')) {
 if (!function_exists('empty_state')) {
     function empty_state($url)
     {
+        $dataNotFound = get_label('data_not_found', 'Data Not Found');
+        $oopsMessage = get_label('oops_data_doesnt_exist', "Oops! 😖 Data doesn't exists.");
+        $createNow = get_label('create_now', 'Create now');
+
         return "
     <div class='card text-center'>
     <div class='card-body'>
         <div class='misc-wrapper'>
-            <h2 class='mb-2 mx-2'>Data Not Found </h2>
-            <p class='mb-4 mx-2'>Oops! 😖 Data doesn't exists.</p>
-            <a href='/$url' class='btn btn-primary'>Create now</a>
+            <h2 class='mb-2 mx-2'>" . htmlspecialchars($dataNotFound, ENT_QUOTES, 'UTF-8') . " </h2>
+            <p class='mb-4 mx-2'>" . htmlspecialchars($oopsMessage, ENT_QUOTES, 'UTF-8') . "</p>
+            <a href='/$url' class='btn btn-primary'>" . htmlspecialchars($createNow, ENT_QUOTES, 'UTF-8') . "</a>
             <div class='mt-3'>
                 <img src='../assets/img/illustrations/page-misc-error-light.png' alt='page-misc-error-light' width='500' class='img-fluid' data-app-dark-img='illustrations/page-misc-error-dark.png' data-app-light-img='illustrations/page-misc-error-light.png' />
             </div>
@@ -232,14 +236,25 @@ if (!function_exists('format_date')) {
             if ($time) {
                 if ($apply_timezone) {
                     if (!$date instanceof \Carbon\Carbon) {
-                        $dateObj = \Carbon\Carbon::createFromFormat($from_format . ' H:i:s', $date)
-                            ->setTimezone(config('app.timezone'));
+                        // Try with seconds first, then without
+                        try {
+                            $dateObj = \Carbon\Carbon::createFromFormat($from_format . ' H:i:s', $date)
+                                ->setTimezone(config('app.timezone'));
+                        } catch (\Exception $e) {
+                            $dateObj = \Carbon\Carbon::createFromFormat($from_format . ' H:i', $date)
+                                ->setTimezone(config('app.timezone'));
+                        }
                     } else {
                         $dateObj = $date->setTimezone(config('app.timezone'));
                     }
                 } else {
                     if (!$date instanceof \Carbon\Carbon) {
-                        $dateObj = \Carbon\Carbon::createFromFormat($from_format . ' H:i:s', $date);
+                        // Try with seconds first, then without
+                        try {
+                            $dateObj = \Carbon\Carbon::createFromFormat($from_format . ' H:i:s', $date);
+                        } catch (\Exception $e) {
+                            $dateObj = \Carbon\Carbon::createFromFormat($from_format . ' H:i', $date);
+                        }
                     } else {
                         $dateObj = $date;
                     }
@@ -505,14 +520,14 @@ if (!function_exists('get_system_update_info')) {
         $data['db_current_version'] = $dbCurrentVersion ? $dbCurrentVersion->version : '1.0.0';
         if ($data['db_current_version'] == $linesArray['version']) {
             $data['updated_error'] = true;
-            $data['message'] = 'Oops!. This version is already updated into your system. Try another one.';
+            $data['message'] = get_label('version_already_updated_try_another_one', 'Oops!. This version is already updated into your system. Try another one.');
             return $data;
         }
         if ($data['db_current_version'] == $linesArray['previous']) {
             $data['file_current_version'] = $linesArray['version'];
         } else {
             $data['sequence_error'] = true;
-            $data['message'] = 'Oops!. Update must performed in sequence.';
+            $data['message'] = get_label('update_must_be_performed_in_sequence', 'Oops!. Update must performed in sequence.');
             return $data;
         }
         $data['query'] = $linesArray['manual_queries'];

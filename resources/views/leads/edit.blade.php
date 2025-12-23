@@ -215,7 +215,7 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="pinterest" class="form-label">{{ 'Pinterest' }}</label>
+                            <label for="pinterest" class="form-label">{{ get_label('pinterest', 'Pinterest') }}</label>
                             <input type="url" name="pinterest" class="form-control"
                                 placeholder="{{ get_label('enter_pinterest_url', 'Enter Pinterest URL') }}"
                                 value="{{ $lead->pinterest }}">

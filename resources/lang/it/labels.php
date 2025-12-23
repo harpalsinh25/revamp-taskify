@@ -10,6 +10,8 @@
 'total_clients' => 'Clienti totali',
 'projects' => 'Progetti',
 'tasks' => 'Compiti',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'Sessione scaduta',
 'log_in' => 'Login',
 'search_results' => 'risultati di ricerca',

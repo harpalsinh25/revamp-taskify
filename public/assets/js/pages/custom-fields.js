@@ -198,7 +198,7 @@ $(document).ready(function () {
                     //     $('input[name="_method"]').val("PUT");
                     // }
 
-                    $("#edit_custom_field").text("Edit Field");
+                    $("#edit_custom_field").text(APP_LABELS && APP_LABELS['edit_field'] ? APP_LABELS['edit_field'] : "Edit Field");
                     $("#add_field_modal").modal("show");
                 } else {
                     showErrorMessage("Could not fetch field data");
@@ -218,7 +218,7 @@ $(document).ready(function () {
         $("#field_options_container").empty().addClass("d-none");
         form.attr("action", "/settings/custom-fields");
         $('input[name="_method"]').remove();
-        $("#exampleModalLabel1").text("Add Field");
+        $("#exampleModalLabel1").text(APP_LABELS && APP_LABELS['add_field'] ? APP_LABELS['add_field'] : "Add Field");
     });
 
     // Handle module filter change

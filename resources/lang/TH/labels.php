@@ -10,6 +10,8 @@
 'total_clients' => 'ลูกค้าทั้งหมด',
 'projects' => 'โครงการ',
 'tasks' => 'งาน',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'เซสชั่นหมดอายุแล้ว',
 'log_in' => 'เข้าสู่ระบบ',
 'search_results' => 'ผลการค้นหา',

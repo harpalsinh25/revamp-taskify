@@ -10,6 +10,8 @@
 'total_clients' => 'إجمالي العملاء',
 'projects' => 'المشاريع',
 'tasks' => 'مهام',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'انتهت الجلسة',
 'log_in' => 'تسجيل الدخول',
 'search_results' => 'نتائج البحث',

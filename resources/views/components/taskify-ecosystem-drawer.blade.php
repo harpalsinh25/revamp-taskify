@@ -34,6 +34,42 @@
                 'https://codecanyon.net/item/taskify-flutter-app-project-management-task-manager-and-productivity-tool/57033235?s_rank=2',
         ],
         [
+            'name' => 'Employee Monitoring, Work Active Idle Break Time Screenshots Desktop App Plugin',
+            'price' => "$29",
+            'description' =>
+                'The Taskify – Employee Monitoring, Work Active Idle Break Time Screenshots Desktop App Plugin lets you monitor your employees\' work activity, screenshots, and break times.',
+            'features' => ['Plugin', 'Add On', 'Employee Monitoring', 'Work Active Idle Break Time Screenshots', 'Desktop App'],
+            'badge' => ['text' => 'Add On', 'class' => 'bg-success'],
+            'icon' => 'bx bx-plug text-success',
+            'button' => [
+                'text' => 'Get Employee Monitoring Plugin',
+                'class' => 'btn btn-success',
+                'icon' => 'bx bx-cart',
+            ],
+            'color' => 'text-success',
+            'image_url' =>
+                'https://market-resized.envatousercontent.com/codecanyon.net/files/660072644/Taskify%20time%20tracker%20Plugin%20promo.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=08be76d54d9e3b57bfbb066613d72e2107cbc03c96b3e1bffb8b69cf10784010',
+            'product_url' =>
+                'https://codecanyon.net/item/employee-monitoring-work-active-idle-break-time-screenshots-desktop-app-plugin-for-taskify/59830859?s_rank=1',
+        ],[
+            'name' => 'Social Media Automation Manager, Publisher Scheduler Plugin',
+            'price' => "$29",
+            'description' =>
+                'The Taskify – Social Media Automation Manager, Publisher Scheduler Plugin lets you automate your social media posts and schedule them for later.',
+            'features' => ['Plugin', 'Add On', 'Social Media Automation', 'Publisher Scheduler'],
+            'badge' => ['text' => 'Add On', 'class' => 'bg-danger'],
+            'icon' => 'bx bx-plug text-danger',
+            'button' => [
+                'text' => 'Get Social Media Automation Plugin',
+                'class' => 'btn btn-danger',
+                'icon' => 'bx bx-cart',
+            ],
+            'color' => 'text-danger',
+            'image_url' =>
+                'https://market-resized.envatousercontent.com/codecanyon.net/files/660072644/Taskify%20time%20tracker%20Plugin%20promo.png?auto=format&q=94&cf_fit=crop&gravity=top&h=8000&w=590&s=08be76d54d9e3b57bfbb066613d72e2107cbc03c96b3e1bffb8b69cf10784010',
+            'product_url' =>
+                'https://codecanyon.net/item/social-media-automation-manager-publisher-scheduler-plugin-for-taskify/59753681?s_rank=2',
+        ],[
             'name' => 'Assets & Resources Organizer, Tracker and Management Plugin',
             'price' => "$29",
             'description' =>

@@ -10,6 +10,8 @@
 'total_clients' => 'Tổng số khách hàng',
 'projects' => 'Dự án',
 'tasks' => 'Nhiệm vụ',
+    'projects_and_task_management' => 'Projects and task management',
+    'utilities' => 'Utilities',
 'session_expired' => 'Phiên hết hạn',
 'log_in' => 'Đăng nhập',
 'search_results' => 'kết quả tìm kiếm',

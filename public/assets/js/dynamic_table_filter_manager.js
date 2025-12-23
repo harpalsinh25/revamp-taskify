@@ -138,7 +138,9 @@ class TableFilterSync {
                         if (picker) {
                             picker.setStartDate(moment(from));
                             picker.setEndDate(moment(to));
-                            $selector.val(moment(from).format('MM/DD/YYYY') + ' - ' + moment(to).format('MM/DD/YYYY'));
+                            const fmt = picker.locale && picker.locale.format ? picker.locale.format : 'YYYY-MM-DD';
+                            const sep = picker.locale && picker.locale.separator ? picker.locale.separator : ' - ';
+                            $selector.val(moment(from).format(fmt) + sep + moment(to).format(fmt));
                         }
                         this.getCachedSelector(filter.hiddenFrom).val(from);
                         this.getCachedSelector(filter.hiddenTo).val(to);

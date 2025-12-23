@@ -189,8 +189,7 @@
         <script src="{{ asset('assets/js/pages/dashboard.js') }}"></script>
     @else
         <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-            <span>You must <a href="{{ url('login') }}">Log in</a> or <a href="{{ url('register') }}">Register</a> to
-                access {{ $general_settings['company_title'] }}!</span>
+            <span>{{ get_label('you_must_log_in_or_register', 'You must') }} <a href="{{ url('login') }}">{{ get_label('log_in', 'Log in') }}</a> {{ get_label('or', 'or') }} <a href="{{ url('register') }}">{{ get_label('register', 'Register') }}</a> {{ get_label('to_access', 'to access') }} {{ $general_settings['company_title'] }}!</span>
         </div>
     @endauth
 @endsection

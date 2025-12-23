@@ -193,7 +193,7 @@
                     }
                     // Set error message text
                     if (errors[fieldName][0] && errors[fieldName][0].includes("required")) {
-                        errorMessageElement.text("This field is required.");
+                        errorMessageElement.text(APP_LABELS && APP_LABELS['this_field_is_required'] ? APP_LABELS['this_field_is_required'] : "This field is required.");
                     } else {
                         errorMessageElement.text(Array.isArray(errors[fieldName]) ? errors[fieldName][0] : errors[fieldName]);
                     }

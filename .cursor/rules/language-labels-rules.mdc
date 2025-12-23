@@ -1,4 +1,142 @@
 ---
 alwaysApply: true
 ---
-We are using the get_label() function for translation , always use this when creating the new labels or display text. Also add respective new label in the settings/language.blade.php for proper sync, and if we want to use this label in the JS. add it to labels.blade.php or pass through the blade file
+
+# =====================================================================
+# RULE GROUP: LABEL INTERNATIONALIZATION ENFORCEMENT
+# =====================================================================
+
+# GOAL:
+# Detect all hardcoded UI strings and enforce usage of:
+#   - get_label($key, $default)
+#   - create_label($variable, $title)
+#   - JS label injection via Blade or labels.blade.php
+# =====================================================================
+
+
+# =====================================================================
+# RULE 1 — FIND HARDCODED TEXT IN BLADE
+# =====================================================================
+SEARCH:
+  - pattern: >([^<"{]+)<
+ACTIONS:
+  - Report as hardcoded UI text when:
+      * The matched content contains alphabetic characters
+      * It is not a dynamic expression, not a variable, not HTML, not a tag
+  - Suggest replacing with:
+      {{ get_label(<snake_case_key>, "<original_text>") }}
+
+
+# =====================================================================
+# RULE 2 — DETECT ECHOED STRINGS IN BLADE OR PHP
+# =====================================================================
+SEARCH:
+  - pattern: \{\{\s*['"].+['"]\s*\}\}
+ACTIONS:
+  - Flag as invalid hardcoded label
+  - Suggest replacing with get_label()
+
+
+# =====================================================================
+# RULE 3 — FIND HARDCODED STRINGS IN CONTROLLER/MODEL PHP CODE
+# =====================================================================
+SEARCH:
+  - pattern: ['"][A-Za-z].*['"]
+FILTER OUT:
+  - variable assignments not shown to UI
+  - URLs
+  - configuration values
+  - log messages
+ACTION:
+  - If visible to user:
+      Replace with get_label('<snake_case_key>', '<original_text>')
+
+
+# =====================================================================
+# RULE 4 — VALIDATION MESSAGES MUST NOT BE HARDCODED
+# =====================================================================
+SEARCH:
+  - pattern: ['"][A-Za-z][^'"]+['"]\s*=>\s*['"][A-Za-z]
+ACTION:
+  - Replace validation message text with get_label('validation_xxx')
+
+
+# =====================================================================
+# RULE 5 — JAVASCRIPT HARDCODED TEXT INSIDE .js, .blade.php, .vue
+# =====================================================================
+SEARCH:
+  - pattern: ["'][A-Za-z][^"']+["']
+IGNORE:
+  - URLs
+  - selectors (#id, .class)
+  - regex patterns
+ACTION:
+  - If JS file can use Blade:
+        var lbl_xxx = "{{ get_label('xxx', 'Original Text') }}";
+  - If JS file cannot use Blade (pure .js):
+        Use labels.blade.php:
+        APP_LABELS['xxx'] = "{{ get_label('xxx', 'Original Text') }}";
+
+
+# =====================================================================
+# RULE 6 — DETECT MISSING get_label() WRAPPING IN BLADE→JS VARIABLES
+# =====================================================================
+SEARCH:
+  - pattern: var\s+[A-Za-z0-9_]+\s*=\s*["'][A-Za-z][^"']*["'];
+ACTION:
+  - Replace with:
+      var key = "{{ get_label('key', 'Default Text') }}";
+
+
+# =====================================================================
+# RULE 7 — BUTTON/TEXT/PLACEHOLDERS/OPTIONS MUST NOT BE HARDCODED
+# =====================================================================
+SEARCH:
+  - patterns:
+      - <button[^>]*>[^<]+</button>
+      - placeholder="[^"]+"
+      - <option[^>]*>[^<]+</option>
+ACTION:
+  - Wrap text with get_label()
+
+
+# =====================================================================
+# RULE 8 — EXTRACT ALL USED LABEL KEYS
+# =====================================================================
+SEARCH:
+  - pattern: get_label\(['"]([a-zA-Z0-9_]+)
+ACTION:
+  - Collect all keys into "USED_LABELS" list
+
+
+# =====================================================================
+# RULE 9 — EXTRACT ALL create_label() KEYS
+# =====================================================================
+SEARCH:
+  - pattern: create_label\(['"]([a-zA-Z0-9_]+)
+ACTION:
+  - Collect all keys into "SETTINGS_LABELS" list
+
+
+# =====================================================================
+# RULE 10 — MISSING SETTINGS LABELS
+# =====================================================================
+COMPARE:
+  - USED_LABELS - SETTINGS_LABELS
+ACTION:
+  - For each missing key:
+      Output:
+        {!! create_label('<key>', '<Human Friendly Name>') !!}
+
+
+# =====================================================================
+# RULE 11 — REPORT FORMAT
+# =====================================================================
+OUTPUT:
+  - File path
+  - Line number
+  - Original snippet
+  - Suggested fix
+  - Label key
+  - Whether a create_label() entry must be added
+

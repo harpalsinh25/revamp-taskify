@@ -19,7 +19,27 @@ use Illuminate\Http\Request;
 use App\Models\ProjectClient;
 use App\Imports\ProjectsImport;
 use App\Models\CommentAttachment;
+use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectRequest;
+use App\Http\Requests\StoreMilestoneRequest;
+use App\Http\Requests\UpdateMilestoneRequest;
+use App\Http\Requests\StoreCommentRequest;
+use App\Http\Requests\UpdateCommentRequest;
+use App\Http\Requests\UpdateFavoriteRequest;
+use App\Http\Requests\UpdatePinnedRequest;
+use App\Http\Requests\UpdateStatusRequest;
+use App\Http\Requests\UpdatePriorityRequest;
+use App\Http\Requests\UpdateProjectDatesRequest;
+use App\Http\Requests\DeleteMultipleMediaRequest;
+use App\Http\Requests\DeleteMultipleMilestoneRequest;
 use App\Services\DeletionService;
+use App\Services\ProjectQueryService;
+use App\Services\ProjectService;
+use App\Services\ProjectMediaService;
+use App\Services\ProjectMilestoneService;
+use App\Services\ProjectCommentService;
+use App\Services\ProjectCalendarService;
+use App\Services\ProjectMetaService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\UserClientPreference;
@@ -39,8 +59,23 @@ class ProjectsController extends Controller
 {
     protected $workspace;
     protected $user;
-    public function __construct()
+    protected ProjectQueryService $projectQueryService;
+    protected ProjectService $projectService;
+    protected ProjectMediaService $projectMediaService;
+    protected ProjectMilestoneService $projectMilestoneService;
+    protected ProjectCommentService $projectCommentService;
+    protected ProjectCalendarService $projectCalendarService;
+    protected ProjectMetaService $projectMetaService;
+
+    public function __construct(ProjectQueryService $projectQueryService, ProjectService $projectService, ProjectMediaService $projectMediaService, ProjectMilestoneService $projectMilestoneService, ProjectCommentService $projectCommentService, ProjectCalendarService $projectCalendarService, ProjectMetaService $projectMetaService)
     {
+        $this->projectQueryService = $projectQueryService;
+        $this->projectService = $projectService;
+        $this->projectMediaService = $projectMediaService;
+        $this->projectMilestoneService = $projectMilestoneService;
+        $this->projectCommentService = $projectCommentService;
+        $this->projectCalendarService = $projectCalendarService;
+        $this->projectMetaService = $projectMetaService;
         $this->middleware(function ($request, $next) {
             // fetch session and use it in entire class with constructor
             $this->workspace = Workspace::find(getWorkspaceId());
@@ -55,140 +90,69 @@ class ProjectsController extends Controller
      */
     public function index(Request $request, $type = null)
     {
-        // Get multiple statuses from the request
-        $statuses = $request->input('statuses', []);
-        $selectedTags = $request->input('tags', []);
-        $is_favorite = 0;
-        if ($type === 'favorite') {
-            $is_favorite = 1;
-        }
-        $sort = $request->input('sort', 'id');
-        $order = 'desc';
-        switch ($sort) {
-            case 'newest':
-                $sort = 'created_at';
-                $order = 'desc';
-                break;
-            case 'oldest':
-                $sort = 'created_at';
-                $order = 'asc';
-                break;
-            case 'recently-updated':
-                $sort = 'updated_at';
-                $order = 'desc';
-                break;
-            case 'earliest-updated':
-                $sort = 'updated_at';
-                $order = 'asc';
-                break;
-            default:
-                $sort = 'id';
-                $order = 'desc';
-                break;
-        }
-        $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
-        if (!empty($statuses)) {
-            $projectsQuery->whereIn('status_id', $statuses); // Apply multiple status filter
-        }
-        if (!empty($selectedTags)) {
-            $projectsQuery->whereHas('tags', function ($q) use ($selectedTags) {
-                $q->whereIn('tags.id', $selectedTags);
-            });
-        }
-        if ($is_favorite) {
-            // Get the IDs of the projects marked as favorites by the user
-            $favoriteProjectIds = $this->user->favoriteProjects()
-                ->pluck('favoritable_id')  // Get the project IDs
-                ->toArray();
-            // Filter projects based on the favorite project IDs
-            $projectsQuery->whereIn('projects.id', $favoriteProjectIds);
-        }
-        $authUser = $this->user;
-        $authUserColumn = $authUser instanceof \App\Models\User ? 'user_id' : 'client_id';
-        $projects = $projectsQuery->leftJoin('pinned', function ($join) use ($authUserColumn, $authUser) {
-            $join->on('pinned.pinnable_id', '=', 'projects.id')
-                ->where('pinned.pinnable_type', '=', Project::class)
-                ->where('pinned.' . $authUserColumn, '=', $authUser->id);
-        })
-            ->select('projects.*', 'pinned.id as pinned_id') // Select the projects and alias pinned.id as pinned_id
-            ->orderByRaw('pinned.id IS NULL ASC') // Pinned projects (0/false) first, non-pinned (1/true) second
-            ->orderBy($sort, $order) // Then order by other parameters (e.g., id or title)
-            ->paginate(6);
+        $filters = [
+            'statuses' => $request->input('statuses', []),
+            'tags' => $request->input('tags', []),
+            'is_favorite' => $type === 'favorite' ? 1 : 0,
+            'sort' => $request->input('sort', 'id'),
+            'order' => 'desc',
+        ];
 
-        // custome field
+        $projectsQuery = $this->projectQueryService->buildIndexQuery($this->workspace, $this->user, $filters);
+        $projects = $projectsQuery->paginate(6);
+
         $customFields = CustomField::where('module', 'project')->get();
 
         return view('projects.grid_view', [
             'projects' => $projects,
             'auth_user' => $this->user,
-            'selectedTags' => $selectedTags,
-            'is_favorite' => $is_favorite,
+            'selectedTags' => $filters['tags'],
+            'is_favorite' => $filters['is_favorite'],
             'customFields' => $customFields
         ]);
     }
     public function kanban_view(Request $request, $type = null)
     {
-        $statuses = $request->input('statuses', []);
-        $selectedTags = $request->input('tags', []);
-        $is_favorite = 0;
-        if ($type === 'favorite') {
-            $is_favorite = 1;
-        }
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = 'desc';
-        if ($sort == 'newest') {
-            $sort = 'created_at';
-            $order = 'desc';
-        } elseif ($sort == 'oldest') {
-            $sort = 'created_at';
-            $order = 'asc';
-        } elseif ($sort == 'recently-updated') {
-            $sort = 'updated_at';
-            $order = 'desc';
-        } elseif ($sort == 'earliest-updated') {
-            $sort = 'updated_at';
-            $order = 'asc';
-        }
-        $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
-        if (!empty($statuses)) {
-            $projectsQuery->whereIn('status_id', $statuses); // Apply multiple status filter
-        }
-        if (!empty($selectedTags)) {
-            $projectsQuery->whereHas('tags', function ($q) use ($selectedTags) {
-                $q->whereIn('tags.id', $selectedTags);
-            });
-        }
-        if ($is_favorite) {
-            // Get the IDs of the projects marked as favorites by the user
-            $favoriteProjectIds = $this->user->favoriteProjects()
-                ->pluck('favoritable_id')  // Get the project IDs
-                ->toArray();
-            // Filter projects based on the favorite project IDs
-            $projectsQuery->whereIn('projects.id', $favoriteProjectIds);
-        }
-        $authUser = $this->user;
-        $authUserColumn = $authUser instanceof \App\Models\User ? 'user_id' : 'client_id';
-        $projects = $projectsQuery->leftJoin('pinned', function ($join) use ($authUserColumn, $authUser) {
-            $join->on('pinned.pinnable_id', '=', 'projects.id')
-                ->where('pinned.pinnable_type', '=', Project::class)
-                ->where('pinned.' . $authUserColumn, '=', $authUser->id);
-        })
-            ->select('projects.*', 'pinned.id as pinned_id') // Select the projects and alias pinned.id as pinned_id
-            ->orderByRaw('pinned.id IS NULL ASC') // Pinned projects (0/false) first, non-pinned (1/true) second
-            ->orderBy($sort, $order)->get();
+        $filters = [
+            'statuses' => $request->input('statuses', []),
+            'tags' => $request->input('tags', []),
+            'is_favorite' => $type === 'favorite' ? 1 : 0,
+            'sort' => request('sort', 'id'),
+            'order' => 'desc',
+        ];
+
+        $projectsQuery = $this->projectQueryService->buildIndexQuery($this->workspace, $this->user, $filters);
+        $projects = $projectsQuery->get();
 
         $customFields = CustomField::where('module', 'project')->get();
-        return view('projects.kanban', ['projects' => $projects, 'auth_user' => $this->user, 'selectedTags' => $selectedTags, 'is_favorite' => $is_favorite, 'customFields' => $customFields]);
+        return view('projects.kanban', [
+            'projects' => $projects,
+            'auth_user' => $this->user,
+            'selectedTags' => $filters['tags'],
+            'is_favorite' => $filters['is_favorite'],
+            'customFields' => $customFields
+        ]);
     }
     public function list_view(Request $request, $type = null)
     {
-        $projects = isAdminOrHasAllDataAccess() ? $this->workspace->projects : $this->user->projects;
-        $customFields = CustomField::where('module', 'project')->get();
-        $is_favorites = 0;
-        if ($type === 'favorite') {
-            $is_favorites = 1;
+        $filters = [
+            'is_favorite' => $type === 'favorite' ? 1 : 0,
+        ];
+
+        $projectsQuery = $this->projectQueryService->buildBaseQuery($this->workspace, $this->user);
+
+        if ($filters['is_favorite']) {
+            $projectsQuery = $this->projectQueryService->applyFilters($projectsQuery, $filters, $this->user);
         }
-        return view('projects.projects', ['projects' => $projects, 'is_favorites' => $is_favorites, 'customFields' => $customFields]);
+
+        $projects = $projectsQuery->get();
+        $customFields = CustomField::where('module', 'project')->get();
+
+        return view('projects.projects', [
+            'projects' => $projects,
+            'is_favorites' => $filters['is_favorite'],
+            'customFields' => $customFields
+        ]);
     }
     public function ganttChartView(Request $request, $type = null)
     {
@@ -303,169 +267,51 @@ class ProjectsController extends Controller
      *   "message": "An error occurred while creating the project."
      * }
      */
-    public function store(Request $request)
+    public function store(StoreProjectRequest $request)
     {
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
-            $request->merge(['priority_id' => null]);
-        }
-        // Define validation rules
-        $rules = [
-            'title' => 'required',
-            'status_id' => 'required|exists:statuses,id',
-            'priority_id' => 'nullable|exists:priorities,id',
-            'start_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $endDate = request()->input('end_date');
-                    $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
-                        foreach ($errors['start_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'end_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $startDate = request()->input('start_date');
-                    $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['end_date'])) {
-                        foreach ($errors['end_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'budget' => [
-                'nullable',
-                function ($attribute, $value, $fail) {
-                    $error = validate_currency_format($value, 'budget');
-                    if ($error) {
-                        $fail($error);
-                    }
-                }
-            ],
-            'task_accessibility' => [
-                'required',
-                'string',
-                function ($attribute, $value, $fail) {
-                    if ($value !== 'project_users' && $value !== 'assigned_users') {
-                        $fail('The task accessibility must be either project_users or assigned_users.');
-                    }
-                }
-            ],
-            'description' => 'nullable|string',
-            'note' => 'nullable|string',
-            'user_id' => 'nullable|array',
-            'user_id.*' => 'integer|exists:users,id', // Validate that each user_id exists in the users table
-            'client_id' => 'nullable|array',
-            'client_id.*' => 'integer|exists:clients,id', // Validate that each client_id exists in the clients table
-            'tag_ids' => 'nullable|array',
-            'tag_ids.*' => 'integer|exists:tags,id', // Validate that each tag_id exists in the tags table
-            'enable_tasks_time_entries' => 'boolean',
-        ];
-        // Custom validation messages
-        $messages = [
-            'status_id.required' => 'The status field is required.',
-            'start_date.after_or_equal' => 'The start date must be today or a future date.',
-            'end_date.after_or_equal'   => 'The end date must be today or a future date.',
-        ];
-        // Validate the request
+
         try {
-            $formFields = $request->validate($rules, $messages);
+            $formFields = $request->validated();
             $status = Status::findOrFail($request->input('status_id'));
-            if (canSetStatus($status)) {
-                $start_date = $request->input('start_date');
-                $end_date = $request->input('end_date');
-                if ($start_date) {
-                    $formFields['start_date'] = format_date($start_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-                }
-                if ($end_date) {
-                    $formFields['end_date'] = format_date($end_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-                }
-                $formFields['budget'] = str_replace(',', '', $request->input('budget'));
-                $formFields['workspace_id'] = getWorkspaceId();
-                $formFields['created_by'] = $this->user->id;
-                unset($formFields['user_id']);
-                unset($formFields['client_id']);
-                unset($formFields['tag_ids']);
-                $clientCanDiscuss = isAdminOrHasAllDataAccess() && $request->filled('clientCanDiscuss') && $request->input('clientCanDiscuss') == 'on' ? 1 : 0;
-                $formFields['client_can_discuss'] = $clientCanDiscuss;
-                $new_project = Project::create($formFields);
-                $userIds = $request->input('user_id') ?? [];
-                $clientIds = $request->input('client_id') ?? [];
-                $tagIds = $request->input('tag_ids') ?? [];
-                // Set creator as a participant automatically if !isAdminOrHasAllDataAccess
-                if (!isAdminOrHasAllDataAccess()) {
-                    if (getGuardName() == 'client' && !in_array($this->user->id, $clientIds)) {
-                        array_splice($clientIds, 0, 0, $this->user->id);
-                    } else if (getGuardName() == 'web' && !in_array($this->user->id, $userIds)) {
-                        array_splice($userIds, 0, 0, $this->user->id);
-                    }
-                }
-                $project_id = $new_project->id;
-                $project = Project::find($project_id);
-                $project->users()->attach($userIds);
-                $project->clients()->attach($clientIds);
-                $project->tags()->attach($tagIds);
-                if ($request->has('is_favorite') && $request->input('is_favorite') == 1) {
-                    $this->user->favorites()->create([
-                        'favoritable_type' => Project::class,
-                        'favoritable_id' => $project_id,
-                    ]);
-                }
-                //Status Timeline
-                $project->statusTimelines()->create([
-                    'status' => $status->title,
-                    'new_color' => $status->color,
-                    'previous_status' => '-',
-                    'changed_at' => now(),
-                ]);
 
-                // Store custom field values
-                if ($request->has('custom_fields')) {
-                    foreach ($request->custom_fields as $field_id => $value) {
-                        // Handle checkboxes (arrays)
-                        if (is_array($value)) {
-                            $value = json_encode($value);
-                        }
-
-                        $project->customFieldValues()->create([
-                            'custom_field_id' => $field_id,
-                            'value' => $value
-                        ]);
-                    }
-                }
-
-                $notification_data = [
-                    'type' => 'project',
-                    'type_id' => $project_id,
-                    'type_title' => $project->title,
-                    'access_url' => 'projects/information/' . $project_id,
-                    'action' => 'assigned'
-                ];
-                $recipients = array_merge(
-                    array_map(function ($userId) {
-                        return 'u_' . $userId;
-                    }, $userIds),
-                    array_map(function ($clientId) {
-                        return 'c_' . $clientId;
-                    }, $clientIds)
-                );
-                processNotifications($notification_data, $recipients);
-                return formatApiResponse(
-                    false,
-                    'Project created successfully.',
-                    [
-                        'id' => $new_project->id,
-                        'data' => formatProject($project)
-                    ]
-                );
-            } else {
+            if (!canSetStatus($status)) {
                 return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
+
+            // Extract relationship data
+            $userIds = $request->input('user_id', []);
+            $clientIds = $request->input('client_id', []);
+            $tagIds = $request->input('tag_ids', []);
+            $isFavorite = $request->has('is_favorite') && $request->input('is_favorite') == 1;
+            $customFields = $request->has('custom_fields') ? $request->input('custom_fields') : [];
+
+            // Handle clientCanDiscuss in formFields for service
+            if ($request->filled('clientCanDiscuss')) {
+                $formFields['clientCanDiscuss'] = $request->input('clientCanDiscuss');
+            }
+
+            // Create project using service
+            $project = $this->projectService->createProject(
+                $this->workspace,
+                $this->user,
+                $formFields,
+                $userIds,
+                $clientIds,
+                $tagIds,
+                $isFavorite,
+                $customFields,
+                $isApi
+            );
+
+            return formatApiResponse(
+                false,
+                'Project created successfully.',
+                [
+                    'id' => $project->id,
+                    'data' => formatProject($project)
+                ]
+            );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
@@ -694,205 +540,61 @@ class ProjectsController extends Controller
      *   "message": "An error occurred while updating the project."
      * }
      */
-    public function update(Request $request)
+    public function update(UpdateProjectRequest $request)
     {
-
         $isApi = request()->get('isApi', false);
-        if ($request->input('priority_id') == 0) {
-            $request->merge(['priority_id' => null]);
-        }
-        $rules = [
-            'id' => 'required|exists:projects,id',
-            'title' => 'required',
-            'status_id' => 'required',
-            'priority_id' => 'nullable|exists:priorities,id',
-            'budget' => [
-                'nullable',
-                function ($attribute, $value, $fail) {
-                    $error = validate_currency_format($value, 'budget');
-                    if ($error) {
-                        $fail($error);
-                    }
-                }
-            ],
-            'task_accessibility' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    if ($value !== 'project_users' && $value !== 'assigned_users') {
-                        $fail('The task accessibility must be either project_users or assigned_users.');
-                    }
-                }
-            ],
-            'start_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $endDate = request()->input('end_date');
-                    $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
-                        foreach ($errors['start_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'end_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $startDate = request()->input('start_date');
-                    $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['end_date'])) {
-                        foreach ($errors['end_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'user_id' => 'nullable|array',
-            'user_id.*' => 'exists:users,id', // Validate that each user_id exists in the users table
-            'client_id' => 'nullable|array',
-            'client_id.*' => 'exists:clients,id', // Validate that each client_id exists in the clients table
-            'tag_ids' => 'nullable|array',
-            'tag_ids.*' => 'exists:tags,id', // Validate that each tag_id exists in the tags table
-            'enable_tasks_time_entries' => 'boolean',
-        ];
-        $messages = [
-            'status_id.required' => 'The status field is required.',
-            'start_date.after_or_equal' => 'The start date must be today or a future date.',
-            'end_date.after_or_equal'   => 'The end date must be today or a future date.',
-        ];
-        // Validate the request
+
         try {
-            $request->validate($rules, $messages);
             $id = $request->input('id');
             $project = Project::findOrFail($id);
+
+            // Check status authorization if status is being changed
             $currentStatusId = $project->status_id;
+            $newStatusId = $request->input('status_id');
+            if ($currentStatusId != $newStatusId) {
+                $status = Status::findOrFail($newStatusId);
+                if (!canSetStatus($status)) {
+                    return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
+                }
+            }
+
+            // Prepare update data
             $formFieldsToUpdate = [
                 'title' => $request->input('title'),
-                'status_id' => $request->input('status_id'),
+                'status_id' => $newStatusId,
                 'priority_id' => $request->input('priority_id'),
-                'budget' => str_replace(',', '', $request->input('budget')),
+                'budget' => $request->input('budget'),
                 'task_accessibility' => $request->input('task_accessibility'),
                 'description' => $request->input('description'),
                 'note' => $request->input('note'),
                 'enable_tasks_time_entries' => $request->input('enable_tasks_time_entries', false),
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date'),
             ];
-            // Check if the status has changed
-            if ($currentStatusId != $request->input('status_id')) {
-                $status = Status::findOrFail($request->input('status_id'));
-                if (!canSetStatus($status)) {
-                    return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
-                }
-                // Status Time Storing
-                $oldStatus = Status::findOrFail($currentStatusId);
-                $newStatus = Status::findOrFail($formFieldsToUpdate['status_id']);
-                $project->statusTimelines()->create([
-                    'status' => $newStatus->title,
-                    'new_color' => $newStatus->color,
-                    'previous_status' => $oldStatus->title,
-                    'old_color' => $oldStatus->color,
-                    'changed_at' => now(),
-                ]);
-            }
-            // Handle start_date
-            if ($request->filled('start_date')) {
-                $formFieldsToUpdate['start_date'] = format_date($request->input('start_date'), false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            } else {
-                $formFieldsToUpdate['start_date'] = null;
-            }
-            // Handle end_date
-            if ($request->filled('end_date')) {
-                $formFieldsToUpdate['end_date'] = format_date($request->input('end_date'), false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            } else {
-                $formFieldsToUpdate['end_date'] = null;
-            }
-            $clientCanDiscuss = isAdminOrHasAllDataAccess()
-                ? ($request->input('clientCanDiscuss') == 'on' ? 1 : 0)
-                : $project->client_can_discuss;
-            $formFieldsToUpdate['client_can_discuss'] = $clientCanDiscuss;
-            $userIds = $request->input('user_id') ?? [];
-            $clientIds = $request->input('client_id') ?? [];
-            $tagIds = $request->input('tag_ids') ?? [];
-            // Get current list of users and clients associated with the project
-            $existingUserIds = $project->users->pluck('id')->toArray();
-            $existingClientIds = $project->clients->pluck('id')->toArray();
-            // Update project and its relationships
-            $project->update($formFieldsToUpdate);
-            $project->users()->sync($userIds);
-            $project->clients()->sync($clientIds);
-            $project->tags()->sync($tagIds);
-            // Exclude old users and clients from receiving notification
-            $userIds = array_diff($userIds, $existingUserIds);
-            $clientIds = array_diff($clientIds, $existingClientIds);
 
-            // Update custom field values
-            if ($request->has('custom_fields')) {
-
-                foreach ($request->custom_fields as $field_id => $value) {
-                    // Handle checkboxes (arrays)
-                    if (is_array($value)) {
-                        $value = json_encode($value);
-                    }
-
-                    // Find existing custom field value or create new
-                    $fieldValue = $project->customFieldValues()
-                        ->where('custom_field_id', $field_id)
-                        ->first();
-
-                    if ($fieldValue) {
-                        $fieldValue->update(['value' => $value]);
-                    } else {
-                        $project->customFieldValues()->create([
-                            'custom_field_id' => $field_id,
-                            'value' => $value
-                        ]);
-                    }
-                }
+            // Handle clientCanDiscuss
+            if ($request->filled('clientCanDiscuss')) {
+                $formFieldsToUpdate['clientCanDiscuss'] = $request->input('clientCanDiscuss');
             }
 
-            // Prepare notification data
-            $notificationData = [
-                'type' => 'project',
-                'type_id' => $project->id,
-                'type_title' => $project->title,
-                'access_url' => 'projects/information/' . $project->id,
-                'action' => 'assigned'
-            ];
-            // Determine recipients
-            $recipients = array_merge(
-                array_map(function ($userId) {
-                    return 'u_' . $userId;
-                }, $userIds),
-                array_map(function ($clientId) {
-                    return 'c_' . $clientId;
-                }, $clientIds)
+            // Extract relationship data
+            $userIds = $request->input('user_id', []);
+            $clientIds = $request->input('client_id', []);
+            $tagIds = $request->input('tag_ids', []);
+            $customFields = $request->has('custom_fields') ? $request->input('custom_fields') : [];
+
+            // Update project using service
+            $project = $this->projectService->updateProject(
+                $project,
+                $this->user,
+                $formFieldsToUpdate,
+                $userIds,
+                $clientIds,
+                $tagIds,
+                $customFields,
+                $isApi
             );
-            // Process notifications
-            processNotifications($notificationData, $recipients);
-            if ($currentStatusId != $request->input('status_id')) {
-                $currentStatus = Status::findOrFail($currentStatusId);
-                $newStatus = Status::findOrFail($request->input('status_id'));
-                $notification_data = [
-                    'type' => 'project_status_updation',
-                    'type_id' => $project->id,
-                    'type_title' => $project->title,
-                    'updater_first_name' => $this->user->first_name,
-                    'updater_last_name' => $this->user->last_name,
-                    'old_status' => $currentStatus->title,
-                    'new_status' => $newStatus->title,
-                    'access_url' => 'projects/information/' . $project->id,
-                    'action' => 'status_updated'
-                ];
-                $currentRecipients = array_merge(
-                    array_map(function ($userId) {
-                        return 'u_' . $userId;
-                    }, $existingUserIds),
-                    array_map(function ($clientId) {
-                        return 'c_' . $clientId;
-                    }, $existingClientIds)
-                );
-                processNotifications($notification_data, $currentRecipients);
-            }
-            $project = $project->fresh();
+
             return formatApiResponse(
                 false,
                 'Project updated successfully.',
@@ -944,144 +646,97 @@ class ProjectsController extends Controller
     public function destroy($id)
     {
         $project = Project::find($id);
-        if ($project) {
-            $response = DeletionService::delete(Project::class, $id, 'Project');
-            $data = $response->getData();
-            if ($data->error) {
-                return response()->json(['error' => true, 'message' => $data->message]);
-            }
-            // Get all attachments before deletion
-            $comments = $project->comments()->with('attachments')->get();
-            // Delete all files using public disk
-            $comments->each(function ($comment) {
-                $comment->attachments->each(function ($attachment) {
-                    Storage::disk('public')->delete($attachment->file_path);
-                    $attachment->delete();
-                });
-            });
-            // Delete associated favorites for this project
-            $project->favorites()->delete();
-            // Delete all pinned records associated with this project
-            $project->pinned()->delete();
-            $project->comments()->forceDelete();
-            $project->notificationsForProject()->delete();
-            return $response;
-        } else {
+        if (!$project) {
             return formatApiResponse(
                 true,
                 'Project not found.',
                 []
             );
         }
+
+        // Delete project using DeletionService
+        $response = DeletionService::delete(Project::class, $id, 'Project');
+        $data = $response->getData();
+
+        if ($data->error) {
+            return response()->json(['error' => true, 'message' => $data->message]);
+        }
+
+        // Clean up related data using service
+        $this->projectService->deleteProject($project);
+
+        return $response;
     }
     public function destroy_multiple(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
-            'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:projects,id' // Ensure each ID in 'ids' is an integer and exists in the 'projects' table
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:projects,id'
         ]);
+
         $ids = $validatedData['ids'];
         $deletedProjects = [];
         $deletedProjectTitles = [];
+
         // Perform deletion using validated IDs
         foreach ($ids as $id) {
             $project = Project::find($id);
             if ($project) {
                 $deletedProjectTitles[] = $project->title;
-                $comments = $project->comments()->with('attachments')->get();
-                // Delete all files using public disk
-                $comments->each(function ($comment) {
-                    $comment->attachments->each(function ($attachment) {
-                        Storage::disk('public')->delete($attachment->file_path);
-                        $attachment->delete();
-                    });
-                });
-                // Delete associated favorites for this project
-                $project->favorites()->delete();
-                // Delete all pinned records associated with this project
-                $project->pinned()->delete();
-                $project->comments()->forceDelete();
-                $project->notificationsForProject()->delete();
+
+                // Clean up related data using service
+                $this->projectService->deleteProject($project);
+
+                // Delete project using DeletionService
                 DeletionService::delete(Project::class, $id, 'Project');
                 $deletedProjects[] = $id;
             }
         }
-        return response()->json(['error' => false, 'message' => 'Project(s) deleted successfully.', 'id' => $deletedProjects, 'titles' => $deletedProjectTitles]);
+
+        return response()->json([
+            'error' => false,
+            'message' => 'Project(s) deleted successfully.',
+            'id' => $deletedProjects,
+            'titles' => $deletedProjectTitles
+        ]);
     }
     public function list(Request $request, $id = '', $type = '')
     {
-        $search = request('search');
-        $sort = (request('sort')) ? request('sort') : "id";
-        $order = (request('order')) ? request('order') : "DESC";
-        $status_ids = request('status_ids', []);
-        $priority_ids = request('priority_ids', []);
-        $user_ids = request('user_ids', []);
-        $client_ids = request('client_ids', []);
-        $tag_ids = $request->input('tag_ids', []);
-        $date_between_from = request('project_date_between_from') ?: "";
-        $date_between_to = request('project_date_between_to') ?: "";
-        $start_date_from = (request('project_start_date_from')) ? request('project_start_date_from') : "";
-        $start_date_to = (request('project_start_date_to')) ? request('project_start_date_to') : "";
-        $end_date_from = (request('project_end_date_from')) ? request('project_end_date_from') : "";
-        $end_date_to = (request('project_end_date_to')) ? request('project_end_date_to') : "";
-        $is_favorites = (request('is_favorites')) ? request('is_favorites') : "";
+        // Prepare filters array
+        $filters = [
+            'search' => request('search'),
+            'sort' => request('sort', 'id'),
+            'order' => request('order', 'DESC'),
+            'status_ids' => request('status_ids', []),
+            'priority_ids' => request('priority_ids', []),
+            'user_ids' => request('user_ids', []),
+            'client_ids' => request('client_ids', []),
+            'tag_ids' => $request->input('tag_ids', []),
+            'date_between_from' => request('project_date_between_from') ?: '',
+            'date_between_to' => request('project_date_between_to') ?: '',
+            'start_date_from' => request('project_start_date_from') ?: '',
+            'start_date_to' => request('project_start_date_to') ?: '',
+            'end_date_from' => request('project_end_date_from') ?: '',
+            'end_date_to' => request('project_end_date_to') ?: '',
+            'is_favorites' => request('is_favorites') ?: '',
+            'belongs_to' => null,
+            'belongs_to_id' => null,
+            'limit' => request('limit', 10),
+        ];
+
+        // Parse id parameter if provided
         if ($id) {
-            $id = explode('_', $id);
-            $belongs_to = $id[0];
-            $belongs_to_id = $id[1];
-            $userOrClient = $belongs_to == 'user' ? User::find($belongs_to_id) : Client::find($belongs_to_id);
-            $projects = isAdminOrHasAllDataAccess($belongs_to, $belongs_to_id) ? $this->workspace->projects() : $userOrClient->projects();
-        } else {
-            $projects = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
+            $idParts = explode('_', $id);
+            $filters['belongs_to'] = $idParts[0];
+            $filters['belongs_to_id'] = (int)$idParts[1];
         }
-        if (!empty($user_ids)) {
-            $projects = $projects->whereHas('users', function ($query) use ($user_ids) {
-                $query->whereIn('users.id', $user_ids);
-            });
-        }
-        if (!empty($client_ids)) {
-            $projects = $projects->whereHas('clients', function ($query) use ($client_ids) {
-                $query->whereIn('clients.id', $client_ids);
-            });
-        }
-        if (!empty($status_ids)) {
-            $projects->whereIn('status_id', $status_ids);
-        }
-        if (!empty($priority_ids)) {
-            $projects->whereIn('priority_id', $priority_ids);
-        }
-        if (!empty($tag_ids)) {
-            $projects->whereHas('tags', function ($query) use ($tag_ids) {
-                $query->whereIn('tags.id', $tag_ids);
-            });
-        }
-        if ($date_between_from && $date_between_to) {
-            // Overlap detection: Find projects that overlap with the date range
-            $projects->where(function ($q) use ($date_between_from, $date_between_to) {
-                $q->where('start_date', '<=', $date_between_to)
-                    ->where('end_date', '>=', $date_between_from);
-            });
-        }
-        if ($start_date_from && $start_date_to) {
-            $projects->whereBetween('start_date', [$start_date_from, $start_date_to]);
-        }
-        if ($end_date_from && $end_date_to) {
-            $projects->whereBetween('end_date', [$end_date_from, $end_date_to]);
-        }
-        if ($is_favorites) {
-            // Get the IDs of the projects marked as favorites by the user
-            $favoriteProjectIds = $this->user->favoriteProjects()
-                ->pluck('favoritable_id')  // Get the project IDs
-                ->toArray();
-            // Filter projects based on the favorite project IDs
-            $projects->whereIn('projects.id', $favoriteProjectIds);
-        }
-        $projects->when($search, function ($query) use ($search) {
-            $query->where('title', 'like', '%' . $search . '%')
-                ->orWhere('projects.id', 'like', '%' . $search . '%');
-        });
-        $totalprojects = $projects->count();
+
+        // Build query using service
+        $projectsQuery = $this->projectQueryService->getProjectListQuery($this->workspace, $this->user, $filters);
+        $totalprojects = $projectsQuery->count();
+
+        // Permissions and formatting data
         $canCreate = checkPermission('create_projects');
         $canEdit = checkPermission('edit_projects');
         $canDelete = checkPermission('delete_projects');
@@ -1089,17 +744,9 @@ class ProjectsController extends Controller
         $priorities = Priority::all();
         $isHome = $request->query('from_home') == '1';
         $webGuard = Auth::guard('web')->check();
-        $authUser = $this->user;
-        $authUserColumn = $authUser instanceof \App\Models\User ? 'user_id' : 'client_id';
-        $projects = $projects->leftJoin('pinned', function ($join) use ($authUserColumn, $authUser) {
-            $join->on('pinned.pinnable_id', '=', 'projects.id')
-                ->where('pinned.pinnable_type', '=', Project::class)
-                ->where('pinned.' . $authUserColumn, '=', $authUser->id);
-        })
-            ->select('projects.*', 'pinned.id as pinned_id')  // Select the projects and alias pinned.id as pinned_id
-            ->orderByRaw('pinned.id IS NULL ASC')  // Pinned projects (0/false) first, non-pinned (1/true) second
-            ->orderBy('projects.' . $sort, $order)  // Then order by other parameters (e.g., id or title)
-            ->paginate(request("limit"))
+
+        // Paginate and format (query already has sorting and pinned join applied)
+        $projects = $projectsQuery->paginate($filters['limit'])
             ->through(
                 function ($project) use ($statuses, $priorities, $canEdit, $canDelete, $canCreate, $isHome, $webGuard) {
                     $statusOptions = '';
@@ -1337,71 +984,33 @@ class ProjectsController extends Controller
                 );
             }
         } else {
-            $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
-            // Multi-select filters
-            if (!empty($user_ids)) {
-                $projectsQuery->whereHas('users', function ($query) use ($user_ids) {
-                    $query->whereIn('users.id', $user_ids);
-                });
-            }
-            if (!empty($client_ids)) {
-                $projectsQuery->whereHas('clients', function ($query) use ($client_ids) {
-                    $query->whereIn('clients.id', $client_ids);
-                });
-            }
-            if (!empty($status_ids)) {
-                $projectsQuery->whereIn('status_id', $status_ids);
-            }
-            if (!empty($priority_ids)) {
-                $projectsQuery->whereIn('priority_id', $priority_ids);
-            }
-            if (!empty($tag_ids)) {
-                $projectsQuery->whereHas('tags', function ($query) use ($tag_ids) {
-                    $query->whereIn('tags.id', $tag_ids);
-                });
-            }
-            if ($start_date_from && $start_date_to) {
-                $projectsQuery->whereBetween('start_date', [$start_date_from, $start_date_to]);
-            }
-            if ($end_date_from && $end_date_to) {
-                $projectsQuery->whereBetween('end_date', [$end_date_from, $end_date_to]);
-            }
-            if ($start_date_from) {
-                $projectsQuery->where('start_date', '>=', $start_date_from);
-            }
-            if ($end_date_to) {
-                $projectsQuery->where('end_date', '<=', $end_date_to);
-            }
-            if ($is_favorites) {
-                // Get the IDs of the projects marked as favorites by the user
-                $favoriteProjectIds = $this->user->favoriteProjects()
-                    ->pluck('favoritable_id')  // Get the project IDs
-                    ->toArray();
-                // Filter projects based on the favorite project IDs
-                $projectsQuery->whereIn('projects.id', $favoriteProjectIds);
-            }
-            // Fixed search functionality to respect workspace constraints
-            if ($search) {
-                $projectsQuery->where(function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%')
-                        ->orWhere('projects.description', 'like', '%' . $search . '%')
-                        ->orWhere('projects.id', 'like', '%' . $search . '%');
-                });
-            }
-            $total = $projectsQuery->count(); // get total count before applying offset and limit
-            $authUser = $this->user;
-            $authUserColumn = $authUser instanceof \App\Models\User ? 'user_id' : 'client_id';
-            $projects = $projectsQuery->leftJoin('pinned', function ($join) use ($authUserColumn, $authUser) {
-                $join->on('pinned.pinnable_id', '=', 'projects.id')
-                    ->where('pinned.pinnable_type', '=', Project::class)
-                    ->where('pinned.' . $authUserColumn, '=', $authUser->id);
-            })
-                ->select('projects.*', 'pinned.id as pinned_id')  // Select projects and alias pinned.id as pinned_id
-                ->orderByRaw('pinned.id IS NULL ASC')  // Pinned projects (0/false) first, non-pinned (1/true) second
-                ->orderBy($sort, $order)  // Then order by other parameters (e.g., id or title)
-                ->skip($offset)  // Apply the offset
-                ->take($limit)  // Apply the limit
-                ->get();
+            // Prepare filters array
+            $filters = [
+                'search' => $search,
+                'sort' => $sort,
+                'order' => $order,
+                'status_ids' => $status_ids,
+                'priority_ids' => $priority_ids,
+                'user_ids' => $user_ids,
+                'client_ids' => $client_ids,
+                'tag_ids' => $tag_ids,
+                'start_date_from' => $start_date_from,
+                'start_date_to' => $start_date_to,
+                'end_date_from' => $end_date_from,
+                'end_date_to' => $end_date_to,
+                'is_favorites' => $is_favorites,
+                'limit' => $limit,
+                'offset' => $offset,
+                'search_include_description' => true, // API includes description in search
+            ];
+
+            // Build query using service
+            $projectsQuery = $this->projectQueryService->getProjectApiListQuery($this->workspace, $this->user, $filters);
+            $total = $projectsQuery->count();
+
+            // Apply pagination
+            $projects = $projectsQuery->skip($offset)->take($limit)->get();
+
             if ($projects->isEmpty()) {
                 return formatApiResponse(
                     false,
@@ -1412,9 +1021,11 @@ class ProjectsController extends Controller
                     ]
                 );
             }
+
             $data = $projects->map(function ($project) {
                 return formatProject($project);
             });
+
             return formatApiResponse(
                 false,
                 'Projects retrieved successfully',
@@ -1500,55 +1111,29 @@ class ProjectsController extends Controller
      *   "message": "An error occurred while updating the favorite status."
      * }
      */
-    public function update_favorite(Request $request, $id)
+    public function update_favorite(UpdateFavoriteRequest $request, $id)
     {
         $isApi = request()->get('isApi', false);
         try {
-            // Validate the request data
-            $request->validate([
-                'is_favorite' => 'required|integer|in:0,1',
-            ]);
-            // Get the authenticated user (could be either User or Client)
-            $authUser = getAuthenticatedUser();
-            // Find the project by ID
             $project = Project::find($id);
-            // If the project is not found, return an error response
             if (!$project) {
-                return formatApiResponse(
-                    true,
-                    'Project not found',
-                    []
-                );
+                return formatApiResponse(true, 'Project not found', []);
             }
-            $isFavorite = $request->input('is_favorite');
-            // Check if the project is already favorited by the authenticated user/client
-            $favorite = $authUser->favorites()->where('favoritable_type', Project::class)
-                ->where('favoritable_id', $id)
-                ->first();
-            if ($isFavorite) {
-                // If no existing favorite, create a new one
-                if (!$favorite) {
-                    $authUser->favorites()->create([
-                        'favoritable_type' => Project::class,
-                        'favoritable_id' => $id,
-                    ]);
-                }
-            } else {
-                // If unfavoriting, delete the record
-                if ($favorite) {
-                    $favorite->delete();
-                }
-            }
-            // Return a successful response with the updated project
+
+            $authUser = getAuthenticatedUser();
+            $isFavorite = (bool) $request->input('is_favorite');
+
+            $updatedProject = $this->projectService->updateFavorite($project, $authUser, $isFavorite);
+
             return formatApiResponse(
                 false,
                 'Project favorite status updated successfully',
-                ['data' => formatProject($project)]
+                ['data' => formatProject($updatedProject)]
             );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Favorite update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while updating the project favorite status.'
@@ -1598,61 +1183,29 @@ class ProjectsController extends Controller
      *   "message": "An error occurred while updating the pinned status."
      * }
      */
-    public function update_pinned(Request $request, $id)
+    public function update_pinned(UpdatePinnedRequest $request, $id)
     {
         $isApi = request()->get('isApi', false);
         try {
-            // Validate the request data
-            $request->validate([
-                'is_pinned' => 'required|integer|in:0,1',
-            ]);
-            // Get the authenticated user (could be either User or Client)
-            $authUser = getAuthenticatedUser();
-            // Find the project by ID
             $project = Project::find($id);
-            // If the project is not found, return an error response
             if (!$project) {
-                return formatApiResponse(
-                    true,
-                    'Project not found',
-                    []
-                );
+                return formatApiResponse(true, 'Project not found', []);
             }
-            $isPinned = $request->input('is_pinned');
-            // Check if the project is already pinned by the authenticated user/client
-            $pinned = $authUser->pinnedProjects()
-                ->where('pinnable_id', $id)
-                ->first();
-            if ($isPinned) {
-                // If no existing pinned item, create a new one
-                if (!$pinned) {
-                    $authUser->pinnedProjects()->create([
-                        'pinnable_type' => Project::class,
-                        'pinnable_id' => $id,
-                    ]);
-                    $message = 'Pinned Successfully.'; // Success message for pinning
-                } else {
-                    $message = 'Already pinned.'; // In case it's already pinned
-                }
-            } else {
-                // If unpinning, delete the record
-                if ($pinned) {
-                    $pinned->delete();
-                    $message = 'Unpinned Successfully.'; // Success message for unpinning
-                } else {
-                    $message = 'Already unpinned.'; // In case it's not pinned to begin with
-                }
-            }
-            // Return a successful response with the updated project
+
+            $authUser = getAuthenticatedUser();
+            $isPinned = (bool) $request->input('is_pinned');
+
+            $result = $this->projectService->updatePinned($project, $authUser, $isPinned);
+
             return formatApiResponse(
                 false,
-                $message,
-                ['data' => formatProject($project)]
+                $result['message'],
+                ['data' => formatProject($result['project'])]
             );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Pinned update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'An error occurred while updating the project pinned status.'
@@ -1661,18 +1214,23 @@ class ProjectsController extends Controller
     }
     public function duplicate($id)
     {
-        // Define the related tables for this meeting
-        $relatedTables = ['users', 'clients', 'tasks', 'tags']; // Include related tables as needed
-        // Use the general duplicateRecord function
-        $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : '';
-        $duplicate = duplicateRecord(Project::class, $id, $relatedTables, $title);
-        if (!$duplicate) {
+        try {
+            $title = (request()->has('title') && !empty(trim(request()->title))) ? request()->title : null;
+            $duplicate = $this->projectService->duplicateProject($id, $title);
+
+            if (!$duplicate) {
+                return response()->json(['error' => true, 'message' => 'Project duplication failed.']);
+            }
+
+            if (request()->has('reload') && request()->input('reload') === 'true') {
+                Session::flash('message', 'Project duplicated successfully.');
+            }
+
+            return response()->json(['error' => false, 'message' => 'Project duplicated successfully.', 'id' => $duplicate->id]);
+        } catch (\Exception $e) {
+            Log::error('Project duplication error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json(['error' => true, 'message' => 'Project duplication failed.']);
         }
-        if (request()->has('reload') && request()->input('reload') === 'true') {
-            Session::flash('message', 'Project duplicated successfully.');
-        }
-        return response()->json(['error' => false, 'message' => 'Project duplicated successfully.', 'id' => $id]);
     }
     /**
      * Upload media files to a project.
@@ -1716,7 +1274,6 @@ class ProjectsController extends Controller
      */
     public function upload_media(Request $request)
     {
-
         $isApi = request()->get('isApi', false);
         try {
             $maxFileSizeBytes = config('media-library.max_file_size');
@@ -1725,36 +1282,26 @@ class ProjectsController extends Controller
                 'id' => ['required', 'integer', 'exists:projects,id'],
                 'media_files.*' => "file|max:$maxFileSizeKb"
             ]);
-            $mediaIds = [];
-            if ($request->hasFile('media_files')) {
-                $project = Project::findOrFail($validatedData['id']);
-                $mediaFiles = $request->file('media_files');
-                foreach ($mediaFiles as $mediaFile) {
-                    $mediaItem = $project->addMedia($mediaFile)
-                        ->sanitizingFileName(function ($fileName) {
-                            $sanitizedFileName = strtolower(str_replace(['#', '/', '\\', ' '], '-', $fileName));
-                            $uniqueId = time() . '_' . mt_rand(1000, 9999);
-                            $extension = pathinfo($sanitizedFileName, PATHINFO_EXTENSION);
-                            $baseName = pathinfo($sanitizedFileName, PATHINFO_FILENAME);
-                            return "{$baseName}-{$uniqueId}.{$extension}";
-                        })
-                        ->toMediaCollection('project-media');
-                    $mediaIds[] = $mediaItem->id;
-                }
-                return response()->json([
-                    'error' => false,
-                    'message' => 'File(s) uploaded successfully.',
-                    'id' => $mediaIds,
-                    'type' => 'media',
-                    'parent_type' => 'project',
-                    'parent_id' => $project->id
-                ]);
-            } else {
+
+            if (!$request->hasFile('media_files')) {
                 return response()->json([
                     'error' => true,
                     'message' => 'No file(s) chosen.'
                 ]);
             }
+
+            $project = Project::findOrFail($validatedData['id']);
+            $mediaFiles = $request->file('media_files');
+            $mediaIds = $this->projectMediaService->uploadMedia($project, $mediaFiles);
+
+            return response()->json([
+                'error' => false,
+                'message' => 'File(s) uploaded successfully.',
+                'id' => $mediaIds,
+                'type' => 'media',
+                'parent_type' => 'project',
+                'parent_id' => $project->id
+            ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (ModelNotFoundException $e) {
@@ -1773,57 +1320,15 @@ class ProjectsController extends Controller
     public function get_media($id)
     {
         try {
+            $project = Project::findOrFail($id);
             $search = request('search');
             $sort = request('sort', 'id');
             $order = request('order', 'DESC');
-            $project = Project::findOrFail($id);
-            $media = $project->getMedia('project-media');
-            if ($search) {
-                $media = $media->filter(function ($mediaItem) use ($search) {
-                    return (
-                        stripos($mediaItem->id, $search) !== false ||
-                        stripos($mediaItem->file_name, $search) !== false ||
-                        stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                    );
-                });
-            }
             $canDelete = checkPermission('delete_media');
-            $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
-                $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
-                $fileUrl = $isPublicDisk
-                    ? asset('storage/project-media/' . $mediaItem->file_name)
-                    : $mediaItem->getFullUrl();
-                $fileExtension = pathinfo($fileUrl, PATHINFO_EXTENSION);
-                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-                $isImage = in_array(strtolower($fileExtension), $imageExtensions);
-                if ($isImage) {
-                    $html = '<a href="' . $fileUrl . '" data-lightbox="project-media">';
-                    $html .= '<img src="' . $fileUrl . '" alt="' . $mediaItem->file_name . '" width="50">';
-                    $html .= '</a>';
-                } else {
-                    $html = '<a href="' . $fileUrl . '" title="' . get_label('download', 'Download') . '">' . $mediaItem->file_name . '</a>';
-                }
-                $actions = '<a href="' . $fileUrl . '" title="' . get_label('download', 'Download') . '" download>' .
-                    '<i class="bx bx-download bx-sm"></i>' .
-                    '</a>';
-                if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $mediaItem->id . '" data-type="project-media" data-table="project_media_table">' .
-                        '<i class="bx bx-trash text-danger"></i>' .
-                        '</button>';
-                }
-                return [
-                    'id' => $mediaItem->id,
-                    'file' => $html,
-                    'file_name' => $mediaItem->file_name,
-                    'file_size' => formatSize($mediaItem->size),
-                    'created_at' => format_date($mediaItem->created_at, true),
-                    'updated_at' => format_date($mediaItem->updated_at, true),
-                    'actions' => $actions,
-                ];
-            });
-            $formattedMedia = $order === 'asc'
-                ? $formattedMedia->sortBy($sort)
-                : $formattedMedia->sortByDesc($sort);
+
+            $media = $this->projectMediaService->getMedia($project, $search, $sort, $order);
+            $formattedMedia = $this->projectMediaService->formatMediaForWeb($media, $canDelete);
+
             return response()->json([
                 'error' => false,
                 'message' => 'Media files retrieved successfully.',
@@ -1886,46 +1391,15 @@ class ProjectsController extends Controller
     public function get_media_api($id)
     {
         try {
+            $project = Project::findOrFail($id);
             $search = request('search');
             $sort = request('sort', 'id');
             $order = request('order', 'DESC');
-            $project = Project::findOrFail($id);
-            $media = $project->getMedia('project-media');
-            if ($search) {
-                $media = $media->filter(function ($mediaItem) use ($search) {
-                    return (
-                        stripos($mediaItem->id, $search) !== false ||
-                        stripos($mediaItem->file_name, $search) !== false ||
-                        stripos($mediaItem->created_at->format('Y-m-d'), $search) !== false
-                    );
-                });
-            }
             $canDelete = checkPermission('delete_media');
-            $formattedMedia = $media->map(function ($mediaItem) use ($canDelete) {
-                $isPublicDisk = $mediaItem->disk == 'public' ? 1 : 0;
-                $fileUrl = $isPublicDisk
-                    ? asset('storage/project-media/' . $mediaItem->file_name)
-                    : $mediaItem->getFullUrl();
-                $fileExtension = pathinfo($fileUrl, PATHINFO_EXTENSION);
-                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-                $isImage = in_array(strtolower($fileExtension), $imageExtensions);
-                $previewUrl = $isImage ? $fileUrl : asset('storage/file-icon.png');
 
-                return [
-                    'id' => $mediaItem->id,
-                    'file' => $fileUrl,
-                    'preview' => $previewUrl,
-                    'file_name' => $mediaItem->file_name,
-                    'file_size' => formatSize($mediaItem->size),
-                    'created_at' => format_date($mediaItem->created_at, to_format: 'Y-m-d'),
-                    'updated_at' => format_date($mediaItem->updated_at, to_format: 'Y-m-d'),
-                    'can_delete' => $canDelete,
+            $media = $this->projectMediaService->getMedia($project, $search, $sort, $order);
+            $formattedMedia = $this->projectMediaService->formatMediaForApi($media, $canDelete);
 
-                ];
-            });
-            $formattedMedia = $order === 'asc'
-                ? $formattedMedia->sortBy($sort)
-                : $formattedMedia->sortByDesc($sort);
             return response()->json([
                 'error' => false,
                 'message' => 'Media files retrieved successfully.',
@@ -1979,10 +1453,8 @@ class ProjectsController extends Controller
     {
         try {
             $mediaItem = Media::findOrFail($mediaId);
-            // Delete the file from storage
-            Storage::disk($mediaItem->disk)->delete($mediaItem->getPath());
-            // Delete the media item from the database
-            $mediaItem->delete();
+            $this->projectMediaService->deleteMedia($mediaItem);
+
             return response()->json([
                 'error' => false,
                 'message' => 'File deleted successfully.',
@@ -2004,28 +1476,27 @@ class ProjectsController extends Controller
             ], 500);
         }
     }
-    public function delete_multiple_media(Request $request)
+    public function delete_multiple_media(DeleteMultipleMediaRequest $request)
     {
-        // Validate the incoming request
-        $validatedData = $request->validate([
-            'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:media,id' // Ensure each ID in 'ids' is an integer and exists in the table
-        ]);
-        $ids = $validatedData['ids'];
-        $deletedIds = [];
-        $deletedTitles = [];
-        $parentIds = [];
-        // Perform deletion using validated IDs
-        foreach ($ids as $id) {
-            $media = Media::find($id);
-            if ($media) {
-                $deletedIds[] = $id;
-                $deletedTitles[] = $media->file_name;
-                $parentIds[] = $media->model_id;
-                $media->delete();
-            }
+        try {
+            $result = $this->projectMediaService->deleteMultipleMedia($request->ids);
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Files(s) deleted successfully.',
+                'id' => $result['deleted_ids'],
+                'titles' => $result['deleted_titles'],
+                'parent_id' => $result['parent_ids'],
+                'type' => 'media',
+                'parent_type' => 'project'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Multiple media deletion error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while deleting media files.'
+            ], 500);
         }
-        return response()->json(['error' => false, 'message' => 'Files(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles, 'parent_id' => $parentIds, 'type' => 'media', 'parent_type' => 'project']);
     }
     /**
      * Store a new milestone.
@@ -2068,63 +1539,18 @@ class ProjectsController extends Controller
      *   "message": "Milestone couldn't be created."
      * }
      */
-    public function store_milestone(Request $request)
+    public function store_milestone(StoreMilestoneRequest $request)
     {
         $isApi = request()->get('isApi', false);
-        $rules = [
-            'project_id' => 'required|exists:projects,id',
-            'title' => 'required|string|max:255',
-            'status' => 'required|string|max:255',
-            'start_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $endDate = request()->input('end_date');
-                    $errors = validate_date_format_and_order($value, $endDate, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['start_date'])) {
-                        foreach ($errors['start_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'end_date' => [
-                'nullable',
-                function ($attribute, $value, $fail) use ($isApi) {
-                    $startDate = request()->input('start_date');
-                    $errors = validate_date_format_and_order($startDate, $value, $isApi ? 'Y-m-d' : null);
-                    if (!empty($errors['end_date'])) {
-                        foreach ($errors['end_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'cost' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    $error = validate_currency_format($value, 'cost');
-                    if ($error) {
-                        $fail($error);
-                    }
-                }
-            ],
-            'description' => 'nullable|string',
-        ];
         try {
-            $request->validate($rules);
-            $formFields = $request->only(['project_id', 'title', 'status', 'description']);
-            $start_date = $request->input('start_date');
-            $end_date = $request->input('end_date');
-            if ($start_date) {
-                $formFields['start_date'] = format_date($start_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            }
-            if ($end_date) {
-                $formFields['end_date'] = format_date($end_date, false, $isApi ? 'Y-m-d' : app('php_date_format'), 'Y-m-d');
-            }
-            $formFields['cost'] = str_replace(',', '', $request->cost);
-            $formFields['workspace_id'] = $this->workspace->id;
-            $formFields['created_by'] = isClient() ? 'c_' . $this->user->id : 'u_' . $this->user->id;
-            $milestone = Milestone::create($formFields);
+            $formFields = $request->only(['project_id', 'title', 'status', 'description', 'start_date', 'end_date', 'cost']);
+            $milestone = $this->projectMilestoneService->createMilestone(
+                $this->workspace,
+                $this->user,
+                $formFields,
+                $isApi
+            );
+
             return formatApiResponse(
                 false,
                 'Milestone created successfully.',
@@ -2138,10 +1564,10 @@ class ProjectsController extends Controller
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-
+            Log::error('Milestone creation error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
-                'message' => 'Milestone couldn\'t be created.' . $e->getMessage()
+                'message' => 'Milestone couldn\'t be created.'
             ], 500);
         }
     }
@@ -2149,45 +1575,24 @@ class ProjectsController extends Controller
     {
         try {
             $project = Project::findOrFail($id);
-            $search = request('search');
+            $filters = [
+                'search' => request('search'),
+                'statuses' => request('statuses'),
+                'date_between_from' => request('date_between_from', ''),
+                'date_between_to' => request('date_between_to', ''),
+                'start_date_from' => request('start_date_from', ''),
+                'start_date_to' => request('start_date_to', ''),
+                'end_date_from' => request('end_date_from', ''),
+                'end_date_to' => request('end_date_to', ''),
+            ];
             $sort = request('sort', 'id');
             $order = request('order', 'DESC');
-            $statuses = request('statuses');
-            $date_between_from = request('date_between_from', '');
-            $date_between_to = request('date_between_to', '');
-            $start_date_from = request('start_date_from', '');
-            $start_date_to = request('start_date_to', '');
-            $end_date_from = request('end_date_from', '');
-            $end_date_to = request('end_date_to', '');
-            $milestones = $project->milestones();
-            if ($search) {
-                $milestones->where(function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%')
-                        ->orWhere('id', 'like', '%' . $search . '%')
-                        ->orWhere('cost', 'like', '%' . $search . '%')
-                        ->orWhere('description', 'like', '%' . $search . '%');
-                });
-            }
-            if ($date_between_from && $date_between_to) {
-                // Overlap detection: Find milestones that overlap with the date range
-                $milestones->where(function ($q) use ($date_between_from, $date_between_to) {
-                    $q->where('start_date', '<=', $date_between_to)
-                        ->where('end_date', '>=', $date_between_from);
-                });
-            }
-            if ($start_date_from && $start_date_to) {
-                $milestones->whereBetween('start_date', [$start_date_from, $start_date_to]);
-            }
-            if ($end_date_from && $end_date_to) {
-                $milestones->whereBetween('end_date', [$end_date_from, $end_date_to]);
-            }
-            if ($statuses) {
-                $milestones->whereIn('status', $statuses);
-            }
-            $total = $milestones->count();
+
+            $milestonesQuery = $this->projectMilestoneService->getMilestones($project, $filters);
+            $total = $milestonesQuery->count();
             $canEdit = checkPermission('edit_milestones');
             $canDelete = checkPermission('delete_milestones');
-            $milestones = $milestones->orderBy($sort, $order)
+            $milestones = $milestonesQuery->orderBy($sort, $order)
                 ->paginate(request("limit"))
                 ->through(function ($milestone) use ($canEdit, $canDelete) {
                     $statusBadge = match ($milestone->status) {
@@ -2298,43 +1703,22 @@ class ProjectsController extends Controller
     {
         try {
             $project = Project::findOrFail($id);
-            $search = request('search');
+            $filters = [
+                'search' => request('search'),
+                'statuses' => request('statuses'),
+                'date_between_from' => request('date_between_from', ''),
+                'date_between_to' => request('date_between_to', ''),
+                'start_date_from' => request('start_date_from', ''),
+                'start_date_to' => request('start_date_to', ''),
+                'end_date_from' => request('end_date_from', ''),
+                'end_date_to' => request('end_date_to', ''),
+            ];
             $sort = request('sort', 'id');
             $order = request('order', 'DESC');
-            $statuses = request('statuses');
-            $date_between_from = request('date_between_from', '');
-            $date_between_to = request('date_between_to', '');
-            $start_date_from = request('start_date_from', '');
-            $start_date_to = request('start_date_to', '');
-            $end_date_from = request('end_date_from', '');
-            $end_date_to = request('end_date_to', '');
-            $milestones = $project->milestones();
-            if ($search) {
-                $milestones->where(function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%')
-                        ->orWhere('id', 'like', '%' . $search . '%')
-                        ->orWhere('cost', 'like', '%' . $search . '%')
-                        ->orWhere('description', 'like', '%' . $search . '%');
-                });
-            }
-            if ($date_between_from && $date_between_to) {
-                // Overlap detection: Find milestones that overlap with the date range
-                $milestones->where(function ($q) use ($date_between_from, $date_between_to) {
-                    $q->where('start_date', '<=', $date_between_to)
-                        ->where('end_date', '>=', $date_between_from);
-                });
-            }
-            if ($start_date_from && $start_date_to) {
-                $milestones->whereBetween('start_date', [$start_date_from, $start_date_to]);
-            }
-            if ($end_date_from && $end_date_to) {
-                $milestones->whereBetween('end_date', [$end_date_from, $end_date_to]);
-            }
-            if ($statuses) {
-                $milestones->whereIn('status', $statuses);
-            }
-            $total = $milestones->count();
-            $milestones = $milestones->orderBy($sort, $order)
+
+            $milestonesQuery = $this->projectMilestoneService->getMilestones($project, $filters);
+            $total = $milestonesQuery->count();
+            $milestones = $milestonesQuery->orderBy($sort, $order)
                 ->paginate(request("limit"))
                 ->through(function ($milestone) {
                     $statusBadge = match ($milestone->status) {
@@ -2371,7 +1755,7 @@ class ProjectsController extends Controller
                 "message" => "Project not found."
             ], 404);
         } catch (\Exception $e) {
-            dd($e);
+            Log::error('Milestone API retrieval error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 "error" => true,
                 "message" => "Could not retrieve milestones."
@@ -2622,26 +2006,27 @@ class ProjectsController extends Controller
             ], 500);
         }
     }
-    public function delete_multiple_milestone(Request $request)
+    public function delete_multiple_milestone(DeleteMultipleMilestoneRequest $request)
     {
-        // Validate the incoming request
-        $validatedData = $request->validate([
-            'ids' => 'required|array', // Ensure 'ids' is present and an array
-            'ids.*' => 'integer|exists:milestones,id' // Ensure each ID in 'ids' is an integer and exists in the table
-        ]);
-        $ids = $validatedData['ids'];
-        $deletedIds = [];
-        $deletedTitles = [];
-        $parentIds = [];
-        // Perform deletion using validated IDs
-        foreach ($ids as $id) {
-            $ms = Milestone::findOrFail($id);
-            $deletedIds[] = $id;
-            $deletedTitles[] = $ms->title;
-            $parentIds[] = $ms->project_id;
-            DeletionService::delete(Milestone::class, $id, 'Milestone');
+        try {
+            $result = $this->projectMilestoneService->deleteMultipleMilestones($request->ids);
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Milestone(s) deleted successfully.',
+                'id' => $result['deleted_ids'],
+                'titles' => $result['deleted_titles'],
+                'type' => 'milestone',
+                'parent_type' => 'project',
+                'parent_id' => $result['parent_ids']
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Multiple milestone deletion error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'error' => true,
+                'message' => 'An error occurred while deleting milestones.'
+            ], 500);
         }
-        return response()->json(['error' => false, 'message' => 'Milestone(s) deleted successfully.', 'id' => $deletedIds, 'titles' => $deletedTitles, 'type' => 'milestone', 'parent_type' => 'project', 'parent_id' => $parentIds]);
     }
     /**
      * Update the status of a project.
@@ -2724,86 +2109,46 @@ class ProjectsController extends Controller
      *   "message": "Status couldn't be updated."
      * }
      */
-    public function update_status(Request $request, $id = null)
+    public function update_status(UpdateStatusRequest $request, $id = null)
     {
         $isApi = request()->get('isApi', false);
-        if ($id) {
-            $request->merge(['id' => $id]);
-        }
-        $rules = [
-            'id' => 'required|exists:projects,id',
-            'statusId' => 'required|exists:statuses,id'
-        ];
         try {
-            $request->validate($rules);
-            $id = $request->id;
-            $statusId = $request->statusId;
-            $status = Status::findOrFail($statusId);
-            if (canSetStatus($status)) {
-                $project = Project::findOrFail($id);
-                $oldStatus = $project->status_id;
-                if ($project->status->id != $statusId) {
-                    $currentStatus = $project->status->title;
-                    $project->status_id = $statusId;
-                    $project->note = $request->note;
-                    $oldStatus = Status::findOrFail($oldStatus);
-                    $newStatus = Status::findOrFail($statusId);
-                    $project->statusTimelines()->create([
-                        'status' => $newStatus->title,
-                        'new_color' => $newStatus->color,
-                        'previous_status' => $oldStatus->title,
-                        'old_color' => $oldStatus->color,
-                        'changed_at' => now(),
-                    ]);
-                    if ($project->save()) {
-                        // Reload the project to get updated status information
-                        $project = $project->fresh();
-                        $newStatus = $project->status->title;
-                        $notification_data = [
-                            'type' => 'project_status_updation',
-                            'type_id' => $id,
-                            'type_title' => $project->title,
-                            'updater_first_name' => $this->user->first_name,
-                            'updater_last_name' => $this->user->last_name,
-                            'old_status' => $currentStatus,
-                            'new_status' => $newStatus,
-                            'access_url' => 'projects/information/' . $id,
-                            'action' => 'status_updated'
-                        ];
-                        $userIds = $project->users->pluck('id')->toArray();
-                        $clientIds = $project->clients->pluck('id')->toArray();
-                        $recipients = array_merge(
-                            array_map(function ($userId) {
-                                return 'u_' . $userId;
-                            }, $userIds),
-                            array_map(function ($clientId) {
-                                return 'c_' . $clientId;
-                            }, $clientIds)
-                        );
-                        processNotifications($notification_data, $recipients);
-                        return formatApiResponse(
-                            false,
-                            'Status updated successfully.',
-                            [
-                                'id' => $id,
-                                'type' => 'project',
-                                'activity_message' => trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated project status from ' . trim($currentStatus) . ' to ' . trim($newStatus),
-                                'data' => formatProject($project)
-                            ]
-                        );
-                    } else {
-                        return response()->json(['error' => true, 'message' => 'Status couldn\'t be updated.']);
-                    }
-                } else {
-                    return response()->json(['error' => true, 'message' => 'No status change detected.']);
-                }
-            } else {
+            if ($id) {
+                $request->merge(['id' => $id]);
+            }
+
+            $project = Project::findOrFail($request->id);
+            $status = Status::findOrFail($request->statusId);
+
+            if (!canSetStatus($status)) {
                 return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
             }
+
+            $result = $this->projectService->updateStatus(
+                $project,
+                $this->user,
+                $status,
+                $request->input('note')
+            );
+
+            if ($result['activity_message'] === null) {
+                return response()->json(['error' => true, 'message' => 'No status change detected.']);
+            }
+
+            return formatApiResponse(
+                false,
+                'Status updated successfully.',
+                [
+                    'id' => $project->id,
+                    'type' => 'project',
+                    'activity_message' => $result['activity_message'],
+                    'data' => formatProject($result['project'])
+                ]
+            );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Status update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'Status couldn\'t be updated.'
@@ -2885,52 +2230,37 @@ class ProjectsController extends Controller
      *   "message": "Priority couldn't be updated."
      * }
      */
-    public function update_priority(Request $request, $id = null)
+    public function update_priority(UpdatePriorityRequest $request, $id = null)
     {
         $isApi = request()->get('isApi', false);
-        if ($id) {
-            $request->merge(['id' => $id]);
-        }
-        if ($request->input('priorityId') == 0) {
-            $request->merge(['priorityId' => null]);
-        }
-        $rules = [
-            'id' => 'required|exists:projects,id',
-            'priorityId' => 'nullable|exists:priorities,id'
-        ];
         try {
-            $request->validate($rules);
-            $id = $request->id;
+            if ($id) {
+                $request->merge(['id' => $id]);
+            }
+
+            $project = Project::findOrFail($request->id);
             $priorityId = $request->priorityId;
-            $project = Project::findOrFail($id);
-            if ($project->priority_id != $priorityId) {
-                $currentPriority = $project->priority ? $project->priority->title : '-';
-                $project->priority_id = $priorityId;
-                if ($project->save()) {
-                    // Reload the project to get updated priority information
-                    $project = $project->fresh();
-                    $newPriority = $project->priority ? $project->priority->title : '-';
-                    $message = trim($this->user->first_name) . ' ' . trim($this->user->last_name) . ' updated project priority from ' . trim($currentPriority) . ' to ' . trim($newPriority);
-                    return formatApiResponse(
-                        false,
-                        'Priority updated successfully.',
-                        [
-                            'id' => $id,
-                            'type' => 'project',
-                            'activity_message' => $message,
-                            'data' => formatProject($project)
-                        ]
-                    );
-                } else {
-                    return response()->json(['error' => true, 'message' => 'Priority couldn\'t be updated.']);
-                }
-            } else {
+
+            $result = $this->projectService->updatePriority($project, $this->user, $priorityId);
+
+            if ($result['activity_message'] === null) {
                 return response()->json(['error' => true, 'message' => 'No priority change detected.']);
             }
+
+            return formatApiResponse(
+                false,
+                'Priority updated successfully.',
+                [
+                    'id' => $project->id,
+                    'type' => 'project',
+                    'activity_message' => $result['activity_message'],
+                    'data' => formatProject($result['project'])
+                ]
+            );
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle any unexpected errors
+            Log::error('Priority update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'Priority couldn\'t be updated.'
@@ -2994,62 +2324,45 @@ class ProjectsController extends Controller
      *   "message": "Comment could not be added."
      * }
      */
-    public function comments(Request $request)
+    public function comments(StoreCommentRequest $request)
     {
         $isApi = request()->get('isApi', false);
         try {
-            $maxFileSizeBytes = config('media-library.max_file_size');
-            $maxFileSizeKb = (int) ($maxFileSizeBytes / 1024);
-            $request->validate([
-                'model_type' => 'required|string',
-                'model_id' => 'required|integer',
-                'content' => 'required|string',
-                'parent_id' => 'nullable|integer|exists:comments,id',
-                'attachments.*' => "file|max:$maxFileSizeKb"
-            ], [
-                'content.required' => 'Please enter a comment'
-            ]);
             $fileValidationResponse = FileValidationHelper::validateFileUpload($request, 'attachments');
             if ($fileValidationResponse !== true) {
                 return $fileValidationResponse;
             }
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
-            $comment = Comment::create([
-                'commentable_type' => $request->model_type,
-                'commentable_id' => $request->model_id,
-                'content' => $processedContent,
-                'commenter_id' => $this->user->id,
-                'commenter_type' => get_class($this->user),
-                'parent_id' => $request->parent_id,
-            ]);
-            // Create directory if it does not exist
-            $directoryPath = storage_path('app/public/comment_attachments');
-            if (!is_dir($directoryPath)) {
-                mkdir($directoryPath, 0755, true);
-            }
-            // Save attachments
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $path = str_replace('public/', '', $file->store('public/comment_attachments'));
-                    CommentAttachment::create([
-                        'comment_id' => $comment->id,
-                        'file_name' => $file->getClientOriginalName(),
-                        'file_path' => $path,
-                        'file_type' => $file->getClientMimeType(),
-                    ]);
-                }
-            }
-            sendMentionNotification($comment, $mentionedUserIds, $this->workspace->id, $this->user->id, $mentionedClientIds);
+
+            $attachments = $request->hasFile('attachments') ? $request->file('attachments') : [];
+            $result = $this->projectCommentService->createComment(
+                $request->model_type,
+                $request->model_id,
+                $this->user,
+                $request->content,
+                $request->parent_id,
+                $attachments
+            );
+
+            $comment = $result['comment'];
+            sendMentionNotification(
+                $comment,
+                $result['mentioned_user_ids'],
+                $this->workspace->id,
+                $this->user->id,
+                $result['mentioned_client_ids']
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Comment Added Successfully',
-                'comment' => $comment->load('attachments'),
+                'comment' => $comment,
                 'user' => $comment->commenter,
                 'created_at' => $comment->created_at->diffForHumans()
             ]);
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
+            Log::error('Comment creation error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Comment could not be added.'
@@ -3152,33 +2465,27 @@ class ProjectsController extends Controller
      *   "message": "Comment couldn't be updated."
      * }
      */
-    public function update_comment(Request $request)
+    public function update_comment(UpdateCommentRequest $request)
     {
         $isApi = request()->get('isApi', false);
         try {
-            $request->validate([
-                'comment_id' => ['required', 'integer', 'exists:comments,id'],
-                'content' => ['required', 'string'],
-            ], [
-                'content.required' => 'Please enter a comment'
-            ]);
-            list($processedContent, $mentionedUserIds, $mentionedClientIds) = replaceUserMentionsWithLinks($request->content);
             $comment = Comment::findOrFail($request->comment_id);
-            $comment->content = $processedContent;
-            if ($comment->save()) {
-                sendMentionNotification($comment, $mentionedUserIds, $this->workspace->id, $this->user->id, $mentionedClientIds);
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Comment updated successfully.',
-                    'id' => $comment->id,
-                    'type' => 'project'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be updated.'
-                ]);
-            }
+            $result = $this->projectCommentService->updateComment($comment, $request->content);
+
+            sendMentionNotification(
+                $result['comment'],
+                $result['mentioned_user_ids'],
+                $this->workspace->id,
+                $this->user->id,
+                $result['mentioned_client_ids']
+            );
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Comment updated successfully.',
+                'id' => $result['comment']->id,
+                'type' => 'project'
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "error" => true,
@@ -3187,6 +2494,7 @@ class ProjectsController extends Controller
         } catch (ValidationException $e) {
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
+            Log::error('Comment update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 "error" => true,
                 "message" => "Comment couldn't be updated."
@@ -3237,26 +2545,14 @@ class ProjectsController extends Controller
                 'comment_id' => ['required', 'integer', 'exists:comments,id'],
             ]);
             $comment = Comment::findOrFail($request->comment_id);
-            $attachments = $comment->attachments;
-            // Delete attachments from storage
-            foreach ($attachments as $attachment) {
-                Storage::disk('public')->delete($attachment->file_path);
-                $attachment->delete();
-            }
-            // Permanently delete the comment
-            if ($comment->forceDelete()) {
-                return response()->json([
-                    'error' => false,
-                    'message' => 'Comment deleted successfully.',
-                    'id' => $comment->id,
-                    'type' => 'project'
-                ]);
-            } else {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Comment couldn\'t be deleted.'
-                ]);
-            }
+            $this->projectCommentService->deleteComment($comment);
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Comment deleted successfully.',
+                'id' => $comment->id,
+                'type' => 'project'
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "error" => true,
@@ -3305,12 +2601,9 @@ class ProjectsController extends Controller
      */
     public function destroy_comment_attachment($id)
     {
-
         try {
             $attachment = CommentAttachment::findOrFail($id);
-
-            Storage::disk('public')->delete($attachment->file_path);
-            $attachment->delete();
+            $this->projectCommentService->deleteCommentAttachment($attachment);
 
             return response()->json([
                 'error' => false,
@@ -3322,6 +2615,7 @@ class ProjectsController extends Controller
                 'message' => 'Attachment not found.',
             ], 404);
         } catch (\Exception $e) {
+            Log::error('Comment attachment deletion error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
                 'message' => 'Something went wrong.',
@@ -3702,30 +2996,12 @@ class ProjectsController extends Controller
     public function ganttProjectsTasks(Request $request)
     {
         $favorite = $request->input('favorite');
-        // Fetch projects based on admin/data access with tasks eagerly loaded
-        $query = isAdminOrHasAllDataAccess() ? $this->workspace->projects()->with('tasks') : $this->user->projects()->with('tasks');
-        // Apply favorite filter if necessary
-        if ($favorite) {
-            // Get the IDs of the projects marked as favorites by the user
-            $favoriteProjectIds = $this->user->favoriteProjects()
-                ->pluck('favoritable_id')  // Get the project IDs
-                ->toArray();
-            // Filter projects based on the favorite project IDs
-            $query->whereIn('projects.id', $favoriteProjectIds);
-        }
-        // Get the projects
-        $projects = $query->get();
-        // Filter projects with valid start and end dates
-        $filteredProjects = $projects->filter(function ($project) {
-            return !is_null($project->start_date) && !is_null($project->end_date);
-        });
-        // Filter tasks within each project for valid start and due dates
-        $filteredProjects->each(function ($project) {
-            $project->tasks = $project->tasks->filter(function ($task) {
-                return !is_null($task->start_date) && !is_null($task->due_date);
-            });
-        });
-        return response()->json($filteredProjects->values());
+        $ganttData = $this->projectCalendarService->getGanttData(
+            $this->workspace,
+            $this->user,
+            $favorite
+        );
+        return response()->json($ganttData);
     }
     protected function parseDate($dateString)
     {
@@ -3776,9 +3052,7 @@ class ProjectsController extends Controller
         if ($module['type'] == 'project') {
             $project = Project::find($module['id']);
             if ($project) {
-                $project->start_date = $startDate;
-                $project->end_date = $endDate;
-                $project->save();
+                $this->projectService->updateProjectDates($project, $startDate, $endDate, false);
                 return response()->json(['error' => false, 'message' => 'Project dates updated successfully.']);
             } else {
                 return response()->json(['error' => true, 'message' => 'Project not found.']);
@@ -3898,130 +3172,43 @@ class ProjectsController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
+        $events = $this->projectCalendarService->getCalendarEvents(
+            $this->workspace,
+            $this->user,
+            $start,
+            $end
+        );
 
-        $projectsQuery = isAdminOrHasAllDataAccess() ? $this->workspace->projects() : $this->user->projects();
-
-        // Apply date range filter with grouping
-        // dd($start, $end, $projectsQuery->get());
-        if ($start && $end) {
-            $projectsQuery->where(function ($query) use ($start, $end) {
-                $query->whereBetween('start_date', [$start, $end])
-                    ->orWhereBetween('end_date', [$start, $end]);
-            });
-        }
-        // Retrieve the tasks
-        $projects = $projectsQuery->get();
-
-
-        // Format the tasks for FullCalendar
-        $events = $projects->map(function ($project) {
-            $backgroundColor = '#007bff';
-            // Set the background color based on the task status
-            switch ($project->status->color) {
-                case 'primary':
-                    $backgroundColor = '#9bafff'; // Lighter primary blue
-                    break;
-                case 'success':
-                    $backgroundColor = '#a0e4a3'; // Lighter green
-                    break;
-                case 'danger':
-                    $backgroundColor = '#ff6b5c'; // Lighter red
-                    break;
-                case 'warning':
-                    $backgroundColor = '#ffca66'; // Lighter yellow
-                    break;
-                case 'info':
-                    $backgroundColor = '#6ed4f0'; // Lighter blue
-                    break;
-                case 'secondary':
-                    $backgroundColor = '#aab0b8'; // Lighter grey
-                    break;
-                case 'dark':
-                    $backgroundColor = '#4f5b67'; // Lighter dark grey
-                    break;
-                case 'light':
-                    $backgroundColor = '#ffffff'; // Already light
-                    break;
-                default:
-                    $backgroundColor = '#5ab0ff'; // Lighter default blue
-            }
-            $title = $project->title . ' : ' . format_date($project->start_date);
-            if ($project->end_date != $project->start_date) {
-                $title .= ' ' . get_label('to', 'to') . ' ' . format_date($project->end_date);
-            }
-            return [
-                'id' => $project->id,
-                'project_info_url' => route('projects.info', ['id' => $project->id]),
-                'title' => $title,
-                'start' => $project->start_date,
-                'end' => $project->end_date,
-                'status_id' => $project->status_id,
-                'priority_id' => $project->priority_id,
-                'backgroundColor' => $backgroundColor,
-                'borderColor' => '#ffffff',
-                'textColor' => '#000000',
-            ];
-        });
         return response()->json($events);
     }
-    public function updateProjectDates(Request $request)
+    public function updateProjectDates(UpdateProjectDatesRequest $request)
     {
         $isApi = $request->get('isApi', false);
-        // Validation rules for start and end dates
-        $rules = [
-            'id' => 'required|exists:projects,id',
-            'start_date' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    $endDate = request()->input('end_date');
-                    $errors = validate_date_format_and_order($value, $endDate);
-                    if (!empty($errors['start_date'])) {
-                        foreach ($errors['start_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-            'end_date' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    $startDate = request()->input('start_date');
-                    $errors = validate_date_format_and_order($startDate, $value, endDateKey: 'end_date');
-                    if (!empty($errors['end_date'])) {
-                        foreach ($errors['end_date'] as $error) {
-                            $fail($error);
-                        }
-                    }
-                },
-            ],
-        ];
         try {
-            // Validate the request data
-            $request->validate($rules);
-            // Find the Project to be updated
             $project = Project::findOrFail($request->input('id'));
-            // Update start and due dates
-            $project->start_date = format_date($request->input('start_date'), false, app('php_date_format'), 'Y-m-d');
-            $project->end_date = format_date($request->input('end_date'), false, app('php_date_format'), 'Y-m-d');
-            // Save the updated project
-            $project->save();
+            $updatedProject = $this->projectService->updateProjectDates(
+                $project,
+                $request->input('start_date'),
+                $request->input('end_date'),
+                $isApi
+            );
+
             return formatApiResponse(
                 false,
                 'Updated successfully.',
                 [
-                    'id' => $project->id,
+                    'id' => $updatedProject->id,
                     'type' => 'project',
-                    'data' => formatProject($project)
+                    'data' => formatProject($updatedProject)
                 ]
             );
         } catch (ValidationException $e) {
-            // Handle validation errors
             return formatApiValidationError($isApi, $e->errors());
         } catch (\Exception $e) {
-            // Handle unexpected errors
+            Log::error('Project dates update error in controller: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'error' => true,
-                'message' => 'An error occurred while updating task dates.',
+                'message' => 'An error occurred while updating project dates.',
             ], 500);
         }
     }
@@ -4029,13 +3216,7 @@ class ProjectsController extends Controller
     public function getStatuses()
     {
         try {
-            $statuses = Status::select('id', 'title', 'color')->get()->map(function ($status) {
-                return [
-                    'id' => $status->id,
-                    'title' => $status->title ?? $status->name ?? 'Untitled',
-                    'color' => $status->color ?? '#6c757d',
-                ];
-            });
+            $statuses = $this->projectMetaService->getStatuses();
             return response()->json([
                 'error' => false,
                 'statuses' => $statuses,
@@ -4053,13 +3234,7 @@ class ProjectsController extends Controller
     public function getPriorities()
     {
         try {
-            $priorities = Priority::select('id', 'title', 'color')->get()->map(function ($priority) {
-                return [
-                    'id' => $priority->id,
-                    'title' => $priority->title ?? $priority->name ?? 'Untitled',
-                    'color' => $priority->color ?? '#6c757d',
-                ];
-            });
+            $priorities = $this->projectMetaService->getPriorities();
             return response()->json([
                 'error' => false,
                 'priorities' => $priorities,

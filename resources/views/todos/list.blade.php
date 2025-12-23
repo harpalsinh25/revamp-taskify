@@ -98,7 +98,7 @@
                                     </div>
                                 @endforeach
                             @else
-                                <div class="text-muted py-3 text-center">No incomplete todos</div>
+                                <div class="text-muted py-3 text-center">{{ get_label('no_incomplete_todos', 'No incomplete todos') }}</div>
                             @endif
                             <div class="todo-add-wrapper mt-3">
                                 <div class="todo-add-item d-flex align-items-center border-light bg-light hover-shadow-sm rounded border border-2 p-2"
@@ -177,7 +177,7 @@
                                     </div>
                                 @endforeach
                             @else
-                                <div class="text-muted py-3 text-center">No completed todos</div>
+                                <div class="text-muted py-3 text-center">{{ get_label('no_completed_todos', 'No completed todos') }}</div>
                             @endif
                             <div class="todo-add-wrapper mt-3">
                                 <div class="todo-add-item d-flex align-items-center border-light bg-light hover-shadow-sm rounded border border-2 p-2"

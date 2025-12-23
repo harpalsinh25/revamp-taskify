@@ -157,6 +157,24 @@
     var dashboardDataEndpoint = "{{ url('/dashboard/data') }}"; // Hardcoded for now, use route if dynamic
     var invoicesReportEndpoint = "{{ url('/reports/invoices-report-data') }}"; // Hardcoded for now
     var usersListEndpoint = "{{ url('/users/list') }}"; // Hardcoded for now
+
+    // Initialize APP_LABELS for pure JS files
+    window.APP_LABELS = window.APP_LABELS || {};
+    APP_LABELS['override_required'] = "{{ get_label('override_required', 'Override Required!') }}";
+    APP_LABELS['failed_sending_message_try_again'] = "{{ get_label('failed_sending_message_try_again', 'Failed sending the message! Please, try again.') }}";
+    APP_LABELS['error_messages_cannot_be_deleted'] = "{{ get_label('error_messages_cannot_be_deleted', 'Error occurred, messages can not be deleted!') }}";
+    APP_LABELS['file_type_not_allowed'] = "{{ get_label('file_type_not_allowed', 'File type not allowed') }}";
+    APP_LABELS['file_is_too_large'] = "{{ get_label('file_is_too_large', 'File is too large!') }}";
+    APP_LABELS['candidate_data_is_missing'] = "{{ get_label('candidate_data_is_missing', 'Candidate data is missing.') }}";
+    APP_LABELS['failed_to_load_candidate_profile'] = "{{ get_label('failed_to_load_candidate_profile', 'Failed to load candidate profile.') }}";
+    APP_LABELS['no_leave_data_available_yet'] = "{{ get_label('no_leave_data_available_yet', 'No leave data available yet.') }}";
+    APP_LABELS['na_text'] = "{{ get_label('na_text', 'N/A') }}";
+    APP_LABELS['post_publishing_details'] = "{{ get_label('post_publishing_details', 'Post Publishing Details') }}";
+    APP_LABELS['this_field_is_required'] = "{{ get_label('this_field_is_required', 'This field is required.') }}";
+    APP_LABELS['error_prefix'] = "{{ get_label('error_prefix', 'Error: ') }}";
+    APP_LABELS['edit_field'] = "{{ get_label('edit_field', 'Edit Field') }}";
+    APP_LABELS['add_field'] = "{{ get_label('add_field', 'Add Field') }}";
+    APP_LABELS['add_candidate_status'] = "{{ get_label('add_candidate_status', 'Add Candidate Status') }}";
 </script>
 <script>
     function addDebouncedEventListener(selector, event, handler, delay = 300) {

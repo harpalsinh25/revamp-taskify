@@ -762,7 +762,7 @@ function showOverrideConfirmationModal(overrideData, form, formData) {
     var modalElement = document.getElementById('overrideConfirmationModal');
     if (!modalElement) {
         console.error('[showOverrideConfirmationModal] Modal element #overrideConfirmationModal not found!');
-        alert('Override Required!\n\n' +
+        alert((APP_LABELS && APP_LABELS['override_required'] ? APP_LABELS['override_required'] : 'Override Required!') + '\n\n' +
             'Available Balance: ' + (overrideData?.available_balance || 0) + '\n' +
             'Excess Paid Leave: ' + (overrideData?.excess_paid_leave || 0) + '\n' +
             'Delta Paid Leave: ' + (overrideData?.delta_paid_leave || 0) + '\n\n' +

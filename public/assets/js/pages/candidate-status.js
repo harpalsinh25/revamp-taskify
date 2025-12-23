@@ -1,6 +1,6 @@
 $(document).on('click', '#createStatusModal', function () {
     $('#candidateStatusModal').modal('show');
-    $('#candidateStatusModalLabel').text('Add Candidate Status');
+    $('#candidateStatusModalLabel').text(APP_LABELS && APP_LABELS['add_candidate_status'] ? APP_LABELS['add_candidate_status'] : 'Add Candidate Status');
     // $('#createStatusForm')[0].reset(); // use correct ID here
     $('#candidate_status_id').val('');
 });
