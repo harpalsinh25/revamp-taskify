@@ -21,14 +21,20 @@ $(document).on('click', '.edit-candidate-status-btn', function () {
     const candidateStatus = $(this).data('candidate-status');
     const actionUrl = `/candidate_status/update/${candidateStatus.id}`;
     const color = candidateStatus.color; // e.g., "success", "danger", etc.
+<<<<<<< HEAD
 
     console.log('Editing Candidate Status:', candidateStatus);
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#status_color')
         .removeClass('select-bg-label-primary select-bg-label-secondary select-bg-label-success select-bg-label-danger select-bg-label-warning select-bg-label-info select-bg-label-dark')
         .addClass(`select-bg-label-${color}`);
 
+<<<<<<< HEAD
     $('#status_color').val(color);
 
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#editStatusForm').attr('action', actionUrl)
     $('#editStatusId').val(candidateStatus.id);
 

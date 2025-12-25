@@ -143,6 +143,7 @@
 
     <div class="card">
         <div class="card-body">
+<<<<<<< HEAD
             <!-- Filters Row: Dates -->
             <div class="row">
                 <!-- Date Range Filter -->
@@ -162,6 +163,11 @@
             </div>
             <!-- Filters Row: Users/Statuses + Actions -->
             <div class="row">
+=======
+            <!-- Filters Row: Dates and Actions -->
+            <div class="row">
+                <x-advanced-date-filters prefix="report" />
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                 <!-- User Filter -->
                 <div class="col-12 col-md-4 mb-3">
                     <select class="form-control users_select" id="user_filter" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
@@ -176,13 +182,18 @@
                     </select>
                 </div>
                 <!-- Actions (aligned right) -->
+<<<<<<< HEAD
                 <div class="col-12 col-md-4 mb-3 d-flex align-items-end justify-content-md-end gap-2 flex-wrap">
+=======
+                <div class="col-12 col-md-4 mb-3 d-flex align-items-end justify-content-md-end gap-2 flex-wrap text-md-end">
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                     <button class="btn btn-info" id="view_charts_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('view_charts', 'View Charts') }}">
                         <i class="bx bx-bar-chart"></i> {{ get_label('view_charts', 'View Charts') }}
                     </button>
                     <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_leaves_report', 'Export Leaves Report') }}">
                         <i class="bx bx-export"></i>
                     </button>
+<<<<<<< HEAD
                 </div>
             </div>
             <input type="hidden" id="filter_date_range_from">
@@ -191,6 +202,13 @@
             <input type="hidden" id="filter_start_date_to">
             <input type="hidden" id="filter_end_date_from">
             <input type="hidden" id="filter_end_date_to">
+=======
+                    <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i>
+                    </button>
+                </div>
+            </div>
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             <!-- Additional Filters Row removed: actions moved into the grid above for alignment -->
             @php
             $visibleColumns = getUserPreferences('leaves_report');
@@ -230,6 +248,7 @@
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 <script>
     var leaves_report_export_url = "{{ route('reports.export-leaves-report') }}";
 </script>
@@ -275,6 +294,8 @@
         }, 500);
     });
 </script>
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 
 <!-- Charts Modal -->
 <div class="modal fade" id="chartsModal" tabindex="-1" aria-labelledby="chartsModalLabel" aria-hidden="true">
@@ -464,6 +485,13 @@
     </div>
 </div>
 
+<<<<<<< HEAD
+=======
+<script>
+    var leaves_report_export_url = "{{ route('reports.export-leaves-report') }}";
+</script>
+<script src="{{ asset('assets/js/pages/leaves-report.js') }}?v={{ time() }}"></script>
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 @endsection
 
 @push('page_scripts')

@@ -117,6 +117,7 @@ $(document).on('click', '.delete_contract_sign', function (e) {
         });
     });
 });
+<<<<<<< HEAD
 // Initialize advanced date range filters with presets
 $(document).ready(function () {
     // Initialize date range filters with preset ranges
@@ -141,6 +142,8 @@ $(document).ready(function () {
         tableId: 'contracts_table'
     });
 });
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 addDebouncedEventListener('#status_filter, #client_filter, #project_filter, #type_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {

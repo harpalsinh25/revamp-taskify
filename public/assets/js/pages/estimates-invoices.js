@@ -6,12 +6,21 @@ function queryParams(p) {
         "client_ids": $('#client_filter').val(),
         "created_by_user_ids": $('#user_creators_filter').val(),
         "created_by_client_ids": $('#client_creators_filter').val(),
+<<<<<<< HEAD
         "date_between_from": $('#date_between_from').val(),
         "date_between_to": $('#date_between_to').val(),
         "start_date_from": $('#start_date_from').val(),
         "start_date_to": $('#start_date_to').val(),
         "end_date_from": $('#end_date_from').val(),
         "end_date_to": $('#end_date_to').val(),
+=======
+        "date_between_from": $('#ie_date_between_from').val(),
+        "date_between_to": $('#ie_date_between_to').val(),
+        "start_date_from": $('#ie_start_date_between_from').val(),
+        "start_date_to": $('#ie_start_date_between_to').val(),
+        "end_date_from": $('#ie_end_date_between_from').val(),
+        "end_date_to": $('#ie_end_date_between_to').val(),
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -29,6 +38,7 @@ addDebouncedEventListener('#type_filter, #client_filter, #created_by_filter, #fi
 $(document).on('click', '.clear-estimates-invoices-filters', function (e) {
     e.preventDefault();
     $('#ie_date_between').val('');
+<<<<<<< HEAD
     $('#date_between_from').val('');
     $('#date_between_to').val('');
     $('#start_date_from').val('');
@@ -37,12 +47,23 @@ $(document).on('click', '.clear-estimates-invoices-filters', function (e) {
     $('#end_date_to').val('');
     $('#start_date_between').val('');
     $('#end_date_between').val('');
+=======
+    $('#ie_date_between_from').val('');
+    $('#ie_date_between_to').val('');
+    $('#ie_start_date_between').val('');
+    $('#ie_start_date_between_from').val('');
+    $('#ie_start_date_between_to').val('');
+    $('#ie_end_date_between').val('');
+    $('#ie_end_date_between_from').val('');
+    $('#ie_end_date_between_to').val('');
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#client_filter').val('').trigger('change', [0]);
     $('#user_creators_filter').val('').trigger('change', [0]);
     $('#client_creators_filter').val('').trigger('change', [0]);
     $('#type_filter').val('').trigger('change', [0]);
     $('#table').bootstrapTable('refresh');
 })
+<<<<<<< HEAD
 // Initialize advanced date range filters with presets
 $(document).ready(function () {
     // Initialize date range filters with preset ranges
@@ -67,6 +88,8 @@ $(document).ready(function () {
         tableId: 'table'
     });
 });
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 window.icons = {
     refresh: 'bx-refresh',
     toggleOn: 'bx-toggle-right',
@@ -525,6 +548,7 @@ $(document).ready(function () {
                 selector: '#ie_date_between',
                 type: 'daterangepicker',
                 name: 'ie_date_between',
+<<<<<<< HEAD
                 hiddenFrom: '#date_between_from',
                 hiddenTo: '#date_between_to'
             },
@@ -541,6 +565,24 @@ $(document).ready(function () {
                 name: 'end_date_between',
                 hiddenFrom: '#end_date_from',
                 hiddenTo: '#end_date_to'
+=======
+                hiddenFrom: '#ie_date_between_from',
+                hiddenTo: '#ie_date_between_to'
+            },
+            {
+                selector: '#ie_start_date_between',
+                type: 'daterangepicker',
+                name: 'ie_start_date_between',
+                hiddenFrom: '#ie_start_date_between_from',
+                hiddenTo: '#ie_start_date_between_to'
+            },
+            {
+                selector: '#ie_end_date_between',
+                type: 'daterangepicker',
+                name: 'ie_end_date_between',
+                hiddenFrom: '#ie_end_date_between_from',
+                hiddenTo: '#ie_end_date_between_to'
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             },
             {
                 selector: '#user_creators_filter',

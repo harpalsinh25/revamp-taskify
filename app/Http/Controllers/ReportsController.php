@@ -294,7 +294,6 @@ class ReportsController extends Controller
                 '</ul>';
 
 
-
             return [
                 'id' => $project->id,
                 'title' => $canManageProjects
@@ -602,7 +601,6 @@ class ReportsController extends Controller
                 })->implode('') .
                 '</ul>';
 
-
             // Format users' HTML
             $userHtml = $task->users->isEmpty()
                 ? '-'
@@ -624,7 +622,6 @@ class ReportsController extends Controller
                 </li>";
                 })->implode('') .
                 '</ul>';
-
 
 
             return [
@@ -1524,7 +1521,6 @@ class ReportsController extends Controller
             ->get();
         // Transform invoice data into the desired report format
         $report = $invoices->map(function ($invoice) {
-
             // Determine the prefix based on the invoice type
             $prefix = $invoice->type == 'invoice' ? get_label('invoice_id_prefix', 'INVC-') : ($invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : '');
 

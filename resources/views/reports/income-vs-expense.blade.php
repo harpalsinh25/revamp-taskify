@@ -51,6 +51,7 @@
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
         <input type="hidden" id="filter_date_range_from">
         <input type="hidden" id="filter_date_range_to">
         <!-- Filters -->
@@ -62,6 +63,18 @@
                 <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_income_expense_report', 'Export Income vs Expense Report') }}">
                 <i class="bx bx-export"></i>
             </button>
+=======
+        <!-- Filters -->
+        <div class="row mb-3">
+            <x-advanced-date-filters prefix="report" :filters="['date_between']" colClass="col-md-6" />
+            <div class="col-md-6 d-flex align-items-center justify-content-md-end mb-md-0 mb-2 gap-2">
+                <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_income_expense_report', 'Export Income vs Expense Report') }}">
+                <i class="bx bx-export"></i>
+                </button>
+                <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                    <i class="bx bx-refresh"></i>
+                </button>
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             </div>
         </div>
         <!-- Invoices Table -->

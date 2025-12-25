@@ -814,7 +814,6 @@ class ProjectsController extends Controller
                     }
                     $isFavorite = getFavoriteStatus($project->id);
                 $isPinned = !is_null($project->pinned_id) ? 1 : 0; // Use pinned_id from the query
-
                 return [
                         'id' => $project->id,
                     'title' => "<a href='" . url("/projects/information/{$project->id}") . "' target='_blank'><strong>{$project->title}</strong></a>

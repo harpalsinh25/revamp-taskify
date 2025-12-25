@@ -1,0 +1,9 @@
+{
+    "name": "Taskify - Letter Plugin",
+    "slug": "letter",
+    "description": "Streamlined HR Letter Generation & Management.",
+    "version": "1.0.0",
+    "enabled": true,
+    "provider": "Plugins\\Letter\\Providers\\LetterServiceProvider",
+    "publish_tag": "letter-assets"
+}

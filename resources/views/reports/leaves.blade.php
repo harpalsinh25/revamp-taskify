@@ -64,6 +64,7 @@
         <div class="card-body">
             <!-- Filters Row -->
             <div class="row">
+<<<<<<< HEAD
                 <!-- Date Range Filter -->
                 <div class="col-md-4 mb-3">
                     <input type="text" id="filter_date_range" class="form-control" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
@@ -78,6 +79,9 @@
                         <input type="text" id="report_end_date_between" class="form-control" placeholder="<?= get_label('to_date_between', 'To date between') ?>" autocomplete="off">
                     </div>
                 </div>
+=======
+                <x-advanced-date-filters prefix="report" :filters="['date_between', 'start_date_between', 'end_date_between']" />
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                 <!-- User Filter -->
                 <div class="col-md-4 mb-3">
                     <select class="form-control users_select" id="user_filter" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
@@ -93,6 +97,7 @@
                     </select>
                 </div>
             </div>
+<<<<<<< HEAD
             <input type="hidden" id="filter_date_range_from">
             <input type="hidden" id="filter_date_range_to">
             <input type="hidden" id="filter_start_date_from">
@@ -106,6 +111,17 @@
                     <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_leaves_report', 'Export Leaves Report') }}">
                         <i class="bx bx-export"></i>
                     </button>
+=======
+            <div class="row mb-2">
+                <!-- Export Button -->
+                <div class="col-md-12 col-lg-12 d-flex align-items-center justify-content-md-end mb-md-0 mb-2 gap-2">
+                    <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_leaves_report', 'Export Leaves Report') }}">
+                        <i class="bx bx-export"></i>
+                    </button>
+                    <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i>
+                    </button>
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                 </div>
             </div>
             <!-- Table -->
@@ -138,4 +154,8 @@
     var leaves_report_export_url = "{{ route('reports.export-leaves-report') }}";
 </script>
 <script src="{{ asset('assets/js/pages/leaves-report.js') }}"></script>
+<<<<<<< HEAD
 @endsection
+=======
+@endsection
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e

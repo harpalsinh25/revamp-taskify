@@ -26,6 +26,7 @@ $(document).ready(function () {
         $exportButton.attr('disabled', false);
         window.open(exportUrl, '_blank');
     });
+<<<<<<< HEAD
     // Initialize advanced date range filters with preset ranges
     initAdvancedDateRangePicker({
         selector: '#filter_date_range',
@@ -47,17 +48,28 @@ $(document).ready(function () {
         hiddenTo: '#filter_end_date_to',
         tableId: 'leaves_report_table'
     });
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 });
 function leaves_report_query_params(p) {
     return {
         user_ids: $('#user_filter').val(),
         statuses: $('#status_filter').val(),
+<<<<<<< HEAD
         date_between_from: $('#filter_date_range_from').val(),
         date_between_to: $('#filter_date_range_to').val(),
         start_date_from: $('#filter_start_date_from').val(),
         start_date_to: $('#filter_start_date_to').val(),
         end_date_from: $('#filter_end_date_from').val(),
         end_date_to: $('#filter_end_date_to').val(),
+=======
+        date_between_from: $('#report_date_between_from').val(),
+        date_between_to: $('#report_date_between_to').val(),
+        start_date_from: $('#report_start_date_from').val(),
+        start_date_to: $('#report_start_date_to').val(),
+        end_date_from: $('#report_end_date_from').val(),
+        end_date_to: $('#report_end_date_to').val(),
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -76,6 +88,7 @@ addDebouncedEventListener('#user_filter, #status_filter', 'change', function (e,
 
 $(document).on('click', '.clear-report-filters', function (e) {
     e.preventDefault();
+<<<<<<< HEAD
     $('#filter_date_range').val('');
     $('#filter_date_range_from').val('');
     $('#filter_date_range_to').val('');
@@ -85,6 +98,17 @@ $(document).on('click', '.clear-report-filters', function (e) {
     $('#report_end_date_between').val('');
     $('#filter_end_date_from').val('');
     $('#filter_end_date_to').val('');
+=======
+    $('#report_date_between').val('');
+    $('#report_date_between_from').val('');
+    $('#report_date_between_to').val('');
+    $('#report_start_date_between').val('');
+    $('#report_start_date_from').val('');
+    $('#report_start_date_to').val('');
+    $('#report_end_date_between').val('');
+    $('#report_end_date_from').val('');
+    $('#report_end_date_to').val('');
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#user_filter').val('').trigger('change', [0]);
     $('#status_filter').val('').trigger('change', [0]);
     $('#leaves_report_table').bootstrapTable('refresh');

@@ -2859,7 +2859,7 @@ if (!function_exists('formatLeaveRequest')) {
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
                         'email' => $user->email,
-                        'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')
+                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')
                     ];
                 });
         }
@@ -4112,8 +4112,6 @@ if (!function_exists('formatClientHtml')) {
         // If the user has 'manage_clients' permission, return the full HTML with links
         $profileLink = route('clients.profile', ['id' => $client->id]);
         $photoUrl = $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg');
-
-        // dd($client->photo);
         // Create the Send Mail link
         $sendMailLink = 'mailto:' . $client->email;
         $sendMailIcon = '<a href="' . $sendMailLink . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '">

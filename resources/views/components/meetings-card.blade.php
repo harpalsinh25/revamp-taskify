@@ -8,6 +8,7 @@ $user = getAuthenticatedUser();
     <div class="card-body">
         {{$slot}}
         <div class="row">
+<<<<<<< HEAD
             <div class="col-md-4 mb-3">
                 <div class="input-group input-group-merge">
                     <input type="text" class="form-control" id="meeting_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
@@ -23,6 +24,9 @@ $user = getAuthenticatedUser();
                     <input type="text" id="meeting_end_date_between" class="form-control" placeholder="<?= get_label('end_date_between', 'End date between') ?>" autocomplete="off">
                 </div>
             </div>
+=======
+            <x-advanced-date-filters prefix="meeting" />
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             @if(isAdminOrHasAllDataAccess())
             <div class="col-md-4 mb-3">
                 <select class="form-select users_select" id="meeting_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
@@ -41,12 +45,15 @@ $user = getAuthenticatedUser();
                 </select>
             </div>
         </div>
+<<<<<<< HEAD
         <input type="hidden" id="meeting_date_between_from">
         <input type="hidden" id="meeting_date_between_to">
         <input type="hidden" id="meeting_start_date_from">
         <input type="hidden" id="meeting_start_date_to">
         <input type="hidden" id="meeting_end_date_from">
         <input type="hidden" id="meeting_end_date_to">
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         <div class="table-responsive text-nowrap">
             <input type="hidden" id="data_type" value="meetings">
             <input type="hidden" id="data_table" value="meetings_table">
@@ -76,4 +83,8 @@ $user = getAuthenticatedUser();
 <?php
 $type = 'Meetings'; ?>
 <x-empty-state-card :type="$type" />
+<<<<<<< HEAD
 @endif
+=======
+@endif
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e

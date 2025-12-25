@@ -19,6 +19,7 @@
 @endif
 {{ $slot }}
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
+<<<<<<< HEAD
     <div class="row">
         <div class="col-md-4 mb-3">
             <div class="input-group input-group-merge">
@@ -76,6 +77,42 @@
     <input type="hidden" name="task_start_date_to" id="task_start_date_to">
     <input type="hidden" name="task_end_date_from" id="task_end_date_from">
     <input type="hidden" name="task_end_date_to" id="task_end_date_to">
+=======
+        <div class="row">
+            <x-advanced-date-filters prefix="task" />
+            @if (getAuthenticatedUser()->can('manage_projects'))
+                <div class="col-md-4 mb-3">
+                    <select class="form-control projects_select" id="task_project_filter" multiple="multiple"
+                        data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
+                    </select>
+                </div>
+            @endif
+            @if (isAdminOrHasAllDataAccess() && !isset($viewAssigned))
+                @if (explode('_', $id)[0] != 'client' && explode('_', $id)[0] != 'user')
+                    <div class="col-md-4 mb-3">
+                        <select class="form-control users_select" id="task_user_filter" name="user_ids[]"
+                            multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <select class="form-control clients_select" id="task_client_filter" name="client_ids[]"
+                            multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">>
+                        </select>
+                    </div>
+                @endif
+            @endif
+            <div class="col-md-4 mb-3">
+                <select class="form-control statuses_filter" id="task_status_filter" name="status_ids[]" multiple="multiple"
+                    data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <select class="form-control priorities_filter" id="task_priority_filter" name="priority_ids[]"
+                    multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                </select>
+            </div>
+        </div>
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     <input type="hidden" id="is_favorites" value="{{ $favorites ?? '' }}">
     <div class="table-responsive text-nowrap">
         <input type="hidden" id="data_type" value="tasks">

@@ -11,6 +11,7 @@ $auth_user = getAuthenticatedUser();
         {{$slot}}
         @if ((isset($projects) && is_countable($projects) && count($projects) > 0) || (isset($viewAssigned) && $viewAssigned == 1))
         <div class="row">
+<<<<<<< HEAD
             <div class="col-md-4 mb-3">
                 <div class="input-group input-group-merge">
                     <input type="text" class="form-control" id="project_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
@@ -26,6 +27,9 @@ $auth_user = getAuthenticatedUser();
                     <input type="text" id="project_end_date_between" name="project_end_date_between" class="form-control" placeholder="<?= get_label('end_date_between', 'End date between') ?>" autocomplete="off">
                 </div>
             </div>
+=======
+            <x-advanced-date-filters prefix="project" />
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             @if(isAdminOrHasAllDataAccess() && !isset($viewAssigned))
             @if(!isset($id) || (explode('_',$id)[0] !='client' && explode('_',$id)[0] !='user'))
             <div class="col-md-4 mb-3">
@@ -66,12 +70,15 @@ $auth_user = getAuthenticatedUser();
                 </select>
             </div>
         </div>
+<<<<<<< HEAD
         <input type="hidden" id="project_date_between_from">
         <input type="hidden" id="project_date_between_to">
         <input type="hidden" name="project_start_date_from" id="project_start_date_from">
         <input type="hidden" name="project_start_date_to" id="project_start_date_to">
         <input type="hidden" name="project_end_date_from" id="project_end_date_from">
         <input type="hidden" name="project_end_date_to" id="project_end_date_to">
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 
         <input type="hidden" id="is_favorites" value="{{$favorites??''}}">
         <div class="table-responsive text-nowrap">

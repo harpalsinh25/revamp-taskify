@@ -29,7 +29,11 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4 mb-3">
+<<<<<<< HEAD
                     <input class="form-control" placeholder="Select date" type="month" id="filter_payslip_month" name="month">
+=======
+                    <input class="form-control" type="month" id="filter_payslip_month" name="month">
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                 </div>
                 @if(isAdminOrHasAllDataAccess())
                 <div class="col-md-4 mb-3">

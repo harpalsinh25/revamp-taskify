@@ -96,6 +96,7 @@
     <div class="card">
         <div class="card-body">
             <!-- Filters Row -->
+<<<<<<< HEAD
             <div class="row">
                 <!-- Date Range Filter -->
                 <div class="col-md-4 mb-3">
@@ -202,10 +203,101 @@
     </div>
 
 </div>
+=======
+        <div class="row">
+            <x-advanced-date-filters prefix="report" />
+            <div class="col-md-4 mb-3">
+                <select class="form-control projects_select" id="project_filter" multiple="multiple" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
+                </select>
+            </div>
+            @if(isAdminOrHasAllDataAccess())
+            <!-- User Filter -->
+            <div class="col-md-4 mb-3">
+                <select class="form-control users_select" id="user_filter" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <select class="form-control clients_select" id="client_filter" multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
+                </select>
+            </div>
+            @endif
+            <!-- Status Filter -->
+            <div class="col-md-4 mb-3">
+                <select class="form-control statuses_filter" id="status_filter" multiple="multiple" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <select class="form-control priorities_filter" id="priority_filter" multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                </select>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <!-- Export Button -->
+            <div class="col-md-12 col-lg-12 d-flex align-items-center justify-content-md-end mb-md-0 mb-2">
+                <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_projects_report', 'Export Projects Report') }}">
+                    <i class="bx bx-export"></i>
+                </button>
+            </div>
+        </div>
+        @php
+        $visibleColumns = getUserPreferences('projects_report');
+        @endphp
+        <!-- Table -->
+        <div class="table-responsive text-nowrap">
+            <input type="hidden" id="multi_select">
+            <input type="hidden" id="data_type" value="report">
+            <input type="hidden" id="save_column_visibility" data-type="projects_report" data-table="projects_report_table">
+            <table id="projects_report_table" data-toggle="table"
+                data-url="{{ route('reports.project-report-data') }}" data-loading-template="loadingTemplate"
+                data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total"
+                data-trim-on-search="false" data-data-field="projects" data-page-list="[5, 10, 20, 50, 100, 200]"
+                data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true"
+                data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true"
+                data-query-params="project_report_query_params">
+                <thead>
+                    <tr>
+                        <th rowspan="2" data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('id', 'ID') }}</th>
+                        <th rowspan="2" data-field="title" data-visible="{{ (in_array('title', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('title', 'Title') }}</th>
+                        <th rowspan="2" data-field="description" data-visible="{{ (in_array('description', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('description', 'Description') }}</th>
+                        <th colspan="2">{{ get_label('dates', 'Dates') }}</th>
+                        <th rowspan="2" data-field="status" data-visible="{{ (in_array('status', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('status', 'Status') }}</th>
+                        <th rowspan="2" data-field="priority" data-visible="{{ (in_array('priority', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('priority', 'Priority') }}</th>
+                        <th rowspan="2" data-field="budget.total" data-visible="{{ (in_array('budget.total', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('budget', 'Budget') }}</th>
+                        <th colspan="4">{{ get_label('duration', 'Duration') }}</th>
+                        <th colspan="4">{{ get_label('tasks', 'Tasks') }}</th>
+                        <th colspan="2">{{ get_label('team', 'Team') }}</th>
+                        <th colspan="2">{{ get_label('clients', 'Clients') }}</th>
+                    </tr>
+                    <tr>
+                        <th data-field="start_date" data-visible="{{ (in_array('start_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('start_date', 'Start Date') }}</th>
+                        <th data-field="end_date" data-visible="{{ (in_array('end_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('end_date', 'End Date') }}</th>
+                        <th data-field="time.total_days" data-visible="{{ (in_array('time.total_days', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('total_days', 'Total Days') }}</th>
+                        <th data-field="time.days_elapsed" data-visible="{{ (in_array('time.days_elapsed', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('days_elapsed', 'Days Elapsed') }}</th>
+                        <th data-field="time.days_remaining" data-visible="{{ (in_array('time.days_remaining', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('days_remaining', 'Days Remaining') }}</th>
+                        <th data-field="time.overdue_days" data-visible="{{ (in_array('time.overdue_days', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('overdue_days', 'Overdue Days') }}</th>
+                        <th data-field="tasks.total" data-visible="{{ (in_array('tasks.total', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('total', 'Total') }}</th>
+                        <th data-field="tasks.due" data-visible="{{ (in_array('tasks.due', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('due', 'Due') }}</th>
+                        <th data-field="tasks.overdue" data-visible="{{ (in_array('tasks.overdue', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('overdue', 'Overdue') }}</th>
+                        <th data-field="tasks.overdue_days" data-visible="{{ (in_array('tasks.overdue_days', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('overdue_days', 'Overdue Days') }}</th>
+                        <th data-field="users" data-visible="{{ (in_array('users', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('members', 'Members') }}</th>
+                        <th data-field="team.total_members" data-visible="{{ (in_array('team.total_members', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('total', 'Total') }}</th>
+                        <th data-field="clients" data-visible="{{ (in_array('clients', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('clients', 'Clients') }}</th>
+                        <th data-field="total_clients" data-visible="{{ (in_array('total_clients', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('total', 'Total') }}</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('page_scripts')
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 <script>
     var projects_report_export_url = "{{ route('reports.export-projects-report') }}";
 </script>
 <script src="{{ asset('assets/js/pages/projects-report.js') }}?v={{ time() }}"></script>
+<<<<<<< HEAD
 <script>
     // Debug: Log when page loads
     console.log('Projects Report Page Loaded');
@@ -258,4 +350,7 @@
         }, 500);
     });
 </script>
+=======
+@endsection
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 @endsection

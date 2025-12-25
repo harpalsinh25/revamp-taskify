@@ -15,8 +15,13 @@ function queryParams(p) {
     return {
         "user_ids": $('#user_filter').val(),
         "type_ids": $('#type_filter').val(),
+<<<<<<< HEAD
         "date_from": $('#expense_date_from').val(),
         "date_to": $('#expense_date_to').val(),
+=======
+        "date_from": $('#expense_date_between_from').val(),
+        "date_to": $('#expense_date_between_to').val(),
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -36,6 +41,7 @@ function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>'
 }
 
+<<<<<<< HEAD
 $('#expense_from_date_between').on('apply.daterangepicker', function (ev, picker) {
     var fromDate = picker.startDate.format('YYYY-MM-DD');
     var toDate = picker.endDate.format('YYYY-MM-DD');
@@ -56,6 +62,8 @@ $('#expense_from_date_between').on('cancel.daterangepicker', function (ev, picke
     $('#table').bootstrapTable('refresh');
 });
 
+=======
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 addDebouncedEventListener('#user_filter, #type_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {
@@ -65,9 +73,15 @@ addDebouncedEventListener('#user_filter, #type_filter', 'change', function (e, r
 
 $(document).on('click', '.clear-expenses-filters', function (e) {
     e.preventDefault();
+<<<<<<< HEAD
     $('#expense_from_date_between').val('');
     $('#expense_date_from').val('');
     $('#expense_date_to').val('');
+=======
+    $('#expense_date_between').val('');
+    $('#expense_date_between_from').val('');
+    $('#expense_date_between_to').val('');
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#user_filter').val('').trigger('change', [0]);
     $('#type_filter').val('').trigger('change', [0]);
     $('#table').bootstrapTable('refresh');
@@ -80,11 +94,19 @@ $(document).ready(function () {
         dataType: 'expenses',
         filters: [
             {
+<<<<<<< HEAD
                 selector: '#expense_from_date_between',
                 type: 'daterangepicker',
                 name: 'expense_from_date_between',
                 hiddenFrom: '#expense_date_from',
                 hiddenTo: '#expense_date_to'
+=======
+                selector: '#expense_date_between',
+                type: 'daterangepicker',
+                name: 'expense_date_between',
+                hiddenFrom: '#expense_date_between_from',
+                hiddenTo: '#expense_date_between_to'
+>>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             },
             {
                 selector: '#user_filter',
