@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assets & Resources Organizer, Tracker and Management Plugin for Taskify</title>
+    <meta name="description"
+        content="Organize, track, and manage your assets and resources effortlessly with Taskify's dedicated plugin. Streamline workflows and enhance productivity.">
+    <meta name="keywords"
+        content="Taskify plugin, asset management, resource tracking, project management, productivity tools, workflow optimization, digital assets, resource organizer">
+    <meta name="author" content="Taskify">
+    <link rel="icon" href="https://taskify.taskhub.company/storage/logos/KidYVZUqFnWyYNhvqoMcROQy7BKy6CbJIPmjWPBl.png"
+        type="image/x-icon">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #696cff;
+            --secondary-color: #03c3ec;
+            --accent-green: #71dd37;
+            --accent-orange: #ffab00;
+            --accent-red: #ff5722;
+            --bg-primary: #0a0b14;
+            --bg-secondary: #151621;
+            --bg-card: #1c1d2e;
+            --bg-elevated: #252640;
+            --text-primary: #ffffff;
+            --text-secondary: #a5a8b8;
+            --text-muted: #70718a;
+            --border-color: #2d2e3f;
+            --border-light: #3a3b4f;
+            --gradient-primary: linear-gradient(135deg, #696cff 0%, #5a5cdb 100%);
+            --gradient-secondary: linear-gradient(135deg, #03c3ec 0%, #0299c7 100%);
+            --gradient-success: linear-gradient(135deg, #71dd37 0%, #56c426 100%);
+            --gradient-warning: linear-gradient(135deg, #ffab00 0%, #e69500 100%);
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --bs-darkest: #0a0b14;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Typography */
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-base {
+            font-size: 1rem;
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+        }
+
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+
+        .text-3xl {
+            font-size: 1.875rem;
+        }
+
+        .text-4xl {
+            font-size: 2.25rem;
+        }
+
+        .text-5xl {
+            font-size: 3rem;
+        }
+
+        .text-6xl {
+            font-size: 3.75rem;
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .section {
+            padding: 3rem 0;
+            margin-bottom: -0.5rem;
+        }
+
+        .section-connector {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin: 0.5rem auto;
+            width: 100%;
+            opacity: 0.3;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 8px 24px rgba(105, 108, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(105, 108, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border-light);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            background: rgba(105, 108, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-ghost {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-elevated);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Background Animation */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+            background: linear-gradient(135deg, var(--bs-darkest) 0%, #1e1f36 50%, var(--bs-darkest) 100%);
+            overflow: hidden;
+            animation: gradientShift 30s ease-in-out infinite;
+        }
+
+        .bg-animation::before,
+        .bg-animation::after,
+        .bg-animation .particle {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(105, 108, 255, 0.2) 0%, transparent 70%);
+        }
+
+        .bg-animation::before {
+            width: 800px;
+            height: 800px;
+            top: -200px;
+            left: -200px;
+            animation: floatRadial 25s ease-in-out infinite;
+        }
+
+        .bg-animation::after {
+            width: 600px;
+            height: 600px;
+            bottom: -150px;
+            right: -150px;
+            animation: floatRadial 20s ease-in-out infinite alternate;
+            animation-delay: 5s;
+        }
+
+        .bg-animation .particle {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            animation: floatParticle 15s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            top: 50%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+
+        .particle:nth-child(3) {
+            top: 70%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        .particle:nth-child(4) {
+            top: 30%;
+            left: 60%;
+            animation-delay: 6s;
+        }
+
+        .particle:nth-child(5) {
+            top: 80%;
+            left: 20%;
+            animation-delay: 8s;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 0%;
+            }
+
+            50% {
+                background-position: 100% 100%;
+            }
+        }
+
+        @keyframes floatRadial {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+                opacity: 0.1;
+            }
+
+            50% {
+                transform: translate(100px, -100px);
+                opacity: 0.15;
+            }
+        }
+
+        @keyframes floatParticle {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.2;
+            }
+
+            50% {
+                transform: translateY(-50px) scale(1.2);
+                opacity: 0.3;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 2rem 0 1rem;
+            text-align: center;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(105, 108, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(3, 195, 236, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(113, 221, 55, 0.05) 0%, transparent 50%);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: -2rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23696cff" fill-opacity="0.05"><circle cx="30" cy="30" r="1"/></g></g></svg>');
+            opacity: 0.3;
+            animation: backgroundMove 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundMove {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(20px, 10px);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .hero-badge::before {
+            content: '🚀';
+            font-size: 1rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, #a5a8b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            visibility: hidden;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        /* Mockup Interfaces */
+        .mockup-container {
+            max-width: 1100px;
+            margin: 0 auto 0.5rem;
+            position: relative;
+        }
+
+        .mockup-main {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-heavy);
+            backdrop-filter: blur(20px);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .mockup-main:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(105, 108, 255, 0.3);
+        }
+
+        .mockup-header {
+            height: 4rem;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-elevated) 100%);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 1rem;
+        }
+
+        .mockup-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .mockup-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .mockup-dot:hover {
+            transform: scale(1.2);
+        }
+
+        .mockup-dot:nth-child(1) {
+            background: #ff5f57;
+        }
+
+        .mockup-dot:nth-child(2) {
+            background: #ffbd2e;
+        }
+
+        .mockup-dot:nth-child(3) {
+            background: #28ca42;
+        }
+
+        .mockup-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mockup-title::before {
+            content: '📊';
+        }
+
+        .mockup-content {
+            padding: 1.5rem;
+            min-height: 450px;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+        }
+
+        .mockup-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .mockup-search {
+            flex: 1;
+            max-width: 300px;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .mockup-search:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(105, 108, 255, 0.3);
+            background: var(--bg-elevated);
+        }
+
+        .mockup-filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-tag {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tag.active,
+        .filter-tag:hover {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .mockup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .asset-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .asset-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .asset-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .asset-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--primary-color);
+        }
+
+        .asset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .asset-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .asset-card:hover .asset-icon {
+            transform: scale(1.1);
+        }
+
+        .asset-card:nth-child(1) .asset-icon {
+            background: var(--gradient-primary);
+        }
+
+        .asset-card:nth-child(2) .asset-icon {
+            background: var(--gradient-secondary);
+        }
+
+        .asset-card:nth-child(3) .asset-icon {
+            background: var(--gradient-success);
+        }
+
+        .asset-card:nth-child(4) .asset-icon {
+            background: var(--gradient-warning);
+        }
+
+        .asset-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-assigned {
+            background: rgba(113, 221, 55, 0.2);
+            color: var(--accent-green);
+        }
+
+        .status-available {
+            background: rgba(3, 195, 236, 0.2);
+            color: var(--secondary-color);
+        }
+
+        .status-maintenance {
+            background: rgba(255, 171, 0, 0.2);
+            color: var(--accent-orange);
+        }
+
+        .asset-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .asset-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .asset-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Section Transitions */
+        .section-transition {
+            height: 80px;
+            background: linear-gradient(180deg, transparent 0%, var(--bg-secondary) 100%);
+            margin: -1rem 0;
+        }
+
+        /* Who Is This For Section */
+        .who-is-this-for {
+            background: var(--bg-secondary);
+            position: relative;
+            margin-top: -1rem;
+        }
+
+        .who-is-this-for::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        }
+
+        .who-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .who-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .who-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--primary-color);
+        }
+
+        .who-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .who-list {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .who-list li::before {
+            content: '→';
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+        }
+
+        /* Dashboard Screenshot Section */
+        .dashboard-screenshot {
+            background: var(--bg-primary);
+            text-align: center;
+            position: relative;
+            margin-top: -1rem;
+        }
+
+        .dashboard-screenshot-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .screenshot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screenshot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--primary-color);
+        }
+
+        .screenshot-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-card:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Features Section */
+        .features {
+            background: var(--bg-secondary);
+            position: relative;
+            margin-top: -1rem;
+        }
+
+        .features::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-heavy);
+            border-color: var(--primary-color);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .feature-card:nth-child(2) .feature-icon {
+            background: var(--gradient-secondary);
+        }
+
+        .feature-card:nth-child(3) .feature-icon {
+            background: var(--gradient-success);
+        }
+
+        .feature-card:nth-child(4) .feature-icon {
+            background: var(--gradient-warning);
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            background: var(--bg-secondary);
+            margin-top: -1rem;
+        }
+
+        .steps-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .steps-container::before {
+            content: '';
+            position: absolute;
+            left: 1.75rem;
+            top: 1.75rem;
+            bottom: 1.75rem;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            opacity: 0.3;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            font-size: 1.125rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step:nth-child(2) .step-number {
+            background: var(--gradient-secondary);
+        }
+
+        .step:nth-child(3) .step-number {
+            background: var(--gradient-success);
+        }
+
+        .step:nth-child(4) .step-number {
+            background: var(--gradient-warning);
+        }
+
+        .step:nth-child(5) .step-number {
+            background: linear-gradient(135deg, #ff5722 0%, #e91e63 100%);
+        }
+
+        .step:nth-child(6) .step-number {
+            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+        }
+
+        .step-content {
+            flex: 1;
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .step-content:hover {
+            transform: translateX(8px);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .step-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Taskify System Section */
+        .taskify-system {
+            background: var(--bg-primary);
+            text-align: center;
+            position: relative;
+            margin-top: -1rem;
+        }
+
+        .taskify-system::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        }
+
+        .taskify-note {
+            /* background: var(--bg-card); */
+            border: 1px solid var(--primary-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 600px;
+            margin: 1.5rem auto;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            box-shadow: var(--shadow-light);
+        }
+
+        .taskify-note::before {
+            content: '📝';
+            margin-right: 0.5rem;
+        }
+
+        .taskify-screenshot-grid {
+            max-width: 600px;
+            margin: 1rem auto;
+        }
+
+        .taskify-screenshot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .taskify-screenshot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--primary-color);
+        }
+
+        .taskify-screenshot-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
+            transition: transform 0.3s ease;
+        }
+
+        .taskify-screenshot-card:hover img {
+            transform: scale(1.02);
+        }
+
+        /* CTA Section */
+        .cta {
+            background:
+                linear-gradient(135deg, rgba(105, 108, 255, 0.1) 0%, rgba(3, 195, 236, 0.05) 100%),
+                radial-gradient(circle at 50% 0%, rgba(105, 108, 255, 0.1) 0%, transparent 50%);
+            text-align: center;
+            position: relative;
+            margin-top: -1rem;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: clamp(1.75rem, 4vw, 2.75rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .cta-guarantee {
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: -1rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-section h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            line-height: 1.6;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .section {
+                padding: 1.5rem 0;
+            }
+
+            .hero {
+                padding: 1.5rem 0 1rem;
+            }
+
+            .hero-actions,
+            .cta-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            .features-grid,
+            .who-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .steps-container::before {
+                display: none;
+            }
+
+            .step {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .step-content:hover {
+                transform: none;
+            }
+
+            .mockup-content {
+                padding: 1rem;
+            }
+
+            .mockup-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .dashboard-screenshot-grid,
+            .taskify-screenshot-grid {
+                padding: 0 1rem;
+            }
+
+            .section-header {
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.8s ease;
+        }
+
+        .slide-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.8s ease;
+        }
+
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .stagger-1 {
+            transition-delay: 0.1s;
+        }
+
+        .stagger-2 {
+            transition-delay: 0.2s;
+        }
+
+        .stagger-3 {
+            transition-delay: 0.3s;
+        }
+
+        .stagger-4 {
+            transition-delay: 0.4s;
+        }
+
+        .stagger-5 {
+            transition-delay: 0.5s;
+        }
+
+        .stagger-6 {
+            transition-delay: 0.6s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .float-object {
+            position: fixed;
+            font-size: 2rem;
+            animation: float 6s ease-in-out infinite;
+            z-index: 10;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .float-object-1 {
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .float-object-2 {
+            top: 45%;
+            right: 5%;
+            animation-delay: 1s;
+        }
+
+        .float-object-3 {
+            bottom: 90%;
+            left: 85%;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .float-object:hover {
+            opacity: 1;
+            transform: translateY(-25px) scale(1.1);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-animation">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge fade-in">
+                    Assets & Resources Organizer, Tracker and Management Plugin for Taskify
+                </div>
+
+                <h1 class="hero-title fade-in stagger-1">
+                    The Complete Taskify Asset & Resource Manager
+                </h1>
+
+                <p class="hero-subtitle fade-in stagger-2">
+                    Track, assign, and organize company assets without spreadsheets or third-party tools — all
+                    integrated seamlessly within your Taskify workspace.
+                </p>
+                <div class="hero-actions fade-in stagger-3">
+                    <a href="https://codecanyon.net/user/infinitietech" class="btn btn-primary">🛒 Buy Now on CodeCanyon</a>
+                    <a href="#features" class="btn btn-secondary">👀 View Features</a>
+                    <a href="https://taskify.taskhub.company/assets/index" class="btn btn-ghost">🎮 Check Demo</a>
+                    <a href="https://taskify.taskhub.company/public/plugins/assets-resources-organizer-plugin/documentation/" class="btn btn-ghost">📖 View Documentation</a>
+                </div>
+            </div>
+
+            <!-- Enhanced Mockup Interface -->
+            <div class="mockup-container fade-in stagger-4">
+                <div class="mockup-main float">
+                    <div class="mockup-header">
+                        <div class="mockup-dots">
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                        </div>
+                        <div class="mockup-title">Taskify Assets Dashboard</div>
+                    </div>
+                    <div class="mockup-content">
+                        <div class="mockup-toolbar">
+                            <input type="text" class="mockup-search" placeholder="🔍 Search assets..." />
+                            <div class="mockup-filters">
+                                <div class="filter-tag active">All</div>
+                                <div class="filter-tag">Laptops</div>
+                                <div class="filter-tag">Monitors</div>
+                                <div class="filter-tag">Mobile</div>
+                            </div>
+                            <button class="btn btn-ghost">+ Add Asset</button>
+                        </div>
+
+                        <div class="mockup-grid">
+                            <div class="asset-card">
+                                <div class="asset-header">
+                                    <div class="asset-icon">💻</div>
+                                    <div class="asset-status status-assigned">Assigned</div>
+                                </div>
+                                <div class="asset-title">MacBook Pro 16"</div>
+                                <div class="asset-details">
+                                    <span><strong>Tag:</strong> LP-001</span>
+                                    <span><strong>Assigned to:</strong> John Smith</span>
+                                    <span><strong>Category:</strong> Engineering</span>
+                                </div>
+                                <div class="asset-meta">
+                                    <span>Purchased: Jan 2024</span>
+                                </div>
+                            </div>
+
+                            <div class="asset-card">
+                                <div class="asset-header">
+                                    <div class="asset-icon">🖥️</div>
+                                    <div class="asset-status status-available">Available</div>
+                                </div>
+                                <div class="asset-title">Dell Monitor 27"</div>
+                                <div class="asset-details">
+                                    <span><strong>Tag:</strong> MN-015</span>
+                                    <span><strong>Assigned To:</strong> Will Jacks</span>
+                                    <span><strong>Category:</strong> Desktop Monitors</span>
+                                </div>
+                                <div class="asset-meta">
+                                    <span>Purchased: Mar 2024</span>
+                                </div>
+                            </div>
+
+                            <div class="asset-card">
+                                <div class="asset-header">
+                                    <div class="asset-icon">📱</div>
+                                    <div class="asset-status status-assigned">Assigned</div>
+                                </div>
+                                <div class="asset-title">iPhone 15 Pro</div>
+                                <div class="asset-details">
+                                    <span><strong>Tag:</strong> PH-008</span>
+                                    <span><strong>Assigned to:</strong> Sarah Wilson</span>
+                                    <span><strong>Category:</strong> Office Devices</span>
+                                </div>
+                                <div class="asset-meta">
+                                    <span>Purchased: Oct 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Floating objects -->
+        <div class="float-object float-object-1">💻</div>
+        <div class="float-object float-object-2">📱</div>
+        <div class="float-object float-object-3">🖥️</div>
+    </section>
+
+    <div class="section-connector"></div>
+
+    <!-- Who Is This For Section -->
+    <section id="who-is-this-for" class="who-is-this-for section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge fade-in">🎯 Who Benefits?</div>
+                <h2 class="section-title fade-in stagger-1">Designed for Your Team</h2>
+                <p class="section-subtitle fade-in stagger-2">
+                    Perfect for teams and businesses looking to streamline asset management within Taskify.
+                </p>
+            </div>
+            <div class="who-grid">
+                <div class="who-card fade-in">
+                    <h3 class="who-title">Who Is This For?</h3>
+                    <ul class="who-list">
+                        <li>IT & Admin Teams: Manage laptops, monitors, and office equipment.</li>
+                        <li>HR Teams: Track onboarding kits and resources issued to new employees.</li>
+                        <li>Growing Companies: Gain a better, structured way to manage internal resources.</li>
+                    </ul>
+                </div>
+                <div class="who-card fade-in stagger-1">
+                    <h3 class="who-title">Why Choose This Plugin?</h3>
+                    <ul class="who-list">
+                        <li>No complex setup.</li>
+                        <li>No unnecessary bloat.</li>
+                        <li>100% native to Taskify.</li>
+                        <li>Built for simplicity, speed, and control.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-connector"></div>
+
+    <!-- Dashboard Screenshot Section -->
+    <section id="dashboard-screenshot" class="dashboard-screenshot section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge fade-in">📸 Live Preview</div>
+                <h2 class="section-title fade-in stagger-1">See the Dashboard in Action</h2>
+                <p class="section-subtitle fade-in stagger-2">
+                    Explore a real-time look at how the Taskify Assets Plugin enhances your workflow.
+                </p>
+            </div>
+            <div class="dashboard-screenshot-grid">
+                <div class="screenshot-card fade-in stagger-3">
+                    <img src="./image (10).png" alt="Taskify Assets Dashboard Screenshot">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-connector"></div>
+
+    <!-- Features Section -->
+    <section id="features" class="features section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge fade-in">🔑 Key Features</div>
+                <h2 class="section-title fade-in stagger-1">Everything you need to manage assets</h2>
+                <p class="section-subtitle fade-in stagger-2">
+                    Powerful features designed to streamline your asset management workflow and boost productivity
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📁</div>
+                    <h3 class="feature-title">Smart Asset Organization</h3>
+                    <p class="feature-description">
+                        Categorize assets by type with comprehensive fields including asset tags, purchase dates,
+                        warranty information, and current condition status.
+                    </p>
+                </div>
+                <div class="feature-card fade-in stagger-1">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="feature-title">Team Assignment System</h3>
+                    <p class="feature-description">
+                        Maintain complete visibility of asset ownership by assigning items to team members with
+                        automated tracking of who has what and when.
+                    </p>
+                </div>
+                <div class="feature-card fade-in stagger-2">
+                    <div class="feature-icon">📋</div>
+                    <h3 class="feature-title">Complete Audit Trail</h3>
+                    <p class="feature-description">
+                        Every asset maintains its full lifecycle history including assignment logs, return records, and
+                        transfer documentation for compliance.
+                    </p>
+                </div>
+                <div class="feature-card fade-in stagger-3">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Bulk Operations</h3>
+                    <p class="feature-description">
+                        Upload hundreds of assets via Excel/CSV import and export comprehensive reports instantly
+                        whenever you need them.
+                    </p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Rapid Deployment</h3>
+                    <p class="feature-description">
+                        Perfect for onboarding new employees — assign multiple assets to team members in just a few
+                        clicks with our bulk assignment feature.
+                    </p>
+                </div>
+                <div class="feature-card fade-in stagger-1">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">Security & Permissions</h3>
+                    <p class="feature-description">
+                        Integrates seamlessly with Taskify's built-in role system ensuring only authorized users can
+                        manage and modify asset information.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-connector"></div>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge fade-in">🚀 Quick Setup</div>
+                <h2 class="section-title fade-in stagger-1">Get started in minutes</h2>
+                <p class="section-subtitle fade-in stagger-2">
+                    Simple installation process compatible with Taskify v2.0.0 and above
+                </p>
+            </div>
+            <div class="steps-container">
+                <div class="step fade-in">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Download Plugin</h3>
+                        <p class="step-description">Get the plugin ZIP file from your CodeCanyon purchase and save it to
+                            your computer for installation.</p>
+                    </div>
+                </div>
+                <div class="step fade-in stagger-1">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Access Admin Panel</h3>
+                        <p class="step-description">Login as Administrator and navigate to Settings > Plugins section in
+                            your Taskify dashboard.</p>
+                    </div>
+                </div>
+                <div class="step fade-in stagger-2">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Install & Activate</h3>
+                        <p class="step-description">Upload the plugin ZIP file and activate it through the plugins
+                            management interface.</p>
+                    </div>
+                </div>
+                <div class="step fade-in stagger-3">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Clear Cache</h3>
+                        <p class="step-description">Clear your Taskify cache to ensure optimal performance and proper
+                            plugin integration.</p>
+                    </div>
+                </div>
+                <div class="step fade-in stagger-4">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Access Assets Section</h3>
+                        <p class="step-description">Find the new "Assets" section in your Taskify sidebar navigation
+                            menu.</p>
+                    </div>
+                </div>
+                <div class="step fade-in stagger-5">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Start Managing</h3>
+                        <p class="step-description">Create categories, upload your assets, and begin assigning them to
+                            your team members!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-connector"></div>
+
+    <!-- Taskify System Section -->
+    <section id="taskify-system" class="taskify-system section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge fade-in">🌟 Discover Taskify</div>
+                <h2 class="section-title fade-in stagger-1">Explore the Power of Taskify</h2>
+                <p class="section-subtitle fade-in stagger-2">
+                    The Assets & Resources Organizer is a powerful plugin designed to enhance your Taskify experience.
+                    Check out the main Taskify system to unlock its full potential.
+                </p>
+                <div class="taskify-screenshot-grid">
+                    <div class="taskify-screenshot-card fade-in stagger-3">
+                        <img src="./Taskify CTA.png" alt="Taskify System Dashboard">
+                    </div>
+                </div>
+                <div class="taskify-note fade-in stagger-4">
+                    Note: This is not a standalone system. It is a plugin that integrates seamlessly with Taskify,
+                    requiring an active Taskify system (v2.0.0 or higher) to function.
+                </div>
+                <div class="cta-actions fade-in stagger-5">
+                    <a href="https://taskify.taskhub.company" class="btn btn-primary">🔍 Explore Taskify - Project & Task Management</a>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-connector"></div>
+
+    <!-- CTA Section -->
+    <section class="cta section">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title fade-in">Stop losing track of your assets.<br>Start managing them the Taskify way.
+                </h2>
+                <p class="cta-subtitle fade-in stagger-1">
+                    Organized, reliable, and efficient — seamlessly integrated within your existing workspace.
+                </p>
+                <div class="cta-actions fade-in stagger-2">
+                    <a href="https://codecanyon.net/user/infinitietech" class="btn btn-primary">🛒 Buy Now on CodeCanyon</a>
+                    <a href="https://teams.live.com/l/invite/FEADpduIPYZUtss7xU?v=g1" class="btn btn-secondary">📧 Contact Support</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Assets & Resources Organizer, Tracker and Management Plugin for Taskify</h4>
+                    <p>The complete asset & resource management solution for modern teams using Taskify project
+                        management software.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Requirements</h4>
+                    <p>Taskify v2.0.0 or higher</p>
+                    <p>PHP 8.2+ recommended</p>
+                    <p>MySQL 5.7+ database</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Assets & Resources Organizer, Tracker and Management Plugin. Built for modern teams who value organization and efficiency.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Initialize animations when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Observe all animated elements
+            document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Enhanced interactive hover effects for asset cards
+            document.querySelectorAll('.asset-card').forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-4px) scale(1.02)';
+                    this.style.boxShadow = '0 10px 20px rgba(105, 108, 255, 0.2)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(-2px) scale(1)';
+                    this.style.boxShadow = 'var(--shadow-medium)';
+                });
+            });
+
+            // Add pulse effect to CTA buttons
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                setInterval(() => {
+                    btn.classList.add('pulse');
+                    setTimeout(() => {
+                        btn.classList.remove('pulse');
+                    }, 1000);
+                }, 5000);
+            });
+
+            // Add click animation to filter tags
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.addEventListener('click', function () {
+                    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+
+        // Enhanced parallax scrolling effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.3;
+
+            // Parallax effect for hero background
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.transform = `translateY(${rate}px)`;
+            }
+
+            // Update mockup position based on scroll
+            const mockup = document.querySelector('.mockup-main');
+            if (mockup) {
+                const mockupRate = scrolled * 0.05;
+                mockup.style.transform = `translateY(${mockupRate}px) rotateX(${mockupRate * 0.05}deg)`;
+            }
+        });
+
+        // Add typing effect to hero subtitle
+        function typeWriter(element, text, speed = 50) {
+            let i = 0;
+            element.innerHTML = '';
+
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+
+            type();
+        }
+
+        // Initialize typing effect after a delay
+        setTimeout(() => {
+            const subtitle = document.querySelector('.hero-subtitle');
+            if (subtitle) {
+                subtitle.style.visibility = 'visible';
+                const originalText = subtitle.textContent;
+                typeWriter(subtitle, originalText, 30);
+            }
+        }, 2000);
+    </script>
+</body>
+
+</html>

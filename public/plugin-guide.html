@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taskify Plugin Development Guide</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      .gradient-text {
+        background: linear-gradient(90deg, #9B5CFF, #4FFFEA);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .neon-glow {
+        box-shadow: 0 0 20px rgba(155, 92, 255, 0.3), 0 0 40px rgba(79, 255, 234, 0.2);
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .gradient-border {
+        position: relative;
+        background: rgba(10, 10, 14, 0.8);
+        border: 1px solid transparent;
+      }
+
+      .gradient-border::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg, #9B5CFF, #4FFFEA);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      .code-editor {
+        background: #1e1e1e;
+        border: 1px solid rgba(155, 92, 255, 0.3);
+        box-shadow: 0 0 30px rgba(155, 92, 255, 0.2);
+      }
+
+      .step-connector {
+        position: absolute;
+        top: 2rem;
+        left: 1.5rem;
+        width: 2px;
+        height: calc(100% - 2rem);
+        background: linear-gradient(180deg, #9B5CFF, #4FFFEA);
+        opacity: 0.3;
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+      }
+
+      .float-animation {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .bg-gradient-dark {
+        background: linear-gradient(180deg, #0A0A0E 0%, #0B0B10 100%);
+      }
+
+      /* Text overflow fixes */
+      .code-block-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+        word-break: break-word;
+        max-width: 100%;
+      }
+
+      .code-block-container pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+      }
+
+      .card-text {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+      }
+
+      /* Prevent flex items from overflowing */
+      .glass-card {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      /* Ensure code blocks don't overflow */
+      pre {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      /* Guide Tabs */
+      .guide-tab-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #8b949e;
+        cursor: pointer;
+      }
+
+      .guide-tab-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-color: rgba(155, 92, 255, 0.3);
+      }
+
+      .guide-tab-btn.active {
+        background: linear-gradient(135deg, #9B5CFF, #4FFFEA);
+        border-color: transparent;
+        color: black;
+        font-weight: 600;
+      }
+
+      .guide-tab-content {
+        display: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .guide-tab-content.active {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .guide-content-container {
+        min-height: 400px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+</head>
+
+<body class="bg-gradient-dark text-white min-h-screen">
+
+    <!-- HEADER -->
+    <header class="w-full border-b border-white/10 sticky top-0 z-50 glass-card">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-md bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center font-bold text-black">
+                    TP
+                </div>
+                <div>
+                    <div class="text-sm font-semibold gradient-text">Taskify Plugin Dev Kit</div>
+                    <div class="text-xs text-slate-400">Build extendable modules</div>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm text-slate-300">
+                <a href="#guide" class="hover:text-white transition">Guide</a>
+                <a href="#examples" class="hover:text-white transition">API Reference</a>
+                <a href="#examples" class="hover:text-white transition">Examples</a>
+                <a href="#" class="hover:text-white transition">GitHub</a>
+
+                <button class="ml-4 px-5 py-2 rounded-full border-2 border-[#9B5CFF] text-sm font-medium hover:bg-[#9B5CFF] hover:text-black transition neon-glow">
+                    Start Building
+                </button>
+            </nav>
+
+            <button class="md:hidden px-3 py-2 rounded bg-white/10">Menu</button>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative overflow-hidden py-28">
+        <!-- Background glow effects -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-20 right-20 w-96 h-96 bg-[#9B5CFF] rounded-full opacity-20 blur-3xl float-animation"></div>
+            <div class="absolute bottom-20 left-20 w-96 h-96 bg-[#4FFFEA] rounded-full opacity-20 blur-3xl float-animation" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+
+            <!-- Left text -->
+            <div>
+                <h1 class="text-5xl md:text-7xl font-extrabold leading-tight gradient-text mb-6">
+                    Extend Your Taskify<br/>Superpowers with Plugins
+                </h1>
+
+                <p class="text-lg text-slate-300 mt-6 leading-relaxed mb-8">
+                    A complete guide to building, registering, packaging, and distributing extensions for our ecosystem.
+                </p>
+
+                <div class="mt-8 flex gap-4 flex-wrap">
+                    <a href="#guide" class="px-8 py-3 rounded-full border-2 border-[#9B5CFF] text-sm font-medium hover:bg-[#9B5CFF] hover:text-black transition neon-glow">
+                        Read Documentation
+                    </a>
+                    <a href="#examples" class="px-8 py-3 rounded-full border border-white/30 text-sm hover:bg-white/10 transition">
+                        View Plugin Examples
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right hero card -->
+            <div class="glass-card rounded-2xl p-6 shadow-xl neon-glow">
+                <h3 class="text-xl font-semibold mb-3 gradient-text">Plugin Architecture</h3>
+                <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                    Each plugin contains its own routes, views, migrations, permissions,
+                    settings, menu placements, and custom logic. Easily extend your SaaS.
+                </p>
+
+                <div class="mt-6 text-sm bg-black/40 p-4 rounded-lg border border-white/10 font-mono code-block-container">
+<pre class="text-xs text-slate-300 whitespace-pre-wrap break-words overflow-x-auto">TimeTracker/
+├── Controllers/
+│   ├── TimeTrackerController.php
+│   ├── DashboardController.php
+│   └── ScreenShotController.php
+├── Models/
+│   ├── TimeTrack.php
+│   ├── Screenshot.php
+│   └── TimeTrackerConfig.php
+├── Database/
+│   └── Migrations/
+├── Providers/
+│   └── TimeTrackerServiceProvider.php
+├── routes/
+│   ├── web.php
+│   └── api.php
+├── Resources/
+│   ├── views/
+│   └── lang/
+│       └── plugin_labels.php
+├── public/
+│   ├── js/
+│   └── css/
+├── menus.php
+└── plugin.json</pre>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button class="px-4 py-2 rounded-full border border-white/30 text-xs hover:bg-white/10 transition">
+                        Architecture Guide
+                    </button>
+                    <button class="px-4 py-2 rounded-full border border-[#9B5CFF] text-xs hover:bg-[#9B5CFF] hover:text-black transition">
+                        Learn More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PLUGIN STRUCTURE OVERVIEW -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+        <h2 class="text-3xl font-bold mb-10 text-center gradient-text">Plugin Structure Overview</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Card 1: plugin.json -->
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition min-w-0">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">plugin.json</h3>
+                <p class="text-sm text-slate-300 mb-4 card-text">
+                    Defines metadata like name, version, author, and permissions. Required fields: name, slug, description, version, enabled, provider.
+                </p>
+                <div class="bg-black/40 p-3 rounded font-mono text-xs text-slate-400 code-block-container">
+                    <pre class="whitespace-pre-wrap break-words">{
+  "name": "Taskify - Time Tracker",
+  "slug": "time-tracker",
+  "description": "Tracks user time and screenshots for productivity analysis.",
+  "version": "1.0.0",
+  "enabled": true,
+  "provider": "Plugins\\TimeTracker\\Providers\\TimeTrackerServiceProvider",
+  "publish_tag": "timetracker-assets"
+}</pre>
+                </div>
+            </div>
+
+            <!-- Card 2: Folder Structure -->
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition min-w-0">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Folder Structure</h3>
+                <p class="text-sm text-slate-300 mb-4 card-text">
+                    Organized directory structure with Controllers, Models, Views, Routes, Migrations, and Assets.
+                </p>
+                <div class="bg-black/40 p-3 rounded font-mono text-xs text-slate-400 code-block-container">
+                    <pre class="whitespace-pre-wrap break-words">TimeTracker/
+├── Controllers/
+├── Models/
+├── Database/
+│   └── Migrations/
+├── Providers/
+│   └── TimeTrackerServiceProvider.php
+├── routes/
+│   ├── web.php
+│   └── api.php
+├── Resources/
+│   ├── views/
+│   └── lang/
+├── public/
+│   ├── js/
+│   └── css/
+├── menus.php
+└── plugin.json</pre>
+                </div>
+            </div>
+
+            <!-- Card 3: Service Provider -->
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition min-w-0">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Hooks & Events</h3>
+                <p class="text-sm text-slate-300 mb-4 card-text">
+                    Plugins register menu items, routes, and system hooks through the Service Provider's boot() method.
+                </p>
+                <div class="bg-black/40 p-3 rounded font-mono text-xs text-slate-400 code-block-container">
+                    <pre class="whitespace-pre-wrap break-words">$this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+$this->loadViewsFrom(__DIR__ . '/../Resources/views', 'timetracker');
+$this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+$this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'timetracker');
+$this->publishes([...], ['timetracker-assets', 'public']);</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INSTALLATION PROCESS -->
+    <section class="max-w-7xl mx-auto px-6 py-20 bg-black/20">
+        <h2 class="text-3xl font-bold mb-12 text-center gradient-text">Installation Process</h2>
+
+        <div class="relative max-w-3xl mx-auto">
+            <!-- Step 1 -->
+            <div class="relative pl-12 pb-12">
+                <div class="step-connector"></div>
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center font-bold text-black z-10 relative">
+                        1
+                    </div>
+                    <div class="flex-1 glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-2">Create New Plugin Folder</h3>
+                        <p class="text-sm text-slate-300 card-text">
+                            Create a new folder in the <code class="text-[#4FFFEA]">plugins/</code> directory with your plugin name in PascalCase (e.g., <code class="text-[#4FFFEA]">MyPlugin</code>).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative pl-12 pb-12">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center font-bold text-black z-10 relative">
+                        2
+                    </div>
+                    <div class="flex-1 glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-2">Add plugin.json</h3>
+                        <p class="text-sm text-slate-300 card-text">
+                            Create a <code class="text-[#4FFFEA]">plugin.json</code> file with required metadata: name, slug, description, version, enabled, and provider class.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative pl-12 pb-12">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center font-bold text-black z-10 relative">
+                        3
+                    </div>
+                    <div class="flex-1 glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-2">Register Routes & Menus</h3>
+                        <p class="text-sm text-slate-300 card-text">
+                            Create your Service Provider and register routes, views, migrations, and menus in the <code class="text-[#4FFFEA]">boot()</code> method.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="relative pl-12 pb-12">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center font-bold text-black z-10 relative">
+                        4
+                    </div>
+                    <div class="flex-1 glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-2">Activate Plugin in Dashboard</h3>
+                        <p class="text-sm text-slate-300 card-text">
+                            Set <code class="text-[#4FFFEA]">"enabled": true</code> in your <code class="text-[#4FFFEA]">plugin.json</code> file. The system will automatically discover and load your plugin.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="relative pl-12">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center font-bold text-black z-10 relative">
+                        5
+                    </div>
+                    <div class="flex-1 glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-2">Test Using Sandbox Mode</h3>
+                        <p class="text-sm text-slate-300 card-text">
+                            Run <code class="text-[#4FFFEA]">php artisan migrate</code> to apply database migrations, then test your plugin functionality.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CODE EXAMPLES SECTION -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+        <h2 class="text-3xl font-bold mb-10 text-center gradient-text">Code Examples</h2>
+
+        <div class="code-editor rounded-xl overflow-hidden">
+            <div class="bg-[#252526] px-4 py-3 flex items-center justify-between border-b border-[#9B5CFF]/30">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <span class="text-xs text-slate-400">PluginServiceProvider.php</span>
+            </div>
+            <div class="p-6 overflow-x-auto">
+                <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words max-w-full"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">namespace</span> <span class="text-[#4EC9B0]">Plugins\TimeTracker\Providers</span>;
+
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\ServiceProvider</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\Facades\Log</span>;
+
+<span class="text-[#569CD6]">class</span> <span class="text-[#4EC9B0]">TimeTrackerServiceProvider</span> <span class="text-[#569CD6]">extends</span> <span class="text-[#4EC9B0]">ServiceProvider</span>
+{
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">boot</span>(): <span class="text-[#569CD6]">void</span>
+    {
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadRoutesFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../routes/web.php'</span>);
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadRoutesFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../routes/api.php'</span>);
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadViewsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Resources/views'</span>, <span class="text-[#CE9178]">'timetracker'</span>);
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadMigrationsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Database/Migrations'</span>);
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadTranslationsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Resources/lang'</span>, <span class="text-[#CE9178]">'timetracker'</span>);
+
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">publishes</span>([
+            <span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../public/js'</span> => <span class="text-[#DCDCAA]">public_path</span>(<span class="text-[#CE9178]">'assets/js/timetracker-plugin'</span>),
+        ], [<span class="text-[#CE9178]">'timetracker-assets'</span>, <span class="text-[#CE9178]">'public'</span>]);
+
+        <span class="text-[#808080]">// Log plugin version on load</span>
+        <span class="text-[#569CD6]">if</span> (<span class="text-[#DCDCAA]">file_exists</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../plugin.json'</span>)) {
+            <span class="text-[#4EC9B0]">$pluginJson</span> = <span class="text-[#DCDCAA]">json_decode</span>(<span class="text-[#DCDCAA]">file_get_contents</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../plugin.json'</span>), <span class="text-[#B5CEA8]">true</span>);
+            <span class="text-[#4EC9B0]">Log</span>::<span class="text-[#DCDCAA]">info</span>(<span class="text-[#CE9178]">'✅ TimeTracker Plugin Loaded - Version: '</span> . (<span class="text-[#4EC9B0]">$pluginJson</span>[<span class="text-[#CE9178]">'version'</span>] ?? <span class="text-[#CE9178]">'unknown'</span>));
+        }
+    }
+}</pre>
+            </div>
+        </div>
+
+        <div class="mt-8 code-editor rounded-xl overflow-hidden">
+            <div class="bg-[#252526] px-4 py-3 flex items-center justify-between border-b border-[#9B5CFF]/30">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <span class="text-xs text-slate-400">menus.php</span>
+            </div>
+            <div class="p-6 overflow-x-auto">
+                <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words max-w-full"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">return</span> [
+    [
+        <span class="text-[#CE9178]">'id'</span> => <span class="text-[#CE9178]">'team_monitoring_and_productivity_tracker'</span>,
+        <span class="text-[#CE9178]">'label'</span> => <span class="text-[#DCDCAA]">get_label</span>(<span class="text-[#CE9178]">'team_insights'</span>, <span class="text-[#CE9178]">'Team Insights'</span>),
+        <span class="text-[#CE9178]">'url'</span> => <span class="text-[#DCDCAA]">route</span>(<span class="text-[#CE9178]">'timetracker.index'</span>),
+        <span class="text-[#CE9178]">'icon'</span> => <span class="text-[#CE9178]">'bx bx-alarm'</span>,
+        <span class="text-[#CE9178]">'class'</span> => <span class="text-[#CE9178]">'menu-item'</span> . (<span class="text-[#DCDCAA]">request</span>()-><span class="text-[#DCDCAA]">is</span>(<span class="text-[#CE9178]">'timetracker*'</span>) ? <span class="text-[#CE9178]">' active open'</span> : <span class="text-[#CE9178]">''</span>),
+        <span class="text-[#CE9178]">'category'</span> => <span class="text-[#CE9178]">'team_monitoring_and_productivity_tracker'</span>,
+        <span class="text-[#CE9178]">'show'</span> => <span class="text-[#B5CEA8]">1</span>,
+        <span class="text-[#CE9178]">'submenus'</span> => [
+            [
+                <span class="text-[#CE9178]">'id'</span> => <span class="text-[#CE9178]">'productivity_dashboard'</span>,
+                <span class="text-[#CE9178]">'label'</span> => <span class="text-[#DCDCAA]">get_label</span>(<span class="text-[#CE9178]">'productivity_dashboard'</span>, <span class="text-[#CE9178]">'Productivity Dashboard'</span>),
+                <span class="text-[#CE9178]">'url'</span> => <span class="text-[#DCDCAA]">route</span>(<span class="text-[#CE9178]">'timetracker.index'</span>),
+                <span class="text-[#CE9178]">'show'</span> => <span class="text-[#DCDCAA]">isAdminOrHasAllDataAccess</span>() ? <span class="text-[#B5CEA8]">1</span> : <span class="text-[#B5CEA8]">0</span>,
+            ],
+        ],
+    ],
+];</pre>
+            </div>
+        </div>
+
+        <div class="mt-8 code-editor rounded-xl overflow-hidden">
+            <div class="bg-[#252526] px-4 py-3 flex items-center justify-between border-b border-[#9B5CFF]/30">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <span class="text-xs text-slate-400">routes/web.php</span>
+            </div>
+            <div class="p-6 overflow-x-auto">
+                <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words max-w-full"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\Facades\Route</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Plugins\TimeTracker\Controllers\TimeTrackerController</span>;
+
+<span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">middleware</span>([<span class="text-[#CE9178]">'web'</span>, <span class="text-[#CE9178]">'auth'</span>])-><span class="text-[#DCDCAA]">prefix</span>(<span class="text-[#CE9178]">'timetracker'</span>)-><span class="text-[#DCDCAA]">group</span>(<span class="text-[#569CD6]">function</span> () {
+    <span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">get</span>(<span class="text-[#CE9178]">'/'</span>, [<span class="text-[#4EC9B0]">TimeTrackerController</span>::<span class="text-[#569CD6]">class</span>, <span class="text-[#CE9178]">'index'</span>])-><span class="text-[#DCDCAA]">name</span>(<span class="text-[#CE9178]">'timetracker.index'</span>);
+    <span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">post</span>(<span class="text-[#CE9178]">'/track'</span>, [<span class="text-[#4EC9B0]">TimeTrackerController</span>::<span class="text-[#569CD6]">class</span>, <span class="text-[#CE9178]">'storeTime'</span>]);
+    <span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">get</span>(<span class="text-[#CE9178]">'/configuration'</span>, [<span class="text-[#4EC9B0]">TimeTrackerController</span>::<span class="text-[#569CD6]">class</span>, <span class="text-[#CE9178]">'configuration'</span>])
+        -><span class="text-[#DCDCAA]">name</span>(<span class="text-[#CE9178]">'timetracker.configuration'</span>);
+});</pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- DETAILED GUIDE SECTION -->
+    <section id="guide" class="max-w-7xl mx-auto px-6 py-20">
+        <h2 class="text-3xl font-bold mb-4 text-center gradient-text">Complete Development Guide</h2>
+        <p class="text-center text-slate-400 mb-12 max-w-2xl mx-auto">
+            A comprehensive guide covering everything you need to build, test, and deploy Taskify plugins
+        </p>
+
+        <!-- Guide Tabs -->
+        <div class="flex flex-wrap gap-2 mb-8 justify-center border-b border-white/10 pb-4">
+            <button class="guide-tab-btn active px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="quickstart">
+                Quick Start
+            </button>
+            <button class="guide-tab-btn px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="structure">
+                Structure
+            </button>
+            <button class="guide-tab-btn px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="service-provider">
+                Service Provider
+            </button>
+            <button class="guide-tab-btn px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="routes">
+                Routes & Controllers
+            </button>
+            <button class="guide-tab-btn px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="database">
+                Database
+            </button>
+            <button class="guide-tab-btn px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="views">
+                Views
+            </button>
+            <button class="guide-tab-btn px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="menus">
+                Menus
+            </button>
+            <button class="guide-tab-btn px-6 py-3 rounded-lg text-sm font-medium transition" data-tab="permissions">
+                Permissions
+            </button>
+        </div>
+
+        <!-- Guide Content -->
+        <div class="guide-content-container">
+            <!-- Quick Start Tab -->
+            <div class="guide-tab-content active" id="tab-quickstart">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Quick Start Guide</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">1. Create Plugin Directory</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Create a new folder in the <code class="text-[#9B5CFF]">plugins/</code> directory. Use PascalCase for the folder name (e.g., <code class="text-[#9B5CFF]">MyPlugin</code>).
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Terminal</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words">mkdir -p plugins/MyPlugin</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">2. Create plugin.json</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Create a <code class="text-[#9B5CFF]">plugin.json</code> file in your plugin root with the required metadata.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">plugin.json</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words">{
+  "name": "Taskify - My Plugin",
+  "slug": "my-plugin",
+  "description": "Description of your plugin",
+  "version": "1.0.0",
+  "enabled": true,
+  "provider": "Plugins\\MyPlugin\\Providers\\MyPluginServiceProvider"
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">3. Create Service Provider</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Create your Service Provider in <code class="text-[#9B5CFF]">Providers/MyPluginServiceProvider.php</code>.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Providers/MyPluginServiceProvider.php</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">namespace</span> <span class="text-[#4EC9B0]">Plugins\MyPlugin\Providers</span>;
+
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\ServiceProvider</span>;
+
+<span class="text-[#569CD6]">class</span> <span class="text-[#4EC9B0]">MyPluginServiceProvider</span> <span class="text-[#569CD6]">extends</span> <span class="text-[#4EC9B0]">ServiceProvider</span>
+{
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">boot</span>(): <span class="text-[#569CD6]">void</span>
+    {
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadRoutesFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../routes/web.php'</span>);
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadViewsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Resources/views'</span>, <span class="text-[#CE9178]">'my-plugin'</span>);
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadMigrationsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Database/Migrations'</span>);
+    }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">4. Enable and Test</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Set <code class="text-[#9B5CFF]">"enabled": true</code> in plugin.json, then run migrations and test your plugin.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Terminal</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words">php artisan migrate
+php artisan cache:clear</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Structure Tab -->
+            <div class="guide-tab-content" id="tab-structure">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Plugin Directory Structure</h3>
+
+                    <p class="text-slate-300 mb-6 card-text">
+                        Follow this standard directory structure for maintainable plugins. All plugins should be placed in the <code class="text-[#9B5CFF]">plugins/</code> directory.
+                    </p>
+
+                    <div class="code-editor rounded-lg overflow-hidden mb-6">
+                        <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                            <span class="text-xs text-slate-400">Directory Structure</span>
+                        </div>
+                        <div class="p-4 overflow-x-auto">
+                            <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words">MyPlugin/
+├── Controllers/              # Plugin controllers
+│   └── MyPluginController.php
+├── Models/                   # Eloquent models
+│   └── MyModel.php
+├── Database/
+│   └── Migrations/          # Database migrations
+│       └── YYYY_MM_DD_HHMMSS_create_table.php
+├── Providers/
+│   └── MyPluginServiceProvider.php
+├── routes/
+│   ├── web.php             # Web routes
+│   └── api.php             # API routes (optional)
+├── Resources/
+│   ├── views/              # Blade views
+│   │   └── my-plugin/
+│   │       └── index.blade.php
+│   └── lang/
+│       └── plugin_labels.php
+├── public/
+│   ├── js/                 # JavaScript files
+│   ├── css/                # CSS files
+│   └── img/                # Images
+├── Services/               # Business logic (optional)
+├── Commands/               # Artisan commands (optional)
+├── Middleware/             # Custom middleware (optional)
+├── menus.php               # Menu configuration
+├── plugin.json             # Plugin manifest (REQUIRED)
+└── README.md               # Plugin documentation</pre>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="glass-card rounded-lg p-4">
+                            <h4 class="font-semibold mb-2 text-[#4FFFEA]">Naming Conventions</h4>
+                            <ul class="space-y-2 text-sm text-slate-300">
+                                <li><strong class="text-white">Plugin Folder:</strong> PascalCase (e.g., <code class="text-[#9B5CFF]">SocialMediaManagement</code>)</li>
+                                <li><strong class="text-white">Controllers:</strong> PascalCase + Controller suffix</li>
+                                <li><strong class="text-white">Models:</strong> PascalCase (singular)</li>
+                                <li><strong class="text-white">Routes:</strong> kebab-case with plugin prefix</li>
+                                <li><strong class="text-white">Views:</strong> kebab-case folder names</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Provider Tab -->
+            <div class="guide-tab-content" id="tab-service-provider">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Service Provider</h3>
+
+                    <p class="text-slate-300 mb-6 card-text">
+                        The Service Provider is the heart of your plugin. It registers routes, views, migrations, translations, assets, commands, and services.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Complete Service Provider Example</h4>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">TimeTrackerServiceProvider.php</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">namespace</span> <span class="text-[#4EC9B0]">Plugins\TimeTracker\Providers</span>;
+
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\ServiceProvider</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\Facades\Log</span>;
+
+<span class="text-[#569CD6]">class</span> <span class="text-[#4EC9B0]">TimeTrackerServiceProvider</span> <span class="text-[#569CD6]">extends</span> <span class="text-[#4EC9B0]">ServiceProvider</span>
+{
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">boot</span>(): <span class="text-[#569CD6]">void</span>
+    {
+        <span class="text-[#808080]">// Load routes</span>
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadRoutesFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../routes/web.php'</span>);
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadRoutesFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../routes/api.php'</span>);
+
+        <span class="text-[#808080]">// Load views</span>
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadViewsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Resources/views'</span>, <span class="text-[#CE9178]">'timetracker'</span>);
+
+        <span class="text-[#808080]">// Load migrations</span>
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadMigrationsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Database/Migrations'</span>);
+
+        <span class="text-[#808080]">// Load translations</span>
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">loadTranslationsFrom</span>(<span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../Resources/lang'</span>, <span class="text-[#CE9178]">'timetracker'</span>);
+
+        <span class="text-[#808080]">// Publish assets</span>
+        <span class="text-[#4EC9B0]">$this</span>-><span class="text-[#DCDCAA]">publishes</span>([
+            <span class="text-[#CE9178]">__DIR__</span> . <span class="text-[#CE9178]">'/../public/js'</span> => <span class="text-[#DCDCAA]">public_path</span>(<span class="text-[#CE9178]">'assets/js/timetracker-plugin'</span>),
+        ], [<span class="text-[#CE9178]">'timetracker-assets'</span>, <span class="text-[#CE9178]">'public'</span>]);
+    }
+
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">register</span>(): <span class="text-[#569CD6]">void</span>
+    {
+        <span class="text-[#808080]">// Register commands, services, etc.</span>
+    }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="glass-card rounded-lg p-4">
+                                <h4 class="font-semibold mb-2 text-[#4FFFEA]">Key Methods</h4>
+                                <ul class="space-y-2 text-sm text-slate-300">
+                                    <li><code class="text-[#9B5CFF]">loadRoutesFrom()</code> - Register routes</li>
+                                    <li><code class="text-[#9B5CFF]">loadViewsFrom()</code> - Register views</li>
+                                    <li><code class="text-[#9B5CFF]">loadMigrationsFrom()</code> - Register migrations</li>
+                                    <li><code class="text-[#9B5CFF]">loadTranslationsFrom()</code> - Register translations</li>
+                                    <li><code class="text-[#9B5CFF]">publishes()</code> - Publish assets</li>
+                                </ul>
+                            </div>
+                            <div class="glass-card rounded-lg p-4">
+                                <h4 class="font-semibold mb-2 text-[#4FFFEA]">Best Practices</h4>
+                                <ul class="space-y-2 text-sm text-slate-300">
+                                    <li>Always use <code class="text-[#9B5CFF]">__DIR__</code> for paths</li>
+                                    <li>Log plugin version on load</li>
+                                    <li>Auto-publish assets if needed</li>
+                                    <li>Register commands in <code class="text-[#9B5CFF]">register()</code></li>
+                                    <li>Use namespaces for views</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Routes & Controllers Tab -->
+            <div class="guide-tab-content" id="tab-routes">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Routes & Controllers</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Route Definition</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Define routes in <code class="text-[#9B5CFF]">routes/web.php</code> with proper middleware and prefixes.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">routes/web.php</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\Facades\Route</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Plugins\MyPlugin\Controllers\MyPluginController</span>;
+
+<span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">middleware</span>([<span class="text-[#CE9178]">'web'</span>, <span class="text-[#CE9178]">'auth'</span>])-><span class="text-[#DCDCAA]">prefix</span>(<span class="text-[#CE9178]">'my-plugin'</span>)-><span class="text-[#DCDCAA]">group</span>(<span class="text-[#569CD6]">function</span> () {
+    <span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">get</span>(<span class="text-[#CE9178]">'/'</span>, [<span class="text-[#4EC9B0]">MyPluginController</span>::<span class="text-[#569CD6]">class</span>, <span class="text-[#CE9178]">'index'</span>])-><span class="text-[#DCDCAA]">name</span>(<span class="text-[#CE9178]">'my-plugin.index'</span>);
+    <span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">post</span>(<span class="text-[#CE9178]">'/store'</span>, [<span class="text-[#4EC9B0]">MyPluginController</span>::<span class="text-[#569CD6]">class</span>, <span class="text-[#CE9178]">'store'</span>])-><span class="text-[#DCDCAA]">name</span>(<span class="text-[#CE9178]">'my-plugin.store'</span>);
+});</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Controller Example</h4>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Controllers/MyPluginController.php</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">namespace</span> <span class="text-[#4EC9B0]">Plugins\MyPlugin\Controllers</span>;
+
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">App\Http\Controllers\Controller</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Http\Request</span>;
+
+<span class="text-[#569CD6]">class</span> <span class="text-[#4EC9B0]">MyPluginController</span> <span class="text-[#569CD6]">extends</span> <span class="text-[#4EC9B0]">Controller</span>
+{
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">index</span>()
+    {
+        <span class="text-[#569CD6]">return</span> <span class="text-[#DCDCAA]">view</span>(<span class="text-[#CE9178]">'my-plugin::index'</span>);
+    }
+
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">store</span>(<span class="text-[#4EC9B0]">Request</span> <span class="text-[#4EC9B0]">$request</span>)
+    {
+        <span class="text-[#4EC9B0]">$validated</span> = <span class="text-[#4EC9B0]">$request</span>-><span class="text-[#DCDCAA]">validate</span>([
+            <span class="text-[#CE9178]">'name'</span> => <span class="text-[#CE9178]">'required|string'</span>,
+        ]);
+
+        <span class="text-[#808080]">// Your logic here</span>
+
+        <span class="text-[#569CD6]">return</span> <span class="text-[#DCDCAA]">redirect</span>()-><span class="text-[#DCDCAA]">route</span>(<span class="text-[#CE9178]">'my-plugin.index'</span>);
+    }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Tab -->
+            <div class="guide-tab-content" id="tab-database">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Database & Migrations</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Creating Migrations</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Create migrations in <code class="text-[#9B5CFF]">Database/Migrations/</code> following Laravel's naming convention.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Database/Migrations/2025_01_15_120000_create_items_table.php</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Database\Migrations\Migration</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Database\Schema\Blueprint</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\Facades\Schema</span>;
+<span class="text-[#569CD6]">use</span> <span class="text-[#4EC9B0]">Illuminate\Support\Facades\DB</span>;
+
+<span class="text-[#569CD6]">return new class extends</span> <span class="text-[#4EC9B0]">Migration</span>
+{
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">up</span>(): <span class="text-[#569CD6]">void</span>
+    {
+        <span class="text-[#4EC9B0]">Schema</span>::<span class="text-[#DCDCAA]">create</span>(<span class="text-[#CE9178]">'items'</span>, <span class="text-[#569CD6]">function</span> (<span class="text-[#4EC9B0]">Blueprint</span> <span class="text-[#4EC9B0]">$table</span>) {
+            <span class="text-[#4EC9B0]">$table</span>-><span class="text-[#DCDCAA]">id</span>();
+            <span class="text-[#4EC9B0]">$table</span>-><span class="text-[#DCDCAA]">foreignId</span>(<span class="text-[#CE9178]">'user_id'</span>)-><span class="text-[#DCDCAA]">constrained</span>()-><span class="text-[#DCDCAA]">onDelete</span>(<span class="text-[#CE9178]">'cascade'</span>);
+            <span class="text-[#4EC9B0]">$table</span>-><span class="text-[#DCDCAA]">string</span>(<span class="text-[#CE9178]">'name'</span>);
+            <span class="text-[#4EC9B0]">$table</span>-><span class="text-[#DCDCAA]">timestamps</span>();
+        });
+
+        <span class="text-[#808080]">// Create permissions</span>
+        <span class="text-[#4EC9B0]">DB</span>::<span class="text-[#DCDCAA]">table</span>(<span class="text-[#CE9178]">'permissions'</span>)-><span class="text-[#DCDCAA]">insert</span>([
+            [<span class="text-[#CE9178]">'name'</span> => <span class="text-[#CE9178]">'manage_items'</span>, <span class="text-[#CE9178]">'guard_name'</span> => <span class="text-[#CE9178]">'web'</span>, <span class="text-[#CE9178]">'created_at'</span> => <span class="text-[#DCDCAA]">now</span>(), <span class="text-[#CE9178]">'updated_at'</span> => <span class="text-[#DCDCAA]">now</span>()],
+        ]);
+    }
+
+    <span class="text-[#569CD6]">public function</span> <span class="text-[#DCDCAA]">down</span>(): <span class="text-[#569CD6]">void</span>
+    {
+        <span class="text-[#4EC9B0]">Schema</span>::<span class="text-[#DCDCAA]">dropIfExists</span>(<span class="text-[#CE9178]">'items'</span>);
+    }
+};</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Views Tab -->
+            <div class="guide-tab-content" id="tab-views">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Views & Templates</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Using Views in Controllers</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Render views using the namespace defined in your Service Provider.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Controller</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]">return</span> <span class="text-[#DCDCAA]">view</span>(<span class="text-[#CE9178]">'my-plugin::index'</span>, [<span class="text-[#CE9178]">'data'</span> => <span class="text-[#4EC9B0]">$data</span>]);</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Blade Template Example</h4>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Resources/views/my-plugin/index.blade.php</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words">@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h3>{{ get_label('my_plugin', 'My Plugin') }}</h3>
+    <a href="{{ route('my-plugin.create') }}" class="btn btn-primary">
+        {{ get_label('create', 'Create') }}
+    </a>
+</div>
+@endsection</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card rounded-lg p-4">
+                            <h4 class="font-semibold mb-2 text-[#4FFFEA]">Important Guidelines</h4>
+                            <ul class="space-y-2 text-sm text-slate-300">
+                                <li>Always use <code class="text-[#9B5CFF]">get_label()</code> for all text - never hardcode</li>
+                                <li>Use <code class="text-[#9B5CFF]">@extends('layouts.app')</code> to inherit Taskify's layout</li>
+                                <li>No inline CSS/JS - use existing classes or custom.css</li>
+                                <li>Prefix views with your plugin namespace: <code class="text-[#9B5CFF]">my-plugin::</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menus Tab -->
+            <div class="guide-tab-content" id="tab-menus">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Menu Integration</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Creating menus.php</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Create a <code class="text-[#9B5CFF]">menus.php</code> file in your plugin root to register menu items.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">menus.php</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]"><?php</span>
+
+<span class="text-[#569CD6]">return</span> [
+    [
+        <span class="text-[#CE9178]">'id'</span> => <span class="text-[#CE9178]">'my_plugin_menu'</span>,
+        <span class="text-[#CE9178]">'label'</span> => <span class="text-[#DCDCAA]">get_label</span>(<span class="text-[#CE9178]">'my_plugin'</span>, <span class="text-[#CE9178]">'My Plugin'</span>),
+        <span class="text-[#CE9178]">'url'</span> => <span class="text-[#DCDCAA]">route</span>(<span class="text-[#CE9178]">'my-plugin.index'</span>),
+        <span class="text-[#CE9178]">'icon'</span> => <span class="text-[#CE9178]">'bx bx-icon'</span>,
+        <span class="text-[#CE9178]">'class'</span> => <span class="text-[#CE9178]">'menu-item'</span> . (<span class="text-[#DCDCAA]">request</span>()-><span class="text-[#DCDCAA]">is</span>(<span class="text-[#CE9178]">'my-plugin*'</span>) ? <span class="text-[#CE9178]">' active'</span> : <span class="text-[#CE9178]">''</span>),
+        <span class="text-[#CE9178]">'category'</span> => <span class="text-[#CE9178]">'utilities'</span>,
+        <span class="text-[#CE9178]">'show'</span> => <span class="text-[#DCDCAA]">isAdminOrHasAllDataAccess</span>() || <span class="text-[#DCDCAA]">auth</span>()-><span class="text-[#DCDCAA]">user</span>()-><span class="text-[#DCDCAA]">can</span>(<span class="text-[#CE9178]">'manage_items'</span>) ? <span class="text-[#B5CEA8]">1</span> : <span class="text-[#B5CEA8]">0</span>,
+        <span class="text-[#CE9178]">'submenus'</span> => [
+            [
+                <span class="text-[#CE9178]">'id'</span> => <span class="text-[#CE9178]">'plugin_items'</span>,
+                <span class="text-[#CE9178]">'label'</span> => <span class="text-[#DCDCAA]">get_label</span>(<span class="text-[#CE9178]">'items'</span>, <span class="text-[#CE9178]">'Items'</span>),
+                <span class="text-[#CE9178]">'url'</span> => <span class="text-[#DCDCAA]">route</span>(<span class="text-[#CE9178]">'my-plugin.index'</span>),
+                <span class="text-[#CE9178]">'show'</span> => <span class="text-[#B5CEA8]">1</span>,
+            ],
+        ],
+    ],
+];</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="glass-card rounded-lg p-4">
+                                <h4 class="font-semibold mb-2 text-[#4FFFEA]">Menu Properties</h4>
+                                <ul class="space-y-1 text-xs text-slate-300">
+                                    <li><code class="text-[#9B5CFF]">id</code> - Unique identifier</li>
+                                    <li><code class="text-[#9B5CFF]">label</code> - Menu text (use get_label())</li>
+                                    <li><code class="text-[#9B5CFF]">url</code> - Route URL</li>
+                                    <li><code class="text-[#9B5CFF]">icon</code> - Boxicons class</li>
+                                    <li><code class="text-[#9B5CFF]">category</code> - Menu category</li>
+                                    <li><code class="text-[#9B5CFF]">show</code> - Visibility (1 or 0)</li>
+                                </ul>
+                            </div>
+                            <div class="glass-card rounded-lg p-4">
+                                <h4 class="font-semibold mb-2 text-[#4FFFEA]">Best Practices</h4>
+                                <ul class="space-y-1 text-xs text-slate-300">
+                                    <li>Always use <code class="text-[#9B5CFF]">get_label()</code> for labels</li>
+                                    <li>Check permissions in <code class="text-[#9B5CFF]">show</code> property</li>
+                                    <li>Use Boxicons for icons</li>
+                                    <li>Set active state with route checking</li>
+                                    <li>Support submenus for complex navigation</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissions Tab -->
+            <div class="guide-tab-content" id="tab-permissions">
+                <div class="glass-card rounded-xl p-8 gradient-border">
+                    <h3 class="text-2xl font-bold mb-6 gradient-text">Permissions & Access Control</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Creating Permissions</h4>
+                            <p class="text-slate-300 mb-4 card-text">
+                                Create permissions in your migration's <code class="text-[#9B5CFF]">up()</code> method.
+                            </p>
+                            <div class="code-editor rounded-lg overflow-hidden">
+                                <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                    <span class="text-xs text-slate-400">Migration</span>
+                                </div>
+                                <div class="p-4 overflow-x-auto">
+                                    <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#4EC9B0]">DB</span>::<span class="text-[#DCDCAA]">table</span>(<span class="text-[#CE9178]">'permissions'</span>)-><span class="text-[#DCDCAA]">insert</span>([
+    [<span class="text-[#CE9178]">'name'</span> => <span class="text-[#CE9178]">'manage_items'</span>, <span class="text-[#CE9178]">'guard_name'</span> => <span class="text-[#CE9178]">'web'</span>, <span class="text-[#CE9178]">'created_at'</span> => <span class="text-[#DCDCAA]">now</span>(), <span class="text-[#CE9178]">'updated_at'</span> => <span class="text-[#DCDCAA]">now</span>()],
+    [<span class="text-[#CE9178]">'name'</span> => <span class="text-[#CE9178]">'create_items'</span>, <span class="text-[#CE9178]">'guard_name'</span> => <span class="text-[#CE9178]">'web'</span>, <span class="text-[#CE9178]">'created_at'</span> => <span class="text-[#DCDCAA]">now</span>(), <span class="text-[#CE9178]">'updated_at'</span> => <span class="text-[#DCDCAA]">now</span>()],
+]);</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3 text-[#4FFFEA]">Using Permissions</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="code-editor rounded-lg overflow-hidden">
+                                    <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                        <span class="text-xs text-slate-400">In Routes</span>
+                                    </div>
+                                    <div class="p-4 overflow-x-auto">
+                                        <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#4EC9B0]">Route</span>::<span class="text-[#DCDCAA]">middleware</span>([<span class="text-[#CE9178]">'web'</span>, <span class="text-[#CE9178]">'auth'</span>, <span class="text-[#CE9178]">'customcan:manage_items'</span>])-><span class="text-[#DCDCAA]">group</span>(<span class="text-[#569CD6]">function</span> () {
+    <span class="text-[#808080]">// Routes here</span>
+});</pre>
+                                    </div>
+                                </div>
+                                <div class="code-editor rounded-lg overflow-hidden">
+                                    <div class="bg-[#252526] px-4 py-2 border-b border-[#9B5CFF]/30">
+                                        <span class="text-xs text-slate-400">In Controllers</span>
+                                    </div>
+                                    <div class="p-4 overflow-x-auto">
+                                        <pre class="text-sm font-mono text-slate-300 whitespace-pre-wrap break-words"><span class="text-[#569CD6]">if</span> (!<span class="text-[#DCDCAA]">isAdminOrHasAllDataAccess</span>() && !<span class="text-[#DCDCAA]">auth</span>()-><span class="text-[#DCDCAA]">user</span>()-><span class="text-[#DCDCAA]">can</span>(<span class="text-[#CE9178]">'manage_items'</span>)) {
+    <span class="text-[#DCDCAA]">abort</span>(<span class="text-[#B5CEA8]">403</span>);
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURE HIGHLIGHTS GRID -->
+    <section class="max-w-7xl mx-auto px-6 py-20 bg-black/20">
+        <h2 class="text-3xl font-bold mb-10 text-center gradient-text">Why Plugins?</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold mb-2">Dynamic Routes</h4>
+                <p class="text-sm text-slate-300 card-text">Register web and API routes that integrate seamlessly with the core system.</p>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold mb-2">Menu Registration</h4>
+                <p class="text-sm text-slate-300 card-text">Add menu items to the main navigation with custom icons and permissions.</p>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold mb-2">Custom Pages</h4>
+                <p class="text-sm text-slate-300 card-text">Create custom Blade views with full access to Taskify's layout system.</p>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold mb-2">API Access</h4>
+                <p class="text-sm text-slate-300 card-text">Build RESTful APIs with Laravel's routing and authentication system.</p>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold mb-2">Scheduled Commands</h4>
+                <p class="text-sm text-slate-300 card-text">Register Artisan commands and schedule automated tasks with Laravel's scheduler.</p>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 gradient-border hover:scale-105 transition">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-[#9B5CFF] to-[#4FFFEA] flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold mb-2">Asset Publishing</h4>
+                <p class="text-sm text-slate-300 card-text">Automatically publish JavaScript, CSS, and image assets to the public directory.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CALL TO ACTION SECTION -->
+    <section class="max-w-7xl mx-auto px-6 py-20 text-center">
+        <div class="glass-card rounded-2xl p-12 gradient-border neon-glow">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">
+                Start Building Your First Plugin Today
+            </h2>
+            <p class="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
+                Join the ecosystem and extend Taskify with powerful, modular plugins. Get started in minutes with our comprehensive guide.
+            </p>
+            <a href="#guide" class="inline-block px-8 py-4 rounded-full border-2 border-[#9B5CFF] text-lg font-medium hover:bg-[#9B5CFF] hover:text-black transition neon-glow">
+                Open Plugin Guide
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 py-12 bg-black/40">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h4 class="font-semibold mb-4 gradient-text">Taskify Plugin Dev Kit</h4>
+                    <p class="text-sm text-slate-400">
+                        Build powerful extensions for the Taskify ecosystem.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Docs</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#guide" class="hover:text-white transition">Documentation</a></li>
+                        <li><a href="#examples" class="hover:text-white transition">API Reference</a></li>
+                        <li><a href="#" class="hover:text-white transition">Tutorials</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-white transition">GitHub</a></li>
+                        <li><a href="#examples" class="hover:text-white transition">Examples</a></li>
+                        <li><a href="#" class="hover:text-white transition">Community</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition">Contact</a></li>
+                        <li><a href="#" class="hover:text-white transition">Feedback</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 text-center text-sm text-slate-400">
+                © 2025 Taskify Plugin Development Guide – All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Guide Tabs -->
+    <script>
+        // Guide Tab Switching with Error Handling
+        (function() {
+            function initTabs() {
+                try {
+                    const tabButtons = document.querySelectorAll('.guide-tab-btn');
+                    const tabContents = document.querySelectorAll('.guide-tab-content');
+
+                    // Debug: Log if elements are found
+                    if (tabButtons.length === 0) {
+                        console.warn('No tab buttons found. Make sure elements with class "guide-tab-btn" exist.');
+                        return;
+                    }
+
+                    if (tabContents.length === 0) {
+                        console.warn('No tab content found. Make sure elements with class "guide-tab-content" exist.');
+                        return;
+                    }
+
+                    // Initialize tabs
+                    tabButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            try {
+                                const targetTab = this.getAttribute('data-tab');
+
+                                if (!targetTab) {
+                                    console.warn('Tab button missing data-tab attribute');
+                                    return;
+                                }
+
+                                // Remove active class from all buttons and contents
+                                tabButtons.forEach(btn => btn.classList.remove('active'));
+                                tabContents.forEach(content => content.classList.remove('active'));
+
+                                // Add active class to clicked button
+                                this.classList.add('active');
+
+                                // Find and activate corresponding content
+                                const targetContent = document.getElementById('tab-' + targetTab);
+                                if (targetContent) {
+                                    targetContent.classList.add('active');
+                                } else {
+                                    console.warn('Tab content not found for: tab-' + targetTab);
+                                }
+                            } catch (error) {
+                                console.error('Error switching tabs:', error);
+                            }
+                        });
+                    });
+
+                    // Ensure first tab is active on load
+                    const firstButton = document.querySelector('.guide-tab-btn.active');
+                    const firstContent = document.querySelector('.guide-tab-content.active');
+
+                    if (firstButton && firstContent) {
+                        // Already set, do nothing
+                    } else if (firstButton) {
+                        const firstTab = firstButton.getAttribute('data-tab');
+                        const firstTabContent = document.getElementById('tab-' + firstTab);
+                        if (firstTabContent) {
+                            firstTabContent.classList.add('active');
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error initializing tabs:', error);
+                }
+            }
+
+            // Try to initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initTabs);
+            } else {
+                // DOM is already loaded
+                initTabs();
+            }
+
+            // Fallback: Try again after a short delay
+            setTimeout(initTabs, 100);
+        })();
+    </script>
+
+</body>
+</html>
