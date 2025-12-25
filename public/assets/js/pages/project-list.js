@@ -68,19 +68,7 @@ addDebouncedEventListener('#project_status_filter, #project_priority_filter, #pr
 });
 $(document).on('click', '.clear-projects-filters', function (e) {
     e.preventDefault();
-<<<<<<< HEAD
-    $('#project_date_between').val('');
-    $('#project_date_between_from').val('');
-    $('#project_date_between_to').val('');
-    $('#project_start_date_between').val('');
-    $('#project_end_date_between').val('');
-    $('#project_start_date_from').val('');
-    $('#project_start_date_to').val('');
-    $('#project_end_date_from').val('');
-    $('#project_end_date_to').val('');
-=======
     window.clearDateRangeFilters('project');
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#project_user_filter').val('').trigger('change', [0]);
     $('#project_client_filter').val('').trigger('change', [0]);
     $('#project_status_filter').val('').trigger('change', [0]);
@@ -97,31 +85,7 @@ $('#viewAssignedModal').on('hidden.bs.modal', function (e) {
 })
 // Initialize advanced date range filters with presets
 $(document).ready(function () {
-<<<<<<< HEAD
-    // Initialize date range filters with preset ranges
-    initAdvancedDateRangePicker({
-        selector: '#project_date_between',
-        hiddenFrom: '#project_date_between_from',
-        hiddenTo: '#project_date_between_to',
-        tableId: 'projects_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#project_start_date_between',
-        hiddenFrom: '#project_start_date_from',
-        hiddenTo: '#project_start_date_to',
-        tableId: 'projects_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#project_end_date_between',
-        hiddenFrom: '#project_end_date_from',
-        hiddenTo: '#project_end_date_to',
-        tableId: 'projects_table'
-    });
-=======
     // Initialized via custom.js standardized loop for standard filter IDs
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 });
 // Include table-filter-sync.js before this
 $(document).ready(function () {

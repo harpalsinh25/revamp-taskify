@@ -29,25 +29,7 @@ $visibleColumns = getUserPreferences('contracts');
     <div class="card">
         <div class="card-body">
             <div class="row">
-<<<<<<< HEAD
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" class="form-control" id="contract_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-                    </div>
-                </div>
-                <div class="mb-3 col-md-4">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="contract_start_date_between" class="form-control" placeholder="<?= get_label('starts_at_between', 'Starts at between') ?>" autocomplete="off">
-                    </div>
-                </div>
-                <div class="mb-3 col-md-4">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="contract_end_date_between" class="form-control" placeholder="<?= get_label('ends_at_between', 'Ends at between') ?>" autocomplete="off">
-                    </div>
-                </div>
-=======
                 <x-advanced-date-filters prefix="contract" />
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                 <div class="col-md-4 mb-3">
                     <select class="form-select projects_select" id="project_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>" multiple>
                     </select>
@@ -69,22 +51,12 @@ $visibleColumns = getUserPreferences('contracts');
                         <option value="partially_signed"><?= get_label('partially_signed', 'Partially signed') ?></option>
                     </select>
                 </div>
-<<<<<<< HEAD
-            </div>
-            <input type="hidden" id="contract_date_between_from">
-            <input type="hidden" id="contract_date_between_to">
-            <input type="hidden" name="start_date_from" id="contract_start_date_from">
-            <input type="hidden" name="start_date_to" id="contract_start_date_to">
-            <input type="hidden" name="end_date_from" id="contract_end_date_from">
-            <input type="hidden" name="end_date_to" id="contract_end_date_to">
-=======
                 <div class="col-md-4 mb-3 d-flex align-items-center">
                     <button class="btn btn-secondary clear-contracts-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
                         <i class="bx bx-refresh"></i>
                     </button>
                 </div>
             </div>
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="data_type" value="contracts">
                 <input type="hidden" id="data_table" value="contracts_table">

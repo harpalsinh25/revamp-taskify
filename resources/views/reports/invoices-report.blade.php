@@ -73,25 +73,7 @@
         <div class="card-body">
             <!-- Filters Row -->
             <div class="row">
-<<<<<<< HEAD
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" class="form-control" id="filter_date_range" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="report_start_date_between" class="form-control" placeholder="<?= get_label('from_date_between', 'From date between') ?>" autocomplete="off">
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="report_end_date_between" class="form-control" placeholder="<?= get_label('to_date_between', 'To date between') ?>" autocomplete="off">
-                    </div>
-                </div>
-=======
                 <x-advanced-date-filters prefix="report" />
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                 <div class="col-md-4 mb-3">
                     <select class="form-select js-example-basic-multiple" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
                         <option value="estimate"><?= get_label('estimates', 'Estimates') ?></option>
@@ -115,20 +97,6 @@
                 </div>
                 @endif
             </div>
-<<<<<<< HEAD
-            <input type="hidden" id="filter_date_range_from">
-            <input type="hidden" id="filter_date_range_to">
-            <input type="hidden" id="filter_start_date_from">
-            <input type="hidden" id="filter_start_date_to">
-            <input type="hidden" id="filter_end_date_from">
-            <input type="hidden" id="filter_end_date_to">
-            <div class="row mb-2">
-                <!-- Export Button -->
-                <div class="col-md-12 col-lg-12 d-flex align-items-center justify-content-md-end mb-md-0 mb-2">
-                    <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_report', 'Export Report') }}">
-                        <i class="bx bx-export"></i>
-                    </button>
-=======
             <div class="row mb-2">
                 <!-- Export Button -->
                 <div class="col-md-12 col-lg-12 d-flex align-items-center justify-content-md-end mb-md-0 mb-2 gap-2">
@@ -138,7 +106,6 @@
                     <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
                         <i class="bx bx-refresh"></i>
                     </button>
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                 </div>
             </div>
             @php
@@ -187,49 +154,5 @@
     var invoices_report_export_url = "{{ route('reports.export-invoices-report') }}";
 </script>
 <script src="{{ asset('assets/js/pages/invoices-report.js') }}?v={{ time() }}"></script>
-<<<<<<< HEAD
-<script>
-    // Force re-initialization of date filters with presets
-    $(window).on('load', function() {
-        setTimeout(function() {
-            // Destroy and reinitialize date filters
-            if ($('#filter_date_range').data('daterangepicker')) {
-                $('#filter_date_range').data('daterangepicker').remove();
-            }
-            if ($('#report_start_date_between').data('daterangepicker')) {
-                $('#report_start_date_between').data('daterangepicker').remove();
-            }
-            if ($('#report_end_date_between').data('daterangepicker')) {
-                $('#report_end_date_between').data('daterangepicker').remove();
-            }
-
-            // Reinitialize with advanced presets
-            if (typeof initAdvancedDateRangePicker === 'function') {
-                initAdvancedDateRangePicker({
-                    selector: '#filter_date_range',
-                    hiddenFrom: '#filter_date_range_from',
-                    hiddenTo: '#filter_date_range_to',
-                    tableId: 'invoices_report_table'
-                });
-
-                initAdvancedDateRangePicker({
-                    selector: '#report_start_date_between',
-                    hiddenFrom: '#filter_start_date_from',
-                    hiddenTo: '#filter_start_date_to',
-                    tableId: 'invoices_report_table'
-                });
-
-                initAdvancedDateRangePicker({
-                    selector: '#report_end_date_between',
-                    hiddenFrom: '#filter_end_date_from',
-                    hiddenTo: '#filter_end_date_to',
-                    tableId: 'invoices_report_table'
-                });
-            }
-        }, 500);
-    });
-</script>
-=======
 @endsection
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
-@endsection
+

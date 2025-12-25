@@ -9,31 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 // Initialize advanced date range filters with presets
 $(document).ready(function () {
-<<<<<<< HEAD
-    // Initialize date range filters with preset ranges
-    initAdvancedDateRangePicker({
-        selector: '#lr_date_between',
-        hiddenFrom: '#lr_date_between_from',
-        hiddenTo: '#lr_date_between_to',
-        tableId: 'lr_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#lr_start_date_between',
-        hiddenFrom: '#lr_start_date_from',
-        hiddenTo: '#lr_start_date_to',
-        tableId: 'lr_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#lr_end_date_between',
-        hiddenFrom: '#lr_end_date_from',
-        hiddenTo: '#lr_end_date_to',
-        tableId: 'lr_table'
-    });
-=======
     // Initialized via custom.js standardized loop for standard filter IDs
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 });
 
 function queryParamsLr(p) {
@@ -74,12 +50,7 @@ addDebouncedEventListener('#lr_status_filter, #lr_user_filter, #lr_action_by_fil
 
 $(document).on('click', '.clear-leave-requests-filters', function (e) {
     e.preventDefault();
-<<<<<<< HEAD
-    $('#lr_date_between, #lr_start_date_between, #lr_end_date_between').val('');
-    $('#lr_date_between_from, #lr_date_between_to, #lr_start_date_from, #lr_start_date_to, #lr_end_date_from, #lr_end_date_to').val('');
-=======
     window.clearDateRangeFilters('lr');
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#lr_status_filter, #lr_user_filter, #lr_action_by_filter, #lr_type_filter').val(null).trigger('change');
 })
 

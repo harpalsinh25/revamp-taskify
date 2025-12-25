@@ -11,14 +11,6 @@ function queryParamsTasks(p) {
         typeof task_parent_id !== "undefined" && task_parent_id !== null
             ? task_parent_id
             : null;
-<<<<<<< HEAD
-
-        // task_date_between_from = $("#task_date_between_from").val();
-        // console.log("From Date: " + task_date_between_from);
-        // task_date_between_to = $("#task_date_between_to").val();
-        // console.log("To Date: " + task_date_between_to);
-=======
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     return {
         status_ids: $("#task_status_filter").val(),
         priority_ids: $("#task_priority_filter").val(),
@@ -82,7 +74,6 @@ function queryParamsUsersClients(p) {
 
 $(document).on("click", ".clear-tasks-filters", function (e) {
     e.preventDefault();
-<<<<<<< HEAD
     $("#task_date_between").val("");
     $("#task_date_between_from").val("");
     $("#task_date_between_to").val("");
@@ -92,9 +83,6 @@ $(document).on("click", ".clear-tasks-filters", function (e) {
     $("#task_start_date_to").val("");
     $("#task_end_date_from").val("");
     $("#task_end_date_to").val("");
-=======
-    window.clearDateRangeFilters('task');
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $("#task_project_filter").val("").trigger("change", [0]);
     $("#task_user_filter").val("").trigger("change", [0]);
     $("#task_client_filter").val("").trigger("change", [0]);
@@ -110,31 +98,7 @@ $("#viewAssignedModal").on("hidden.bs.modal", function (e) {
 
 // Initialize advanced date range filters with presets
 $(document).ready(function () {
-<<<<<<< HEAD
-    // Initialize date range filters with preset ranges
-    initAdvancedDateRangePicker({
-        selector: '#task_date_between',
-        hiddenFrom: '#task_date_between_from',
-        hiddenTo: '#task_date_between_to',
-        tableId: 'task_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#task_start_date_between',
-        hiddenFrom: '#task_start_date_from',
-        hiddenTo: '#task_start_date_to',
-        tableId: 'task_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#task_end_date_between',
-        hiddenFrom: '#task_end_date_from',
-        hiddenTo: '#task_end_date_to',
-        tableId: 'task_table'
-    });
-=======
     // Initialized via custom.js standardized loop for standard filter IDs
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 });
 
 // Include table-filter-sync.js before this

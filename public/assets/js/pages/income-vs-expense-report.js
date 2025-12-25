@@ -2,14 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to get current filters
     function getFilters() {
         // Get the values from hidden inputs
-<<<<<<< HEAD
-        var startDate = $('#filter_date_range_from').val();
-        console.log(startDate);
-        var endDate = $('#filter_date_range_to').val();
-=======
         var startDate = $('#report_date_between_from').val();
         var endDate = $('#report_date_between_to').val();
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 
         // Check if the input values are not empty
         if (startDate && endDate) {
@@ -89,28 +83,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Initialize advanced date range filter with preset ranges
-<<<<<<< HEAD
-    initAdvancedDateRangePicker({
-        selector: '#filter_date_range',
-        hiddenFrom: '#filter_date_range_from',
-        hiddenTo: '#filter_date_range_to',
-=======
     // We do this manually here because we need the custom callback
     initAdvancedDateRangePicker({
         selector: '#report_date_between',
         hiddenFrom: '#report_date_between_from',
         hiddenTo: '#report_date_between_to',
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         callback: function (start, end, label) {
             updateReport(); // Update report when dates are applied
         }
     });
 
-<<<<<<< HEAD
-    // Also trigger update on cancel
-    $('#filter_date_range').on('daterange:cancelled', function () {
-        updateReport(); // Update report when dates are cleared
-=======
     // Handle clear filters
     $(document).on('click', '.clear-report-filters', function (e) {
         e.preventDefault();
@@ -118,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#report_date_between_from').val('');
         $('#report_date_between_to').val('');
         updateReport();
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     });
 
     // Initialize report with default filters
@@ -139,13 +120,8 @@ $('#export_button').on('click', async function () {
     $exportButton.attr('disabled', true);
 
     try {
-<<<<<<< HEAD
-        var startDate = $('#filter_date_range_from').val();
-        var endDate = $('#filter_date_range_to').val();
-=======
         var startDate = $('#report_date_between_from').val();
         var endDate = $('#report_date_between_to').val();
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 
         // Build the URL conditionally
         var exportUrl = export_income_vs_expense_url;
@@ -174,18 +150,8 @@ $('#export_button').on('click', async function () {
 });
 
 async function performExport(url) {
-<<<<<<< HEAD
-    // Simulate a delay to represent the export process
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            window.open(url, '_blank');
-            resolve(); // Mark the export as complete
-        }, 2000); // Simulate a 2-second export delay
-    });
-=======
     // Open in new tab after a small delay
     setTimeout(() => {
         window.open(url, '_blank');
     }, 500);
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 }

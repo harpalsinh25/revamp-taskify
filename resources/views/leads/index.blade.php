@@ -74,17 +74,7 @@
                                 data-allow-clear="true" multiple>
                             </select>
                         </div>
-<<<<<<< HEAD
-                        <div class="col-md-3 mb-3">
-                            <input type="text" name="date_range" id="lead_date_range" class="form-control"
-                                placeholder="{{ get_label('filter_by_date_range', 'Filter by date range') }}"
-                                value="" autocomplete="off">
-                            <input type="hidden" name="start_date" id="lead_start_date" value="">
-                            <input type="hidden" name="end_date" id="lead_end_date" value="">
-                        </div>
-=======
                         <x-advanced-date-filters prefix="lead" :filters="['date_range']" colClass="col-md-3" />
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
                         <div class="col-md-3 mb-3">
                             <select class="form-select" id="selected_stages" name="stages[]"
                                 aria-label="Default select example"
@@ -92,14 +82,11 @@
                                 data-allow-clear="true" multiple>
                             </select>
                         </div>
-<<<<<<< HEAD
-=======
                         <div class="col-md-3 mb-3 d-flex align-items-center">
                             <button class="btn btn-secondary clear-leads-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
                                 <i class="bx bx-refresh"></i>
                             </button>
                         </div>
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 
                     </div>
                     <div class="table-responsive text-nowrap">

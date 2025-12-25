@@ -3,7 +3,6 @@ $('#sort').on('change', function (e) {
     location.href = setUrlParameter(location.href, 'sort', sort);
 });
 
-<<<<<<< HEAD
 
 function setUrlParameter(url, paramName, paramValue) {
     paramName = paramName.replace(/\s+/g, '-');
@@ -19,8 +18,6 @@ function setUrlParameter(url, paramName, paramValue) {
     return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
 }
 
-=======
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 $('#filter').click(function () {
     // Get the selected values from status select and other filters
     var statuses = $('#selected_statuses').val(); // Array of selected statuses

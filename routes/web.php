@@ -181,11 +181,7 @@ Route::middleware(['CheckInstallation'])->group(function () {
             ->name('system.purchase.check');
     });
     // ,'custom-verified'
-<<<<<<< HEAD
     Route::middleware(['multiguard', 'custom-verified'])->group(function () {
-=======
-    Route::middleware(['multiguard', 'custom-verified', 'system.check'])->group(function () {
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         Route::get('/home', [HomeController::class, 'index'])->name('home.index');
         Route::any('/dashboard/data', [HomeController::class, 'getDashboardData'])->name('home.dashboard-data');
         Route::get('/home/upcoming-birthdays', [HomeController::class, 'upcoming_birthdays']);

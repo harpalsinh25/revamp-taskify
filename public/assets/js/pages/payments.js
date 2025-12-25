@@ -6,13 +6,8 @@ function queryParams(p) {
         "user_id": $('#user_filter').val(),
         "invoice_id": $('#invoice_filter').val(),
         "pm_id": $('#payment_method_filter').val(),
-<<<<<<< HEAD
-        "date_from": $('#payment_date_from').val(),
-        "date_to": $('#payment_date_to').val(),
-=======
         "date_from": $('#payment_date_between_from').val(),
         "date_to": $('#payment_date_between_to').val(),
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -32,29 +27,6 @@ function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>'
 }
 
-<<<<<<< HEAD
-$('#payment_date_between').on('apply.daterangepicker', function (ev, picker) {
-    var fromDate = picker.startDate.format('YYYY-MM-DD');
-    var toDate = picker.endDate.format('YYYY-MM-DD');
-
-    $('#payment_date_from').val(fromDate);
-    $('#payment_date_to').val(toDate);
-
-    $('#table').bootstrapTable('refresh');
-});
-
-$('#payment_date_between').on('cancel.daterangepicker', function (ev, picker) {
-    $('#payment_date_from').val('');
-    $('#payment_date_to').val('');
-    $('#payment_date_between').val('');
-    picker.setStartDate(moment());
-    picker.setEndDate(moment());
-    picker.updateElement();
-    $('#table').bootstrapTable('refresh');
-});
-
-=======
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
 addDebouncedEventListener('#user_filter, #invoice_filter, #payment_method_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {
@@ -64,15 +36,9 @@ addDebouncedEventListener('#user_filter, #invoice_filter, #payment_method_filter
 
 $(document).on('click', '.clear-payments-filters', function (e) {
     e.preventDefault();
-<<<<<<< HEAD
-    $('#payment_date_from').val('');
-    $('#payment_date_to').val('');
-    $('#payment_date_between').val('');
-=======
     $('#payment_date_between').val('');
     $('#payment_date_between_from').val('');
     $('#payment_date_between_to').val('');
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#user_filter').val('').trigger('change', [0]);
     $('#invoice_filter').val('').trigger('change', [0]);
     $('#payment_method_filter').val('').trigger('change', [0]);

@@ -24,31 +24,6 @@ $(function () {
 });
 // Initialize advanced date range filters with preset ranges - FIRST before anything else
 $(document).ready(function () {
-<<<<<<< HEAD
-    // Initialize advanced date range filters FIRST
-    initAdvancedDateRangePicker({
-        selector: '#filter_date_range',
-        hiddenFrom: '#filter_date_range_from',
-        hiddenTo: '#filter_date_range_to',
-        tableId: 'projects_report_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#report_start_date_between',
-        hiddenFrom: '#filter_start_date_from',
-        hiddenTo: '#filter_start_date_to',
-        tableId: 'projects_report_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#report_end_date_between',
-        hiddenFrom: '#filter_end_date_from',
-        hiddenTo: '#filter_end_date_to',
-        tableId: 'projects_report_table'
-    });
-
-=======
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     // Export button
     $('#export_button').click(function () {
         var $exportButton = $(this);
@@ -69,21 +44,12 @@ function project_report_query_params(p) {
         client_ids: $('#client_filter').val(),
         status_ids: $('#status_filter').val(),
         priority_ids: $('#priority_filter').val(),
-<<<<<<< HEAD
-        date_between_from: $('#filter_date_range_from').val(),
-        date_between_to: $('#filter_date_range_to').val(),
-        start_date_from: $('#filter_start_date_from').val(),
-        start_date_to: $('#filter_start_date_to').val(),
-        end_date_from: $('#filter_end_date_from').val(),
-        end_date_to: $('#filter_end_date_to').val(),
-=======
         date_between_from: $('#report_date_between_from').val(),
         date_between_to: $('#report_date_between_to').val(),
         start_date_from: $('#report_start_date_from').val(),
         start_date_to: $('#report_start_date_to').val(),
         end_date_from: $('#report_end_date_from').val(),
         end_date_to: $('#report_end_date_to').val(),
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -102,17 +68,6 @@ addDebouncedEventListener('#project_filter,#user_filter,#client_filter,#status_f
 
 $(document).on('click', '.clear-report-filters', function (e) {
     e.preventDefault();
-<<<<<<< HEAD
-    $('#filter_date_range').val('');
-    $('#filter_date_range_from').val('');
-    $('#filter_date_range_to').val('');
-    $('#report_start_date_between').val('');
-    $('#filter_start_date_from').val('');
-    $('#filter_start_date_to').val('');
-    $('#report_end_date_between').val('');
-    $('#filter_end_date_from').val('');
-    $('#filter_end_date_to').val('');
-=======
     $('#report_date_between').val('');
     $('#report_date_between_from').val('');
     $('#report_date_between_to').val('');
@@ -122,7 +77,6 @@ $(document).on('click', '.clear-report-filters', function (e) {
     $('#report_end_date_between').val('');
     $('#report_end_date_from').val('');
     $('#report_end_date_to').val('');
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
     $('#project_filter').val('').trigger('change', [0]);
     $('#user_filter').val('').trigger('change', [0]);
     $('#client_filter').val('').trigger('change', [0]);
@@ -138,43 +92,25 @@ $(document).ready(function () {
         dataType: 'report',
         filters: [
             {
-<<<<<<< HEAD
-                selector: '#filter_date_range',
-                type: 'daterangepicker',
-                name: 'filter_date_range',
-                hiddenFrom: '#filter_date_range_from',
-                hiddenTo: '#filter_date_range_to'
-=======
                 selector: '#report_date_between',
                 type: 'daterangepicker',
                 name: 'report_date_between',
                 hiddenFrom: '#report_date_between_from',
                 hiddenTo: '#report_date_between_to'
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             },
             {
                 selector: '#report_start_date_between',
                 type: 'daterangepicker',
                 name: 'report_start_date_between',
-<<<<<<< HEAD
-                hiddenFrom: '#filter_start_date_from',
-                hiddenTo: '#filter_start_date_to'
-=======
                 hiddenFrom: '#report_start_date_from',
                 hiddenTo: '#report_start_date_to'
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             },
             {
                 selector: '#report_end_date_between',
                 type: 'daterangepicker',
                 name: 'report_end_date_between',
-<<<<<<< HEAD
-                hiddenFrom: '#filter_end_date_from',
-                hiddenTo: '#filter_end_date_to'
-=======
                 hiddenFrom: '#report_end_date_from',
                 hiddenTo: '#report_end_date_to'
->>>>>>> 144e56db9f7d21936e8433596f818ef2d9bfc72e
             },
             {
                 selector: '#project_filter',
