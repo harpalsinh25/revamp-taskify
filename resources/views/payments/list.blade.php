@@ -29,19 +29,15 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="mb-3 col-md-4">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="payment_date_between" class="form-control" placeholder="<?= get_label('payment_date_between', 'Payment date between') ?>" autocomplete="off">
-                    </div>
-                </div>
+                <x-advanced-date-filters prefix="payment" :filters="['date_between']" />
                 @if(isAdminOrHasAllDataAccess())
                 <div class="col-md-4 mb-3">
-                    <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>                        
+                    <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
                     </select>
                 </div>
                 @endif
                 <div class="col-md-4 mb-3">
-                    <select class="form-select invoices_select" id="invoice_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_invoices', 'Select Invoices') ?>" multiple>                        
+                    <select class="form-select invoices_select" id="invoice_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_invoices', 'Select Invoices') ?>" multiple>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -51,9 +47,12 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="col-md-4 mb-3 d-flex align-items-center">
+                    <button class="btn btn-secondary clear-payments-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i>
+                    </button>
+                </div>
             </div>
-            <input type="hidden" id="payment_date_from">
-            <input type="hidden" id="payment_date_to">
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="data_type" value="payments">
                 <input type="hidden" id="save_column_visibility">

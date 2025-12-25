@@ -284,26 +284,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4 mb-3 d-flex align-items-center gap-2">
-                            <div class="input-group input-group-merge">
-                                <input type="text" class="form-control" id="lr_date_between"
-                                    placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-                            </div>
-
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="input-group input-group-merge">
-                                <input type="text" id="lr_start_date_between" class="form-control"
-                                    placeholder="<?= get_label('from_date_between', 'From date between') ?>"
-                                    autocomplete="off">
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="input-group input-group-merge">
-                                <input type="text" id="lr_end_date_between" class="form-control"
-                                    placeholder="<?= get_label('to_date_between', 'To date between') ?>" autocomplete="off">
-                            </div>
-                        </div>
+                        <x-advanced-date-filters prefix="lr" />
                         @if (is_admin_or_leave_editor())
                             <div class="col-md-4 mb-3">
                                 <select class="form-select users_select" id="lr_user_filter"
@@ -338,12 +319,6 @@
                             </select>
                         </div>
                     </div>
-                    <input type="hidden" name="lr_date_between_from" id="lr_date_between_from">
-                    <input type="hidden" name="lr_date_between_to" id="lr_date_between_to">
-                    <input type="hidden" name="lr_start_date_from" id="lr_start_date_from">
-                    <input type="hidden" name="lr_start_date_to" id="lr_start_date_to">
-                    <input type="hidden" name="lr_end_date_from" id="lr_end_date_from">
-                    <input type="hidden" name="lr_end_date_to" id="lr_end_date_to">
                     <div class="table-responsive text-nowrap">
                         <input type="hidden" id="data_type" value="leave-requests">
                         <input type="hidden" id="data_table" value="lr_table">

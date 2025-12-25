@@ -143,25 +143,9 @@
 
     <div class="card">
         <div class="card-body">
-            <!-- Filters Row: Dates -->
+            <!-- Filters Row: Dates and Actions -->
             <div class="row">
-                <!-- Date Range Filter -->
-                <div class="col-md-4 mb-3">
-                    <input type="text" id="filter_date_range" class="form-control" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="report_start_date_between" class="form-control" placeholder="<?= get_label('from_date_between', 'From date between') ?>" autocomplete="off">
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="report_end_date_between" class="form-control" placeholder="<?= get_label('to_date_between', 'To date between') ?>" autocomplete="off">
-                    </div>
-                </div>
-            </div>
-            <!-- Filters Row: Users/Statuses + Actions -->
-            <div class="row">
+                <x-advanced-date-filters prefix="report" />
                 <!-- User Filter -->
                 <div class="col-12 col-md-4 mb-3">
                     <select class="form-control users_select" id="user_filter" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
@@ -176,21 +160,18 @@
                     </select>
                 </div>
                 <!-- Actions (aligned right) -->
-                <div class="col-12 col-md-4 mb-3 d-flex align-items-end justify-content-md-end gap-2 flex-wrap">
+                <div class="col-12 col-md-4 mb-3 d-flex align-items-end justify-content-md-end gap-2 flex-wrap text-md-end">
                     <button class="btn btn-info" id="view_charts_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('view_charts', 'View Charts') }}">
                         <i class="bx bx-bar-chart"></i> {{ get_label('view_charts', 'View Charts') }}
                     </button>
                     <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_leaves_report', 'Export Leaves Report') }}">
                         <i class="bx bx-export"></i>
                     </button>
+                    <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i>
+                    </button>
                 </div>
             </div>
-            <input type="hidden" id="filter_date_range_from">
-            <input type="hidden" id="filter_date_range_to">
-            <input type="hidden" id="filter_start_date_from">
-            <input type="hidden" id="filter_start_date_to">
-            <input type="hidden" id="filter_end_date_from">
-            <input type="hidden" id="filter_end_date_to">
             <!-- Additional Filters Row removed: actions moved into the grid above for alignment -->
             @php
             $visibleColumns = getUserPreferences('leaves_report');
@@ -230,51 +211,6 @@
         </div>
     </div>
 </div>
-<script>
-    var leaves_report_export_url = "{{ route('reports.export-leaves-report') }}";
-</script>
-<script src="{{ asset('assets/js/pages/leaves-report.js') }}?v={{ time() }}"></script>
-<script>
-    // Force re-initialization of date filters with presets
-    $(window).on('load', function() {
-        setTimeout(function() {
-            // Destroy and reinitialize date filters
-            if ($('#filter_date_range').data('daterangepicker')) {
-                $('#filter_date_range').data('daterangepicker').remove();
-            }
-            if ($('#report_start_date_between').data('daterangepicker')) {
-                $('#report_start_date_between').data('daterangepicker').remove();
-            }
-            if ($('#report_end_date_between').data('daterangepicker')) {
-                $('#report_end_date_between').data('daterangepicker').remove();
-            }
-
-            // Reinitialize with advanced presets
-            if (typeof initAdvancedDateRangePicker === 'function') {
-                initAdvancedDateRangePicker({
-                    selector: '#filter_date_range',
-                    hiddenFrom: '#filter_date_range_from',
-                    hiddenTo: '#filter_date_range_to',
-                    tableId: 'leaves_report_table'
-                });
-
-                initAdvancedDateRangePicker({
-                    selector: '#report_start_date_between',
-                    hiddenFrom: '#filter_start_date_from',
-                    hiddenTo: '#filter_start_date_to',
-                    tableId: 'leaves_report_table'
-                });
-
-                initAdvancedDateRangePicker({
-                    selector: '#report_end_date_between',
-                    hiddenFrom: '#filter_end_date_from',
-                    hiddenTo: '#filter_end_date_to',
-                    tableId: 'leaves_report_table'
-                });
-            }
-        }, 500);
-    });
-</script>
 
 <!-- Charts Modal -->
 <div class="modal fade" id="chartsModal" tabindex="-1" aria-labelledby="chartsModalLabel" aria-hidden="true">
@@ -464,6 +400,10 @@
     </div>
 </div>
 
+<script>
+    var leaves_report_export_url = "{{ route('reports.export-leaves-report') }}";
+</script>
+<script src="{{ asset('assets/js/pages/leaves-report.js') }}?v={{ time() }}"></script>
 @endsection
 
 @push('page_scripts')

@@ -29,14 +29,10 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="expense_from_date_between" class="form-control" placeholder="<?= get_label('date_between', 'Date between') ?>" autocomplete="off">
-                    </div>
-                </div>
+                <x-advanced-date-filters prefix="expense" :filters="['date_between']" />
                 @if(isAdminOrHasAllDataAccess())
                 <div class="col-md-4 mb-3">
-                    <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>                        
+                    <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
                     </select>
                 </div>
                 @endif
@@ -44,9 +40,12 @@
                     <select class="form-select expense_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
                     </select>
                 </div>
+                <div class="col-md-4 mb-3 d-flex align-items-center">
+                    <button class="btn btn-secondary clear-expenses-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i>
+                    </button>
+                </div>
             </div>
-            <input type="hidden" id="expense_date_from">
-            <input type="hidden" id="expense_date_to">
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="data_type" value="expenses">
                 <input type="hidden" id="save_column_visibility">

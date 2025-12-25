@@ -29,11 +29,7 @@ $auth_user = getAuthenticatedUser();
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <div class="input-group input-group-merge">
-                        <input type="text" id="notification_between_date" class="form-control" placeholder="<?= get_label('date_between', 'Date between') ?>" autocomplete="off">
-                    </div>
-                </div>
+                <x-advanced-date-filters prefix="notification" :filters="['date_between']" />
                 @if(isAdminOrHasAllDataAccess())
                 <div class="col-md-4 mb-3">
                     <select class="form-control users_select" id="user_filter" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
@@ -69,9 +65,12 @@ $auth_user = getAuthenticatedUser();
                         <option value="push"><?= get_label('push_in_app', 'Push (In APP)') ?></option>
                     </select>
                 </div>
+                <div class="col-md-4 mb-3 d-flex align-items-center">
+                    <button class="btn btn-secondary clear-notifications-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i>
+                    </button>
+                </div>
             </div>
-            <input type="hidden" id="notification_between_date_from">
-            <input type="hidden" id="notification_between_date_to">
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="data_type" value="notifications">
                 <input type="hidden" id="save_column_visibility">

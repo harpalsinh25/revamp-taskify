@@ -6,21 +6,7 @@ $visibleColumns = getUserPreferences('time_tracker');
     <div class="card-body">
         {{$slot}}
         <div class="row">
-        <div class="col-md-4 mb-3">
-                <div class="input-group input-group-merge">
-                    <input type="text" class="form-control" id="timesheet_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="input-group input-group-merge">
-                    <input type="text" id="timesheet_start_date_between" class="form-control" placeholder="<?= get_label('start_date_between', 'Start date between') ?>" autocomplete="off">
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="input-group input-group-merge">
-                    <input type="text" id="timesheet_end_date_between" class="form-control" placeholder="<?= get_label('end_date_between', 'End date between') ?>" autocomplete="off">
-                </div>
-            </div>
+            <x-advanced-date-filters prefix="timesheet" />
             @if(isAdminOrHasAllDataAccess())
             <div class="col-md-4 mb-3">
                 <select class="form-control users_select" id="timesheet_user_filter" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
@@ -28,12 +14,6 @@ $visibleColumns = getUserPreferences('time_tracker');
             </div>
             @endif
         </div>
-        <input type="hidden" id="timesheet_date_between_from">
-        <input type="hidden" id="timesheet_date_between_to">
-        <input type="hidden" id="timesheet_start_date_from">
-        <input type="hidden" id="timesheet_start_date_to">
-        <input type="hidden" id="timesheet_end_date_from">
-        <input type="hidden" id="timesheet_end_date_to">
         <div class="table-responsive text-nowrap">
             <input type="hidden" id="data_type" value="time-tracker">
             <input type="hidden" id="data_table" value="timesheet_table">

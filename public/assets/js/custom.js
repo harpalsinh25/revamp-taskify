@@ -1123,71 +1123,10 @@ $(document).on("click", "#remove-participant", function (e) {
  * @returns {void}
  */
 function resetDateFields($form) {
-    /**
-     * List of modal and offcanvas IDs to check for parent context.
-     * @type {string[]}
-     */
-    var modalsToCheck = [
-        "#create_project_modal",
-        "#edit_project_modal",
-        "#create_milestone_modal",
-        "#edit_milestone_modal",
-        "#create_project_offcanvas",
-        "#edit_project_offcanvas",
-        "#create_task_offcanvas",
-        "#edit_task_offcanvas",
-        "#create_milestone_offcanvas",
-        "#edit_milestone_offcanvas",
-    ];
-    var currentDate = moment().format(js_date_format); // Get current date
     $form.find("input").each(function () {
         var $this = $(this);
         if ($this.data("daterangepicker")) {
-            // Destroy old instance
-            $this.data("daterangepicker").remove();
-            // Check for closest modal or offcanvas
-            var parentOverlay = $form.closest(".modal, .offcanvas");
-            var parentOverlayId = parentOverlay.length ? parentOverlay.attr("id") : "";
-            // Check if form is inside any of the specified modals or offcanvas
-            var isInsideOverlay = modalsToCheck.some(function (overlayId) {
-                var isInOverlay = $form.closest(overlayId).length > 0;
-                if (isInOverlay) {
-                }
-                return isInOverlay;
-            });
-            /**
-             * Configuration for DateRangePicker.
-             * @type {Object}
-             */
-            var daterangepickerOptions = {
-                alwaysShowCalendars: true,
-                showCustomRangeLabel: true,
-                singleDatePicker: true,
-                showDropdowns: true,
-                autoUpdateInput: !isInsideOverlay,
-                locale: {
-                    cancelLabel: "Clear",
-                    format: js_date_format,
-                },
-            };
-            // Set parentEl to the closest modal or offcanvas, or body if none found
-            if (parentOverlayId) {
-                daterangepickerOptions.parentEl = `#${parentOverlayId}`;
-            } else {
-                daterangepickerOptions.parentEl = $(document.body);
-            }
-            // Set startDate if not in an overlay
-            if (!isInsideOverlay) {
-                daterangepickerOptions.startDate = moment(currentDate, js_date_format);
-            }
-            // Reinitialize DateRangePicker
-            $this.daterangepicker(daterangepickerOptions);
-            // Set or clear input value based on overlay context
-            $this.val(isInsideOverlay ? "" : currentDate);
-            // Manually update input value on date selection
-            $this.on("apply.daterangepicker", function (ev, picker) {
-                $(this).val(picker.startDate.format(js_date_format));
-            });
+            window.initSingleDatePicker({ selector: this });
         }
     });
 }
@@ -1201,7 +1140,7 @@ function resetDateFields($form) {
  */
 $(document).ready(function () {
     /**
-     * List of input IDs to initialize with DateRangePicker.
+     * List of input IDs to initialize with standardized Date Picker.
      * @type {string[]}
      */
     var idsToProcess = [
@@ -1219,332 +1158,88 @@ $(document).ready(function () {
         "#update_milestone_end_date",
         "#task_start_date",
         "#task_end_date",
+        "#dob",
+        "#doj"
     ];
-    /**
-     * List of modal and offcanvas IDs to check for parent context.
-     * @type {string[]}
-     */
-    var modalsToCheck = [
-        "#create_project_modal",
-        "#edit_project_modal",
-        "#create_milestone_modal",
-        "#edit_milestone_modal",
-        "#create_project_offcanvas",
-        "#edit_project_offcanvas",
-        "#create_task_offcanvas",
-        "#edit_task_offcanvas",
-        "#create_milestone_offcanvas",
-        "#edit_milestone_offcanvas",
-    ];
-    /**
-     * Base configuration for DateRangePicker.
-     * @type {Object}
-     */
-    var daterangepickerOptions = {
-        alwaysShowCalendars: true,
-        showCustomRangeLabel: true,
-        singleDatePicker: true,
-        showDropdowns: true,
-        autoUpdateInput: true,
-        locale: {
-            cancelLabel: "Clear",
-            format: js_date_format,
-        },
-    };
-    /**
-     * Initializes DateRangePicker for general date inputs with dynamic parent detection.
-     */
+
     idsToProcess.forEach(function (id) {
-        var $input = $(id);
-        if ($input.length) {
-            // Check for closest modal or offcanvas
-            var parentOverlay = $input.closest(".modal, .offcanvas");
-            var isInsideOverlay = modalsToCheck.some(function (modalId) {
-                var isInModal = $input.closest(modalId).length > 0;
-                if (isInModal) {
-                    // console.log(`${id} is inside ${modalId}`);
-                }
-                return isInModal;
-            });
-            // Set parentEl to the closest modal or offcanvas, or body if none found
-            daterangepickerOptions.parentEl = parentOverlay.length
-                ? parentOverlay
-                : $(document.body);
-            // Debug: Log the selected parentEl
-            // console.log(`ParentEl for ${id}`, daterangepickerOptions.parentEl);
-            // Disable autoUpdateInput for overlays or if data-defaultDate is false
-            if (
-                isInsideOverlay ||
-                $input.attr("data-defaultDate") === "false"
-            ) {
-                daterangepickerOptions.autoUpdateInput = false;
-            }
-            // Set default date if empty, not in an overlay, and data-defaultDate is undefined or true
-            if (
-                $input.val() === "" &&
-                !isInsideOverlay &&
-                ($input.attr("data-defaultDate") === undefined ||
-                    $input.attr("data-defaultDate") === "true")
-            ) {
-                $input.val(moment().format(js_date_format));
-            }
-            // Initialize DateRangePicker
-            $input.daterangepicker(daterangepickerOptions);
-            // Handle apply event
-            $input.on("apply.daterangepicker", function (ev, picker) {
-                $(this).val(picker.startDate.format(js_date_format));
-            });
-            // Handle cancel event
-            $input.on("cancel.daterangepicker", function () {
-                $(this).val("");
-            });
-        } else {
-            // console.warn(`Input ${id} not found in DOM`);
+        var config = { selector: id };
+        if (id === '#dob' || id === '#doj') {
+            config.minDate = moment("01/01/1950", "DD/MM/YYYY");
+            config.maxDate = moment();
         }
-    });
-    /**
-     * Initializes DateRangePicker for #dob and #doj with restricted date ranges.
-     */
-    var restrictedIds = ["#dob", "#doj"];
-    var minDate = moment("01/01/1950", "DD/MM/YYYY");
-    var maxDate = moment();
-    restrictedIds.forEach(function (id) {
-        var $input = $(id);
-        if ($input.length) {
-            var parentOverlay = $input.closest(".modal, .offcanvas");
-            // console.log(`Parent overlay for ${id}`, parentOverlay);
-            $input.daterangepicker({
-                alwaysShowCalendars: true,
-                showCustomRangeLabel: true,
-                singleDatePicker: true,
-                showDropdowns: true,
-                autoUpdateInput: false,
-                minDate: minDate,
-                maxDate: maxDate,
-                parentEl: parentOverlay.length ? parentOverlay : $(document.body),
-                locale: {
-                    cancelLabel: "Clear",
-                    format: js_date_format,
-                },
-            });
-            $input.on("apply.daterangepicker", function (ev, picker) {
-                $(this).val(picker.startDate.format(js_date_format));
-            });
-        } else {
-            // console.warn(`Input ${id} not found in DOM`);
-        }
+        window.initSingleDatePicker(config);
     });
 });
 $(document).ready(function () {
-    $(
-        "#report_start_date_between,#report_end_date_between,#filter_date_range,#ie_date_between,#ms_date_between,#start_date_between,#end_date_between,#project_date_between,#project_start_date_between,#project_end_date_between,#task_date_between,#task_start_date_between,#task_end_date_between,#lr_date_between,#lr_start_date_between,#lr_end_date_between,#contract_date_between,#contract_start_date_between,#contract_end_date_between,#timesheet_date_between,#timesheet_start_date_between,#timesheet_end_date_between,#meeting_date_between,#meeting_start_date_between,#meeting_end_date_between,#activity_log_between_date,#notification_between_date,#expense_from_date_between,#payment_date_between,#lead_kanban_date_range,#lead_date_range,#candidate_date_between, #interview_date_between"
-    ).daterangepicker({
-        alwaysShowCalendars: true,
-        showCustomRangeLabel: true,
-        singleDatePicker: false,
-        showDropdowns: true,
-        autoUpdateInput: false,
-        locale: {
-            cancelLabel: "Clear",
-            format: js_date_format,
-        },
-    });
-    $(
-        "#report_start_date_between,#report_end_date_between,#filter_date_range,#ie_date_between,#ms_date_between,#start_date_between,#end_date_between,#project_date_between,#project_start_date_between,#project_end_date_between,#task_date_between,#task_start_date_between,#task_end_date_between,#lr_date_between,#lr_start_date_between,#lr_end_date_between,#contract_date_between,#contract_start_date_between,#contract_end_date_between,#timesheet_date_between,#timesheet_start_date_between,#timesheet_end_date_between,#meeting_date_between,#meeting_start_date_between,#meeting_end_date_between,#activity_log_between_date,#notification_between_date,#expense_from_date_between,#payment_date_between,#lead_kanban_date_range,#lead_date_range,#candidate_date_between, #interview_date_between"
-    ).on("apply.daterangepicker", function (ev, picker) {
-        $(this).val(
-            picker.startDate.format(js_date_format) +
-            " " +
-            label_to +
-            " " +
-            picker.endDate.format(js_date_format)
-        );
+    var filterIds = [
+        "#report_start_date_between", "#report_end_date_between", "#filter_date_range", "#ie_date_between",
+        "#ms_date_between", "#start_date_between", "#end_date_between", "#project_date_between",
+        "#project_start_date_between", "#project_end_date_between", "#task_date_between",
+        "#task_start_date_between", "#task_end_date_between", "#lr_date_between",
+        "#lr_start_date_between", "#lr_end_date_between", "#contract_date_between",
+        "#contract_start_date_between", "#contract_end_date_between", "#timesheet_date_between",
+        "#timesheet_start_date_between", "#timesheet_end_date_between", "#meeting_date_between",
+        "#meeting_start_date_between", "#meeting_end_date_between", "#activity_log_between_date",
+        "#notification_between_date", "#expense_from_date_between", "#payment_date_between",
+        "#lead_kanban_date_range", "#lead_date_range", "#candidate_date_between", "#interview_date_between"
+    ];
+
+    filterIds.forEach(function (id) {
+        var baseId = id.replace('#', '');
+        var tableIdMap = {
+            'project': 'projects_table',
+            'task': 'task_table',
+            'lr': 'lr_table',
+            'contract': 'contract_table',
+            'timesheet': 'timesheet_table',
+            'meeting': 'meetings_table',
+            'expense_from': 'expense_table',
+            'payment': 'payment_table'
+        };
+
+        var tableId = null;
+        for (var prefix in tableIdMap) {
+            if (baseId.startsWith(prefix)) {
+                tableId = tableIdMap[prefix];
+                break;
+            }
+        }
+
+        var hiddenFrom = id + '_from';
+        var hiddenTo = id + '_to';
+
+        // Robust fallback logic for hidden field IDs
+        if (!$(hiddenFrom).length) {
+            var fallbacks = ['_between', '_range', '_date'];
+            for (var i = 0; i < fallbacks.length; i++) {
+                var fallbackFrom = id.replace(fallbacks[i], '_from');
+                if ($(fallbackFrom).length) {
+                    hiddenFrom = fallbackFrom;
+                    break;
+                }
+            }
+        }
+        if (!$(hiddenTo).length) {
+            var fallbacks = ['_between', '_range', '_date'];
+            for (var i = 0; i < fallbacks.length; i++) {
+                var fallbackTo = id.replace(fallbacks[i], '_to');
+                if ($(fallbackTo).length) {
+                    hiddenTo = fallbackTo;
+                    break;
+                }
+            }
+        }
+
+        window.initAdvancedDateRangePicker({
+            selector: id,
+            hiddenFrom: hiddenFrom,
+            hiddenTo: hiddenTo,
+            tableId: tableId
+        });
     });
 });
-if ($("#project_start_date_between").length) {
-    $("#project_start_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#project_start_date_from").val(startDate);
-            $("#project_start_date_to").val(endDate);
-            $("#projects_table").bootstrapTable("refresh");
-        }
-    );
-    $("#project_start_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#project_start_date_from").val("");
-            $("#project_start_date_to").val("");
-            $("#project_start_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#projects_table").bootstrapTable("refresh");
-        }
-    );
-    $("#project_end_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#project_end_date_from").val(startDate);
-            $("#project_end_date_to").val(endDate);
-            $("#projects_table").bootstrapTable("refresh");
-        }
-    );
-    $("#project_end_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#project_end_date_from").val("");
-            $("#project_end_date_to").val("");
-            $("#project_end_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#projects_table").bootstrapTable("refresh");
-        }
-    );
-}
-if ($("#task_start_date_between").length) {
-    $("#task_start_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#task_start_date_from").val(startDate);
-            $("#task_start_date_to").val(endDate);
-            $("#task_table").bootstrapTable("refresh");
-        }
-    );
-    $("#task_start_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#task_start_date_from").val("");
-            $("#task_start_date_to").val("");
-            $("#task_start_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#task_table").bootstrapTable("refresh");
-        }
-    );
-    $("#task_end_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#task_end_date_from").val(startDate);
-            $("#task_end_date_to").val(endDate);
-            $("#task_table").bootstrapTable("refresh");
-        }
-    );
-    $("#task_end_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#task_end_date_from").val("");
-            $("#task_end_date_to").val("");
-            $("#task_end_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#task_table").bootstrapTable("refresh");
-        }
-    );
-}
-if ($("#timesheet_start_date_between").length) {
-    $("#timesheet_start_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#timesheet_start_date_from").val(startDate);
-            $("#timesheet_start_date_to").val(endDate);
-            $("#timesheet_table").bootstrapTable("refresh");
-        }
-    );
-    $("#timesheet_start_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#timesheet_start_date_from").val("");
-            $("#timesheet_start_date_to").val("");
-            $("#timesheet_start_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#timesheet_table").bootstrapTable("refresh");
-        }
-    );
-    $("#timesheet_end_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#timesheet_end_date_from").val(startDate);
-            $("#timesheet_end_date_to").val(endDate);
-            $("#timesheet_table").bootstrapTable("refresh");
-        }
-    );
-    $("#timesheet_end_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#timesheet_end_date_from").val("");
-            $("#timesheet_end_date_to").val("");
-            $("#timesheet_end_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#timesheet_table").bootstrapTable("refresh");
-        }
-    );
-}
-if ($("#meeting_start_date_between").length) {
-    $("#meeting_start_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#meeting_start_date_from").val(startDate);
-            $("#meeting_start_date_to").val(endDate);
-            $("#meetings_table").bootstrapTable("refresh");
-        }
-    );
-    $("#meeting_start_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#meeting_start_date_from").val("");
-            $("#meeting_start_date_to").val("");
-            $("#meeting_start_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#meetings_table").bootstrapTable("refresh");
-        }
-    );
-    $("#meeting_end_date_between").on(
-        "apply.daterangepicker",
-        function (ev, picker) {
-            var startDate = picker.startDate.format("YYYY-MM-DD");
-            var endDate = picker.endDate.format("YYYY-MM-DD");
-            $("#meeting_end_date_from").val(startDate);
-            $("#meeting_end_date_to").val(endDate);
-            $("#meetings_table").bootstrapTable("refresh");
-        }
-    );
-    $("#meeting_end_date_between").on(
-        "cancel.daterangepicker",
-        function (ev, picker) {
-            $("#meeting_end_date_from").val("");
-            $("#meeting_end_date_to").val("");
-            $("#meeting_end_date_between").val("");
-            picker.setStartDate(moment());
-            picker.setEndDate(moment());
-            picker.updateElement();
-            $("#meetings_table").bootstrapTable("refresh");
-        }
-    );
-}
+// Redundant manual handlers removed as they are now handled by initAdvancedDateRangePicker
 $(
     "textarea#footer_text,textarea#contract_description,textarea#update_contract_description,textarea.description"
 ).tinymce({

@@ -7,8 +7,8 @@ function queryParams(p) {
         "notification_types": $('#noti_types_filter').val(),
         "user_ids": $('#user_filter').val(),
         "client_ids": $('#client_filter').val(),
-        "date_from": $('#notification_between_date_from').val(),
-        "date_to": $('#notification_between_date_to').val(),
+        "date_from": $('#notification_date_between_from').val(),
+        "date_to": $('#notification_date_between_to').val(),
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -17,26 +17,6 @@ function queryParams(p) {
         search: p.search
     };
 }
-
-$('#notification_between_date').on('apply.daterangepicker', function (ev, picker) {
-    var startDate = picker.startDate.format('YYYY-MM-DD');
-    var endDate = picker.endDate.format('YYYY-MM-DD');
-
-    $('#notification_between_date_from').val(startDate);
-    $('#notification_between_date_to').val(endDate);
-
-    $('#table').bootstrapTable('refresh');
-});
-
-$('#notification_between_date').on('cancel.daterangepicker', function (ev, picker) {
-    $('#notification_between_date_from').val('');
-    $('#notification_between_date_to').val('');
-    $('#notification_between_date').val('');
-    picker.setStartDate(moment());
-    picker.setEndDate(moment());
-    picker.updateElement();
-    $('#table').bootstrapTable('refresh');
-});
 
 
 window.icons = {
@@ -77,7 +57,7 @@ addDebouncedEventListener('#status_filter, #user_filter, #client_filter, #type_f
     }
 });
 $(document).on('click', '.clear-notifications-filters', function (e) {
-    e.preventDefault();  
+    e.preventDefault();
     $('#notification_between_date_from').val('');
     $('#notification_between_date_to').val('');
     $('#notification_between_date').val('');

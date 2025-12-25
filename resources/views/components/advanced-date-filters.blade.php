@@ -39,15 +39,9 @@
                 @if ($showIcons)
                     <span class="input-group-text"><i class="bx bx-calendar"></i></span>
                 @endif
-                <input
-                    type="text"
-                    class="form-control advanced-daterange-picker"
-                    id="{{ $prefix }}_{{ $filter }}"
-                    name="{{ $prefix }}_{{ $filter }}"
-                    placeholder="{{ $filterLabels[$filter] }}"
-                    autocomplete="off"
-                    data-filter-type="{{ $filter }}"
-                >
+                <input type="text" class="form-control" id="{{ $prefix }}_{{ $filter }}"
+                    name="{{ $prefix }}_{{ $filter }}" placeholder="{{ $filterLabels[$filter] }}"
+                    autocomplete="off">
             </div>
         </div>
     @endif
@@ -56,13 +50,14 @@
 {{-- Hidden Fields for Date Values --}}
 @foreach ($filters as $filter)
     @php
-        // Convert filter name to from/to field names
-        // e.g., 'date_between' -> 'date_between_from', 'date_between_to'
-        $fromField = $prefix . '_' . str_replace('_between', '_from', $filter);
-        $toField = $prefix . '_' . str_replace('_between', '_to', $filter);
+        // Hidden fields follow the pattern [prefix]_[type]_from/to
+        // AND fallback pattern [prefix]_[type.replace('_between', '')]_from/to
+        // We'll provide both to ensure maximum compatibility with different backend expectations
+        $idBase = $prefix . '_' . $filter;
+        $nameBase = $prefix . '_' . str_replace('_between', '', $filter);
     @endphp
-    <input type="hidden" id="{{ $fromField }}" name="{{ $fromField }}">
-    <input type="hidden" id="{{ $toField }}" name="{{ $toField }}">
+    <input type="hidden" id="{{ $idBase }}_from" name="{{ $nameBase }}_from">
+    <input type="hidden" id="{{ $idBase }}_to" name="{{ $nameBase }}_to">
 @endforeach
 
 {{-- Note: Date range picker initialization should be done in page-specific JavaScript files --}}

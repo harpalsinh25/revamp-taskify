@@ -74,15 +74,7 @@ function queryParamsUsersClients(p) {
 
 $(document).on("click", ".clear-tasks-filters", function (e) {
     e.preventDefault();
-    $("#task_date_between").val("");
-    $("#task_date_between_from").val("");
-    $("#task_date_between_to").val("");
-    $("#task_start_date_between").val("");
-    $("#task_end_date_between").val("");
-    $("#task_start_date_from").val("");
-    $("#task_start_date_to").val("");
-    $("#task_end_date_from").val("");
-    $("#task_end_date_to").val("");
+    window.clearDateRangeFilters('task');
     $("#task_project_filter").val("").trigger("change", [0]);
     $("#task_user_filter").val("").trigger("change", [0]);
     $("#task_client_filter").val("").trigger("change", [0]);
@@ -98,27 +90,7 @@ $("#viewAssignedModal").on("hidden.bs.modal", function (e) {
 
 // Initialize advanced date range filters with presets
 $(document).ready(function () {
-    // Initialize date range filters with preset ranges
-    initAdvancedDateRangePicker({
-        selector: '#task_date_between',
-        hiddenFrom: '#task_date_between_from',
-        hiddenTo: '#task_date_between_to',
-        tableId: 'task_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#task_start_date_between',
-        hiddenFrom: '#task_start_date_from',
-        hiddenTo: '#task_start_date_to',
-        tableId: 'task_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#task_end_date_between',
-        hiddenFrom: '#task_end_date_from',
-        hiddenTo: '#task_end_date_to',
-        tableId: 'task_table'
-    });
+    // Initialized via custom.js standardized loop for standard filter IDs
 });
 
 // Include table-filter-sync.js before this

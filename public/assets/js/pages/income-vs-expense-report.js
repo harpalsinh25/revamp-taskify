@@ -2,9 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to get current filters
     function getFilters() {
         // Get the values from hidden inputs
-        var startDate = $('#filter_date_range_from').val();
-        console.log(startDate);
-        var endDate = $('#filter_date_range_to').val();
+        var startDate = $('#report_date_between_from').val();
+        var endDate = $('#report_date_between_to').val();
 
         // Check if the input values are not empty
         if (startDate && endDate) {
@@ -84,18 +83,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Initialize advanced date range filter with preset ranges
+    // We do this manually here because we need the custom callback
     initAdvancedDateRangePicker({
-        selector: '#filter_date_range',
-        hiddenFrom: '#filter_date_range_from',
-        hiddenTo: '#filter_date_range_to',
+        selector: '#report_date_between',
+        hiddenFrom: '#report_date_between_from',
+        hiddenTo: '#report_date_between_to',
         callback: function (start, end, label) {
             updateReport(); // Update report when dates are applied
         }
     });
 
-    // Also trigger update on cancel
-    $('#filter_date_range').on('daterange:cancelled', function () {
-        updateReport(); // Update report when dates are cleared
+    // Handle clear filters
+    $(document).on('click', '.clear-report-filters', function (e) {
+        e.preventDefault();
+        $('#report_date_between').val('');
+        $('#report_date_between_from').val('');
+        $('#report_date_between_to').val('');
+        updateReport();
     });
 
     // Initialize report with default filters
@@ -116,8 +120,8 @@ $('#export_button').on('click', async function () {
     $exportButton.attr('disabled', true);
 
     try {
-        var startDate = $('#filter_date_range_from').val();
-        var endDate = $('#filter_date_range_to').val();
+        var startDate = $('#report_date_between_from').val();
+        var endDate = $('#report_date_between_to').val();
 
         // Build the URL conditionally
         var exportUrl = export_income_vs_expense_url;
@@ -146,11 +150,8 @@ $('#export_button').on('click', async function () {
 });
 
 async function performExport(url) {
-    // Simulate a delay to represent the export process
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            window.open(url, '_blank');
-            resolve(); // Mark the export as complete
-        }, 2000); // Simulate a 2-second export delay
-    });
+    // Open in new tab after a small delay
+    setTimeout(() => {
+        window.open(url, '_blank');
+    }, 500);
 }

@@ -117,30 +117,6 @@ $(document).on('click', '.delete_contract_sign', function (e) {
         });
     });
 });
-// Initialize advanced date range filters with presets
-$(document).ready(function () {
-    // Initialize date range filters with preset ranges
-    initAdvancedDateRangePicker({
-        selector: '#contract_date_between',
-        hiddenFrom: '#contract_date_between_from',
-        hiddenTo: '#contract_date_between_to',
-        tableId: 'contracts_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#contract_start_date_between',
-        hiddenFrom: '#contract_start_date_from',
-        hiddenTo: '#contract_start_date_to',
-        tableId: 'contracts_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#contract_end_date_between',
-        hiddenFrom: '#contract_end_date_from',
-        hiddenTo: '#contract_end_date_to',
-        tableId: 'contracts_table'
-    });
-});
 addDebouncedEventListener('#status_filter, #client_filter, #project_filter, #type_filter', 'change', function (e, refreshTable) {
     e.preventDefault();
     if (typeof refreshTable === 'undefined' || refreshTable) {

@@ -20,27 +20,6 @@ $(document).ready(function () {
         $exportButton.attr('disabled', false);
         window.open(exportUrl, '_blank');
     });
-    // Initialize advanced date range filters with preset ranges
-    initAdvancedDateRangePicker({
-        selector: '#filter_date_range',
-        hiddenFrom: '#filter_date_range_from',
-        hiddenTo: '#filter_date_range_to',
-        tableId: 'invoices_report_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#report_start_date_between',
-        hiddenFrom: '#filter_start_date_from',
-        hiddenTo: '#filter_start_date_to',
-        tableId: 'invoices_report_table'
-    });
-
-    initAdvancedDateRangePicker({
-        selector: '#report_end_date_between',
-        hiddenFrom: '#filter_end_date_from',
-        hiddenTo: '#filter_end_date_to',
-        tableId: 'invoices_report_table'
-    });
 });
 function invoices_report_query_params(p) {
     return {
@@ -49,12 +28,12 @@ function invoices_report_query_params(p) {
         "client_ids": $('#client_filter').val(),
         "created_by_user_ids": $('#user_creators_filter').val(),
         "created_by_client_ids": $('#client_creators_filter').val(),
-        date_between_from: $('#filter_date_range_from').val(),
-        date_between_to: $('#filter_date_range_to').val(),
-        start_date_from: $('#filter_start_date_from').val(),
-        start_date_to: $('#filter_start_date_to').val(),
-        end_date_from: $('#filter_end_date_from').val(),
-        end_date_to: $('#filter_end_date_to').val(),
+        date_between_from: $('#report_date_between_from').val(),
+        date_between_to: $('#report_date_between_to').val(),
+        start_date_from: $('#report_start_date_from').val(),
+        start_date_to: $('#report_start_date_to').val(),
+        end_date_from: $('#report_end_date_from').val(),
+        end_date_to: $('#report_end_date_to').val(),
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -73,15 +52,15 @@ addDebouncedEventListener('#type_filter, #client_filter, #status_filter, #user_c
 
 $(document).on('click', '.clear-report-filters', function (e) {
     e.preventDefault();
-    $('#filter_date_range').val('');
-    $('#filter_date_range_from').val('');
-    $('#filter_date_range_to').val('');
+    $('#report_date_between').val('');
+    $('#report_date_between_from').val('');
+    $('#report_date_between_to').val('');
     $('#report_start_date_between').val('');
-    $('#filter_start_date_from').val('');
-    $('#filter_start_date_to').val('');
+    $('#report_start_date_from').val('');
+    $('#report_start_date_to').val('');
     $('#report_end_date_between').val('');
-    $('#filter_end_date_from').val('');
-    $('#filter_end_date_to').val('');
+    $('#report_end_date_from').val('');
+    $('#report_end_date_to').val('');
     $('#type_filter').val('').trigger('change', [0]);
     $('#client_filter').val('').trigger('change', [0]);
     $('#status_filter').val('').trigger('change', [0]);
@@ -98,25 +77,25 @@ $(document).ready(function () {
         dataType: 'report',
         filters: [
             {
-                selector: '#filter_date_range',
+                selector: '#report_date_between',
                 type: 'daterangepicker',
-                name: 'filter_date_range',
-                hiddenFrom: '#filter_date_range_from',
-                hiddenTo: '#filter_date_range_to'
+                name: 'report_date_between',
+                hiddenFrom: '#report_date_between_from',
+                hiddenTo: '#report_date_between_to'
             },
             {
                 selector: '#report_start_date_between',
                 type: 'daterangepicker',
                 name: 'report_start_date_between',
-                hiddenFrom: '#filter_start_date_from',
-                hiddenTo: '#filter_start_date_to'
+                hiddenFrom: '#report_start_date_from',
+                hiddenTo: '#report_start_date_to'
             },
             {
                 selector: '#report_end_date_between',
                 type: 'daterangepicker',
                 name: 'report_end_date_between',
-                hiddenFrom: '#filter_end_date_from',
-                hiddenTo: '#filter_end_date_to'
+                hiddenFrom: '#report_end_date_from',
+                hiddenTo: '#report_end_date_to'
             },
             {
                 selector: '#type_filter',

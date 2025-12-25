@@ -51,16 +51,15 @@
             </div>
         </div>
     </div>
-    <input type="hidden" id="filter_date_range_from">
-    <input type="hidden" id="filter_date_range_to">
     <!-- Filters -->
     <div class="row mb-3">
-        <div class="col-md-6 mb-md-0 mb-2">
-            <input type="text" id="filter_date_range" class="form-control" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-        </div>
-        <div class="col-md-6 d-flex align-items-center justify-content-md-end mb-md-0 mb-2">
+        <x-advanced-date-filters prefix="report" :filters="['date_between']" colClass="col-md-6" />
+        <div class="col-md-6 d-flex align-items-center justify-content-md-end mb-md-0 mb-2 gap-2">
             <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_income_expense_report', 'Export Income vs Expense Report') }}">
                 <i class="bx bx-export"></i>
+            </button>
+            <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                <i class="bx bx-refresh"></i>
             </button>
         </div>
     </div>
@@ -106,29 +105,5 @@
     var export_income_vs_expense_url = "{{ route('reports.export-income-vs-expense-report') }}";
 </script>
 <script src="{{ asset('assets/js/pages/income-vs-expense-report.js') }}?v={{ time() }}"></script>
-<script>
-    // Force re-initialization of date filter with presets
-    $(window).on('load', function() {
-        setTimeout(function() {
-            // Destroy and reinitialize date filter
-            if ($('#filter_date_range').data('daterangepicker')) {
-                $('#filter_date_range').data('daterangepicker').remove();
-            }
-
-            // Reinitialize with advanced presets
-            if (typeof initAdvancedDateRangePicker === 'function') {
-                initAdvancedDateRangePicker({
-                    selector: '#filter_date_range',
-                    hiddenFrom: '#filter_date_range_from',
-                    hiddenTo: '#filter_date_range_to',
-                    callback: function(start, end, label) {
-                        if (typeof updateReport === 'function') {
-                            updateReport();
-                        }
-                    }
-                });
-            }
-        }, 500);
-    });
-</script>
+@endsection
 @endsection
