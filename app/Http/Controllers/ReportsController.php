@@ -254,30 +254,42 @@ class ReportsController extends Controller
             }
 
             $totalBudget = !empty($project->budget) && $project->budget !== null ? format_currency($project->budget) : '-';
-            // Format clients' HTML
+
+
             // Format clients' HTML
             $clientHtml = $project->clients->isEmpty()
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $project->clients->map(function ($client) {
-                return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . " " . $client->last_name) . "'>
-                    <a href='" . route('clients.profile', ['id' => $client->id]) . "' target='_blank' >
-                        <img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' />
-                    </a>
-                </li>";
+
+                    $imagePath = $client->photo
+                        ? storage_path('app/public/' . $client->photo)
+                        : storage_path('app/public/photos/no-image.jpg');
+
+                    $imageBase64 = imageToBase64($imagePath);
+
+                    return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . " " . $client->last_name) . "'>
+            <img src='{$imageBase64}' alt='Avatar' class='rounded-circle' width='32' height='32'/>
+        </li>";
                 })->implode('') .
                 '</ul>';
+
 
             // Format users' HTML
             $userHtml = $project->users->isEmpty()
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $project->users->map(function ($user) {
-                return "<li class='avatar avatar-sm pull-up' title='" . e($user->first_name . " " . $user->last_name) . "'>
-                    <a href='" . route('users.profile', ['id' => $user->id]) . "' target='_blank'>
-                        <img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' class='rounded-circle' />
-                    </a>
-                </li>";
+
+                    $imagePath = $user->photo
+                        ? storage_path('app/public/' . $user->photo)
+                        : storage_path('app/public/photos/no-image.jpg');
+
+                    $imageBase64 = imageToBase64($imagePath);
+
+                    return "<li class='avatar avatar-sm pull-up' title='" . e($user->first_name . " " . $user->last_name) . "'>
+            <img src='{$imageBase64}' class='rounded-circle' width='32' height='32'/>
+        </li>";
                 })->implode('') .
                 '</ul>';
 
@@ -571,10 +583,20 @@ class ReportsController extends Controller
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $task->project->clients->map(function ($client) {
-                return "<li class='avatar avatar-sm pull-up' title='" . e($client->first_name . " " . $client->last_name) . "'>
-                    <a href='" . route('clients.profile', ['id' => $client->id]) . "' target='_blank'>
-                        <img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' />
-                    </a>
+
+                    $imagePath = $client->photo
+                        ? storage_path('app/public/' . $client->photo)
+                        : storage_path('app/public/photos/no-image.jpg');
+
+                    $imageBase64 = imageToBase64($imagePath);
+
+                    return "<li class='avatar avatar-sm pull-up'
+                    title='" . e($client->first_name . " " . $client->last_name) . "'>
+                    <img src='{$imageBase64}'
+                         alt='Avatar'
+                         class='rounded-circle'
+                         width='32'
+                         height='32'>
                 </li>";
                 })->implode('') .
                 '</ul>';
@@ -584,10 +606,19 @@ class ReportsController extends Controller
                 ? '-'
                 : "<ul class='list-unstyled users-list m-0 avatar-group d-flex align-items-center'>" .
                 $task->users->map(function ($user) {
-                return "<li class='avatar avatar-sm pull-up' title='" . e($user->first_name . " " . $user->last_name) . "'>
-                    <a href='" . route('users.profile', ['id' => $user->id]) . "' target='_blank'>
-                        <img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' class='rounded-circle' />
-                    </a>
+
+                    $imagePath = $user->photo
+                        ? storage_path('app/public/' . $user->photo)
+                        : storage_path('app/public/photos/no-image.jpg');
+
+                    $imageBase64 = imageToBase64($imagePath);
+
+                    return "<li class='avatar avatar-sm pull-up'
+                    title='" . e($user->first_name . " " . $user->last_name) . "'>
+                    <img src='{$imageBase64}'
+                         class='rounded-circle'
+                         width='32'
+                         height='32'>
                 </li>";
                 })->implode('') .
                 '</ul>';
@@ -1040,9 +1071,39 @@ class ReportsController extends Controller
                 ];
             }
 
+            $imagePath = $user->photo
+                ? storage_path('app/public/' . $user->photo)
+                : storage_path('app/public/photos/no-image.jpg');
+
+            $imageBase64 = imageToBase64($imagePath);
+
+            $userHtml = "
+                    <div style='display:flex; align-items:center;'>
+                        <div style='margin-right:10px;'>
+                            <img src='{$imageBase64}'
+                                width='32'
+                                height='32'
+                                style='border-radius:50%;'>
+                        </div>
+
+                        <div>
+                            <div style='line-height:1.2;'>
+                                " . e($user->first_name . " " . $user->last_name) . "
+                            </div>
+
+                            <div style='font-size:12px; color:#6c757d; line-height:1.2;'>
+                                " . e($user->email) . "
+                            </div>
+                        </div>
+                    </div>";
+
+
+
+
+
             return [
                 'id' => $user->id,
-                'user_name' => formatUserHtml($user),
+                'user_name' => $userHtml,
                 'total_leaves' => $leaveRequests->count(),
                 'approved_leaves' => $leaveRequests->where('status', 'approved')->count(),
                 'pending_leaves' => $leaveRequests->where('status', 'pending')->count(),
@@ -1360,8 +1421,10 @@ class ReportsController extends Controller
             'not_specified' => get_label('not_specified', 'Not Specified'),
             'due' => get_label('due', 'Due')
         ];
-        return view('reports.invoices-report', compact('clients', 'invoice_statuses', ));
+        return view('reports.invoices-report', compact('clients', 'invoice_statuses',));
     }
+
+
 
     public function getInvoicesReportData(Request $request)
     {
@@ -1537,5 +1600,37 @@ class ReportsController extends Controller
             ->setPaper([0, 0, 2000, 900], 'mm');
 
         return $pdf->download($fileName);
+    }
+
+
+
+    function convertImagesToBase64($html)
+    {
+        return preg_replace_callback(
+            '/<img[^>]+src=["\']([^"\']+)["\']/i',
+            function ($matches) {
+                $src = $matches[1];
+
+                // Ignore already-base64 images
+                if (str_starts_with($src, 'data:image')) {
+                    return $matches[0];
+                }
+
+                // Convert asset URL → storage path
+                $relativePath = str_replace(asset('storage') . '/', '', $src);
+                $fullPath = storage_path('app/public/' . $relativePath);
+
+                if (!file_exists($fullPath)) {
+                    return $matches[0]; // fail silently
+                }
+
+                $type = pathinfo($fullPath, PATHINFO_EXTENSION);
+                $data = base64_encode(file_get_contents($fullPath));
+                $base64 = "data:image/{$type};base64,{$data}";
+
+                return str_replace($src, $base64, $matches[0]);
+            },
+            $html
+        );
     }
 }

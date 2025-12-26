@@ -74,7 +74,15 @@ function queryParamsUsersClients(p) {
 
 $(document).on("click", ".clear-tasks-filters", function (e) {
     e.preventDefault();
-    window.clearDateRangeFilters('task');
+    $("#task_date_between").val("");
+    $("#task_date_between_from").val("");
+    $("#task_date_between_to").val("");
+    $("#task_start_date_between").val("");
+    $("#task_end_date_between").val("");
+    $("#task_start_date_from").val("");
+    $("#task_start_date_to").val("");
+    $("#task_end_date_from").val("");
+    $("#task_end_date_to").val("");
     $("#task_project_filter").val("").trigger("change", [0]);
     $("#task_user_filter").val("").trigger("change", [0]);
     $("#task_client_filter").val("").trigger("change", [0]);

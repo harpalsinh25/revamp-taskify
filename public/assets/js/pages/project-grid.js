@@ -3,6 +3,21 @@ $('#sort').on('change', function (e) {
     location.href = setUrlParameter(location.href, 'sort', sort);
 });
 
+
+function setUrlParameter(url, paramName, paramValue) {
+    paramName = paramName.replace(/\s+/g, '-');
+    if (paramValue == null || paramValue == '') {
+        return url.replace(new RegExp('[?&]' + paramName + '=[^&#]*(#.*)?$'), '$1')
+            .replace(new RegExp('([?&])' + paramName + '=[^&]*&'), '$1');
+    }
+    var pattern = new RegExp('\\b(' + paramName + '=).*?(&|#|$)');
+    if (url.search(pattern) >= 0) {
+        return url.replace(pattern, '$1' + paramValue + '$2');
+    }
+    url = url.replace(/[?#]$/, '');
+    return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
+}
+
 $('#filter').click(function () {
     // Get the selected values from status select and other filters
     var statuses = $('#selected_statuses').val(); // Array of selected statuses

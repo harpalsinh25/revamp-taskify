@@ -232,10 +232,10 @@ class LeadController extends Controller
                 ]);
             }
         } catch (ValidationException $e) {
-            
+
             return formatApiValidationError($isApi, $e->errors());
         } catch (Exception $e) {
-            
+
             return formatApiResponse(
                 true,
                 'Lead Couldn\'t Created.',
@@ -907,55 +907,66 @@ class LeadController extends Controller
      */
     public function convertToClient(Request $request, Lead $lead)
     {
-        if ($lead->is_converted == 1) {
-            return formatApiResponse(
-                true,
-                'Lead is already converted to the client.',
-                [
-                    'id' => $lead->id
-                ]
-            );
+
+
+
+        try {
+            if ($lead->is_converted == 1) {
+                return formatApiResponse(
+                    true,
+                    'Lead is already converted to the client.',
+                    [
+                        'id' => $lead->id
+                    ]
+                );
+            }
+
+            $clientData = [
+                'first_name' => $lead->first_name,
+                'last_name' => $lead->last_name,
+                'company' => $lead->company,
+                'email' => $lead->email,
+                'phone' => $lead->phone,
+                'country_code' => $lead->country_code,
+                'address' => $lead->address,
+                'city' => $lead->city,
+                'state' => $lead->state,
+                'country' => $lead->country,
+                'zip' => $lead->zip,
+                'internal_purpose' => 'on',
+            ];
+
+            $clientRequest = new Request($clientData);
+
+           
+            $clientController = new \App\Http\Controllers\ClientController();
+            $response = $clientController->store($clientRequest);
+
+            $responseBody = json_decode($response->getContent(), true);
+
+            if (isset($responseBody['error']) && $responseBody['error'] === true) {
+                return formatApiValidationError(
+                    true,
+                    $responseBody['message'] ?? []
+                );
+            }
+
+            if ($response->getStatusCode() != 200) {
+                return formatApiResponse(
+                    true,
+                    'Something went wrong while converting the lead.',
+                    []
+                );
+            }
+
+            $lead->update(['is_converted' => 1, 'converted_at' => now()]);
+
+
+
+            return $response;
+        } catch (\Throwable $th) {
+            dd($th);
         }
-
-        $clientData = [
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'company' => $lead->company,
-            'email' => $lead->email,
-            'phone' => $lead->phone,
-            'country_code' => $lead->country_code,
-            'address' => $lead->address,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'country' => $lead->country,
-            'zip' => $lead->zip,
-            'internal_purpose' => 'on',
-        ];
-
-        $clientRequest = new Request($clientData);
-        $clientController = new \App\Http\Controllers\ClientController();
-        $response = $clientController->store($clientRequest);
-
-        $responseBody = json_decode($response->getContent(), true);
-
-        if (isset($responseBody['error']) && $responseBody['error'] === true) {
-            return formatApiValidationError(
-                true,
-                $responseBody['errors'] ?? []
-            );
-        }
-
-        if ($response->getStatusCode() != 200) {
-            return formatApiResponse(
-                true,
-                'Something went wrong while converting the lead.',
-                []
-            );
-        }
-
-        $lead->update(['is_converted' => 1, 'converted_at' => now()]);
-
-        return $response;
     }
 
     /**

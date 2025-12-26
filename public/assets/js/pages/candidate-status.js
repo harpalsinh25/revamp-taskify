@@ -25,6 +25,8 @@ $(document).on('click', '.edit-candidate-status-btn', function () {
         .removeClass('select-bg-label-primary select-bg-label-secondary select-bg-label-success select-bg-label-danger select-bg-label-warning select-bg-label-info select-bg-label-dark')
         .addClass(`select-bg-label-${color}`);
 
+    $('#status_color').val(color);
+
     $('#editStatusForm').attr('action', actionUrl)
     $('#editStatusId').val(candidateStatus.id);
 

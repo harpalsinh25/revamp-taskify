@@ -155,4 +155,4 @@
 </script>
 <script src="{{ asset('assets/js/pages/invoices-report.js') }}?v={{ time() }}"></script>
 @endsection
-@endsection
+

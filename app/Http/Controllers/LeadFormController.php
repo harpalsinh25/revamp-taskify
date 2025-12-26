@@ -296,7 +296,7 @@ class LeadFormController extends Controller
                 'title' => $request->title,
                 'description' => $request->description,
                 'created_by' => getAuthenticatedUser()->id,
-                'workspace_id' => 1,
+                'workspace_id' => $this->workspace->id,
                 'source_id' => $request->source_id,
                 'stage_id' => $request->stage_id,
                 'assigned_to' => $request->assigned_to,

@@ -2929,8 +2929,8 @@ if (!function_exists('formatUser')) {
                     'tasks' => Workspace::find(getWorkspaceId())->tasks()->count(),
                 ] : [
                     'projects' => $user->projects()->count(),
-                'tasks' => $user->tasks()->count()
-            ]
+                    'tasks' => $user->tasks()->count()
+                ]
             )
         ];
     }
@@ -2975,8 +2975,8 @@ if (!function_exists('formatClient')) {
                     'tasks' => Workspace::find(getWorkspaceId())->tasks()->count(),
                 ] : [
                     'projects' => $client->projects()->count(),
-                'tasks' => $client->tasks()->count()
-            ]
+                    'tasks' => $client->tasks()->count()
+                ]
             )
         ];
     }
@@ -3390,7 +3390,7 @@ if (!function_exists('getMenus')) {
                 'label' => get_label('leads_management', 'Leads Management'),
                 'url' => '',
                 'icon' => 'bx bxs-phone-call',
-                'class' => 'menu-item ' . (Request::is('lead-sources') || Request::is('lead-sources/*') || Request::is('lead-stages') || Request::is('lead-stages/*') || Request::is('leads') || Request::is('leads/*') ? 'active open' : ''),
+                'class' => 'menu-item ' . (Request::is('lead-sources') || Request::is('lead-sources/*') || Request::is('lead-stages') || Request::is('lead-stages/*') || Request::is('leads') || Request::is('leads/*') || Request::is('lead-forms') || Request::is('lead-forms/*')  ? 'active open' : ''),
                 'category' => 'utilities',
                 'show' =>  $user->can('manage_leads') ? 1 : 0,
                 'submenus' => [
@@ -3426,7 +3426,7 @@ if (!function_exists('getMenus')) {
                         'id' => 'lead_forms',
                         'label' => get_label('lead_forms', 'Lead Forms'),
                         'url' => route('lead-forms.index'),
-                        'class' => 'menu-item' . (Request::is('/lead-forms') ? ' active' : ''),
+                        'class' => 'menu-item' . (Request::is('lead-forms') || (Request::is('lead-forms/*')) ? ' active' : ''),
                         'show' => ($user->can('manage_leads') && $user->can('create_leads')) ? 1 : 0
                     ],
                 ],
@@ -5657,4 +5657,18 @@ if (!function_exists('number_to_words')) {
             return number_to_words($crores_digit) . ' Crore' . ($crores_digit > 1 ? 's' : '') . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
         }
     }
+
+    function imageToBase64($path)
+    {
+        if (!$path || !file_exists($path)) {
+            return null;
+        }
+
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+
+        return 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+
+    
 }

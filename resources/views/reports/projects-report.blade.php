@@ -189,4 +189,4 @@
 </script>
 <script src="{{ asset('assets/js/pages/projects-report.js') }}?v={{ time() }}"></script>
 @endsection
-@endsection
+
