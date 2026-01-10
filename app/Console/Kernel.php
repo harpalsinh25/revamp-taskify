@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
 
-        $schedule->command('send:wishes')->daily();
+        $schedule->command('send:wishes')->daily()->at('00:00')->withoutOverlapping();
         // $schedule->command('send:wishes')->everyMinute();
 
         // Remider Task
@@ -51,6 +51,19 @@ class Kernel extends ConsoleKernel
                 Log::info('Company year started - Leave balances initialized for new year');
             }
         })->daily()->at('00:05'); // Run at 00:05 AM to avoid conflicts with other midnight jobs
+
+        // Process background queues
+        $schedule->command('queue:work --stop-when-empty --tries=3')
+            ->everyMinute()
+            ->appendOutputTo(storage_path('logs/queue-worker.log'))
+            ->onSuccess(function () {
+                Log::info('Queue worker processed successfully or no jobs found.');
+            })
+            ->onFailure(function () {
+                Log::error('Queue worker failed to execute.');
+            })
+            ->withoutOverlapping()
+            ->onOneServer();
     }
 
     /**

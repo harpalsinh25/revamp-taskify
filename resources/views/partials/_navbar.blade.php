@@ -142,7 +142,7 @@ if ($remainingUnreadNotificationsCount < 0) {
                 <li class="nav-item navbar-dropdown dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                         <div class="avatar avatar-online">
-                            <img src="{{$authenticatedUser->photo ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg')}}" alt class="rounded-circle" />
+                            <img src="{{($authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo)) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg')}}" alt class="rounded-circle" />
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -151,7 +151,7 @@ if ($remainingUnreadNotificationsCount < 0) {
                                 <div class="d-flex">
                                     <div class="flex-shrink-0 me-3">
                                         <div class="avatar avatar-online avatar-nav-dropdown">
-                                            <img src="{{$authenticatedUser->photo ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg')}}" alt class="rounded-circle" />
+                                            <img src="{{($authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo)) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg')}}" alt class="rounded-circle" />
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">

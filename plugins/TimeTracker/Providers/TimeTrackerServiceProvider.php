@@ -39,7 +39,7 @@ class TimeTrackerServiceProvider extends ServiceProvider
         // Optional logging for plugin version on load
         if (file_exists(__DIR__ . '/../plugin.json')) {
             $pluginJson = json_decode(file_get_contents(__DIR__ . '/../plugin.json'), true);
-            Log::info('✅ TimeTracker Plugin Loaded - Version: ' . ($pluginJson['version'] ?? 'unknown'));
+            // Log::info('✅ TimeTracker Plugin Loaded - Version: ' . ($pluginJson['version'] ?? 'unknown'));
         }
 
         // Attach plugin's scheduled task cleanly

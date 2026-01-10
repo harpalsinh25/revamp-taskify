@@ -604,7 +604,7 @@
 
 /* Clear button */
 .select2-container--default .select2-selection--single .select2-selection__clear {
-    margin-right: 0.5rem !important;
+    margin-right: 1.3rem !important;
     color: #697a8d !important;
 }
 

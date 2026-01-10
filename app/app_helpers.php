@@ -127,17 +127,17 @@ if (!function_exists('relativeTime')) {
 if (!function_exists('get_settings')) {
     function get_settings($variable, $default = null)
     {
+        static $requestCache = null;
 
-        static $settings = null;
-        // if ($settings === null) {
-        //     // Cache forever (clear when settings change)
-        //     // $settings = Cache::remember('settings_cache', now()->addMinutes(20), function () {
-        //     return Setting::pluck('value', 'variable')->toArray();
-        //     // });
-        // }
-        // dd($settings);
-        $settings =  Setting::pluck('value', 'variable')->toArray();
-        $value = $settings[$variable] ?? $default;
+        if ($requestCache === null) {
+            // Use Laravel Cache to store settings persistently (e.g. for 24 hours)
+            // This prevents DB queries on every single request across all users
+            $requestCache = \Illuminate\Support\Facades\Cache::remember('app_settings_global', 86400, function () {
+                return \App\Models\Setting::pluck('value', 'variable')->toArray();
+            });
+        }
+
+        $value = $requestCache[$variable] ?? $default;
 
         if ($value && is_string($value) && isJson($value)) {
             return json_decode($value, true);
@@ -552,8 +552,6 @@ if (!function_exists('escape_array')) {
         }
     }
 }
-
-
 if (!function_exists('isEmailConfigured')) {
     function isEmailConfigured()
     {
@@ -593,11 +591,6 @@ if (!function_exists('isEmailConfigured')) {
         }
     }
 }
-
-
-
-
-
 if (!function_exists('get_current_version')) {
     function get_current_version()
     {
@@ -788,347 +781,57 @@ if (!function_exists('get_tax_data')) {
         ];
     }
 }
+if (!function_exists('processNotificationsSynchronously')) {
+    function processNotificationsSynchronously($data, $recipients)
+    {
+        return app(\App\Services\NotificationService::class)->processNotificationsSynchronously($data, $recipients);
+    }
+}
 if (!function_exists('processNotifications')) {
     function processNotifications($data, $recipients)
     {
-        // Define an array of types for which email notifications should be sent
-        $emailNotificationTypes = ['project_assignment', 'project_status_updation', 'interview_assignment', 'interview_status_update', 'task_assignment', 'task_status_updation', 'workspace_assignment', 'meeting_assignment', 'leave_request_creation', 'leave_request_status_updation', 'team_member_on_leave_alert'];
-        $smsNotificationTypes = ['project_assignment', 'project_status_updation', 'interview_assignment', 'interview_status_update', 'task_assignment', 'task_status_updation', 'workspace_assignment', 'meeting_assignment', 'leave_request_creation', 'leave_request_status_updation', 'team_member_on_leave_alert'];
-        if (!empty($recipients)) {
-            $type = $data['type'] == 'task_status_updation' ? 'task' : ($data['type'] == 'project_status_updation' ? 'project' : ($data['type'] == 'leave_request_creation' || $data['type'] == 'leave_request_status_updation' || $data['type'] == 'team_member_on_leave_alert' ? 'leave_request' : $data['type']));
-            $systemNotificationTemplate = getNotificationTemplate($data['type'], 'system');
-            $pushNotificationTemplate = getNotificationTemplate($data['type'], 'push');
-            if (
-                !$systemNotificationTemplate || $systemNotificationTemplate->status !== 0 ||
-                !$pushNotificationTemplate || $pushNotificationTemplate->status !== 0
-            ) {
-                $notification = Notification::create([
-                    'workspace_id' => getWorkspaceId(),
-                    'from_id' => getGuardName() == 'client' ? 'c_' . getAuthenticatedUser()->id : 'u_' . getAuthenticatedUser()->id,
-                    'type' => $type,
-                    'type_id' => $data['type_id'],
-                    'action' => $data['action'],
-                    'title' => getTitle($data),
-                    'message' => get_message($data, NULL, 'system'),
-                ]);
-            }
-            // Exclude creator from receiving notification
-            $loggedInUserId = getGuardName() == 'client' ? 'c_' . getAuthenticatedUser()->id : 'u_' . getAuthenticatedUser()->id;
-            $recipients = array_diff($recipients, [$loggedInUserId]);
-            $recipients = array_unique($recipients);
-            // dd($recipients);
-            $whatsappNotificationTemplate = getNotificationTemplate($data['type'], 'whatsapp');
-            $slackNotificationTemplate = getNotificationTemplate($data['type'], 'slack');
-            foreach ($recipients as $recipient) {
-                $isSystem = 0;
-                $isPush = 0;
-                $enabledNotifications = getUserPreferences('notification_preference', 'enabled_notifications', $recipient);
-                $recipientId = substr($recipient, 2);
-                if (substr($recipient, 0, 2) === 'u_') {
-                    $recipientModel = User::find($recipientId);
-                } elseif (substr($recipient, 0, 2) === 'c_') {
-                    $recipientModel = Client::find($recipientId);
-                } elseif (substr($recipient, 0, 2) === 'ca') {
-                    $recipientModel = Candidate::find($recipientId);
-                }
-                // Check if recipient was found
-                // dd($recipientModel);
-                if ($recipientModel) {
-                    if (!$systemNotificationTemplate || ($systemNotificationTemplate->status !== 0)) {
-                        if (
-                            (is_array($enabledNotifications) && empty($enabledNotifications)) || (
-                                is_array($enabledNotifications) && (
-                                    in_array('system_' . $data['type'] . '_assignment', $enabledNotifications) ||
-                                    in_array('system_' . $data['type'], $enabledNotifications)
-                                )
-                            )
-                        ) {
-                            $isSystem = 1;
-                        }
-                    }
-                    if (!$pushNotificationTemplate || ($pushNotificationTemplate->status !== 0)) {
-                        if (
-                            (is_array($enabledNotifications) && empty($enabledNotifications)) || (
-                                is_array($enabledNotifications) && (
-                                    in_array('push_' . $data['type'] . '_assignment', $enabledNotifications) ||
-                                    in_array('push_' . $data['type'], $enabledNotifications)
-                                )
-                            )
-                        ) {
-                            $isPush = 1;
-
-                            try {
-                                sendPushNotification($recipientModel, $data);
-                            } catch (\Exception $e) {
-                            }
-                        }
-                    }
-                    if ($isSystem || $isPush) {
-                        // dd($recipientModel, $notification);
-                        $recipientModel->notifications()->attach($notification->id, [
-                            'is_system' => $isSystem,
-                            'is_push' => $isPush,
-                        ]);
-                    }
-                    if (in_array($data['type'] . '_assignment', $emailNotificationTypes) || in_array($data['type'], $emailNotificationTypes)) {
-                        if (
-                            (is_array($enabledNotifications) && empty($enabledNotifications)) || (
-                                is_array($enabledNotifications) && (
-                                    in_array('email_' . $data['type'] . '_assignment', $enabledNotifications) ||
-                                    in_array('email_' . $data['type'], $enabledNotifications)
-                                )
-                            )
-                        ) {
-                            try {
-                                sendEmailNotification($recipientModel, $data);
-                            } catch (\Exception $e) {
-                                // dd($e->getMessage());
-                            } catch (TransportExceptionInterface $e) {
-                                // dd($e->getMessage());
-                            } catch (Throwable $e) {
-                                // dd($e->getMessage());
-                                // Catch any other throwable, including non-Exception errors
-                            }
-                        }
-                    }
-                    if (in_array($data['type'] . '_assignment', $smsNotificationTypes) || in_array($data['type'], $smsNotificationTypes)) {
-                        if (
-                            (is_array($enabledNotifications) && empty($enabledNotifications)) || (
-                                is_array($enabledNotifications) && (
-                                    in_array('sms_' . $data['type'] . '_assignment', $enabledNotifications) ||
-                                    in_array('sms_' . $data['type'], $enabledNotifications)
-                                )
-                            )
-                        ) {
-                            try {
-                                sendSMSNotification($data, $recipientModel);
-                            } catch (\Exception $e) {
-                            }
-                        }
-                    }
-                    if (!$whatsappNotificationTemplate || ($whatsappNotificationTemplate->status !== 0)) {
-                        if (
-                            (is_array($enabledNotifications) && empty($enabledNotifications)) || (
-                                is_array($enabledNotifications) && (
-                                    in_array('whatsapp_' . $data['type'] . '_assignment', $enabledNotifications) ||
-                                    in_array('whatsapp_' . $data['type'], $enabledNotifications)
-                                )
-                            )
-                        ) {
-                            try {
-                                sendWhatsAppNotification($recipientModel, $data);
-                            } catch (\Exception $e) {
-                            }
-                        }
-                    }
-                    if (!$slackNotificationTemplate || ($slackNotificationTemplate->status !== 0)) {
-                        if (
-                            (is_array($enabledNotifications) && empty($enabledNotifications)) || (
-                                is_array($enabledNotifications) && (
-                                    in_array('slack_' . $data['type'] . '_assignment', $enabledNotifications) ||
-                                    in_array('slack_' . $data['type'], $enabledNotifications)
-                                )
-                            )
-                        ) {
-                            try {
-                                sendSlackNotification($recipientModel, $data);
-                            } catch (\Exception $e) {
-                            }
-                        }
-                    }
-                }
-            }
+        if (empty($recipients)) {
+            return;
         }
+
+        // Capture current context
+        $workspaceId = getWorkspaceId();
+        $auth = getAuthenticatedUser();
+        $authId = $auth ? $auth->id : null;
+        $authGuard = getGuardName();
+
+        // Dispatch the job
+        \App\Jobs\ProcessNotificationsJob::dispatch($data, $recipients, $workspaceId, $authId, $authGuard);
     }
 }
 if (!function_exists('sendPushNotification')) {
     function sendPushNotification($recipientModel, $data)
     {
-        // Path to your service account key
-        $serviceAccountPath = storage_path('app/firebase/firebase-service-account.json');
-        // Set up the Google Client for authentication
-        $googleClient = new GoogleClient();
-        $googleClient->setAuthConfig($serviceAccountPath);
-        $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
-        // Generate an access token
-        $accessToken = $googleClient->fetchAccessTokenWithAssertion()['access_token'];
-        $projectId = json_decode(file_get_contents($serviceAccountPath), true)['project_id'];
-        // Retrieve device tokens based on the recipient model
-        if ($recipientModel instanceof User) {
-            $deviceTokens = FcmToken::where('user_id', $recipientModel->id)->pluck('fcm_token')->toArray();
-        } elseif ($recipientModel instanceof Client) {
-            $deviceTokens = FcmToken::where('client_id', $recipientModel->id)->pluck('fcm_token')->toArray();
-        }
-        if (empty($deviceTokens)) {
-            return; // No device tokens found, skip sending
-        }
-        // Set up Guzzle HTTP client
-        $httpClient = new HttpClient([
-            'base_uri' => 'https://fcm.googleapis.com/v1/',
-            'headers' => [
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Content-Type' => 'application/json',
-            ],
-        ]);
-        $title = getTitle($data, $recipientModel, 'push');
-        $body = get_message($data, $recipientModel, 'push');
-        // Prepare the notification message
-        $message = [
-            'message' => [
-                'notification' => [
-                    'title' => $title,
-                    'body' => $body,
-                ],
-                'android' => [
-                    'notification' => [
-                        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                    ],
-                ],
-                'apns' => [
-                    'headers' => [
-                        'apns-priority' => '10',
-                    ],
-                    'payload' => [
-                        'aps' => [
-                            'alert' => [
-                                'title' => $title,
-                                'body' => $body,
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-        // Add additional data based on the notification type
-        if ($data['type'] == 'project' || $data['type'] == 'project_status_updation') {
-            $project = Project::find($data['type_id']);
-            $message['message']['data']['item'] = json_encode([
-                'type' => 'project',
-                'item' => formatProject($project),
-            ]);
-        } elseif ($data['type'] == 'task' || $data['type'] == 'task_status_updation') {
-            $task = Task::find($data['type_id']);
-            $message['message']['data']['item'] = json_encode([
-                'type' => 'task',
-                'item' => formatTask($task),
-            ]);
-        } elseif ($data['type'] == 'meeting') {
-            $meeting = Meeting::find($data['type_id']);
-            $message['message']['data']['item'] = json_encode([
-                'type' => 'meeting',
-                'item' => formatMeeting($meeting),
-            ]);
-        } elseif ($data['type'] == 'workspace') {
-            $workspace = Workspace::find($data['type_id']);
-            $message['message']['data']['item'] = json_encode([
-                'type' => 'workspace',
-                'item' => formatWorkspace($workspace),
-            ]);
-        } elseif (in_array($data['type'], ['leave_request_creation', 'team_member_on_leave_alert', 'leave_request_status_updation'])) {
-            $leaveRequest = LeaveRequest::find($data['type_id']);
-            $message['message']['data']['item'] = json_encode([
-                'type' => 'leave_request',
-                'item' => formatLeaveRequest($leaveRequest),
-            ]);
-        }
-        foreach ($deviceTokens as $deviceToken) {
-            try {
-                // Set the current device token
-                $message['message']['token'] = $deviceToken;
-                // Send the notification
-
-                $response = $httpClient->post("projects/{$projectId}/messages:send", [
-                    'json' => $message,
-                ]);
-
-                // Uncomment for debugging
-                // dd($projectId);
-                // dd($response);
-            } catch (\Exception $e) {
-                // Handle the error for the current token
-                // Log the error or take appropriate action
-                // Uncomment for debugging
-                // dd($e->getMessage());
-            }
-        }
+        return app(\App\Services\NotificationService::class)->sendPushNotification($recipientModel, $data);
     }
 }
 if (!function_exists('sendEmailNotification')) {
     function sendEmailNotification($recipientModel, $data)
     {
-        $template = getNotificationTemplate($data['type']);
-        if (!$template || ($template->status !== 0)) {
-            $recipientModel->notify(new AssignmentNotification($recipientModel, $data));
-        }
+        return app(\App\Services\NotificationService::class)->sendEmailNotification($recipientModel, $data);
     }
 }
 if (!function_exists('sendSMSNotification')) {
     function sendSMSNotification($data, $recipient)
     {
-        $template = getNotificationTemplate($data['type'], 'sms');
-        if (!$template || ($template->status !== 0)) {
-            send_sms($recipient, $data);
-        }
+        return app(\App\Services\NotificationService::class)->sendSMSNotification($data, $recipient);
     }
 }
 if (!function_exists('getNotificationTemplate')) {
     function getNotificationTemplate($type, $emailOrSMS = 'email')
     {
-        $template = Template::where('type', $emailOrSMS)
-            ->where('name', $type . '_assignment')
-            ->first();
-        if (!$template) {
-            // If template with $type . '_assignment' name not found, check for template with $type name
-            $template = Template::where('type', $emailOrSMS)
-                ->where('name', $type)
-                ->first();
-        }
-        // dd($template);
-        return $template;
+        return app(\App\Services\NotificationService::class)->getNotificationTemplate($type, $emailOrSMS);
     }
 }
 if (!function_exists('send_sms')) {
     function send_sms($recipient, $itemData = NULL, $message = NULL)
     {
-        $msg = $itemData ? get_message($itemData, $recipient) : $message;
-        try {
-            $sms_gateway_settings = get_settings('sms_gateway_settings', true);
-            $data = [
-                "base_url" => $sms_gateway_settings['base_url'],
-                "sms_gateway_method" => $sms_gateway_settings['sms_gateway_method']
-            ];
-            $data["body"] = [];
-            if (isset($sms_gateway_settings["body_formdata"])) {
-                foreach ($sms_gateway_settings["body_formdata"] as $key => $value) {
-                    $value = parse_sms($value, $recipient->phone, $msg, $recipient->country_code);
-                    $data["body"][$key] = $value;
-                }
-            }
-            $data["header"] = [];
-            if (isset($sms_gateway_settings["header_data"])) {
-                foreach ($sms_gateway_settings["header_data"] as $key => $value) {
-                    $value = parse_sms($value, $recipient->phone, $msg, $recipient->country_code);
-                    $data["header"][] = $key . ": " . $value;
-                }
-            }
-            $data["params"] = [];
-            if (isset($sms_gateway_settings["params_data"])) {
-                foreach ($sms_gateway_settings["params_data"] as $key => $value) {
-                    $value = parse_sms($value, $recipient->phone, $msg, $recipient->country_code);
-                    $data["params"][$key] = $value;
-                }
-            }
-            $response = curl_sms($data["base_url"], $data["sms_gateway_method"], $data["body"], $data["header"]);
-            // print_r($response);
-            if ($itemData == NULL) {
-                return $response;
-            }
-        } catch (Exception $e) {
-            // Handle the exception
-            if ($itemData == NULL) {
-                throw new Exception('Failed to send SMS: ' . $e->getMessage());
-            }
-        }
+        return app(\App\Services\NotificationService::class)->send_sms($recipient, $itemData, $message);
     }
 }
 if (!function_exists('storeFcmToken')) {
@@ -1168,884 +871,37 @@ if (!function_exists('storeFcmToken')) {
 if (!function_exists('sendWhatsAppNotification')) {
     function sendWhatsAppNotification($recipient, $itemData = NULL, $message = NULL)
     {
-        $msg = $itemData ? get_message($itemData, $recipient, 'whatsapp') : $message;
-        $whatsapp_settings = get_settings('whatsapp_settings', true);
-        $general_settings = get_settings('general_settings');
-        $company_title = $general_settings['company_title'] ?? 'Taskify';
-        $client = new GuzzleHttpClient();
-        try {
-            $response = $client->post('https://graph.facebook.com/v20.0/' . $whatsapp_settings['whatsapp_phone_number_id'] . '/messages', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $whatsapp_settings['whatsapp_access_token'],
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'messaging_product' => 'whatsapp',
-                    'recipient_type' => 'individual',
-                    'to' => $recipient->country_code . $recipient->phone,
-                    'type' => 'template',
-                    'template' => [
-                        'name' => 'taskify_saas_notification',
-                        'language' => [
-                            'code' => 'en'
-                        ],
-                        'components' => [
-                            [
-                                'type' => 'body',
-                                'parameters' => [
-                                    [
-                                        'type' => 'text',
-                                        'text' => $msg  // This will replace {{1}}
-                                    ],
-                                    [
-                                        'type' => 'text',
-                                        'text' => $company_title  // This will replace {{2}}
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-            ]);
-            $data = json_decode($response->getBody(), true);
-            if ($itemData == NULL) {
-                return $data;
-            }
-            // dd("Message sent successfully. Response: " . print_r($data, true));
-        } catch (RequestException $e) {
-            // dd("Error sending message: " . $e->getMessage());
-            if ($e->hasResponse()) {
-                if ($itemData == NULL) {
-                    throw new Exception('Failed: ' . $e->getMessage());
-                }
-                // dd("Response: " . $e->getResponse()->getBody()->getContents());
-            }
-        }
+        return app(\App\Services\NotificationService::class)->sendWhatsAppNotification($recipient, $itemData, $message);
     }
 }
 if (!function_exists('sendSlackNotification')) {
     function sendSlackNotification($recipient, $itemData = NULL, $message = NULL)
     {
-        $slack_settings = get_settings('slack_settings');
-        $message = $itemData ? get_message($itemData, $recipient, 'slack') : $message;
-        $botToken = $slack_settings['slack_bot_token'];
-        // Create a Guzzle client for Slack API
-        $client = new GuzzleHttpClient([
-            'base_uri' => 'https://slack.com/api/',
-            'headers' => [
-                'Authorization' => 'Bearer ' . $botToken,
-                'Content-Type' => 'application/json',
-            ],
-        ]);
-        // Step 4: Look up the Slack user ID by email
-        $email = $recipient->email;
-        // $email = 'infinitietechnologies10@gmail.com';
-        $userId = getSlackUserIdByEmail($client, $email);
-        if ($userId) {
-            // Step 5: Prepare the message payload
-            // Assuming template has a 'content' field
-            $slackMessage = [
-                'channel' => $userId,
-                'text' => $message,
-                'username' => 'Taskify Notification',
-                'icon_emoji' => ':office:',
-            ];
-            try {
-                // Step 6: Send the Slack message
-                $response = $client->post('chat.postMessage', [
-                    'json' => $slackMessage
-                ]);
-                $responseBody = json_decode(
-                    $response->getBody(),
-                    true
-                );
-                if ($responseBody['ok']) {
-                    if ($itemData === NULL) {
-                        return [
-                            'status' => 'success',
-                            'message' => 'Slack DM sent successfully to user: ' . $userId,
-                        ];
-                    }
-                    // Log::info('Slack DM sent successfully to user: ' . $userId);
-                } else {
-                    if ($itemData === NULL) {
-                        return [
-                            'status' => 'error',
-                            'message' => 'Failed to send Slack DM: ' . $responseBody['error'],
-                        ];
-                    }
-                    // Log::warning('Failed to send Slack DM to user ' . $userId . ': ' . $responseBody['error']);
-                }
-            } catch (\Exception $e) {
-                if ($itemData === NULL) {
-                    return [
-                        'status' => 'error',
-                        'message' => 'Error sending Slack DM: ' . $e->getMessage(),
-                    ];
-                }
-                // Log::error('Error sending Slack DM to user: ' . $userId . ', Error: ' . $e->getMessage());
-            }
-        } else {
-            if ($itemData === NULL) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Slack user ID not found for email: ' . $email,
-                ];
-            }
-            // Log::warning('Slack user ID not found for email: ' . $email);
-        }
+        return app(\App\Services\NotificationService::class)->sendSlackNotification($recipient, $itemData, $message);
     }
 }
 if (!function_exists('getSlackUserIdByEmail')) {
     function getSlackUserIdByEmail($client, $email)
     {
-        try {
-            $response = $client->get('users.lookupByEmail', [
-                'query' => ['email' => $email]
-            ]);
-            $body = json_decode($response->getBody(), true);
-            if ($body['ok'] === true) {
-                return $body['user']['id']; // Return Slack User ID
-            } else {
-                Log::error("Failed to get Slack user ID: " . $body['error']);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error getting Slack user ID for email ' . $email . ': ' . $e->getMessage());
-        }
+        return app(\App\Services\NotificationService::class)->getSlackUserIdByEmail($client, $email);
     }
 }
 if (!function_exists('curl_sms')) {
     function curl_sms($url, $method = 'GET', $data = [], $headers = [])
     {
-        $ch = curl_init();
-        $curl_options = array(
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_HEADER => 0,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/x-www-form-urlencoded',
-            )
-        );
-        if (count($headers) != 0) {
-            $curl_options[CURLOPT_HTTPHEADER] = $headers;
-        }
-        if (strtolower($method) == 'post') {
-            $curl_options[CURLOPT_POST] = 1;
-            $curl_options[CURLOPT_POSTFIELDS] = http_build_query($data);
-        } else {
-            $curl_options[CURLOPT_CUSTOMREQUEST] = 'GET';
-        }
-        curl_setopt_array($ch, $curl_options);
-        $result = array(
-            'body' => json_decode(curl_exec($ch), true),
-            'http_code' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
-        );
-        return $result;
+        return app(\App\Services\NotificationService::class)->curl_sms($url, $method, $data, $headers);
     }
 }
 if (!function_exists('parse_sms')) {
     function parse_sms($template, $phone, $msg, $country_code)
     {
-        // Implement your parsing logic here
-        // This is just a placeholder
-        return str_replace(['{only_mobile_number}', '{message}', '{country_code}'], [$phone, $msg, $country_code], $template);
+        return app(\App\Services\NotificationService::class)->parse_sms($template, $phone, $msg, $country_code);
     }
 }
 if (!function_exists('get_message')) {
     function get_message($data, $recipient, $type = 'sms')
     {
-        $authUser = getAuthenticatedUser();
-        $general_settings = get_settings('general_settings');
-        $company_title = $general_settings['company_title'] ?? 'Taskify';
-        $siteUrl = $general_settings['site_url'] ?? request()->getSchemeAndHttpHost();
-        $fetched_data = Template::where('type', $type)
-            ->where('name', $data['type'] . '_assignment')
-            ->first();
-        if (!$fetched_data) {
-            // If template with $this->data['type'] . '_assignment' name not found, check for template with $this->data['type'] name
-            $fetched_data = Template::where('type', $type)
-                ->where('name', $data['type'])
-                ->first();
-        }
-        $templateContent = 'Default Content';
-        $contentPlaceholders = []; // Initialize outside the switch
-        // Customize content based on type
-        if ($type === 'system' || $type === 'push') {
-            switch ($data['type']) {
-                case 'project':
-                    $contentPlaceholders = [
-                        '{PROJECT_ID}' => $data['type_id'],
-                        '{PROJECT_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{PROJECT_URL}' => $siteUrl . '/' . $data['access_url']
-                    ];
-                    $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} assigned you new project: {PROJECT_TITLE}, ID:#{PROJECT_ID}.';
-                    break;
-                case 'project_status_updation':
-                    $contentPlaceholders = [
-                        '{PROJECT_ID}' => $data['type_id'],
-                        '{PROJECT_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{PROJECT_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of project {PROJECT_TITLE}, ID:#{PROJECT_ID}, from {OLD_STATUS} to {NEW_STATUS}.';
-                    break;
-                case 'task':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url']
-                    ];
-                    $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} assigned you new task: {TASK_TITLE}, ID:#{TASK_ID}.';
-                    break;
-                case 'task_status_updation':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of task {TASK_TITLE}, ID:#{TASK_ID}, from {OLD_STATUS} to {NEW_STATUS}.';
-                    break;
-                case 'workspace':
-                    $contentPlaceholders = [
-                        '{WORKSPACE_ID}' => $data['type_id'],
-                        '{WORKSPACE_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{WORKSPACE_URL}' => $siteUrl . '/workspaces'
-                    ];
-                    $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} added you in a new workspace {WORKSPACE_TITLE}, ID:#{WORKSPACE_ID}.';
-                    break;
-                case 'meeting':
-                    $contentPlaceholders = [
-                        '{MEETING_ID}' => $data['type_id'],
-                        '{MEETING_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{MEETING_URL}' => $siteUrl . '/meetings'
-                    ];
-                    $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} added you in a new meeting {MEETING_TITLE}, ID:#{MEETING_ID}.';
-                    break;
-                case 'leave_request_creation':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{REASON}' => $data['reason'],
-                        '{COMMENT}' => $data['comment'],
-                        '{STATUS}' => $data['status'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = 'New Leave Request ID:#{ID} Has Been Created By {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME}.';
-                    break;
-                case 'leave_request_status_updation':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{REASON}' => $data['reason'],
-                        '{COMMENT}' => $data['comment'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = 'Leave Request ID:#{ID} Status Updated From {OLD_STATUS} To {NEW_STATUS}.';
-                    break;
-                case 'team_member_on_leave_alert':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                        '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.';
-                    break;
-                case 'birthday_wish':
-                    $contentPlaceholders = [
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{BIRTHDAY_COUNT}' => $data['birthday_count'],
-                        '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello {FIRST_NAME} {LAST_NAME}, {COMPANY_TITLE} wishes you a very Happy Birthday!';
-                    break;
-                case 'work_anniversary_wish':
-                    $contentPlaceholders = [
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{WORK_ANNIVERSARY_COUNT}' => $data['work_anniversary_count'],
-                        '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello {FIRST_NAME} {LAST_NAME}, {COMPANY_TITLE} wishes you a very happy work anniversary!';
-                    break;
-                case 'task_reminder':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'You have a task reminder for Task #{TASK_ID} - "{TASK_TITLE}". You can view the task here: {TASK_URL}.';
-                    break;
-                case 'recurring_task':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'The recurring task #{TASK_ID} - "{TASK_TITLE}" has been executed. You can view the new instance here: {TASK_URL}';
-                    break;
-                case 'todo_reminder':
-                    $contentPlaceholders = [
-                        '{TODO_ID}' => $data['type_id'],
-                        '{TODO_TITLE}' => $data['type_title'],
-                        '{TODO_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'You have a todo reminder for Todo #{TODO_ID} - "{TODO_TITLE}". You can view the task here: {TODO_URL}.';
-                    break;
-                case 'interview_assignment':
-                    $contentPlaceholders = [
-                        '{INTERVIEW_ID}' => $data['type_id'],
-                        '{CANDIDATE_NAME}' => $data['candidate_name'],
-                        '{ROUND}' => $data['round'],
-                        '{SCHEDULED_AT}' => $data['scheduled_at'],
-                        '{INTERVIEWER_FIRST_NAME}' => $data['interviewer_first_name'],
-                        '{INTERVIEWER_LAST_NAME}' => $data['interviewer_last_name'],
-                        '{FULL_NAME}' =>  $recipient ? $recipient->name : '',
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} from {COMPANY_TITLE} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.';
-                    break;
-                case 'interview_status_update':
-                    $contentPlaceholders = [
-                        '{INTERVIEW_ID}' => $data['type_id'],
-                        '{CANDIDATE_NAME}' => $data['candidate_name'],
-                        '{ROUND}' => $data['round'],
-                        '{SCHEDULED_AT}' => $data['scheduled_at'],
-                        '{INTERVIEWER_FIRST_NAME}' => $data['interviewer_first_name'],
-                        '{INTERVIEWER_LAST_NAME}' => $data['interviewer_last_name'],
-                        '{FULL_NAME}' =>  $recipient ? $recipient->name : '',
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of your interview (ID: #{INTERVIEW_ID}) for {CANDIDATE_NAME} from "{OLD_STATUS}" to "{NEW_STATUS}".';
-                    break;
-            }
-        } else if ($type === 'slack') {
-            switch ($data['type']) {
-                case 'project':
-                    $contentPlaceholders = [
-                        '{PROJECT_ID}' => $data['type_id'],
-                        '{PROJECT_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{PROJECT_URL}' => $siteUrl . '/' . $data['access_url']
-                    ];
-                    $templateContent = '*New Project Assigned:* {PROJECT_TITLE}, ID: #{PROJECT_ID}. By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} You can find the project here :{PROJECT_URL}';
-                    break;
-                case 'project_status_updation':
-                    $contentPlaceholders = [
-                        '{PROJECT_ID}' => $data['type_id'],
-                        '{PROJECT_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{PROJECT_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '*Project Status Updated:* By {UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} , {PROJECT_TITLE}, ID: #{PROJECT_ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`. You can find the project here :{PROJECT_URL}';
-                    break;
-                case 'task':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url']
-                    ];
-                    $templateContent = '*New Task Assigned:* {TASK_TITLE}, ID: #{TASK_ID}. By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} You can find the task here : {TASK_URL}';
-                    break;
-                case 'task_status_updation':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '*Task Status Updated:* By {UPDATER_FIRST_NAME} {UPDATER_LAST_NAME},  {TASK_TITLE}, ID: #{TASK_ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`. You can find the Task here : {TASK_URL}';
-                    break;
-                case 'workspace':
-                    $contentPlaceholders = [
-                        '{WORKSPACE_ID}' => $data['type_id'],
-                        '{WORKSPACE_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{WORKSPACE_URL}' => $siteUrl . '/workspaces'
-                    ];
-                    $templateContent = '*New Workspace Added:* By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME},   {WORKSPACE_TITLE}, ID: #{WORKSPACE_ID}. You can find the Workspace here : {WORKSPACE_URL}';
-                    break;
-                case 'meeting':
-                    $contentPlaceholders = [
-                        '{MEETING_ID}' => $data['type_id'],
-                        '{MEETING_TITLE}' => $data['type_title'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{MEETING_URL}' => $siteUrl . '/meetings'
-                    ];
-                    $templateContent = 'New Meeting Scheduled:* By {ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME},  {MEETING_TITLE}, ID: #{MEETING_ID}. You can find the Meeting here : {MEETING_URL}';
-                    break;
-                case 'leave_request_creation':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{REASON}' => $data['reason'],
-                        '{COMMENT}' => $data['comment'],
-                        '{STATUS}' => $data['status'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '*New {TYPE} Leave Request Created:* ID: #{ID} By {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} for {REASON}.  From ( {FROM} ) -  To ( {TO} ).';
-                    break;
-                case 'leave_request_status_updation':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{REASON}' => $data['reason'],
-                        '{COMMENT}' => $data['comment'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '*Leave Request Status Updated:* For {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME},  ID: #{ID}. Status changed from `{OLD_STATUS}` to `{NEW_STATUS}`.';
-                    break;
-                case 'team_member_on_leave_alert':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '*Team Member Leave Alert:* {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.';
-                    break;
-                case 'birthday_wish':
-                    $contentPlaceholders = [
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{BIRTHDAY_COUNT}' => $data['birthday_count'],
-                        '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello *{FIRST_NAME} {LAST_NAME}*, {COMPANY_TITLE} wishes you a very Happy Birthday!';
-                    break;
-                case 'work_anniversary_wish':
-                    $contentPlaceholders = [
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{WORK_ANNIVERSARY_COUNT}' => $data['work_anniversary_count'],
-                        '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello *{FIRST_NAME} {LAST_NAME}*, {COMPANY_TITLE} wishes you a very happy work anniversary!';
-                    break;
-                case 'task_reminder':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'You have a task reminder for Task #{TASK_ID} - "{TASK_TITLE}". You can view the task here: {TASK_URL}.';
-                    break;
-                case 'recurring_task':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'The recurring task #{TASK_ID} - "{TASK_TITLE}" has been executed. You can view the new instance here: {TASK_URL}';
-                    break;
-                case 'todo_reminder':
-                    $contentPlaceholders = [
-                        '{TODO_ID}' => $data['type_id'],
-                        '{TODO_TITLE}' => $data['type_title'],
-                        '{TODO_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'You have a todo reminder for Todo #{TODO_ID} - "{TODO_TITLE}". You can view the task here: {TODO_URL}.';
-                    break;
-                case 'interview_assignment':
-                    $contentPlaceholders = [
-                        '{INTERVIEW_ID}' => $data['type_id'],
-                        '{CANDIDATE_NAME}' => $data['candidate_name'],
-                        '{ROUND}' => $data['round'],
-                        '{SCHEDULED_AT}' => $data['scheduled_at'],
-                        '{INTERVIEWER_FIRST_NAME}' => $data['interviewer_first_name'],
-                        '{INTERVIEWER_LAST_NAME}' => $data['interviewer_last_name'],
-                        '{FULL_NAME}' =>  $recipient ? $recipient->name : '',
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} from {COMPANY_TITLE} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.';
-                    break;
-                case 'interview_status_update':
-                    $contentPlaceholders = [
-                        '{INTERVIEW_ID}' => $data['type_id'],
-                        '{CANDIDATE_NAME}' => $data['candidate_name'],
-                        '{ROUND}' => $data['round'],
-                        '{SCHEDULED_AT}' => $data['scheduled_at'],
-                        '{INTERVIEWER_FIRST_NAME}' => $data['interviewer_first_name'],
-                        '{INTERVIEWER_LAST_NAME}' => $data['interviewer_last_name'],
-                        '{FULL_NAME}' =>  $recipient ? $recipient->name : '',
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of your interview (ID: #{INTERVIEW_ID}) for {CANDIDATE_NAME} from "{OLD_STATUS}" to "{NEW_STATUS}".';
-                    break;
-            }
-        } else {
-            switch ($data['type']) {
-                case 'project':
-                    $contentPlaceholders = [
-                        '{PROJECT_ID}' => $data['type_id'],
-                        '{PROJECT_TITLE}' => $data['type_title'],
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{PROJECT_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello, {FIRST_NAME} {LAST_NAME} You have been assigned a new project {PROJECT_TITLE}, ID:#{PROJECT_ID}.';
-                    break;
-                case 'project_status_updation':
-                    $contentPlaceholders = [
-                        '{PROJECT_ID}' => $data['type_id'],
-                        '{PROJECT_TITLE}' => $data['type_title'],
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{PROJECT_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{SITE_URL}' => $siteUrl,
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of project {PROJECT_TITLE}, ID:#{PROJECT_ID}, from {OLD_STATUS} to {NEW_STATUS}.';
-                    break;
-                case 'task':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello, {FIRST_NAME} {LAST_NAME} You have been assigned a new task {TASK_TITLE}, ID:#{TASK_ID}.';
-                    break;
-                case 'task_status_updation':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{SITE_URL}' => $siteUrl,
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of task {TASK_TITLE}, ID:#{TASK_ID}, from {OLD_STATUS} to {NEW_STATUS}.';
-                    break;
-                case 'workspace':
-                    $contentPlaceholders = [
-                        '{WORKSPACE_ID}' => $data['type_id'],
-                        '{WORKSPACE_TITLE}' => $data['type_title'],
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{WORKSPACE_URL}' => $siteUrl . '/workspaces',
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello, {FIRST_NAME} {LAST_NAME} You have been added in a new workspace {WORKSPACE_TITLE}, ID:#{WORKSPACE_ID}.';
-                    break;
-                case 'meeting':
-                    $contentPlaceholders = [
-                        '{MEETING_ID}' => $data['type_id'],
-                        '{MEETING_TITLE}' => $data['type_title'],
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{MEETING_URL}' => $siteUrl . '/meetings',
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello, {FIRST_NAME} {LAST_NAME} You have been added in a new meeting {MEETING_TITLE}, ID:#{MEETING_ID}.';
-                    break;
-                case 'leave_request_creation':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{REASON}' => $data['reason'],
-                        '{COMMENT}' => $data['comment'],
-                        '{STATUS}' => $data['status'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl,
-                        '{CURRENT_YEAR}' => date('Y')
-                    ];
-                    $templateContent = 'New Leave Request ID:#{ID} Has Been Created By {REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME}.';
-                    break;
-                case 'leave_request_status_updation':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{REASON}' => $data['reason'],
-                        '{COMMENT}' => $data['comment'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl,
-                        '{CURRENT_YEAR}' => date('Y')
-                    ];
-                    $templateContent = 'Leave Request ID:#{ID} Status Updated From {OLD_STATUS} To {NEW_STATUS}.';
-                    break;
-                case 'team_member_on_leave_alert':
-                    $contentPlaceholders = [
-                        '{ID}' => $data['type_id'],
-                        '{USER_FIRST_NAME}' => $recipient->first_name,
-                        '{USER_LAST_NAME}' => $recipient->last_name,
-                        '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                        '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                        '{TYPE}' => $data['leave_type'],
-                        '{FROM}' => $data['from'],
-                        '{TO}' => $data['to'],
-                        '{DURATION}' => $data['duration'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl,
-                        '{CURRENT_YEAR}' => date('Y')
-                    ];
-                    $templateContent = '{REQUESTEE_FIRST_NAME} {REQUESTEE_LAST_NAME} will be on {TYPE} leave from {FROM} to {TO}.';
-                    break;
-                case 'birthday_wish':
-                    $contentPlaceholders = [
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{BIRTHDAY_COUNT}' => $data['birthday_count'],
-                        '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello {FIRST_NAME} {LAST_NAME}, {COMPANY_TITLE} wishes you a very Happy Birthday!';
-                    break;
-                case 'work_anniversary_wish':
-                    $contentPlaceholders = [
-                        '{FIRST_NAME}' => $recipient->first_name,
-                        '{LAST_NAME}' => $recipient->last_name,
-                        '{WORK_ANNIVERSARY_COUNT}' => $data['work_anniversary_count'],
-                        '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'Hello {FIRST_NAME} {LAST_NAME}, {COMPANY_TITLE} wishes you a very happy work anniversary!';
-                    break;
-                case 'task_reminder':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                        '{SITE_URL}' => $siteUrl
-                    ];
-                    $templateContent = 'You have a task reminder for Task #{TASK_ID} - {TASK_TITLE}. You can view the task here: {TASK_URL}';
-                    break;
-                case 'recurring_task':
-                    $contentPlaceholders = [
-                        '{TASK_ID}' => $data['type_id'],
-                        '{TASK_TITLE}' => $data['type_title'],
-                        '{TASK_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'The recurring task #{TASK_ID} - "{TASK_TITLE}" has been executed. You can view the new instance here: {TASK_URL}';
-                    break;
-                case 'todo_reminder':
-                    $contentPlaceholders = [
-                        '{TODO_ID}' => $data['type_id'],
-                        '{TODO_TITLE}' => $data['type_title'],
-                        '{TODO_URL}' => $siteUrl . '/' . $data['access_url'],
-                        '{COMPANY_TITLE}' => $company_title,
-                    ];
-                    $templateContent = 'You have a todo reminder for Todo #{TODO_ID} - "{TODO_TITLE}". You can view the task here: {TODO_URL}.';
-                    break;
-                case 'interview_assignment':
-                    $contentPlaceholders = [
-                        '{INTERVIEW_ID}' => $data['type_id'],
-                        '{CANDIDATE_NAME}' => $data['candidate_name'],
-                        '{ROUND}' => $data['round'],
-                        '{SCHEDULED_AT}' => $data['scheduled_at'],
-                        '{INTERVIEWER_FIRST_NAME}' => $data['interviewer_first_name'],
-                        '{INTERVIEWER_LAST_NAME}' => $data['interviewer_last_name'],
-                        '{FULL_NAME}' =>  $recipient ? $recipient->name : '',
-                        '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                        '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{ASSIGNEE_FIRST_NAME} {ASSIGNEE_LAST_NAME} has scheduled a new interview for {CANDIDATE_NAME}. Interview ID: #{INTERVIEW_ID}, Round: {ROUND}, Scheduled at: {SCHEDULED_AT}, Interviewer: {INTERVIEWER_FIRST_NAME} {INTERVIEWER_LAST_NAME}.';
-                    break;
-                case 'interview_status_update':
-                    $contentPlaceholders = [
-                        '{INTERVIEW_ID}' => $data['type_id'],
-                        '{CANDIDATE_NAME}' => $data['candidate_name'],
-                        '{ROUND}' => $data['round'],
-                        '{SCHEDULED_AT}' => $data['scheduled_at'],
-                        '{INTERVIEWER_FIRST_NAME}' => $data['interviewer_first_name'],
-                        '{INTERVIEWER_LAST_NAME}' => $data['interviewer_last_name'],
-                        '{FULL_NAME}' =>  $recipient ? $recipient->name : '',
-                        '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                        '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                        '{OLD_STATUS}' => $data['old_status'],
-                        '{NEW_STATUS}' => $data['new_status'],
-                        '{COMPANY_TITLE}' => $company_title
-                    ];
-                    $templateContent = '{UPDATER_FIRST_NAME} {UPDATER_LAST_NAME} has updated the status of your interview (ID: #{INTERVIEW_ID}) for {CANDIDATE_NAME} from "{OLD_STATUS}" to "{NEW_STATUS}".';
-                    break;
-            }
-        }
-        if (filled(Arr::get($fetched_data, 'content'))) {
-            $templateContent = $fetched_data->content;
-        }
-        // Replace placeholders with actual values
-        $content = str_replace(array_keys($contentPlaceholders), array_values($contentPlaceholders), $templateContent);
-        return $content;
+        return app(\App\Services\NotificationService::class)->getMessage($data, $recipient, $type);
     }
 }
 if (!function_exists('format_budget')) {
@@ -2135,7 +991,6 @@ if (!function_exists('getUserPreferences')) {
                 return $result && $result->visible_columns ? $result->visible_columns : [];
                 break;
             case 'enabled_notifications':
-            case 'enabled_notifications':
                 if ($result) {
                     if ($result->enabled_notifications === null) {
                         return null;
@@ -2170,172 +1025,7 @@ if (!function_exists('getOrdinalSuffix')) {
 if (!function_exists('getTitle')) {
     function getTitle($data, $recipient = NULL, $type = 'system')
     {
-        static $authUser = null;
-        static $companyTitle = null;
-        if ($authUser === null) {
-            $authUser = getAuthenticatedUser();
-        }
-        if ($companyTitle === null) {
-            $general_settings = get_settings('general_settings');
-            $companyTitle = $general_settings['company_title'] ?? 'Taskify';
-        }
-        $fetched_data = Template::where('type', $type)
-            ->where('name', $data['type'] . '_assignment')
-            ->first();
-        if (!$fetched_data) {
-            $fetched_data = Template::where('type', $type)
-                ->where('name', $data['type'])
-                ->first();
-        }
-        $subject = 'Default Subject'; // Set a default subject
-        $subjectPlaceholders = [];
-        // Customize subject based on type
-        switch ($data['type']) {
-            case 'project':
-                $subjectPlaceholders = [
-                    '{PROJECT_ID}' => $data['type_id'],
-                    '{PROJECT_TITLE}' => $data['type_title'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                    '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'task':
-                $subjectPlaceholders = [
-                    '{TASK_ID}' => $data['type_id'],
-                    '{TASK_TITLE}' => $data['type_title'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                    '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'workspace':
-                $subjectPlaceholders = [
-                    '{WORKSPACE_ID}' => $data['type_id'],
-                    '{WORKSPACE_TITLE}' => $data['type_title'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                    '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'meeting':
-                $subjectPlaceholders = [
-                    '{MEETING_ID}' => $data['type_id'],
-                    '{MEETING_TITLE}' => $data['type_title'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{ASSIGNEE_FIRST_NAME}' => $authUser->first_name,
-                    '{ASSIGNEE_LAST_NAME}' => $authUser->last_name,
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'leave_request_creation':
-                $subjectPlaceholders = [
-                    '{ID}' => $data['type_id'],
-                    '{STATUS}' => $data['status'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                    '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'leave_request_status_updation':
-                $subjectPlaceholders = [
-                    '{ID}' => $data['type_id'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                    '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                    '{OLD_STATUS}' => $data['old_status'],
-                    '{NEW_STATUS}' => $data['new_status'],
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'team_member_on_leave_alert':
-                $subjectPlaceholders = [
-                    '{ID}' => $data['type_id'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{REQUESTEE_FIRST_NAME}' => $data['team_member_first_name'],
-                    '{REQUESTEE_LAST_NAME}' => $data['team_member_last_name'],
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'project_status_updation':
-                $subjectPlaceholders = [
-                    '{PROJECT_ID}' => $data['type_id'],
-                    '{PROJECT_TITLE}' => $data['type_title'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                    '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                    '{OLD_STATUS}' => $data['old_status'],
-                    '{NEW_STATUS}' => $data['new_status'],
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'task_status_updation':
-                $subjectPlaceholders = [
-                    '{TASK_ID}' => $data['type_id'],
-                    '{TASK_TITLE}' => $data['type_title'],
-                    '{USER_FIRST_NAME}' => $recipient ? $recipient->first_name : '',
-                    '{USER_LAST_NAME}' => $recipient ? $recipient->last_name : '',
-                    '{UPDATER_FIRST_NAME}' => $data['updater_first_name'],
-                    '{UPDATER_LAST_NAME}' => $data['updater_last_name'],
-                    '{OLD_STATUS}' => $data['old_status'],
-                    '{NEW_STATUS}' => $data['new_status'],
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'birthday_wish':
-                $subjectPlaceholders = [
-                    '{FIRST_NAME}' => $recipient->first_name,
-                    '{LAST_NAME}' => $recipient->last_name,
-                    '{BIRTHDAY_COUNT}' => $data['birthday_count'],
-                    '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-            case 'work_anniversary_wish':
-                $subjectPlaceholders = [
-                    '{FIRST_NAME}' => $recipient->first_name,
-                    '{LAST_NAME}' => $recipient->last_name,
-                    '{WORK_ANNIVERSARY_COUNT}' => $data['work_anniversary_count'],
-                    '{ORDINAL_SUFFIX}' => $data['ordinal_suffix'],
-                    '{COMPANY_TITLE}' => $companyTitle
-                ];
-                break;
-        }
-        if (filled(Arr::get($fetched_data, 'subject'))) {
-            $subject = $fetched_data->subject;
-        } else {
-            if ($data['type'] == 'leave_request_creation') {
-                $subject = 'Leave Requested';
-            } elseif ($data['type'] == 'leave_request_status_updation') {
-                $subject = 'Leave Request Status Updated';
-            } elseif ($data['type'] == 'team_member_on_leave_alert') {
-                $subject = 'Team Member on Leave Alert';
-            } elseif ($data['type'] == 'project_status_updation') {
-                $subject = 'Project Status Updated';
-            } elseif ($data['type'] == 'task_status_updation') {
-                $subject = 'Task Status Updated';
-            } elseif ($data['type'] == 'birthday_wish') {
-                $subject = 'Happy Birthday!';
-            } elseif ($data['type'] == 'work_anniversary_wish') {
-                $subject = 'Happy Work Anniversary!';
-            } else {
-                $subject = 'New ' . ucfirst($data['type']) . ' Assigned';
-            }
-        }
-        $subject = str_replace(array_keys($subjectPlaceholders), array_values($subjectPlaceholders), $subject);
-        return $subject;
+        return app(\App\Services\NotificationService::class)->getTitle($data, $recipient, $type);
     }
 }
 if (!function_exists('hasPrimaryWorkspace')) {
@@ -2393,209 +1083,19 @@ if (!function_exists('getGuardName')) {
 if (!function_exists('formatProject')) {
     function formatProject($project)
     {
-        $customFields = CustomField::where('module', 'project')->get();
-        $customFields->transform(function ($field) {
-            // Check if options is not already a string (or is an array/object)
-            if (is_string($field->options)) {
-                $field->options = json_decode($field->options);
-            }
-            return $field;
-        });
-        // dd($project->customFieldValues);
-        // Prepare custom field values for the view
-        $customFieldValues = [];
-        foreach ($project->customFieldValues as $fieldValue) {
-            $value = $fieldValue->value;
-            $decoded = json_decode($value, true);
-            if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
-                // Replace all nulls with empty string
-                array_walk_recursive($decoded, function (&$item) {
-                    if (is_null($item)) {
-                        $item = '';
-                    }
-                });
-                $customFieldValues[$fieldValue->custom_field_id] = $decoded;
-            } else {
-                // If it's a single null value, also convert to empty string
-                $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
-            }
-        }
-        $auth_user = getAuthenticatedUser();
-        return [
-            'id' => $project->id,
-            'title' => $project->title,
-            'task_count' => isAdminOrHasAllDataAccess() ? count($project->tasks) : $auth_user->project_tasks($project->id)->count(),
-            'status' => $project->status->title,
-            'status_id' => $project->status->id,
-            'priority' => $project->priority ? $project->priority->title : null,
-            'priority_id' => $project->priority ? $project->priority->id : null,
-            'users' => $project->users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'user_id' => $project->users->pluck('id')->toArray(),
-            'clients' => $project->clients->map(function ($client) {
-                return [
-                    'id' => $client->id,
-                    'first_name' => $client->first_name,
-                    'last_name' => $client->last_name,
-                    'email' => $client->email,
-                    'photo' => $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'client_id' => $project->clients->pluck('id')->toArray(),
-            'tags' => $project->tags->map(function ($tag) {
-                return [
-                    'id' => $tag->id,
-                    'title' => $tag->title
-                ];
-            }),
-            'tag_ids' => $project->tags->pluck('id')->toArray(),
-            'start_date' => $project->start_date ? format_date($project->start_date, to_format: 'Y-m-d') : null,
-            'end_date' => $project->end_date ? format_date($project->end_date, to_format: 'Y-m-d') : null,
-            'budget' => $project->budget ?? null,
-            'task_accessibility' => $project->task_accessibility,
-            'description' => $project->description,
-            'note' => $project->note,
-            'favorite' => getFavoriteStatus($project->id),
-            'pinned' => isset($project->pinned_id) && !is_null($project->pinned_id) ? 1 : (isset($project->pinned_id) ? 0 : getPinnedStatus($project->id)),
-            'client_can_discuss' => $project->client_can_discuss,
-            'created_at' => format_date($project->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($project->updated_at, to_format: 'Y-m-d'),
-            'customFields' => $customFields,
-            'customFieldValues' => $customFieldValues
-        ];
+        return app(\App\Services\FormatterService::class)->formatProject($project);
     }
 }
 if (!function_exists('formatTask')) {
     function formatTask($task)
     {
-        $task->load('reminders', 'recurringTask');
-        $reminder = $task->reminders[0] ?? null;
-        $recurringTask = $task->recurringTask ?? null;
-        $customFields = CustomField::where('module', 'task')->get();
-        $customFields->transform(function ($field) {
-            // Check if options is not already a string (or is an array/object)
-            if (is_string($field->options)) {
-                $field->options = json_decode($field->options);
-            }
-            return $field;
-        });
-        // Prepare custom field values for the view
-        $customFieldValues = [];
-        foreach ($task->customFieldValues as $fieldValue) {
-            $value = $fieldValue->value;
-            $decoded = json_decode($value, true);
-            if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
-                // Replace all nulls with empty string
-                array_walk_recursive($decoded, function (&$item) {
-                    if (is_null($item)) {
-                        $item = '';
-                    }
-                });
-                $customFieldValues[$fieldValue->custom_field_id] = $decoded;
-            } else {
-                // If it's a single null value, also convert to empty string
-                $customFieldValues[$fieldValue->custom_field_id] = [is_null($value) ? '' : $value];
-            }
-        }
-        return [
-            'id' => $task->id,
-            'workspace_id' => $task->workspace_id,
-            'title' => $task->title,
-            'status' => $task->status->title,
-            'status_id' => $task->status->id,
-            'priority' => $task->priority ? $task->priority->title : null,
-            'priority_id' => $task->priority ? $task->priority->id : null,
-            'users' => $task->users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'user_id' => $task->users->pluck('id')->toArray(),
-            'clients' => $task->project->clients->map(function ($client) {
-                return [
-                    'id' => $client->id,
-                    'first_name' => $client->first_name,
-                    'last_name' => $client->last_name,
-                    'email' => $client->email,
-                    'photo' => $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'start_date' => $task->start_date ? format_date($task->start_date, to_format: 'Y-m-d') : null,
-            'due_date' => $task->due_date ? format_date($task->due_date, to_format: 'Y-m-d') : null,
-            'project' => $task->project->title,
-            'project_id' => $task->project->id,
-            'description' => $task->description,
-            'note' => $task->note,
-            'favorite' => getFavoriteStatus($task->id, \App\Models\Task::class),
-            'pinned' => getPinnedStatus($task->id, \App\Models\Task::class),
-            'client_can_discuss' => $task->client_can_discuss,
-            'created_at' => format_date($task->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($task->updated_at, to_format: 'Y-m-d'),
-            'enable_reminder' => $reminder ? 1 : 0,
-            'last_reminder_sent' => $reminder && $reminder->last_sent_at ? \Carbon\Carbon::parse($reminder->last_sent_at)->diffForHumans() : null,
-            'frequency_type' => $reminder ? $reminder->frequency_type : null,
-            'day_of_week' => $reminder && $reminder->day_of_week ? (int)$reminder->day_of_week : null,
-            'day_of_month' => $reminder && $reminder->day_of_month ? (int)$reminder->day_of_month : null,
-            'time_of_day' => $reminder ? $reminder->time_of_day : null,
-            'enable_recurring_task' => $recurringTask ? 1 : 0,
-            'recurrence_frequency' => $recurringTask ? $recurringTask->frequency : null,
-            'recurrence_day_of_week' => $recurringTask && $recurringTask->day_of_week ? (int)$recurringTask->day_of_week : null,
-            'recurrence_day_of_month' => $recurringTask && $recurringTask->day_of_month ? (int)$recurringTask->day_of_month : null,
-            'recurrence_month_of_year' => $recurringTask && $recurringTask->month_of_year ? (int)$recurringTask->month_of_year : null,
-            'recurrence_starts_from' => $recurringTask ? format_date($recurringTask->starts_from, to_format: 'Y-m-d') : null,
-            'recurrence_occurrences' => $recurringTask && $recurringTask->number_of_occurrences ? (int)$recurringTask->number_of_occurrences : null,
-            'completed_occurrences' => $recurringTask && $recurringTask->completed_occurrences ? (int)$recurringTask->completed_occurrences : null,
-            'billing_type' => $task->billing_type,
-            'completion_percentage' => $task->completion_percentage,
-            'task_list_id' => $task->task_list_id,
-            'customFields' => $customFields,
-            'customFieldValues' => $customFieldValues,
-        ];
+        return app(\App\Services\FormatterService::class)->formatTask($task);
     }
 }
 if (!function_exists('formatWorkspace')) {
     function formatWorkspace($workspace)
     {
-        $authUser = getAuthenticatedUser();
-        return [
-            'id' => $workspace->id,
-            'title' => $workspace->title,
-            'primaryWorkspace' => $workspace->is_primary,
-            'defaultWorkspace' => $authUser->default_workspace_id == $workspace->id ? 1 : 0,
-            'users' => $workspace->users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'user_ids' => $workspace->users->pluck('id')->toArray(),
-            'clients' => $workspace->clients->map(function ($client) {
-                return [
-                    'id' => $client->id,
-                    'first_name' => $client->first_name,
-                    'last_name' => $client->last_name,
-                    'email' => $client->email,
-                    'photo' => $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'client_ids' => $workspace->clients->pluck('id')->toArray(),
-            'created_at' => format_date($workspace->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($workspace->updated_at, to_format: 'Y-m-d'),
-        ];
+        return app(\App\Services\FormatterService::class)->formatWorkspace($workspace);
     }
 }
 // formating email templates for api
@@ -2722,95 +1222,13 @@ if (!function_exists('formatInterview')) {
 if (!function_exists('formatMeeting')) {
     function formatMeeting($meeting)
     {
-        $currentDateTime = Carbon::now(config('app.timezone'));
-        $status = (($currentDateTime < \Carbon\Carbon::parse($meeting->start_date_time, config('app.timezone'))) ? 'Will start in ' . $currentDateTime->diff(\Carbon\Carbon::parse($meeting->start_date_time, config('app.timezone')))->format('%a days %H hours %I minutes %S seconds') : (($currentDateTime > \Carbon\Carbon::parse($meeting->end_date_time, config('app.timezone')) ? 'Ended before ' . \Carbon\Carbon::parse($meeting->end_date_time, config('app.timezone'))->diff($currentDateTime)->format('%a days %H hours %I minutes %S seconds') : 'Ongoing')));
-        return [
-            'id' => $meeting->id,
-            'title' => $meeting->title,
-            'start_date' => \Carbon\Carbon::parse($meeting->start_date_time)->format('Y-m-d'),
-            'start_time' => \Carbon\Carbon::parse($meeting->start_date_time)->format('H:i'),
-            'end_date' => \Carbon\Carbon::parse($meeting->end_date_time)->format('Y-m-d'),
-            'end_time' => \Carbon\Carbon::parse($meeting->end_date_time)->format('H:i'),
-            'users' => $meeting->users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'user_ids' => $meeting->users->pluck('id')->toArray(),
-            'clients' => $meeting->clients->map(function ($client) {
-                return [
-                    'id' => $client->id,
-                    'first_name' => $client->first_name,
-                    'last_name' => $client->last_name,
-                    'email' => $client->email,
-                    'photo' => $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'client_ids' => $meeting->clients->pluck('id')->toArray(),
-            'status' => $status,
-            'ongoing' => $status == 'Ongoing' ? 1 : 0,
-            'join_url' => url('meetings/join/web-view/' . $meeting->id),
-            'created_at' => format_date($meeting->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($meeting->updated_at, to_format: 'Y-m-d')
-        ];
+        return app(\App\Services\FormatterService::class)->formatMeeting($meeting);
     }
 }
 if (!function_exists('formatNotification')) {
     function formatNotification($notification)
     {
-        $readAt = isset($notification->notification_user_read_at)
-            ? format_date($notification->notification_user_read_at, true)
-            : (isset($notification->client_notifications_read_at)
-                ? format_date($notification->client_notifications_read_at, true)
-                : (isset($notification->pivot) && isset($notification->pivot->read_at)
-                    ? format_date($notification->pivot->read_at, true)
-                    : null));
-        $labelRead = get_label('read', 'Read');
-        $labelUnread = get_label('unread', 'Unread');
-        $status = is_null($readAt) ? $labelUnread : $labelRead;
-        // Handle is_system logic, including pivot
-        $isSystem = $notification->notification_user_is_system
-            ?? $notification->client_notifications_is_system
-            ?? ($notification->pivot->is_system ?? null);
-        // Handle is_push logic, including pivot
-        $isPush = $notification->notification_user_is_push
-            ?? $notification->client_notifications_is_push
-            ?? ($notification->pivot->is_push ?? null);
-        return [
-            'id' => $notification->id,
-            'title' => $notification->title,
-            'users' => $notification->users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'photo' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'clients' => $notification->clients->map(function ($client) {
-                return [
-                    'id' => $client->id,
-                    'first_name' => $client->first_name,
-                    'last_name' => $client->last_name,
-                    'email' => $client->email,
-                    'photo' => $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')
-                ];
-            }),
-            'type' => ucfirst(str_replace('_', ' ', $notification->type)),
-            'type_id' => $notification->type_id,
-            'message' => $notification->message,
-            'status' => $status,
-            'is_system' => $isSystem,
-            'is_push' => $isPush,
-            'read_at' => $readAt,
-            'created_at' => format_date($notification->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($notification->updated_at, to_format: 'Y-m-d')
-        ];
+        return app(\App\Services\FormatterService::class)->formatNotification($notification);
     }
 }
 if (!function_exists('formatLeaveRequest')) {
@@ -2894,91 +1312,13 @@ if (!function_exists('formatLeaveRequest')) {
 if (!function_exists('formatUser')) {
     function formatUser($user, $isSignup = false)
     {
-        $fcmToken = FcmToken::where('user_id', $user->id)->latest()->value('fcm_token');
-        return [
-            'id' => $user->id,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'role' => $user->getRoleNames()->count() > 0 ? $user->getRoleNames()->first() : null,
-            'role_id' => $user->roles()->count() > 0 ? $user->roles()->first()->id : null,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'country_code' => $user->country_code,
-            'country_iso_code' => $user->country_iso_code,
-            'password' => $user->password,
-            'password_confirmation' => $user->password,
-            'type' => 'member',
-            'dob' => $user->dob ? format_date($user->dob, to_format: 'Y-m-d') : null,
-            'doj' => $user->doj ? format_date($user->doj, to_format: 'Y-m-d') : null,
-            'address' => $user->address,
-            'city' => $user->city,
-            'state' => $user->state,
-            'country' => $user->country,
-            'zip' => $user->zip,
-            'profile' => $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg'),
-            'status' => $user->status,
-            'fcm_token' => $fcmToken,
-            'created_at' => format_date($user->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($user->updated_at, to_format: 'Y-m-d'),
-            'assigned' => $isSignup ? [
-                'projects' => 0,
-                'tasks' => 0
-            ] : (
-                isAdminOrHasAllDataAccess('user', $user->id) ? [
-                    'projects' => Workspace::find(getWorkspaceId())->projects()->count(),
-                    'tasks' => Workspace::find(getWorkspaceId())->tasks()->count(),
-                ] : [
-                    'projects' => $user->projects()->count(),
-                    'tasks' => $user->tasks()->count()
-                ]
-            )
-        ];
+        return app(\App\Services\FormatterService::class)->formatUser($user, $isSignup);
     }
 }
 if (!function_exists('formatClient')) {
     function formatClient($client, $isSignup = false)
     {
-        return [
-            'id' => $client->id,
-            'first_name' => $client->first_name,
-            'last_name' => $client->last_name,
-            'role' => $client->getRoleNames()->first(),
-            'company' => $client->company,
-            'email' => $client->email,
-            'phone' => $client->phone,
-            'country_code' => $client->country_code,
-            'country_iso_code' => $client->country_iso_code,
-            'password' => $client->password,
-            'password_confirmation' => $client->password,
-            'type' => 'client',
-            'dob' => $client->dob ? format_date($client->dob, to_format: 'Y-m-d') : null,
-            'doj' => $client->doj ? format_date($client->doj, to_format: 'Y-m-d') : null,
-            'address' => $client->address ? $client->address : null,
-            'city' => $client->city,
-            'state' => $client->state,
-            'country' => $client->country,
-            'zip' => $client->zip,
-            'profile' => $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg'),
-            'status' => $client->status,
-            'fcm_token' => $client->fcm_token,
-            'internal_purpose' => $client->internal_purpose,
-            'email_verification_mail_sent' => $client->email_verification_mail_sent,
-            'email_verified_at' => $client->email_verified_at,
-            'created_at' => format_date($client->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($client->updated_at, to_format: 'Y-m-d'),
-            'assigned' => $isSignup ? [
-                'projects' => 0,
-                'tasks' => 0
-            ] : (
-                isAdminOrHasAllDataAccess('client', $client->id) ? [
-                    'projects' => Workspace::find(getWorkspaceId())->projects()->count(),
-                    'tasks' => Workspace::find(getWorkspaceId())->tasks()->count(),
-                ] : [
-                    'projects' => $client->projects()->count(),
-                    'tasks' => $client->tasks()->count()
-                ]
-            )
-        ];
+        return app(\App\Services\FormatterService::class)->formatClient($client, $isSignup);
     }
 }
 if (!function_exists('formatNote')) {
@@ -3249,627 +1589,7 @@ if (!function_exists('getMainAdminId')) {
 if (!function_exists('getMenus')) {
     function getMenus()
     {
-        $user = getAuthenticatedUser();
-        $current_workspace_id = getWorkspaceId();
-        $messenger = new ChatifyMessenger();
-        $unread = $messenger->totalUnseenMessages();
-        $pending_todos_count = $user->todos(0)->count();
-        $ongoing_meetings_count = $user->meetings('ongoing')->count();
-        $query = LeaveRequest::where('status', 'pending')
-            ->where('workspace_id', $current_workspace_id);
-        if (!is_admin_or_leave_editor()) {
-            $query->where('user_id', $user->id);
-        }
-        $pendingLeaveRequestsCount = $query->count();
-        return [
-            [
-                'id' => 'dashboard',
-                'label' => get_label('dashboard', 'Dashboard'),
-                'url' => url('home'),
-                'icon' => 'bx bx-home-circle',
-                'class' => 'menu-item' . (Request::is('home') ? ' active' : ''),
-                'category' => 'dashboard',
-            ],
-            [
-                'id' => 'projects',
-                'label' => get_label('projects', 'Projects'),
-                'url' => url('projects'),
-                'icon' => 'bx bx-briefcase-alt-2',
-                'class' => 'menu-item' . (Request::is('projects') || Request::is('tags/*') || Request::is('projects/*') ? ' active open' : ''),
-                'category' => 'projects_and_task_management',
-                'show' => ($user->can('manage_projects') || $user->can('manage_tags')) ? 1 : 0,
-                'submenus' => [
-                    [
-                        'id' => 'manage_projects',
-                        'label' => get_label('manage_projects', 'Manage projects'),
-                        'url' => url(getUserPreferences('projects', 'default_view')),
-                        'class' => 'menu-item' . (Request::is('projects') || (Request::is('projects/*') && !Request::is('projects/*/favorite') && !Request::is('projects/favorite') && !Request::is('projects/bulk-upload')) ? ' active' : ''),
-                        'show' => ($user->can('manage_projects')) ? 1 : 0
-                    ],
-                    [
-                        'id' => 'favorite_projects',
-                        'label' => get_label('favorite_projects', 'Favorite projects'),
-                        'url' => url('/projects/list/favorite?is_favorites=1'),
-                        'class' => 'menu-item' . (Request::is('projects/favorite') || Request::is('projects/list/favorite') || Request::is('projects/kanban/favorite') ? ' active' : ''),
-                        'show' => ($user->can('manage_projects')) ? 1 : 0
-                    ],
-                    [
-                        'id' => 'projects_bulk_upload',
-                        'label' => get_label('bulk_upload', 'Bulk Upload'),
-                        'url' => route('projects.showBulkUploadForm'),
-                        'class' => 'menu-item' . (Request::is('projects/bulk-upload') ? ' active' : ''),
-                        'show' => ($user->can('manage_projects') && $user->can('create_projects')) ? 1 : 0
-                    ],
-                    [
-                        'id' => 'tags',
-                        'label' => get_label('tags', 'Tags'),
-                        'url' => url('tags/manage'),
-                        'class' => 'menu-item' . (Request::is('tags/*') ? ' active' : ''),
-                        'show' => ($user->can('manage_tags')) ? 1 : 0
-                    ],
-                    [
-                        'id' => 'task-lists',
-                        'label' => get_label('task_lists', 'Task lists'),
-                        'url' => url('/task-lists'),
-                        'class' => 'menu-item' . (Request::is('task-lists/*') ? ' active' : ''),
-                        'show' =>  1
-                    ],
-                ],
-            ],
-            [
-                'id' => 'tasks',
-                'label' => get_label('tasks', 'Tasks'),
-                'url' => url('tasks'),
-                'icon' => 'bx bx-task',
-                'class' => 'menu-item' . (Request::is('tasks') || Request::is('tasks/*') ? ' active open' : ''),
-                'show' => $user->can('manage_tasks') ? 1 : 0,
-                'category' => 'projects_and_task_management',
-                'submenus' => [
-                    [
-                        'id' => 'manage_tasks',
-                        'label' => get_label('manage_tasks', 'Manage Tasks'),
-                        'url' => url(getUserPreferences('tasks', 'default_view')),
-                        'class' => 'menu-item' . (!(request()->query('favorite')) && (Request::is('tasks') || Request::is('tasks/*') && !Request::is('tasks/bulk-upload')) ? ' active' : ''),
-                        'show' => ($user->can('manage_tasks')) ? 1 : 0
-                    ],
-                    [
-                        'id' => 'favorite_tasks',
-                        'label' => get_label('favorite_tasks', 'Favorite Tasks'),
-                        'url' => url(getUserPreferences('tasks', 'default_view') . '?favorite=1'),
-                        'class' => 'menu-item' . (request()->query('favorite') && (Request::is('tasks') || Request::is('tasks/calendar') || Request::is('tasks/draggable')) ? ' active' : ''),
-                        'show' => ($user->can('manage_tasks')) ? 1 : 0
-                    ],
-                    [
-                        'id' => 'tasks_bulk_upload',
-                        'label' => get_label('bulk_upload', 'Bulk Upload'),
-                        'url' => route('tasks.showBulkUploadForm'),
-                        'class' => 'menu-item' . (Request::is('tasks/bulk-upload') ? ' active' : ''),
-                        'show' => ($user->can('manage_tasks') && $user->can('create_tasks')) ? 1 : 0
-                    ],
-                ],
-            ],
-            [
-                'id' => 'statuses',
-                'label' => get_label('statuses', 'Statuses'),
-                'url' => url('status/manage'),
-                'icon' => 'bx bx-grid-small',
-                'class' => 'menu-item' . (Request::is('status/manage') ? ' active' : ''),
-                'show' => $user->can('manage_statuses') ? 1 : 0,
-                'category' => 'projects_and_task_management',
-            ],
-            [
-                'id' => 'priorities',
-                'label' => get_label('priorities', 'Priorities'),
-                'url' => url('priority/manage'),
-                'icon' => 'bx bx-up-arrow-alt',
-                'class' => 'menu-item' . (Request::is('priority/manage') ? ' active' : ''),
-                'show' => $user->can('manage_priorities') ? 1 : 0,
-                'category' => 'projects_and_task_management',
-            ],
-            [
-                'id' => 'workspaces',
-                'label' => get_label('workspaces', 'Workspaces'),
-                'url' => url('workspaces'),
-                'icon' => 'bx bx-check-square',
-                'class' => 'menu-item' . (Request::is('workspaces') || Request::is('workspaces/*') ? ' active' : ''),
-                'show' => $user->can('manage_workspaces') ? 1 : 0,
-                'category' => 'team',
-            ],
-            [
-                'id' => 'chat',
-                'label' => get_label('chat', 'Chat'),
-                'url' => url('chat'),
-                'icon' => 'bx bx-chat',
-                'class' => 'menu-item' . (Request::is('chat') || Request::is('chat/*') ? ' active' : ''),
-                'badge' => ($unread > 0) ? '<span class="flex-shrink-0 badge badge-center bg-danger w-px-20 h-px-20">' . $unread . '</span>' : '',
-                'show' => Auth::guard('web')->check() ? 1 : 0,
-                'category' => 'team',
-            ],
-            [
-                'id' => 'leads_management',
-                'label' => get_label('leads_management', 'Leads Management'),
-                'url' => '',
-                'icon' => 'bx bxs-phone-call',
-                'class' => 'menu-item ' . (Request::is('lead-sources') || Request::is('lead-sources/*') || Request::is('lead-stages') || Request::is('lead-stages/*') || Request::is('leads') || Request::is('leads/*') || Request::is('lead-forms') || Request::is('lead-forms/*')  ? 'active open' : ''),
-                'category' => 'utilities',
-                'show' =>  $user->can('manage_leads') ? 1 : 0,
-                'submenus' => [
-                    [
-                        'id' => 'lead_sources',
-                        'label' => get_label('lead_sources', 'Lead Sources'),
-                        'url' => route('lead-sources.index'),
-                        'show' => $user->can('manage_leads') ? 1 : 0,
-                        'class' => 'menu-item ' . (Request::is('lead-sources') || Request::is('lead-sources/*') ? 'active' : '')
-                    ],
-                    [
-                        'id' => 'lead_stages',
-                        'label' => get_label('lead_stages', 'Lead Stages'),
-                        'url' => route('lead-stages.index'),
-                        'show' => $user->can('manage_leads') ? 1 : 0,
-                        'class' => 'menu-item ' . (Request::is('lead-stages') || Request::is('lead-stages/*') ? 'active' : '')
-                    ],
-                    [
-                        'id' => 'leads',
-                        'label' => get_label('leads', 'Leads'),
-                        'url' => getDefaultRoute('leads'),
-                        'show' => $user->can('manage_leads') ? 1 : 0,
-                        'class' => 'menu-item ' . (Request::is('leads') || (Request::is('leads/*') && !Request::is('leads/bulk-upload')) ? 'active' : '')
-                    ],
-                    [
-                        'id' => 'lead_bulk_upload',
-                        'label' => get_label('bulk_upload', 'Bulk Upload'),
-                        'url' => route('leads.upload'),
-                        'class' => 'menu-item' . (Request::is('leads/bulk-upload') ? ' active' : ''),
-                        'show' => ($user->can('manage_leads') && $user->can('create_leads')) ? 1 : 0
-                    ],
-                    [
-                        'id' => 'lead_forms',
-                        'label' => get_label('lead_forms', 'Lead Forms'),
-                        'url' => route('lead-forms.index'),
-                        'class' => 'menu-item' . (Request::is('lead-forms') || (Request::is('lead-forms/*')) ? ' active' : ''),
-                        'show' => ($user->can('manage_leads') && $user->can('create_leads')) ? 1 : 0
-                    ],
-                ],
-            ],
-            [
-                'id' => 'email',
-                'label' => get_label('email', 'Email'),
-                'class' => 'menu-item' . (Request::is('emails') || Request::is('emails/create') || Request::is('email-templates') ? ' active open' : ''),
-                'category' => 'utilities',
-                'show' => ($user->can('send_email') || $user->can('manage_email_template')) ? 1 : 0,
-                'icon' => 'bx bx-mail-send',
-                'submenus' => [
-                    [
-                        'id' => 'email_history',
-                        'label' => get_label('send_email', 'Send Email'),
-                        'url' => route('emails.sent_list'),
-                        'class' => 'menu-item' . (Request::is('emails') || Request::is('emails/create') ? ' active' : ''),
-                        'show' => $user->can('send_email') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'email_templates',
-                        'label' => get_label('email_templates', 'Email Templates'),
-                        'url' => route('email.templates'),
-                        'class' => 'menu-item' . (Request::is('email-templates') ? ' active' : ''),
-                        'show' => $user->can('manage_email_template') ? 1 : 0
-                    ],
-                ],
-            ],
-            [
-                'id' => 'todos',
-                'label' => get_label('todos', 'Todos'),
-                'url' => url('todos'),
-                'icon' => 'bx bx-list-check',
-                'class' => 'menu-item' . (Request::is('todos') || Request::is('todos/*') ? ' active' : ''),
-                'badge' => ($pending_todos_count > 0) ? '<span class="flex-shrink-0 badge badge-center bg-danger w-px-20 h-px-20">' . $pending_todos_count . '</span>' : '',
-                'category' => 'utilities',
-            ],
-            [
-                'id' => 'meetings',
-                'label' => get_label('meetings', 'Meetings'),
-                'url' => getDefaultRoute('meetings'),
-                'icon' => 'bx bx-shape-polygon',
-                'class' => 'menu-item' . (Request::is('meetings') || Request::is('meetings/*') ? ' active' : ''),
-                'badge' => ($ongoing_meetings_count > 0) ? '<span class="flex-shrink-0 badge badge-center bg-success w-px-20 h-px-20">' . $ongoing_meetings_count . '</span>' : '',
-                'show' => $user->can('manage_meetings') ? 1 : 0,
-                'category' => 'utilities',
-            ],
-            [
-                'id' => 'users',
-                'label' => get_label('users', 'Users'),
-                'url' => url('users'),
-                'icon' => 'bx bx-group',
-                'class' => 'menu-item' . (Request::is('users') || Request::is('users/*') ? ' active' : ''),
-                'show' => $user->can('manage_users') ? 1 : 0,
-                'category' => 'team',
-            ],
-            [
-                'id' => 'clients',
-                'label' => get_label('clients', 'Clients'),
-                'url' => url('clients'),
-                'icon' => 'bx bx-group',
-                'class' => 'menu-item' . (Request::is('clients') || Request::is('clients/*') ? ' active' : ''),
-                'show' => $user->can('manage_clients') ? 1 : 0,
-                'category' => 'team',
-            ],
-            [
-                'id' => 'contracts',
-                'label' => get_label('contracts', 'Contracts'),
-                'url' => 'javascript:void(0)',
-                'icon' => 'bx bx-news',
-                'class' => 'menu-item' . (Request::is('contracts') || Request::is('contracts/*') ? ' active open' : ''),
-                'show' => ($user->can('manage_contracts') || $user->can('manage_contract_types')) ? 1 : 0,
-                'category' => 'finance',
-                'submenus' => [
-                    [
-                        'id' => 'manage_contracts',
-                        'label' => get_label('manage_contracts', 'Manage contracts'),
-                        'url' => url('contracts'),
-                        'class' => 'menu-item' . (Request::is('contracts') ? ' active' : ''),
-                        'show' => $user->can('manage_contracts') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'contract_types',
-                        'label' => get_label('contract_types', 'Contract types'),
-                        'url' => url('contracts/contract-types'),
-                        'class' => 'menu-item' . (Request::is('contracts/contract-types') ? ' active' : ''),
-                        'show' => $user->can('manage_contract_types') ? 1 : 0
-                    ],
-                ],
-            ],
-            [
-                'id' => 'payslips',
-                'label' => get_label('payslips', 'Payslips'),
-                'url' => 'javascript:void(0)',
-                'icon' => 'bx bx-box',
-                'class' => 'menu-item' . (Request::is('payslips') || Request::is('payslips/*') || Request::is('allowances') || Request::is('deductions') ? ' active open' : ''),
-                'show' => ($user->can('manage_payslips') || $user->can('manage_allowances') || $user->can('manage_deductions')) ? 1 : 0,
-                'category' => 'finance',
-                'submenus' => [
-                    [
-                        'id' => 'manage_payslips',
-                        'label' => get_label('manage_payslips', 'Manage payslips'),
-                        'url' => url('payslips'),
-                        'class' => 'menu-item' . (Request::is('payslips') || Request::is('payslips/*') ? ' active' : ''),
-                        'show' => $user->can('manage_payslips') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'allowances',
-                        'label' => get_label('allowances', 'Allowances'),
-                        'url' => url('allowances'),
-                        'class' => 'menu-item' . (Request::is('allowances') ? ' active' : ''),
-                        'show' => $user->can('manage_allowances') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'deductions',
-                        'label' => get_label('deductions', 'Deductions'),
-                        'url' => url('deductions'),
-                        'class' => 'menu-item' . (Request::is('deductions') ? ' active' : ''),
-                        'show' => $user->can('manage_deductions') ? 1 : 0
-                    ],
-                ],
-            ],
-            [
-                'id' => 'finance',
-                'label' => get_label('finance', 'Finance'),
-                'url' => 'javascript:void(0)',
-                'icon' => 'bx bx-box',
-                'class' => 'menu-item' . (Request::is('estimates-invoices') || Request::is('estimates-invoices/*') || Request::is('taxes') || Request::is('payment-methods') || Request::is('payments') || Request::is('units') || Request::is('items') || Request::is('expenses') || Request::is('expenses/*') ? ' active open' : ''),
-                'show' => ($user->can('manage_estimates_invoices') || $user->can('manage_expenses') || $user->can('manage_payment_methods') ||
-                    $user->can('manage_expense_types') || $user->can('manage_payments') || $user->can('manage_taxes') ||
-                    $user->can('manage_units') || $user->can('manage_items')) ? 1 : 0,
-                'category' => 'finance',
-                'submenus' => [
-                    [
-                        'id' => 'expenses',
-                        'label' => get_label('expenses', 'Expenses'),
-                        'url' => url('expenses'),
-                        'class' => 'menu-item' . (Request::is('expenses') ? ' active' : ''),
-                        'show' => $user->can('manage_expenses') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'expense_types',
-                        'label' => get_label('expense_types', 'Expense types'),
-                        'url' => url('expenses/expense-types'),
-                        'class' => 'menu-item' . (Request::is('expenses/expense-types') ? ' active' : ''),
-                        'show' => $user->can('manage_expense_types') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'estimates_invoices',
-                        'label' => get_label('estimates_invoices', 'Estimates/Invoices'),
-                        'url' => url('estimates-invoices'),
-                        'class' => 'menu-item' . (Request::is('estimates-invoices') || Request::is('estimates-invoices/*') ? ' active' : ''),
-                        'show' => $user->can('manage_estimates_invoices') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'payments',
-                        'label' => get_label('payments', 'Payments'),
-                        'url' => url('payments'),
-                        'class' => 'menu-item' . (Request::is('payments') ? ' active' : ''),
-                        'show' => $user->can('manage_payments') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'payment_methods',
-                        'label' => get_label('payment_methods', 'Payment methods'),
-                        'url' => url('payment-methods'),
-                        'class' => 'menu-item' . (Request::is('payment-methods') ? ' active' : ''),
-                        'show' => $user->can('manage_payment_methods') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'taxes',
-                        'label' => get_label('taxes', 'Taxes'),
-                        'url' => url('taxes'),
-                        'class' => 'menu-item' . (Request::is('taxes') ? ' active' : ''),
-                        'show' => $user->can('manage_taxes') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'units',
-                        'label' => get_label('units', 'Units'),
-                        'url' => url('units'),
-                        'class' => 'menu-item' . (Request::is('units') ? ' active' : ''),
-                        'show' => $user->can('manage_units') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'items',
-                        'label' => get_label('items', 'Items'),
-                        'url' => url('items'),
-                        'class' => 'menu-item' . (Request::is('items') ? ' active' : ''),
-                        'show' => $user->can('manage_items') ? 1 : 0
-                    ],
-                ],
-            ],
-            [
-                'id' => 'reports',
-                'label' => get_label('reports', 'Reports'),
-                'url' => 'javascript:void(0)',
-                'icon' => 'bx bx-file',
-                'class' => 'menu-item' . (Request::is('reports') || Request::is('reports/*') ? ' active open' : ''),
-                'show' => $user->hasRole('admin') || Auth::guard('web')->check() || checkPermission('manage_projects') || checkPermission('manage_tasks') || checkPermission('manage_estimates_invoices') ? 1 : 0,
-                'category' => 'utilities',
-                'submenus' => [
-                    [
-                        'id' => 'projects_report',
-                        'label' => get_label('projects', 'Projects'),
-                        'url' => route('reports.projects'),
-                        'class' => 'menu-item' . (Request::is('reports/projects') ? ' active' : ''),
-                        'show' => checkPermission('manage_projects') ? 1 : 0,
-                    ],
-                    [
-                        'id' => 'tasks_report',
-                        'label' => get_label('tasks', 'Tasks'),
-                        'url' => route('reports.tasks'),
-                        'class' => 'menu-item' . (Request::is('reports/tasks') ? ' active' : ''),
-                        'show' => checkPermission('manage_tasks') ? 1 : 0,
-                    ],
-                    [
-                        'id' => 'estimates_invoices_report',
-                        'label' => get_label('estimates_invoices', 'Estimates/Invoices'),
-                        'url' => route('reports.invoices-report'),
-                        'class' => 'menu-item' . (Request::is('reports/estimates-invoices') ? ' active' : ''),
-                        'show' => checkPermission('manage_estimates_invoices') ? 1 : 0,
-                    ],
-                    [
-                        'id' => 'income_vs_expense',
-                        'label' => get_label('income_vs_expense', 'Income vs Expense'),
-                        'url' => route('reports.income-vs-expense'),
-                        'class' => 'menu-item' . (Request::is('reports/income-vs-expense') ? ' active' : ''),
-                        'show' => $user->hasRole('admin') ? 1 : 0,
-                    ],
-                    [
-                        'id' => 'leaves',
-                        'label' => get_label('leaves', 'Leaves'),
-                        'url' => route('reports.leaves'),
-                        'class' => 'menu-item' . (Request::is('reports/leaves') ? ' active' : ''),
-                        'show' => Auth::guard('web')->check() ? 1 : 0,
-                    ]
-                ],
-            ],
-            [
-                'id' => 'hrms',
-                'label' => get_label('HRMS', 'HRMS'),
-                'icon' => 'bx bx-group',
-                'class' => 'menu-item' . (Request::is('candidate*') || Request::is('candidate_status*') || Request::is('interviews*') ? ' active open' : ''),
-                'show' => ($user->can('manage_candidate') || $user->can('manage_candidate_status') || $user->can('manage_interview')) ? 1 : 0,
-                'category' => 'utilities',
-                'submenus' => [
-                    [
-                        'id' => 'candidates',
-                        'label' => get_label('candidate', 'Candidates'),
-                        'url' => route('candidate.index'),
-                        'class' => 'menu-item' . (Request::is('candidate/index') ? ' active' : ''),
-                        'show' => $user->can('manage_candidate') ? 1 : 0,
-                    ],
-                    [
-                        'id' => 'candidates_status',
-                        'label' => get_label('candidate_status', 'Candidates Status'),
-                        'url' => route('candidate.status.index'),
-                        'class' => 'menu-item' . (Request::is('candidate_status*') ? ' active' : ''),
-                        'show' => $user->can('manage_candidate_status') ? 1 : 0,
-                    ],
-                    [
-                        'id' => 'interviews',
-                        'label' => get_label('interviews', 'Interviews'),
-                        'url' => route('interviews.index'),
-                        'class' => 'menu-item' . (Request::is('interviews*') ? ' active' : ''),
-                        'show' => $user->can('manage_interview') ? 1 : 0,
-                    ],
-                ]
-            ],
-            [
-                'id' => 'notes',
-                'label' => get_label('notes', 'Notes'),
-                'url' => url('notes'),
-                'icon' => 'bx bx-notepad',
-                'class' => 'menu-item' . (Request::is('notes') || Request::is('notes/*') ? ' active' : ''),
-                'category' => 'utilities',
-            ],
-            [
-                'id' => 'leave_requests',
-                'label' => get_label('leave_requests', 'Leave requests'),
-                'url' => getDefaultRoute('leave_requests'),
-                'icon' => 'bx bx-right-arrow-alt',
-                'class' => 'menu-item' . (Request::is('leave-requests') || Request::is('leave-requests/*') ? ' active' : ''),
-                'badge' => ($pendingLeaveRequestsCount > 0) ? '<span class="flex-shrink-0 badge badge-center bg-danger w-px-20 h-px-20">' . $pendingLeaveRequestsCount . '</span>' : '',
-                'show' => Auth::guard('web')->check() ? 1 : 0,
-                'category' => 'utilities',
-            ],
-            // [
-            //     'id' => 'leave_balances',
-            //     'label' => get_label('leave_balances', 'Leave balances'),
-            //     'url' => url('leave-balances'),
-            //     'icon' => 'bx bx-doughnut-chart',
-            //     'class' => 'menu-item' . (Request::is('leave-balances') || Request::is('leave-balances/*') ? ' active' : ''),
-            //     'show' => is_admin_or_leave_editor() ? 1 : 0,
-            //     'category' => 'utilities',
-            // ],
-            [
-                'id' => 'activity_log',
-                'label' => get_label('activity_log', 'Activity log'),
-                'url' => getDefaultRoute('activity_logs'),
-                'icon' => 'bx bx-line-chart',
-                'class' => 'menu-item' . (Request::is('activity-log') || Request::is('activity-log/*') ? ' active' : ''),
-                'show' => $user->can('manage_activity_log') ? 1 : 0,
-                'category' => 'utilities',
-            ],
-            [
-                'id' => 'calendars',
-                'label' => get_label('calendars', 'Calendars'),
-                'icon' => 'bx bx-calendar',
-                'class' => 'menu-item' . (Request::is('calendars') || Request::is('calendars/*') ? ' active open' : ''),
-                'show' => 1,
-                'category' => 'utilities',
-                'submenus' => [
-                    [
-                        'id' => 'holiday_calendar',
-                        'label' => get_settings('google_calendar_settings')['calendar_name'] ??  get_label('holiday_calendar', 'Holiday Calendar'),
-                        'url' => route('calendars.holiday_calendar'),
-                        'show' => 1,
-                        'class' => 'menu-item' . (Request::is('calendars/holiday-calendar') ? ' active' : ''),
-                    ],
-                ]
-            ],
-            [
-                'id' => 'general_file_manager',
-                'label' => get_label('general_file_manager', 'General File Manager'),
-                'url' => route('file-manager.index'),
-                'icon' => 'bx bx-folder-open',
-                'class' => 'menu-item' . (Request::is('file-manager') || Request::is('file-manager/*') ? ' active' : ''),
-                'show' => isAdminOrHasAllDataAccess() ? 1 : 0,
-                'category' => 'utilities',
-            ],
-            [
-                'id' => 'settings',
-                'label' => get_label('settings', 'Settings'),
-                'icon' => 'bx bx-box',
-                'class' => 'menu-item' . (Request::is('settings') || Request::is('roles/*') || Request::is('settings/*') ? ' active open' : ''),
-                'show' => $user->hasRole('admin') ? 1 : 0,
-                'category' => 'settings',
-                'submenus' => [
-                    [
-                        'id' => 'general',
-                        'label' => get_label('general', 'General'),
-                        'url' => url('settings/general'),
-                        'class' => 'menu-item' . (Request::is('settings/general') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'company',
-                        'label' => get_label('company_info', 'Company Information'),
-                        'url' => url('settings/company-info'),
-                        'class' => 'menu-item' . (Request::is('settings/company-info') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'custom_fields',
-                        'label' => get_label('custom_fields', 'Custom Fields'),
-                        'url' => route('custom_fields.index'),
-                        'class' => 'menu-item' . (Request::is('settings/custom-fields') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'security',
-                        'label' => get_label('security', 'Security'),
-                        'url' => url('settings/security'),
-                        'class' => 'menu-item' . (Request::is('settings/security') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'permissions',
-                        'label' => get_label('permissions', 'Permissions'),
-                        'url' => url('settings/permission'),
-                        'class' => 'menu-item' . (Request::is('settings/permission') || Request::is('roles/*') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'languages',
-                        'label' => get_label('languages', 'Languages'),
-                        'url' => url('settings/languages'),
-                        'class' => 'menu-item' . (Request::is('settings/languages') || Request::is('settings/languages/create') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'email',
-                        'label' => get_label('email', 'Email'),
-                        'url' => url('settings/email'),
-                        'class' => 'menu-item' . (Request::is('settings/email') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'ai_model_settings',
-                        'label' => get_label('ai_model_settings', 'AI Model Settings'),
-                        'url' => url('settings/ai-model-settings'),
-                        'class' => 'menu-item' . (Request::is('settings/ai-model-settings') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'sms_gateway',
-                        'label' => get_label('messaging_and_integrations', 'Messaging & Integrations'),
-                        'url' => url('settings/sms-gateway'),
-                        'class' => 'menu-item' . (Request::is('settings/sms-gateway') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'google_calendar',
-                        'label' => get_label('google_calendar', 'Google Calendar'),
-                        'url' => route('google_calendar.index'),
-                        'class' => 'menu-item' . (Request::is('settings/google-calendar') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'pusher',
-                        'label' => get_label('pusher', 'Pusher'),
-                        'url' => url('settings/pusher'),
-                        'class' => 'menu-item' . (Request::is('settings/pusher') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'media_storage',
-                        'label' => get_label('media_storage', 'Media storage'),
-                        'url' => url('settings/media-storage'),
-                        'class' => 'menu-item' . (Request::is('settings/media-storage') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'notification_templates',
-                        'label' => get_label('notification_templates', 'Notification Templates'),
-                        'url' => url('settings/templates'),
-                        'class' => 'menu-item' . (Request::is('settings/templates') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'privacy_policy',
-                        'label' => get_label('terms_privacy_about', 'Terms, Privacy & About'),
-                        'url' => url('settings/terms-privacy-about'),
-                        'class' => 'menu-item' . (Request::is('settings/terms-privacy-about') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'plugins',
-                        'label' => get_label('plugins', 'Plugins'),
-                        'url' => route('plugins.index'),
-                        'class' => 'menu-item' . (Request::is('settings/plugins') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'system_updater',
-                        'label' => get_label('system_updater', 'System updater'),
-                        'url' => url('settings/system-updater'),
-                        'class' => 'menu-item' . (Request::is('settings/system-updater') ? ' active' : ''),
-                    ],
-                    [
-                        'id' => 'pwa',
-                        'label' => get_label('pwa_settings', 'PWA Settings'),
-                        'url' => url('settings/pwa-settings'),
-                        'class' => 'menu-item' . (Request::is('settings/pwa-settings') ? ' active' : ''),
-                    ]
-                ]
-            ]
-        ];
+        return app(\App\Services\MenuService::class)->getMenus();
     }
 }
 if (!function_exists('getAllPermissions')) {
@@ -4035,101 +1755,13 @@ if (!function_exists('get_file_settings')) {
 if (!function_exists('formatUserHtml')) {
     function formatUserHtml($user)
     {
-        if (!$user) {
-            return "-";
-        }
-        // Get the authenticated user
-        $authenticatedUser = getAuthenticatedUser();
-        // Get the guard name (web or client)
-        $guardName = getGuardName();
-        // Check if the authenticated user is the same as the user being displayed
-        if (
-            ($guardName === 'web' && $authenticatedUser->id === $user->id) ||
-            ($guardName === 'client' && $authenticatedUser->id === $user->id)
-        ) {
-            // Don't show the "Make Call" option if it's the logged-in user
-            $makeCallIcon = '';
-        } else {
-            // Check if the phone number or both phone and country code exist
-            $makeCallIcon = '';
-            if (!empty($user->phone) || (!empty($user->phone) && !empty($user->country_code))) {
-                $makeCallLink = 'tel:' . ($user->country_code ? $user->country_code . $user->phone : $user->phone);
-                $makeCallIcon = '<a href="' . $makeCallLink . '" class="text-decoration-none" title="' . get_label('make_call', 'Make Call') . '">
-                                     <i class="bx bx-phone-call text-primary"></i>
-                                   </a>';
-            }
-        }
-        // If the user has 'manage_users' permission, return the full HTML with links
-        $profileLink = route('users.profile', ['id' => $user->id]);
-        $photoUrl = $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg');
-        // Create the Send Mail link
-        $sendMailLink = 'mailto:' . $user->email;
-        $sendMailIcon = '<a href="' . $sendMailLink . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '">
-                            <i class="bx bx-envelope text-primary"></i>
-                          </a>';
-        return "<div class='d-flex justify-content-start align-items-center user-name'>
-                    <div class='avatar-wrapper me-3'>
-                        <div class='avatar avatar-sm pull-up'>
-                            <a href='{$profileLink}' target='_blank'>
-                                <img src='{$photoUrl}' alt='Photo' class='rounded-circle'>
-                            </a>
-                        </div>
-                    </div>
-                    <div class='d-flex flex-column'>
-                        <span class='fw-semibold'>{$user->first_name} {$user->last_name} {$makeCallIcon}</span>
-                        <small class='text-muted'>{$user->email} {$sendMailIcon}</small>
-                    </div>
-                </div>";
+        return app(\App\Services\FormatterService::class)->formatUserHtml($user);
     }
 }
 if (!function_exists('formatClientHtml')) {
     function formatClientHtml($client)
     {
-        if (!$client) {
-            return "-";
-        }
-        // Get the authenticated user
-        $authenticatedUser = getAuthenticatedUser();
-        // Get the guard name (web or client)
-        $guardName = getGuardName();
-        // Check if the authenticated user is the same as the client being displayed
-        if (
-            ($guardName === 'web' && $authenticatedUser->id === $client->id) ||
-            ($guardName === 'client' && $authenticatedUser->id === $client->id)
-        ) {
-            // Don't show the "Make Call" option if it's the logged-in client
-            $makeCallIcon = '';
-        } else {
-            // Check if the phone number or both phone and country code exist
-            $makeCallIcon = '';
-            if (!empty($client->phone) || (!empty($client->phone) && !empty($client->country_code))) {
-                $makeCallLink = 'tel:' . ($client->country_code ? $client->country_code . $client->phone : $client->phone);
-                $makeCallIcon = '<a href="' . $makeCallLink . '" class="text-decoration-none" title="' . get_label('make_call', 'Make Call') . '">
-                                     <i class="bx bx-phone-call text-primary"></i>
-                                   </a>';
-            }
-        }
-        // If the user has 'manage_clients' permission, return the full HTML with links
-        $profileLink = route('clients.profile', ['id' => $client->id]);
-        $photoUrl = $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg');
-        // Create the Send Mail link
-        $sendMailLink = 'mailto:' . $client->email;
-        $sendMailIcon = '<a href="' . $sendMailLink . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '">
-                            <i class="bx bx-envelope text-primary"></i>
-                          </a>';
-        return "<div class='d-flex justify-content-start align-items-center user-name'>
-                    <div class='avatar-wrapper me-3'>
-                        <div class='avatar avatar-sm pull-up'>
-                            <a href='{$profileLink}' target='_blank'>
-                                <img src='{$photoUrl}' alt='Photo' class='rounded-circle'>
-                            </a>
-                        </div>
-                    </div>
-                    <div class='d-flex flex-column'>
-                        <span class='fw-semibold'>{$client->first_name} {$client->last_name} {$makeCallIcon}</span>
-                        <small class='text-muted'>{$client->email} {$sendMailIcon}</small>
-                    </div>
-                </div>";
+        return app(\App\Services\FormatterService::class)->formatClientHtml($client);
     }
 }
 if (!function_exists('getFavoriteStatus')) {
@@ -4592,7 +2224,7 @@ if (!function_exists('formatEstimateInvoice')) {
                 'first_name' => $invoice->client->first_name,
                 'last_name' => $invoice->client->last_name,
                 'email' => $invoice->client->email,
-                'photo' => $invoice->client->photo ? asset('storage/' . $invoice->client->photo) : asset('storage/photos/no-image.jpg'),
+                'photo' => ($invoice->client->photo && Storage::disk('public')->exists($invoice->client->photo)) ? asset('storage/' . $invoice->client->photo) : asset('storage/photos/no-image.jpg'),
             ],
             'name' => $invoice->name,
             'address' => $invoice->address,
@@ -4633,1042 +2265,159 @@ if (!function_exists('formatEstimateInvoice')) {
 if (!function_exists('formatLeadSource')) {
     function formatLeadSource($lead_source)
     {
-        return [
-            'id' => $lead_source->id,
-            'name' => $lead_source->name,
-            'created_at' => format_date($lead_source->created_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
-            'updated_at' => format_date($lead_source->updated_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
-        ];
+        return app(\App\Services\FormatterService::class)->formatLeadSource($lead_source);
     }
 }
 if (!function_exists('formatLeadStage')) {
     function formatLeadStage($lead_stage)
     {
-        return [
-            'id' => $lead_stage->id,
-            'name' => $lead_stage->name,
-            'slug' => $lead_stage->slug,
-            'order' => $lead_stage->order,
-            'color' => $lead_stage->color,
-            'created_at' => format_date($lead_stage->created_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
-            'updated_at' => format_date($lead_stage->updated_at, false, 'Y-m-d H:i:s', 'Y-m-d'),
-        ];
+        return app(\App\Services\FormatterService::class)->formatLeadStage($lead_stage);
     }
 }
 if (!function_exists('formatLead')) {
     function formatLead($lead)
     {
-        $lead->load('source', 'stage', 'assigned_user');
-        return [
-            'id' => $lead->id,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'email' => $lead->email,
-            'phone' => $lead->phone,
-            'country_code' => $lead->country_code,
-            'country_iso_code' => $lead->country_iso_code,
-            'lead_source_id' => $lead->source_id,
-            'lead_source' => $lead->source ? $lead->source->name : '-',
-            'lead_stage_id' => $lead->stage_id,
-            'lead_stage' => $lead->stage ? $lead->stage->name : '-',
-            'lead_stage_color' => $lead->stage->color ? $lead->stage->color : '-',
-            'assigned_to' => $lead->assigned_to,
-            'assigned_user' => ucfirst($lead->assigned_user->first_name) . ' ' . ucfirst($lead->assigned_user->last_name),
-            'job_title' => $lead->job_title,
-            'industry' => $lead->industry,
-            'company' => $lead->company,
-            'website' => $lead->website,
-            'linkedin' => $lead->linkedin,
-            'instagram' => $lead->instagram,
-            'facebook' => $lead->facebook,
-            'pinterest' => $lead->pinterest,
-            'city' => $lead->city,
-            'state' => $lead->state,
-            'zip' => $lead->zip,
-            'country' => $lead->country,
-            'isConverted' => $lead->is_converted == 1 ? true : false,
-            'assigned_user' => [
-                'id' => $lead->assigned_user->id,
-                'name' => $lead->assigned_user->first_name . "" . $lead->assigned_user->last_name,
-                'email' => $lead->assigned_user->email,
-                'profile_picture' => $lead->assigned_user ? asset('storage/' . $lead->assigned_user->photo) : asset('/photos/1.png'),
-            ],
-            'follow_ups' => $lead->follow_ups->map(function ($followUp) {
-                return [
-                    'id' => $followUp->id,
-                    // 'follow_up_at' => format_date($followUp->follow_up_at, false, 'Y-m-d H:', 'Y-m-d'),
-                    'follow_up_at' => $followUp->follow_up_at,
-                    'type' => $followUp->type,
-                    'status' => $followUp->status,
-                    'note' => $followUp->note, // Strip HTML
-                    // 'note' => $followUp->note ? strip_tags($followUp->note) : null, // Strip HTML
-                    'assigned_to' => [
-                        'id' => $followUp->assignedTo->id,
-                        'name' => $followUp->assignedTo->first_name . " " . $followUp->assignedTo->last_name
-                    ],
-                    'created_at' => format_date($followUp->created_at, to_format: 'Y-m-d'),
-                    'updated_at' => format_date($followUp->updated_at, to_format: 'Y-m-d'),
-                ];
-            })->toArray(),
-            // 'assignedTo' => $lead->assigned_user,
-            'created_at' => format_date($lead->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($lead->updated_at, to_format: 'Y-m-d'),
-        ];
+        return app(\App\Services\FormatterService::class)->formatLead($lead);
     }
 }
 if (!function_exists('formatLeadUserHtml')) {
     function formatLeadUserHtml($lead)
     {
-        if (!$lead) {
-            return "-";
-        }
-        // Check if the lead has phone and/or country code
-        $makeCallIcon = '';
-        if (!empty($lead->phone) || (!empty($lead->phone) && !empty($lead->country_code))) {
-            $makeCallLink = 'tel:' . ($lead->country_code ? $lead->country_code . $lead->phone : $lead->phone);
-            $makeCallIcon = '<a href="' . $makeCallLink . '" class="text-decoration-none" title="' . get_label('make_call', 'Make Call') . '">
-                             <i class="bx bx-phone-call text-primary"></i>
-                         </a>';
-        }
-        // Email & Mail Link
-        $sendMailLink = 'mailto:' . $lead->email;
-        $sendMailIcon = '<a href="' . $sendMailLink . '" class="text-decoration-none" title="' . get_label('send_mail', 'Send Mail') . '">
-                        <i class="bx bx-envelope text-primary"></i>
-                     </a>';
-        return "<div class='d-flex justify-content-start align-items-center user-name'>
-                <div class='d-flex flex-column'>
-                    <span class='fw-semibold'>" . ucwords($lead->first_name . ' ' . $lead->last_name) . " {$makeCallIcon}</span>
-                    <small class='text-muted'>{$lead->email} {$sendMailIcon}</small>
-                </div>
-            </div>";
+        return app(\App\Services\FormatterService::class)->formatLeadUserHtml($lead);
     }
-    if (!function_exists('formatLeadFollowUp')) {
-        function formatLeadFollowUp($followUp)
-        {
-            return [
-                'id' => $followUp->id,
-                'lead_id' => $followUp->lead_id,
-                'assigned_to' => $followUp->assigned_to,
-                'followUp_at' => $followUp->follow_up_data,
-                'type' => $followUp->type,
-                'status' => $followUp->status,
-                'note' => $followUp->note,
-                'created_at' => format_date($followUp->created_at, to_format: 'Y-m-d'),
-                'updated_at' => format_date($followUp->updated_at, to_format: 'Y-m-d'),
-            ];
-        }
+}
+if (!function_exists('formatLeadFollowUp')) {
+    function formatLeadFollowUp($followUp)
+    {
+        return app(\App\Services\FormatterService::class)->formatLeadFollowUp($followUp);
     }
-    if (!function_exists('formatCustomField')) {
-        function formatCustomField($field)
-        {
-            return [
-                'id' => $field->id,
-                'module' => $field->module,
-                'field_label' => $field->field_label,
-                'field_type' => $field->field_type,
-                'options' => json_decode($field->options, true),
-                'required' => $field->required,
-                'show_in_table' => $field->visibility
-            ];
-        }
+}
+if (!function_exists('formatCustomField')) {
+    function formatCustomField($field)
+    {
+        return app(\App\Services\FormatterService::class)->formatCustomField($field);
     }
-    if (!function_exists('formatPayslip')) {
-        function formatPayslip($payslip)
-        {
-            // dd(format_date($payslip->payment_date, true, to_format: 'Y-m-d'));
-            return [
-                'id' => $payslip->id,
-                'user' => [
-                    'id' => $payslip->user_id,
-                    'name' => $payslip->user ? ($payslip->user->full_name ?? ($payslip->user->first_name . ' ' . $payslip->user->last_name)) : '-',
-                    'email' => $payslip->user->email,
-                    'profile_picture' =>  $payslip->user ? asset('storage/' . $payslip->user->photo) : asset('/photos/1.png'),
-                ],
-                'month' => $payslip->month,
-                'basic_salary' => $payslip->basic_salary,
-                'working_days' => $payslip->working_days,
-                'lop_days' => $payslip->lop_days,
-                'paid_days' => $payslip->paid_days,
-                'bonus' => $payslip->bonus,
-                'incentives' => $payslip->incentives,
-                'leave_deduction' => $payslip->leave_deduction,
-                'ot_hours' => $payslip->ot_hours,
-                'ot_rate' => $payslip->ot_rate,
-                'ot_payment' => $payslip->ot_payment,
-                'allowances' => $payslip->allowances->map(function ($allowance) {
-                    return [
-                        'id' => $allowance->id,
-                        'title' => $allowance->title,
-                        'amount' => $allowance->amount ?? 0, // assuming `amount` is on pivot
-                    ];
-                }),
-                'total_allowance' => $payslip->total_allowance,
-                'deductions' => $payslip->deductions->map(function ($deduction) {
-                    return [
-                        'id' => $deduction->id,
-                        'title' => $deduction->title,
-                        'amount' => $deduction->amount ?? 0, // assuming `amount` is on pivot
-                    ];
-                }),
-                'total_deductions' => $payslip->total_deductions,
-                'total_earnings' => $payslip->total_earnings,
-                'net_pay' => $payslip->net_pay,
-                'status' => $payslip->status,
-                'status_label' => match ((int)$payslip->status) {
-                    0 => 'Pending',
-                    1 => 'Paid',
-                    default => 'Unknown',
-                },
-                'payment_method_id' => $payslip->payment_method_id,
-                'payment_method' => $payslip->paymentMethod->title ?? '-',
-                'payment_date' =>  $payslip->payment_date !== null ? format_date($payslip->payment_date, true, to_format: 'Y-m-d') : '',
-                'note' => $payslip->note,
-                'created_at_date' => format_date($payslip->created_at, false, to_format: 'Y-m-d'),
-                'created_at_time' => format_date($payslip->created_at, false, to_format: 'H:i:s'),
-                'updated_at_date' => format_date($payslip->updated_at, false, to_format: 'Y-m-d'),
-                'updated_at_time' => format_date($payslip->updated_at, false, to_format: 'H:i:s'),
-                'current_date' => format_date(Carbon::now(), false, to_format: 'Y-m-d'),
-                'current_time' => format_date(Carbon::now(), false, to_format: 'H:i:s'),
-            ];
-        }
+}
+if (!function_exists('formatPayslip')) {
+    function formatPayslip($payslip)
+    {
+        return app(\App\Services\FormatterService::class)->formatPayslip($payslip);
     }
-    if (!function_exists('formatAllowance')) {
-        function formatAllowance($allowance)
-        {
-            return [
-                'id' => $allowance->id,
-                'title' => $allowance->title,
-                'amount' => format_currency($allowance->amount, false),
-                'created_at' => format_date($allowance->created_at, to_format: 'Y-m-d'),
-                'updated_at' => format_date($allowance->updated_at, to_format: 'Y-m-d'),
-            ];
-        }
+}
+if (!function_exists('formatAllowance')) {
+    function formatAllowance($allowance)
+    {
+        return app(\App\Services\FormatterService::class)->formatAllowance($allowance);
     }
-    if (!function_exists('formatDeduction')) {
-        function formatDeduction($deduction)
-        {
-            return [
-                'id' => $deduction->id,
-                'title' => $deduction->title,
-                'type' => ucfirst($deduction->type),
-                'percentage' => $deduction->percentage,
-                'amount' => format_currency($deduction->amount, false),
-                'created_at' => format_date($deduction->created_at, to_format: 'Y-m-d'),
-                'updated_at' => format_date($deduction->updated_at, to_format: 'Y-m-d')
-            ];
-        }
+}
+if (!function_exists('formatDeduction')) {
+    function formatDeduction($deduction)
+    {
+        return app(\App\Services\FormatterService::class)->formatDeduction($deduction);
     }
+}
+if (!function_exists('formatContract')) {
     function formatContract($contract)
     {
-        // Determine sign statuses
-        $promisorSign = $contract->promisor_sign;
-        $promiseeSign = $contract->promisee_sign;
-        $promisor_sign_status = !is_null($promisorSign) ? 'signed' : 'not_signed';
-        $promisee_sign_status = !is_null($promiseeSign) ? 'signed' : 'not_signed';
-        if (!is_null($promisorSign) && !is_null($promiseeSign)) {
-            $status = 'signed';
-        } elseif (!is_null($promisorSign) || !is_null($promiseeSign)) {
-            $status = 'partially_signed';
-        } else {
-            $status = 'not_signed';
-        }
-        if (strpos($contract->created_by, 'u_') === 0) {
-            $userId = substr($contract->created_by, 2);
-            $user = \App\Models\User::find($userId);
-            $createdBy = $user ? [
-                'type' => 'user',
-                'id' => $user->id,
-                'name' => $user->first_name . ' ' . $user->last_name,
-                'email' => $user->email,
-                'profile_picture' => $user->photo ? asset('storage/' . $user->photo) : asset('/photos/1.png'),
-            ] : null;
-        } else {
-            $clientId = substr($contract->created_by, 2);
-            $client = \App\Models\Client::find($clientId);
-            $createdBy = $client ? [
-                'type' => 'client',
-                'id' => $client->id,
-                'name' => $client->name,
-                'email' => $client->email,
-                'profile_picture' => $client->photo ? asset('storage/' . $client->photo) : asset('/photos/1.png'),
-            ] : null;
-        }
-        return [
-            'id' => $contract->id,
-            'title' => $contract->title,
-            'value' => format_currency($contract->value, 0),
-            'start_date' => format_date($contract->start_date, to_format: 'Y-m-d'),
-            'end_date' => format_date($contract->end_date, to_format: 'Y-m-d'),
-            'client' => [
-                'id' => $contract->client->id,
-                'name' => $contract->client->first_name . " " . $contract->client->last_name,
-                'email' => $contract->client->email,
-                'profile_picture' => $contract->client->photo ? asset('storage/' . $contract->client->photo) : asset('storage/photos/no-image.jpg')
-            ],
-            'created_by' => $createdBy,
-            'project' => [
-                'id' => $contract->project_id,
-                'title' => $contract->project_title
-            ],
-            'contract_type' => [
-                'id' => $contract->contract_type_id,
-                'name' => $contract->contract_type
-            ],
-            'description' => $contract->description,
-            'workspace_id' => $contract->workspace_id,
-            'created_at' => format_date($contract->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($contract->updated_at, to_format: 'Y-m-d'),
-            'status' => $status,
-            'signatures' => [
-                'promisor' => [
-                    'status' => $promisor_sign_status,
-                    'url' => $promisorSign && Storage::disk('public')->exists('signatures/' . $promisorSign) ? asset('storage/signatures/' . $promisorSign) : null, // CHANGED: Use asset() for consistency with profile_picture and added exists() check
-                ],
-                'promisee' => [
-                    'status' => $promisee_sign_status,
-                    'url' => $promiseeSign && Storage::disk('public')->exists('signatures/' . $promiseeSign) ? asset('storage/signatures/' . $promiseeSign) : null, // CHANGED: Use asset() for consistency with profile_picture and added exists() check
-                ],
-            ],
-            'signed_pdf_url' => $contract->signed_pdf ? asset('storage/contracts/' . $contract->signed_pdf) : null,
-        ];
+        return app(\App\Services\FormatterService::class)->formatContract($contract);
     }
-    if (!function_exists('formatContractType')) {
-        function formatContractType($contract_type)
-        {
-            return [
-                'id' => $contract_type->id,
-                'type' => $contract_type->type,
-                'created_at' => format_date($contract_type->created_at, to_format: 'Y-m-d'),
-                'updated_at' => format_date($contract_type->updated_at, to_format: 'Y-m-d'),
-            ];
-        }
+}
+if (!function_exists('formatContractType')) {
+    function formatContractType($contract_type)
+    {
+        return app(\App\Services\FormatterService::class)->formatContractType($contract_type);
     }
 }
 if (!function_exists('generate_description_openrouter')) {
-    /**
-     * Generates a project/task description using OpenRouter's API.
-     *
-     * @param string $prompt The input for generating the description.
-     * @param string|null $apiKey Optional API key to override settings
-     * @return array{error: bool, data?: string, message?: string} Response array with status and data/message
-     */
-    function generate_description_openrouter(string $prompt, $apiKey = null): array
+    function generate_description_openrouter(string $prompt, $apiKey = null)
     {
-        // Get settings from database
-        $settings = get_ai_settings('openrouter');
-        // Use provided API key or get from settings
-        $apiKey = $apiKey ?: $settings['openrouter_api_key'] ?? null;
-        if (empty($apiKey)) {
-            Log::error('Missing OpenRouter API key');
-            return [
-                'error' => true,
-                'message' => 'System configuration error: Missing API key.',
-            ];
-        }
-        // Get dynamic settings
-        $endpoint = $settings['openrouter_endpoint'] ?? 'https://openrouter.ai/api/v1/chat/completions';
-        $model = $settings['openrouter_model'] ?? 'nousresearch/deephermes-3-mistral-24b-preview:free';
-        $systemPrompt = $settings['openrouter_system_prompt'] ?? 'You are a helpful assistant that writes concise, professional project or task descriptions.';
-        $temperature = $settings['openrouter_temperature'] ?? 0.7;
-        $maxTokens = $settings['openrouter_max_tokens'] ?? 1024;
-        $topP = $settings['openrouter_top_p'] ?? 0.95;
-        $frequencyPenalty = $settings['openrouter_frequency_penalty'] ?? 0;
-        $presencePenalty = $settings['openrouter_presence_penalty'] ?? 0;
-        $timeout = $settings['request_timeout'] ?? 15;
-        $maxRetries = $settings['max_retries'] ?? 2;
-        // Apply prompt formatting if configured
-        $formattedPrompt = $prompt;
-        if (!empty($settings['default_prompt_prefix'])) {
-            $formattedPrompt = $settings['default_prompt_prefix'] . ' ' . $formattedPrompt;
-        }
-        if (!empty($settings['default_prompt_suffix'])) {
-            $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
-        }
-        // Check prompt length
-        $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
-        if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
-            return [
-                'error' => true,
-                'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
-            ];
-        }
-        $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
-        $attempt = 0;
-        while ($attempt < $maxRetries) {
-            try {
-                $response = $client->post($endpoint, [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $apiKey,
-                        'HTTP-Referer' => config('app.url'),
-                        'X-Title' => 'Taskify', // Optional: Name your app
-                        'Content-Type' => 'application/json',
-                    ],
-                    'json' => [
-                        'model' => $model,
-                        'messages' => [
-                            ['role' => 'system', 'content' => $systemPrompt],
-                            ['role' => 'user', 'content' => $formattedPrompt],
-                        ],
-                        'temperature' => (float)$temperature,
-                        'max_tokens' => (int)$maxTokens,
-                        'top_p' => (float)$topP,
-                        'frequency_penalty' => (float)$frequencyPenalty,
-                        'presence_penalty' => (float)$presencePenalty,
-                    ],
-                ]);
-                $body = json_decode($response->getBody(), true);
-                if (isset($body['choices'][0]['message']['content'])) {
-                    return [
-                        'error' => false,
-                        'data' => $body['choices'][0]['message']['content'],
-                    ];
-                }
-                return [
-                    'error' => true,
-                    'message' => $body['error']['message'],
-                ];
-            } catch (\Exception $e) {
-                $attempt++;
-                if ($attempt >= $maxRetries) {
-                    Log::error('OpenRouter API Error', [
-                        'message' => $e->getMessage(),
-                    ]);
-                    // Try fallback if enabled
-                    if (
-                        !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
-                        !empty($settings['fallback_provider']) && $settings['fallback_provider'] === 'gemini'
-                    ) {
-                        $fallbackResult = generate_description_gemini($prompt);
-                        if (!$fallbackResult['error']) {
-                            // Add note that fallback was used
-                            $fallbackResult['data'] = '[Generated using fallback provider] ' . $fallbackResult['data'];
-                        }
-                        return $fallbackResult;
-                    }
-                    return [
-                        'error' => true,
-                        'message' => 'An error occurred while generating the description using OpenRouter API.',
-                    ];
-                }
-                // Wait before retrying
-                $retryDelay = $settings['retry_delay'] ?? 1;
-                sleep($retryDelay);
-            }
-        }
-        // Should not reach here, but just in case
-        return [
-            'error' => true,
-            'message' => 'Failed to generate description after multiple attempts.',
-        ];
+        return app(\App\Services\AiService::class)->generateDescriptionOpenRouter($prompt, $apiKey);
     }
 }
 if (!function_exists('generate_description_gemini')) {
-    /**
-     * Generates a project/task description using Gemini API.
-     *
-     * @param string $prompt The input for generating the description.
-     * @param string|null $apiKey Optional API key to override settings
-     * @return array{error: bool, data?: string, message?: string} Response array with status and data/message
-     */
     function generate_description_gemini(string $prompt, $apiKey = null)
     {
-        try {
-            // Get settings from database
-            $settings = get_ai_settings('gemini');
-            // Use provided API key or get from settings
-            $apiKey = $apiKey ?: $settings['gemini_api_key'] ?? null;
-            if (empty($apiKey)) {
-                Log::error('Missing Gemini API key');
-                return [
-                    'error' => true,
-                    'message' => 'System configuration error: Missing API key.',
-                ];
-            }
-            // Get dynamic settings
-            $model = $settings['gemini_model'] ?? 'gemini-2.0-flash';
-            $endpointTemplate = $settings['gemini_endpoint'] ?? 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
-            $endpoint = sprintf($endpointTemplate, $model);
-            if (strpos($endpoint, '?key=') === false) {
-                $endpoint .= '?key=' . $apiKey;
-            }
-            $temperature = $settings['gemini_temperature'] ?? 0.7;
-            $topK = $settings['gemini_top_k'] ?? 40;
-            $topP = $settings['gemini_top_p'] ?? 0.95;
-            $maxOutputTokens = $settings['gemini_max_output_tokens'] ?? 1024;
-            $timeout = $settings['request_timeout'] ?? 15;
-            $maxRetries = $settings['max_retries'] ?? 2;
-            // Rate limiting settings
-            $MAX_REQUESTS_PER_MINUTE = $settings['rate_limit_per_minute'] ?? 15;
-            $MAX_REQUESTS_PER_DAY = $settings['rate_limit_per_day'] ?? 1500;
-            $userId = auth()->user()?->id ?? request()->ip();
-            $minuteKey = "gemini_rate_minute_{$userId}";
-            $dayKey = "gemini_rate_day_{$userId}";
-            $currentTime = now();
-            $minuteRequests = Cache::get($minuteKey, 0);
-            if ($minuteRequests >= $MAX_REQUESTS_PER_MINUTE) {
-                $retryAfter = 60 - $currentTime->second;
-                return [
-                    'error' => true,
-                    'message' => "Rate limit exceeded. Please try again in {$retryAfter} seconds.",
-                ];
-            }
-            $dayRequests = Cache::get($dayKey, 0);
-            if ($dayRequests >= $MAX_REQUESTS_PER_DAY) {
-                $tomorrow = $currentTime->addDay()->startOfDay();
-                $hoursRemaining = $currentTime->diffInHours($tomorrow);
-                return [
-                    'error' => true,
-                    'message' => "Daily limit exceeded. Please try again in {$hoursRemaining} hours.",
-                ];
-            }
-            // Apply prompt formatting if configured
-            $formattedPrompt = $prompt;
-            if (!empty($settings['default_prompt_prefix'])) {
-                $formattedPrompt = $settings['default_prompt_prefix'] . ' ' . $formattedPrompt;
-            }
-            if (!empty($settings['default_prompt_suffix'])) {
-                $formattedPrompt .= ' ' . $settings['default_prompt_suffix'];
-            }
-            // Set default prompt prefix for Gemini if not specified
-            if (strpos($formattedPrompt, "Generate a concise") === false) {
-                $formattedPrompt = "Generate a concise, professional description for the following: {$formattedPrompt}";
-            }
-            $maxPromptLength = $settings['max_prompt_length'] ?? 1000;
-            if (empty($formattedPrompt) || strlen($formattedPrompt) > $maxPromptLength) {
-                return [
-                    'error' => true,
-                    'message' => "Invalid prompt length. Must be between 1 and {$maxPromptLength} characters.",
-                ];
-            }
-            $client = new \GuzzleHttp\Client(['timeout' => $timeout]);
-            $attempt = 0;
-            while ($attempt < $maxRetries) {
-                try {
-                    $response = $client->post($endpoint, [
-                        'headers' => [
-                            'Content-Type' => 'application/json',
-                        ],
-                        'json' => [
-                            'contents' => [
-                                [
-                                    'parts' => [
-                                        [
-                                            'text' => $formattedPrompt
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            'generationConfig' => [
-                                'temperature' => (float)$temperature,
-                                'topK' => (int)$topK,
-                                'topP' => (float)$topP,
-                                'maxOutputTokens' => (int)$maxOutputTokens,
-                            ]
-                        ]
-                    ]);
-                    $result = json_decode($response->getBody(), true);
-                    if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                        return [
-                            'error' => true,
-                            'message' => 'Invalid API response. Please Contact Support'
-                        ];
-                    }
-                    Cache::put($minuteKey, $minuteRequests + 1, now()->addMinutes(1));
-                    Cache::put($dayKey, $dayRequests + 1, now()->addDays(1));
-                    return [
-                        'error' => false,
-                        'data' => $result['candidates'][0]['content']['parts'][0]['text'],
-                    ];
-                } catch (\Exception $e) {
-                    $attempt++;
-                    if ($attempt >= $maxRetries) {
-                        Log::error('Gemini API Error', [
-                            'message' => $e->getMessage(),
-                        ]);
-                        // Try fallback if enabled
-                        if (
-                            !empty($settings['enable_fallback']) && $settings['enable_fallback'] &&
-                            !empty($settings['fallback_provider']) && $settings['fallback_provider'] === 'openrouter'
-                        ) {
-                            $fallbackResult = generate_description_openrouter($prompt);
-                            if (!$fallbackResult['error']) {
-                                // Add note that fallback was used
-                                $fallbackResult['data'] = '[Generated using fallback provider] ' . $fallbackResult['data'];
-                            }
-                            return $fallbackResult;
-                        }
-                        return [
-                            'error' => true,
-                            'message' => 'Failed to generate description. Please try again later.',
-                        ];
-                    }
-                    // Wait before retrying
-                    $retryDelay = $settings['retry_delay'] ?? 1;
-                    sleep($retryDelay);
-                }
-            }
-        } catch (\Exception $e) {
-            Log::critical('Unexpected Error in generate_description_gemini', [
-                'error' => $e->getMessage(),
-            ]);
-            return [
-                'error' => true,
-                'message' => 'An unexpected error occurred. Please try again later.',
-            ];
-        }
+        return app(\App\Services\AiService::class)->generateDescriptionGemini($prompt, $apiKey);
     }
 }
 if (!function_exists('generate_description')) {
-    /**
-     * Determines which AI model to use and generates a description.
-     *
-     * @param string $prompt The input for generating the description.
-     * @return mixed The generated description or error response.
-     */
     function generate_description(string $prompt)
     {
-        $ai_model_settings = get_settings('ai_model_settings');
-        $selectedModel = $ai_model_settings['is_active']; // Assume this is stored in app settings
-        if ($selectedModel === 'openrouter') {
-            Log::info('Creating Description Using Openrouter AI Model/API');
-            return generate_description_openrouter($prompt, $ai_model_settings['openrouter_api_key']);
-        } elseif ($selectedModel === 'gemini') {
-            Log::info('Creating Description Using Google Gemini AI Model/API');
-            return generate_description_gemini($prompt, $ai_model_settings['gemini_api_key']);
-        } else {
-            return [
-                'error' => true,
-                'message' => 'Invalid AI model selected. Please update your settings.'
-            ];
-        }
+        return app(\App\Services\AiService::class)->generateDescription($prompt);
     }
 }
 if (!function_exists('get_ai_settings')) {
-    /**
-     * Retrieve AI model settings from the database
-     *
-     * @param string|null $provider Specific provider to get settings for
-     * @return array AI settings from the database with defaults applied
-     */
-    function get_ai_settings(?string $provider = null): array
+    function get_ai_settings(?string $provider = null)
     {
-        $settings = Setting::where('variable', 'ai_model_settings')->first();
-        if (!$settings) {
-            // Return default settings if none found
-            return [
-                'is_active' => 'openrouter',
-                'openrouter_endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-                'openrouter_system_prompt' => 'You are a helpful assistant that writes concise, professional project or task descriptions.',
-                'openrouter_temperature' => 0.7,
-                'openrouter_max_tokens' => 1024,
-                'openrouter_top_p' => 0.95,
-                'gemini_endpoint' => 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent',
-                'gemini_temperature' => 0.7,
-                'gemini_top_k' => 40,
-                'gemini_top_p' => 0.95,
-                'gemini_max_output_tokens' => 1024,
-                'rate_limit_per_minute' => 15,
-                'rate_limit_per_day' => 1500,
-                'max_retries' => 2,
-                'retry_delay' => 1,
-                'request_timeout' => 15,
-                'max_prompt_length' => 1000,
-            ];
-        }
-        $settings = json_decode($settings->value, true);
-        // If a specific provider is requested, only return those settings
-        if ($provider) {
-            $providerSettings = [];
-            // Get all settings that belong to the requested provider
-            foreach ($settings as $key => $value) {
-                if (strpos($key, $provider) === 0 || !str_contains($key, 'openrouter_') && !str_contains($key, 'gemini_')) {
-                    $providerSettings[$key] = $value;
-                }
-            }
-            // Add global settings that aren't provider-specific
-            $globalKeys = [
-                'is_active',
-                'rate_limit_per_minute',
-                'rate_limit_per_day',
-                'max_retries',
-                'retry_delay',
-                'request_timeout',
-                'max_prompt_length',
-                'enable_fallback',
-                'fallback_provider'
-            ];
-            foreach ($globalKeys as $key) {
-                if (isset($settings[$key])) {
-                    $providerSettings[$key] = $settings[$key];
-                }
-            }
-            return $providerSettings;
-        }
-        return $settings;
+        return app(\App\Services\AiService::class)->getAiSettings($provider);
     }
 }
 if (!function_exists('getStatusCounts')) {
     function getStatusCounts($statuses, $auth_user, $type = 'projects')
     {
-        $statusCounts = [];
-        $totalCount = 0;
-        foreach ($statuses as $status) {
-            $count = isAdminOrHasAllDataAccess()
-                ? count($status->$type)
-                : $auth_user->{"status_{$type}"}($status->id)->count();
-            $statusCounts[$status->id] = $count;
-            $totalCount += $count;
-        }
-        arsort($statusCounts); // Sort by count descending
-        return [$statusCounts, $totalCount];
+        return app(\App\Services\FormatterService::class)->getStatusCounts($statuses, $auth_user, $type);
     }
 }
 if (!function_exists('formatComment')) {
     function formatComment($comment)
     {
-        return [
-            'id' => $comment->id,
-            'content' => $comment->content,
-            'commenter' => $comment->commenter ? [
-                'id' => $comment->commenter->id,
-                'first_name' => $comment->commenter->first_name,
-                'last_name' => $comment->commenter->last_name,
-                'email' => $comment->commenter->email,
-                'photo' => $comment->commenter->photo ? asset('storage/' . $comment->commenter->photo) : asset('storage/photos/no-image.jpg'),
-            ] : null,
-            'created_at' => format_date($comment->created_at, to_format: 'Y-m-d H:i:s'),
-            'sent_time' => $comment->created_at->diffForHumans(), // <-- Added for "5 seconds ago"
-            'attachments' => $comment->attachments->map(function ($a) {
-                return [
-                    'id' => $a->id,
-                    'file_name' => $a->file_name,
-                    'file_path' => $a->file_path,
-                    'file_type' => $a->file_type,
-                    'url' => asset('storage/' . $a->file_path),
-                ];
-            }),
-            'children' => $comment->children->map(function ($child) {
-                return formatComment($child);
-            })->values(),
-        ];
+        return app(\App\Services\FormatterService::class)->formatComment($comment);
     }
 }
 if (!function_exists('formatLeadForm')) {
     function formatLeadForm($leadForm)
     {
-        return [
-            'id' => $leadForm->id,
-            'title' => $leadForm->title,
-            'description' => $leadForm->description,
-            'source' => $leadForm->leadSource ? [
-                'id' => $leadForm->leadSource->id,
-                'name' => $leadForm->leadSource->name,
-            ] : null,
-            'stage' => $leadForm->leadStage ? [
-                'id' => $leadForm->leadStage->id,
-                'name' => $leadForm->leadStage->name,
-                'color' => $leadForm->leadStage->color,
-            ] : null,
-            'assigned_to' => $leadForm->assignedUser ? [
-                'id' => $leadForm->assignedUser->id,
-                'first_name' => $leadForm->assignedUser->first_name,
-                'last_name' => $leadForm->assignedUser->last_name,
-                'email' => $leadForm->assignedUser->email,
-                'photo' => $leadForm->assignedUser->photo ? asset('storage/' . $leadForm->assignedUser->photo) : asset('storage/photos/no-image.jpg'),
-            ] : null,
-            'fields' => $leadForm->leadFormFields->map(function ($field) {
-
-                return [
-                    'id' => $field->id,
-                    'label' => $field->label,
-                    'name' => $field->name,
-                    'type' => $field->type,
-                    'is_required' => (bool) $field->is_required,
-                    'is_mapped' => (bool) $field->is_mapped,
-                    'options' => is_array($decoded = json_decode($field->options ?? '[]', true)) && !(count($decoded) === 1 && is_null($decoded[0])) ? $decoded : [],
-
-                    'placeholder' => $field->placeholder,
-                    'order' => $field->order,
-                    'validation_rules' => $field->validation_rules,
-                ];
-            })->values(),
-            'public_url' => $leadForm->public_url,
-            'embed_code' => $leadForm->embed_code,
-            'leads_count' => $leadForm->leads_count ?? 0,
-            'created_at' => format_date($leadForm->created_at, to_format: 'Y-m-d'),
-            'updated_at' => format_date($leadForm->updated_at, to_format: 'Y-m-d'),
-
-        ];
+        return app(\App\Services\FormatterService::class)->formatLeadForm($leadForm);
     }
 }
-
 if (!function_exists('formatLeadFormResponse')) {
-    /**
-     * Format a Lead model for clean API response when returned from lead form responses.
-     *
-     * @param \App\Models\Lead $lead
-     * @return array
-     */
     function formatLeadFormResponse($lead)
     {
-        return [
-            'id' => $lead->id,
-            'first_name' => $lead->first_name,
-            'last_name' => $lead->last_name,
-            'full_name' => trim($lead->first_name . ' ' . $lead->last_name),
-            'email' => $lead->email,
-            'phone' => $lead->phone,
-            'company' => $lead->company ?? null,
-            'source' => $lead->leadSource ? [
-                'id' => $lead->leadSource->id,
-                'name' => $lead->leadSource->name,
-            ] : null,
-            'stage' => $lead->leadStage ? [
-                'id' => $lead->leadStage->id,
-                'name' => $lead->leadStage->name,
-                'color' => $lead->leadStage->color,
-            ] : null,
-            'assigned_to' => $lead->assignedUser ? [
-                'id' => $lead->assignedUser->id,
-                'first_name' => $lead->assignedUser->first_name,
-                'last_name' => $lead->assignedUser->last_name,
-                'email' => $lead->assignedUser->email,
-                'photo' => $lead->assignedUser->photo ? asset('storage/' . $lead->assignedUser->photo) : asset('storage/photos/no-image.jpg'),
-            ] : null,
-            'submitted_at' => format_date($lead->created_at, to_format: "Y-m-d"),
-            'sent_time' => $lead->created_at->diffForHumans(),
-            'custom_fields' => $lead->custom_fields ?? [], // if you store custom fields for each lead form response
-        ];
+        return app(\App\Services\FormatterService::class)->formatLeadFormResponse($lead);
     }
 }
-
 /**
  * Calculate leave days from date range, handling partial leaves (0.5 for half day)
  */
 if (!function_exists('calculate_leave_days')) {
     function calculate_leave_days($fromDate, $toDate, $fromTime = null, $toTime = null)
     {
-        $fromDate = \Carbon\Carbon::parse($fromDate);
-        $toDate = \Carbon\Carbon::parse($toDate);
-
-        // If times are specified, it's a partial leave
-        if ($fromTime && $toTime) {
-            $duration = 0;
-            // Loop through each day
-            while ($fromDate->lessThanOrEqualTo($toDate)) {
-                // Create Carbon instances for the start and end times of the leave request for the current day
-                $fromDateTime = \Carbon\Carbon::parse($fromDate->toDateString() . ' ' . $fromTime);
-                $toDateTime = \Carbon\Carbon::parse($fromDate->toDateString() . ' ' . $toTime);
-
-                // Calculate the duration for the current day and add it to the total duration
-                $duration += $fromDateTime->diffInMinutes($toDateTime) / 60; // Duration in hours
-
-                // Move to the next day
-                $fromDate->addDay();
-            }
-
-            // Convert hours to days (assuming 8 hours = 1 day, or use 0.5 for half day)
-            // If duration is less than 8 hours, count as 0.5 day
-            return $duration < 8 ? 0.5 : round($duration / 8, 2);
-        } else {
-            // Calculate the inclusive duration in days
-            return $fromDate->diffInDays($toDate) + 1;
-        }
+        return app(\App\Services\LeaveService::class)->calculateLeaveDays($fromDate, $toDate, $fromTime, $toTime);
     }
 }
-
-/**
- * Get user's leave balance for a specific workspace and year
- */
 if (!function_exists('get_user_leave_balance')) {
     function get_user_leave_balance($userId, $workspaceId, $year = null)
     {
-        if ($year === null) {
-            $year = date('Y');
-        }
-
-        $balance = \App\Models\UserLeaveBalance::where('user_id', $userId)
-            ->where('workspace_id', $workspaceId)
-            ->where('year', $year)
-            ->first();
-
-        if (!$balance) {
-            // Return default structure if no balance record exists
-            $totalAnnualLeaves = get_settings('general_settings')['total_paid_leaves_per_year'] ?? 0;
-            return [
-                'total_annual_leaves' => $totalAnnualLeaves,
-                'used_paid_leaves' => 0,
-                'remaining_paid_leaves' => $totalAnnualLeaves,
-            ];
-        }
-
-        return [
-            'id' => $balance->id,
-            'total_annual_leaves' => $balance->total_annual_leaves,
-            'used_paid_leaves' => $balance->used_paid_leaves,
-            'remaining_paid_leaves' => $balance->remaining_paid_leaves,
-        ];
+        return app(\App\Services\LeaveService::class)->getUserLeaveBalance($userId, $workspaceId, $year);
     }
 }
-
-/**
- * Get the current company year based on company year start settings
- * Returns the year identifier (e.g., if company year is Apr 2024 - Mar 2025, returns 2024)
- */
 if (!function_exists('get_current_company_year')) {
     function get_current_company_year()
     {
-        $settings = get_settings('general_settings');
-        $startMonth = $settings['company_year_start_month'] ?? 1;
-        $startDay = $settings['company_year_start_day'] ?? 1;
-
-        $today = \Carbon\Carbon::now();
-        $currentYear = $today->year;
-
-        // Create the company year start date for this calendar year
-        $companyYearStart = \Carbon\Carbon::create($currentYear, $startMonth, $startDay);
-
-        // If today is before the company year start, we're still in the previous company year
-        if ($today->lt($companyYearStart)) {
-            return $currentYear - 1;
-        }
-
-        return $currentYear;
+        return app(\App\Services\LeaveService::class)->getCurrentCompanyYear();
     }
 }
-
-/**
- * Get company year start and end dates
- * @param int $companyYear The company year identifier
- * @return array ['start' => Carbon, 'end' => Carbon]
- */
 if (!function_exists('get_company_year_dates')) {
     function get_company_year_dates($companyYear = null)
     {
-        if ($companyYear === null) {
-            $companyYear = get_current_company_year();
-        }
-
-        $settings = get_settings('general_settings');
-        $startMonth = $settings['company_year_start_month'] ?? 1;
-        $startDay = $settings['company_year_start_day'] ?? 1;
-
-        $start = \Carbon\Carbon::create($companyYear, $startMonth, $startDay)->startOfDay();
-        $end = $start->copy()->addYear()->subDay()->endOfDay();
-
-        return [
-            'start' => $start,
-            'end' => $end,
-            'year' => $companyYear,
-        ];
+        return app(\App\Services\LeaveService::class)->getCompanyYearDates($companyYear);
     }
 }
-
-/**
- * Format company year for display
- * @param int $companyYear
- * @return string e.g., "2024-2025" or "Apr 2024 - Mar 2025"
- */
 if (!function_exists('format_company_year')) {
     function format_company_year($companyYear = null, $detailed = false)
     {
-        $dates = get_company_year_dates($companyYear);
-
-        if ($detailed) {
-            return $dates['start']->format('M Y') . ' - ' . $dates['end']->format('M Y');
-        }
-
-        return $dates['start']->year . '-' . $dates['end']->year;
+        return app(\App\Services\LeaveService::class)->formatCompanyYear($companyYear, $detailed);
     }
 }
-
 if (!function_exists('number_to_words')) {
     function number_to_words($number)
     {
-        // Handle zero case
-        if ($number == 0) {
-            return 'Zero';
-        }
-
-        $ones = array(
-            0 => '',
-            1 => 'One',
-            2 => 'Two',
-            3 => 'Three',
-            4 => 'Four',
-            5 => 'Five',
-            6 => 'Six',
-            7 => 'Seven',
-            8 => 'Eight',
-            9 => 'Nine',
-            10 => 'Ten',
-            11 => 'Eleven',
-            12 => 'Twelve',
-            13 => 'Thirteen',
-            14 => 'Fourteen',
-            15 => 'Fifteen',
-            16 => 'Sixteen',
-            17 => 'Seventeen',
-            18 => 'Eighteen',
-            19 => 'Nineteen'
-        );
-
-        $tens = array(
-            2 => 'Twenty',
-            3 => 'Thirty',
-            4 => 'Forty',
-            5 => 'Fifty',
-            6 => 'Sixty',
-            7 => 'Seventy',
-            8 => 'Eighty',
-            9 => 'Ninety'
-        );
-
-        // Handle decimal numbers
-        $original_number = $number;
-        $number = (string)$number;
-        if (strpos($number, '.') !== false) {
-            list($number, $decimal) = explode('.', $number);
-        }
-
-        $number = (int)$number;
-
-        if ($number < 20) {
-            return $ones[$number];
-        } elseif ($number < 100) {
-            $tens_digit = floor($number / 10);
-            $ones_digit = $number % 10;
-            return $tens[$tens_digit] . ($ones_digit > 0 ? ' ' . $ones[$ones_digit] : '');
-        } elseif ($number < 1000) {
-            $hundreds_digit = floor($number / 100);
-            $remainder = $number % 100;
-            return $ones[$hundreds_digit] . ' Hundred' . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
-        } elseif ($number < 100000) {
-            $thousands_digit = floor($number / 1000);
-            $remainder = $number % 1000;
-            return number_to_words($thousands_digit) . ' Thousand' . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
-        } elseif ($number < 10000000) {
-            $lakhs_digit = floor($number / 100000);
-            $remainder = $number % 100000;
-            return number_to_words($lakhs_digit) . ' Lakh' . ($lakhs_digit > 1 ? 's' : '') . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
-        } else {
-            $crores_digit = floor($number / 10000000);
-            $remainder = $number % 10000000;
-            return number_to_words($crores_digit) . ' Crore' . ($crores_digit > 1 ? 's' : '') . ($remainder > 0 ? ' ' . number_to_words($remainder) : '');
-        }
+        return app(\App\Services\FormatterService::class)->numberToWords($number);
     }
-
+}
+if (!function_exists('imageToBase64')) {
     function imageToBase64($path)
     {
-        if (!$path || !file_exists($path)) {
-            return null;
-        }
-
-        $type = pathinfo($path, PATHINFO_EXTENSION);
-        $data = file_get_contents($path);
-
-        return 'data:image/' . $type . ';base64,' . base64_encode($data);
+        return app(\App\Services\FormatterService::class)->imageToBase64($path);
     }
-
-    
 }

@@ -77,6 +77,8 @@
      * Initialize standardized Date Range Picker (Filters)
      */
     window.initAdvancedDateRangePicker = function (config) {
+        console.log(config);
+
         if (!config || !config.selector) return;
 
         var $input = $(config.selector);

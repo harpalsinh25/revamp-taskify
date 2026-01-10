@@ -1182,7 +1182,7 @@ $(document).ready(function () {
         "#timesheet_start_date_between", "#timesheet_end_date_between", "#meeting_date_between",
         "#meeting_start_date_between", "#meeting_end_date_between", "#activity_log_between_date",
         "#notification_between_date", "#expense_from_date_between", "#payment_date_between",
-        "#lead_kanban_date_range", "#lead_date_range", "#candidate_date_between", "#interview_date_between"
+        "#lead_kanban_date_range", "#lead_date_range", "#candidate_date_between", "#interview_date_between", "#report_date_between"
     ];
 
     filterIds.forEach(function (id) {
