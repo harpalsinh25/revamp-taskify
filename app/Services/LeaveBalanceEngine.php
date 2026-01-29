@@ -472,7 +472,7 @@ class LeaveBalanceEngine
             'year_end' => $yearDates['end']->toDateString(),
         ]);
 
-        $usedLeaves = LeaveRequest::where('user_id', $userId)
+        $sum = LeaveRequest::where('user_id', $userId)
             ->where('workspace_id', $workspaceId)
             ->where('status', 'approved')
             ->where('is_paid', true)
@@ -480,26 +480,14 @@ class LeaveBalanceEngine
                 $yearDates['start']->toDateString(),
                 $yearDates['end']->toDateString()
             ])
-            ->get();
+            ->sum('paid_days');
 
         Log::info('[LeaveBalanceEngine] Found approved paid leaves', [
             'user_id' => $userId,
             'workspace_id' => $workspaceId,
             'company_year' => $companyYear,
-            'leaves_count' => $usedLeaves->count(),
-            'leaves_data' => $usedLeaves->map(function ($leave) {
-                return [
-                    'id' => $leave->id,
-                    'from_date' => $leave->from_date,
-                    'to_date' => $leave->to_date,
-                    'status' => $leave->status,
-                    'is_paid' => $leave->is_paid,
-                    'paid_days' => $leave->paid_days,
-                ];
-            })->toArray(),
+            'calculated_sum' => $sum,
         ]);
-
-        $sum = (float) $usedLeaves->sum('paid_days');
 
         Log::info('[LeaveBalanceEngine] Used paid leaves sum calculated', [
             'user_id' => $userId,

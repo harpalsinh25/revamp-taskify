@@ -381,7 +381,7 @@ class LeaveRequestController extends Controller
             : $totalDays . ' day' . ($totalDays > 1 ? 's' : '');
 
         $user = User::find($leaveRequest->user_id);
-        $workspaceUsers = $this->workspace->users->pluck('id')->toArray();
+        $workspaceUsers = $this->workspace->users()->pluck('users.id')->toArray();
 
         // Determine recipients (admins and leave editors)
         $adminModelIds = DB::table('model_has_roles')
