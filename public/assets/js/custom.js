@@ -5116,6 +5116,33 @@ function initTomSelectWithAjax(selector, type) {
         });
     });
 }
+// Tom Select for a <select> that already has static <option>s (no AJAX).
+function initTomSelectStatic(selector) {
+    document.querySelectorAll(selector).forEach(function (el) {
+        if (el.tomselect) {
+            el.tomselect.destroy();
+        }
+        var allowClear = el.dataset.allowClear !== "false";
+        new TomSelect(el, {
+            plugins: allowClear ? ['remove_button', 'clear_button'] : ['remove_button'],
+            persist: false,
+            placeholder: el.dataset.placeholder || ''
+        });
+    });
+}
+
+// When a "Clear filters" button is clicked, also clear any Tom Select instances
+// in the same card (the page JS only resets the underlying <select>, which would
+// leave the Tom Select chips visible). Additive — no page JS changed.
+$(document).on('click', '[class*="clear-"][class*="-filters"]', function () {
+    var scope = this.closest('.tk-filter-panel, .card, .container-fluid') || document;
+    scope.querySelectorAll('select').forEach(function (s) {
+        if (s.tomselect) {
+            s.tomselect.clear(true); // silent: page handler already triggers the refresh
+        }
+    });
+});
+
 function initTagifyFromSelect(selector, type) {
     document.querySelectorAll(selector).forEach(function (selectEl) {
         // Hide the original select
@@ -5209,6 +5236,9 @@ $(document).ready(function () {
 
     initTomSelectWithAjax(".tom_users_select", "users");
     initTomSelectWithAjax(".tom_clients_select", "clients");
+    initTomSelectWithAjax(".tom_projects_select", "projects");
+    initTomSelectWithAjax(".tom_contract_types_select", "contract_types");
+    initTomSelectStatic(".tom_static_select");
 
     initSelect2WithAjax(".clients_select", "clients");
     initSelect2WithAjax(".tags_select", "tags");
@@ -7746,7 +7776,7 @@ $(document).ready(function () {
                         } else {
                             // Fallback for native inputs
                             $(el).val('');
-                            $(el).trigger('change'); 
+                            $(el).trigger('change');
                         }
                     }
                 });

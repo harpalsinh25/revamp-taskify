@@ -6070,83 +6070,172 @@ body.v2-shell .tk-spinner {
 /* =====================================================================
    Taskify v2 — Tom Select Dark Mode & UI Fixes
    ===================================================================== */
-body.v2-shell .ts-wrapper.form-select .ts-control {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 6px;
-    padding-right: 30px;
+body.v2-shell .ts-wrapper.form-select,
+body.v2-shell .ts-wrapper.form-control {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    height: auto !important;
+    box-shadow: none !important;
+}
+
+body.v2-shell .ts-wrapper .ts-control {
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 0 6px !important;
+    padding-right: 30px !important;
     /* space for arrow */
-    min-height: var(--ctrl-h-md);
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    color: var(--fg-0);
-    border-radius: var(--r-2);
+    min-height: var(--ctrl-h-md) !important;
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-0) !important;
+    border-radius: var(--r-2) !important;
+    transition: border-color var(--t-1) var(--ease) !important;
+}
+
+body.v2-shell .ts-wrapper:hover .ts-control {
+    border-color: var(--line-2) !important;
 }
 
 body.v2-shell .ts-wrapper.focus .ts-control {
-    border-color: var(--signal);
-    box-shadow: var(--shadow-focus);
+    border-color: var(--signal) !important;
+    box-shadow: var(--shadow-focus) !important;
 }
 
-body.v2-shell .ts-control>.item {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--bg-3);
-    color: var(--fg-0);
-    border-radius: 3px;
-    font-size: 11px;
-    height: 22px;
-    line-height: 1;
-    padding: 0 6px;
-    margin: 0;
-    border: 0;
+body.v2-shell .ts-control > .item {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    background: var(--bg-3) !important;
+    color: var(--fg-0) !important;
+    border-radius: 3px !important;
+    font-size: 11px !important;
+    height: 22px !important;
+    line-height: 1 !important;
+    padding: 0 6px !important;
+    margin: 0 !important;
+    border: 0 !important;
 }
 
-body.v2-shell .ts-control>.item .remove {
-    color: var(--fg-3);
-    text-decoration: none;
-    font-size: 14px;
-    border: 0;
-    margin-left: 2px;
+body.v2-shell .ts-control > .item .remove {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 14px !important;
+    height: 14px !important;
+    line-height: 1 !important;
+    color: var(--fg-3) !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+    border: 0 !important;
+    margin-left: 4px !important;
+    padding: 0 !important;
 }
 
-body.v2-shell .ts-control>.item .remove:hover {
-    color: var(--err);
-    background: transparent;
+body.v2-shell .ts-control > .item .remove:hover {
+    color: var(--err) !important;
+    background: transparent !important;
 }
 
 body.v2-shell .ts-dropdown {
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-radius: var(--r-2);
-    box-shadow: var(--shadow-3);
-    color: var(--fg-1);
-    padding: 4px;
-    margin-top: 4px;
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important;
+    box-shadow: var(--shadow-3) !important;
+    color: var(--fg-1) !important;
+    padding: 4px !important;
+    margin-top: 4px !important;
 }
 
 body.v2-shell .ts-dropdown .option {
-    padding: 7px 10px;
-    color: var(--fg-1);
-    border-radius: 4px;
+    padding: 7px 10px !important;
+    color: var(--fg-1) !important;
+    border-radius: 4px !important;
 }
 
 body.v2-shell .ts-dropdown .option.active,
-body.v2-shell .ts-dropdown .option:hover {
-    background: var(--bg-2);
-    color: var(--fg-0);
+body.v2-shell .ts-dropdown .option:hover,
+body.v2-shell .ts-dropdown .active {
+    background: var(--bg-2) !important;
+    color: var(--fg-0) !important;
 }
 
 body.v2-shell .ts-control input {
-    color: var(--fg-0);
-    font-size: var(--fs-base);
+    color: var(--fg-0) !important;
+    font-size: var(--fs-base) !important;
 }
 
 body.v2-shell .ts-control input::placeholder {
-    color: var(--fg-3);
+    color: var(--fg-3) !important;
+}
+
+/* =====================================================================
+   Taskify v2 — Global Form Controls / Inputs & Focus Rings
+   ===================================================================== */
+body.v2-shell .form-control,
+body.v2-shell .form-select {
+    box-sizing: border-box !important;
+    height: var(--ctrl-h-md) !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    line-height: 30px !important; /* matches ctrl-h-md (32px) - borders (2px) */
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-0) !important;
+    border-radius: var(--r-2) !important;
+    font-size: var(--fs-base) !important;
+    box-shadow: none !important;
+    transition: border-color var(--t-1) var(--ease) !important;
+}
+
+body.v2-shell .form-control::placeholder,
+body.v2-shell .form-select::placeholder,
+body.v2-shell input::placeholder,
+body.v2-shell select::placeholder {
+    color: var(--fg-3) !important;
+    opacity: 1 !important;
+}
+
+body.v2-shell .form-control:hover,
+body.v2-shell .form-select:hover {
+    border-color: var(--line-2) !important;
+}
+
+body.v2-shell .form-control:focus,
+body.v2-shell .form-select:focus {
+    border-color: var(--signal) !important;
+    box-shadow: var(--shadow-focus) !important;
+    outline: none !important;
+}
+
+body.v2-shell input[type="number"] {
+    line-height: normal !important;
+    box-sizing: border-box !important;
+}
+
+/* Strip borders/backgrounds on input groups so the child form-control handles everything */
+body.v2-shell .input-group,
+body.v2-shell .input-group-merge {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+}
+
+body.v2-shell .input-group .form-control,
+body.v2-shell .input-group .form-select {
+    padding-block: 0 !important;
+    padding-inline: 10px !important;
+    border-width: 1px !important;
+    margin: 0 !important;
 }
 
 /* =====================================================================

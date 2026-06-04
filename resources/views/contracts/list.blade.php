@@ -26,37 +26,42 @@ $visibleColumns = getUserPreferences('contracts');
         </div>
     </div>
     @if ($contracts > 0)
-    <div class="card">
-       
-            <div class="row">
-                <x-advanced-date-filters prefix="contract" />
-                <div class="col-md-4 mb-3">
-                    <select class="form-select projects_select" id="project_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>" multiple>
-                    </select>
-                </div>
-                @if (!isClient() || isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-3">
-                    <select class="form-select clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
-                    </select>
-                </div>
-                @endif
-                <div class="col-md-4 mb-3">
-                    <select class="form-select contract_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
-                    </select>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <select class="form-select js-example-basic-multiple" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
-                        <option value="signed"><?= get_label('signed', 'Signed') ?></option>
-                        <option value="not_signed"><?= get_label('not_signed', 'Not signed') ?></option>
-                        <option value="partially_signed"><?= get_label('partially_signed', 'Partially signed') ?></option>
-                    </select>
-                </div>
-                <div class="col-md-4 mb-3 d-flex align-items-center">
-                    <button class="btn btn-secondary clear-contracts-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
-                        <i class="bx bx-refresh"></i>
-                    </button>
-                </div>
+    <div class="tk-filter-panel mb-4">
+        <div class="row g-3 align-items-end tk-filter-row">
+            <x-advanced-date-filters prefix="contract" />
+            <div class="col-md-4">
+                <label class="tk-filter-label"><?= get_label('projects', 'Projects') ?></label>
+                <select class="form-select tom_projects_select" id="project_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>" multiple>
+                </select>
             </div>
+            @if (!isClient() || isAdminOrHasAllDataAccess())
+            <div class="col-md-4">
+                <label class="tk-filter-label"><?= get_label('clients', 'Clients') ?></label>
+                <select class="form-select tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+                </select>
+            </div>
+            @endif
+            <div class="col-md-4">
+                <label class="tk-filter-label"><?= get_label('types', 'Types') ?></label>
+                <select class="form-select tom_contract_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="tk-filter-label"><?= get_label('status', 'Status') ?></label>
+                <select class="form-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+                    <option value="signed"><?= get_label('signed', 'Signed') ?></option>
+                    <option value="not_signed"><?= get_label('not_signed', 'Not signed') ?></option>
+                    <option value="partially_signed"><?= get_label('partially_signed', 'Partially signed') ?></option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-secondary clear-contracts-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                    <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="tk-table-card">
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="data_type" value="contracts">
                 <input type="hidden" id="data_table" value="contracts_table">

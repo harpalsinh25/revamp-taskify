@@ -57,3 +57,17 @@ All notable changes to the Taskify project will be documented in this folder.
 - **`members-on-leave-card.blade.php`**: Applied identical flexbox alignment and width corrections for the filter bar.
 - **`priority-card.blade.php`**: Replaced the standard HTML `<table data-toggle="table">` with the `<x-tk-table>` component and removed redundant `.table-responsive` wrappers to ensure the page accurately adopts the Revamp Kit design system, specifically fixing the white card background issue in dark mode.
 - **`tabs.blade.php` (Dashboard)**: Removed the `.nav-align-top` wrapper and added `.bg-transparent .shadow-none` to the `.tab-content`. This eliminates the massive white "card" background wrapper rendering incorrectly behind the Upcoming Birthdays/Anniversaries/Leave sections in dark mode.
+
+## [2026-06-04] - UI Style Improvements & Consistency
+### Modified
+- **`custom.css`**:
+  - Overhauled Tom Select styles to use flex centering on selected items (`.item`) and tag removal buttons (`.remove`) to ensure the "x" sits perfectly in the center.
+  - Custom-styled dropdown highlighting in Tom Select (`.ts-dropdown .option.active`) to use design system token `var(--bg-2)` instead of Bootstrap default blue.
+  - Standardized `.form-control` and `.form-select` styling under `body.v2-shell` (background, borders, placeholder colors, border-radii, and focus outline/box-shadow rings) to guarantee input visual consistency across the entire app.
+  - Reset styles on `.ts-wrapper` elements inheriting `.form-select` or `.form-control` to prevent outer "double borders" (field inside of a field) and ensure consistent margins/paddings.
+  - Implemented interactive border transition styling on hover (`var(--line-2)`) for inputs, selects, and Tom Select fields.
+  - Reset wrapper borders and margins on `.input-group` and `.input-group-merge` to resolve styling and alignment conflicts on standard form inputs (e.g. number inputs).
+  - Explicitly aligned and standardized placeholder text color (`var(--fg-3)`) and opacity (`1`) globally for all input, select, and form control placeholders.
+  - Enforced exact vertical alignment and a height of 32px on standard inputs and Tom Select controls by resetting vertical padding on `.ts-control` and adding strict `padding-top: 0`, `padding-bottom: 0`, and `line-height: 30px` rules to `.form-control` and `.form-select`.
+  - Added strict `box-sizing: border-box !important` globally on `.form-control`, `.form-select`, and `.ts-control` to ensure browser height declarations include borders and padding consistently.
+
