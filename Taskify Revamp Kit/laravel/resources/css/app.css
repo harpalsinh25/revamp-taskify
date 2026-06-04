@@ -1,0 +1,52 @@
+/* ============================================================
+   Taskify — main stylesheet entry
+   Imported by /resources/css/app.css → built via Vite
+   ============================================================ */
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./typography.css";
+
+@import "./components/buttons.css";
+@import "./components/forms.css";
+@import "./components/badges.css";
+@import "./components/cards.css";
+@import "./components/navigation.css";
+@import "./components/overlays.css";
+@import "./components/feedback.css";
+@import "./components/data.css";
+
+/* ---- App shell layout ---- */
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+.main {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  background: var(--bg-0);
+}
+.content {
+  flex: 1; overflow: auto;
+  padding: 22px 26px 32px;
+  min-height: 0;
+}
+
+/* ---- Grid helpers (page composition) ---- */
+.d-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.d-grid .card.span-2 { grid-column: span 2; }
+.d-grid .card.span-3 { grid-column: span 3; }
+@media (max-width: 1180px) {
+  .d-grid { grid-template-columns: repeat(2, 1fr); }
+  .d-grid .card.span-3 { grid-column: span 2; }
+}
+@media (max-width: 760px) {
+  .d-grid { grid-template-columns: 1fr; }
+  .d-grid .card.span-2, .d-grid .card.span-3 { grid-column: span 1; }
+}

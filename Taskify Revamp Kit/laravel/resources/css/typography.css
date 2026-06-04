@@ -1,0 +1,31 @@
+/* ============================================================
+   Typography scale (utility classes + heading defaults)
+   ============================================================ */
+
+h1, h2, h3, h4, h5, h6 { margin: 0; font-weight: 700; color: var(--fg-0); letter-spacing: var(--tracking-tight); }
+h1 { font-size: var(--fs-3xl); line-height: var(--lh-tight); }
+h2 { font-size: var(--fs-2xl); line-height: var(--lh-tight); }
+h3 { font-size: var(--fs-xl);  line-height: var(--lh-snug); }
+h4 { font-size: var(--fs-lg);  line-height: var(--lh-snug); letter-spacing: var(--tracking-snug); }
+h5 { font-size: var(--fs-md);  line-height: var(--lh-snug); letter-spacing: 0; font-weight: 600; }
+h6 { font-size: var(--fs-base); line-height: var(--lh-snug); letter-spacing: 0; font-weight: 600; }
+p  { margin: 0; line-height: var(--lh-base); color: var(--fg-1); }
+
+.txt-xs   { font-size: var(--fs-xs); }
+.txt-sm   { font-size: var(--fs-sm); }
+.txt-base { font-size: var(--fs-base); }
+.txt-md   { font-size: var(--fs-md); }
+.txt-lg   { font-size: var(--fs-lg); }
+
+.txt-mute   { color: var(--fg-2); }
+.txt-subtle { color: var(--fg-3); }
+.txt-strong { color: var(--fg-0); font-weight: 600; }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--fg-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-weight: 500;
+}

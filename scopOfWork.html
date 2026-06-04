@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Scope of Work: Platform Customization</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #2980b9;
+            margin-top: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .mermaid {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                font-size: 12pt;
+            }
+
+            .mermaid {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</head>
+
+<body>
+
+    <h1>Detailed Scope of Work: Platform Customization</h1>
+    <p>This document outlines the detailed technical and functional specifications for the customization of the
+        platform. The objective is to implement a robust, automated ecosystem that handles dynamic task management,
+        complex role-based accessibility, automated KPI-driven payroll, and comprehensive daily reporting.</p>
+
+    <h2>1. Task Management Customization</h2>
+    <p>The core task module will be heavily customized to support dynamic data capture and streamlined daily reporting
+        for assigned users.</p>
+
+    <h3>Feature Specifications</h3>
+    <ul>
+        <li><strong>Dynamic Task Forms & Templates:</strong> The creation interface will be overhauled. Instead of a
+            one-size-fits-all form, users will select a "Task Template".</li>
+        <li><strong>Contextual Field Rendering:</strong> Based on the selected template, the system's rendering engine
+            will dynamically inject only the relevant custom fields required for that specific task type, hiding all
+            non-essential default fields.</li>
+        <li><strong>Daily Activity Submission (EOD):</strong> A new sub-module will be injected directly into the task
+            view. This allows the assigned employee to log their End-of-Day (EOD) progress directly against the task
+            without navigating away.</li>
+        <li><strong>Advanced Reporting:</strong> Task reports will be upgraded to support deep filtering based on the
+            dynamic custom fields, allowing management to query highly specific operational metrics.</li>
+    </ul>
+
+    <h3>Task Workflow</h3>
+    <div class="mermaid">
+        graph TD
+        A[Initiate Task Creation] --> B[Select Task Template]
+        B --> C{Dynamic Engine}
+        C -->|Template A| D[Render Specific Custom Fields]
+        C -->|Template B| E[Render Different Custom Fields]
+        D --> F[Save Task]
+        E --> F
+        F --> G[Task Becomes Active]
+        G --> H[Assigned User Submits Daily EOD Log]
+        H --> I[System Updates Analytics & Reports]
+    </div>
+
+    <h2>2. User Registration & Accessibility Enhancements</h2>
+    <p>The onboarding process and access control matrix will be modified to support specific organizational roles like
+        'Affiliate' and 'Affiliate Manager'.</p>
+
+    <h3>Feature Specifications</h3>
+    <ul>
+        <li><strong>Dynamic Registration Flow:</strong> The registration form will be enhanced to dynamically load
+            required custom fields configured by the admin (e.g., Mobicash application details, regional data, or
+            specific user preferences), allowing precise data capture right at signup without relying on static forms.
+        </li>
+        <li><strong>Specialized Role Configuration:</strong> The platform's foundational role architecture will be
+            expanded.</li>
+        <li><strong>Targeted Access Profiles:</strong> We will build, configure, and lock down specific permission
+            profiles for Affiliates and Affiliate Managers, ensuring their dashboard views are strictly confined to
+            their operational purview.</li>
+    </ul>
+
+    <h2>3. Automated KPI & Salary Integration</h2>
+    <p>A completely automated, performance-driven payroll engine will be integrated, directly tying daily task
+        performance to financial compensation.</p>
+
+    <h3>Feature Specifications</h3>
+    <ul>
+        <li><strong>Real-time Performance Dashboard:</strong> Every user profile will feature a new, dynamic KPI Card.
+            This widget provides real-time visualization of their performance metrics (e.g., tasks completed vs.
+            overdue, EOD logs submitted).</li>
+        <li><strong>Automated Payroll Engine:</strong> The system will dynamically generate salaries and payslips by
+            evaluating the user's base configuration against their actual KPI performance.</li>
+        <li><strong>Performance-Based Adjustments (Bonuses/Penalties):</strong> A rule-based engine will automatically
+            calculate financial modifiers. Users exceeding targets will receive calculated bonuses, while users missing
+            deadlines or failing to submit EOD logs will incur automated salary penalties.</li>
+    </ul>
+
+    <h3>KPI & Payroll Calculation Flow</h3>
+    <div class="mermaid">
+        graph TD
+        A[Daily Task Completions & EOD Logs] --> B[System Aggregates Performance Data]
+        B --> C[Update User KPI Card Real-Time]
+        C --> D{Payroll Cycle Trigger}
+        D --> E{Evaluate KPI Targets}
+        E -->|Targets Exceeded| F[Apply Salary Bonus]
+        E -->|Targets Met| G[Calculate Base Salary]
+        E -->|Targets Missed| H[Apply Salary Penalty]
+        F --> I[Generate & Issue Final Payslip]
+        G --> I
+        H --> I
+    </div>
+
+    <h2>4. Daily Data Processing & Automation</h2>
+    <p>To ensure all dashboards, reports, and KPI metrics remain perfectly accurate without manual intervention, a
+        background automation engine will be deployed.</p>
+
+    <h3>Feature Specifications</h3>
+    <ul>
+        <li><strong>System-Wide Batch Processing:</strong> A cron-based scheduled engine will execute automatically at
+            the close of every business day.</li>
+        <li><strong>Automated Status Recalculations:</strong> The engine will scan the entire database, automatically
+            flagging overdue tasks, recalculating total KPI scores, and refreshing the data caches that drive the
+            frontend dashboards.</li>
+        <li><strong>Automated Report Generation:</strong> The system will automatically compile the daily Affiliate
+            Manager report—aggregating all transaction logs, application statuses, and overall performance metrics—and
+            prepare it for management review the following morning.</li>
+    </ul>
+
+</body>
+
+</html>

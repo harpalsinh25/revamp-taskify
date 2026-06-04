@@ -1,0 +1,241 @@
+/* ============================================================
+   DATA: table, kanban, schedule row, charts
+   ============================================================ */
+
+/* ---- TABLE ---- */
+.table-wrap {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  overflow: hidden;
+}
+.table-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.table-toolbar .right { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-base);
+}
+.table th {
+  text-align: left;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--fg-3);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  white-space: nowrap;
+}
+.table th[data-sort] { cursor: pointer; user-select: none; }
+.table th[data-sort]::after {
+  content: '↕'; margin-left: 4px; opacity: 0.5; font-size: 9px;
+}
+.table th[data-sort="asc"]::after  { content: '↑'; opacity: 1; color: var(--fg-0); }
+.table th[data-sort="desc"]::after { content: '↓'; opacity: 1; color: var(--fg-0); }
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg-1);
+}
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--bg-2); }
+.table tr[data-selected="true"] td { background: var(--signal-soft); }
+[data-theme="dark"] .table tr[data-selected="true"] td { background: oklch(from var(--signal) l c h / 0.08); }
+.table-checkbox { width: 32px; padding-right: 0; }
+.table-actions  { text-align: right; }
+
+.table-footer {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm); color: var(--fg-2);
+}
+.table-footer .right { margin-left: auto; }
+
+/* ---- KANBAN BOARD ---- */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  gap: 12px;
+  height: 100%;
+  overflow: auto;
+}
+.kcol {
+  display: flex; flex-direction: column;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  min-width: 0;
+  overflow: hidden;
+}
+.kcol.over { box-shadow: 0 0 0 2px var(--signal); }
+.kcol-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.kcol-name { font-size: var(--fs-base); font-weight: 600; color: var(--fg-0); }
+.kcol-count {
+  font-size: 10.5px; color: var(--fg-3);
+  background: var(--bg-2);
+  padding: 1px 6px; border-radius: 99px;
+}
+.kcol-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: auto; }
+
+.tcard {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  padding: 10px;
+  display: flex; flex-direction: column; gap: 8px;
+  cursor: pointer;
+  transition: border-color var(--t-1), box-shadow var(--t-1);
+}
+.tcard:hover { border-color: var(--line-2); box-shadow: var(--shadow-2); }
+.tcard.on { border-color: var(--signal); box-shadow: 0 0 0 1px var(--signal); }
+.tcard.dragging { opacity: 0.6; }
+.tcard-meta { display: flex; align-items: center; justify-content: space-between; }
+.tcard-code     { font-size: 10.5px; color: var(--fg-3); font-weight: 600; }
+.tcard-priority { font-size: 10.5px; font-weight: 600; }
+.tcard-title    { font-size: var(--fs-base); color: var(--fg-0); margin: 0; font-weight: 500; line-height: var(--lh-snug); }
+.tcard-tags     { display: flex; gap: 4px; flex-wrap: wrap; }
+.tcard-foot     { display: flex; align-items: center; justify-content: space-between; }
+.tcard-stats    {
+  display: flex; gap: 8px;
+  font-size: 10px; color: var(--fg-2);
+  align-items: center;
+}
+.tcard-stats > span { display: inline-flex; align-items: center; gap: 3px; }
+
+/* ---- SCHEDULE ROW ---- */
+.sched-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  position: relative;
+  transition: background var(--t-1);
+}
+.sched-row:first-child { border-top: 0; }
+.sched-row:hover { background: var(--bg-2); }
+.sched-row[data-soon="true"]::before {
+  content: ''; position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 2px;
+  background: var(--signal);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px var(--signal-glow);
+}
+.sched-time { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+.sched-t { font-size: 12.5px; font-weight: 600; color: var(--fg-0); letter-spacing: var(--tracking-snug); }
+.sched-d { font-size: 10px; color: var(--fg-3); letter-spacing: 0.02em; }
+.sched-content { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sched-name {
+  font-size: 12.5px; color: var(--fg-1); font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0; flex: 0 1 auto;
+}
+.sched-row[data-soon="true"] .sched-name { color: var(--fg-0); }
+.sched-soon {
+  font-size: 10px; color: var(--signal);
+  font-weight: 600; letter-spacing: 0.04em;
+  padding: 3px 6px; border-radius: 3px;
+  background: var(--signal-soft); white-space: nowrap;
+}
+[data-theme="dark"] .sched-soon { background: oklch(from var(--signal) l c h / 0.12); }
+
+/* ---- AVATAR ---- */
+.av {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.av-stack { display: inline-flex; }
+.av-stack .av { margin-left: -6px; border: 1.5px solid var(--bg-0); }
+.av-stack .av:first-child { margin-left: 0; }
+
+/* ---- BARS (progress) ---- */
+.bar {
+  height: 6px; background: var(--bg-3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%; background: var(--signal);
+  border-radius: 99px;
+  transition: width var(--t-3) var(--ease);
+}
+
+/* ---- CHART GRID/AXIS (consumed by svg charts) ---- */
+.chart-grid line { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.chart-axis text { fill: var(--fg-3); font-size: 10px; font-family: var(--font-mono); }
+.spark-line { stroke-width: 1.5; fill: none; }
+
+
+/* ============================================================
+   CHART TOOLTIP — singleton, attaches via JS to any
+   .chart with data-chart-tooltip="true"
+   ============================================================ */
+
+.chart-tt {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  pointer-events: none;
+  background: var(--fg-0);
+  color: var(--bg-0);
+  border-radius: 5px;
+  padding: 6px 9px;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--shadow-3);
+  opacity: 0;
+  transform: translateY(-100%) translateY(-8px) translateX(-50%);
+  transition: opacity 120ms var(--ease), transform 120ms var(--ease);
+}
+.chart-tt[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(-100%) translateY(-10px) translateX(-50%);
+}
+.chart-tt-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.65;
+  display: block;
+  margin-bottom: 1px;
+}
+.chart-tt-value {
+  font-weight: 600;
+}
+.chart-tt-row {
+  display: flex; align-items: center; gap: 6px;
+}
+.chart-tt-row + .chart-tt-row { margin-top: 2px; }
+.chart-tt-swatch {
+  width: 8px; height: 8px; border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Hover targets within charts need to look hover-friendly */
+.chart-hit { cursor: pointer; }
+.chart-point {
+  transition: r 100ms var(--ease), stroke-width 100ms var(--ease);
+}
+.chart-point.is-hover { stroke-width: 2.4; }
+
+/* Donut segments — pointer events on the stroke only */
+.donut-segment {
+  pointer-events: stroke;
+  transition: opacity 120ms var(--ease);
+}
+.donut-segment.is-faded { opacity: 0.35; }

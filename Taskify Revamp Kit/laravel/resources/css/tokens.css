@@ -1,0 +1,160 @@
+/* ============================================================
+   TASKIFY — Design Tokens
+   Single source of truth for color, type, spacing, radius,
+   shadow, motion. Theme-switching is done by toggling
+   [data-theme="dark"] on <html>.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ---- Brand ---- */
+  --signal:        oklch(0.88 0.20 130);
+  --signal-fg:     oklch(0.18 0.02 130);
+  --signal-soft:   oklch(0.95 0.10 130);
+  --signal-glow:   oklch(0.88 0.20 130 / 0.35);
+
+  /* ---- Status ---- */
+  --ok:    oklch(0.70 0.16 155);
+  --warn:  oklch(0.78 0.16 80);
+  --err:   oklch(0.65 0.22 25);
+  --info:  oklch(0.68 0.14 235);
+
+  /* ---- Surface (light) ---- */
+  --bg-0: oklch(1 0 0);
+  --bg-1: oklch(0.985 0.002 280);
+  --bg-2: oklch(0.97 0.003 280);
+  --bg-3: oklch(0.945 0.005 280);
+  --bg-hover: oklch(0.96 0.005 280);
+
+  --line:   oklch(0.92 0.005 280);
+  --line-2: oklch(0.86 0.008 280);
+
+  /* ---- Foreground (light) ---- */
+  --fg-0: oklch(0.16 0.012 280);
+  --fg-1: oklch(0.32 0.010 280);
+  --fg-2: oklch(0.50 0.008 280);
+  --fg-3: oklch(0.65 0.006 280);
+  --fg-inv: oklch(0.99 0 0);
+
+  /* ---- Type ---- */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --fs-xs:   10.5px;
+  --fs-sm:   11.5px;
+  --fs-base: 13px;
+  --fs-md:   14px;
+  --fs-lg:   16px;
+  --fs-xl:   20px;
+  --fs-2xl:  24px;
+  --fs-3xl:  28px;
+  --fs-4xl:  36px;
+
+  --lh-tight: 1.2;
+  --lh-snug:  1.35;
+  --lh-base:  1.5;
+  --lh-loose: 1.7;
+
+  --tracking-tight: -0.02em;
+  --tracking-snug:  -0.01em;
+  --tracking-wide:   0.06em;
+
+  /* ---- Radius ---- */
+  --r-1: 3px;
+  --r-2: 5px;
+  --r-3: 8px;
+  --r-4: 12px;
+  --r-pill: 999px;
+
+  /* ---- Spacing scale (4px grid) ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 28px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* legacy aliases (used in many places — keep for back-compat) */
+  --gap-1: var(--sp-1);
+  --gap-2: var(--sp-2);
+  --gap-3: var(--sp-3);
+  --gap-4: var(--sp-4);
+  --gap-5: var(--sp-5);
+  --gap-6: var(--sp-6);
+  --gap-8: var(--sp-8);
+
+  /* ---- Sizes ---- */
+  --row-h: 30px;
+  --ctrl-h-sm: 24px;
+  --ctrl-h-md: 32px;
+  --ctrl-h-lg: 40px;
+
+  --rail-w: 56px;
+  --panel-w: 232px;
+  --cbar-h: 48px;
+
+  /* ---- Shadows ---- */
+  --shadow-1: 0 1px 1px oklch(0.16 0.01 280 / 0.04);
+  --shadow-2: 0 2px 6px oklch(0.16 0.01 280 / 0.06), 0 1px 2px oklch(0.16 0.01 280 / 0.04);
+  --shadow-3: 0 8px 24px oklch(0.16 0.01 280 / 0.10), 0 2px 6px oklch(0.16 0.01 280 / 0.05);
+  --shadow-4: 0 24px 48px oklch(0.16 0.01 280 / 0.16), 0 8px 16px oklch(0.16 0.01 280 / 0.08);
+  --shadow-focus: 0 0 0 2px var(--signal-glow);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-1: 100ms;
+  --t-2: 160ms;
+  --t-3: 240ms;
+  --t-4: 360ms;
+
+  /* ---- Z-index layers ---- */
+  --z-base:      0;
+  --z-raised:    10;
+  --z-sticky:    50;
+  --z-dropdown:  100;
+  --z-tooltip:   200;
+  --z-overlay:   500;
+  --z-modal:     600;
+  --z-toast:     700;
+  --z-palette:   800;
+}
+
+[data-theme="dark"] {
+  --bg-0: oklch(0.135 0.008 280);
+  --bg-1: oklch(0.165 0.010 280);
+  --bg-2: oklch(0.195 0.012 280);
+  --bg-3: oklch(0.225 0.014 280);
+  --bg-hover: oklch(0.215 0.014 280);
+
+  --line:   oklch(0.26 0.014 280);
+  --line-2: oklch(0.34 0.018 280);
+
+  --fg-0: oklch(0.97 0.005 280);
+  --fg-1: oklch(0.78 0.008 280);
+  --fg-2: oklch(0.58 0.010 280);
+  --fg-3: oklch(0.42 0.012 280);
+  --fg-inv: oklch(0.16 0.012 280);
+
+  --signal-soft: oklch(0.32 0.10 130);
+
+  --shadow-1: 0 1px 1px oklch(0 0 0 / 0.30);
+  --shadow-2: 0 2px 6px oklch(0 0 0 / 0.30), 0 1px 2px oklch(0 0 0 / 0.20);
+  --shadow-3: 0 8px 24px oklch(0 0 0 / 0.40), 0 2px 6px oklch(0 0 0 / 0.25);
+  --shadow-4: 0 24px 48px oklch(0 0 0 / 0.55), 0 8px 16px oklch(0 0 0 / 0.30);
+}
+
+/* ---- Breakpoints (for reference — used via @media) ----
+   xs:  < 480px
+   sm:  480 – 640
+   md:  640 – 960
+   lg:  960 – 1180
+   xl:  1180 – 1440
+   2xl: > 1440
+*/

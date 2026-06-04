@@ -1,0 +1,112 @@
+/* ============================================================
+   FEEDBACK: alert, toast, loader, skeleton, empty-state
+   ============================================================ */
+
+/* ---- ALERT (inline) ---- */
+.alert {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-2);
+  font-size: var(--fs-base);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--fg-1);
+}
+.alert-icon { color: var(--fg-2); flex-shrink: 0; margin-top: 1px; }
+.alert-body { flex: 1; min-width: 0; line-height: var(--lh-base); }
+.alert-title { font-weight: 600; color: var(--fg-0); margin-bottom: 2px; }
+.alert-close { color: var(--fg-3); }
+
+.alert-info    { background: oklch(from var(--info) l c h / 0.08); border-color: oklch(from var(--info) l c h / 0.25); }
+.alert-info    .alert-icon { color: var(--info); }
+.alert-success { background: oklch(from var(--ok)   l c h / 0.08); border-color: oklch(from var(--ok)   l c h / 0.25); }
+.alert-success .alert-icon { color: var(--ok); }
+.alert-warn    { background: oklch(from var(--warn) l c h / 0.10); border-color: oklch(from var(--warn) l c h / 0.30); }
+.alert-warn    .alert-icon { color: var(--warn); }
+.alert-error   { background: oklch(from var(--err)  l c h / 0.08); border-color: oklch(from var(--err)  l c h / 0.25); }
+.alert-error   .alert-icon { color: var(--err); }
+
+/* ---- TOAST (host = .toast-host pinned bottom-right) ---- */
+.toast-host {
+  position: fixed; bottom: 20px; right: 20px;
+  display: flex; flex-direction: column-reverse; gap: 8px;
+  z-index: var(--z-toast);
+  pointer-events: none;
+  max-width: 360px;
+}
+.toast {
+  pointer-events: auto;
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-3);
+  font-size: var(--fs-base);
+  color: var(--fg-1);
+  animation: toast-in 240ms var(--ease-out);
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: none; }
+}
+.toast.leaving { animation: toast-out 200ms var(--ease) forwards; }
+@keyframes toast-out { to { opacity: 0; transform: translateX(20px); } }
+.toast-icon { flex-shrink: 0; margin-top: 1px; }
+.toast-body { flex: 1; }
+.toast-title { font-weight: 600; color: var(--fg-0); }
+.toast-success .toast-icon { color: var(--ok); }
+.toast-error   .toast-icon { color: var(--err); }
+.toast-info    .toast-icon { color: var(--info); }
+.toast-warn    .toast-icon { color: var(--warn); }
+
+/* ---- LOADER / SPINNER ---- */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--signal);
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+  display: inline-block;
+}
+.spinner-sm { width: 12px; height: 12px; border-width: 1.5px; }
+.spinner-lg { width: 28px; height: 28px; border-width: 3px; }
+
+.loader-overlay {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: oklch(from var(--bg-0) l c h / 0.60);
+  backdrop-filter: blur(2px);
+  z-index: var(--z-raised);
+}
+
+/* ---- SKELETON ---- */
+.skel {
+  background: linear-gradient(90deg, var(--bg-2), var(--bg-3), var(--bg-2));
+  background-size: 200% 100%;
+  border-radius: var(--r-2);
+  animation: skel-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skel-pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skel-line   { height: 12px; border-radius: 4px; }
+.skel-title  { height: 18px; width: 60%; border-radius: 4px; }
+.skel-circle { border-radius: 50%; }
+
+/* ---- EMPTY STATE ---- */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  gap: 12px;
+  color: var(--fg-2);
+}
+.empty-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--r-3);
+  background: var(--bg-2);
+  display: grid; place-items: center;
+  color: var(--fg-3);
+}
+.empty-title { font-size: var(--fs-md); font-weight: 600; color: var(--fg-0); }
+.empty-sub   { font-size: var(--fs-base); color: var(--fg-2); max-width: 360px; }
+.empty-actions { display: flex; gap: 8px; margin-top: 4px; }
