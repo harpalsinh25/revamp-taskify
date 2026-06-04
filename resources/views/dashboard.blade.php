@@ -5,20 +5,41 @@
 @section('content')
     @authBoth
     <div class="container-fluid">
+        {{-- Welcome card (Taskify v2 — Graphite hero) --}}
+        @php
+            $tkUser = getAuthenticatedUser();
+            $tkWs = \App\Models\Workspace::find(getWorkspaceId());
+            $tkAllData = isAdminOrHasAllDataAccess();
+            // Task counts mirror HomeController scoping: workspace tasks for admins,
+            // assigned tasks otherwise. Display-only, no logic changed.
+            $tkTotalTasks = $tkAllData ? ($tkWs ? $tkWs->tasks()->count() : 0) : $tkUser->tasks()->count();
+            $tkDeadlines = $tkAllData
+                ? ($tkWs
+                    ? $tkWs->tasks()->whereNotNull('tasks.due_date')
+                        ->whereBetween('tasks.due_date', [now()->startOfDay(), now()->endOfWeek()])->count()
+                    : 0)
+                : $tkUser->tasks()->whereNotNull('tasks.due_date')
+                    ->whereBetween('tasks.due_date', [now()->startOfDay(), now()->endOfWeek()])->count();
+        @endphp
+        <div class="tk-welcome">
+            <div class="tk-welcome-main">
+                <div class="tk-welcome-eyebrow">{{ now()->format('H:i') }} · {{ now()->translatedFormat('D d M') }} · {{ get_label('wk', 'WK') }} {{ now()->weekOfYear }}</div>
+                <h1 class="tk-welcome-title">{{ get_label('welcome_back', 'Welcome back') }}, {{ $tkUser->first_name }}.</h1>
+                <p class="tk-welcome-sub">
+                    <span class="tk-welcome-stat {{ $tkDeadlines > 0 ? 'tk-stat-warn' : '' }}">{{ $tkDeadlines }}</span>
+                    {{ $tkDeadlines == 1 ? get_label('deadline_this_week', 'deadline this week') : get_label('deadlines_this_week', 'deadlines this week') }}
+                    <span class="tk-welcome-dot">·</span>
+                    <span class="tk-welcome-stat">{{ $tkTotalTasks }}</span>
+                    {{ $tkTotalTasks == 1 ? get_label('task', 'task') : get_label('tasks', 'tasks') }}
+                </p>
+            </div>
+        </div>
+
         <!-- Filter Card -->
-        <div class="card mb-4 mt-4 shadow-sm">
+        <!-- <div class="card mb-4 mt-4 shadow-sm">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-9">
-                        <h3 class="fw-bold mb-1">
-                            <i class="bx bx-bar-chart-alt-2 me-2"></i>
-                            {{ get_label('analytics_dashboard', 'Analytics Dashboard') }}
-                        </h3>
-                        <p class="text-muted small mb-3">
-                            {{ get_label('monitor_projects_and_tasks_insights', 'Monitor Projects ,Tasks and more insights.') }}
-                            <i class="bx bx-help-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="right"
-                                title="{{ get_label('dashboard_insights', 'This dashboard displays counts and trends for projects, tasks, todos, and activities, filtered by date range and team members (for admins). Data reflects active and ongoing records, including those without specific start or end dates.') }}"></i>
-                        </p>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="daterange" class="form-label fw-semibold">
@@ -89,7 +110,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- Alert for Reset Warning -->
         @if (config('constants.ALLOW_MODIFICATION') === 0)
             <x-dashboard.alert type="warning" classes="container mb-0 mt-4" icon="bx bx-timer"
@@ -170,14 +191,121 @@
             });
             $filteredTiles = array_slice($filteredTiles, 0, 4);
         @endphp
-        <div class="col-lg-12 col-md-12 order-1">
-            <div class="row mt-4">
-                @foreach ($filteredTiles as $tile)
-                    <x-dashboard.tile id="{{ $tile['id'] }}" label="{{ $tile['label'] }}" count="{{ $tile['count'] }}"
-                        url="{{ $tile['url'] }}" linkColor="{{ $tile['link_color'] }}" icon="{{ $tile['icon'] }}"
-                        iconBg="{{ $tile['icon-bg'] }}" customCardClass="{{ $tile['custom-card-class'] }}"
-                        extraAttributes="data-id='{{ $tile['id'] }}' class='draggable-item'" />
-                @endforeach
+        <div class="tk-metric-strip">
+            @foreach ($filteredTiles as $tile)
+                <x-dashboard.tile id="{{ $tile['id'] }}" label="{{ $tile['label'] }}" count="{{ $tile['count'] }}"
+                    url="{{ $tile['url'] }}" linkColor="{{ $tile['link_color'] }}" icon="{{ $tile['icon'] }}"
+                    iconBg="{{ $tile['icon-bg'] }}" customCardClass="{{ $tile['custom-card-class'] }}"
+                    extraAttributes="data-id='{{ $tile['id'] }}' class='draggable-item'" />
+            @endforeach
+        </div>
+        {{-- Taskify v2 main grid (kit d-grid).
+             LEFT (8): Recent Activity (top) + Income vs Expense area chart.
+             RIGHT (4): Project chart, then Task chart, then Todo chart.
+             All are kit SVG charts fed by the existing dashboard AJAX (read via
+             ajaxSuccess); dashboard.js, routes and logic are untouched. The
+             equivalent cards in the old statistics grid are hidden via CSS. --}}
+        @php $tkHasHero = $auth_user->hasRole('admin'); @endphp
+        <div class="row g-4 tk-dash-grid mb-4">
+            {{-- LEFT COLUMN --}}
+            <div class="col-lg-8 d-flex flex-column gap-4">
+                <div class="tk-card {{ $tkHasHero ? '' : 'flex-grow-1' }}" data-id="tk-activity-card">
+                    <div class="tk-card-head">
+                        <div class="tk-card-head-main">
+                            <div class="tk-card-eyebrow">{{ get_label('activity_feed', 'Activity feed') }}</div>
+                            <h3 class="tk-card-title">{{ get_label('recent_activities', 'Recent Activities') }}</h3>
+                        </div>
+                        <a href="{{ url('activity-log') }}" class="tk-card-link">{{ get_label('view_more', 'View more') }}</a>
+                    </div>
+                    <div class="tk-card-body">
+                        <div id="tk-activity-list" class="tk-act-list"
+                            data-empty-label="{{ get_label('no_activities', 'No recent activities') }}"></div>
+                    </div>
+                </div>
+                @if ($tkHasHero)
+                    <div class="tk-card tk-hero-card flex-grow-1" data-id="income-vs-expense-hero">
+                        <div class="tk-card-head">
+                            <div class="tk-card-head-main">
+                                <div class="tk-card-eyebrow">{{ get_label('cash_flow', 'Cash flow') }}</div>
+                                <h3 class="tk-card-title">{{ get_label('income_vs_expense', 'Income vs Expense') }}</h3>
+                            </div>
+                            <div class="tk-seg" data-chart="hero" role="radiogroup">
+                                <button type="button" class="tk-seg-btn on" role="radio" aria-checked="true"
+                                    data-value="both">{{ get_label('both', 'Both') }}</button>
+                                <button type="button" class="tk-seg-btn" role="radio" aria-checked="false"
+                                    data-value="income"><span class="tk-seg-dot" style="background: var(--signal)"></span>{{ get_label('income', 'Income') }}</button>
+                                <button type="button" class="tk-seg-btn" role="radio" aria-checked="false"
+                                    data-value="expense"><span class="tk-seg-dot" style="background: var(--fg-2)"></span>{{ get_label('expenses', 'Expenses') }}</button>
+                            </div>
+                        </div>
+                        <div class="tk-card-body">
+                            <div id="tk-hero-chart" class="tk-area-chart"
+                                data-label-income="{{ get_label('income', 'Income') }}"
+                                data-label-expense="{{ get_label('expenses', 'Expenses') }}"
+                                data-empty-label="{{ get_label('no_data_available', 'No data available') }}"></div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+            {{-- RIGHT COLUMN: project → task → todo --}}
+            <div class="col-lg-4 d-flex flex-column gap-4">
+                @if ($auth_user->can('manage_projects'))
+                    <div class="tk-card flex-grow-1" data-id="tk-project-chart">
+                        <div class="tk-card-head">
+                            <div class="tk-card-head-main">
+                                <div class="tk-card-eyebrow">{{ get_label('projects', 'Projects') }}</div>
+                                <h3 class="tk-card-title"><span id="tk-project-total">0</span>
+                                    <span class="tk-card-title-sub">{{ get_label('total', 'total') }}</span>
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="tk-card-body">
+                            <div class="tk-donut-wrap">
+                                <div id="tk-project-donut" class="tk-donut" data-kind="project"
+                                    data-center-label="{{ get_label('projects', 'PROJECTS') }}"></div>
+                                <div id="tk-project-legend" class="tk-donut-legend"></div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                @if ($auth_user->can('manage_tasks'))
+                    <div class="tk-card flex-grow-1" data-id="tk-task-chart">
+                        <div class="tk-card-head">
+                            <div class="tk-card-head-main">
+                                <div class="tk-card-eyebrow">{{ get_label('tasks', 'Tasks') }}</div>
+                                <h3 class="tk-card-title"><span id="tk-task-total">0</span>
+                                    <span class="tk-card-title-sub">{{ get_label('total', 'total') }}</span>
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="tk-card-body">
+                            <div class="tk-donut-wrap">
+                                <div id="tk-task-donut" class="tk-donut" data-kind="task"
+                                    data-center-label="{{ get_label('tasks', 'TASKS') }}"></div>
+                                <div id="tk-task-legend" class="tk-donut-legend"></div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                <div class="tk-card flex-grow-1" data-id="tk-todo-chart">
+                    <div class="tk-card-head">
+                        <div class="tk-card-head-main">
+                            <div class="tk-card-eyebrow">{{ get_label('todos', 'Todos') }}</div>
+                            <h3 class="tk-card-title"><span id="tk-todo-total">0</span>
+                                <span class="tk-card-title-sub">{{ get_label('total', 'total') }}</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="tk-card-body">
+                        <div class="tk-donut-wrap">
+                            <div id="tk-todo-donut" class="tk-donut" data-kind="todo"
+                                data-center-label="{{ get_label('todos', 'TODOS') }}"
+                                data-label-done="{{ get_label('completed', 'Completed') }}"
+                                data-label-pending="{{ get_label('pending', 'Pending') }}"></div>
+                            <div id="tk-todo-legend" class="tk-donut-legend"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <x-dashboard.statistics :statuses="[]" :todos="[]" :activities="[]" />

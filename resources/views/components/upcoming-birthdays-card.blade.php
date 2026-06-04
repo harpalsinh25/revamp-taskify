@@ -1,5 +1,5 @@
 <!-- projects card -->
-<div class="align-items-baseline d-flex gap-1">
+<div class="align-items-baseline d-flex gap-1 tk-filter-bar">
     <div class="col-md-3 mb-4">
         <select class="form-select users_select" id="birthday_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_members', 'Select Members') ?>" multiple>
         </select>
@@ -19,21 +19,19 @@
         </div>
     </div>
 </div>
-<div class="table-responsive text-nowrap">
-    <input type="hidden" id="data_type" value="users">
-    <input type="hidden" id="data_table" value="birthdays_table">
-    <input type="hidden" id="data_reload" value="1">
-    <input type="hidden" id="multi_select" value="upcoming-bd">
-    <table id="birthdays_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/home/upcoming-birthdays') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="dob" data-sort-order="asc" data-mobile-responsive="true" data-query-params="queryParamsUpcomingBirthdays">
-        <thead>
-            <tr>
-                <th data-field="id"><?= get_label('id', 'ID') ?></th>
-                <th data-field="member"><?= get_label('whose', 'Whose') ?></th>
-                <th data-field="type"><?= get_label('type', 'Type') ?></th>
-                <th data-field="dob" data-sortable="true"><?= get_label('birth_day_date', 'Birth day date') ?></th>
-                <!-- <th data-field="age" data-visible="false"><?= get_label('birthday_count', 'Birthday count') ?></th>  -->
-                <th data-field="days_left"><?= get_label('days_left', 'Days left') ?></th>
-            </tr>
-        </thead>
-    </table>
-</div>
+<x-tk-table id="birthdays_table" :url="url('/home/upcoming-birthdays')"
+    data-sort-name="dob" data-sort-order="asc" data-query-params="queryParamsUpcomingBirthdays"
+    :columns="[
+        ['field' => 'id', 'label' => get_label('id', 'ID')],
+        ['field' => 'member', 'label' => get_label('whose', 'Whose')],
+        ['field' => 'type', 'label' => get_label('type', 'Type')],
+        ['field' => 'dob', 'label' => get_label('birth_day_date', 'Birth day date'), 'sortable' => true],
+        ['field' => 'days_left', 'label' => get_label('days_left', 'Days left')],
+    ]">
+    <x-slot:before>
+        <input type="hidden" id="data_type" value="users">
+        <input type="hidden" id="data_table" value="birthdays_table">
+        <input type="hidden" id="data_reload" value="1">
+        <input type="hidden" id="multi_select" value="upcoming-bd">
+    </x-slot:before>
+</x-tk-table>

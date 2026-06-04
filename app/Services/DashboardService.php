@@ -92,7 +92,193 @@ class DashboardService
             'task_status_counts' => $taskStatusCounts,
             'total_projects' => array_sum($projectData),
             'total_tasks' => array_sum($taskData),
+            'trends' => $this->buildTrends($workspace, $user, $userIds, $startDate, $endDate),
         ];
+    }
+
+    /**
+     * Build real per-metric trend series (cumulative daily record counts) over
+     * the selected date range. Read-only and additive: it does not alter any
+     * existing count/chart logic. Each series ends at the cumulative total of
+     * records created up to $endDate, scoped identically to the tile counts
+     * (workspace/user, admin-access, selected user ids). Powers the KPI
+     * sparklines on the dashboard.
+     *
+     * @param  Workspace|null  $workspace
+     * @param  User|null  $user
+     * @param  array<int,int>  $userIds
+     * @param  string  $startDate
+     * @param  string  $endDate
+     * @return array<string,array<int,int>>
+     */
+    protected function buildTrends(
+        ?Workspace $workspace,
+        ?User $user,
+        array $userIds,
+        string $startDate,
+        string $endDate
+    ): array {
+        $empty = [
+            'projects' => [], 'tasks' => [], 'users' => [],
+            'clients' => [], 'meetings' => [], 'todos' => [],
+        ];
+
+        if (!$workspace) {
+            return $empty;
+        }
+
+        $isAdmin = isAdminOrHasAllDataAccess();
+
+        // Each factory returns a FRESH relation query (so it can be re-run for
+        // the baseline + grouped passes) or null when the relation is absent.
+        $projectsFactory = static function () use ($isAdmin, $workspace, $user, $userIds) {
+            if ($isAdmin) {
+                $q = $workspace->projects();
+            } elseif ($user && method_exists($user, 'projects')) {
+                $q = $user->projects();
+            } else {
+                return null;
+            }
+            if (!empty($userIds)) {
+                $q->whereHas('users', static fn ($u) => $u->whereIn('users.id', $userIds));
+            }
+            return $q;
+        };
+
+        $tasksFactory = static function () use ($isAdmin, $workspace, $user, $userIds) {
+            if ($isAdmin) {
+                $q = $workspace->tasks();
+            } elseif ($user && method_exists($user, 'tasks')) {
+                $q = $user->tasks();
+            } else {
+                return null;
+            }
+            if (!empty($userIds)) {
+                $q->whereHas('users', static fn ($u) => $u->whereIn('users.id', $userIds));
+            }
+            return $q;
+        };
+
+        $meetingsFactory = static function () use ($isAdmin, $workspace, $user, $userIds) {
+            if ($isAdmin) {
+                $q = $workspace->meetings();
+            } elseif ($user && method_exists($user, 'meetings')) {
+                $q = $user->meetings();
+            } else {
+                return null;
+            }
+            if (!empty($userIds)) {
+                $q->whereHas('users', static fn ($u) => $u->whereIn('users.id', $userIds));
+            }
+            return $q;
+        };
+
+        $usersFactory = static function () use ($workspace, $userIds) {
+            $q = $workspace->users();
+            if (!empty($userIds)) {
+                $q->whereIn('users.id', $userIds);
+            }
+            return $q;
+        };
+
+        $clientsFactory = static fn () => $workspace->clients();
+
+        $todosFactory = method_exists($workspace, 'todos')
+            ? static function () use ($workspace, $userIds) {
+                $q = $workspace->todos();
+                if (!empty($userIds)) {
+                    $q->whereIn('creator_id', $userIds);
+                }
+                return $q;
+            }
+            : null;
+
+        return [
+            'projects' => $this->growthSeries($projectsFactory, 'projects.created_at'),
+            'tasks' => $this->growthSeries($tasksFactory, 'tasks.created_at'),
+            'users' => $this->growthSeries($usersFactory, 'users.created_at'),
+            'clients' => $this->growthSeries($clientsFactory, 'clients.created_at'),
+            'meetings' => $this->growthSeries($meetingsFactory, 'meetings.created_at'),
+            'todos' => $this->growthSeries($todosFactory, 'todos.created_at'),
+        ];
+    }
+
+    /**
+     * Compute a metric's real all-time growth series: the cumulative record
+     * count (scoped by the given relation) from before the first record up to
+     * today, sampled over evenly-spaced buckets. The line therefore starts near
+     * 0 and rises to the metric's true current total, reflecting genuine growth
+     * over its actual creation history — independent of the dashboard's date
+     * filter, so it is never flat just because nothing was created this week.
+     *
+     * One grouped query per metric (counts per creation day); the buckets are
+     * accumulated in PHP. Returns [] when the relation is absent or has no rows.
+     *
+     * @param  callable|null  $factory   returns a fresh relation query, or null
+     * @param  string  $dateColumn       fully-qualified created_at column
+     * @return array<int,int>
+     */
+    protected function growthSeries(?callable $factory, string $dateColumn): array
+    {
+        if ($factory === null) {
+            return [];
+        }
+
+        $probe = $factory();
+        if ($probe === null) {
+            return [];
+        }
+
+        try {
+            $perDay = $factory()
+                ->whereNotNull($dateColumn)
+                ->selectRaw("DATE($dateColumn) as d, COUNT(*) as c")
+                ->groupBy('d')
+                ->orderBy('d')
+                ->pluck('c', 'd')
+                ->toArray();
+        } catch (\Throwable $e) {
+            // Never break the dashboard for a decorative trend.
+            return [];
+        }
+
+        if (empty($perDay)) {
+            return [];
+        }
+
+        // Real day -> count, as sorted parallel arrays of [timestamp, count].
+        $dayTs = [];
+        $dayCount = [];
+        foreach ($perDay as $day => $count) {
+            $dayTs[] = Carbon::parse($day)->endOfDay()->getTimestamp();
+            $dayCount[] = (int) $count;
+        }
+
+        $first = reset($dayTs);
+        $last = Carbon::now()->endOfDay()->getTimestamp();
+        // Start one day before the first record so the series begins at 0.
+        $start = Carbon::createFromTimestamp($first)->subDay()->getTimestamp();
+        if ($last <= $start) {
+            $last = $start + 86400;
+        }
+        $span = $last - $start;
+
+        $points = 24;
+        $series = [];
+        for ($i = 0; $i < $points; $i++) {
+            $boundary = $start + (int) round($span * $i / ($points - 1));
+            $cumulative = 0;
+            foreach ($dayTs as $j => $ts) {
+                if ($ts <= $boundary) {
+                    $cumulative += $dayCount[$j];
+                } else {
+                    break; // arrays are sorted ascending by day
+                }
+            }
+            $series[] = $cumulative;
+        }
+
+        return $series;
     }
 
     /**

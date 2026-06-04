@@ -3222,11 +3222,31 @@ html:not([dir="rtl"]) .timeline-item {
     --panel-w: 232px;
 
     --fs-base: 13px;
+    --fs-xs: 10.5px;
+    --fs-sm: 11.5px;
+    --fs-md: 14px;
+    --lh-base: 1.5;
+    --lh-snug: 1.35;
     --tracking-snug: -0.01em;
     --tracking-wide: 0.06em;
+    --tracking-tight: -0.02em;
+    --r-3: 8px;
+    --t-3: 240ms;
+    --ctrl-h-sm: 24px;
+    --ctrl-h-md: 32px;
+    --ctrl-h-lg: 40px;
+    --signal-soft: oklch(0.95 0.10 130);
+    --shadow-1: 0 1px 1px oklch(0.16 0.01 280 / 0.04);
+    --shadow-2: 0 2px 6px oklch(0.16 0.01 280 / 0.06), 0 1px 2px oklch(0.16 0.01 280 / 0.04);
+    --shadow-3: 0 8px 24px oklch(0.16 0.01 280 / 0.10), 0 2px 6px oklch(0.16 0.01 280 / 0.05);
+    --shadow-focus: 0 0 0 2px var(--signal-glow);
 }
 
 [data-theme="dark"] {
+    --signal-soft: oklch(0.32 0.10 130);
+    --shadow-1: 0 1px 1px oklch(0 0 0 / 0.30);
+    --shadow-2: 0 2px 6px oklch(0 0 0 / 0.30), 0 1px 2px oklch(0 0 0 / 0.20);
+    --shadow-3: 0 8px 24px oklch(0 0 0 / 0.40), 0 2px 6px oklch(0 0 0 / 0.25);
     --bg-0: oklch(0.135 0.008 280);
     --bg-1: oklch(0.165 0.010 280);
     --bg-2: oklch(0.195 0.012 280);
@@ -3701,3 +3721,623 @@ body.v2-shell .layout-page {
 
 /* The command palette replaces the old quick-access / recent grid as the default view */
 #globalSearchModal #popularSection { display: none !important; }
+
+/* =====================================================================
+   TASKIFY v2 — Dashboard: welcome card (Graphite hero). Sizes/colors
+   mirror the kit tokens exactly (card r-2, eyebrow fs-xs, title fs-3xl).
+   ===================================================================== */
+.tk-welcome {
+    position: relative; overflow: hidden;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    padding: 22px 24px;
+    margin: 24px 0 16px;
+    font-family: var(--font-sans);
+}
+.tk-welcome::after {
+    content: ''; position: absolute; top: -60%; right: -3%;
+    width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, var(--signal-glow), transparent 66%);
+    pointer-events: none; z-index: 0;
+}
+.tk-welcome-main { position: relative; z-index: 1; min-width: 0; }
+.tk-welcome-eyebrow {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3);
+}
+.tk-welcome-title {
+    font-size: 28px; font-weight: 700; line-height: 1.2;
+    letter-spacing: -0.02em; color: var(--fg-0); margin: 6px 0 0;
+}
+.tk-welcome-sub { font-size: 13px; line-height: 1.5; color: var(--fg-1); margin: 8px 0 0; }
+.tk-welcome-stat { color: var(--fg-0); font-weight: 700; }
+.tk-welcome-stat.tk-stat-warn { color: var(--warn); }
+.tk-welcome-dot { color: var(--fg-3); margin: 0 4px; }
+@media (max-width: 575.98px) {
+    .tk-welcome { padding: 18px; }
+    .tk-welcome-title { font-size: 22px; }
+}
+
+/* =====================================================================
+   TASKIFY v2 — Dashboard: KPI metric-strip (pixel-matched to
+   core-design.html). Joined cells, mono values, no icons. The .count
+   hook + #id are kept so dashboard.js fills live values.
+   ===================================================================== */
+.tk-metric-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: var(--r-2);
+    overflow: hidden; margin: 0 0 24px;
+    font-family: var(--font-sans);
+}
+@media (max-width: 1100px) { .tk-metric-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .tk-metric-strip { grid-template-columns: 1fr; } }
+
+.tk-metric {
+    background: var(--bg-1); padding: 12px 14px; min-width: 0;
+    display: block; text-decoration: none;
+    transition: background var(--t-1);
+}
+.tk-metric:hover { background: var(--bg-2); }
+.tk-metric-row {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 8px; margin-bottom: 4px;
+}
+.tk-metric-label {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+    color: var(--fg-2); text-transform: uppercase; letter-spacing: 0.06em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.tk-metric-value {
+    font-family: var(--font-mono); font-size: 22px; font-weight: 700;
+    letter-spacing: -0.02em; color: var(--fg-0); line-height: 1.15;
+}
+
+/* Trend badge (top-right of each cell): arrow glyph + signed delta.
+   Color is driven by the .is-up / .is-down / .is-flat modifier from JS. */
+.tk-metric-trend {
+    display: inline-flex; align-items: center; gap: 2px;
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.01em; white-space: nowrap; flex: none;
+    color: var(--fg-2); line-height: 1;
+}
+.tk-metric-trend:empty { display: none; }
+.tk-metric-trend .tk-trend-arrow { font-size: 11px; line-height: 1; }
+.tk-metric-trend.is-up   { color: var(--ok, #22c55e); }
+.tk-metric-trend.is-down { color: var(--err, #ef4444); }
+.tk-metric-trend.is-flat { color: var(--fg-3, var(--fg-2)); }
+
+/* Sparkline: tiny inline-SVG trend line under the value. Matches the kit
+   <x-data.sparkline> default — a neutral ink line, no fill, no end dot. */
+.tk-metric-spark {
+    margin-top: 8px; height: 28px; width: 100%;
+    line-height: 0; pointer-events: none;
+}
+.tk-metric-spark:empty { display: none; }
+.tk-metric-spark svg { display: block; width: 100%; height: 28px; overflow: visible; }
+.tk-metric-spark .tk-spark-line {
+    fill: none; stroke: var(--fg-0);
+    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+/* =====================================================================
+   Taskify v2 — Dashboard hero area chart (Income vs Expense)
+   Mirrors the kit <x-cards.card> shell + <x-data.area-chart> styling.
+   Rendered by initHeroAreaChart() in custom.js from the existing AJAX.
+   ===================================================================== */
+body.v2-shell .tk-card {
+    background: var(--bg-1); border: 1px solid var(--line);
+    border-radius: var(--r-2); overflow: hidden;
+    margin: 0 0 24px; font-family: var(--font-sans);
+    display: flex; flex-direction: column;
+}
+body.v2-shell .tk-card-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; padding: 14px 14px 10px; border-bottom: 1px solid var(--line);
+}
+body.v2-shell .tk-card-head-main { min-width: 0; }
+body.v2-shell .tk-card-eyebrow {
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--fg-3);
+    text-transform: uppercase; letter-spacing: var(--tracking-wide);
+    margin-bottom: 4px; font-weight: 500;
+}
+body.v2-shell .tk-card-title {
+    font-size: 13px; font-weight: 600; color: var(--fg-0); margin: 0;
+    letter-spacing: var(--tracking-snug); display: inline-flex; align-items: center; gap: 8px;
+}
+body.v2-shell .tk-card-title-sub { font-weight: 400; color: var(--fg-2); font-size: 12px; }
+body.v2-shell .tk-card-body { padding: 14px; flex: 1 1 auto; }
+
+/* Legend */
+.tk-chart-legend { display: inline-flex; align-items: center; gap: 14px; flex: none; }
+.tk-legend {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+    color: var(--fg-2); text-transform: uppercase; letter-spacing: 0.04em;
+}
+.tk-legend::before {
+    content: ''; width: 9px; height: 9px; border-radius: 2px;
+    background: var(--fg-2); flex: none;
+}
+.tk-legend--income::before  { background: var(--signal); }
+.tk-legend--expense::before { background: var(--fg-2); }
+
+/* Area chart canvas — design-system palette: lime signal accent (income) +
+   neutral graphite (expense), matching the standalone Studio look. */
+.tk-area-chart { position: relative; width: 100%; min-height: 240px; }
+.tk-area-chart svg { display: block; width: 100%; height: 100%; min-height: 240px; }
+/* When the income card stretches to match the right column, let the chart
+   fill the extra height instead of leaving a gap below it. */
+body.v2-shell .tk-hero-card .tk-card-body { display: flex; flex-direction: column; min-height: 0; }
+body.v2-shell .tk-hero-card .tk-area-chart { flex: 1 1 auto; }
+.tk-area-grid line { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.tk-area-axis text { fill: var(--fg-3); font-size: 10px; font-family: var(--font-mono); }
+.tk-area-line { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.tk-area-line--income  { stroke: var(--signal); stroke-width: 2; }
+.tk-area-line--expense { stroke: var(--fg-2); stroke-width: 1.6; }
+.tk-area-dot { stroke-width: 1.5; }
+.tk-area-dot--income  { fill: var(--bg-0); stroke: var(--signal); }
+.tk-area-dot--expense { fill: var(--bg-0); stroke: var(--fg-2); }
+.tk-area-cursor { stroke: var(--line-2, var(--line)); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
+.tk-area-chart.is-hover .tk-area-cursor { opacity: 1; }
+/* Gradient stops are themed via CSS so dark mode tokens apply automatically. */
+.tk-grad--income  .tk-g0 { stop-color: var(--signal); stop-opacity: 0.28; }
+.tk-grad--income  .tk-g1 { stop-color: var(--signal); stop-opacity: 0; }
+.tk-grad--expense .tk-g0 { stop-color: var(--fg-2);   stop-opacity: 0.12; }
+.tk-grad--expense .tk-g1 { stop-color: var(--fg-2);   stop-opacity: 0; }
+.tk-area-empty {
+    display: flex; align-items: center; justify-content: center;
+    height: 240px; color: var(--fg-3); font-size: 12.5px; font-family: var(--font-sans);
+}
+
+/* Singleton chart tooltip (kit .chart-tt) */
+.tk-chart-tt {
+    position: fixed; z-index: 1080; pointer-events: none;
+    background: var(--fg-0); color: var(--bg-0);
+    border-radius: 5px; padding: 7px 9px;
+    font-family: var(--font-sans); font-size: 11.5px; font-weight: 500;
+    white-space: nowrap; box-shadow: var(--shadow-3, 0 6px 20px rgba(0,0,0,.20));
+    opacity: 0; transform: translate(-50%, calc(-100% - 10px));
+    transition: opacity 120ms var(--ease, ease);
+}
+.tk-chart-tt.is-on { opacity: 1; }
+.tk-chart-tt-date { font-family: var(--font-mono); font-size: 10px; opacity: 0.65; margin-bottom: 3px; }
+.tk-chart-tt-row { display: flex; align-items: center; gap: 6px; }
+.tk-chart-tt-row + .tk-chart-tt-row { margin-top: 2px; }
+.tk-chart-tt-sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.tk-chart-tt-val { font-weight: 600; margin-left: auto; padding-left: 14px; }
+
+/* =====================================================================
+   Taskify v2 — Overview distribution donut (kit <x-data.donut>)
+   4-col card beside the area chart; projects/tasks/todos. Rendered by
+   initOverviewDonut() from the existing /dashboard/data AJAX.
+   ===================================================================== */
+.tk-donut-wrap {
+    display: flex; align-items: center; gap: 18px; height: 100%;
+    min-height: 132px;
+}
+.tk-donut { flex: none; line-height: 0; }
+.tk-donut svg { display: block; }
+.tk-donut .donut-segment { transition: opacity 120ms var(--ease, ease); cursor: pointer; }
+.tk-donut .donut-segment.is-faded { opacity: 0.35; }
+.tk-donut-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.tk-donut-legend-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; color: var(--fg-1); font-family: var(--font-sans);
+}
+.tk-donut-legend-row .tk-ld {
+    width: 8px; height: 8px; border-radius: 50%; flex: none;
+}
+.tk-donut-legend-row .tk-ll {
+    flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tk-donut-legend-row .tk-lv {
+    font-family: var(--font-mono); font-weight: 600; color: var(--fg-0);
+}
+@media (max-width: 420px) {
+    .tk-donut-wrap { flex-direction: column; align-items: flex-start; }
+    .tk-donut { align-self: center; }
+}
+
+/* Segmented control (kit .seg) — Income | Expense | Both selector */
+body.v2-shell .tk-seg {
+    display: inline-flex; flex: none;
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: var(--r-2); padding: 2px; gap: 2px;
+}
+body.v2-shell .tk-seg-btn {
+    height: 24px; padding: 0 10px; border: 0; background: transparent;
+    border-radius: 3px; cursor: pointer;
+    font-family: var(--font-sans); font-size: 12px; color: var(--fg-2);
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: background var(--t-1, 100ms), color var(--t-1, 100ms);
+}
+body.v2-shell .tk-seg-btn:hover { color: var(--fg-0); }
+body.v2-shell .tk-seg-btn.on {
+    background: var(--bg-0); color: var(--fg-0);
+    box-shadow: var(--shadow-1, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+body.v2-shell .tk-seg-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+
+/* Header "view more" link in kit card heads */
+body.v2-shell .tk-card-link {
+    flex: none; font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--fg-2); text-decoration: none; white-space: nowrap;
+    transition: color var(--t-1, 100ms);
+}
+body.v2-shell .tk-card-link:hover { color: var(--signal); }
+
+/* Donut empty state */
+.tk-donut-empty { color: var(--fg-3); font-size: 12px; font-family: var(--font-sans); }
+
+/* =====================================================================
+   Taskify v2 — Recent Activity feed (left column, kit list)
+   ===================================================================== */
+.tk-act-list { display: flex; flex-direction: column; max-height: 320px; overflow-y: auto; }
+.tk-act-row {
+    display: flex; gap: 10px; padding: 10px 0;
+    border-top: 1px solid var(--line);
+}
+.tk-act-row:first-child { border-top: 0; }
+.tk-act-dot {
+    width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex: none;
+    background: var(--fg-3);
+}
+.tk-act-dot.is-created { background: var(--ok); }
+.tk-act-dot.is-updated { background: var(--info); }
+.tk-act-dot.is-deleted { background: var(--err); }
+.tk-act-dot.is-status  { background: var(--warn); }
+.tk-act-main { min-width: 0; flex: 1; }
+.tk-act-msg { font-size: 12.5px; color: var(--fg-1); line-height: 1.45; }
+.tk-act-time {
+    font-size: 10.5px; color: var(--fg-3); font-family: var(--font-mono); margin-top: 2px;
+}
+.tk-act-empty {
+    color: var(--fg-3); font-size: 12.5px; text-align: center; padding: 16px 0;
+}
+
+/* =====================================================================
+   Taskify v2 — Dashboard layout: hide the OLD statistics cards that the
+   new kit grid replaces (no markup removed; dashboard.js still feeds the
+   hidden canvases harmlessly). Plus token-driven page background so dark
+   mode darkens the whole content area, not just the cards.
+   ===================================================================== */
+body.v2-shell [data-id="project-statistics"],
+body.v2-shell [data-id="task-statistics"],
+body.v2-shell [data-id="todos-overview"],
+body.v2-shell [data-id="income-vs-expense"],
+body.v2-shell [data-id="recent-activities"] { display: none !important; }
+
+/* Equal-height dashboard columns: each column is a flex column whose last
+   card grows to absorb slack, so the left and right bottoms line up. The
+   explicit gap guarantees spacing even if the Bootstrap gap utility is absent. */
+body.v2-shell .tk-dash-grid > [class*="col-"].d-flex.flex-column { gap: 24px; }
+body.v2-shell .tk-dash-grid .tk-card { margin-bottom: 0; }
+
+/* Whole content surface follows the tokens (light + dark) */
+body.v2-shell,
+body.v2-shell .layout-wrapper,
+body.v2-shell .layout-container,
+body.v2-shell .layout-page,
+body.v2-shell .content-wrapper {
+    background-color: var(--bg-0) !important;
+}
+body.v2-shell .content-wrapper .container-fluid,
+body.v2-shell .content-wrapper .container-xxl,
+body.v2-shell .content-wrapper .container-p-y { background-color: transparent !important; }
+
+/* =====================================================================
+   Taskify v2 — Design-system table (one source for ALL tables).
+   Restyles the app-wide `bootstrap-table` plugin DOM to the kit table
+   look — one bordered card: toolbar (top) · table · pagination (footer).
+   Authored once; every table (the <x-tk-table> component + any raw
+   data-toggle="table") inherits it. Light + dark via tokens. Server-side
+   pagination/search/sort/refresh are untouched.
+   ===================================================================== */
+body.v2-shell .bootstrap-table {
+    font-family: var(--font-sans); color: var(--fg-1);
+    background: var(--bg-1);
+    border: 1px solid var(--line); border-radius: var(--r-2); overflow: hidden;
+}
+
+/* --- Toolbar bar: flex row, NO floats (overrides bootstrap-table.min.css).
+   Left = custom text buttons (delete/clear/save) · middle = search ·
+   right = icon buttons (refresh / column toggle). --- */
+body.v2-shell .bootstrap-table .fixed-table-toolbar {
+    padding: 10px 12px; border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar::after,
+body.v2-shell .bootstrap-table .fixed-table-toolbar::before { display: none !important; content: none !important; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar > * { float: none !important; margin: 0 !important; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .bars,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .bs-bars,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left { order: 0; display: inline-flex; align-items: center; gap: 8px; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search { order: 1; flex: 1 1 200px; min-width: 160px; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right { order: 2; margin-left: auto !important; display: inline-flex; align-items: center; gap: 4px; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search input,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search .form-control {
+    height: var(--ctrl-h-md); width: 100%; min-width: 0; max-width: 360px; padding: 0 10px;
+    background: var(--bg-1); border: 1px solid var(--line); color: var(--fg-0);
+    border-radius: var(--r-2); font-size: var(--fs-base); font-family: var(--font-sans);
+    box-shadow: none;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search input::placeholder { color: var(--fg-3); }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search input:focus,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search .form-control:focus {
+    border-color: var(--signal); box-shadow: var(--shadow-focus); outline: none;
+}
+
+/* Custom TEXT buttons (Delete Selected · Clear Filters · Save) = kit secondary
+   button, AUTO width (this was the overlap bug — they were forced to 32px). */
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left .btn {
+    width: auto !important; height: var(--ctrl-h-md); padding: 0 12px;
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    background: var(--bg-1) !important; border: 1px solid var(--line) !important;
+    color: var(--fg-1) !important; border-radius: var(--r-2) !important;
+    font-size: var(--fs-base); font-weight: 500; box-shadow: none !important;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left .btn:hover {
+    background: var(--bg-2) !important; color: var(--fg-0) !important;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left .btn i { font-size: 15px; line-height: 1; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .delete-selected { color: var(--err) !important; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .delete-selected:hover {
+    background: oklch(from var(--err) l c h / 0.10) !important;
+    border-color: oklch(from var(--err) l c h / 0.30) !important; color: var(--err) !important;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .save-column-visibility i { color: var(--signal); }
+
+/* ICON-ONLY buttons (refresh, column toggle) = kit .icon-btn (square, borderless) */
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn {
+    width: var(--ctrl-h-md); height: var(--ctrl-h-md); padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent !important; border: 0 !important;
+    color: var(--fg-2) !important; border-radius: var(--r-2) !important; box-shadow: none !important;
+    font-size: 16px;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn:hover {
+    color: var(--fg-0) !important; background: var(--bg-2) !important;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn i { font-size: 16px; line-height: 1; }
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-toggle::after { display: none; }
+/* column-toggle menu = kit .dropdown-menu */
+body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-menu {
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-2);
+    box-shadow: var(--shadow-3); color: var(--fg-1); padding: 4px; min-width: 180px;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-item,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-menu label {
+    color: var(--fg-1); font-size: 12.5px; border-radius: 4px; padding: 7px 10px;
+    display: flex; align-items: center; gap: 8px; margin: 0;
+}
+body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-item:hover { background: var(--bg-2); color: var(--fg-0); }
+
+/* --- Table surface --- */
+body.v2-shell .bootstrap-table .fixed-table-container { border: 0; }
+body.v2-shell .bootstrap-table .fixed-table-body { background: var(--bg-1); }
+body.v2-shell .bootstrap-table table.table {
+    margin: 0; background: transparent; border: 0;
+    color: var(--fg-1); font-size: var(--fs-base, 13px);
+}
+body.v2-shell .bootstrap-table table.table > thead > tr > th {
+    background: var(--bg-2); color: var(--fg-3);
+    text-transform: uppercase; font-size: var(--fs-xs); font-weight: 600;
+    letter-spacing: var(--tracking-wide); white-space: nowrap; text-align: left;
+    border: 0; border-bottom: 1px solid var(--line);
+    padding: 8px 12px; vertical-align: middle;
+}
+body.v2-shell .bootstrap-table table.table > thead > tr > th .th-inner { padding: 0; }
+body.v2-shell .bootstrap-table table.table > tbody > tr > td {
+    border: 0; border-bottom: 1px solid var(--line);
+    padding: 10px 12px; color: var(--fg-1); vertical-align: middle;
+    background: transparent; font-size: 13px;
+}
+body.v2-shell .bootstrap-table table.table > tbody > tr:hover > td { background: var(--bg-2); }
+body.v2-shell .bootstrap-table table.table > tbody > tr:last-child > td { border-bottom: 0; }
+body.v2-shell .bootstrap-table table.table > tbody > tr.no-records-found:hover > td,
+body.v2-shell .bootstrap-table table.table > tbody > tr.no-records-found > td {
+    color: var(--fg-3); text-align: center; padding: 24px 12px; background: transparent;
+}
+body.v2-shell .bootstrap-table table.table a { color: var(--fg-0); }
+body.v2-shell .bootstrap-table table.table a:hover { color: var(--signal); }
+
+/* Sortable header affordance */
+body.v2-shell .bootstrap-table table.table > thead > tr > th .sortable { cursor: pointer; }
+body.v2-shell .bootstrap-table table.table > thead > tr > th.asc,
+body.v2-shell .bootstrap-table table.table > thead > tr > th.desc { color: var(--fg-0); }
+
+/* --- Pagination footer --- */
+body.v2-shell .bootstrap-table .fixed-table-pagination {
+    padding: 10px 12px; border-top: 1px solid var(--line);
+    color: var(--fg-2); font-size: var(--fs-sm);
+}
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination-detail { color: var(--fg-2); font-size: var(--fs-sm); }
+body.v2-shell .bootstrap-table .fixed-table-pagination .page-list .btn,
+body.v2-shell .bootstrap-table .fixed-table-pagination .page-list .dropdown-toggle {
+    background: var(--bg-1) !important; border: 1px solid var(--line) !important;
+    color: var(--fg-1) !important; box-shadow: none !important; border-radius: var(--r-2);
+    height: 26px; font-size: var(--fs-sm);
+}
+/* pagination = kit .pagination (borderless, .on = bg-3 bold) */
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination { gap: 4px; }
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item { margin: 0; }
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-link {
+    border: 0; background: transparent; color: var(--fg-1);
+    min-width: 28px; height: 28px; padding: 0 8px; margin: 0;
+    border-radius: var(--r-2); font-size: var(--fs-sm);
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background var(--t-1);
+}
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-link:hover {
+    background: var(--bg-2); color: var(--fg-0);
+}
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item.active .page-link,
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item.active .page-link:hover {
+    background: var(--bg-3); color: var(--fg-0); font-weight: 600;
+}
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item.disabled .page-link {
+    color: var(--fg-3); background: transparent;
+}
+body.v2-shell .bootstrap-table .fixed-table-loading { background: var(--bg-1); color: var(--fg-2); }
+
+/* =====================================================================
+   Taskify v2 — Filter bar above the table (selects · days · filter btn)
+   Scoped to .tk-filter-bar so only the redesigned filters are affected.
+   ===================================================================== */
+body.v2-shell .tk-filter-bar {
+    display: flex !important; align-items: center !important; gap: 10px !important;
+    flex-wrap: wrap; margin-bottom: 16px;
+}
+body.v2-shell .tk-filter-bar > [class*="col-"] {
+    margin-bottom: 0 !important; padding: 0; flex: 1 1 200px; min-width: 160px;
+}
+body.v2-shell .tk-filter-bar > [class*="col-"]:last-child { flex: 0 0 auto; min-width: 0; }
+body.v2-shell .tk-filter-bar .form-control {
+    height: var(--ctrl-h-md); padding: 0 10px; background: var(--bg-1); border: 1px solid var(--line);
+    color: var(--fg-0); border-radius: var(--r-2); font-size: var(--fs-base); box-shadow: none;
+}
+body.v2-shell .tk-filter-bar .form-control::placeholder { color: var(--fg-3); }
+body.v2-shell .tk-filter-bar .form-control:focus {
+    border-color: var(--signal); box-shadow: var(--shadow-focus); outline: none;
+}
+body.v2-shell .tk-filter-bar .input-group-merge { border-radius: var(--r-2); }
+body.v2-shell .tk-filter-bar .btn-primary {
+    height: var(--ctrl-h-md); min-width: var(--ctrl-h-md); padding: 0 12px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--signal) !important; border: 1px solid var(--signal) !important;
+    color: var(--signal-fg) !important; border-radius: var(--r-2); box-shadow: none !important;
+    font-size: 15px; font-weight: 500;
+}
+body.v2-shell .tk-filter-bar .btn-primary:hover { filter: brightness(1.04); }
+/* Auto-filter replaces the explicit Filter button — hide it on the dashboard cards. */
+body.v2-shell #upcoming_days_birthday_filter,
+body.v2-shell #upcoming_days_wa_filter,
+body.v2-shell #upcoming_days_mol_filter { display: none !important; }
+
+/* =====================================================================
+   Taskify v2 — Select2 to the design system (themes every Select2).
+   Selection box matches the kit input; dropdown matches the kit menu.
+   ===================================================================== */
+/* selection box = kit .tag-strip / .input (min-height ctrl-h-md, signal focus) */
+body.v2-shell .select2-container--default .select2-selection--single,
+body.v2-shell .select2-container--default .select2-selection--multiple {
+    min-height: var(--ctrl-h-md); background: var(--bg-1);
+    border: 1px solid var(--line) !important; border-radius: var(--r-2);
+    color: var(--fg-0); font-size: var(--fs-base);
+}
+body.v2-shell .select2-container--default .select2-selection--multiple { padding: 3px 4px; }
+body.v2-shell .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 30px; color: var(--fg-0); padding-left: 10px;
+}
+body.v2-shell .select2-container--default .select2-selection--single .select2-selection__arrow { height: 30px; }
+body.v2-shell .select2-container--default .select2-selection__placeholder,
+body.v2-shell .select2-container--default .select2-search__field::placeholder { color: var(--fg-3); }
+body.v2-shell .select2-container--default.select2-container--focus .select2-selection--single,
+body.v2-shell .select2-container--default.select2-container--focus .select2-selection--multiple,
+body.v2-shell .select2-container--default.select2-container--open .select2-selection--single,
+body.v2-shell .select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: var(--signal) !important; box-shadow: var(--shadow-focus);
+}
+/* tokens = kit .tag-token (bg-3, no border, 22px, × after) */
+body.v2-shell .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--bg-3); border: 0; color: var(--fg-0);
+    border-radius: 3px; font-size: 11px; height: 22px; line-height: 1; padding: 0 6px;
+    margin: 2px 4px 2px 0;
+}
+body.v2-shell .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    order: 2; color: var(--fg-3); font-size: 14px; line-height: 1;
+    margin: 0; border: 0; background: transparent; float: none;
+}
+body.v2-shell .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover { color: var(--err); background: transparent; }
+body.v2-shell .select2-container--default .select2-search--inline .select2-search__field {
+    color: var(--fg-0); font-size: var(--fs-base); margin-top: 0; height: 22px;
+}
+
+/* dropdown = kit .dropdown-menu; options = kit .dropdown-item */
+body.v2-shell .select2-dropdown,
+.select2-container--open .select2-dropdown {
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-2);
+    box-shadow: var(--shadow-3); color: var(--fg-1); padding: 4px;
+}
+body.v2-shell .select2-search--dropdown .select2-search__field,
+.select2-container--open .select2-search--dropdown .select2-search__field {
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-2);
+    color: var(--fg-0); font-size: var(--fs-base); padding: 0 8px; height: var(--ctrl-h-sm);
+}
+body.v2-shell .select2-results__option,
+.select2-container--open .select2-results__option {
+    color: var(--fg-1); font-size: 12.5px; padding: 7px 10px; border-radius: 4px;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background: var(--bg-2); color: var(--fg-0);
+}
+.select2-container--default .select2-results__option[aria-selected="true"] {
+    background: var(--bg-3); color: var(--fg-0);
+}
+
+/* =====================================================================
+   Taskify v2 — Tabs (Bootstrap .nav-tabs -> kit .tabs, signal underline)
+   ===================================================================== */
+body.v2-shell .nav-tabs {
+    border-bottom: 1px solid var(--line); gap: 4px; border-radius: 0;
+}
+body.v2-shell .nav-tabs .nav-link {
+    position: relative; margin: 0; padding: 8px 12px !important;
+    font-size: var(--fs-base); color: var(--fg-2);
+    border: 0 !important; background: transparent !important; border-radius: 0 !important;
+}
+body.v2-shell .nav-tabs .nav-link:hover { color: var(--fg-0); }
+body.v2-shell .nav-tabs .nav-link.active {
+    color: var(--fg-0) !important; font-weight: 500; background: transparent !important;
+}
+body.v2-shell .nav-tabs .nav-link.active::after {
+    content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px;
+    height: 2px; background: var(--signal); border-radius: 1px;
+}
+body.v2-shell .nav-tabs.rounded-pill { border-radius: 0; }
+
+/* =====================================================================
+   Taskify v2 — Alert (Bootstrap .alert -> kit .alert, token tints)
+   ===================================================================== */
+body.v2-shell .alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: var(--r-2); font-size: var(--fs-base);
+    background: var(--bg-2); border: 1px solid var(--line); color: var(--fg-1);
+}
+body.v2-shell .alert .btn-close { color: var(--fg-3); }
+body.v2-shell .alert-primary,
+body.v2-shell .alert-info {
+    background: oklch(from var(--info) l c h / 0.08); border-color: oklch(from var(--info) l c h / 0.25); color: var(--fg-1);
+}
+body.v2-shell .alert-success { background: oklch(from var(--ok) l c h / 0.08); border-color: oklch(from var(--ok) l c h / 0.25); color: var(--fg-1); }
+body.v2-shell .alert-warning { background: oklch(from var(--warn) l c h / 0.10); border-color: oklch(from var(--warn) l c h / 0.30); color: var(--fg-1); }
+body.v2-shell .alert-danger { background: oklch(from var(--err) l c h / 0.08); border-color: oklch(from var(--err) l c h / 0.25); color: var(--fg-1); }
+
+/* =====================================================================
+   Taskify v2 — Breadcrumb (Bootstrap .breadcrumb -> kit)
+   ===================================================================== */
+body.v2-shell .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: var(--fs-sm); color: var(--fg-2);
+    background: transparent; padding: 0; margin: 0;
+}
+body.v2-shell .breadcrumb-item { display: inline-flex; align-items: center; }
+body.v2-shell .breadcrumb-item a { color: var(--fg-2); text-decoration: none; }
+body.v2-shell .breadcrumb-item a:hover { color: var(--fg-0); }
+body.v2-shell .breadcrumb-item.active { color: var(--fg-0); font-weight: 500; }
+body.v2-shell .breadcrumb-item + .breadcrumb-item { padding-left: 0; }
+body.v2-shell .breadcrumb-item + .breadcrumb-item::before { color: var(--fg-3); padding-right: 6px; }
+
+/* =====================================================================
+   Taskify v2 — Spinner (kit) — available for loaders/empty states
+   ===================================================================== */
+body.v2-shell .tk-spinner {
+    width: 18px; height: 18px; border: 2px solid var(--line-2); border-top-color: var(--signal);
+    border-radius: 50%; animation: tk-spin 0.7s linear infinite; display: inline-block;
+}
+@keyframes tk-spin { to { transform: rotate(360deg); } }

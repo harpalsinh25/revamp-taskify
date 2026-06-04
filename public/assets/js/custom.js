@@ -6988,3 +6988,717 @@ $(document).ready(function () {
         initPalette();
     }
 })();
+
+/* =====================================================================
+   Taskify v2 — Dashboard KPI sparklines + trend badges
+   ---------------------------------------------------------------------
+   The KPI value (.tk-metric-value.count) is the real, live number filled
+   by dashboard.js. This module only renders the sparkline + signed delta
+   badge from REAL data — the per-metric daily series in response.trends,
+   added (read-only) by DashboardService::buildTrends().
+
+   No random, no static: each series is the cumulative count of records
+   created up to each day in the selected range, so the line is the true
+   growth of that metric and the badge delta (last − first) is the net new
+   in the period. We hook jQuery's global ajaxSuccess for /dashboard/data,
+   so dashboard.js is NOT modified; when filters change, dashboard.js
+   re-fetches and the sparklines update with it.
+   ===================================================================== */
+(function () {
+    "use strict";
+
+    var VB_W = 100, VB_H = 28;   // svg viewBox
+    var PAD_Y = 3;
+
+    // tile id -> trends key returned by the backend.
+    var TREND_KEY = {
+        "projects-tile": "projects",
+        "tasks-tile": "tasks",
+        "users-tile": "users",
+        "clients-tile": "clients",
+        "meetings-tile": "meetings",
+        "todos-tile": "todos"
+    };
+
+    function buildLinePath(series) {
+        var data = series.slice();
+        if (data.length === 1) { data = [data[0], data[0]]; }
+        var n = data.length;
+        var min = Math.min.apply(null, data);
+        var max = Math.max.apply(null, data);
+        var range = (max - min) || 1;
+        var usableH = VB_H - PAD_Y * 2;
+        var d = "";
+        for (var i = 0; i < n; i++) {
+            var x = (i / (n - 1)) * VB_W;
+            var y = PAD_Y + (1 - (data[i] - min) / range) * usableH;
+            d += (i === 0 ? "M" : " L") + (Math.round(x * 100) / 100) + " " + (Math.round(y * 100) / 100);
+        }
+        return d;
+    }
+
+    function formatDelta(delta) {
+        var sign = delta > 0 ? "+" : (delta < 0 ? "−" : "");
+        return sign + Math.abs(Math.round(delta));
+    }
+
+    function render(metric, series) {
+        var sparkEl = metric.querySelector(".tk-metric-spark");
+        var trendEl = metric.querySelector(".tk-metric-trend");
+
+        // No real data for this metric -> show nothing (cells stay clean).
+        if (!Array.isArray(series) || series.length === 0) {
+            if (sparkEl) { sparkEl.innerHTML = ""; }
+            if (trendEl) { trendEl.innerHTML = ""; }
+            return;
+        }
+
+        var delta = series[series.length - 1] - series[0];
+        var dir = delta > 0 ? "up" : (delta < 0 ? "down" : "flat");
+
+        if (trendEl) {
+            trendEl.classList.remove("is-up", "is-down", "is-flat");
+            trendEl.classList.add("is-" + dir);
+            var arrow = dir === "down" ? "↓" : (dir === "up" ? "↑" : "→");
+            trendEl.innerHTML = '<span class="tk-trend-arrow">' + arrow + "</span>" +
+                "<span>" + formatDelta(delta) + "</span>";
+        }
+
+        if (sparkEl) {
+            var d = buildLinePath(series);
+            sparkEl.innerHTML =
+                '<svg viewBox="0 0 ' + VB_W + " " + VB_H + '" preserveAspectRatio="none" focusable="false">' +
+                    '<path class="tk-spark-line" d="' + d + '"></path>' +
+                "</svg>";
+        }
+    }
+
+    function applyTrends(trends) {
+        if (!trends) { return; }
+        var metrics = document.querySelectorAll(".tk-metric");
+        for (var i = 0; i < metrics.length; i++) {
+            var metric = metrics[i];
+            var key = TREND_KEY[metric.id];
+            if (key && Object.prototype.hasOwnProperty.call(trends, key)) {
+                render(metric, trends[key]);
+            }
+        }
+    }
+
+    function initMetricSparklines() {
+        if (!document.querySelector(".tk-metric")) { return; }
+        if (!window.jQuery) { return; }
+
+        // Read the real trend series from the dashboard AJAX response without
+        // touching dashboard.js — jQuery fires ajaxSuccess globally.
+        window.jQuery(document).ajaxSuccess(function (evt, xhr, settings) {
+            if (!settings || !settings.url || settings.url.indexOf("/dashboard/data") < 0) { return; }
+            var resp = xhr.responseJSON;
+            if (!resp && xhr.responseText) {
+                try { resp = JSON.parse(xhr.responseText); } catch (e) { resp = null; }
+            }
+            if (resp && resp.trends) { applyTrends(resp.trends); }
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initMetricSparklines);
+    } else {
+        initMetricSparklines();
+    }
+})();
+
+/* =====================================================================
+   Taskify v2 — Dashboard hero area chart (Income vs Expense)
+   ---------------------------------------------------------------------
+   Draws the kit <x-data.area-chart> as a vanilla SVG into #tk-hero-chart
+   from the REAL /reports/income-vs-expense-report-data response. We hook
+   jQuery's global ajaxSuccess (the same request dashboard.js already
+   fires), so dashboard.js is NOT modified. Two series (income/expense)
+   share one Y scale; kit grid/axis/gradients + a singleton tooltip and a
+   hover cursor. Re-renders on resize and on every filter-driven refetch.
+   ===================================================================== */
+(function () {
+    "use strict";
+
+    var ENDPOINT_HINT = "income-vs-expense-report-data";
+    var H = 240, PT = 16, PB = 26, PL = 48, PR = 14;
+    var CUR = (typeof window.label_currency_symbol === "string" && window.label_currency_symbol) || "₹";
+
+    var lastData = null; // {categories, income, expense, labels}
+    var tooltip = null;
+    var mode = "both"; // income | expense | both (driven by the segmented selector)
+
+    function el() { return document.getElementById("tk-hero-chart"); }
+
+    function fmtMoney(v) {
+        var n = Math.abs(Math.round(Number(v) || 0));
+        return CUR + n.toLocaleString();
+    }
+
+    // dd-mm-yyyy -> Date (mirrors dashboard.js parseDMY).
+    function parseDMY(d) {
+        if (!d) { return new Date(0); }
+        var parts = String(d).split("-");
+        if (parts.length !== 3) { return new Date(d); }
+        return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+    }
+
+    function groupByDate(rows, dateField, amountField) {
+        var acc = {};
+        (rows || []).forEach(function (item) {
+            var date = (String(item[dateField] || "").split(" ")[0]) || "";
+            if (!date) { return; }
+            var amount = parseFloat(String(item[amountField] || "").replace(/[^0-9.\-]+/g, "")) || 0;
+            acc[date] = (acc[date] || 0) + amount;
+        });
+        return acc;
+    }
+
+    // Build the chart model from the raw AJAX response.
+    function buildModel(resp) {
+        var invoices = (resp && resp.invoices) || [];
+        var expenses = (resp && resp.expenses) || [];
+        var inc = groupByDate(invoices, "from_date", "amount");
+        var exp = groupByDate(expenses, "expense_date", "amount");
+        var dates = Object.keys(inc).concat(Object.keys(exp));
+        var seen = {}; var all = [];
+        dates.forEach(function (d) { if (!seen[d]) { seen[d] = 1; all.push(d); } });
+        all.sort(function (a, b) { return parseDMY(a) - parseDMY(b); });
+        return {
+            categories: all,
+            income: all.map(function (d) { return inc[d] || 0; }),
+            expense: all.map(function (d) { return exp[d] || 0; }),
+            labels: all.map(function (d) {
+                var dt = parseDMY(d);
+                return isNaN(dt) ? d : (dt.getDate() + " " + dt.toLocaleString(undefined, { month: "short" }));
+            })
+        };
+    }
+
+    function ensureTooltip() {
+        if (tooltip) { return tooltip; }
+        tooltip = document.createElement("div");
+        tooltip.className = "tk-chart-tt";
+        document.body.appendChild(tooltip);
+        return tooltip;
+    }
+
+    function svgNS(tag, attrs) {
+        var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        for (var k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) { node.setAttribute(k, attrs[k]); } }
+        return node;
+    }
+
+    function round(n) { return Math.round(n * 100) / 100; }
+
+    function linePath(pts) {
+        return pts.map(function (p, i) { return (i === 0 ? "M" : "L") + round(p[0]) + " " + round(p[1]); }).join(" ");
+    }
+
+    function render() {
+        var host = el();
+        if (!host || !lastData) { return; }
+
+        var data = lastData;
+        var n = data.categories.length;
+        host.innerHTML = "";
+
+        if (n === 0) {
+            var empty = document.createElement("div");
+            empty.className = "tk-area-empty";
+            empty.textContent = host.getAttribute("data-empty-label") || "No data available";
+            host.appendChild(empty);
+            return;
+        }
+
+        var showInc = mode === "both" || mode === "income";
+        var showExp = mode === "both" || mode === "expense";
+
+        var W = Math.max(host.clientWidth || host.offsetWidth || 700, 320);
+        var plotW = W - PL - PR;
+        var plotH = H - PT - PB;
+        var visible = [];
+        if (showInc) { visible = visible.concat(data.income); }
+        if (showExp) { visible = visible.concat(data.expense); }
+        var maxV = visible.length ? Math.max.apply(null, visible) : 0;
+        maxV = maxV > 0 ? maxV * 1.15 : 1;
+
+        var x = function (i) { return n === 1 ? PL + plotW / 2 : PL + (i / (n - 1)) * plotW; };
+        var y = function (v) { return PT + (1 - v / maxV) * plotH; };
+
+        var incPts = data.income.map(function (v, i) { return [x(i), y(v)]; });
+        var expPts = data.expense.map(function (v, i) { return [x(i), y(v)]; });
+
+        var svg = svgNS("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none", focusable: "false" });
+
+        // gradients
+        var defs = svgNS("defs", {});
+        [["tkHeroIncomeGrad", "tk-grad--income"], ["tkHeroExpenseGrad", "tk-grad--expense"]].forEach(function (g) {
+            var grad = svgNS("linearGradient", { id: g[0], class: "tk-grad " + g[1], x1: 0, y1: 0, x2: 0, y2: 1 });
+            grad.appendChild(svgNS("stop", { class: "tk-g0", offset: "0%" }));
+            grad.appendChild(svgNS("stop", { class: "tk-g1", offset: "100%" }));
+            defs.appendChild(grad);
+        });
+        svg.appendChild(defs);
+
+        // grid + y axis labels
+        var grid = svgNS("g", { class: "tk-area-grid" });
+        var axis = svgNS("g", { class: "tk-area-axis" });
+        [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+            var gy = PT + t * plotH;
+            grid.appendChild(svgNS("line", { x1: PL, x2: W - PR, y1: gy, y2: gy }));
+            var label = svgNS("text", { x: PL - 8, y: gy + 3, "text-anchor": "end" });
+            label.textContent = Math.round(maxV * (1 - t)).toLocaleString();
+            axis.appendChild(label);
+        });
+        // x axis labels (~8 max)
+        var stepLabel = Math.max(1, Math.floor(n / 8));
+        for (var i = 0; i < n; i++) {
+            if (i % stepLabel === 0 || i === n - 1) {
+                var tx = svgNS("text", { x: x(i), y: H - 8, "text-anchor": "middle" });
+                tx.textContent = data.labels[i];
+                axis.appendChild(tx);
+            }
+        }
+        svg.appendChild(grid);
+        svg.appendChild(axis);
+
+        // areas (closed to baseline)
+        var baseY = PT + plotH;
+        function areaPath(pts) {
+            return linePath(pts) + " L" + round(pts[pts.length - 1][0]) + " " + baseY + " L" + round(pts[0][0]) + " " + baseY + " Z";
+        }
+        if (showInc) { svg.appendChild(svgNS("path", { d: areaPath(incPts), fill: "url(#tkHeroIncomeGrad)" })); }
+        if (showExp) { svg.appendChild(svgNS("path", { d: areaPath(expPts), fill: "url(#tkHeroExpenseGrad)" })); }
+
+        // hover cursor line
+        var cursor = svgNS("line", { class: "tk-area-cursor", x1: 0, x2: 0, y1: PT, y2: baseY });
+        svg.appendChild(cursor);
+
+        // lines
+        if (showInc) { svg.appendChild(svgNS("path", { class: "tk-area-line tk-area-line--income", d: linePath(incPts) })); }
+        if (showExp) { svg.appendChild(svgNS("path", { class: "tk-area-line tk-area-line--expense", d: linePath(expPts) })); }
+
+        // dots (skip when too dense)
+        var showDots = n <= 24;
+        var incDots = [], expDots = [];
+        if (showDots) {
+            if (showInc) {
+                incPts.forEach(function (p) {
+                    var c = svgNS("circle", { class: "tk-area-dot tk-area-dot--income", cx: round(p[0]), cy: round(p[1]), r: 2.5 });
+                    svg.appendChild(c); incDots.push(c);
+                });
+            }
+            if (showExp) {
+                expPts.forEach(function (p) {
+                    var c = svgNS("circle", { class: "tk-area-dot tk-area-dot--expense", cx: round(p[0]), cy: round(p[1]), r: 2.5 });
+                    svg.appendChild(c); expDots.push(c);
+                });
+            }
+        }
+
+        host.appendChild(svg);
+
+        // ---- interaction: nearest-point tooltip + cursor ----
+        var incLabel = host.getAttribute("data-label-income") || "Income";
+        var expLabel = host.getAttribute("data-label-expense") || "Expenses";
+
+        function indexFromEvent(evt) {
+            var rect = svg.getBoundingClientRect();
+            var px = (evt.clientX - rect.left) / rect.width * W; // map back to viewBox units
+            var idx = n === 1 ? 0 : Math.round((px - PL) / plotW * (n - 1));
+            return Math.max(0, Math.min(n - 1, idx));
+        }
+
+        function showAt(evt) {
+            var idx = indexFromEvent(evt);
+            var cx = x(idx);
+            cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx);
+            host.classList.add("is-hover");
+            if (showDots) {
+                incDots.forEach(function (c, i) { c.setAttribute("r", i === idx ? 3.6 : 2.5); });
+                expDots.forEach(function (c, i) { c.setAttribute("r", i === idx ? 3.6 : 2.5); });
+            }
+            var tt = ensureTooltip();
+            var rows = '<div class="tk-chart-tt-date">' + data.labels[idx] + "</div>";
+            if (showInc) {
+                rows += '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:var(--signal)"></span>' + incLabel +
+                    '<span class="tk-chart-tt-val">' + fmtMoney(data.income[idx]) + "</span></div>";
+            }
+            if (showExp) {
+                rows += '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:var(--fg-2)"></span>' + expLabel +
+                    '<span class="tk-chart-tt-val">' + fmtMoney(data.expense[idx]) + "</span></div>";
+            }
+            tt.innerHTML = rows;
+            tt.classList.add("is-on");
+            tt.style.left = evt.clientX + "px";
+            tt.style.top = (evt.clientY) + "px";
+        }
+
+        function hide() {
+            host.classList.remove("is-hover");
+            if (tooltip) { tooltip.classList.remove("is-on"); }
+            if (showDots) {
+                incDots.forEach(function (c) { c.setAttribute("r", 2.5); });
+                expDots.forEach(function (c) { c.setAttribute("r", 2.5); });
+            }
+        }
+
+        svg.addEventListener("mousemove", showAt);
+        svg.addEventListener("mouseleave", hide);
+    }
+
+    var resizeTimer = null;
+    function onResize() {
+        if (resizeTimer) { clearTimeout(resizeTimer); }
+        resizeTimer = setTimeout(render, 120);
+    }
+
+    function initHeroAreaChart() {
+        if (!el() || !window.jQuery) { return; }
+
+        window.jQuery(document).ajaxSuccess(function (evt, xhr, settings) {
+            if (!settings || !settings.url || settings.url.indexOf(ENDPOINT_HINT) < 0) { return; }
+            var resp = xhr.responseJSON;
+            if (!resp && xhr.responseText) {
+                try { resp = JSON.parse(xhr.responseText); } catch (e) { resp = null; }
+            }
+            if (!resp) { return; }
+            lastData = buildModel(resp);
+            render();
+        });
+
+        window.addEventListener("resize", onResize);
+
+        // Income | Expense | Both segmented selector (kit .seg control).
+        var seg = document.querySelector('.tk-seg[data-chart="hero"]');
+        if (seg) {
+            var onBtn = seg.querySelector(".tk-seg-btn.on");
+            if (onBtn) { mode = onBtn.getAttribute("data-value") || "both"; }
+            seg.addEventListener("click", function (e) {
+                var btn = e.target.closest(".tk-seg-btn");
+                if (!btn) { return; }
+                mode = btn.getAttribute("data-value") || "both";
+                var btns = seg.querySelectorAll(".tk-seg-btn");
+                for (var i = 0; i < btns.length; i++) {
+                    var isOn = btns[i] === btn;
+                    btns[i].classList.toggle("on", isOn);
+                    btns[i].setAttribute("aria-checked", isOn ? "true" : "false");
+                }
+                render();
+            });
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initHeroAreaChart);
+    } else {
+        initHeroAreaChart();
+    }
+})();
+
+/* =====================================================================
+   Taskify v2 — Right-column status donuts (Project / Task / Todo) +
+   left-column Recent Activity feed.
+   ---------------------------------------------------------------------
+   Vanilla SVG donuts matching the kit <x-data.donut> (size 132, thickness
+   14, bg-3 track, rotate -90 segments). Segment colors come from the
+   design tokens (status colour -> token). All fed by the real
+   /dashboard/data response via jQuery ajaxSuccess — dashboard.js is NOT
+   modified; the equivalent old statistics cards are hidden via CSS.
+   ===================================================================== */
+(function () {
+    "use strict";
+
+    var SIZE = 132, TH = 14;
+    // App status colour name -> design-system token.
+    var STATUS_TOKENS = {
+        primary: "var(--signal)", secondary: "var(--fg-3)",
+        success: "var(--ok)", danger: "var(--err)",
+        warning: "var(--warn)", info: "var(--info)"
+    };
+    var FALLBACK = ["var(--signal)", "var(--info)", "var(--warn)", "var(--ok)", "var(--err)", "var(--fg-3)"];
+    var tt = null;
+
+    function tooltip() {
+        if (tt) { return tt; }
+        tt = document.querySelector(".tk-chart-tt");
+        if (!tt) { tt = document.createElement("div"); tt.className = "tk-chart-tt"; document.body.appendChild(tt); }
+        return tt;
+    }
+
+    function svgNS(tag, attrs) {
+        var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        for (var k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) { node.setAttribute(k, attrs[k]); } }
+        return node;
+    }
+
+    function colorFor(name, i) { return STATUS_TOKENS[name] || FALLBACK[i % FALLBACK.length]; }
+
+    function drawDonut(host, legendHost, totalEl, items, centerLabel) {
+        if (!host) { return; }
+        var total = items.reduce(function (a, b) { return a + b.value; }, 0);
+        if (totalEl) { totalEl.textContent = total.toLocaleString(); }
+
+        var r = SIZE / 2 - TH / 2, cx = SIZE / 2, cy = SIZE / 2, circ = 2 * Math.PI * r;
+        var svg = svgNS("svg", { width: SIZE, height: SIZE, viewBox: "0 0 " + SIZE + " " + SIZE });
+        svg.appendChild(svgNS("circle", { cx: cx, cy: cy, r: r, fill: "none", stroke: "var(--bg-3)", "stroke-width": TH }));
+
+        var acc = 0;
+        var segNodes = [];
+        items.forEach(function (it) {
+            var frac = total ? it.value / total : 0;
+            if (it.value > 0) {
+                var len = frac * circ;
+                var seg = svgNS("circle", {
+                    cx: cx, cy: cy, r: r, fill: "none", stroke: it.color, "stroke-width": TH,
+                    "stroke-dasharray": Math.max(len - 2, 0) + " " + circ,
+                    "stroke-dashoffset": (-acc * circ),
+                    transform: "rotate(-90 " + cx + " " + cy + ")",
+                    "class": "donut-segment"
+                });
+                svg.appendChild(seg);
+                segNodes.push(seg);
+            } else {
+                segNodes.push(null);
+            }
+            acc += frac;
+        });
+
+        var t1 = svgNS("text", {
+            x: cx, y: cy - 1, "text-anchor": "middle", "font-size": 22, "font-weight": 700,
+            fill: "var(--fg-0)", "letter-spacing": "-0.03em", "font-family": "var(--font-sans)"
+        });
+        t1.textContent = total.toLocaleString();
+        var t2 = svgNS("text", {
+            x: cx, y: cy + 14, "text-anchor": "middle", "font-size": 9,
+            fill: "var(--fg-3)", "font-family": "var(--font-mono)", "letter-spacing": "0.06em"
+        });
+        t2.textContent = centerLabel || "TOTAL";
+        svg.appendChild(t1);
+        svg.appendChild(t2);
+
+        host.innerHTML = "";
+        host.appendChild(svg);
+
+        function fadeExcept(idx) { segNodes.forEach(function (s, j) { if (s) { s.classList.toggle("is-faded", j !== idx); } }); }
+        function clearFade() { segNodes.forEach(function (s) { if (s) { s.classList.remove("is-faded"); } }); }
+
+        if (legendHost) {
+            legendHost.innerHTML = "";
+            if (!items.length) {
+                legendHost.innerHTML = '<div class="tk-donut-empty">' + (legendHost.getAttribute("data-empty-label") || "No data") + "</div>";
+            }
+            items.forEach(function (it, i) {
+                var pct = total ? Math.round(it.value / total * 100) : 0;
+                var row = document.createElement("div");
+                row.className = "tk-donut-legend-row";
+                row.innerHTML =
+                    '<span class="tk-ld" style="background:' + it.color + '"></span>' +
+                    '<span class="tk-ll">' + it.label + "</span>" +
+                    '<span class="tk-lv">' + it.value.toLocaleString() + "</span>";
+                legendHost.appendChild(row);
+                row.addEventListener("mouseenter", function () { fadeExcept(i); });
+                row.addEventListener("mouseleave", clearFade);
+            });
+        }
+
+        segNodes.forEach(function (seg, i) {
+            if (!seg) { return; }
+            var it = items[i];
+            var pct = total ? Math.round(it.value / total * 100) : 0;
+            seg.addEventListener("mousemove", function (e) {
+                fadeExcept(i);
+                var el = tooltip();
+                el.innerHTML =
+                    '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:' + it.color + '"></span>' +
+                    it.label + '<span class="tk-chart-tt-val">' + it.value.toLocaleString() + " (" + pct + "%)</span></div>";
+                el.classList.add("is-on");
+                el.style.left = e.clientX + "px";
+                el.style.top = e.clientY + "px";
+            });
+            seg.addEventListener("mouseleave", function () {
+                clearFade();
+                var el = tooltip();
+                el.classList.remove("is-on");
+            });
+        });
+    }
+
+    // Build segments from the workspace statuses + a status_id -> count map.
+    function statusItems(statuses, counts) {
+        return (statuses || []).map(function (s, i) {
+            return { label: s.title, value: Math.max(0, Number((counts || {})[s.id]) || 0), color: colorFor(s.color, i) };
+        }).filter(function (x) { return x.value > 0; });
+    }
+
+    function renderCharts(resp) {
+        var pHost = document.getElementById("tk-project-donut");
+        if (pHost) {
+            drawDonut(pHost, document.getElementById("tk-project-legend"), document.getElementById("tk-project-total"),
+                statusItems(resp.statuses, resp.project_status_counts), pHost.getAttribute("data-center-label") || "PROJECTS");
+        }
+        var kHost = document.getElementById("tk-task-donut");
+        if (kHost) {
+            drawDonut(kHost, document.getElementById("tk-task-legend"), document.getElementById("tk-task-total"),
+                statusItems(resp.statuses, resp.task_status_counts), kHost.getAttribute("data-center-label") || "TASKS");
+        }
+        var dHost = document.getElementById("tk-todo-donut");
+        if (dHost) {
+            var td = resp.todo_data || [0, 0];
+            var todoItems = [
+                { label: dHost.getAttribute("data-label-done") || "Completed", value: Math.max(0, Number(td[0]) || 0), color: "var(--ok)" },
+                { label: dHost.getAttribute("data-label-pending") || "Pending", value: Math.max(0, Number(td[1]) || 0), color: "var(--warn)" }
+            ].filter(function (x) { return x.value > 0; });
+            drawDonut(dHost, document.getElementById("tk-todo-legend"), document.getElementById("tk-todo-total"),
+                todoItems, dHost.getAttribute("data-center-label") || "TODOS");
+        }
+    }
+
+    // ---- Recent Activity feed ----
+    var ACT_CLASS = { created: "is-created", updated: "is-updated", deleted: "is-deleted", "updated status": "is-status" };
+    function escTime(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+    }
+    function renderActivity(resp) {
+        var host = document.getElementById("tk-activity-list");
+        if (!host) { return; }
+        var acts = resp.activities || [];
+        if (!acts.length) {
+            host.innerHTML = '<div class="tk-act-empty">' + escTime(host.getAttribute("data-empty-label") || "No recent activities") + "</div>";
+            return;
+        }
+        // message is server-rendered (same as dashboard.js timeline) -> inserted as-is.
+        host.innerHTML = acts.map(function (a) {
+            var cls = ACT_CLASS[a.activity] || "is-default";
+            return '<div class="tk-act-row"><span class="tk-act-dot ' + cls + '"></span>' +
+                '<div class="tk-act-main"><div class="tk-act-msg">' + (a.message || "") + "</div>" +
+                '<div class="tk-act-time">' + escTime(a.created_at_diff || a.created_at_formatted || "") + "</div></div></div>";
+        }).join("");
+    }
+
+    function apply(resp) { renderCharts(resp); renderActivity(resp); }
+
+    function initDashboardCharts() {
+        if (!window.jQuery) { return; }
+        var anchor = document.getElementById("tk-project-donut") || document.getElementById("tk-task-donut") ||
+            document.getElementById("tk-todo-donut") || document.getElementById("tk-activity-list");
+        if (!anchor) { return; }
+        window.jQuery(document).ajaxSuccess(function (evt, xhr, settings) {
+            if (!settings || !settings.url || settings.url.indexOf("/dashboard/data") < 0) { return; }
+            var resp = xhr.responseJSON;
+            if (!resp && xhr.responseText) {
+                try { resp = JSON.parse(xhr.responseText); } catch (e) { resp = null; }
+            }
+            if (resp) { apply(resp); }
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initDashboardCharts);
+    } else {
+        initDashboardCharts();
+    }
+})();
+
+/* =====================================================================
+   Taskify v2 — Dashboard birthday / anniversary / leave table filtering
+   ---------------------------------------------------------------------
+   The bootstrap-table data-query-params="queryParamsUpcoming*" referenced
+   functions that were not defined anywhere, so the member/client/days
+   filters were never sent to the server (filtering did nothing). This
+   defines them (sending the real filter values + page/limit the
+   controllers expect) AND auto-filters on select/input change so the
+   explicit "Filter" button is no longer needed. No backend changes.
+   ===================================================================== */
+(function () {
+    "use strict";
+
+    function $j() { return window.jQuery; }
+    function val(sel) { var $ = $j(); return ($ && $(sel).length) ? ($(sel).val() || "") : ""; }
+    function arr(sel) {
+        var $ = $j(); if (!$ || !$(sel).length) { return []; }
+        var v = $(sel).val() || [];
+        return Array.isArray(v) ? v : (v ? [v] : []);
+    }
+    // Drop empty values so the server defaults (e.g. upcoming_days = 30) apply.
+    function clean(extra) {
+        Object.keys(extra).forEach(function (k) {
+            var v = extra[k];
+            if (v === "" || v === null || typeof v === "undefined" || (Array.isArray(v) && v.length === 0)) {
+                delete extra[k];
+            }
+        });
+        return extra;
+    }
+    function base(p, extra) {
+        var out = {
+            search: p.search, sort: p.sort, order: p.order,
+            offset: p.offset, limit: p.limit,
+            page: p.limit ? (p.offset / p.limit) + 1 : 1
+        };
+        return Object.assign(out, clean(extra));
+    }
+
+    // Functions referenced by data-query-params in the three card tables.
+    window.queryParamsUpcomingBirthdays = function (p) {
+        return base(p, {
+            upcoming_days: val("#upcoming_days_bd"),
+            user_ids: arr("#birthday_user_filter"),
+            client_ids: arr("#birthday_client_filter")
+        });
+    };
+    window.queryParamsUpcomingWa = function (p) {
+        return base(p, {
+            upcoming_days: val("#upcoming_days_wa"),
+            user_ids: arr("#wa_user_filter"),
+            client_ids: arr("#wa_client_filter")
+        });
+    };
+    window.queryParamsMol = function (p) {
+        return base(p, {
+            upcoming_days: val("#upcoming_days_mol"),
+            user_ids: arr("#mol_user_filter")
+        });
+    };
+
+    function initDashboardTableFilters() {
+        var $ = $j();
+        if (!$) { return; }
+
+        var groups = [
+            { table: "#birthdays_table", filters: ["#birthday_user_filter", "#birthday_client_filter", "#upcoming_days_bd"], btn: "#upcoming_days_birthday_filter" },
+            { table: "#wa_table", filters: ["#wa_user_filter", "#wa_client_filter", "#upcoming_days_wa"], btn: "#upcoming_days_wa_filter" },
+            { table: "#mol_table", filters: ["#mol_user_filter", "#upcoming_days_mol"], btn: "#upcoming_days_mol_filter" }
+        ];
+
+        groups.forEach(function (g) {
+            var timer = null;
+            function refresh() {
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    var $t = $(g.table);
+                    if ($t.length && $t.data("bootstrap.table")) {
+                        try { $t.bootstrapTable("refresh"); } catch (e) { /* table not ready */ }
+                    }
+                }, 350);
+            }
+            // Auto-filter: select2 fires "change"; the days field fires input/change.
+            g.filters.forEach(function (sel) {
+                $(document).on("change", sel, refresh);
+                $(document).on("input", sel, refresh);
+            });
+            // Keep the (now hidden) button working if anything still triggers it.
+            $(document).on("click", g.btn, refresh);
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initDashboardTableFilters);
+    } else {
+        initDashboardTableFilters();
+    }
+})();
