@@ -1,4 +1,4 @@
-# Taskify v2 "Graphite Studio" Redesign — Implementation Plan
+# Taskify v2 "Graphite Studio" Redesign — Implementation Planing
 
 > **Goal:** Replace the entire UI of Taskify with the v2 *Graphite Studio* design
 > system (from `Taskify Revamp Kit/`) and ship it as one big update to 400+
