@@ -1,5 +1,5 @@
 <div class="card">
-    <div class="card-body">
+    
         <div class="table-responsive text-nowrap">
             {{$slot}}
             @if (is_countable($tags) && count($tags) > 0)
@@ -23,5 +23,5 @@
             <x-empty-state-card :type="$type" />
             @endif
         </div>
-    </div>
+    
 </div>

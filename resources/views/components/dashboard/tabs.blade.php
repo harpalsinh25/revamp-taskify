@@ -10,8 +10,8 @@ $users = App\Models\Workspace::find(getWorkspaceId())->users()->where('status', 
         (!isset($general_settings['membersOnLeave']) || $general_settings['membersOnLeave'] == 1)
     )
 ))
-<div class="nav-align-top ">
-    <ul class="nav nav-tabs flex-wrap" role="tablist">
+<div class="tk-dash-tabs">
+    <ul class="nav nav-tabs flex-wrap mb-4" role="tablist">
         @if (!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] == 1)
             <x-dashboard.tab-item
                 :active="true"
@@ -38,7 +38,7 @@ $users = App\Models\Workspace::find(getWorkspaceId())->users()->where('status', 
             />
         @endif
     </ul>
-    <div class="tab-content">
+    <div class="tab-content bg-transparent shadow-none p-0">
         @if (!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] == 1)
             <x-dashboard.tab-content :active="true" id="navs-top-upcoming-birthdays">
                 <x-dashboard.calendar-tab

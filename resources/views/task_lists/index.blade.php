@@ -28,7 +28,7 @@
         </div>
     </div>
     <div class="card">
-        <div class="card-body">
+       
             <div class="table-responsive text-nowrap">
                 @if ($taskLists->count() > 0)
                     <input type="hidden" id="data_type" value="task-lists">
@@ -62,7 +62,7 @@
                     <x-empty-state-card :type="$type" />
                 @endif
             </div>
-        </div>
+        
     </div>
 
 </div>

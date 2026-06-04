@@ -1,18 +1,18 @@
 <!-- projects card -->
-<div class="align-items-baseline d-flex gap-1 tk-filter-bar">
-    <div class="col-md-7 mb-4">
+<div class="d-flex flex-wrap gap-3 mb-3 tk-filter-bar">
+    <div class="flex-grow-1" style="min-width: 250px; max-width: 300px;">
         <select class="form-select users_select" id="mol_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_members', 'Select Members') ?>" multiple>
         </select>
     </div>
-    <div class="col-md-4">
+    <div class="flex-grow-1" style="min-width: 250px; max-width: 300px;">
         <div class="input-group input-group-merge">
             <input type="number" id="upcoming_days_mol" name="upcoming_days" class="form-control" min="0" placeholder="<?= get_label('till_upcoming_days_def_30', 'Till upcoming days : default 30') ?>" autocomplete="off">
         </div>
     </div>
-    <div class="col-md-1">
-        <div>
-            <button type="button" id="upcoming_days_mol_filter" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('filter', 'Filter') ?>"><i class='bx bx-filter-alt'></i></button>
-        </div>
+    <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-1" id="upcoming_days_mol_filter" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('clear_filters', 'Clear Filters') ?>">
+            <i class='bx bx-x-circle'></i> <?= get_label('clear_filters', 'Clear Filters') ?>
+        </button>
     </div>
 </div>
 <x-tk-table id="mol_table" :url="url('/home/members-on-leave')"

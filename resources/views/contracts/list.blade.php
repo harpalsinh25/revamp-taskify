@@ -27,7 +27,7 @@ $visibleColumns = getUserPreferences('contracts');
     </div>
     @if ($contracts > 0)
     <div class="card">
-        <div class="card-body">
+       
             <div class="row">
                 <x-advanced-date-filters prefix="contract" />
                 <div class="col-md-4 mb-3">
@@ -87,7 +87,7 @@ $visibleColumns = getUserPreferences('contracts');
                     </thead>
                 </table>
             </div>
-        </div>
+        
     </div>
     @else
     <?php
