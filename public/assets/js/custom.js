@@ -1511,7 +1511,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                                     " (" +
                                                     newItem.color +
                                                     ")"
-                                            );
+                                                );
                                             // Append the option to the select element in the modal
                                             otherModalSelector.append(
                                                 otherOption
@@ -1575,7 +1575,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                                     " (" +
                                                     newItem.color +
                                                     ")"
-                                            );
+                                                );
                                             // Append the option to the select element in the modal
                                             otherModalSelector.append(
                                                 otherOption
@@ -3137,7 +3137,7 @@ $(document).ready(function () {
                             " <strong>" +
                             response.project.title +
                             "</strong>)"
-                    );
+                        );
                     usersSelect.empty(); // Clear existing options
                     // Check if task_accessibility is 'project_users'
                     if (response.users && response.users.length > 0) {
@@ -5076,6 +5076,46 @@ function initSelect2WithAjax(selector, type) {
         }
     });
 }
+
+function initTomSelectWithAjax(selector, type) {
+    document.querySelectorAll(selector).forEach(function (el) {
+        if (el.tomselect) {
+            el.tomselect.destroy();
+        }
+
+        var allowClear = el.dataset.allowClear !== "false";
+        var considerWorkspace = el.dataset.considerWorkspace !== "false";
+        var leaveVisibleToUsers = el.dataset.leaveVisibleToUsers !== "false";
+        var ignoreAdmins = el.dataset.ignoreAdmins !== "false";
+
+        new TomSelect(el, {
+            valueField: 'id',
+            labelField: 'text',
+            searchField: 'text',
+            plugins: allowClear ? ['remove_button', 'clear_button'] : ['remove_button'],
+            preload: true,
+            load: function (query, callback) {
+                var url = '/search?q=' + encodeURIComponent(query) +
+                    '&type=' + encodeURIComponent(type) +
+                    '&considerWorkspace=' + considerWorkspace +
+                    '&leaveVisibleToUsers=' + leaveVisibleToUsers +
+                    '&ignoreAdmins=' + ignoreAdmins;
+
+                if (!query) {
+                    url += '&initial=true&limit=' + (el.dataset.initialLimit || 10);
+                }
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json.results);
+                    }).catch(() => {
+                        callback();
+                    });
+            }
+        });
+    });
+}
 function initTagifyFromSelect(selector, type) {
     document.querySelectorAll(selector).forEach(function (selectEl) {
         // Hide the original select
@@ -5166,6 +5206,9 @@ $(document).ready(function () {
     initSelect2WithAjax(".projects_select", "projects");
     initSelect2WithAjax(".users_select", "users");
     // initTagifyFromSelect(".users_select", "users");
+
+    initTomSelectWithAjax(".tom_users_select", "users");
+    initTomSelectWithAjax(".tom_clients_select", "clients");
 
     initSelect2WithAjax(".clients_select", "clients");
     initSelect2WithAjax(".tags_select", "tags");
@@ -6886,7 +6929,7 @@ $(document).ready(function () {
             toggle.addEventListener("click", function () {
                 var next = currentTheme() === "dark" ? "light" : "dark";
                 applyTheme(next);
-                try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
+                try { localStorage.setItem(STORAGE_KEY, next); } catch (e) { }
             });
         }
 
@@ -7068,7 +7111,7 @@ $(document).ready(function () {
             var d = buildLinePath(series);
             sparkEl.innerHTML =
                 '<svg viewBox="0 0 ' + VB_W + " " + VB_H + '" preserveAspectRatio="none" focusable="false">' +
-                    '<path class="tk-spark-line" d="' + d + '"></path>' +
+                '<path class="tk-spark-line" d="' + d + '"></path>' +
                 "</svg>";
         }
     }
@@ -7691,8 +7734,24 @@ $(document).ready(function () {
                 $(document).on("change", sel, refresh);
                 $(document).on("input", sel, refresh);
             });
-            // Keep the (now hidden) button working if anything still triggers it.
-            $(document).on("click", g.btn, refresh);
+            // Clear filters button logic
+            $(document).on("click", g.btn, function (e) {
+                e.preventDefault();
+                g.filters.forEach(function (sel) {
+                    var el = document.querySelector(sel);
+                    if (el) {
+                        if (el.tomselect) {
+                            el.tomselect.clear(true);
+                            $(el).trigger('change');
+                        } else {
+                            // Fallback for native inputs
+                            $(el).val('');
+                            $(el).trigger('change'); 
+                        }
+                    }
+                });
+                refresh();
+            });
         });
     }
 

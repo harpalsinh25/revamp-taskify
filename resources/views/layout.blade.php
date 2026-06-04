@@ -48,6 +48,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-datetimepicker.min.css') }}" />
     <link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet" />
 
 
     <link href="{{ asset('assets/css/bootstrap-table.min.css') }}" rel="stylesheet" />
@@ -198,6 +199,7 @@
 <script async defer src="{{ asset('assets/js/buttons.js') }}"></script>
 <!-- select 2 js !-->
 <script src="{{ asset('assets/js/select2.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 
 <script>

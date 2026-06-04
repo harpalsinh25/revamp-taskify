@@ -11,11 +11,11 @@ $users = App\Models\Workspace::find(getWorkspaceId())->users()->where('status', 
     )
 ))
 <div class="tk-dash-tabs">
-    <ul class="nav nav-tabs flex-wrap mb-4" role="tablist">
+    <div class="tabs nav flex-wrap mb-4" role="tablist">
         @if (!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] == 1)
             <x-dashboard.tab-item
                 :active="true"
-                icon="bx bx-cake text-success"
+                icon="bx bx-cake"
                 :label="get_label('upcoming_birthdays', 'Upcoming birthdays')"
                 target="navs-top-upcoming-birthdays"
             />
@@ -23,21 +23,23 @@ $users = App\Models\Workspace::find(getWorkspaceId())->users()->where('status', 
         @if (!isset($general_settings['upcomingWorkAnniversaries']) || $general_settings['upcomingWorkAnniversaries'] == 1)
             <x-dashboard.tab-item
                 :active="!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] != 1"
-                icon="bx bx-star text-warning"
+                icon="bx bx-star"
                 :label="get_label('upcoming_work_anniversaries', 'Upcoming work anniversaries')"
                 target="navs-top-upcoming-work-anniversaries"
             />
         @endif
         @if (!isset($general_settings['membersOnLeave']) || $general_settings['membersOnLeave'] == 1)
             <x-dashboard.tab-item
-                :active="isset($general_settings['upcomingBirthdays']) && isset($general_settings['upcomingWorkAnniversaries']) &&
-                        $general_settings['upcomingBirthdays'] != 1 && $general_settings['upcomingWorkAnniversaries'] != 1"
-                icon="bx bx-home text-danger"
+                :active="
+                    (!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] != 1) &&
+                    (!isset($general_settings['upcomingWorkAnniversaries']) || $general_settings['upcomingWorkAnniversaries'] != 1)
+                "
+                icon="bx bx-home"
                 :label="get_label('members_on_leave', 'Members on leave')"
                 target="navs-top-members-on-leave"
             />
         @endif
-    </ul>
+    </div>
     <div class="tab-content bg-transparent shadow-none p-0">
         @if (!isset($general_settings['upcomingBirthdays']) || $general_settings['upcomingBirthdays'] == 1)
             <x-dashboard.tab-content :active="true" id="navs-top-upcoming-birthdays">
