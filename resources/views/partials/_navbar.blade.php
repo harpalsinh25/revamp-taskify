@@ -1,4 +1,4 @@
-<!-- Navbar -->
+<!-- Navbar (Taskify v2 command bar) -->
 <?php
 
 use App\Models\Language;
@@ -30,177 +30,192 @@ if ($remainingUnreadNotificationsCount < 0) {
 ?>
 @authBoth
 <div id="section-not-to-print">
-    <nav class="layout-navbar container-fluid navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
-        <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-                <i class="bx bx-menu bx-sm"></i>
-            </a>
-        </div>
-        <div class="navbar-nav-right d-flex  align-items-center" id="navbar-collapse">
-           <div class="nav-item">
-    <i class="bx bx-search"></i>
-    <span class="cursor-pointer mx-2" id="global-search">
-        {{ get_label('search','Search') }}
-        <span class="d-none d-sm-inline">[CTRL + K]</span>
-    </span>
-</div>
+    <header class="tk-cbar" id="layout-navbar">
+        {{-- Mobile: toggle the context panel --}}
+        <button type="button" class="tk-cbar-burger layout-menu-toggle" aria-label="{{ get_label('menu', 'Menu') }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
 
-            <ul class="navbar-nav flex-row align-items-center ms-auto">
-                  @if (getAuthenticatedUser()->can('manage_system_notifications'))
-                <li class="nav-item navbar-dropdown dropdown">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                        <i class='bx bx-bell bx-sm'></i>
+        {{-- Breadcrumb: workspace monogram / current page --}}
+        <div class="tk-cbar-crumb">
+            <span class="tk-cbar-ws">{{ strtoupper(substr($general_settings['company_title'] ?? 'TK', 0, 2)) }}</span>
+            <span class="tk-cbar-sep">/</span>
+            <span class="tk-cbar-crumb-title">@yield('title')</span>
+        </div>
+
+        {{-- Global search (CTRL+K → #globalSearchModal). Keep #global-search for the existing handler --}}
+        <button type="button" class="tk-cbar-search" id="global-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <span class="tk-cbar-search-text">{{ get_label('search', 'Search') }}</span>
+            <span class="tk-kbd">CTRL K</span>
+        </button>
+
+        <div class="tk-cbar-actions">
+            {{-- Theme toggle (light/dark via the design system) --}}
+            <button type="button" class="tk-icon-btn" id="tk-theme-toggle"
+                title="{{ get_label('toggle_theme', 'Toggle theme') }}" aria-label="{{ get_label('toggle_theme', 'Toggle theme') }}">
+                <span class="tk-ico-moon">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+                </span>
+                <span class="tk-ico-sun">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                </span>
+            </button>
+
+            {{-- Notifications (unchanged logic + IDs/classes) --}}
+            @if (getAuthenticatedUser()->can('manage_system_notifications'))
+                <div class="dropdown">
+                    <a class="tk-icon-btn" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"
+                        title="{{ get_label('notifications', 'Notifications') }}">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9ZM10 21a2 2 0 0 0 4 0"/></svg>
                         <span id="unreadNotificationsCount" class="badge badge-notifications bg-danger rounded-pill {{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}">{{ $unreadNotificationsCount }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end p-0">
                         <li class="dropdown-header dropdown-header-highlighted fixed-header">
-                            <i class="bx bx-bell bx-md me-2"></i>{{ get_label('notifications','Notifications') }}
+                            <i class="bx bx-bell bx-md me-2"></i>{{ get_label('notifications', 'Notifications') }}
                         </li>
                         <div id="unreadNotificationsContainer" class="scrollable-dropdown">
                             @if ($unreadNotificationsCount > 0)
-                            @foreach ($unreadNotifications as $notification)
-                            <li>
-                                <a class="dropdown-item update-notification-status" data-id="{{$notification->id}}" href="javascript:void(0);">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-auto fw-semibold">{{ $notification->title }} <small class="text-muted mx-2">{{ $notification->created_at->diffForHumans() }}</small></div>
-                                        <i class="bx bx-bell me-2"></i>
-                                    </div>
-                                    <div class="mt-2">
-                                        {{ strlen(strip_tags($notification->message)) > 50 ? substr(strip_tags($notification->message), 0, 50) . '...' : strip_tags($notification->message) }}
-                                    </div>
-
-                                </a>
-                            </li>
-                            <li>
-                                <div class="dropdown-divider"></div>
-                            </li>
-                            @endforeach
+                                @foreach ($unreadNotifications as $notification)
+                                    <li>
+                                        <a class="dropdown-item update-notification-status" data-id="{{ $notification->id }}" href="javascript:void(0);">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-auto fw-semibold">{{ $notification->title }} <small class="text-muted mx-2">{{ $notification->created_at->diffForHumans() }}</small></div>
+                                                <i class="bx bx-bell me-2"></i>
+                                            </div>
+                                            <div class="mt-2">
+                                                {{ strlen(strip_tags($notification->message)) > 50 ? substr(strip_tags($notification->message), 0, 50) . '...' : strip_tags($notification->message) }}
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider"></div>
+                                    </li>
+                                @endforeach
                             @else
-                            <li class="p-5 d-flex align-items-center justify-content-center">
-                                <span>{{ get_label('no_unread_notifications', 'No unread notifications') }}</span>
-                            </li>
-                            <li>
-                                <div class="dropdown-divider"></div>
-                            </li>
+                                <li class="p-5 d-flex align-items-center justify-content-center">
+                                    <span>{{ get_label('no_unread_notifications', 'No unread notifications') }}</span>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider"></div>
+                                </li>
                             @endif
                         </div>
                         <li class="d-flex justify-content-between fixed-footer">
                             <a href="{{ url('notifications') }}" class="p-3">
                                 <b>{{ get_label('view_all', 'View all') }}</b>
-                                @if($remainingUnreadNotificationsCount > 0)
-                                <span class="badge bg-primary">+{{ $remainingUnreadNotificationsCount }}</span>
+                                @if ($remainingUnreadNotificationsCount > 0)
+                                    <span class="badge bg-primary">+{{ $remainingUnreadNotificationsCount }}</span>
                                 @endif
                             </a>
                             <a href="#" class="p-3 text-end" id="mark-all-notifications-as-read"><b>{{ get_label('mark_all_as_read', 'Mark all as read') }}</b></a>
                         </li>
                     </ul>
-                </li>
+                </div>
+            @endif
 
-                @endif
-                <li class="nav-item navbar-dropdown dropdown ml-1">
-                    <div class="btn-group dropend px-1">
-                        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="icon-only"><i class='bx bx-globe'></i></span> <span class="language-name"><?= $current_language[0]['name'] ?? '' ?></span>
-                        </button>
-                        <ul class="dropdown-menu language-dropdown" id="languageDropdown">
-                            @foreach ($languages as $language)
-                            <?php $checked = $language->code == app()->getLocale() ? "<i class='menu-icon tf-icons bx bx-check-square text-primary'></i>" : "<i class='menu-icon tf-icons bx bx-square text-solid'></i>" ?>
-                            <li class="dropdown-item">
-                                <a href="{{ url('/settings/languages/switch/' . $language->code) }}">
-                                    <?= $checked ?>
-                                    {{ $language->name }}
-                                </a>
-                            </li>
-                            @endforeach
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            @if (!$current_language->isEmpty() && $current_language[0]['code'] == $default_language)
-                            <li>
-                                <span class="badge bg-primary mx-5 mb-1 mt-1" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>">
-                                    <?= get_label('primary', 'Primary') ?>
-                                </span>
-                            </li>
-                            @else
-                            <a href="javascript:void(0);">
-                                <span class="badge bg-secondary mx-5 mb-1 mt-1" id="set-as-default" data-lang="{{ app()->getLocale() }}" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('set_current_language_as_your_primary_language', 'Set current language as your primary language') ?>">
-                                    <?= get_label('set_as_primary', 'Set as primary') ?>
-                                </span>
+            {{-- Language switcher (unchanged logic + IDs/classes) --}}
+            <div class="dropdown">
+                <button type="button" class="tk-icon-btn" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                    title="{{ get_label('language', 'Language') }}">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.9 2.6 15.1 0 18M12 3c-2.6 2.9-2.6 15.1 0 18"/></svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end language-dropdown" id="languageDropdown">
+                    @foreach ($languages as $language)
+                        <?php $checked = $language->code == app()->getLocale() ? "<i class='menu-icon tf-icons bx bx-check-square text-primary'></i>" : "<i class='menu-icon tf-icons bx bx-square text-solid'></i>" ?>
+                        <li class="dropdown-item">
+                            <a href="{{ url('/settings/languages/switch/' . $language->code) }}">
+                                <?= $checked ?>
+                                {{ $language->name }}
                             </a>
-                            @endif
-                        </ul>
-                    </div>
-                    </button>
-                </li>
-                <li class="nav-item navbar-dropdown dropdown mt-3 mx-2">
-                    <p class="nav-item">
-                        <span class="nav-mobile-hidden"><?= get_label('hi', 'Hi') ?>👋</span>
-                        <span class="nav-mobile-hidden">{{Str::limit($authenticatedUser->first_name,7)}}</span>
-                    </p>
-                </li>
-                <!-- User -->
-                <li class="nav-item navbar-dropdown dropdown">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                        <div class="avatar avatar-online">
-                            <img src="{{($authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo)) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg')}}" alt class="rounded-circle" />
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                        </li>
+                    @endforeach
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    @if (!$current_language->isEmpty() && $current_language[0]['code'] == $default_language)
                         <li>
-                            <div class="dropdown-item">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0 me-3">
-                                        <div class="avatar avatar-online avatar-nav-dropdown">
-                                            <img src="{{($authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo)) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg')}}" alt class="rounded-circle" />
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <span class="fw-semibold d-block">{{ Str::limit($authenticatedUser->first_name . ' ' . $authenticatedUser->last_name, 16) }}</span>
-                                        <small class="text-muted text-capitalize">
-                                            {{ucfirst($authenticatedUser->getRoleNames()->first())}}
-                                        </small>
+                            <span class="badge bg-primary mx-5 mb-1 mt-1" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>">
+                                <?= get_label('primary', 'Primary') ?>
+                            </span>
+                        </li>
+                    @else
+                        <a href="javascript:void(0);">
+                            <span class="badge bg-secondary mx-5 mb-1 mt-1" id="set-as-default" data-lang="{{ app()->getLocale() }}" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('set_current_language_as_your_primary_language', 'Set current language as your primary language') ?>">
+                                <?= get_label('set_as_primary', 'Set as primary') ?>
+                            </span>
+                        </a>
+                    @endif
+                </ul>
+            </div>
+
+            <span class="tk-cbar-divider"></span>
+
+            {{-- User menu (unchanged logic) --}}
+            <div class="dropdown">
+                <a class="tk-cbar-user" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"
+                    title="<?= get_label('hi', 'Hi') ?> {{ $authenticatedUser->first_name }}">
+                    <img src="{{ $authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg') }}" alt="" />
+                    <span class="tk-cbar-username nav-mobile-hidden">{{ Str::limit($authenticatedUser->first_name, 10) }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <div class="dropdown-item">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="avatar avatar-online avatar-nav-dropdown">
+                                        <img src="{{ $authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg') }}" alt class="rounded-circle" />
                                     </div>
                                 </div>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold d-block">{{ Str::limit($authenticatedUser->first_name . ' ' . $authenticatedUser->last_name, 16) }}</span>
+                                    <small class="text-muted text-capitalize">
+                                        {{ ucfirst($authenticatedUser->getRoleNames()->first()) }}
+                                    </small>
+                                </div>
                             </div>
-                        </li>
-                        <li>
-                            <div class="dropdown-divider"></div>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url('/account/' . $authenticatedUser->id) }}">
-                                <i class="bx bx-user me-2"></i>
-                                <span class="align-middle"><?= get_label('my_profile', 'My Profile') ?></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url('preferences') }}">
-                                <i class='bx bx-cog me-2'></i>
-                                <span class="align-middle"><?= get_label('preferences', 'Preferences') ?></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url('clear-cache') }}">
-                                <i class="bx bx-refresh"></i>
-                                <span class="align-middle">{{ get_label('clear_system_cache', 'Clear System Cache') }}</span>
-                            </a>
-                        </li>
-
-
-                        <li>
-                            <div class="dropdown-divider"></div>
-                        </li>
-                        <li>
-                            <form action="{{url('logout')}}" method="POST" class="dropdown-item">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-log-out-circle"></i> <?= get_label('logout', 'Logout') ?></button>
-                            </form>
-                        </li>
-                    </ul>
-                </li>
-                <!--/ User -->
-            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url('/account/' . $authenticatedUser->id) }}">
+                            <i class="bx bx-user me-2"></i>
+                            <span class="align-middle"><?= get_label('my_profile', 'My Profile') ?></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url('preferences') }}">
+                            <i class='bx bx-cog me-2'></i>
+                            <span class="align-middle"><?= get_label('preferences', 'Preferences') ?></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url('clear-cache') }}">
+                            <i class="bx bx-refresh"></i>
+                            <span class="align-middle">{{ get_label('clear_system_cache', 'Clear System Cache') }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        <form action="{{ url('logout') }}" method="POST" class="dropdown-item">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-log-out-circle"></i> <?= get_label('logout', 'Logout') ?></button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </nav>
+    </header>
 </div>
 
 @else
@@ -208,5 +223,5 @@ if ($remainingUnreadNotificationsCount < 0) {
 <script>
     var label_search = '<?= get_label('search', 'Search') ?>';
 </script>
-<script src="{{asset('assets/js/pages/navbar.js')}}"></script>
+<script src="{{ asset('assets/js/pages/navbar.js') }}"></script>
 <!-- / Navbar -->

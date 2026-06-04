@@ -4818,25 +4818,107 @@
 <div class="modal fade" id="globalSearchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-3 shadow-lg">
-            <!-- Header -->
-            <div class="modal-header border-0 px-4 pt-4 pb-2">
-                <h5 class="modal-title text-body-emphasis fw-semibold mb-0" id="searchModalLabel">
-                    <i class="bx bx-search text-primary me-2"></i>{{ get_label('search_everything', 'Search Everything') }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ get_label('close', 'Close') }}"></button>
+            {{-- Palette-style search row (Taskify Revamp Kit command palette) --}}
+            <h5 id="searchModalLabel" class="visually-hidden">{{ get_label('search_everything', 'Search Everything') }}</h5>
+            <div class="tk-search-row">
+                <svg class="tk-search-row-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+                </svg>
+                <input type="text" class="tk-search-input" id="modalSearchInput"
+                    placeholder="{{ get_label('search_everything_placeholder', 'Search projects, tasks, users, and more...') }}"
+                    autocomplete="off"
+                    aria-label="{{ get_label('global_search_input', 'Global Search Input') }}">
+                <kbd class="tk-kbd">ESC</kbd>
+                <button type="button" class="tk-search-close" data-bs-dismiss="modal" aria-label="{{ get_label('close', 'Close') }}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                </button>
             </div>
-            <!-- Search Input -->
-            <div class="px-4 pb-3">
-                <div class="position-relative">
-                    <input type="text" class="form-control form-control-lg rounded-3 ps-5 pe-5" id="modalSearchInput"
-                        placeholder="{{ get_label('search_everything_placeholder', 'Search projects, tasks, users, and more...') }}"
-                        autocomplete="off"
-                        aria-label="{{ get_label('global_search_input', 'Global Search Input') }}">
-                    {{-- <i class="bx bx-search position-absolute top-50 translate-middle-y fs-5 text-muted ms-3"></i> --}}
-                    <kbd class="position-absolute top-50 translate-middle-y bg-dark text-muted small end-0 me-3 rounded border px-2 py-1">
-                        Esc
-                    </kbd>
-                </div>
+
+            {{-- Command palette: every real, permission-gated menu as a navigable
+                 list (icons + redirection). Filters live via custom.js. --}}
+            @php
+                $tkPalMenus = getMenus();
+                $tkPalPluginPath = base_path('plugins');
+                if (\Illuminate\Support\Facades\File::exists($tkPalPluginPath)) {
+                    foreach (glob($tkPalPluginPath . '/*', GLOB_ONLYDIR) as $tkPalDir) {
+                        $tkPalJson = $tkPalDir . '/plugin.json';
+                        if (\Illuminate\Support\Facades\File::exists($tkPalJson)) {
+                            $tkPalData = json_decode(\Illuminate\Support\Facades\File::get($tkPalJson), true);
+                            if (!empty($tkPalData['enabled']) && \Illuminate\Support\Facades\File::exists($tkPalDir . '/menus.php')) {
+                                $tkPalItems = include $tkPalDir . '/menus.php';
+                                if (is_array($tkPalItems)) {
+                                    $tkPalMenus = array_merge($tkPalMenus, $tkPalItems);
+                                }
+                            }
+                        }
+                    }
+                }
+                $tkPalGroups = collect($tkPalMenus)
+                    ->filter(fn($m) => !isset($m['show']) || $m['show'] === 1)
+                    ->groupBy('category');
+                $tkPalReal = fn($u) => ($u = trim((string) $u)) !== '' && stripos($u, 'javascript:') === false && $u !== '#';
+                $tkPalCat = fn($c) => get_label($c, ucfirst(str_replace('_', ' ', $c)));
+
+                // Quick access: one key, accessible destination per major area.
+                $tkPalPriority = [];
+                foreach (['dashboard', 'projects_and_task_management', 'team', 'finance', 'utilities', 'settings'] as $tkPc) {
+                    foreach ($tkPalGroups[$tkPc] ?? [] as $tkPm) {
+                        $tkPu = $tkPalReal($tkPm['url'] ?? '') ? $tkPm['url'] : null;
+                        $tkPl = $tkPm['label'] ?? '';
+                        if (!$tkPu) {
+                            foreach ($tkPm['submenus'] ?? [] as $tkPs) {
+                                if ((!isset($tkPs['show']) || $tkPs['show'] === 1) && $tkPalReal($tkPs['url'] ?? '')) {
+                                    $tkPu = $tkPs['url']; $tkPl = $tkPs['label']; break;
+                                }
+                            }
+                        }
+                        if ($tkPu) { $tkPalPriority[] = ['label' => $tkPl, 'url' => $tkPu, 'icon' => $tkPm['icon'] ?? 'bx bx-circle']; break; }
+                    }
+                }
+            @endphp
+            <div class="tk-pal" id="tk-pal" role="listbox" aria-label="{{ get_label('navigation', 'Navigation') }}">
+                <div class="tk-pal-empty" id="tk-pal-empty" hidden>{{ get_label('no_results_found', 'No results found') }}</div>
+
+                @if (count($tkPalPriority))
+                    <div class="tk-pal-group">
+                        <div class="tk-pal-section">{{ get_label('quick_access', 'Quick access') }}</div>
+                        @foreach ($tkPalPriority as $tkP)
+                            <a class="tk-pal-item" href="{{ $tkP['url'] }}" role="option"
+                                data-text="{{ \Illuminate\Support\Str::lower($tkP['label']) }}">
+                                <span class="tk-pal-ico"><i class="{{ $tkP['icon'] }}"></i></span>
+                                <span class="tk-pal-label">{{ $tkP['label'] }}</span>
+                                <span class="tk-pal-meta">{{ get_label('quick_access', 'Quick access') }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+                @foreach ($tkPalGroups as $tkCat => $tkItems)
+                    <div class="tk-pal-group">
+                        <div class="tk-pal-section">{{ $tkPalCat($tkCat) }}</div>
+                        @foreach ($tkItems as $tkM)
+                            @if ($tkPalReal($tkM['url'] ?? ''))
+                                <a class="tk-pal-item" href="{{ $tkM['url'] }}" role="option"
+                                    data-text="{{ \Illuminate\Support\Str::lower(($tkM['label'] ?? '') . ' ' . $tkPalCat($tkCat)) }}">
+                                    <span class="tk-pal-ico"><i class="{{ $tkM['icon'] ?? 'bx bx-circle' }}"></i></span>
+                                    <span class="tk-pal-label">{{ $tkM['label'] }}</span>
+                                    <span class="tk-pal-meta">{{ $tkPalCat($tkCat) }}</span>
+                                </a>
+                            @endif
+                            @foreach ($tkM['submenus'] ?? [] as $tkSub)
+                                @if ((!isset($tkSub['show']) || $tkSub['show'] === 1) && $tkPalReal($tkSub['url'] ?? ''))
+                                    <a class="tk-pal-item" href="{{ $tkSub['url'] }}" role="option"
+                                        data-text="{{ \Illuminate\Support\Str::lower(($tkSub['label'] ?? '') . ' ' . ($tkM['label'] ?? '') . ' ' . $tkPalCat($tkCat)) }}">
+                                        <span class="tk-pal-ico"><i class="{{ $tkM['icon'] ?? 'bx bx-circle' }}"></i></span>
+                                        <span class="tk-pal-label">{{ $tkSub['label'] }}</span>
+                                        <span class="tk-pal-meta">{{ $tkM['label'] }}</span>
+                                    </a>
+                                @endif
+                            @endforeach
+                        @endforeach
+                    </div>
+                @endforeach
             </div>
             <!-- Search Tabs -->
             <div class="search-tabs d-none px-4 py-2" id="searchTabs">

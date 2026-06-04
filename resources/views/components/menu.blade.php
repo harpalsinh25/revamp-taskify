@@ -40,232 +40,326 @@ if (!is_admin_or_leave_editor()) {
 }
 $pendingLeaveRequestsCount = $query->count();
 ?>
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme menu-container">
-    <div class="app-brand demo">
-        <a href="{{ url('home') }}" class="app-brand-link">
-            <span class="app-brand-logo demo">
-                <img src="{{ asset($general_settings['full_logo']) }}" width="200px" alt="" />
-            </span>
-            <!-- <span class="app-brand-text demo menu-text fw-bolder ms-2">Taskify</span> -->
+
+@php
+    // ---------------------------------------------------------------
+    // Menu data (UNCHANGED logic): real permission-gated menus, plugin
+    // menus, and the per-user saved ordering from the menu_orders table.
+    // ---------------------------------------------------------------
+    $menuOrder = json_decode(
+        DB::table('menu_orders')
+            ->where(getGuardName() == 'web' ? 'user_id' : 'client_id', getAuthenticatedUser()->id)
+            ->value('menu_order'),
+        true,
+    );
+
+    $menus = getMenus();
+    $pluginMenus = []; // Initialize safely
+
+    $pluginPath = base_path('plugins');
+
+    if (File::exists($pluginPath)) {
+        $pluginDirs = glob($pluginPath . '/*', GLOB_ONLYDIR);
+
+        foreach ($pluginDirs as $pluginDir) {
+            $pluginJsonFile = $pluginDir . '/plugin.json';
+
+            if (File::exists($pluginJsonFile)) {
+                $pluginData = json_decode(File::get($pluginJsonFile), true);
+
+                // Check if plugin is enabled
+                if (!empty($pluginData['enabled'])) {
+                    $menuFile = $pluginDir . '/menus.php';
+
+                    if (File::exists($menuFile)) {
+                        $pluginMenuItems = include $menuFile;
+
+                        if (is_array($pluginMenuItems)) {
+                            $pluginMenus = array_merge($pluginMenus, $pluginMenuItems);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Merge your core menus with plugin menus
+    $menus = array_merge($menus, $pluginMenus);
+    // Sort menus based on saved order
+    $sortedMenus = [];
+
+    if ($menuOrder) {
+        foreach ($menuOrder as $categoryData) {
+            // Ensure 'menus' key exists in categoryData
+            if (!isset($categoryData['menus']) || !is_array($categoryData['menus'])) {
+                continue;
+            }
+
+            foreach ($categoryData['menus'] as $order) {
+                if (!isset($order['id'])) {
+                    continue; // Skip if id is missing
+                }
+
+                // Find menu by ID from $menus
+                $menu = collect($menus)->firstWhere('id', $order['id']);
+                if ($menu) {
+                    // Sort submenus if present
+                    if (!empty($order['submenus'])) {
+                        $submenuIds = collect($order['submenus'])->pluck('id')->toArray();
+                        $menu['submenus'] = collect($menu['submenus'] ?? [])
+                            ->whereNotNull('id')
+                            ->sortBy(function ($submenu) use ($submenuIds) {
+                                return array_search($submenu['id'], $submenuIds) ?? PHP_INT_MAX;
+                            })
+                            ->toArray();
+                    }
+
+                    $sortedMenus[] = $menu;
+                }
+            }
+        }
+    } else {
+        // Use default order if no saved menu order
+        $sortedMenus = $menus;
+    }
+
+    // Group menus by category
+    $groupedMenus = collect($sortedMenus)->groupBy('category');
+
+    // ---------------------------------------------------------------
+    // v2 transform (presentation only): reshape the SAME menu data into
+    // a rail (one icon per category) + a context panel (per category).
+    // Permissions ($menu['show']), badges and active state all flow
+    // straight through from the data above — nothing is recomputed.
+    // ---------------------------------------------------------------
+    $tkCategoryIcons = [
+        'dashboard'                    => 'home',
+        'projects_and_task_management' => 'columns',
+        'team'                         => 'users',
+        'finance'                      => 'wallet',
+        'utilities'                    => 'list',
+        'settings'                     => 'settings',
+    ];
+    $tkIconPaths = [
+        'home'     => '<path d="M3 11 12 3l9 8"/><path d="M5 9v11h5v-7h4v7h5V9"/>',
+        'columns'  => '<path d="M4 4h6v16H4zM14 4h6v16h-6z"/>',
+        'users'    => '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M21 19c0-2-2-3.5-4-3.5"/>',
+        'wallet'   => '<path d="M3 7a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M16 13h2"/>',
+        'list'     => '<path d="M3 6h18M3 12h18M3 18h18"/>',
+        'settings' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+    ];
+
+    // helper: is a url a real navigation target (not a placeholder)?
+    $tkRealUrl = function ($url) {
+        $url = trim((string) $url);
+        return $url !== '' && stripos($url, 'javascript:') === false && $url !== '#';
+    };
+
+    // Build per-category rail + pane structures, preserving order + permissions.
+    $tkRail = [];
+    foreach ($groupedMenus as $category => $catMenus) {
+        // visible top-level menus (same rule as the legacy menu)
+        $visibleMenus = collect($catMenus)->filter(function ($menu) {
+            return !isset($menu['show']) || $menu['show'] === 1;
+        });
+        if ($visibleMenus->isEmpty()) {
+            continue;
+        }
+
+        // category active if any of its visible menus is active
+        $isActive = $visibleMenus->contains(function ($menu) {
+            return isset($menu['class']) && strpos($menu['class'], 'active') !== false;
+        });
+
+        // badge count for the rail = sum of numeric badges in the category
+        $badgeCount = 0;
+        foreach ($visibleMenus as $menu) {
+            if (!empty($menu['badge'])) {
+                $badgeCount += (int) trim(strip_tags($menu['badge']));
+            }
+        }
+
+        // pick a real landing URL (first menu, then first submenu)
+        $landing = '#';
+        foreach ($visibleMenus as $menu) {
+            if ($tkRealUrl($menu['url'] ?? '')) { $landing = $menu['url']; break; }
+            foreach ($menu['submenus'] ?? [] as $sub) {
+                if ((!isset($sub['show']) || $sub['show'] === 1) && $tkRealUrl($sub['url'] ?? '')) {
+                    $landing = $sub['url']; break 2;
+                }
+            }
+        }
+
+        $iconName = $tkCategoryIcons[$category] ?? 'list';
+        $tkRail[] = [
+            'category' => $category,
+            'label'    => get_label($category, ucfirst(str_replace('_', ' ', $category))),
+            'icon'     => $tkIconPaths[$iconName] ?? $tkIconPaths['list'],
+            'url'      => $landing,
+            'active'   => $isActive,
+            'badge'    => $badgeCount,
+            'menus'    => $visibleMenus,
+        ];
+    }
+
+    // default active = first category if none matched the current route
+    $tkActiveRow = collect($tkRail)->firstWhere('active', true);
+    $tkActive = $tkActiveRow['category'] ?? ($tkRail[0]['category'] ?? null);
+
+    $tkUserPhoto = ($user->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->photo))
+        ? asset('storage/' . $user->photo)
+        : asset('storage/photos/no-image.jpg');
+@endphp
+
+{{-- ============================ RAIL ============================ --}}
+<aside class="tk-rail" aria-label="{{ get_label('primary_navigation', 'Primary navigation') }}">
+    <a href="{{ url('home') }}" class="tk-rail-brand" title="{{ $general_settings['company_title'] ?? 'Taskify' }}">
+        <img src="{{ asset($general_settings['favicon'] ?? 'storage/logos/default_favicon.png') }}" alt="" />
+    </a>
+
+    @foreach ($tkRail as $item)
+        <a href="{{ $item['url'] }}"
+            class="tk-rail-btn"
+            data-panel="{{ $item['category'] }}"
+            data-active="{{ $item['active'] ? 'true' : 'false' }}"
+            title="{{ $item['label'] }}"
+            aria-label="{{ $item['label'] }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                {!! $item['icon'] !!}
+            </svg>
+            @if ($item['badge'] > 0)
+                <span class="tk-rail-badge">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
+            @endif
         </a>
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large d-block d-xl-none ms-auto">
-            <i class="bx bx-chevron-left bx-sm align-middle"></i>
+    @endforeach
+
+    <div class="tk-rail-foot">
+        <a href="{{ url('preferences') }}" class="tk-rail-btn" title="{{ get_label('preferences', 'Preferences') }}"
+            aria-label="{{ get_label('preferences', 'Preferences') }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                {!! $tkIconPaths['settings'] !!}
+            </svg>
+        </a>
+        <a href="{{ url('/account/' . $user->id) }}" class="tk-rail-avatar"
+            title="{{ Str::limit($user->first_name . ' ' . $user->last_name, 24) }}">
+            <img src="{{ $tkUserPhoto }}" alt="" />
         </a>
     </div>
-    <div class="btn-group dropend px-2">
-        <button type="button"
-            class="btn btn-primary {{ getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin') ? 'dropdown-toggle' : '' }}"
-            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {{ strlen($current_workspace_title) > 22 ? substr($current_workspace_title, 0, 22) . '...' : $current_workspace_title }}
-        </button>
-        @if (getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin'))
-            <ul class="dropdown-menu">
-                @if ($total_workspaces > 0)
-                    @foreach ($workspaces as $workspace)
-                        <?php $checked = $workspace->id == $current_workspace_id ? "<i class='menu-icon tf-icons bx bx-check-square text-primary'></i>" : "<i class='menu-icon tf-icons bx bx-square text-solid'></i>"; ?>
-                        <li>
-                            <a class="dropdown-item" href="{{ url('/workspaces/switch/' . $workspace->id) }}">
-                                {!! $checked !!}
-                                {{ $workspace->title }}
-                                {{-- Check if the workspace is marked as primary and display the badge --}}
-                                @if ($workspace->is_primary)
-                                    <span class="badge bg-success">{{ get_label('primary', 'Primary') }}</span>
-                                @endif
+</aside>
 
-                                {{-- Check if the workspace is the user's default and display the badge --}}
-                                @if ($user->default_workspace_id == $workspace->id)
-                                    <span class="badge bg-primary">{{ get_label('default', 'Default') }}</span>
-                                @endif
-
-                            </a>
-                        </li>
-                    @endforeach
-                    <li>
-                        <hr class="dropdown-divider" />
-                    </li>
-                @endif
-                @if ($user->can('manage_workspaces'))
-                    <li>
-                        <a class="dropdown-item" href="{{ url('workspaces') }}">
-                            <i class='menu-icon tf-icons bx bx-bar-chart-alt-2 text-success'></i>
-                            {!! get_label('manage_workspaces', 'Manage workspaces') !!}
-                            {!! $total_workspaces > 5 ? '<span class="badge bg-primary"> + ' . ($total_workspaces - 5) . '</span>' : '' !!}
-                        </a>
-                    </li>
-                    @if ($user->can('create_workspaces'))
-                        <li>
-                            <span data-bs-toggle="modal" data-bs-target="#createWorkspaceModal">
-                                <a class="dropdown-item" href="javascript:void(0);">
-                                    <i class='menu-icon tf-icons bx bx-plus text-warning'></i>
-                                    {!! get_label('create_workspace', 'Create workspace') !!}
+{{-- ====================== CONTEXT PANEL ======================= --}}
+<aside class="tk-panel" id="tk-context-panel" aria-label="{{ get_label('secondary_navigation', 'Secondary navigation') }}">
+    {{-- Workspace switcher (logic preserved from the legacy menu) --}}
+    <div class="tk-panel-head">
+        <div class="btn-group dropend tk-ws w-100">
+            <button type="button"
+                class="btn {{ getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin') ? 'dropdown-toggle' : '' }}"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="text-truncate">{{ strlen($current_workspace_title) > 20 ? substr($current_workspace_title, 0, 20) . '...' : $current_workspace_title }}</span>
+            </button>
+            @if (getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin'))
+                <ul class="dropdown-menu">
+                    @if ($total_workspaces > 0)
+                        @foreach ($workspaces as $workspace)
+                            <?php $checked = $workspace->id == $current_workspace_id ? "<i class='menu-icon tf-icons bx bx-check-square text-primary'></i>" : "<i class='menu-icon tf-icons bx bx-square text-solid'></i>"; ?>
+                            <li>
+                                <a class="dropdown-item" href="{{ url('/workspaces/switch/' . $workspace->id) }}">
+                                    {!! $checked !!}
+                                    {{ $workspace->title }}
+                                    @if ($workspace->is_primary)
+                                        <span class="badge bg-success">{{ get_label('primary', 'Primary') }}</span>
+                                    @endif
+                                    @if ($user->default_workspace_id == $workspace->id)
+                                        <span class="badge bg-primary">{{ get_label('default', 'Default') }}</span>
+                                    @endif
                                 </a>
-                            </span>
-                        </li>
+                            </li>
+                        @endforeach
+                        <li><hr class="dropdown-divider" /></li>
                     @endif
-                    @if ($user->can('edit_workspaces'))
+                    @if ($user->can('manage_workspaces'))
                         <li>
-                            <a class="dropdown-item edit-workspace" href="javascript:void(0);"
-                                data-id="{{ getWorkspaceId() }}">
-                                <i class='menu-icon tf-icons bx bx-edit text-primary'></i>
-                                {!! get_label('edit_workspace', 'Edit workspace') !!}
+                            <a class="dropdown-item" href="{{ url('workspaces') }}">
+                                <i class='menu-icon tf-icons bx bx-bar-chart-alt-2 text-success'></i>
+                                {!! get_label('manage_workspaces', 'Manage workspaces') !!}
+                                {!! $total_workspaces > 5 ? '<span class="badge bg-primary"> + ' . ($total_workspaces - 5) . '</span>' : '' !!}
+                            </a>
+                        </li>
+                        @if ($user->can('create_workspaces'))
+                            <li>
+                                <span data-bs-toggle="modal" data-bs-target="#createWorkspaceModal">
+                                    <a class="dropdown-item" href="javascript:void(0);">
+                                        <i class='menu-icon tf-icons bx bx-plus text-warning'></i>
+                                        {!! get_label('create_workspace', 'Create workspace') !!}
+                                    </a>
+                                </span>
+                            </li>
+                        @endif
+                        @if ($user->can('edit_workspaces'))
+                            <li>
+                                <a class="dropdown-item edit-workspace" href="javascript:void(0);" data-id="{{ getWorkspaceId() }}">
+                                    <i class='menu-icon tf-icons bx bx-edit text-primary'></i>
+                                    {!! get_label('edit_workspace', 'Edit workspace') !!}
+                                </a>
+                            </li>
+                        @endif
+                    @endif
+                    @if ($current_workspace)
+                        <li>
+                            <a class="dropdown-item" href="#" id="remove-participant">
+                                <i class='menu-icon tf-icons bx bx-exit text-danger'></i>
+                                {!! get_label('remove_me_from_workspace', 'Remove me from workspace') !!}
                             </a>
                         </li>
                     @endif
-                @endif
-                @if ($current_workspace)
-                    <li>
-                        <a class="dropdown-item" href="#" id="remove-participant">
-                            <i class='menu-icon tf-icons bx bx-exit text-danger'></i>
-                            {!! get_label('remove_me_from_workspace', 'Remove me from workspace') !!}
-                        </a>
-                    </li>
-                @endif
-            </ul>
-        @endif
-    </div>
-
-    <div class="px-2 pt-3">
-        <div class="input-group input-group-merge">
-            <input type="text" id="menu-search" class="form-control custom-search-input"
-                placeholder="{{ get_label('search_menu', 'Search Menu...') }}">
+                </ul>
+            @endif
         </div>
     </div>
 
-    <ul class="menu-inner pb-1">
-        <hr class="dropdown-divider" />
+    {{-- Menu search (filters the active pane, behaviour wired in custom.js) --}}
+    <div class="tk-panel-search">
+        <input type="text" id="menu-search" class="custom-search-input" autocomplete="off"
+            placeholder="{{ get_label('search_menu', 'Search Menu...') }}">
+    </div>
 
-        @php
-            $menuOrder = json_decode(
-                DB::table('menu_orders')
-                    ->where(getGuardName() == 'web' ? 'user_id' : 'client_id', getAuthenticatedUser()->id)
-                    ->value('menu_order'),
-                true,
-            );
+    {{-- Per-category panes --}}
+    <div class="tk-panel-body">
+        @foreach ($tkRail as $item)
+            <div class="tk-panel-pane" data-panel="{{ $item['category'] }}" @if ($item['category'] !== $tkActive) hidden @endif>
+                <div class="tk-panel-title">{{ $item['label'] }}</div>
 
-            $menus = getMenus();
-            // dd($menuOrder, $menus);
-            $pluginMenus = []; // Initialize safely
+                @foreach ($item['menus'] as $menu)
+                    @php
+                        $menuActive = isset($menu['class']) && strpos($menu['class'], 'active') !== false;
+                        $visibleSubs = collect($menu['submenus'] ?? [])->filter(function ($sub) {
+                            return !isset($sub['show']) || $sub['show'] === 1;
+                        });
+                    @endphp
 
-            $pluginPath = base_path('plugins');
-
-            if (File::exists($pluginPath)) {
-                $pluginDirs = glob($pluginPath . '/*', GLOB_ONLYDIR);
-
-                foreach ($pluginDirs as $pluginDir) {
-                    $pluginJsonFile = $pluginDir . '/plugin.json';
-
-                    if (File::exists($pluginJsonFile)) {
-                        $pluginData = json_decode(File::get($pluginJsonFile), true);
-
-                        // Check if plugin is enabled
-                        if (!empty($pluginData['enabled'])) {
-                            $menuFile = $pluginDir . '/menus.php';
-
-                            if (File::exists($menuFile)) {
-                                $pluginMenuItems = include $menuFile;
-
-                                if (is_array($pluginMenuItems)) {
-                                    $pluginMenus = array_merge($pluginMenus, $pluginMenuItems);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Merge your core menus with plugin menus
-            $menus = array_merge($menus, $pluginMenus);
-            // Sort menus based on saved order
-            $sortedMenus = [];
-
-            if ($menuOrder) {
-                foreach ($menuOrder as $categoryData) {
-                    // Ensure 'menus' key exists in categoryData
-                    if (!isset($categoryData['menus']) || !is_array($categoryData['menus'])) {
-                        continue;
-                    }
-
-                    foreach ($categoryData['menus'] as $order) {
-                        if (!isset($order['id'])) {
-                            continue; // Skip if id is missing
-                        }
-
-                        // Find menu by ID from $menus
-                        $menu = collect($menus)->firstWhere('id', $order['id']);
-                        if ($menu) {
-                            // Sort submenus if present
-                            if (!empty($order['submenus'])) {
-                                $submenuIds = collect($order['submenus'])->pluck('id')->toArray();
-                                $menu['submenus'] = collect($menu['submenus'] ?? [])
-                                    ->whereNotNull('id')
-                                    ->sortBy(function ($submenu) use ($submenuIds) {
-                                        return array_search($submenu['id'], $submenuIds) ?? PHP_INT_MAX;
-                                    })
-                                    ->toArray();
-                            }
-
-                            $sortedMenus[] = $menu;
-                        }
-                    }
-                }
-            } else {
-                // Use default order if no saved menu order
-                $sortedMenus = $menus;
-            }
-
-            // Group menus by category
-            $groupedMenus = collect($sortedMenus)->groupBy('category');
-        @endphp
-
-        @foreach ($groupedMenus as $category => $menus)
-            @php
-                // Filter out empty categories
-                $filteredMenus = collect($menus)->filter(function ($menu) {
-                    return !isset($menu['show']) || $menu['show'] === 1;
-                });
-            @endphp
-
-            @if ($filteredMenus->isNotEmpty())
-                <!-- Category Header -->
-                <li class="menu-header small text-uppercase">
-                    <span class="menu-header-text">
-                        {{ get_label($category, ucfirst(str_replace('_', ' ', $category))) }}
-                    </span>
-                </li>
-
-                @foreach ($filteredMenus as $menu)
-                    <li class="{{ $menu['class'] }}">
-                        <a href="{{ $menu['url'] ?? 'javascript:void(0)' }}"
-                            class="menu-link {{ isset($menu['submenus']) ? 'menu-toggle' : '' }}">
-                            <i class="menu-icon tf-icons {{ $menu['icon'] }}"></i>
-                            <div>
-                                {{ $menu['label'] }}
-                                @if (isset($menu['badge']) && $menu['badge'])
-                                    {!! $menu['badge'] !!}
-                                @endif
-                            </div>
+                    @if ($visibleSubs->isNotEmpty())
+                        <div class="tk-panel-group">
+                            <div class="tk-panel-label">{{ $menu['label'] }}</div>
+                            @foreach ($visibleSubs as $sub)
+                                @php $subActive = isset($sub['class']) && strpos($sub['class'], 'active') !== false; @endphp
+                                <a class="tk-panel-item" href="{{ $sub['url'] ?? 'javascript:void(0)' }}"
+                                    data-active="{{ $subActive ? 'true' : 'false' }}">
+                                    <span>{{ $sub['label'] }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <a class="tk-panel-item" href="{{ $menu['url'] ?? 'javascript:void(0)' }}"
+                            data-active="{{ $menuActive ? 'true' : 'false' }}">
+                            @if (!empty($menu['icon']))<i class="{{ $menu['icon'] }}"></i>@endif
+                            <span>{{ $menu['label'] }}</span>
+                            @if (!empty($menu['badge'])){!! $menu['badge'] !!}@endif
                         </a>
-
-                        @if (isset($menu['submenus']))
-                            <ul class="menu-sub">
-                                @foreach ($menu['submenus'] as $submenu)
-                                    @if (!isset($submenu['show']) || $submenu['show'] === 1)
-                                        <li class="{{ $submenu['class'] }}">
-                                            <a href="{{ $submenu['url'] }}" class="menu-link">
-                                                <div>{{ $submenu['label'] }}</div>
-                                            </a>
-                                        </li>
-                                    @endif
-                                @endforeach
-                            </ul>
-                        @endif
-                    </li>
+                    @endif
                 @endforeach
-            @endif
+            </div>
         @endforeach
-    </ul>
-
-
-
-
+    </div>
 </aside>

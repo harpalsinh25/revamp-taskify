@@ -6760,3 +6760,231 @@ $(document).ready(function () {
     // Initialize by checking URL for modal parameters
     checkUrlForModal();
 });
+
+/* =====================================================================
+   TASKIFY v2 "Graphite Studio" — app shell behaviour (rail + panel).
+   - Hovering a rail icon previews that category's pane; leaving the rail
+     restores the active pane.
+   - The menu search filters items within the currently visible pane.
+   - On <xl screens the rail toggles the collapsed context panel.
+   ===================================================================== */
+(function () {
+    "use strict";
+
+    function initTaskifyShell() {
+        var rail = document.querySelector(".tk-rail");
+        var panel = document.querySelector(".tk-panel");
+        if (!rail || !panel) return;
+
+        var panes = panel.querySelectorAll(".tk-panel-pane");
+        var activePane = panel.querySelector(".tk-panel-pane:not([hidden])");
+        var activeKey = activePane ? activePane.getAttribute("data-panel") : null;
+
+        function showPane(key) {
+            panes.forEach(function (p) {
+                if (p.getAttribute("data-panel") === key) {
+                    p.removeAttribute("hidden");
+                } else {
+                    p.setAttribute("hidden", "");
+                }
+            });
+        }
+
+        var railButtons = rail.querySelectorAll(".tk-rail-btn[data-panel]");
+        var isCompact = function () { return window.matchMedia("(max-width: 1199.98px)").matches; };
+
+        railButtons.forEach(function (btn) {
+            var key = btn.getAttribute("data-panel");
+
+            // Desktop: preview pane on hover.
+            btn.addEventListener("mouseenter", function () {
+                if (!isCompact()) showPane(key);
+            });
+
+            // Compact: tapping the rail opens that pane in the slide-over panel
+            // (instead of navigating) so the submenu is reachable on phones.
+            btn.addEventListener("click", function (e) {
+                if (isCompact()) {
+                    e.preventDefault();
+                    showPane(key);
+                    document.body.classList.add("tk-panel-open");
+                }
+            });
+        });
+
+        // Restore the route's active pane when the pointer leaves the rail.
+        rail.addEventListener("mouseleave", function () {
+            if (!isCompact() && activeKey) showPane(activeKey);
+        });
+
+        // Close the slide-over panel when clicking the page content / scrim
+        // (compact only). The burger is excluded so its own click can open it.
+        document.addEventListener("click", function (e) {
+            if (!isCompact()) return;
+            if (
+                !e.target.closest(".tk-panel") &&
+                !e.target.closest(".tk-rail") &&
+                !e.target.closest(".tk-cbar-burger")
+            ) {
+                document.body.classList.remove("tk-panel-open");
+            }
+        });
+
+        // Menu search: filter items inside the visible pane.
+        var search = document.getElementById("menu-search");
+        if (search) {
+            search.addEventListener("input", function () {
+                var q = this.value.trim().toLowerCase();
+                var pane = panel.querySelector(".tk-panel-pane:not([hidden])");
+                if (!pane) return;
+                pane.querySelectorAll(".tk-panel-item").forEach(function (item) {
+                    var text = item.textContent.trim().toLowerCase();
+                    item.style.display = (!q || text.indexOf(q) !== -1) ? "" : "none";
+                });
+                pane.querySelectorAll(".tk-panel-group").forEach(function (group) {
+                    var anyVisible = Array.prototype.some.call(
+                        group.querySelectorAll(".tk-panel-item"),
+                        function (it) { return it.style.display !== "none"; }
+                    );
+                    group.style.display = anyVisible ? "" : "none";
+                });
+            });
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initTaskifyShell);
+    } else {
+        initTaskifyShell();
+    }
+})();
+
+/* =====================================================================
+   TASKIFY v2 — command bar behaviour: light/dark theme toggle and the
+   mobile burger that opens the context panel. Theme is stored in
+   localStorage and applied to both the design system (data-theme) and
+   Bootstrap 5.3 components (data-bs-theme).
+   ===================================================================== */
+(function () {
+    "use strict";
+
+    var STORAGE_KEY = "taskify.theme";
+
+    function applyTheme(theme) {
+        var el = document.documentElement;
+        el.setAttribute("data-theme", theme);
+        el.setAttribute("data-bs-theme", theme);
+    }
+
+    function currentTheme() {
+        return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    }
+
+    function initCbar() {
+        var toggle = document.getElementById("tk-theme-toggle");
+        if (toggle) {
+            toggle.addEventListener("click", function () {
+                var next = currentTheme() === "dark" ? "light" : "dark";
+                applyTheme(next);
+                try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
+            });
+        }
+
+        // Mobile burger opens / closes the context panel.
+        document.querySelectorAll(".tk-cbar-burger").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.body.classList.toggle("tk-panel-open");
+            });
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initCbar);
+    } else {
+        initCbar();
+    }
+})();
+
+/* =====================================================================
+   TASKIFY v2 — Global search command palette (#globalSearchModal #tk-pal)
+   Lists every permission-gated menu. Typing filters the list; Arrow keys
+   move the highlight; Enter navigates. Mirrors the kit palette behaviour
+   and runs alongside the existing AJAX content search.
+   ===================================================================== */
+(function () {
+    "use strict";
+
+    function initPalette() {
+        var modal = document.getElementById("globalSearchModal");
+        if (!modal) return;
+        var input = modal.querySelector("#modalSearchInput");
+        var pal = modal.querySelector("#tk-pal");
+        if (!input || !pal) return;
+        var empty = modal.querySelector("#tk-pal-empty");
+
+        function items() { return Array.prototype.slice.call(pal.querySelectorAll(".tk-pal-item")); }
+        function visibleItems() { return items().filter(function (it) { return it.style.display !== "none"; }); }
+        function clearActive() { items().forEach(function (it) { it.removeAttribute("data-active"); }); }
+        function setActive(it) {
+            clearActive();
+            if (it) { it.setAttribute("data-active", "true"); it.scrollIntoView({ block: "nearest" }); }
+        }
+
+        function filter() {
+            var q = (input.value || "").trim().toLowerCase();
+            var anyVisible = false;
+            items().forEach(function (it) {
+                var text = it.getAttribute("data-text") || it.textContent.toLowerCase();
+                var match = !q || text.indexOf(q) !== -1;
+                it.style.display = match ? "" : "none";
+                if (match) anyVisible = true;
+            });
+            pal.querySelectorAll(".tk-pal-group").forEach(function (group) {
+                var groupVisible = Array.prototype.some.call(
+                    group.querySelectorAll(".tk-pal-item"),
+                    function (it) { return it.style.display !== "none"; }
+                );
+                group.style.display = groupVisible ? "" : "none";
+            });
+            if (empty) empty.hidden = true;
+            // Collapse the palette entirely when no menu matches, so the AJAX
+            // content results below can speak for themselves.
+            pal.style.display = anyVisible ? "" : "none";
+            setActive(visibleItems()[0] || null);
+        }
+
+        input.addEventListener("input", filter);
+
+        input.addEventListener("keydown", function (e) {
+            var vis = visibleItems();
+            if (!vis.length) return;
+            var idx = vis.findIndex(function (it) { return it.getAttribute("data-active") === "true"; });
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setActive(vis[Math.min(idx + 1, vis.length - 1)] || vis[0]);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setActive(vis[Math.max(idx - 1, 0)] || vis[vis.length - 1]);
+            } else if (e.key === "Enter") {
+                var target = vis[idx] || vis[0];
+                if (target && target.getAttribute("href")) {
+                    e.preventDefault();
+                    window.location.href = target.getAttribute("href");
+                }
+            }
+        });
+
+        // Reset filter + highlight each time the modal opens.
+        if (window.jQuery) {
+            window.jQuery(modal).on("shown.bs.modal", function () { filter(); input.focus(); });
+        }
+        filter();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initPalette);
+    } else {
+        initPalette();
+    }
+})();

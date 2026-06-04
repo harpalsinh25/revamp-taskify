@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr"  data-template="vertical-menu-template" data-bs-theme="light"
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr"  data-template="vertical-menu-template" data-bs-theme="light" data-theme="light"
     data-assets-path="{{ asset('assets/') }}" data-template="vertical-menu-template-free">
 
 <head>
     <meta charset="utf-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    {{-- Taskify v2: apply stored light/dark theme before first paint (no flash) --}}
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem("taskify.theme");
+                if (t === "dark" || t === "light") {
+                    document.documentElement.setAttribute("data-theme", t);
+                    document.documentElement.setAttribute("data-bs-theme", t);
+                }
+            } catch (e) {}
+        })();
+    </script>
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>@yield('title') - {{ $general_settings['company_title'] ?? 'Taskify' }}</title>
@@ -79,7 +91,7 @@
     @laravelPWA
 </head>
 
-<body>
+<body class="v2-shell">
 
     <!-- Layout wrapper -->
     @if (Request::is('forgot-password') ||

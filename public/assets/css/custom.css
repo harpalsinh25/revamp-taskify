@@ -1,3 +1,7 @@
+/* Taskify v2 design-system fonts (Inter + JetBrains Mono), used by the
+   new shell chrome and the global search palette. Must precede all rules. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 /* ============================================================================
    CSS VARIABLES & ROOT STYLES
    ============================================================================ */
@@ -3179,3 +3183,521 @@ html:not([dir="rtl"]) .timeline-item {
         margin-bottom: 1rem;
     }
 }
+
+/* =====================================================================
+   TASKIFY v2 "Graphite Studio" — App shell chrome (rail + context panel)
+   Additive & scoped. Design source: "Taskify Revamp Kit/". All new
+   classes are prefixed tk-* and structural overrides apply only under
+   body.v2-shell, so non-chrome pages (login, print) are untouched.
+   ===================================================================== */
+:root {
+    --signal:      oklch(0.88 0.20 130);
+    --signal-fg:   oklch(0.18 0.02 130);
+    --signal-glow: oklch(0.88 0.20 130 / 0.35);
+    --ok:   oklch(0.70 0.16 155);
+    --warn: oklch(0.78 0.16 80);
+    --err:  oklch(0.65 0.22 25);
+    --info: oklch(0.68 0.14 235);
+
+    --bg-0: oklch(1 0 0);
+    --bg-1: oklch(0.985 0.002 280);
+    --bg-2: oklch(0.97 0.003 280);
+    --bg-3: oklch(0.945 0.005 280);
+    --line:   oklch(0.92 0.005 280);
+    --line-2: oklch(0.86 0.008 280);
+
+    --fg-0: oklch(0.16 0.012 280);
+    --fg-1: oklch(0.32 0.010 280);
+    --fg-2: oklch(0.50 0.008 280);
+    --fg-3: oklch(0.65 0.006 280);
+
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --r-2: 5px;
+    --t-1: 100ms;
+    --t-2: 160ms;
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+    --rail-w: 56px;
+    --panel-w: 232px;
+
+    --fs-base: 13px;
+    --tracking-snug: -0.01em;
+    --tracking-wide: 0.06em;
+}
+
+[data-theme="dark"] {
+    --bg-0: oklch(0.135 0.008 280);
+    --bg-1: oklch(0.165 0.010 280);
+    --bg-2: oklch(0.195 0.012 280);
+    --bg-3: oklch(0.225 0.014 280);
+    --line:   oklch(0.26 0.014 280);
+    --line-2: oklch(0.34 0.018 280);
+    --fg-0: oklch(0.97 0.005 280);
+    --fg-1: oklch(0.78 0.008 280);
+    --fg-2: oklch(0.58 0.010 280);
+    --fg-3: oklch(0.42 0.012 280);
+}
+
+/* ---- Shell layout: rail + panel fixed at the left, page offset ---- */
+body.v2-shell .tk-rail,
+body.v2-shell .tk-panel { position: fixed; top: 0; bottom: 0; z-index: 1040; }
+body.v2-shell .tk-rail  { left: 0; }
+body.v2-shell .tk-panel { left: var(--rail-w); }
+body.v2-shell .layout-page {
+    padding-left: calc(var(--rail-w) + var(--panel-w)) !important;
+    transition: padding-left var(--t-2) var(--ease);
+}
+
+/* ---- RAIL (left icon sidebar) ---- */
+.tk-rail {
+    width: var(--rail-w); background: var(--bg-0);
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px 0; gap: 4px;
+}
+.tk-rail-brand {
+    width: 34px; height: 34px; border-radius: var(--r-2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; margin-bottom: 8px; background: var(--bg-2);
+}
+.tk-rail-brand img { width: 100%; height: 100%; object-fit: contain; }
+.tk-rail-btn {
+    position: relative; width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--r-2); color: var(--fg-2); isolation: isolate;
+    transition: color var(--t-1); cursor: pointer;
+}
+.tk-rail-btn svg { position: relative; z-index: 2; transition: transform var(--t-2) var(--ease); }
+.tk-rail-btn:hover { color: var(--fg-0); }
+.tk-rail-btn:hover svg { transform: scale(1.08); }
+.tk-rail-btn:not([data-active="true"]):hover::before {
+    content: ''; position: absolute; inset: 4px; border-radius: 8px; background: var(--bg-2); z-index: 0;
+}
+.tk-rail-btn[data-active="true"] { color: var(--fg-0); }
+.tk-rail-btn[data-active="true"]::before {
+    content: ''; position: absolute; inset: 4px; border-radius: 8px;
+    background: linear-gradient(180deg, var(--bg-3), var(--bg-2));
+    box-shadow: inset 0 0 0 1px var(--line-2); z-index: 0;
+}
+.tk-rail-btn[data-active="true"]::after {
+    content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 18px; background: var(--signal); border-radius: 2px;
+    box-shadow: 0 0 8px var(--signal-glow); z-index: 0;
+}
+.tk-rail-badge {
+    position: absolute; top: 1px; right: 1px; min-width: 14px; height: 14px; padding: 0 3px;
+    background: var(--err); color: #fff; border-radius: 7px; font-size: 9px; font-weight: 700;
+    font-family: var(--font-mono); display: flex; align-items: center; justify-content: center; z-index: 3;
+}
+.tk-rail-foot { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.tk-rail-avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; display: block; }
+.tk-rail-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- CONTEXT PANEL (per-module submenu) ---- */
+.tk-panel {
+    width: var(--panel-w); background: var(--bg-1); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; overflow: visible;
+}
+.tk-panel-head { padding: 10px 12px 4px; }
+.tk-panel-search { padding: 6px 12px 8px; border-bottom: 1px solid var(--line); }
+.tk-panel-search input {
+    width: 100%; height: 30px; padding: 0 10px; font-size: var(--fs-base);
+    background: var(--bg-0); border: 1px solid var(--line); border-radius: var(--r-2); color: var(--fg-0);
+}
+.tk-panel-search input::placeholder { color: var(--fg-3); }
+.tk-panel-search input:focus { outline: none; border-color: var(--line-2); }
+.tk-panel-body { flex: 1; overflow: auto; padding: 6px 8px 16px; }
+.tk-panel-pane[hidden] { display: none; }
+.tk-panel-title {
+    font-size: var(--fs-base); font-weight: 600; color: var(--fg-0);
+    letter-spacing: var(--tracking-snug); padding: 8px 8px 4px;
+}
+.tk-panel-group { padding: 2px 0 8px; }
+.tk-panel-label {
+    font-family: var(--font-mono); font-size: 10px; color: var(--fg-3);
+    text-transform: uppercase; letter-spacing: var(--tracking-wide);
+    padding: 8px 8px 4px; font-weight: 500;
+}
+.tk-panel-item {
+    width: 100%; display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: 4px; min-height: 28px;
+    font-size: var(--fs-base); color: var(--fg-1); text-align: left;
+    text-decoration: none; transition: background var(--t-1), color var(--t-1); cursor: pointer;
+}
+.tk-panel-item:hover { background: var(--bg-2); color: var(--fg-0); }
+.tk-panel-item[data-active="true"] { background: var(--bg-3); color: var(--fg-0); font-weight: 500; }
+.tk-panel-item > span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tk-panel-item i.bx { font-size: 16px; color: var(--fg-2); flex: 0 0 auto; }
+.tk-panel-item:hover i.bx,
+.tk-panel-item[data-active="true"] i.bx { color: var(--fg-0); }
+.tk-panel-item .badge { flex: 0 0 auto; }
+
+/* Workspace switcher inside the panel head */
+.tk-ws { width: 100%; }
+.tk-ws > .btn {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    background: var(--bg-0); border: 1px solid var(--line); color: var(--fg-0);
+    font-size: var(--fs-base); font-weight: 600; padding: 7px 10px; border-radius: var(--r-2);
+}
+.tk-ws > .btn::after { margin-left: auto; }
+.tk-ws > .btn:hover { border-color: var(--line-2); }
+
+/* Responsive: collapse the context panel below xl, rail stays */
+@media (max-width: 1199.98px) {
+    body.v2-shell .tk-panel { transform: translateX(-100%); transition: transform var(--t-2) var(--ease); }
+    body.v2-shell .layout-page { padding-left: var(--rail-w) !important; }
+    body.v2-shell.tk-panel-open .tk-panel { transform: none; }
+}
+
+/* =====================================================================
+   TASKIFY v2 — Command bar (top header / cbar). Restyles the navbar
+   while preserving every control (search, notifications, language, user).
+   ===================================================================== */
+.tk-cbar {
+    position: sticky; top: 0; z-index: 1030;
+    display: flex; align-items: center; gap: 12px;
+    height: 48px; padding: 0 16px;
+    background: var(--bg-0); border-bottom: 1px solid var(--line);
+}
+.tk-cbar-burger {
+    display: none; width: 32px; height: 32px; flex: 0 0 auto;
+    align-items: center; justify-content: center;
+    border: 0; background: transparent; color: var(--fg-2);
+    border-radius: var(--r-2); cursor: pointer;
+}
+.tk-cbar-burger:hover { background: var(--bg-2); color: var(--fg-0); }
+.tk-cbar-crumb { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--fg-2); min-width: 0; }
+.tk-cbar-ws {
+    background: var(--signal); color: var(--signal-fg);
+    font-size: 10px; font-weight: 700; font-family: var(--font-mono);
+    padding: 2px 5px; border-radius: 3px; flex: 0 0 auto;
+}
+.tk-cbar-sep { color: var(--fg-3); flex: 0 0 auto; }
+.tk-cbar-crumb-title {
+    color: var(--fg-0); font-weight: 600; text-transform: capitalize;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+
+/* search trigger (opens #globalSearchModal via #global-search) */
+.tk-cbar-search {
+    display: flex; align-items: center; gap: 8px;
+    flex: 0 1 320px; height: 30px; padding: 0 10px; margin-left: auto;
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-2);
+    color: var(--fg-3); font-size: 12.5px; cursor: pointer;
+    transition: border-color var(--t-1);
+}
+.tk-cbar-search:hover { border-color: var(--line-2); color: var(--fg-2); }
+.tk-cbar-search-text { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tk-kbd {
+    font-family: var(--font-mono); font-size: 10px; color: var(--fg-2);
+    background: var(--bg-2); border: 1px solid var(--line); border-bottom-width: 2px;
+    border-radius: 4px; padding: 1px 5px; flex: 0 0 auto;
+}
+
+/* action icon buttons */
+.tk-cbar-actions { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+.tk-icon-btn {
+    position: relative; width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--r-2); color: var(--fg-2);
+    background: transparent; border: 0; cursor: pointer; text-decoration: none;
+    transition: background var(--t-1), color var(--t-1);
+}
+.tk-icon-btn:hover { background: var(--bg-2); color: var(--fg-0); }
+.tk-cbar-divider { width: 1px; height: 18px; background: var(--line); margin: 0 6px; flex: 0 0 auto; }
+
+/* notification count badge sits on the bell */
+.tk-icon-btn .badge-notifications {
+    position: absolute; top: 1px; right: 1px;
+    min-width: 15px; height: 15px; padding: 0 3px; font-size: 9px; line-height: 15px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* language switcher name */
+.tk-cbar .tk-lang-name { font-size: 12px; color: var(--fg-1); }
+
+/* user pill */
+.tk-cbar-user {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 8px 3px 3px; border-radius: 999px;
+    color: var(--fg-1); cursor: pointer; text-decoration: none;
+    transition: background var(--t-1);
+}
+.tk-cbar-user:hover { background: var(--bg-2); }
+.tk-cbar-user img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+.tk-cbar-username { font-size: 12.5px; font-weight: 600; color: var(--fg-0); }
+
+/* theme toggle: show exactly one icon (the state you can switch TO) */
+.tk-ico-moon, .tk-ico-sun { align-items: center; justify-content: center; line-height: 0; }
+.tk-ico-moon { display: inline-flex; }   /* light mode → show moon */
+.tk-ico-sun  { display: none; }
+[data-theme="dark"] .tk-ico-moon { display: none; }      /* dark mode → show sun */
+[data-theme="dark"] .tk-ico-sun  { display: inline-flex; }
+
+/* In dark mode, let Bootstrap dropdown menus follow our surfaces */
+[data-theme="dark"] .dropdown-menu {
+    background: var(--bg-1); border-color: var(--line); color: var(--fg-1);
+}
+[data-theme="dark"] .dropdown-menu .dropdown-item { color: var(--fg-1); }
+[data-theme="dark"] .dropdown-menu .dropdown-item:hover { background: var(--bg-2); color: var(--fg-0); }
+[data-theme="dark"] .dropdown-divider { border-color: var(--line); }
+
+@media (max-width: 1199.98px) {
+    body.v2-shell .tk-cbar-burger { display: inline-flex; }
+}
+@media (max-width: 640px) {
+    .tk-cbar-search-text, .tk-kbd { display: none; }
+    .tk-cbar-search { flex: 0 0 32px; width: 32px; padding: 0; justify-content: center; margin-left: auto; }
+    .tk-cbar-crumb-title, .tk-cbar-username, .tk-lang-name { display: none; }
+}
+
+/* =====================================================================
+   TASKIFY v2 — Mobile / responsive shell behaviour
+   < 1200px: context panel becomes a slide-over above the content, with a
+   dismissible scrim. The rail stays as a fixed quick-nav strip.
+   ===================================================================== */
+@media (max-width: 1199.98px) {
+    /* Slide-over panel sits above the rail and content */
+    body.v2-shell .tk-panel {
+        top: 0; bottom: 0; z-index: 1045;
+        box-shadow: var(--shadow-3, 0 8px 24px rgba(0,0,0,.18));
+    }
+
+    /* Dismissible scrim behind the open panel (click anywhere to close) */
+    body.v2-shell.tk-panel-open::before {
+        content: ''; position: fixed; inset: 0; z-index: 1042;
+        background: oklch(0 0 0 / 0.42);
+        animation: tk-fade-in var(--t-2) var(--ease);
+    }
+}
+@keyframes tk-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Tablet / small: tighten the command bar spacing */
+@media (max-width: 991.98px) {
+    .tk-cbar { gap: 8px; padding: 0 12px; }
+    .tk-cbar-actions { gap: 0; }
+}
+
+/* Phones: drop the breadcrumb separator, keep just the workspace chip */
+@media (max-width: 480px) {
+    .tk-cbar { padding: 0 10px; }
+    .tk-cbar-sep { display: none; }
+    .tk-cbar-divider { display: none; }
+    /* Full-bleed slide-over panel for very narrow screens */
+    body.v2-shell .tk-panel { width: min(86vw, 320px); }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    body.v2-shell .tk-panel,
+    body.v2-shell .layout-page,
+    .tk-rail-btn, .tk-rail-btn svg { transition: none !important; }
+    body.v2-shell.tk-panel-open::before { animation: none; }
+}
+
+/* =====================================================================
+   TASKIFY v2 — Global search modal (#globalSearchModal) restyled to the
+   command-palette design system. Scoped to the modal id only, so no other
+   modal is touched and every JS hook/id/class is preserved.
+   ===================================================================== */
+#globalSearchModal .modal-dialog {
+    max-width: 600px;
+    margin: 8vh auto auto;
+}
+#globalSearchModal .modal-content {
+    background: var(--bg-1);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-3, 8px);
+    box-shadow: var(--shadow-4, 0 24px 48px rgba(0,0,0,.28));
+    overflow: hidden;
+    max-height: 78vh;
+}
+
+/* Kit typography (Inter) for the search palette + shell chrome, so labels
+   read in the toolkit font instead of the app's default. Mono accents keep
+   their JetBrains Mono via --font-mono. */
+#globalSearchModal,
+.tk-rail, .tk-panel, .tk-cbar, .tk-pal { font-family: var(--font-sans); }
+#globalSearchModal .tk-pal-label,
+#globalSearchModal .tk-search-input { font-family: var(--font-sans); }
+
+/* Palette-style search row (icon · borderless input · ESC · close) */
+#globalSearchModal .tk-search-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+}
+#globalSearchModal .tk-search-row-icon { color: var(--fg-3); flex: 0 0 auto; }
+#globalSearchModal .tk-search-input {
+    flex: 1 1 auto; min-width: 0;
+    background: transparent; border: 0; outline: none; box-shadow: none;
+    font-size: 15px; color: var(--fg-0); padding: 3px 0;
+}
+#globalSearchModal .tk-search-input::placeholder { color: var(--fg-3); }
+#globalSearchModal .tk-search-row .tk-kbd { flex: 0 0 auto; }
+#globalSearchModal .tk-search-close {
+    flex: 0 0 auto;
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; border: 0; border-radius: var(--r-2);
+    color: var(--fg-3); cursor: pointer;
+    transition: background var(--t-1), color var(--t-1);
+}
+#globalSearchModal .tk-search-close:hover { background: var(--bg-2); color: var(--fg-0); }
+
+/* Tabs (nav-pills) → clean segmented control. Forced over Sneat's
+   !important primary styles so the active pill uses the design accent. */
+#globalSearchModal .search-tabs .nav-pills {
+    background: var(--bg-2) !important;
+    border-radius: var(--r-2);
+    gap: 2px; padding: 3px !important;
+}
+#globalSearchModal .search-tabs .nav-link {
+    color: var(--fg-2) !important;
+    background: transparent !important;
+    font-size: 12px !important; font-weight: 500 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    transition: background var(--t-1), color var(--t-1);
+}
+#globalSearchModal .search-tabs .nav-link:hover {
+    color: var(--fg-0) !important; background: var(--bg-0) !important;
+}
+#globalSearchModal .search-tabs .nav-link.active {
+    color: var(--signal-fg) !important;
+    background: var(--signal) !important;
+}
+#globalSearchModal .search-tabs .nav-link .badge {
+    background: var(--bg-3) !important; color: var(--fg-2) !important;
+    font-family: var(--font-mono); font-weight: 600;
+}
+#globalSearchModal .search-tabs .nav-link.active .badge {
+    background: oklch(0 0 0 / 0.18) !important; color: var(--signal-fg) !important;
+}
+#globalSearchModal .search-tabs .border-bottom { border-color: var(--line) !important; }
+
+/* Section headings */
+#globalSearchModal h6 {
+    color: var(--fg-3) !important;
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-wide);
+}
+#globalSearchModal .popular-section i.bx-star { color: var(--warn) !important; }
+
+/* Quick-access buttons → neutral design-system surfaces */
+#globalSearchModal .popular-section .btn {
+    background: var(--bg-0) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-1) !important;
+    border-radius: var(--r-2) !important;
+    transition: background var(--t-1), border-color var(--t-1);
+}
+#globalSearchModal .popular-section .btn:hover {
+    background: var(--bg-2) !important;
+    border-color: var(--line-2) !important;
+    color: var(--fg-0) !important;
+}
+
+/* Recent searches chips (rendered by navbar.js as .recent-search) */
+#globalSearchModal .recent-search {
+    background: var(--bg-2) !important;
+    color: var(--fg-1) !important;
+    border: 1px solid var(--line) !important;
+    cursor: pointer;
+}
+#globalSearchModal .recent-search:hover { background: var(--bg-3) !important; color: var(--fg-0) !important; }
+
+/* Results list */
+#globalSearchModal #searchResultsList {
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important;
+    background: var(--bg-0);
+}
+#globalSearchModal .search-category-header {
+    background: var(--bg-2) !important;
+    border-bottom: 1px solid var(--line) !important;
+}
+#globalSearchModal .search-category-header small { color: var(--fg-2) !important; }
+#globalSearchModal .search-category-header .badge { background: var(--signal) !important; color: var(--signal-fg) !important; }
+#globalSearchModal .search-result-item {
+    padding: 8px 12px !important;
+    gap: 10px !important;
+    border-bottom: 1px solid var(--line) !important;
+    color: var(--fg-1) !important;
+    transition: background var(--t-1);
+}
+#globalSearchModal .search-result-item:last-child { border-bottom: 0 !important; }
+#globalSearchModal .search-result-item:hover,
+#globalSearchModal .search-result-item.active { background: var(--bg-2) !important; }
+#globalSearchModal .search-result-item .result-title {
+    color: var(--fg-0) !important;
+    font-family: var(--font-sans) !important;
+    font-size: 13px !important; font-weight: 500 !important;
+    margin: 0 !important;
+}
+#globalSearchModal .search-result-item .result-icon {
+    width: 30px; height: 30px;
+    /* Override Bootstrap bg-* colorClass utilities so icons read as token tiles */
+    background: var(--bg-2) !important; color: var(--fg-1) !important;
+    border-radius: var(--r-2) !important;
+    flex: 0 0 auto;
+}
+#globalSearchModal .search-result-item .result-icon i { color: var(--fg-1) !important; font-size: 16px; }
+#globalSearchModal .search-result-item .bx-chevron-right { color: var(--fg-3) !important; font-size: 18px; }
+
+/* Loading + no-results states themed to the design system */
+#globalSearchModal #searchResultsList .spinner-border { color: var(--signal) !important; }
+#globalSearchModal #searchResultsList h6 { color: var(--fg-1) !important; }
+#globalSearchModal #searchResultsList p,
+#globalSearchModal #searchResultsList .text-muted { color: var(--fg-3) !important; }
+#globalSearchModal #searchResultsList .no-results .bg-light {
+    background: var(--bg-2) !important;
+}
+#globalSearchModal #searchResultsList .no-results .bg-light i { color: var(--fg-3) !important; }
+
+/* Clear button */
+#globalSearchModal .search-results .btn-outline-secondary {
+    border-color: var(--line) !important; color: var(--fg-2) !important;
+}
+#globalSearchModal .search-results .btn-outline-secondary:hover {
+    background: var(--bg-2) !important; color: var(--fg-0) !important;
+}
+
+/* ---- Command palette: all menus as navigable items ---- */
+#globalSearchModal .tk-pal { padding: 6px; max-height: 52vh; overflow: auto; }
+#globalSearchModal .tk-pal-group { padding: 2px 0 6px; }
+#globalSearchModal .tk-pal-section {
+    font-family: var(--font-mono); font-size: 10px; color: var(--fg-3);
+    text-transform: uppercase; letter-spacing: var(--tracking-wide);
+    padding: 8px 10px 4px; font-weight: 500;
+}
+#globalSearchModal .tk-pal-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 7px 10px; border-radius: var(--r-2);
+    color: var(--fg-1) !important; text-decoration: none; cursor: pointer;
+    transition: background var(--t-1), color var(--t-1);
+}
+#globalSearchModal .tk-pal-item:hover,
+#globalSearchModal .tk-pal-item[data-active="true"] { background: var(--bg-2); color: var(--fg-0) !important; }
+#globalSearchModal .tk-pal-ico {
+    width: 30px; height: 30px; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--bg-2); border-radius: var(--r-2); color: var(--fg-2);
+    transition: background var(--t-1), color var(--t-1);
+}
+#globalSearchModal .tk-pal-item:hover .tk-pal-ico,
+#globalSearchModal .tk-pal-item[data-active="true"] .tk-pal-ico { background: var(--bg-3); color: var(--fg-0); }
+#globalSearchModal .tk-pal-ico i { font-size: 16px; }
+#globalSearchModal .tk-pal-label {
+    flex: 1 1 auto; min-width: 0; font-size: 13px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#globalSearchModal .tk-pal-meta {
+    flex: 0 0 auto; font-size: 10.5px; color: var(--fg-3);
+    font-family: var(--font-mono); text-transform: capitalize;
+}
+#globalSearchModal .tk-pal-empty { padding: 24px; text-align: center; color: var(--fg-3); font-size: 12.5px; }
+
+/* The command palette replaces the old quick-access / recent grid as the default view */
+#globalSearchModal #popularSection { display: none !important; }

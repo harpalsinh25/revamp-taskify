@@ -5,6 +5,7 @@ use App\Http\Controllers\AIController;
 use App\Http\Controllers\AllowancesController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CandidateStatusController;
 use App\Http\Controllers\ClientController;
