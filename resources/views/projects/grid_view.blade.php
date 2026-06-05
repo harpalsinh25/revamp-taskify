@@ -100,8 +100,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-3 mb-3">
-                <select class="form-select js-example-basic-multiple" id="sort" aria-label="Default select example"
+            <div class="col-md-4 mb-3">
+                <select class="form-select tom-select-sort" id="sort" aria-label="Default select example"
                     data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">
                     <option></option>
                     <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
@@ -125,7 +125,7 @@
                 $filterTags = \App\Models\Tag::whereIn('id', $selectedTags)->get();
             @endphp
             <div class="col-md-4 mb-3">
-                <select class="form-select statuses_filter" id="selected_statuses" name="statuses[]"
+                <select class="form-select tom_statuses_filter" id="selected_statuses" name="statuses[]"
                     aria-label="Default select example"
                     data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true"
                     multiple>
@@ -135,20 +135,12 @@
                 </select>
             </div>
             <div class="col-md-4 mb-3">
-                <select id="selected_tags" class="form-control tags_select" name="tag[]" multiple="multiple"
-                    data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true"
-                    multiple>
+                <select id="selected_tags" class="form-control tom_tags_filter" name="tag[]" multiple="multiple"
+                    data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true">
                     @foreach ($filterTags as $tag)
                         <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div class="col-md-1">
-                <div>
-                    <button type="button" id="filter" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
-                        data-bs-placement="left" data-bs-original-title="<?= get_label('filter', 'Filter') ?>"><i
-                            class='bx bx-filter-alt'></i></button>
-                </div>
             </div>
         </div>
         @if (is_countable($projects) && count($projects) > 0)

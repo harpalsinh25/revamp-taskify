@@ -8,11 +8,17 @@ $('#sort').on('change', function (e) {
     location.href = setUrlParameter(location.href, 'sort', sort);
 });
 
-$('#filter').click(function () {
+if ($('.tom-select-sort').length > 0) {
+    new TomSelect('.tom-select-sort', {
+        allowEmptyOption: true,
+    });
+}
+
+$('#selected_statuses, #selected_tags').on('change', function () {
     // Get the selected values from status select and other filters
     var statuses = $('#selected_statuses').val(); // Array of selected statuses
     var sort = $('#sort').val();
-    // Get selected tags using Select2
+    // Get selected tags using TomSelect
     var selectedTags = $('#selected_tags').val(); // Array of selected tags
 
     // Form the URL with the selected filters

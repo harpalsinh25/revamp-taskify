@@ -1,3 +1,15 @@
 [2026-06-05]
 - Migrated 'Roles Can Set the Status' Select2 field (`js-example-basic-multiple`) to Tom Select (`tom_static_select`) in `#create_status_modal` and `#edit_status_modal` (`resources/views/modals.blade.php`).
 - Fixed preselection of roles in the edit status modal by updating `custom.js` to correctly target `.tom_static_select` and use the Tom Select API (`setValue`) for assigning fetched roles.
+
+- Unified Project Kanban board with the V2 UI design system (applied .tcard, .kcol logic from Taskify Revamp kit to projects-kanban-card.blade.php).
+- Removed redundant Bootstrap .card wrapping around bootstrap-table components in tasks-card.blade.php and projects-card.blade.php to fix double-border UI spacing issues.
+
+
+- Modernized the Projects Grid View (grid_view.blade.php) using the V2 Design System's .tcard component to achieve pixel-perfect consistency with the Kanban board.
+- Re-styled inline select dropdowns on grid cards for compact layout alignment.
+
+
+- Created a custom pagination component in resources/views/components/pagination.blade.php to match the V2 design system and applied it to the grid view, right-aligned.
+
+- Upgraded Grid View filter dropdowns to use Tom Select and automatically apply filters upon selection, removing the manual filter button.

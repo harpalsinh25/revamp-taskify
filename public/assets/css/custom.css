@@ -6860,3 +6860,14 @@ body.v2-shell .card>.card-body {
 body.v2-shell .card .card-title {
     color: var(--fg-0);
 }
+/* Tom Select Dark Mode Fixes */
+[data-theme='dark'] .ts-dropdown, [data-theme='dark'] .ts-dropdown .option { background: var(--bg-1, #2b2c40) !important; color: var(--fg-1, #a1b0cb) !important; border-color: var(--border-color, #444564) !important; }
+[data-theme='dark'] .ts-dropdown .active { background: var(--bg-2, #32344d) !important; color: #fff !important; }
+
+/* Kanban Footer Dark Mode Fix */
+[data-theme='dark'] .kanban-footer { background: transparent !important; }
+[data-theme='dark'] .create-project-btn { background: var(--bg-2, #32344d) !important; color: var(--fg-1, #a1b0cb) !important; border: 1px dashed var(--border-color, #444564) !important; }
+[data-theme='dark'] .create-project-btn:hover { background: rgba(105, 108, 255, 0.1) !important; color: #696cff !important; border-color: #696cff !important; }
+
+/* Fix button alignment */
+.create-project-btn { display: flex !important; justify-content: center !important; align-items: center !important; gap: 4px; }

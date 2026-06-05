@@ -12,14 +12,11 @@
     $auth_user = getAuthenticatedUser();
 @endphp
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
-     <div class="<?= $flag == 1 ? 'card ' : '' ?>mt-2">
-@endif
-@if ($flag == 1 && ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0)))
-    <div class="card-body">
+    <div class="mt-2">
 @endif
 {{ $slot }}
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
-        <div class="row g-3 align-items-end tk-filter-row mb-2">
+        <div class="row g-3 align-items-end tk-filter-row mb-3">
             <x-advanced-date-filters prefix="task" />
             @if (getAuthenticatedUser()->can('manage_projects'))
                 <div class="col-md-4">
@@ -138,9 +135,6 @@
         ?>
         <x-empty-state-card :type="$type" />
     @endif
-@endif
-@if ($flag == 1 && ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0)))
-    </div>
 @endif
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
     </div>

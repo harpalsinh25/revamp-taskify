@@ -4,13 +4,10 @@ $flag = (Request::segment(1) == 'home' || Request::segment(1) == 'users' || Requ
 $visibleColumns = getUserPreferences('projects');
 $auth_user = getAuthenticatedUser();
 @endphp
-<div class="<?= $flag == 1 ? 'card ' : '' ?>mt-2">
-    @if($flag == 1)
-    <div class="card-body">
-        @endif
+<div class="mt-2">
         {{$slot}}
         @if ((isset($projects) && is_countable($projects) && count($projects) > 0) || (isset($viewAssigned) && $viewAssigned == 1))
-        <div class="row">
+        <div class="row g-3 align-items-end tk-filter-row mb-3">
             <x-advanced-date-filters prefix="project" />
             @if(isAdminOrHasAllDataAccess() && !isset($viewAssigned))
             @if(!isset($id) || (explode('_',$id)[0] !='client' && explode('_',$id)[0] !='user'))
@@ -101,9 +98,6 @@ $auth_user = getAuthenticatedUser();
         $type = 'Projects'; ?>
         <x-empty-state-card :type="$type" />
         @endif
-        @if($flag == 1)
-    </div>
-    @endif
 </div>
 @section('page_scripts')
 <script>

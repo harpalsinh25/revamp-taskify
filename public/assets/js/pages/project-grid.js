@@ -1,3 +1,9 @@
+if ($('.tom-select-sort').length > 0) {
+    new TomSelect('.tom-select-sort', {
+        allowEmptyOption: true,
+    });
+}
+
 $('#sort').on('change', function (e) {
     var sort = $(this).val();
     location.href = setUrlParameter(location.href, 'sort', sort);
@@ -18,11 +24,11 @@ function setUrlParameter(url, paramName, paramValue) {
     return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
 }
 
-$('#filter').click(function () {
+$('#selected_statuses, #selected_tags').on('change', function () {
     // Get the selected values from status select and other filters
     var statuses = $('#selected_statuses').val(); // Array of selected statuses
     var sort = $('#sort').val();
-    // Get selected tags using Select2
+    // Get selected tags using Select2 / TomSelect
     var selectedTags = $('#selected_tags').val(); // Array of selected tags
 
     // Form the URL with the selected filters
