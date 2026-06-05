@@ -2,6 +2,13 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-05] - Fix Task Date Range Picker Initialization
+### Modified
+- **`tasks-card.blade.php`**: Wrapped script tags at the bottom of the component inside `@section('page_scripts')` and `@endsection` to ensure they execute after `custom.js` and `dynamic_table_filter_manager.js` load, resolving initialization timing issues with `TableFilterSync` and the date range picker.
+- **`board_view.blade.php`**: Wrapped status array and task-board.js script tags inside `@section('page_scripts')` and `@endsection` to guarantee they run after layout scripts, fixing the ReferenceError for dragula and preventing picker initialization blockages.
+- **`group_by_task_lists.blade.php`**: Wrapped group-by-task-lists.js script tag inside `@section('page_scripts')` and `@endsection` to align execution order.
+- **`task_information.blade.php`**: Wrapped task-information.js and delete variables script tags inside `@section('page_scripts')` and `@endsection` to ensure dependencies load beforehand.
+
 ## [2026-06-03] - Sidebar UI Redesign
 ### Added
 - Appended v2 Graphite Studio design tokens (OKLCH color space, radius, typography, transitions) and sidebar layout CSS rules (`.rail` and `.panel`) to `public/assets/css/custom.css`.

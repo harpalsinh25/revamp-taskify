@@ -5238,6 +5238,8 @@ $(document).ready(function () {
     initTomSelectWithAjax(".tom_clients_select", "clients");
     initTomSelectWithAjax(".tom_projects_select", "projects");
     initTomSelectWithAjax(".tom_contract_types_select", "contract_types");
+    initTomSelectWithAjax(".tom_statuses_filter", "statuses");
+    initTomSelectWithAjax(".tom_priorities_filter", "priorities");
     initTomSelectStatic(".tom_static_select");
 
     initSelect2WithAjax(".clients_select", "clients");
@@ -7789,5 +7791,10 @@ $(document).ready(function () {
         document.addEventListener("DOMContentLoaded", initDashboardTableFilters);
     } else {
         initDashboardTableFilters();
+$(function(){
+    if (typeof window.initAdvancedDateRangePicker === 'function' && $('#task_date_between').length) {
+        window.initAdvancedDateRangePicker('#task_date_between', '#task_date_between_from', '#task_date_between_to');
+    }
+});
     }
 })();

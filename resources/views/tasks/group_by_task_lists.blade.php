@@ -125,6 +125,8 @@
             </div>
         </div>
     </div>
-    <script src="{{ asset('assets/js/pages/group-by-task-lists.js') }}"></script>
+@endsection
 
+@section('page_scripts')
+    <script src="{{ asset('assets/js/pages/group-by-task-lists.js') }}"></script>
 @endsection

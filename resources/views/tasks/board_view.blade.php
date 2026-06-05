@@ -110,11 +110,19 @@
         <?= get_label('drag_drop_update_task_status', 'Drag and drop to update task status') . ' !' ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div class="kanban-container d-flex card flex-row">
+    {{-- Taskify v2 — Kanban board (design-system .kanban / .kcol / .tcard).
+         Drag-and-drop hooks preserved: column id={slug} + data-status are the
+         dragula containers, the task cards (data-task-id) are the draggables. --}}
+    <div class="kanban-board tk-kanban">
         @foreach ($statuses as $status)
-        <div class="my-4 kanban-column">
-            <h4 class="fw-bold mx-4 my-2">{{$status->title}}</h4>
-            <div class="row m-2 d-flex flex-column kanban-tasks" id="{{$status->slug}}" data-status="{{$status->id}}">
+        @php $statusTaskCount = collect($tasks)->where('status_id', $status->id)->count(); @endphp
+        <div class="kcol kanban-column">
+            <div class="kcol-head">
+                <span class="kcol-dot kcol-dot-{{ $status->color }}"></span>
+                <span class="kcol-name">{{ $status->title }}</span>
+                <span class="kcol-count">{{ $statusTaskCount }}</span>
+            </div>
+            <div class="kanban-tasks kcol-body" id="{{ $status->slug }}" data-status="{{ $status->id }}">
                 @foreach ($tasks as $task)
                 @if($task->status_id==$status->id)
                 <x-kanban :task="$task" />
@@ -131,6 +139,9 @@
     <x-empty-state-card :type="$type" />
     @endif
 </div>
+@endsection
+
+@section('page_scripts')
 <script>
     var statusArray = <?php echo json_encode($statuses); ?>;
 </script>

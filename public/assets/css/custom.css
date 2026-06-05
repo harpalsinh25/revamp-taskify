@@ -3562,7 +3562,9 @@ html:not([dir="rtl"]) .timeline-item {
     --shadow-1: 0 1px 1px oklch(0.16 0.01 280 / 0.04);
     --shadow-2: 0 2px 6px oklch(0.16 0.01 280 / 0.06), 0 1px 2px oklch(0.16 0.01 280 / 0.04);
     --shadow-3: 0 8px 24px oklch(0.16 0.01 280 / 0.10), 0 2px 6px oklch(0.16 0.01 280 / 0.05);
+    --shadow-4: 0 24px 48px oklch(0.16 0.01 280 / 0.16), 0 8px 16px oklch(0.16 0.01 280 / 0.08);
     --shadow-focus: 0 0 0 2px var(--signal-glow);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="dark"] {
@@ -3570,6 +3572,7 @@ html:not([dir="rtl"]) .timeline-item {
     --shadow-1: 0 1px 1px oklch(0 0 0 / 0.30);
     --shadow-2: 0 2px 6px oklch(0 0 0 / 0.30), 0 1px 2px oklch(0 0 0 / 0.20);
     --shadow-3: 0 8px 24px oklch(0 0 0 / 0.40), 0 2px 6px oklch(0 0 0 / 0.25);
+    --shadow-4: 0 24px 48px oklch(0 0 0 / 0.55), 0 8px 16px oklch(0 0 0 / 0.30);
     --bg-0: oklch(0.135 0.008 280);
     --bg-1: oklch(0.165 0.010 280);
     --bg-2: oklch(0.195 0.012 280);
@@ -4557,7 +4560,7 @@ body.v2-shell .layout-page {
 }
 
 /* Override Bootstrap table-hover to avoid blue backgrounds */
-body.v2-shell .table-hover > tbody > tr:hover > * {
+body.v2-shell .table-hover>tbody>tr:hover>* {
     background: var(--bg-2) !important;
     color: inherit !important;
     box-shadow: none !important;
@@ -5581,6 +5584,7 @@ body.v2-shell .bootstrap-table table.table {
     margin: 0;
     background: transparent;
     border: 0;
+    border-collapse: collapse;
     color: var(--fg-1);
     font-size: var(--fs-base, 13px);
 }
@@ -5638,9 +5642,94 @@ body.v2-shell .bootstrap-table table.table a:hover {
     color: var(--signal);
 }
 
-/* Sortable header affordance */
-body.v2-shell .bootstrap-table table.table>thead>tr>th .sortable {
+/* Selected row = kit .table tr[data-selected] */
+body.v2-shell .bootstrap-table table.table>tbody>tr.selected>td {
+    background: var(--signal-soft);
+}
+
+[data-theme="dark"] body.v2-shell .bootstrap-table table.table>tbody>tr.selected>td {
+    background: oklch(from var(--signal) l c h / 0.08);
+}
+
+/* Checkbox column (kit .table-checkbox) + kit .check checkbox */
+body.v2-shell .bootstrap-table table.table th.bs-checkbox,
+body.v2-shell .bootstrap-table table.table td.bs-checkbox {
+    width: 40px;
+    text-align: center;
+    padding-right: 0;
+}
+
+body.v2-shell .bootstrap-table table.table input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    vertical-align: middle;
+    border: 1.5px solid var(--line-2);
+    background: var(--bg-1);
+    border-radius: 3px;
     cursor: pointer;
+    display: inline-grid;
+    place-content: center;
+    transition: background var(--t-1), border-color var(--t-1);
+}
+
+body.v2-shell .bootstrap-table table.table input[type="checkbox"]:hover {
+    border-color: var(--fg-2);
+}
+
+body.v2-shell .bootstrap-table table.table input[type="checkbox"]:checked {
+    background: var(--signal);
+    border-color: var(--signal);
+}
+
+body.v2-shell .bootstrap-table table.table input[type="checkbox"]:checked::after {
+    content: '';
+    width: 9px;
+    height: 9px;
+    background: var(--signal-fg);
+    clip-path: polygon(14% 50%, 0 64%, 36% 100%, 100% 22%, 86% 8%, 36% 72%);
+}
+
+/* Actions column right-aligned (kit .table-actions) */
+body.v2-shell .bootstrap-table table.table th[data-field="actions"],
+body.v2-shell .bootstrap-table table.table td[data-field="actions"] {
+    text-align: right;
+}
+
+/* Sort indicators = kit th[data-sort]::after (↕ neutral · ↑ asc · ↓ desc),
+   replacing bootstrap-table's default caret background images. */
+body.v2-shell .bootstrap-table table.table th .sortable {
+    cursor: pointer;
+    user-select: none;
+    background-image: none !important;
+    padding-right: 18px !important;
+    position: relative;
+}
+
+body.v2-shell .bootstrap-table table.table th .sortable::after {
+    content: '↕';
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    opacity: 0.5;
+    color: var(--fg-3);
+    font-weight: 400;
+}
+
+body.v2-shell .bootstrap-table table.table th .sortable.asc::after {
+    content: '↑';
+    opacity: 1;
+    color: var(--fg-0);
+}
+
+body.v2-shell .bootstrap-table table.table th .sortable.desc::after {
+    content: '↓';
+    opacity: 1;
+    color: var(--fg-0);
 }
 
 body.v2-shell .bootstrap-table table.table>thead>tr>th.asc,
@@ -5648,17 +5737,39 @@ body.v2-shell .bootstrap-table table.table>thead>tr>th.desc {
     color: var(--fg-0);
 }
 
-/* --- Pagination footer --- */
+/* --- Pagination footer = kit .table-footer (flex: detail left, pages right) --- */
 body.v2-shell .bootstrap-table .fixed-table-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
     padding: 10px 12px;
     border-top: 1px solid var(--line);
     color: var(--fg-2);
     font-size: var(--fs-sm);
 }
 
+body.v2-shell .bootstrap-table .fixed-table-pagination>div {
+    float: none !important;
+}
+
 body.v2-shell .bootstrap-table .fixed-table-pagination .pagination-detail {
     color: var(--fg-2);
     font-size: var(--fs-sm);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+body.v2-shell .bootstrap-table .fixed-table-pagination .pagination-detail .pagination-info {
+    color: var(--fg-2);
+}
+
+body.v2-shell .bootstrap-table .fixed-table-pagination>.pagination,
+body.v2-shell .bootstrap-table .fixed-table-pagination ul.pagination {
+    margin: 0 0 0 auto !important;
 }
 
 body.v2-shell .bootstrap-table .fixed-table-pagination .page-list .btn,
@@ -6105,7 +6216,7 @@ body.v2-shell .ts-wrapper.focus .ts-control {
     box-shadow: var(--shadow-focus) !important;
 }
 
-body.v2-shell .ts-control > .item {
+body.v2-shell .ts-control>.item {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -6121,7 +6232,7 @@ body.v2-shell .ts-control > .item {
     border: 0 !important;
 }
 
-body.v2-shell .ts-control > .item .remove {
+body.v2-shell .ts-control>.item .remove {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -6136,7 +6247,7 @@ body.v2-shell .ts-control > .item .remove {
     padding: 0 !important;
 }
 
-body.v2-shell .ts-control > .item .remove:hover {
+body.v2-shell .ts-control>.item .remove:hover {
     color: var(--err) !important;
     background: transparent !important;
 }
@@ -6184,7 +6295,8 @@ body.v2-shell .form-select {
     padding-bottom: 0 !important;
     padding-left: 10px !important;
     padding-right: 10px !important;
-    line-height: 30px !important; /* matches ctrl-h-md (32px) - borders (2px) */
+    line-height: 30px !important;
+    /* matches ctrl-h-md (32px) - borders (2px) */
     background: var(--bg-1) !important;
     border: 1px solid var(--line) !important;
     color: var(--fg-0) !important;
@@ -6288,4 +6400,911 @@ body.v2-shell .tab.active::after {
     height: 2px;
     background: var(--signal) !important;
     border-radius: 1px;
+}
+
+/* =====================================================================
+   Taskify v2 — Badge (Bootstrap .badge -> design-system .badge)
+   One source, applied app-wide so every badge matches the toolkit:
+   18px tall, 3px radius, 10.5px/600. primary = signal solid;
+   success/warning/danger/info = soft token tints; secondary = neutral.
+   Maps both Bootstrap solids (.bg-*) and Sneat softs (.bg-label-*).
+   ===================================================================== */
+body.v2-shell .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 18px;
+    min-height: 18px;
+    padding: 0 6px;
+    border-radius: 3px;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    vertical-align: middle;
+    background: var(--bg-3);
+    color: var(--fg-1);
+}
+
+/* count/pill badges keep their pill radius (e.g. notification counters) */
+body.v2-shell .badge.rounded-pill {
+    border-radius: 50rem;
+}
+
+
+body.v2-shell .badge.bg-primary,
+body.v2-shell .badge.text-bg-primary {
+    background: var(--signal) !important;
+    color: var(--signal-fg) !important;
+}
+
+body.v2-shell .badge.bg-label-primary {
+    background: var(--signal-soft) !important;
+    color: var(--signal-fg) !important;
+}
+
+[data-theme="dark"] body.v2-shell .badge.bg-label-primary {
+    color: var(--signal) !important;
+}
+
+/* success / ok (soft) */
+body.v2-shell .badge.bg-success,
+body.v2-shell .badge.text-bg-success,
+body.v2-shell .badge.bg-label-success {
+    background: oklch(from var(--ok) l c h / 0.18) !important;
+    color: var(--ok) !important;
+}
+
+/* warning / warn (soft) */
+body.v2-shell .badge.bg-warning,
+body.v2-shell .badge.text-bg-warning,
+body.v2-shell .badge.bg-label-warning {
+    background: oklch(from var(--warn) l c h / 0.18) !important;
+    color: var(--warn) !important;
+}
+
+/* danger / err (soft) */
+body.v2-shell .badge.bg-danger,
+body.v2-shell .badge.text-bg-danger,
+body.v2-shell .badge.bg-label-danger {
+    background: oklch(from var(--err) l c h / 0.18) !important;
+    color: var(--err) !important;
+}
+
+/* info (soft) */
+body.v2-shell .badge.bg-info,
+body.v2-shell .badge.text-bg-info,
+body.v2-shell .badge.bg-label-info {
+    background: oklch(from var(--info) l c h / 0.18) !important;
+    color: var(--info) !important;
+}
+
+/* secondary / dark / light / white -> neutral kit badge */
+body.v2-shell .badge.bg-secondary,
+body.v2-shell .badge.text-bg-secondary,
+body.v2-shell .badge.bg-label-secondary,
+body.v2-shell .badge.bg-dark,
+body.v2-shell .badge.bg-label-dark,
+body.v2-shell .badge.bg-light,
+body.v2-shell .badge.bg-white,
+body.v2-shell .badge.bg-label-light {
+    background: var(--bg-3) !important;
+    color: var(--fg-1) !important;
+}
+
+/* badge with an icon inside keeps it sized to the text */
+body.v2-shell .badge i,
+body.v2-shell .badge .bx {
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* =====================================================================
+   Taskify v2 — Buttons (Bootstrap .btn -> design-system .btn)
+   One source, applied app-wide. Compact kit sizing + token variants.
+   ===================================================================== */
+body.v2-shell .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: var(--ctrl-h-md);
+    padding: 0 14px;
+    border-radius: var(--r-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-base);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: background var(--t-1) var(--ease), color var(--t-1) var(--ease),
+        border-color var(--t-1) var(--ease), box-shadow var(--t-1) var(--ease), filter var(--t-1);
+}
+
+body.v2-shell .btn-sm,
+body.v2-shell .btn-xs {
+    height: var(--ctrl-h-sm);
+    padding: 0 10px;
+    font-size: var(--fs-sm);
+    gap: 5px;
+}
+
+body.v2-shell .btn-lg {
+    height: var(--ctrl-h-lg);
+    padding: 0 18px;
+    font-size: var(--fs-md);
+    gap: 7px;
+}
+
+body.v2-shell .btn i,
+body.v2-shell .btn .bx {
+    font-size: 1.15em;
+    line-height: 1;
+}
+
+body.v2-shell .btn:focus-visible {
+    box-shadow: var(--shadow-focus);
+    outline: none;
+}
+
+body.v2-shell .btn:disabled,
+body.v2-shell .btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+body.v2-shell .btn.rounded-pill {
+    border-radius: 50rem;
+}
+
+/* solid variants (primary = signal) */
+body.v2-shell .btn-primary {
+    background: var(--signal) !important;
+    color: var(--signal-fg) !important;
+    border-color: var(--signal) !important;
+    box-shadow: var(--shadow-1), inset 0 1px 0 oklch(1 0 0 / 0.18);
+}
+
+body.v2-shell .btn-primary:hover {
+    filter: brightness(1.05);
+    color: var(--signal-fg) !important;
+}
+
+body.v2-shell .btn-success {
+    background: var(--ok) !important;
+    color: var(--signal-fg) !important;
+    border-color: var(--ok) !important;
+}
+
+body.v2-shell .btn-danger {
+    background: var(--err) !important;
+    color: #fff !important;
+    border-color: var(--err) !important;
+}
+
+body.v2-shell .btn-info {
+    background: var(--info) !important;
+    color: #fff !important;
+    border-color: var(--info) !important;
+}
+
+body.v2-shell .btn-warning {
+    background: var(--warn) !important;
+    color: var(--signal-fg) !important;
+    border-color: var(--warn) !important;
+}
+
+body.v2-shell .btn-success:hover,
+body.v2-shell .btn-danger:hover,
+body.v2-shell .btn-info:hover,
+body.v2-shell .btn-warning:hover {
+    filter: brightness(1.06);
+}
+
+/* secondary / neutral */
+body.v2-shell .btn-secondary,
+body.v2-shell .btn-light,
+body.v2-shell .btn-default {
+    background: var(--bg-2) !important;
+    color: var(--fg-0) !important;
+    border-color: var(--line) !important;
+    box-shadow: none !important;
+}
+
+body.v2-shell .btn-secondary:hover,
+body.v2-shell .btn-light:hover,
+body.v2-shell .btn-default:hover {
+    background: var(--bg-3) !important;
+    color: var(--fg-0) !important;
+}
+
+body.v2-shell .btn-dark {
+    background: var(--fg-0) !important;
+    color: var(--bg-0) !important;
+    border-color: var(--fg-0) !important;
+}
+
+/* outline variants (kit .btn-outline) */
+body.v2-shell [class*="btn-outline-"] {
+    background: transparent !important;
+    color: var(--fg-0) !important;
+    border: 1px solid var(--line-2) !important;
+    box-shadow: none !important;
+}
+
+body.v2-shell [class*="btn-outline-"]:hover {
+    background: var(--bg-2) !important;
+    color: var(--fg-0) !important;
+}
+
+body.v2-shell .btn-outline-primary {
+    color: var(--fg-0) !important;
+}
+
+body.v2-shell .btn-outline-primary:hover {
+    background: var(--signal-soft) !important;
+    border-color: var(--signal) !important;
+}
+
+body.v2-shell .btn-outline-danger {
+    color: var(--err) !important;
+    border-color: oklch(from var(--err) l c h / 0.40) !important;
+}
+
+body.v2-shell .btn-outline-danger:hover {
+    background: oklch(from var(--err) l c h / 0.10) !important;
+    color: var(--err) !important;
+}
+
+body.v2-shell .btn-outline-success {
+    color: var(--ok) !important;
+    border-color: oklch(from var(--ok) l c h / 0.40) !important;
+}
+
+body.v2-shell .btn-outline-success:hover {
+    background: oklch(from var(--ok) l c h / 0.12) !important;
+    color: var(--ok) !important;
+}
+
+/* soft "label" buttons (Sneat .btn-label-*) -> kit soft tints */
+body.v2-shell .btn-label-primary {
+    background: var(--signal-soft) !important;
+    color: var(--signal-fg) !important;
+    border-color: transparent !important;
+}
+
+body.v2-shell .btn-label-success {
+    background: oklch(from var(--ok) l c h / 0.16) !important;
+    color: var(--ok) !important;
+    border-color: transparent !important;
+}
+
+body.v2-shell .btn-label-danger {
+    background: oklch(from var(--err) l c h / 0.16) !important;
+    color: var(--err) !important;
+    border-color: transparent !important;
+}
+
+body.v2-shell .btn-label-warning {
+    background: oklch(from var(--warn) l c h / 0.16) !important;
+    color: var(--warn) !important;
+    border-color: transparent !important;
+}
+
+body.v2-shell .btn-label-info {
+    background: oklch(from var(--info) l c h / 0.16) !important;
+    color: var(--info) !important;
+    border-color: transparent !important;
+}
+
+/* ghost / link */
+body.v2-shell .btn-link {
+    color: var(--fg-1) !important;
+    text-decoration: none;
+}
+
+body.v2-shell .btn-link:hover {
+    color: var(--signal) !important;
+    background: transparent !important;
+}
+
+/* =====================================================================
+   Taskify v2 — Modal (Bootstrap .modal -> design-system modal)
+   ===================================================================== */
+body.v2-shell .modal-content {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    box-shadow: var(--shadow-4);
+    color: var(--fg-1);
+    overflow: hidden;
+}
+
+body.v2-shell .modal-header {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--line);
+    align-items: flex-start;
+    background: transparent;
+}
+
+body.v2-shell .modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg-0);
+    letter-spacing: var(--tracking-snug);
+}
+
+body.v2-shell .modal-body {
+    padding: 16px 18px;
+    color: var(--fg-1);
+    font-size: var(--fs-base);
+}
+
+body.v2-shell .modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+    gap: 8px;
+    margin: 0;
+}
+
+body.v2-shell .modal-footer>* {
+    margin: 0;
+}
+
+body.v2-shell .modal-backdrop {
+    background-color: #000;
+}
+
+body.v2-shell .modal-backdrop.show {
+    opacity: 0.40;
+}
+
+body.v2-shell .modal .btn-close,
+body.v2-shell .offcanvas .btn-close {
+    opacity: 0.7;
+}
+
+body.v2-shell .modal .btn-close:hover,
+body.v2-shell .offcanvas .btn-close:hover {
+    opacity: 1;
+}
+
+/* dark-mode close icon is handled by Bootstrap 5.3 via data-bs-theme="dark" */
+
+/* =====================================================================
+   Taskify v2 — Offcanvas / drawer (Bootstrap .offcanvas -> design system)
+   ===================================================================== */
+body.v2-shell .offcanvas {
+    background: var(--bg-1);
+    border-left: 1px solid var(--line);
+    box-shadow: var(--shadow-3);
+    color: var(--fg-1);
+}
+
+body.v2-shell .offcanvas-start {
+    border-left: 0;
+    border-right: 1px solid var(--line);
+}
+
+body.v2-shell .offcanvas-top {
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+}
+
+body.v2-shell .offcanvas-bottom {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+}
+
+body.v2-shell .offcanvas-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    gap: 10px;
+}
+
+body.v2-shell .offcanvas-title {
+    font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--fg-0);
+}
+
+body.v2-shell .offcanvas-body {
+    padding: 16px;
+    color: var(--fg-1);
+    font-size: var(--fs-base);
+}
+
+body.v2-shell .offcanvas-footer,
+body.v2-shell .offcanvas .offcanvas-foot {
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.v2-shell .offcanvas-backdrop {
+    background-color: #000;
+}
+
+body.v2-shell .offcanvas-backdrop.show {
+    opacity: 0.40;
+}
+
+/* =====================================================================
+   Taskify v2 — Kanban board (design-system .kanban / .kcol / .tcard).
+   Restyles the existing board markup; drag-and-drop (dragula) hooks are
+   untouched. Horizontal-scrolling columns, kit cards, drag states.
+   ===================================================================== */
+body.v2-shell .tk-kanban {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 2px 14px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+/* column = kit .kcol */
+body.v2-shell .tk-kanban .kcol {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 300px;
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
+    margin: 0;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    overflow: hidden;
+    max-height: calc(100vh - 220px);
+}
+
+body.v2-shell .tk-kanban .kcol-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+}
+
+body.v2-shell .tk-kanban .kcol-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--fg-3);
+}
+
+body.v2-shell .tk-kanban .kcol-dot-success {
+    background: var(--ok);
+}
+
+body.v2-shell .tk-kanban .kcol-dot-danger {
+    background: var(--err);
+}
+
+body.v2-shell .tk-kanban .kcol-dot-warning {
+    background: var(--warn);
+}
+
+body.v2-shell .tk-kanban .kcol-dot-info {
+    background: var(--info);
+}
+
+body.v2-shell .tk-kanban .kcol-dot-primary {
+    background: var(--signal);
+}
+
+body.v2-shell .tk-kanban .kcol-dot-secondary,
+body.v2-shell .tk-kanban .kcol-dot-dark {
+    background: var(--fg-3);
+}
+
+body.v2-shell .tk-kanban .kcol-name {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--fg-0);
+    margin: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.v2-shell .tk-kanban .kcol-count {
+    font-size: 10.5px;
+    color: var(--fg-3);
+    background: var(--bg-2);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-weight: 600;
+    flex: none;
+    font-family: var(--font-mono);
+}
+
+/* droppable body = kit .kcol-body (keeps id + data-status for dragula) */
+body.v2-shell .tk-kanban .kanban-tasks {
+    padding: 8px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 64px;
+}
+
+/* task card = kit .tcard (pixel-perfect) */
+body.v2-shell .tcard {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    padding: 10px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: grab;
+    font-family: var(--font-sans);
+    transition: border-color var(--t-1), box-shadow var(--t-1);
+}
+
+body.v2-shell .tcard:hover {
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-2);
+}
+
+body.v2-shell .tcard:active {
+    cursor: grabbing;
+}
+
+body.v2-shell .tcard .mono {
+    font-family: var(--font-mono);
+}
+
+/* meta: code + actions */
+body.v2-shell .tcard-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+body.v2-shell .tcard-code {
+    font-size: 10.5px;
+    color: var(--fg-3);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+body.v2-shell .tcard-code:hover {
+    color: var(--fg-1);
+}
+
+body.v2-shell .tcard-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+body.v2-shell .tcard-ic {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    color: var(--fg-3);
+    text-decoration: none;
+    transition: background var(--t-1), color var(--t-1);
+}
+
+body.v2-shell .tcard-ic:hover {
+    background: var(--bg-2);
+    color: var(--fg-0);
+}
+
+body.v2-shell .tcard-ic i {
+    font-size: 15px;
+    line-height: 1;
+}
+
+body.v2-shell .tcard-ic .tcard-star-on {
+    color: var(--warn);
+}
+
+body.v2-shell .tcard-ic .tcard-pin-on {
+    color: var(--ok);
+}
+
+/* title */
+body.v2-shell .tcard-title {
+    font-size: var(--fs-base);
+    color: var(--fg-0);
+    margin: 0;
+    font-weight: 600;
+    line-height: var(--lh-snug);
+}
+
+body.v2-shell .tcard-title a {
+    color: var(--fg-0);
+    text-decoration: none;
+}
+
+body.v2-shell .tcard-title a:hover {
+    color: var(--signal);
+}
+
+/* tags (kit .tag) */
+body.v2-shell .tcard-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+body.v2-shell .tk-kanban .tag,
+body.v2-shell .tcard .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: var(--fg-2);
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+
+body.v2-shell .tcard .tag:hover {
+    border-color: var(--line-2);
+    color: var(--fg-0);
+}
+
+body.v2-shell .tcard .tag-priority {
+    font-weight: 600;
+    background: transparent;
+    border-color: var(--line);
+}
+
+body.v2-shell .tcard .tag-note i {
+    font-size: 12px;
+    color: var(--info);
+}
+
+/* footer: avatars + stats */
+body.v2-shell .tcard-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+body.v2-shell .tk-av-stack {
+    display: inline-flex;
+    align-items: center;
+}
+
+body.v2-shell .tk-av-stack .av {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -6px;
+    border: 1.5px solid var(--bg-1);
+    background: var(--bg-3);
+    color: var(--fg-2);
+    font-size: 9px;
+    font-weight: 600;
+    text-decoration: none;
+    flex: none;
+}
+
+body.v2-shell .tk-av-stack .av:first-child {
+    margin-left: 0;
+}
+
+body.v2-shell .tk-av-stack .av img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+body.v2-shell .tk-av-stack .av-more {
+    background: var(--bg-2);
+    color: var(--fg-2);
+}
+
+body.v2-shell .tk-av-stack .av-add {
+    background: var(--bg-2);
+    color: var(--fg-2);
+    border-style: dashed;
+}
+
+body.v2-shell .tk-av-stack .av-add:hover {
+    color: var(--signal);
+    border-color: var(--signal);
+}
+
+body.v2-shell .tk-av-stack .av-add i {
+    font-size: 13px;
+}
+
+body.v2-shell .tcard-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* drag states (dragula): faded source + floating mirror + drop target ring */
+.gu-transit {
+    opacity: 0.35 !important;
+}
+
+body.v2-shell .gu-mirror,
+.gu-mirror.tcard,
+.gu-mirror.card {
+    margin: 0 !important;
+    background: var(--bg-1) !important;
+    border: 1px solid var(--signal) !important;
+    border-radius: var(--r-2) !important;
+    box-shadow: var(--shadow-3) !important;
+    opacity: 0.97 !important;
+    list-style: none;
+    padding: 10px;
+}
+
+body.v2-shell .tk-kanban .kanban-tasks.gu-over,
+body.v2-shell .tk-kanban .kanban-tasks.drag-over {
+    box-shadow: inset 0 0 0 2px var(--signal);
+    border-radius: var(--r-2);
+}
+
+/* thin kit scrollbars inside the board */
+body.v2-shell .tk-kanban,
+body.v2-shell .tk-kanban .kanban-tasks {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-2) transparent;
+}
+
+body.v2-shell .tk-kanban::-webkit-scrollbar,
+body.v2-shell .tk-kanban .kanban-tasks::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+body.v2-shell .tk-kanban::-webkit-scrollbar-thumb,
+body.v2-shell .tk-kanban .kanban-tasks::-webkit-scrollbar-thumb {
+    background: var(--line-2);
+    border-radius: 99px;
+}
+
+body.v2-shell .tk-kanban::-webkit-scrollbar-track,
+body.v2-shell .tk-kanban .kanban-tasks::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* =====================================================================
+   Taskify v2 — Filter rows (list pages: tasks, contracts, …)
+   Labels + aligned controls + date-filter inputs, design system.
+   ===================================================================== */
+body.v2-shell .tk-filter-panel {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    padding: 16px;
+    font-family: var(--font-sans);
+}
+
+body.v2-shell .tk-filter-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--fg-1);
+}
+
+body.v2-shell .tk-filter-row>[class*="col-"] {
+    margin-bottom: 0;
+}
+
+/* =====================================================================
+   Taskify v2 — Tom Select polish: dropdown caret + selected option
+   ===================================================================== */
+body.v2-shell .ts-wrapper {
+    position: relative;
+}
+
+body.v2-shell .ts-wrapper.single .ts-control,
+body.v2-shell .ts-wrapper.form-select .ts-control,
+body.v2-shell .ts-wrapper.form-control .ts-control {
+    cursor: pointer;
+}
+
+body.v2-shell .ts-wrapper.multi .ts-control {
+    cursor: text;
+}
+
+body.v2-shell .ts-dropdown .option.selected {
+    background: var(--bg-3);
+    color: var(--fg-0);
+}
+
+body.v2-shell .ts-dropdown .no-results,
+body.v2-shell .ts-dropdown .optgroup-header {
+    color: var(--fg-3);
+    font-size: var(--fs-sm);
+    padding: 7px 10px;
+}
+
+body.v2-shell .ts-wrapper.disabled .ts-control {
+    background: var(--bg-2);
+    opacity: 0.7;
+}
+
+body.v2-shell .ts-control .clear-button {
+    color: var(--fg-3);
+}
+
+body.v2-shell .ts-control .clear-button:hover {
+    color: var(--err);
+}
+
+
+/* =====================================================================
+   Taskify v2 — List-view wrapper (card class removed): nco ard chrome,
+   the bootstrap-table provides its own card. Plus a dark-aware fallback
+   for any remaining Sneat .card so list pages read correctly in dark.
+   ===================================================================== */
+body.v2-shell .tk-list-wrap {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+body.v2-shell .tk-list-wrap>.card-body {
+    padding: 0;
+    background: transparent;
+}
+
+/* Sneat .card -> design tokens (dark-aware) for non-redesigned pages.
+   Skips intentionally-coloured cards (.card.bg-*) and the v2 .tk-card. */
+body.v2-shell .card:not([class*="bg-"]) {
+    background-color: var(--bg-1);
+    border: 1px solid var(--line);
+    color: var(--fg-1);
+    box-shadow: none;
+}
+
+body.v2-shell .card>.card-header,
+body.v2-shell .card>.card-footer {
+    background-color: transparent;
+    border-color: var(--line);
+    color: var(--fg-0);
+}
+
+body.v2-shell .card>.card-body {
+    color: var(--fg-1);
+}
+
+body.v2-shell .card .card-title {
+    color: var(--fg-0);
 }

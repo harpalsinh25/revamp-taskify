@@ -12,43 +12,48 @@
     $auth_user = getAuthenticatedUser();
 @endphp
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
-    <div class="<?= $flag == 1 ? 'card ' : '' ?>mt-2">
+     <div class="<?= $flag == 1 ? 'card ' : '' ?>mt-2">
 @endif
 @if ($flag == 1 && ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0)))
     <div class="card-body">
 @endif
 {{ $slot }}
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
-        <div class="row">
+        <div class="row g-3 align-items-end tk-filter-row mb-2">
             <x-advanced-date-filters prefix="task" />
             @if (getAuthenticatedUser()->can('manage_projects'))
-                <div class="col-md-4 mb-3">
-                    <select class="form-control projects_select" id="task_project_filter" multiple="multiple"
+                <div class="col-md-4">
+                    <label class="tk-filter-label">{{ get_label('projects', 'Projects') }}</label>
+                    <select class="form-control tom_projects_select" id="task_project_filter" multiple="multiple"
                         data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
                     </select>
                 </div>
             @endif
             @if (isAdminOrHasAllDataAccess() && !isset($viewAssigned))
                 @if (explode('_', $id)[0] != 'client' && explode('_', $id)[0] != 'user')
-                    <div class="col-md-4 mb-3">
-                        <select class="form-control users_select" id="task_user_filter" name="user_ids[]"
+                    <div class="col-md-4">
+                        <label class="tk-filter-label">{{ get_label('users', 'Users') }}</label>
+                        <select class="form-control tom_users_select" id="task_user_filter" name="user_ids[]"
                             multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <select class="form-control clients_select" id="task_client_filter" name="client_ids[]"
-                            multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">>
+                    <div class="col-md-4">
+                        <label class="tk-filter-label">{{ get_label('clients', 'Clients') }}</label>
+                        <select class="form-control tom_clients_select" id="task_client_filter" name="client_ids[]"
+                            multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
                         </select>
                     </div>
                 @endif
             @endif
-            <div class="col-md-4 mb-3">
-                <select class="form-control statuses_filter" id="task_status_filter" name="status_ids[]" multiple="multiple"
+            <div class="col-md-4">
+                <label class="tk-filter-label">{{ get_label('statuses', 'Statuses') }}</label>
+                <select class="form-control tom_statuses_filter" id="task_status_filter" name="status_ids[]" multiple="multiple"
                     data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                 </select>
             </div>
-            <div class="col-md-4 mb-3">
-                <select class="form-control priorities_filter" id="task_priority_filter" name="priority_ids[]"
+            <div class="col-md-4">
+                <label class="tk-filter-label">{{ get_label('priorities', 'Priorities') }}</label>
+                <select class="form-control tom_priorities_filter" id="task_priority_filter" name="priority_ids[]"
                     multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
                 </select>
             </div>
@@ -140,6 +145,7 @@
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
     </div>
 @endif
+@section('page_scripts')
 <script>
     var label_update = '<?= get_label('update', 'Update') ?>';
     var label_delete = '<?= get_label('delete', 'Delete') ?>';
@@ -150,3 +156,4 @@
     var id = '<?= $id ?? '' ?>';
 </script>
 <script src="{{ asset('assets/js/pages/tasks.js') }}"></script>
+@endsection
