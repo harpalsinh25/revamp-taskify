@@ -535,10 +535,14 @@ $(document).on("click", ".edit-status", function () {
                 .addClass("select-bg-label-" + response.status.color);
             var modalForm = $("#edit_status_modal").find("form");
             var usersSelect = modalForm.find(
-                '.js-example-basic-multiple[name="role_ids[]"]'
+                '.tom_static_select[name="role_ids[]"]'
             );
-            usersSelect.val(response.roles);
-            usersSelect.trigger("change"); // Trigger change event to update select2
+            if (usersSelect.length && usersSelect[0].tomselect) {
+                usersSelect[0].tomselect.setValue(response.roles);
+            } else {
+                usersSelect.val(response.roles);
+                usersSelect.trigger("change");
+            }
         },
     });
 });

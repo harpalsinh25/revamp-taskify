@@ -1,0 +1,3 @@
+[2026-06-05]
+- Migrated 'Roles Can Set the Status' Select2 field (`js-example-basic-multiple`) to Tom Select (`tom_static_select`) in `#create_status_modal` and `#edit_status_modal` (`resources/views/modals.blade.php`).
+- Fixed preselection of roles in the edit status modal by updating `custom.js` to correctly target `.tom_static_select` and use the Tom Select API (`setValue`) for assigning fetched roles.

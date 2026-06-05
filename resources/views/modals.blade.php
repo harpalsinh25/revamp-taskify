@@ -22,12 +22,12 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_status', 'Create status') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-1" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col mb-4">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
                             <input type="text" id="nameBasic" class="form-control" name="title"
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col mb-4">
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="color" name="color">
@@ -66,13 +66,13 @@
                     </div>
                     @if ($isAdminOrHasAllDataAccess)
                         <div class="row">
-                            <div class="col-12 mb-3">
+                            <div class="col-12 mb-4">
                                 <label
                                     class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
                                     <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
                                         data-bs-offset="0,4" data-bs-placement="top" title=""
                                         data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
-                                <select class="form-control js-example-basic-multiple" name="role_ids[]"
+                                <select class="form-control tom_static_select" name="role_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-allow-clear="true">
@@ -106,12 +106,12 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_status', 'Update status') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-1" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col mb-4">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
                             <input type="text" id="status_title" class="form-control" name="title"
@@ -119,7 +119,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col mb-4">
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="status_color" name="color"
@@ -144,13 +144,13 @@
                     </div>
                     @if ($isAdminOrHasAllDataAccess)
                         <div class="row">
-                            <div class="col-12 mb-3">
+                            <div class="col-12 mb-4">
                                 <label
                                     class="form-label"><?= get_label('roles_can_set_status', 'Roles Can Set the Status') ?>
                                     <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
                                         data-bs-offset="0,4" data-bs-placement="top" title=""
                                         data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
-                                <select class="form-control js-example-basic-multiple" name="role_ids[]"
+                                <select class="form-control tom_static_select" name="role_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-allow-clear="true">
