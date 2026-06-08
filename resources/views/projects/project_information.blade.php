@@ -110,12 +110,12 @@
     </div>{{-- /.tk-workspace-main --}}
 
     {{-- ===== DOCKED PROJECT DETAIL PANEL (always open; project info + module tabs) ===== --}}
-    <aside class="tk-detail-dock tk-detail-canvas" id="project_detail_panel">
-        <div class="tk-detail-dock-head">
-            <span class="tk-detail-dock-title"><x-tk-icon name="info" size="14" class="me-1" />{{ get_label('project_details', 'Project details') }}</span>
-            <button type="button" class="tk-ic-btn" id="tk_detail_close" aria-label="{{ get_label('close', 'Close') }}"><x-tk-icon name="close" /></button>
+    <aside class="tk-dock tk-detail-dock tk-detail-canvas" id="project_detail_panel">
+        <div class="tk-dock-head">
+            <span class="tk-dock-title"><x-tk-icon name="info" size="14" />{{ get_label('project_details', 'Project details') }}</span>
+            <button type="button" class="tk-iconbtn" id="tk_detail_close" aria-label="{{ get_label('close', 'Close') }}"><x-tk-icon name="close" /></button>
         </div>
-        <div class="tk-detail-dock-body">
+        <div class="tk-dock-body">
         <div class="row">
         <div class="col-md-12">
             <div class="card mb-4">
@@ -146,7 +146,11 @@
                                         <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center flex-wrap">
                                             @foreach($users as $user)
                                             <li class="avatar avatar-sm pull-up" title="{{ $user->first_name }} {{ $user->last_name }}"><a href="{{ url('/users/profile/' . $user->id) }}">
-                                                    <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{$user->first_name}} {{$user->last_name}}">
+                                                    @if(!empty($user->photo) && $user->photo !== 'photos/no-image.jpg')
+                                                        <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($user->first_name, 0, 1) }}</span>'" alt="{{$user->first_name}} {{$user->last_name}}">
+                                                    @else
+                                                        <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(substr($user->first_name, 0, 1)) }}</span>
+                                                    @endif
                                                 </a></li>
                                             @endforeach
                                             <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
@@ -163,7 +167,11 @@
                                         <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center flex-wrap">
                                             @foreach($clients as $client)
                                             <li class="avatar avatar-sm pull-up" title="{{ $client->first_name }} {{ $client->last_name }}"><a href="{{ url('/clients/profile/' . $client->id) }}">
-                                                    <img src="{{$client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{$client->first_name}} {{$client->last_name}}">
+                                                    @if(!empty($client->photo) && $client->photo !== 'photos/no-image.jpg')
+                                                        <img src="{{ asset('storage/' . $client->photo) }}" class="rounded-circle" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($client->first_name, 0, 1) }}</span>'" alt="{{$client->first_name}} {{$client->last_name}}">
+                                                    @else
+                                                        <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(substr($client->first_name, 0, 1)) }}</span>
+                                                    @endif
                                                 </a></li>
                                             @endforeach
                                             <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
@@ -297,33 +305,33 @@
                             }
                         @endphp
                         <div class="col-12 mb-2">
-                            <div class="tk-pi-facts">
-                                <div class="tk-pi-fact">
-                                    <span class="tk-pi-fact-ic"><x-tk-icon name="calendar" size="15" /></span>
-                                    <div class="tk-pi-fact-txt">
-                                        <span class="tk-pi-fact-lbl"><?= get_label('starts_at', 'Starts at') ?></span>
-                                        <span class="tk-pi-fact-val">{{ $project->start_date ? format_date($project->start_date) : '-' }}</span>
+                            <div class="tk-facts">
+                                <div class="tk-fact">
+                                    <x-tk-icon name="calendar" size="15" />
+                                    <div class="tk-fact-txt">
+                                        <span class="tk-fact-k"><?= get_label('starts_at', 'Starts at') ?></span>
+                                        <span class="tk-fact-v">{{ $project->start_date ? format_date($project->start_date) : '-' }}</span>
                                     </div>
                                 </div>
-                                <div class="tk-pi-fact">
-                                    <span class="tk-pi-fact-ic"><x-tk-icon name="calendar" size="15" /></span>
-                                    <div class="tk-pi-fact-txt">
-                                        <span class="tk-pi-fact-lbl"><?= get_label('ends_at', 'Ends at') ?></span>
-                                        <span class="tk-pi-fact-val">{{ $project->end_date ? format_date($project->end_date) : '-' }}</span>
+                                <div class="tk-fact">
+                                    <x-tk-icon name="calendar" size="15" />
+                                    <div class="tk-fact-txt">
+                                        <span class="tk-fact-k"><?= get_label('ends_at', 'Ends at') ?></span>
+                                        <span class="tk-fact-v">{{ $project->end_date ? format_date($project->end_date) : '-' }}</span>
                                     </div>
                                 </div>
-                                <div class="tk-pi-fact">
-                                    <span class="tk-pi-fact-ic"><x-tk-icon name="clock" size="15" /></span>
-                                    <div class="tk-pi-fact-txt">
-                                        <span class="tk-pi-fact-lbl"><?= get_label('duration', 'Duration') ?></span>
-                                        <span class="tk-pi-fact-val">{{ $durationText }}</span>
+                                <div class="tk-fact">
+                                    <x-tk-icon name="clock" size="15" />
+                                    <div class="tk-fact-txt">
+                                        <span class="tk-fact-k"><?= get_label('duration', 'Duration') ?></span>
+                                        <span class="tk-fact-v">{{ $durationText }}</span>
                                     </div>
                                 </div>
-                                <div class="tk-pi-fact">
-                                    <span class="tk-pi-fact-ic"><x-tk-icon name="wallet" size="15" /></span>
-                                    <div class="tk-pi-fact-txt">
-                                        <span class="tk-pi-fact-lbl"><?= get_label('budget', 'Budget') ?></span>
-                                        <span class="tk-pi-fact-val">{{ !empty($project->budget) ? format_currency($project->budget) : '-' }}</span>
+                                <div class="tk-fact">
+                                    <x-tk-icon name="wallet" size="15" />
+                                    <div class="tk-fact-txt">
+                                        <span class="tk-fact-k"><?= get_label('budget', 'Budget') ?></span>
+                                        <span class="tk-fact-v">{{ !empty($project->budget) ? format_currency($project->budget) : '-' }}</span>
                                     </div>
                                 </div>
                             </div>

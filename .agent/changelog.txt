@@ -13,3 +13,15 @@
 - Created a custom pagination component in resources/views/components/pagination.blade.php to match the V2 design system and applied it to the grid view, right-aligned.
 
 - Upgraded Grid View filter dropdowns to use Tom Select and automatically apply filters upon selection, removing the manual filter button.
+
+[2026-06-08]
+- Updated `tk-table` component (`resources/views/components/tk-table.blade.php`) design by configuring standard Bootstrap 5 styling classes (`table table-hover align-middle`) in `$tableDefaults['data-classes']`.
+- Fixed visual clipping on table headers by reverting `data-classes` override and increasing header vertical padding in `table.css`.
+- Overhauled `table.css` for a premium SaaS aesthetic:
+  - Added subtle `box-shadow: var(--shadow-1)` to `.bootstrap-table`.
+  - Increased internal padding significantly across `.fixed-table-toolbar` (16px 20px), headers (16px 20px), cells (14px 20px), and `.fixed-table-pagination` (14px 20px) for a breathable design.
+  - Transparentized table header backgrounds (`var(--bg-1)`) for modern cleanliness.
+  - Added smooth hover background transitions to table rows.
+- Redesigned Create Project and Update Project offcanvas (`resources/views/offcanvas.blade.php`) to adhere to V2 Design System:
+  - Migrated `users_select`, `clients_select`, and `tags_select` from Select2 to Tom Select (`tom_users_select`, `tom_clients_select`, `tom_tags_select`).
+  - Added `initTomSelectWithAjax(".tom_tags_select", "tags")` inside `public/assets/js/custom.js`.

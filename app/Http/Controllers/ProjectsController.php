@@ -765,32 +765,36 @@ class ProjectsController extends Controller
                     $actions = '';
                     if ($canEdit) {
                     $actions .= '<a href="javascript:void(0);" class="edit-project" data-offcanvas="true" data-id="' . $project->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
+                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="edit" class="mx-1" />') .
                         '</a>';
                     }
                     if ($canDelete) {
                         $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $project->id . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '">' .
-                            '<i class="bx bx-trash text-danger mx-1"></i>' .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="tk-ic-danger mx-1" />') .
                             '</button>';
                     }
                     if ($canCreate) {
                         $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $project->id . '" data-title="' . $project->title . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                            '<i class="bx bx-copy text-warning mx-2"></i>' .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="copy" class="tk-ic-warning mx-2" />') .
                             '</a>';
                     }
                     $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $project->id . '" data-type="project" title="' . get_label('quick_view', 'Quick View') . '">' .
-                        '<i class="bx bx-info-circle text-info mx-3"></i>' .
+                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="tk-ic-info mx-3" />') .
                         '</a>';
                 $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" title="' . get_label('mind_map', 'Mind Map') . '">' .
-                    '<i class="bx bx-sitemap ms-2"></i>' .
+                    \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="sitemap" class="ms-2" />') .
                     '</a>';
                 $actions = $actions ?: '-';
                     $userHtml = '';
                 if (!empty($project->users) && count($project->users) > 0) {
                         $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->users as $user) {
-                        $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target=
-                            '_blank' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                            if (!empty($user->photo) && $user->photo !== 'photos/no-image.jpg') {
+                                $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target='_blank' title='{$user->first_name} {$user->last_name}'><img src='" . asset('storage/' . $user->photo) . "' alt='Avatar' class='rounded-circle' onerror=\"this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>" . strtoupper(substr($user->first_name, 0, 1)) . "</span>'\" /></a></li>";
+                            } else {
+                                $initial = strtoupper(substr($user->first_name, 0, 1));
+                                $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target='_blank' title='{$user->first_name} {$user->last_name}'><span class='avatar-initial rounded-circle bg-label-primary'>{$initial}</span></a></li>";
+                            }
                         }
 
                     $userHtml .= '</ul>';
@@ -801,7 +805,12 @@ class ProjectsController extends Controller
                 if (!empty($project->clients) && count($project->clients) > 0) {
                         $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->clients as $client) {
-                        $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
+                            if (!empty($client->photo) && $client->photo !== 'photos/no-image.jpg') {
+                                $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . asset('storage/' . $client->photo) . "' alt='Avatar' class='rounded-circle' onerror=\"this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>" . strtoupper(substr($client->first_name, 0, 1)) . "</span>'\" /></a></li>";
+                            } else {
+                                $initial = strtoupper(substr($client->first_name, 0, 1));
+                                $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><span class='avatar-initial rounded-circle bg-label-primary'>{$initial}</span></a></li>";
+                            }
                         }
 
                     $clientHtml .= '</ul>';
@@ -817,13 +826,13 @@ class ProjectsController extends Controller
                 return [
                         'id' => $project->id,
                     'title' => "<a href='" . url("/projects/information/{$project->id}") . "' target='_blank'><strong>{$project->title}</strong></a>
-                        <a href='javascript:void(0);' class='mx-2'>
-                            <i class='bx " . ($isFavorite ? 'bxs' : 'bx') . "-star favorite-icon text-warning' data-favorite='{$isFavorite}' data-id='{$project->id}' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'></i>
-                        </a><a href='javascript:void(0);' class='mr-2'>
-                <i class='bx " . ($isPinned ? 'bxs' : 'bx') . "-pin pinned-icon text-success' data-pinned='{$isPinned}' data-id='{$project->id}' data-require_reload='0' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'></i>
+                        <a href='javascript:void(0);' class='mx-2 btn-icon favorite-icon " . ($isFavorite ? 'text-warning' : 'text-muted') . "' data-favorite='{$isFavorite}' data-id='{$project->id}' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'>" .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="star" />') . "
+                        </a><a href='javascript:void(0);' class='mr-2 btn-icon pinned-icon " . ($isPinned ? 'text-success' : 'text-muted') . "' data-pinned='{$isPinned}' data-id='{$project->id}' data-require_reload='0' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'>" .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="pin" />') . "
             </a>" . ($webGuard || $project->client_can_discuss ?
-                            "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions'  class='ms-2'>
-                                <i class='bx bx-message-rounded-dots text-danger' data-bs-toggle='tooltip' data-bs-placement='right' title='" . get_label('discussions', 'Discussions') . "'></i>
+                            "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions'  class='ms-2 btn-icon text-danger'>" .
+                                \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="msg" />') . "
                             </a>"
                         : ""),
                         'users' => $userHtml,

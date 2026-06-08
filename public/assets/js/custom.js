@@ -5245,6 +5245,7 @@ $(document).ready(function () {
     initTomSelectWithAjax(".tom_statuses_filter", "statuses");
     initTomSelectWithAjax(".tom_priorities_filter", "priorities");
     initTomSelectWithAjax(".tom_tags_filter", "tags");
+    initTomSelectWithAjax(".tom_tags_select", "tags");
     initTomSelectStatic(".tom_static_select");
 
     initSelect2WithAjax(".clients_select", "clients");

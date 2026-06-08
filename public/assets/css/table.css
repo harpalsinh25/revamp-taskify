@@ -13,13 +13,14 @@ body.v2-shell .bootstrap-table {
     border: 1px solid var(--line);
     border-radius: var(--r-2);
     overflow: hidden;
+    box-shadow: var(--shadow-1);
 }
 
 /* --- Toolbar bar: flex row, NO floats (overrides bootstrap-table.min.css).
    Left = custom text buttons (delete/clear/save) · middle = search ·
    right = icon buttons (refresh / column toggle). --- */
 body.v2-shell .bootstrap-table .fixed-table-toolbar {
-    padding: 10px 12px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--line);
     display: flex;
     flex-wrap: wrap;
@@ -226,7 +227,7 @@ body.v2-shell .bootstrap-table table.table>tbody {
 }
 
 body.v2-shell .bootstrap-table table.table>thead>tr>th {
-    background: var(--bg-2);
+    background: var(--bg-1);
     color: var(--fg-3);
     text-transform: uppercase;
     font-size: var(--fs-xs);
@@ -236,7 +237,7 @@ body.v2-shell .bootstrap-table table.table>thead>tr>th {
     text-align: left;
     border: 0 !important;
     border-bottom: 1px solid var(--line) !important;
-    padding: 8px 12px;
+    padding: 16px 20px;
     vertical-align: middle;
 }
 
@@ -271,11 +272,12 @@ body.v2-shell .bootstrap-table table.table .bs-checkbox input[type="checkbox"] {
 body.v2-shell .bootstrap-table table.table>tbody>tr>td {
     border: 0 !important;
     border-bottom: 1px solid var(--line) !important;
-    padding: 10px 12px;
+    padding: 14px 20px;
     color: var(--fg-1);
     vertical-align: middle;
     background: transparent;
     font-size: 13px;
+    transition: background var(--t-1) ease;
 }
 
 body.v2-shell .bootstrap-table table.table>tbody>tr:hover>td {
@@ -436,7 +438,7 @@ body.v2-shell .bootstrap-table .fixed-table-pagination {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 12px;
-    padding: 10px 12px;
+    padding: 14px 20px;
     border-top: 1px solid var(--line);
     color: var(--fg-2);
     font-size: var(--fs-sm);
@@ -522,3 +524,12 @@ body.v2-shell .bootstrap-table .fixed-table-loading {
     background: var(--bg-1);
     color: var(--fg-2);
 }
+/* Table design-system icons */
+body.v2-shell .bootstrap-table .favorite-icon:hover { color: var(--warn); }
+body.v2-shell .bootstrap-table .favorite-icon[data-favorite="1"] { color: var(--warn); }
+body.v2-shell .bootstrap-table .favorite-icon[data-favorite="1"] .tk-ic { fill: currentColor; }
+body.v2-shell .bootstrap-table .pinned-icon:hover { color: var(--ok); }
+body.v2-shell .bootstrap-table .pinned-icon[data-pinned="1"] { color: var(--ok); }
+body.v2-shell .bootstrap-table .pinned-icon[data-pinned="1"] .tk-ic { fill: currentColor; }
+body.v2-shell .bootstrap-table .btn-icon .tk-ic { width: 14px; height: 14px; }
+

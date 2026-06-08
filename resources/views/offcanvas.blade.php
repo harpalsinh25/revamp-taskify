@@ -158,7 +158,7 @@
             <div class="row">
                 <div class="mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                    <select class="form-control users_select" name="user_id[]" multiple="multiple"
+                    <select class="form-control tom_users_select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'web')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -171,7 +171,7 @@
                 <div class="mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-control clients_select" name="client_id[]" multiple="multiple"
+                    <select class="form-control tom_clients_select" name="client_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'client')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -183,7 +183,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label" for=""><?= get_label('select_tags', 'Select tags') ?></label>
-                    <select class="form-control tags_select" name="tag_ids[]" multiple="multiple"
+                    <select class="form-control tom_tags_select" name="tag_ids[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                     <div class="mt-2">
@@ -414,7 +414,7 @@
             <div class="row">
                 <div class="mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                    <select class="form-control users_select" name="user_id[]" multiple="multiple"
+                    <select class="form-control tom_users_select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -423,7 +423,7 @@
                 <div class="mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-control clients_select" name="client_id[]" multiple="multiple"
+                    <select class="form-control tom_clients_select" name="client_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -431,7 +431,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label" for=""><?= get_label('select_tags', 'Select tags') ?></label>
-                    <select class="form-control tags_select" name="tag_ids[]" multiple="multiple"
+                    <select class="form-control tom_tags_select" name="tag_ids[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                     <div class="mt-2">

@@ -36,6 +36,9 @@
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}?v={{ rand() }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}?v={{ rand() }}" />
+    {{-- Design-system component helper (prefixed .tk-* classes; build views from
+         classes instead of writing bespoke CSS in custom.css). --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/tk-design-system.css') }}?v={{ rand() }}" />
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}" />

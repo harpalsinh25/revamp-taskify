@@ -79,9 +79,13 @@
                                 @if ($userCount > 0)
                                     @foreach ($users as $u)
                                         @if ($displayed < 3)
-                                        <a href="{{ url('/users/profile/' . $u->id) }}" class="av" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ $u->first_name }} {{ $u->last_name }}">
-                                            <img src="{{ $u->photo ? asset('storage/' . $u->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{ $u->first_name }}">
-                                        </a>
+                                            <a href="{{ url('/users/profile/' . $u->id) }}" target="_blank">
+                                                @if(!empty($u->photo) && $u->photo !== 'photos/no-image.jpg')
+                                                    <img src="{{ asset('storage/' . $u->photo) }}" loading="lazy" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($u->first_name, 0, 1) }}</span>'" alt="{{ $u->first_name }}">
+                                                @else
+                                                    <span class="avatar-initial rounded-circle bg-label-primary" title="{{ $u->first_name }} {{ $u->last_name }}">{{ strtoupper(substr($u->first_name, 0, 1)) }}</span>
+                                                @endif
+                                            </a>
                                         @php $displayed++; @endphp
                                         @else @break @endif
                                     @endforeach
@@ -97,9 +101,13 @@
                                 @if ($clientCount > 0)
                                     @foreach ($clients as $c)
                                         @if ($displayedClients < 3)
-                                        <a href="{{ url('/clients/profile/' . $c->id) }}" class="av" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ $c->first_name }} {{ $c->last_name }}">
-                                            <img src="{{ $c->photo ? asset('storage/' . $c->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{ $c->first_name }}">
-                                        </a>
+                                            <a href="{{ url('/clients/profile/' . $c->id) }}" target="_blank">
+                                                @if(!empty($c->photo) && $c->photo !== 'photos/no-image.jpg')
+                                                    <img src="{{ asset('storage/' . $c->photo) }}" loading="lazy" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($c->first_name, 0, 1) }}</span>'" alt="{{ $c->first_name }}">
+                                                @else
+                                                    <span class="avatar-initial rounded-circle bg-label-primary" title="{{ $c->first_name }} {{ $c->last_name }}">{{ strtoupper(substr($c->first_name, 0, 1)) }}</span>
+                                                @endif
+                                            </a>
                                         @php $displayedClients++; @endphp
                                         @else @break @endif
                                     @endforeach
