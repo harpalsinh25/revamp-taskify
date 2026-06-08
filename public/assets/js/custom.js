@@ -7803,3 +7803,381 @@ $(function(){
 });
     }
 })();
+
+/* ============================================================
+   Docked project detail panel — presentational helpers.
+   No business logic: only fixes width-dependent rendering of the
+   bootstrap-tables in the module tabs (they initialise at 0-width
+   while their tab is hidden) by recomputing on tab-show.
+   ============================================================ */
+(function () {
+    var SEL = '#project_detail_panel';
+
+    // Re-fit the table of whichever module tab the user switches to.
+    if (window.jQuery) {
+        jQuery(document).on('shown.bs.tab', SEL + ' [data-bs-toggle="tab"]', function (e) {
+            var target = jQuery(e.target).attr('data-bs-target');
+            if (target) {
+                jQuery(target).find('table[data-toggle="table"]').each(function () {
+                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) {}
+                });
+            }
+        });
+
+        // The panel is visible from the start; nudge the active tab's table +
+        // the statistics chart once the layout has settled.
+        jQuery(function () {
+            setTimeout(function () {
+                try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+                jQuery(SEL + ' .tab-pane.active table[data-toggle="table"]').each(function () {
+                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) {}
+                });
+            }, 300);
+        });
+    }
+})();
+
+
+/* ============================================================
+   DOCKED TASK INSPECTOR (project board / list) — always-visible
+   right column. Opens a task on card/row click; loads its modules
+   lazily from existing endpoints (tasks.get / tasks.list /
+   tasks.info / tasks.get-media). Tabs: Subtask · Comments ·
+   Timeline · Media (embedded) + Activity (deep-link). No
+   controller/route changes.
+   ============================================================ */
+(function () {
+    if (!window.jQuery) return;
+    var $ = jQuery;
+    var $dock = $('#task_inspector');
+    if (!$dock.length) return;
+
+    var listUrl    = $dock.data('tasks-list-url');
+    var infoUrl    = $dock.data('task-info-url');
+    var mediaUrl   = $dock.data('task-media-url');
+    var getUrl     = $dock.data('task-get-url');
+    var commentBase= $dock.data('comment-url');
+    var storageUrl = $dock.data('storage-url');
+    var noImage    = $dock.data('no-image');
+    var tasksBase  = String(listUrl || '').replace(/\/list$/, '');
+
+    var currentTaskId = null;
+    var loaded = {};
+    var taskPageDoc = null;
+
+    function csrf() {
+        return $('meta[name="csrf-token"]').attr('content') ||
+               $dock.find('input[name="_token"]').val() || '';
+    }
+    function statuses()  { return window.statusArray   || []; }
+    function priorities(){ return window.priorityArray || []; }
+    function byId(arr, id) { for (var i=0;i<arr.length;i++){ if (String(arr[i].id)===String(id)) return arr[i]; } return null; }
+    function statusTitleById(id){ var s=byId(statuses(),id); return s?s.title:''; }
+    function doneStatusId(){ var s=statuses(); return s.length?s[s.length-1].id:null; }
+    function todoStatusId(){ var s=statuses(); return s.length?s[0].id:null; }
+    function esc(t){ return $('<div>').text(t==null?'':t).html(); }
+    var COLORVAR = { success:'var(--ok)', danger:'var(--err)', warning:'var(--warn)', info:'var(--info)', primary:'var(--signal)', secondary:'var(--fg-3)' };
+    function colorVar(c){ return COLORVAR[c] || 'var(--fg-3)'; }
+    function parseStatusId(html){ var m=/data-original-status-id=['"]?(\d+)/.exec(html||''); return m?m[1]:null; }
+    function parseTitle(html){ var $h=$('<div>').html(html||''); var t=$h.find('strong').first().text(); return t||$.trim($h.text()); }
+    function row(lbl, val){ return '<div class="tk-insp-lbl">'+esc(lbl)+'</div><div class="tk-insp-val">'+val+'</div>'; }
+
+    function photoSrc(p){ return p ? (storageUrl + '/' + p) : noImage; }
+    function avatarsFromUsers(users){
+        users = users || [];
+        if (!users.length) return '<span style="font-size:12px;color:var(--fg-3)">—</span>';
+        var h = '<span class="av-stack tk-av-stack">', n = 0;
+        users.forEach(function(u){
+            if (n < 5) {
+                h += '<span class="av" title="'+esc((u.first_name||'')+' '+(u.last_name||''))+'"><img src="'+esc(photoSrc(u.photo))+'" onerror="this.onerror=null;this.src=DEFAULT_IMG" alt=""></span>';
+                n++;
+            }
+        });
+        if (users.length > 5) h += '<span class="av av-more">+'+(users.length-5)+'</span>';
+        h = h.replace(/DEFAULT_IMG/g, "'" + String(noImage).replace(/'/g, "%27") + "'");
+        return h + '</span>';
+    }
+
+    function openTask(taskId, $card) {
+        if (!taskId) return;
+        currentTaskId = taskId;
+        loaded = {};
+        taskPageDoc = null;
+        $('#tk_insp_empty').hide();
+        $('#tk_insp_content').show();
+        $('#tk_insp_foot').show();
+        $('#tk_insp_task_id').val(taskId);
+        $('#tk_insp_open').attr('href', infoUrl + '/' + taskId);
+        $('#tk_insp_scroll').scrollTop(0);
+        activateTab('subtask');
+        if ($card && $card.length) { metaFromCard($card, taskId); }
+        else { metaFromJson(taskId); }
+        loadTab('subtask');
+    }
+
+    function metaFromCard($card, taskId) {
+        var code = $.trim($card.find('.tcard-code').first().text());
+        var title = $.trim($card.find('.tcard-title').first().text());
+        var statusId = $card.closest('.kanban-tasks').data('status');
+        var stTitle = statusTitleById(statusId);
+        var $prio = $card.find('.tag-priority').first();
+        var prioTxt = $.trim($prio.text());
+        var prioColor = $prio.length ? $prio.css('color') : '';
+        var dueTxt = $.trim($card.find('.tag-due').first().text());
+        var $assignees = $card.find('.tcard-foot .av-stack').first().clone();
+        $assignees.find('.av-add').remove();
+        $('#tk_insp_code').text(code || ('#' + taskId));
+        $('#tk_insp_status').html('<span class="dot"></span>' + esc(stTitle));
+        $('#tk_insp_title').text(title);
+        var html = '';
+        if (prioTxt) html += row('Priority', '<span class="mono" style="color:'+prioColor+'">'+esc(prioTxt)+'</span>');
+        html += row('Assignees', '<span id="tk_insp_assignees"></span>');
+        if (dueTxt) html += row('Due', '<span class="mono">'+esc(dueTxt)+'</span>');
+        if (stTitle) html += row('Status', esc(stTitle));
+        $('#tk_insp_meta').html(html);
+        if ($assignees.length) $('#tk_insp_assignees').replaceWith($assignees); else $('#tk_insp_assignees').text('—');
+    }
+
+    function metaFromJson(taskId) {
+        $('#tk_insp_code').text('#' + taskId);
+        $('#tk_insp_title').text('');
+        $('#tk_insp_meta').html('<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:60%"></div>');
+        if (!getUrl) return;
+        $.getJSON(getUrl + '/' + taskId).done(function (res) {
+            if (!res || res.error || !res.task) { $('#tk_insp_meta').html(''); return; }
+            var t = res.task;
+            var stTitle = statusTitleById(t.status_id);
+            $('#tk_insp_code').text('#' + t.id);
+            $('#tk_insp_status').html('<span class="dot"></span>' + esc(stTitle));
+            $('#tk_insp_title').text(t.title || '');
+            var html = '';
+            var pr = byId(priorities(), t.priority_id);
+            if (pr) html += row('Priority', '<span class="mono" style="color:'+colorVar(pr.color)+'">● '+esc(pr.title)+'</span>');
+            html += row('Assignees', avatarsFromUsers(t.users));
+            if (t.due_date) html += row('Due', '<span class="mono">'+esc(t.due_date)+'</span>');
+            if (stTitle) html += row('Status', esc(stTitle));
+            $('#tk_insp_meta').html(html);
+        }).fail(function(){ $('#tk_insp_meta').html(''); });
+    }
+
+    function activateTab(name) {
+        $('#tk_insp_tabs .tk-insp-tab').removeClass('active').filter('[data-insp-tab="'+name+'"]').addClass('active');
+        $('#tk_insp_panes .tk-insp-pane').removeClass('active').filter('[data-insp-pane="'+name+'"]').addClass('active');
+    }
+    $dock.on('click', '.tk-insp-tab', function () {
+        var name = $(this).data('insp-tab');
+        activateTab(name);
+        loadTab(name);
+    });
+
+    function loadTab(name) {
+        if (!currentTaskId) return;
+        if (loaded[name]) return;
+        loaded[name] = true;
+        if (name === 'subtask') return loadSubtasks(currentTaskId);
+        if (name === 'media')   return loadMedia(currentTaskId);
+        if (name === 'activity')return fillActivity(currentTaskId);
+        if (name === 'comments' || name === 'timeline') return loadTaskPage(currentTaskId);
+    }
+
+    function loadSubtasks(taskId) {
+        var $p = $('#tk_insp_pane_subtask');
+        $p.html('<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:80%"></div>');
+        if (!listUrl) { $p.html('<div class="tk-insp-emptyline">—</div>'); return; }
+        $.ajax({ url: listUrl, data: { task_parent_id: taskId, limit: 100 }, dataType: 'json' })
+            .done(function (res) { renderSubtasks((res && res.rows) || []); })
+            .fail(function () { $p.html('<div class="tk-insp-emptyline">Could not load subtasks.</div>'); });
+    }
+    function renderSubtasks(rows) {
+        var $p = $('#tk_insp_pane_subtask');
+        var total = rows.length, done = 0, dId = doneStatusId();
+        if (!total) { $p.html('<div class="tk-insp-emptyline">No subtasks.</div>'); return; }
+        var items = '';
+        rows.forEach(function (r) {
+            var sid = parseStatusId(r.status_id);
+            var isDone = dId && String(sid) === String(dId);
+            if (isDone) done++;
+            items += '<label class="tk-subtask'+(isDone?' is-done':'')+'" data-sub-id="'+r.id+'">';
+            items += '<input type="checkbox" '+(isDone?'checked':'')+'>';
+            items += '<span class="tk-subtask-title">'+esc(parseTitle(r.title))+'</span></label>';
+        });
+        var pct = total ? Math.round(done/total*100) : 0;
+        $p.html('<div class="tk-insp-sechead"><strong>Subtasks</strong><span class="tk-insp-count" id="tk_insp_subcount">'+done+'/'+total+'</span></div>'
+              + '<div class="tk-insp-progress"><span id="tk_insp_progress" style="width:'+pct+'%"></span></div>'
+              + '<div class="tk-subtask-list">'+items+'</div>');
+    }
+    function updateSubCount() {
+        var $list = $('#tk_insp_pane_subtask');
+        var total = $list.find('.tk-subtask').length;
+        var done = $list.find('.tk-subtask input:checked').length;
+        $('#tk_insp_subcount').text(done + '/' + total);
+        $('#tk_insp_progress').css('width', (total ? Math.round(done/total*100) : 0) + '%');
+    }
+    $dock.on('change', '.tk-subtask input[type=checkbox]', function () {
+        var $r = $(this).closest('.tk-subtask');
+        var sid = $r.data('sub-id');
+        var checked = this.checked, self = this;
+        var target = checked ? doneStatusId() : todoStatusId();
+        if (!target || !tasksBase) return;
+        $r.toggleClass('is-done', checked);
+        updateSubCount();
+        $.ajax({ url: tasksBase + '/' + sid + '/update-status/' + target, method: 'PUT', headers: { 'X-CSRF-TOKEN': csrf() } })
+            .fail(function () { self.checked = !checked; $r.toggleClass('is-done', self.checked); updateSubCount(); });
+    });
+
+    function loadTaskPage(taskId) {
+        $('#tk_insp_pane_comments').html('<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:70%"></div>');
+        $('#tk_insp_pane_timeline').html('<div class="tk-insp-skel"></div>');
+        if (!infoUrl) return;
+        $.ajax({ url: infoUrl + '/' + taskId, dataType: 'html' })
+            .done(function (htmlStr) {
+                // Full HTML document — parse with DOMParser (jQuery .html() drops
+                // <html>/<head>/<body> and mangles the panes).
+                try { taskPageDoc = new DOMParser().parseFromString(htmlStr, 'text/html'); }
+                catch (e) { taskPageDoc = null; }
+                fillComments(); fillTimeline();
+            })
+            .fail(function () {
+                $('#tk_insp_pane_comments').html('<div class="tk-insp-emptyline">Could not load comments.</div>');
+                $('#tk_insp_pane_timeline').html('<div class="tk-insp-emptyline">Could not load timeline.</div>');
+            });
+    }
+    function paneHtml(sel) {
+        if (!taskPageDoc || !taskPageDoc.querySelector) return null;
+        var el = taskPageDoc.querySelector(sel);
+        return el ? el.innerHTML : null;
+    }
+    function hasText(html) { return html && $.trim($('<div>').html(html).text()) !== ''; }
+    function fillComments() {
+        var $p = $('#tk_insp_pane_comments');
+        var html = paneHtml('#navs-top-discussions');
+        if (hasText(html)) { $p.html('<div class="tk-insp-activity">' + html + '</div>'); }
+        else { $p.html('<div class="tk-insp-emptyline">No comments yet.</div>'); }
+    }
+    function fillTimeline() {
+        var $p = $('#tk_insp_pane_timeline');
+        var html = paneHtml('#navs-top-status_timeline');
+        if (hasText(html)) { $p.html('<div class="tk-insp-timeline">' + html + '</div>'); }
+        else { $p.html('<div class="tk-insp-emptyline">No timeline entries.</div>'); }
+    }
+
+    function loadMedia(taskId) {
+        var $p = $('#tk_insp_pane_media');
+        $p.html('<div class="tk-insp-skel"></div>');
+        if (!mediaUrl) { $p.html('<div class="tk-insp-emptyline">—</div>'); return; }
+        $.getJSON(mediaUrl + '/' + taskId).done(function (res) {
+            var rows = (res && res.rows) || [];
+            if (!rows.length) { $p.html('<div class="tk-insp-emptyline">No media.</div>'); return; }
+            // `file` is server-rendered HTML (image thumbnail link or download link).
+            var h = '<div class="tk-insp-media-grid">';
+            rows.forEach(function (m) {
+                h += '<div class="tk-insp-media">' + (m.file || '') + '<span class="tk-insp-media-name">' + esc(m.file_name || '') + '</span></div>';
+            });
+            $p.html(h + '</div>');
+        }).fail(function(){ $p.html('<div class="tk-insp-emptyline">Could not load media.</div>'); });
+    }
+
+    function fillActivity(taskId) {
+        $('#tk_insp_pane_activity').html(
+            '<div class="tk-insp-emptyline" style="text-align:center;padding:18px 8px;">'
+          + 'Activity log opens in the full task view.<br>'
+          + '<a class="btn btn-sm btn-outline-secondary mt-2" target="_blank" href="' + esc(infoUrl + '/' + taskId) + '#navs-top-activity-log">Open activity</a>'
+          + '</div>');
+    }
+
+    $('#tk_insp_comment_form').on('submit', function (e) {
+        e.preventDefault();
+        var taskId = $('#tk_insp_task_id').val();
+        var content = $.trim($('#tk_insp_comment_input').val());
+        if (!taskId || !content || !commentBase) return;
+        var fd = new FormData();
+        fd.append('model_type', 'App\\Models\\Task');
+        fd.append('model_id', taskId);
+        fd.append('parent_id', '');
+        fd.append('content', content);
+        fd.append('_token', csrf());
+        var $btn = $('#tk_insp_comment_submit');
+        $btn.prop('disabled', true);
+        $.ajax({ url: commentBase + '/' + taskId + '/comments', method: 'POST', data: fd, processData: false, contentType: false })
+            .done(function () {
+                $('#tk_insp_comment_input').val('');
+                activateTab('comments');
+                taskPageDoc = null; loaded['comments'] = false; loaded['timeline'] = false;
+                loadTab('comments');
+            })
+            .always(function () { $btn.prop('disabled', false); });
+    });
+
+    $(document).on('click', '#project_task_board .tcard', function (e) {
+        if ($(e.target).closest('.tcard-actions, .tcard-stats, .av-stack, .dropdown, [data-bs-toggle]').length) return;
+        if ($(this).hasClass('gu-transit') || $(this).hasClass('gu-mirror')) return;
+        e.preventDefault();
+        $('#project_task_board .tcard').removeClass('tk-card-active');
+        $(this).addClass('tk-card-active');
+        openTask($(this).data('task-id'), $(this));
+    });
+
+    $(document).on('click', 'table[data-toggle="table"] tbody tr', function (e) {
+        if (!$('#task_inspector').length) return;
+        if ($(e.target).closest('a, button, input, select, .dropdown, label, .form-check, [data-bs-toggle]').length) return;
+        var id = $(this).find('[data-task-row-id]').data('task-row-id');
+        if (!id) {
+            var href = $(this).find('a[href*="/tasks/information/"]').attr('href') || '';
+            var m = /\/tasks\/information\/(\d+)/.exec(href);
+            id = m ? m[1] : null;
+        }
+        if (!id) return;
+        $('table[data-toggle="table"] tbody tr').removeClass('tk-row-active');
+        $(this).addClass('tk-row-active');
+        openTask(id, null);
+    });
+
+    $(document).on('input', '#tk_board_search', function () {
+        var q = $.trim(this.value).toLowerCase();
+        $('#project_task_board .tcard').each(function () {
+            var t = $(this).find('.tcard-title').text().toLowerCase();
+            $(this).toggleClass('tk-hide', !!q && t.indexOf(q) === -1);
+        });
+        $('#project_task_board .kcol').each(function () {
+            $(this).find('.kcol-count').text($(this).find('.tcard:not(.tk-hide)').length);
+        });
+    });
+})();
+
+/* Board search (standalone) — filters kanban cards by title and updates
+   column counts. Kept independent of the (now optional) task inspector. */
+(function () {
+    if (!window.jQuery) return;
+    jQuery(document).on('input', '#tk_board_search', function () {
+        var q = jQuery.trim(this.value).toLowerCase();
+        jQuery('#project_task_board .tcard').each(function () {
+            var t = jQuery(this).find('.tcard-title').text().toLowerCase();
+            jQuery(this).toggleClass('tk-hide', !!q && t.indexOf(q) === -1);
+        });
+        jQuery('#project_task_board .kcol').each(function () {
+            jQuery(this).find('.kcol-count').text(jQuery(this).find('.tcard:not(.tk-hide)').length);
+        });
+    });
+})();
+
+/* Project detail panel — expand / collapse toggle (toolbar button opens,
+   the panel's × closes; last state remembered). */
+(function () {
+    if (!window.jQuery) return;
+    var $ = jQuery;
+    function setCollapsed(collapsed) {
+        $('#tk_workspace').toggleClass('tk-detail-collapsed', collapsed);
+        $('#tk_detail_toggle').toggleClass('active', !collapsed);
+        try { localStorage.setItem('tkProjectDetailCollapsed', collapsed ? '1' : '0'); } catch (e) {}
+    }
+    $(document).on('click', '#tk_detail_toggle', function () {
+        setCollapsed(!$('#tk_workspace').hasClass('tk-detail-collapsed'));
+    });
+    $(document).on('click', '#tk_detail_close', function () { setCollapsed(true); });
+    $(function () {
+        if (!$('#tk_workspace').length) return;
+        var saved = null;
+        try { saved = localStorage.getItem('tkProjectDetailCollapsed'); } catch (e) {}
+        if (saved === '1') setCollapsed(true);
+    });
+})();

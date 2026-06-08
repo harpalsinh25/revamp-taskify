@@ -26,6 +26,11 @@
         'note'      => '<path d="M5 3h11l3 3v15a0 0 0 0 1 0 0H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M15 3v4h4M8 13h8M8 17h5"/>',
         'kanban'    => '<rect x="3" y="4" width="6" height="16" rx="1"/><rect x="11" y="4" width="6" height="10" rx="1"/><rect x="18.5" y="4" width="2.5" height="13" rx="1"/>',
         'chart'     => '<path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/>',
+        'search'    => '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+        'close'     => '<path d="M6 6l12 12M18 6 6 18"/>',
+        'branch'    => '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="7" r="2.5"/><path d="M6 8.5v7M18 9.5c0 4-6 1.5-6 6"/>',
+        'clock'     => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        'flag'      => '<path d="M4 21V4h12l-2 4 2 4H4"/>',
     ];
     $path = $icons[$name] ?? '<circle cx="12" cy="12" r="9"/>';
 @endphp

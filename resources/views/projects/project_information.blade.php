@@ -4,36 +4,119 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mb-2 mt-4">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
-                    <li class="breadcrumb-item">
-                        <a href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{url(getUserPreferences('projects', 'default_view'))}}"><?= get_label('projects', 'Projects') ?></a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        {{$project->title}}
-                    </li>
-                </ol>
-            </nav>
+    {{-- ============================================================
+         PROJECT BOARD HEADER  (design-system: eyebrow / title / meta
+         / avatar-stack / actions) — matches Taskify Revamp Kit
+         pages/projects/index.blade.php
+         ============================================================ --}}
+    <header class="tk-proj-head mt-4 mb-3">
+        <div class="tk-proj-headmain">
+            <div class="tk-proj-eyebrow mono">
+                <span class="kcol-dot kcol-dot-{{ $project->status->color }}"></span>
+                {{ strtoupper(str_replace(' ', '-', $project->title)) }}@if($project->clients->isNotEmpty()) · {{ strtoupper($project->clients->first()->first_name.' '.$project->clients->first()->last_name) }}@endif
+            </div>
+            <h1 class="tk-proj-title">
+                {{ $project->title }}
+                <a href="javascript:void(0);" class="tk-proj-ic">
+                    <i class='bx {{getFavoriteStatus($project->id) ? "bxs" : "bx"}}-star favorite-icon text-warning' data-id="{{$project->id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')}}" data-favorite="{{getFavoriteStatus($project->id) ? 1 : 0}}"></i>
+                </a>
+                <a href="javascript:void(0);" class="tk-proj-ic">
+                    <i class='bx {{getPinnedStatus($project->id) ? "bxs" : "bx"}}-pin pinned-icon text-success' data-id="{{$project->id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')}}" data-pinned="{{getPinnedStatus($project->id)}}" data-require_reload="0"></i>
+                </a>
+            </h1>
+            <div class="tk-proj-meta">
+                <span><x-tk-icon name="check" size="13" /> {{ $project->tasks->count() }} {{ get_label('tasks', 'tasks') }}</span>
+                <span><x-tk-icon name="users" size="13" /> {{ $project->users->count() }} {{ get_label('members', 'members') }}</span>
+                @if($project->end_date)
+                <span><x-tk-icon name="calendar" size="13" /> {{ get_label('due', 'Due') }} {{ format_date($project->end_date) }}</span>
+                @endif
+                @if($project->priority)
+                <span class="text-{{ $project->priority->color }}">● {{ $project->priority->title }}</span>
+                @endif
+            </div>
         </div>
-        @php
-        $taskDefaultView = getUserPreferences('tasks', 'default_view')=='tasks'?'tasks/list':'tasks/draggable';
-        @endphp
-        <div>
-            <a href="{{url('projects/mind-map/'.$project->id)}}">
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('mind_map', 'Mind Map') ?>">
-                    <i class="bx bx-sitemap"></i>
-                </button>
+        <div class="tk-proj-headside">
+            <span class="av-stack tk-av-stack">
+                @php $hu = $project->users; $huCount = $hu->count(); $huShown = 0; @endphp
+                @foreach($hu as $u)
+                    @if($huShown < 4)
+                    <a href="{{ url('/users/profile/' . $u->id) }}" class="av" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ $u->first_name }} {{ $u->last_name }}">
+                        <img src="{{ $u->photo ? asset('storage/' . $u->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{ $u->first_name }}">
+                    </a>
+                    @php $huShown++; @endphp
+                    @endif
+                @endforeach
+                @if($huCount > 4) <span class="av av-more">+{{ $huCount - 4 }}</span> @endif
+            </span>
+            <a href="{{url('projects/mind-map/'.$project->id)}}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="<?= get_label('mind_map', 'Mind Map') ?>">
+                <x-tk-icon name="sitemap" />
             </a>
-            <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas"><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title=" <?= get_label('create_task', 'Create task') ?>"><i class="bx bx-plus"></i></button></a>
-            <a href="{{url('projects/'.$taskDefaultView.'/' . $project->id)}}"><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('tasks', 'Tasks') ?>"><i class="bx bx-task"></i></button></a>
+            @if ($auth_user->can('manage_tasks'))
+            <a href="javascript:void(0);" class="btn btn-sm btn-primary" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas" aria-controls="create_task_offcanvas">
+                <x-tk-icon name="plus" class="me-1" />{{ get_label('new_task', 'New task') }}
+            </a>
+            @endif
         </div>
+    </header>
+
+    {{-- ============================ TOOLBAR ============================ --}}
+    <div class="tk-board-toolbar mb-3">
+        <div class="tk-seg" role="tablist">
+            <a href="javascript:void(0);" class="tk-seg-item active"><x-tk-icon name="kanban" size="14" /> {{ get_label('board', 'Board') }}</a>
+            <a href="{{ url('projects/tasks/list/'.$project->id) }}" class="tk-seg-item"><x-tk-icon name="list" size="14" /> {{ get_label('list', 'List') }}</a>
+            <a href="{{ url('projects/tasks/calendar/'.$project->id) }}" class="tk-seg-item"><x-tk-icon name="calendar" size="14" /> {{ get_label('timeline', 'Timeline') }}</a>
+        </div>
+        <div class="tk-board-search">
+            <x-tk-icon name="search" size="14" />
+            <input type="text" id="tk_board_search" placeholder="{{ get_label('search_tasks', 'Search tasks…') }}" autocomplete="off">
+        </div>
+        <span class="tk-toolbar-spacer"></span>
+        <button type="button" class="btn btn-sm btn-outline-secondary tk-detail-toggle active" id="tk_detail_toggle">
+            <x-tk-icon name="info" size="14" class="me-1" />{{ get_label('project_details', 'Project details') }}
+        </button>
     </div>
-    <div class="row">
+
+    {{-- ============= WORKSPACE: board (left) + docked project detail panel (right) ============= --}}
+    <div class="tk-workspace" id="tk_workspace">
+    <div class="tk-workspace-main">
+    @if ($auth_user->can('manage_tasks'))
+    @if ($project->tasks->count() > 0)
+    {{-- Drag-and-drop hooks preserved: column id={slug} + data-status are the
+         dragula containers; task cards (data-task-id) are the draggables. --}}
+    <div class="kanban-board tk-kanban" id="project_task_board" data-project-id="{{ $project->id }}">
+        @foreach ($statuses as $status)
+        @php $statusTaskCount = $project->tasks->where('status_id', $status->id)->count(); @endphp
+        <div class="kcol kanban-column">
+            <div class="kcol-head">
+                <span class="kcol-dot kcol-dot-{{ $status->color }}"></span>
+                <span class="kcol-name">{{ $status->title }}</span>
+                <span class="kcol-count">{{ $statusTaskCount }}</span>
+            </div>
+            <div class="kanban-tasks kcol-body" id="{{ $status->slug }}" data-status="{{ $status->id }}">
+                @foreach ($project->tasks as $task)
+                @if($task->status_id == $status->id)
+                <x-kanban :task="$task" />
+                @endif
+                @endforeach
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @else
+    <?php $type = 'Tasks'; ?>
+    <x-empty-state-card :type="$type" />
+    @endif
+    @endif
+    </div>{{-- /.tk-workspace-main --}}
+
+    {{-- ===== DOCKED PROJECT DETAIL PANEL (always open; project info + module tabs) ===== --}}
+    <aside class="tk-detail-dock tk-detail-canvas" id="project_detail_panel">
+        <div class="tk-detail-dock-head">
+            <span class="tk-detail-dock-title"><x-tk-icon name="info" size="14" class="me-1" />{{ get_label('project_details', 'Project details') }}</span>
+            <button type="button" class="tk-ic-btn" id="tk_detail_close" aria-label="{{ get_label('close', 'Close') }}"><x-tk-icon name="close" /></button>
+        </div>
+        <div class="tk-detail-dock-body">
+        <div class="row">
         <div class="col-md-12">
             <div class="card mb-4">
                 <div class="card-body">
@@ -63,7 +146,7 @@
                                         <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center flex-wrap">
                                             @foreach($users as $user)
                                             <li class="avatar avatar-sm pull-up" title="{{ $user->first_name }} {{ $user->last_name }}"><a href="{{ url('/users/profile/' . $user->id) }}">
-                                                    <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" alt="{{$user->first_name}} {{$user->last_name}}">
+                                                    <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{$user->first_name}} {{$user->last_name}}">
                                                 </a></li>
                                             @endforeach
                                             <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
@@ -80,7 +163,7 @@
                                         <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center flex-wrap">
                                             @foreach($clients as $client)
                                             <li class="avatar avatar-sm pull-up" title="{{ $client->first_name }} {{ $client->last_name }}"><a href="{{ url('/clients/profile/' . $client->id) }}">
-                                                    <img src="{{$client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" alt="{{$client->first_name}} {{$client->last_name}}">
+                                                    <img src="{{$client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')}}" class="rounded-circle" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{$client->first_name}} {{$client->last_name}}">
                                                 </a></li>
                                             @endforeach
                                             <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
@@ -203,66 +286,45 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-12 col-6 mb-4">
-                            <!-- "Starts at" card -->
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="card-title d-flex align-items-start justify-content-between">
-                                        <div class="avatar flex-shrink-0">
-                                            <i class="menu-icon tf-iconsbx bx bx-calendar-check bx-md text-success"></i>
-                                        </div>
-                                    </div>
-                                    <span class="fw-semibold d-block mb-1"><?= get_label('starts_at', 'Starts at') ?></span>
-                                    <h3 class="card-title mb-2">{{ format_date($project->start_date) }}</h3>
-                                </div>
-                            </div>
-                            @php
-                            use Carbon\Carbon;
-
-                            $fromDate = $project->start_date ? Carbon::parse($project->start_date) : null;
-                            $toDate = $project->end_date ? Carbon::parse($project->end_date) : null;
-
+                        @php
+                            $fromDate = $project->start_date ? \Carbon\Carbon::parse($project->start_date) : null;
+                            $toDate = $project->end_date ? \Carbon\Carbon::parse($project->end_date) : null;
                             if ($fromDate && $toDate) {
-                            $duration = $fromDate->diffInDays($toDate) + 1;
-                            $durationText = $duration . ' day' . ($duration > 1 ? 's' : '');
+                                $duration = $fromDate->diffInDays($toDate) + 1;
+                                $durationText = $duration . ' ' . ($duration > 1 ? get_label('days', 'days') : get_label('day', 'day'));
                             } else {
-                            $durationText = '-';
+                                $durationText = '-';
                             }
-                            @endphp
-                            <div class="card mt-4">
-                                <div class="card-body">
-                                    <div class="card-title d-flex align-items-start justify-content-between">
-                                        <div class="avatar flex-shrink-0">
-                                            <i class="menu-icon tf-iconsbx bx bx-time bx-md text-primary"></i>
-                                        </div>
+                        @endphp
+                        <div class="col-12 mb-2">
+                            <div class="tk-pi-facts">
+                                <div class="tk-pi-fact">
+                                    <span class="tk-pi-fact-ic"><x-tk-icon name="calendar" size="15" /></span>
+                                    <div class="tk-pi-fact-txt">
+                                        <span class="tk-pi-fact-lbl"><?= get_label('starts_at', 'Starts at') ?></span>
+                                        <span class="tk-pi-fact-val">{{ $project->start_date ? format_date($project->start_date) : '-' }}</span>
                                     </div>
-                                    <span class="fw-semibold d-block mb-1"><?= get_label('duration', 'Duration') ?></span>
-                                    <h3 class="card-title mb-2">{{ $durationText }}</h3>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-12 col-6 mb-4">
-                            <!-- "Ends at" card -->
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="card-title d-flex align-items-start justify-content-between">
-                                        <div class="avatar flex-shrink-0">
-                                            <i class="menu-icon tf-icons bx bx-calendar-x bx-md text-danger"></i>
-                                        </div>
+                                <div class="tk-pi-fact">
+                                    <span class="tk-pi-fact-ic"><x-tk-icon name="calendar" size="15" /></span>
+                                    <div class="tk-pi-fact-txt">
+                                        <span class="tk-pi-fact-lbl"><?= get_label('ends_at', 'Ends at') ?></span>
+                                        <span class="tk-pi-fact-val">{{ $project->end_date ? format_date($project->end_date) : '-' }}</span>
                                     </div>
-                                    <span class="fw-semibold d-block mb-1"><?= get_label('ends_at', 'Ends at') ?></span>
-                                    <h3 class="card-title mb-2">{{ format_date($project->end_date) }}</h3>
                                 </div>
-                            </div>
-                            <div class="card mt-4">
-                                <div class="card-body">
-                                    <div class="card-title d-flex align-items-start justify-content-between">
-                                        <div class="avatar flex-shrink-0">
-                                            <i class="menu-icon tf-icons bx bx-purchase-tag-alt bx-md text-warning"></i>
-                                        </div>
+                                <div class="tk-pi-fact">
+                                    <span class="tk-pi-fact-ic"><x-tk-icon name="clock" size="15" /></span>
+                                    <div class="tk-pi-fact-txt">
+                                        <span class="tk-pi-fact-lbl"><?= get_label('duration', 'Duration') ?></span>
+                                        <span class="tk-pi-fact-val">{{ $durationText }}</span>
                                     </div>
-                                    <span class="fw-semibold d-block mb-1"><?= get_label('budget', 'Budget') ?></span>
-                                    <h3 class="card-title mb-2">{{ !empty($project->budget) ? format_currency($project->budget) : '-' }}</h3>
+                                </div>
+                                <div class="tk-pi-fact">
+                                    <span class="tk-pi-fact-ic"><x-tk-icon name="wallet" size="15" /></span>
+                                    <div class="tk-pi-fact-txt">
+                                        <span class="tk-pi-fact-lbl"><?= get_label('budget', 'Budget') ?></span>
+                                        <span class="tk-pi-fact-val">{{ !empty($project->budget) ? format_currency($project->budget) : '-' }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -445,27 +507,23 @@
         <div class="nav-align-top mt-2">
             <ul class="nav nav-tabs" role="tablist">
                 @php
-                $activeTab = '';
-                @endphp
-                @if ($auth_user->can('manage_tasks'))
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}" role="tab"
-                        data-bs-toggle="tab" data-bs-target="#navs-top-tasks" aria-controls="navs-top-tasks">
-                        <i class="menu-icon tf-icons bx bx-task text-primary"></i><?= get_label('tasks', 'Tasks') ?>
-                    </button>
-                </li>
-                @php
-                if (empty($activeTab)) {
-                $activeTab = 'tasks';
+                // First available module becomes the active tab inside the details offcanvas.
+                if (Auth::guard('web')->check() || $project->client_can_discuss) {
+                    $activeTab = 'discussions';
+                } elseif ($auth_user->can('manage_milestones')) {
+                    $activeTab = 'milestones';
+                } elseif ($auth_user->can('manage_media')) {
+                    $activeTab = 'media';
+                } else {
+                    $activeTab = 'status_timeline';
                 }
                 @endphp
-                @endif
 
                 @if (Auth::guard('web')->check() || $project->client_can_discuss)
                 <li class="nav-item">
                     <button type="button" class="nav-link {{ $activeTab == 'discussions' ? 'active' : '' }}" role="tab"
                         data-bs-toggle="tab" data-bs-target="#navs-top-discussions" aria-controls="navs-top-discussions">
-                        <i class="menu-icon tf-icons bx bxs-chat text-danger"></i><?= get_label('discussions', 'Discussions') ?>
+                        <x-tk-icon name="msg" size="14" class="me-1" /><?= get_label('discussions', 'Discussions') ?>
                     </button>
                 </li>
                 @php
@@ -479,7 +537,7 @@
                 <li class="nav-item">
                     <button type="button" class="nav-link {{ $activeTab == 'milestones' ? 'active' : '' }}" role="tab"
                         data-bs-toggle="tab" data-bs-target="#navs-top-milestones" aria-controls="navs-top-milestones">
-                        <i class="menu-icon tf-icons bx bx-list-check text-warning"></i><?= get_label('milestones', 'Milestones') ?>
+                        <x-tk-icon name="flag" size="14" class="me-1" /><?= get_label('milestones', 'Milestones') ?>
                     </button>
                 </li>
                 @php
@@ -491,9 +549,9 @@
 
                 @if ($auth_user->can('manage_media'))
                 <li class="nav-item">
-                    <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}" role="tab"
+                    <button type="button" class="nav-link {{ $activeTab == 'media' ? 'active' : '' }}" role="tab"
                         data-bs-toggle="tab" data-bs-target="#navs-top-media" aria-controls="navs-top-media">
-                        <i class="menu-icon tf-icons bx bx-image-alt text-success"></i><?= get_label('media', 'Media') ?>
+                        <x-tk-icon name="note" size="14" class="me-1" /><?= get_label('media', 'Media') ?>
                     </button>
                 </li>
                 @php
@@ -504,8 +562,8 @@
                 @endif
 
                 <li class="nav-item">
-                    <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-status_timeline" aria-controls="navs-top-status_timeline">
-                        <i class="menu-icon tf-icons bx bx-align-justify text-dark"></i><?= get_label('status_timeline', 'Status Timeline') ?>
+                    <button type="button" class="nav-link {{ $activeTab == 'status_timeline' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-status_timeline" aria-controls="navs-top-status_timeline">
+                        <x-tk-icon name="clock" size="14" class="me-1" /><?= get_label('status_timeline', 'Status Timeline') ?>
                     </button>
                 </li>
                 @php
@@ -518,7 +576,7 @@
                 <li class="nav-item">
                     <button type="button" class="nav-link {{ $activeTab == 'activity_log' ? 'active' : '' }}" role="tab"
                         data-bs-toggle="tab" data-bs-target="#navs-top-activity-log" aria-controls="navs-top-activity-log">
-                        <i class="menu-icon tf-icons bx bx-line-chart text-info"></i><?= get_label('activity_log', 'Activity log') ?>
+                        <x-tk-icon name="chart" size="14" class="me-1" /><?= get_label('activity_log', 'Activity log') ?>
                     </button>
                 </li>
                 @php
@@ -530,25 +588,6 @@
             </ul>
 
             <div class="tab-content">
-                @if ($auth_user->can('manage_tasks'))
-                <div class="tab-pane fade {{ $activeTab == 'tasks' ? 'active show' : '' }}" id="navs-top-tasks" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div></div>
-                        <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas" aria-controls="create_task_offcanvas">
-                            <button type="button" class="btn btn-sm btn-primary action_create_tasks" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_task', 'Create Task') ?>">
-                                <i class="bx bx-plus"></i>
-                            </button>
-                        </a>
-                    </div>
-                    <?php
-                    $id = 'project_' . $project->id;
-                    $tasks = $project->tasks->count();
-                    $users = $project->users;
-                    $clients = $project->clients;
-                    ?>
-                    <x-tasks-card :tasks="$tasks" :id="$id" :users="$users" :clients="$clients" :emptyState="0" />
-                </div>
-                @endif
                 @if (Auth::guard('web')->check() || $project->client_can_discuss)
                 <div class="tab-pane fade {{ $activeTab == 'discussions' ? 'active show' : '' }}" id="navs-top-discussions"
                     role="tabpanel">
@@ -748,6 +787,11 @@
             </div>
         </div>
         @endif
+        </div>{{-- /.row inside dock-body --}}
+        </div>{{-- /.tk-detail-dock-body --}}
+    </aside>{{-- /.tk-detail-dock --}}
+    </div>{{-- /.tk-workspace --}}
+
         <div class="modal fade" id="create_milestone_modal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
                 <form class="modal-content form-submit-event" action="{{url('projects/store-milestone')}}" method="POST">
@@ -888,7 +932,6 @@
             </div>
         </div>
     </div>
-</div>
 <?php
 $titles = [];
 $task_counts = [];
@@ -1024,7 +1067,14 @@ $bg_colors = implode(",", $bg_colors);
 <script>
     var labels = [<?= $titles ?>];
     var task_data = [<?= $task_counts ?>];
-    var bg_colors = [<?= $bg_colors ?>];
+    // Design-system palette for the statistics donut (replaces the random neon set).
+    var bg_colors = (function () {
+        var pal = ['#4c6ef5', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#64748b', '#6366f1', '#84cc16'];
+        var n = (typeof task_data !== 'undefined' && task_data.length) ? task_data.length : pal.length;
+        var out = [];
+        for (var i = 0; i < n; i++) { out.push(pal[i % pal.length]); }
+        return out;
+    })();
     var total_tasks = [<?= $total_tasks ?>];
     //labels
     var total = '<?= get_label('total', 'Total') ?>';
@@ -1033,4 +1083,11 @@ $bg_colors = implode(",", $bg_colors);
 </script>
 <script src="{{asset('assets/js/apexcharts.js')}}"></script>
 <script src="{{asset('assets/js/pages/project-information.js')}}"></script>
+{{-- Project board: status data (drag-and-drop + task inspector) --}}
+<script>
+    var statusArray = <?php echo json_encode($statuses); ?>;
+    window.statusArray = statusArray;
+    window.priorityArray = <?php echo json_encode($priorities); ?>;
+</script>
+<script src="{{asset('assets/js/pages/task-board.js')}}"></script>
 @endsection

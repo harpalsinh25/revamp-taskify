@@ -20,7 +20,7 @@
                 <div class="comment-heading">
                     <div class="comment-avatar">
                         <img src="{{ isset($comment->commenter->photo) ? asset('storage/' . $comment->commenter->photo) : asset('storage/photos/no-image.jpg') }}"
-                            class="bg-footer-theme rounded-circle border"
+                            class="bg-footer-theme rounded-circle border" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'"
                             alt="{{ isset($comment->commenter->first_name) && isset($comment->commenter->last_name) ? $comment->commenter->first_name . ' ' . $comment->commenter->last_name : get_label('unknown_user', 'Unknown User') }}">
                     </div>
                     <div class="comment-info">
@@ -108,7 +108,7 @@
                         <div class="comment-heading">
                             <div class="comment-avatar">
                                 <img src="{{ isset($reply->commenter->photo) ? asset('storage/' . $reply->commenter->photo) : asset('storage/photos/no-image.jpg') }}"
-                                    class="bg-footer-theme rounded-circle border"
+                                    class="bg-footer-theme rounded-circle border" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'"
                                     alt="{{ isset($reply->commenter->first_name) && isset($reply->commenter->last_name) ? $reply->commenter->first_name . ' ' . $reply->commenter->last_name : get_label('unknown_user', 'Unknown User') }}">
                             </div>
                             <div class="comment-info">

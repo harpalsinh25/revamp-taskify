@@ -5608,6 +5608,7 @@ body.v2-shell .nav-tabs .nav-link.active {
     color: var(--fg-0) !important;
     font-weight: 500;
     background: transparent !important;
+    box-shadow: none !important; /* kill the Sneat blue inset underline; keep only the ::after signal line */
 }
 
 body.v2-shell .nav-tabs .nav-link.active::after {
@@ -7058,3 +7059,556 @@ body.v2-shell .dropdown-header {
     color: var(--fg-3); font-size: 10.5px; text-transform: uppercase;
     letter-spacing: 0.06em; padding: 6px 10px 4px; font-family: var(--font-mono);
 }
+
+/* ============================================================
+   DOCKED PROJECT DETAIL PANEL  (always-open right column holding
+   the project info + module tabs; replaces the offcanvas+button)
+   ============================================================ */
+body.v2-shell .tk-detail-dock {
+    flex: 0 0 560px; width: 560px; align-self: stretch;
+    position: sticky; top: 12px;
+    height: calc(100vh - 96px);
+    display: flex; flex-direction: column;
+    background: var(--bg-1); border: 1px solid var(--line);
+    border-radius: var(--r-2); box-shadow: var(--shadow-1); overflow: hidden;
+}
+@media (max-width: 1199.98px) {
+    body.v2-shell .tk-detail-dock { width: 100%; flex-basis: auto; position: static; height: auto; max-height: none; }
+}
+body.v2-shell .tk-detail-dock-body { flex: 1 1 auto; overflow-y: auto; padding: 16px; scrollbar-width: none; -ms-overflow-style: none; }
+body.v2-shell .tk-detail-dock-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+/* dock header (title + close button) */
+body.v2-shell .tk-detail-dock-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px 9px 14px; border-bottom: 1px solid var(--line); flex: none;
+}
+body.v2-shell .tk-detail-dock-title {
+    display: inline-flex; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--fg-0);
+}
+body.v2-shell .tk-detail-dock-title .tk-ic { color: var(--fg-3); }
+/* collapsed: hide the panel; the board flexes to full width */
+body.v2-shell .tk-workspace.tk-detail-collapsed .tk-detail-dock { display: none; }
+/* toggle button: highlighted while the panel is open */
+body.v2-shell .tk-detail-toggle.active {
+    background: var(--bg-2) !important; border-color: var(--line) !important; color: var(--fg-0) !important;
+}
+/* inner cards already carry the design-system card styling; trim the doubled
+   outer chrome so the panel reads as one continuous surface */
+body.v2-shell .tk-detail-dock-body > .row > .col-md-12 > .card.mb-4 {
+    border: 0; box-shadow: none; background: transparent;
+}
+body.v2-shell .tk-detail-dock-body > .row > .col-md-12 > .card.mb-4 > .card-body {
+    padding-left: 0; padding-right: 0;
+}
+/* module tab strip inside the panel: horizontally scrollable so the
+   tabs never wrap or clip in the narrower panel width */
+body.v2-shell .tk-detail-canvas .nav-align-top .nav-tabs {
+    flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none;
+}
+body.v2-shell .tk-detail-canvas .nav-align-top .nav-tabs::-webkit-scrollbar { display: none; }
+body.v2-shell .tk-detail-canvas .nav-align-top .nav-tabs .nav-link { white-space: nowrap; }
+/* tables inside the panel keep their own horizontal scroll */
+body.v2-shell .tk-detail-canvas .table-responsive { width: 100%; }
+
+/* ---- design-system styling for the project info block in the dock ----
+   Bootstrap cols size to the ~460px panel (not the viewport), so force a
+   clean single-column stack and retile the nested cards. */
+body.v2-shell #project_detail_panel .card-body .row { margin-left: 0; margin-right: 0; }
+body.v2-shell #project_detail_panel .card-body [class*="col-"] {
+    padding-left: 0; padding-right: 0; flex: 0 0 100%; max-width: 100%;
+}
+/* outer info card is already transparent; strip its padding + dividers */
+body.v2-shell #project_detail_panel > .tk-detail-dock-body > .row > .col-md-12 > .card.mb-4 > .card-body { padding: 0 !important; }
+body.v2-shell #project_detail_panel > .tk-detail-dock-body > .row > .col-md-12 > .card.mb-4 > hr {
+    margin: 16px 0; border: 0; border-top: 1px solid var(--line); opacity: 1;
+}
+/* title + favourite/pin */
+body.v2-shell #project_detail_panel h2.fw-bold {
+    font-size: 18px; font-weight: 700; color: var(--fg-0);
+    display: flex; align-items: center; gap: 6px; margin: 0 0 14px;
+}
+body.v2-shell #project_detail_panel h2.fw-bold .mx-2 { margin: 0 !important; line-height: 0; }
+body.v2-shell #project_detail_panel h2.fw-bold .bx { font-size: 18px; }
+/* meta field labels (Users / Clients / Status / Priority) */
+body.v2-shell #project_detail_panel .form-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--fg-3); font-weight: 600; margin-bottom: 5px;
+}
+body.v2-shell #project_detail_panel .card-body .row > [class*="col-"] { margin-top: 0 !important; margin-bottom: 14px !important; }
+/* avatar groups */
+body.v2-shell #project_detail_panel .avatar-group .avatar img,
+body.v2-shell #project_detail_panel .avatar-sm img { width: 28px; height: 28px; }
+/* status / priority selects */
+body.v2-shell #project_detail_panel .form-select-sm { font-size: 12.5px; }
+
+/* nested stat / statistics / description / fields cards -> design-system tiles */
+body.v2-shell #project_detail_panel .card-body .card {
+    border: 1px solid var(--line) !important; box-shadow: none !important;
+    background: var(--bg-2) !important; border-radius: var(--r-2) !important;
+    margin-top: 0 !important; margin-bottom: 10px !important;
+}
+body.v2-shell #project_detail_panel .card-body .card .card-header,
+body.v2-shell #project_detail_panel .card-body .card > .card-body { padding: 12px 14px !important; }
+body.v2-shell #project_detail_panel .card-body .card h3.card-title { font-size: 17px; margin: 0; color: var(--fg-0); font-weight: 700; }
+body.v2-shell #project_detail_panel .card-body .card .fw-semibold.d-block {
+    font-size: 10.5px; color: var(--fg-3); text-transform: uppercase; letter-spacing: 0.04em;
+}
+body.v2-shell #project_detail_panel .card-body .card .card-title h5,
+body.v2-shell #project_detail_panel .card-body .card .card-title.mb-0 h5 { font-size: 13px; color: var(--fg-0); margin: 0; }
+/* the stat tiles' icon chip */
+body.v2-shell #project_detail_panel .card-body .card .avatar .bx-md { font-size: 22px; }
+
+/* task-statistics donut: fit the panel width */
+body.v2-shell #project_detail_panel #taskStatisticsChart { max-width: 100%; display: flex; justify-content: center; }
+body.v2-shell #project_detail_panel #taskStatisticsChart .apexcharts-canvas { max-width: 100% !important; }
+/* task-statistics status breakdown rows */
+body.v2-shell #project_detail_panel #task-statistics ul { list-style: none; }
+body.v2-shell #project_detail_panel #task-statistics li { margin-bottom: 12px !important; padding-bottom: 0 !important; }
+body.v2-shell #project_detail_panel #task-statistics .avatar { width: 30px; height: 30px; }
+body.v2-shell #project_detail_panel #task-statistics h6,
+body.v2-shell #project_detail_panel #task-statistics h5 { font-size: 13px; margin: 0; }
+/* description text */
+body.v2-shell #project_detail_panel .card-body .card p { font-size: 12.5px; color: var(--fg-1); margin: 0; }
+
+/* ---- colour consistency: map Bootstrap/Sneat accents -> design tokens ---- */
+body.v2-shell #project_detail_panel .text-success { color: var(--ok) !important; }
+body.v2-shell #project_detail_panel .text-danger  { color: var(--err) !important; }
+body.v2-shell #project_detail_panel .text-warning { color: var(--warn) !important; }
+body.v2-shell #project_detail_panel .text-primary { color: var(--signal) !important; }
+body.v2-shell #project_detail_panel .text-info    { color: var(--info) !important; }
+body.v2-shell #project_detail_panel .text-dark    { color: var(--fg-1) !important; }
+body.v2-shell #project_detail_panel .favorite-icon { color: var(--warn) !important; }
+body.v2-shell #project_detail_panel .pinned-icon { color: var(--ok) !important; }
+/* statistics breakdown chips: calm + uniform (the donut carries the colour) */
+body.v2-shell #project_detail_panel #task-statistics .avatar-initial {
+    background: var(--bg-3) !important; color: var(--fg-2) !important; box-shadow: none !important;
+}
+body.v2-shell #project_detail_panel #task-statistics a { color: var(--fg-1); }
+body.v2-shell #project_detail_panel #task-statistics .status-count small,
+body.v2-shell #project_detail_panel #task-statistics .status-count h5 { color: var(--fg-1); font-weight: 600; }
+/* status / priority selects -> clean design-system controls (drop the soft Sneat fill) */
+body.v2-shell #project_detail_panel select.form-select[class*="select-bg-label-"] {
+    background-color: var(--bg-2) !important; color: var(--fg-0) !important;
+    border: 1px solid var(--line) !important;
+}
+/* "Not assigned" badge -> soft design-system chip */
+body.v2-shell #project_detail_panel .badge.bg-primary {
+    background: oklch(from var(--signal) l c h / 0.14) !important; color: var(--signal) !important; font-weight: 600;
+}
+/* edit (pencil) action buttons -> subtle */
+body.v2-shell #project_detail_panel .btn-outline-primary {
+    border-color: var(--line) !important; color: var(--fg-2) !important;
+}
+body.v2-shell #project_detail_panel .btn-outline-primary:hover {
+    background: var(--bg-2) !important; color: var(--fg-0) !important;
+}
+
+/* remove the task-statistics graph + breakdown column (kept in DOM, hidden,
+   so the existing ApexCharts init on #taskStatisticsChart doesn't error) */
+body.v2-shell #project_detail_panel .card-body > .row > .col-md-6.col-lg-4.col-xl-4 { display: none !important; }
+
+/* compact key-facts grid (Starts / Ends / Duration / Budget) */
+body.v2-shell #project_detail_panel .tk-pi-facts {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+body.v2-shell #project_detail_panel .tk-pi-fact {
+    display: flex; align-items: center; gap: 9px; min-width: 0;
+    padding: 9px 11px; border: 1px solid var(--line); border-radius: var(--r-2); background: var(--bg-2);
+}
+body.v2-shell #project_detail_panel .tk-pi-fact-ic { color: var(--fg-3); flex: none; display: flex; }
+body.v2-shell #project_detail_panel .tk-pi-fact-txt { display: flex; flex-direction: column; min-width: 0; }
+body.v2-shell #project_detail_panel .tk-pi-fact-lbl {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-3); font-weight: 600;
+}
+body.v2-shell #project_detail_panel .tk-pi-fact-val {
+    font-size: 13px; color: var(--fg-0); font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* compact, professional module tabs in the panel */
+body.v2-shell #project_detail_panel .nav-align-top .nav-tabs { gap: 2px; padding-bottom: 0; }
+body.v2-shell #project_detail_panel .nav-tabs .nav-link {
+    display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto;
+    padding: 8px 11px !important; font-size: 12px; font-weight: 500; line-height: 1;
+    color: var(--fg-2); white-space: nowrap; border-radius: var(--r-1) var(--r-1) 0 0;
+}
+body.v2-shell #project_detail_panel .nav-tabs .nav-link .tk-ic { width: 14px; height: 14px; color: currentColor; flex: none; }
+body.v2-shell #project_detail_panel .nav-tabs .nav-link:hover { color: var(--fg-0); background: var(--bg-2); }
+/* active indicator drawn INSIDE the tab (inset box-shadow) so the scroll
+   container's overflow:hidden can't clip it like the ::after underline did */
+body.v2-shell #project_detail_panel .nav-tabs .nav-link.active {
+    color: var(--fg-0) !important; background: var(--bg-2) !important;
+    box-shadow: inset 0 -2px 0 0 var(--signal) !important;
+}
+body.v2-shell #project_detail_panel .nav-tabs .nav-link.active::after { display: none !important; }
+/* additional-fields readonly inputs: compact */
+body.v2-shell #project_detail_panel .form-control[readonly],
+body.v2-shell #project_detail_panel textarea[readonly] {
+    background: var(--bg-2); border: 1px solid var(--line); color: var(--fg-1); font-size: 12px; min-height: auto;
+}
+
+/* ============================================================
+   Module tabs content (Milestones / Media / Comments / Timeline /
+   Activity / Additional fields) — force design-system tokens so the
+   Sneat markup themes correctly in BOTH light and dark mode.
+   ============================================================ */
+/* inputs / filters / selects */
+body.v2-shell #project_detail_panel .form-control,
+body.v2-shell #project_detail_panel .form-select,
+body.v2-shell #project_detail_panel .input-group-text,
+body.v2-shell #project_detail_panel .ts-control {
+    background-color: var(--bg-2) !important;
+    border-color: var(--line) !important;
+    color: var(--fg-0) !important;
+}
+body.v2-shell #project_detail_panel .form-control::placeholder { color: var(--fg-3); opacity: 1; }
+body.v2-shell #project_detail_panel .input-group-text { color: var(--fg-2) !important; }
+
+/* bootstrap-table: text + borders + chrome (backgrounds stay transparent) */
+body.v2-shell #project_detail_panel .table { color: var(--fg-1) !important; --bs-table-bg: transparent; }
+body.v2-shell #project_detail_panel .table > :not(caption) > * > * {
+    background-color: transparent !important; color: var(--fg-1) !important; border-color: var(--line) !important; box-shadow: none !important;
+}
+body.v2-shell #project_detail_panel .table thead th { color: var(--fg-3) !important; border-color: var(--line) !important; }
+body.v2-shell #project_detail_panel .table tbody tr:hover > * { background-color: var(--bg-2) !important; }
+body.v2-shell #project_detail_panel .table a { color: var(--fg-1); }
+body.v2-shell #project_detail_panel .fixed-table-toolbar,
+body.v2-shell #project_detail_panel .fixed-table-pagination,
+body.v2-shell #project_detail_panel .fixed-table-pagination .pagination-detail,
+body.v2-shell #project_detail_panel .fixed-table-container { color: var(--fg-2); }
+body.v2-shell #project_detail_panel .no-records-found td { color: var(--fg-3) !important; background: transparent !important; }
+/* pagination */
+body.v2-shell #project_detail_panel .page-link { background: var(--bg-1) !important; border-color: var(--line) !important; color: var(--fg-1) !important; }
+body.v2-shell #project_detail_panel .page-item.active .page-link { background: var(--signal) !important; border-color: var(--signal) !important; color: #fff !important; }
+body.v2-shell #project_detail_panel .page-item.disabled .page-link { color: var(--fg-3) !important; }
+body.v2-shell #project_detail_panel .fixed-table-toolbar .btn { background: var(--bg-2) !important; border-color: var(--line) !important; color: var(--fg-1) !important; }
+
+/* comments / discussions feed */
+body.v2-shell #project_detail_panel .comment,
+body.v2-shell #project_detail_panel details { color: var(--fg-1); }
+body.v2-shell #project_detail_panel .comment-body,
+body.v2-shell #project_detail_panel .comment .card,
+body.v2-shell #project_detail_panel .reply,
+body.v2-shell #project_detail_panel .replies > * {
+    background: var(--bg-2) !important; border-color: var(--line) !important; color: var(--fg-1) !important;
+}
+body.v2-shell #project_detail_panel .comment-info,
+body.v2-shell #project_detail_panel .comment-heading,
+body.v2-shell #project_detail_panel .comment small { color: var(--fg-2) !important; }
+
+/* status timeline component */
+body.v2-shell #project_detail_panel .timeline .timeline-item,
+body.v2-shell #project_detail_panel .timeline-event {
+    background: var(--bg-2) !important; border-color: var(--line) !important; color: var(--fg-1) !important;
+}
+
+/* additional-fields card header */
+body.v2-shell #project_detail_panel .card-header {
+    background: transparent !important; border-bottom: 1px solid var(--line) !important; padding: 0 0 8px !important;
+}
+body.v2-shell #project_detail_panel .card-header h5 { color: var(--fg-0); }
+
+/* generic Sneat light surfaces -> tokens (dark-mode safety net) */
+body.v2-shell #project_detail_panel .bg-white,
+body.v2-shell #project_detail_panel .bg-light { background: var(--bg-2) !important; }
+body.v2-shell #project_detail_panel .text-muted { color: var(--fg-3) !important; }
+body.v2-shell #project_detail_panel hr { border-color: var(--line); }
+
+/* ---- comments / discussions: avatar, body, actions, replies ---- */
+body.v2-shell #project_detail_panel .comment-avatar img {
+    width: 32px; height: 32px; min-width: 32px; border-radius: 50%; object-fit: cover;
+    background: var(--bg-3); border-color: var(--line) !important;
+    color: transparent; font-size: 0; /* hide spilling alt text on broken images */
+}
+body.v2-shell #project_detail_panel .comment summary { list-style: none; cursor: default; }
+body.v2-shell #project_detail_panel .comment summary::-webkit-details-marker { display: none; }
+body.v2-shell #project_detail_panel .comment-heading { align-items: center; gap: 8px; }
+body.v2-shell #project_detail_panel .comment-author,
+body.v2-shell #project_detail_panel .comment-author.text-body { color: var(--fg-0) !important; }
+body.v2-shell #project_detail_panel .comment-info p,
+body.v2-shell #project_detail_panel .comment-info small { color: var(--fg-3) !important; }
+body.v2-shell #project_detail_panel .comment-body {
+    background: var(--bg-2) !important; border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important; padding: 11px 13px !important;
+    color: var(--fg-1) !important; margin-top: 6px;
+}
+body.v2-shell #project_detail_panel .comment-body p { color: var(--fg-1) !important; margin: 0; font-size: 12.5px; }
+/* edit (was loud green) + delete (red) action icons -> subtle/consistent */
+body.v2-shell #project_detail_panel .comment-actions .btn {
+    background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 2px 4px !important;
+}
+body.v2-shell #project_detail_panel .comment-actions .edit-comment,
+body.v2-shell #project_detail_panel .comment-actions .edit-comment.text-primary { color: var(--fg-3) !important; }
+body.v2-shell #project_detail_panel .comment-actions .edit-comment:hover { color: var(--signal) !important; }
+body.v2-shell #project_detail_panel .comment-actions .delete-comment,
+body.v2-shell #project_detail_panel .comment-actions .delete-comment.text-danger { color: var(--err) !important; }
+/* reply button -> design-system ghost */
+body.v2-shell #project_detail_panel .open-reply-modal,
+body.v2-shell #project_detail_panel .open-task-reply-modal {
+    background: var(--bg-2); border: 1px solid var(--line); color: var(--fg-1);
+    border-radius: var(--r-1); padding: 4px 12px; font-size: 12px; font-weight: 500;
+}
+body.v2-shell #project_detail_panel .open-reply-modal:hover,
+body.v2-shell #project_detail_panel .open-task-reply-modal:hover { background: var(--bg-3); color: var(--fg-0); }
+/* discussions heading */
+body.v2-shell #project_detail_panel .card-title { color: var(--fg-0); }
+
+/* ---- status timeline: line, points, events ---- */
+body.v2-shell #project_detail_panel .timeline .timeline-item,
+body.v2-shell #project_detail_panel .timeline-event {
+    background: transparent !important; border: 0 !important; box-shadow: none !important; color: var(--fg-1) !important;
+}
+body.v2-shell #project_detail_panel .timeline-item { padding-bottom: 14px !important; }
+body.v2-shell #project_detail_panel .timeline:before,
+body.v2-shell #project_detail_panel .timeline-item:not(:last-child):before { background: var(--line) !important; }
+body.v2-shell #project_detail_panel .timeline-header h5 { color: var(--fg-0) !important; font-size: 12.5px; }
+body.v2-shell #project_detail_panel .timeline-header small { color: var(--fg-3) !important; }
+body.v2-shell #project_detail_panel .timeline .text-dark { color: var(--fg-2) !important; }
+
+/* ---- DARK-MODE SWEEP: Sneat .card / table / tab surfaces have hardcoded
+   light backgrounds that don't follow the design-system theme. Force them
+   onto tokens. (Stat tiles, facts tiles and comment bodies keep their own
+   --bg-2 via more-specific selectors.) ---- */
+body.v2-shell #project_detail_panel .card {
+    background-color: transparent !important; color: var(--fg-1) !important; border-color: var(--line) !important;
+}
+body.v2-shell #project_detail_panel .card > .card-body,
+body.v2-shell #project_detail_panel .card > .card-header,
+body.v2-shell #project_detail_panel .tab-content,
+body.v2-shell #project_detail_panel .tab-pane,
+body.v2-shell #project_detail_panel .bootstrap-table,
+body.v2-shell #project_detail_panel .bootstrap-table .fixed-table-container,
+body.v2-shell #project_detail_panel .fixed-table-body,
+body.v2-shell #project_detail_panel .fixed-table-header,
+body.v2-shell #project_detail_panel .fixed-table-footer,
+body.v2-shell #project_detail_panel .table-responsive,
+body.v2-shell #project_detail_panel #comment-thread-container,
+body.v2-shell #project_detail_panel .comment-thread,
+body.v2-shell #project_detail_panel .comment {
+    background-color: transparent !important; color: var(--fg-1);
+}
+/* tables: clip the white container edge + theme header strip */
+body.v2-shell #project_detail_panel .fixed-table-container { border-color: var(--line) !important; }
+body.v2-shell #project_detail_panel .table thead,
+body.v2-shell #project_detail_panel .fixed-table-header table thead th { background: var(--bg-2) !important; }
+
+/* ============================================================
+   PROJECT BOARD  — header + toolbar + task inspector drawer
+   (Taskify Revamp Kit: pages/projects/index.blade.php)
+   ============================================================ */
+/* ---- header ---- */
+body.v2-shell .tk-proj-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 16px; flex-wrap: wrap;
+}
+body.v2-shell .tk-proj-eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 11px; letter-spacing: 0.04em; color: var(--fg-3);
+    text-transform: uppercase; font-weight: 600;
+}
+body.v2-shell .tk-proj-title {
+    font-size: 22px; font-weight: 700; color: var(--fg-0);
+    margin: 6px 0 0; line-height: 1.2; display: flex; align-items: center; gap: 8px;
+}
+body.v2-shell .tk-proj-ic { line-height: 0; font-size: 17px; }
+body.v2-shell .tk-proj-meta {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-top: 9px;
+    color: var(--fg-2); font-size: 12.5px; align-items: center;
+}
+body.v2-shell .tk-proj-meta span { display: inline-flex; align-items: center; gap: 5px; }
+body.v2-shell .tk-proj-meta .tk-ic { color: var(--fg-3); }
+body.v2-shell .tk-proj-headside {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+}
+body.v2-shell .tk-proj-headside .tk-av-stack { margin-right: 4px; }
+
+/* ---- toolbar + segmented ---- */
+body.v2-shell .tk-board-toolbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+body.v2-shell .tk-seg {
+    display: inline-flex; background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: var(--r-2); padding: 2px; gap: 2px;
+}
+body.v2-shell .tk-seg-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: calc(var(--r-2) - 2px);
+    font-size: 12.5px; font-weight: 500; color: var(--fg-2);
+    text-decoration: none; transition: background var(--t-1), color var(--t-1);
+}
+body.v2-shell .tk-seg-item .tk-ic { color: currentColor; }
+body.v2-shell .tk-seg-item:hover { color: var(--fg-0); }
+body.v2-shell .tk-seg-item.active {
+    background: var(--bg-0); color: var(--fg-0); box-shadow: var(--shadow-1);
+}
+body.v2-shell .tk-board-search {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-2);
+    padding: 0 10px; height: 32px; max-width: 280px; flex: 0 1 280px;
+}
+body.v2-shell .tk-board-search .tk-ic { color: var(--fg-3); flex: none; }
+body.v2-shell .tk-board-search input {
+    border: 0; background: transparent; outline: none; color: var(--fg-0);
+    font-size: 12.5px; width: 100%;
+}
+body.v2-shell .tk-toolbar-spacer { flex: 1; }
+body.v2-shell .tcard.tk-hide { display: none !important; }
+
+/* ============================================================
+   TASK INSPECTOR DRAWER
+   ============================================================ */
+body.v2-shell .offcanvas.tk-inspector {
+    width: 440px; max-width: 96vw; background: var(--bg-1);
+    border-left: 1px solid var(--line); box-shadow: var(--shadow-3);
+    display: flex; flex-direction: column;
+}
+body.v2-shell .tk-inspector-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); flex: none;
+}
+body.v2-shell .tk-inspector-head-l { display: flex; align-items: center; gap: 8px; }
+body.v2-shell .tk-insp-code { font-size: 11.5px; font-weight: 600; color: var(--fg-1); }
+body.v2-shell .tk-inspector-head-r { display: flex; align-items: center; gap: 2px; }
+body.v2-shell .tk-ic-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: var(--r-1); color: var(--fg-2);
+    border: 0; background: transparent; cursor: pointer; transition: background var(--t-1), color var(--t-1);
+}
+body.v2-shell .tk-ic-btn:hover { background: var(--bg-2); color: var(--fg-0); }
+body.v2-shell .tk-inspector-body { padding: 18px 16px; overflow-y: auto; flex: 1 1 auto; }
+body.v2-shell .tk-insp-empty {
+    height: 100%; min-height: 220px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px; color: var(--fg-3); text-align: center;
+}
+body.v2-shell .tk-insp-empty .tk-ic { color: var(--fg-3); opacity: 0.6; }
+body.v2-shell .tk-insp-empty p { margin: 0; font-size: 12.5px; }
+
+body.v2-shell .tk-insp-title { font-size: 16px; font-weight: 650; color: var(--fg-0); margin: 0 0 14px; line-height: 1.35; }
+body.v2-shell .tk-insp-status {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px; background: var(--bg-2); color: var(--fg-1);
+}
+body.v2-shell .tk-insp-status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--signal); }
+
+body.v2-shell .tk-insp-grid {
+    display: grid; grid-template-columns: 92px 1fr; gap: 9px 16px; align-items: center;
+    font-size: 12.5px;
+}
+body.v2-shell .tk-insp-grid .tk-insp-lbl {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--fg-3); font-weight: 600;
+}
+body.v2-shell .tk-insp-grid .tk-insp-val { color: var(--fg-1); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+body.v2-shell .tk-insp-val .mono { font-size: 12px; }
+
+body.v2-shell .tk-insp-divider { border: none; height: 1px; background: var(--line); margin: 18px 0; }
+
+body.v2-shell .tk-insp-sechead {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+body.v2-shell .tk-insp-sechead strong { font-size: 12px; color: var(--fg-0); }
+body.v2-shell .tk-insp-sechead .tk-insp-count { font-size: 11px; color: var(--fg-3); }
+
+body.v2-shell .tk-insp-progress { height: 6px; border-radius: 999px; background: var(--bg-3); overflow: hidden; margin-bottom: 12px; }
+body.v2-shell .tk-insp-progress > span { display: block; height: 100%; background: var(--signal); border-radius: 999px; transition: width var(--t-2); }
+body.v2-shell .tk-subtask-list { display: flex; flex-direction: column; gap: 2px; }
+body.v2-shell .tk-subtask {
+    display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-radius: var(--r-1);
+    font-size: 13px; color: var(--fg-1); transition: background var(--t-1);
+}
+body.v2-shell .tk-subtask:hover { background: var(--bg-2); }
+body.v2-shell .tk-subtask input[type="checkbox"] {
+    width: 16px; height: 16px; flex: none; cursor: pointer; accent-color: var(--signal);
+}
+body.v2-shell .tk-subtask .tk-subtask-title { flex: 1; min-width: 0; }
+body.v2-shell .tk-subtask.is-done .tk-subtask-title { text-decoration: line-through; color: var(--fg-3); }
+body.v2-shell .tk-subtask .av { width: 20px; height: 20px; }
+body.v2-shell .tk-insp-emptyline { font-size: 12.5px; color: var(--fg-3); padding: 4px 2px; }
+
+body.v2-shell .tk-insp-activity { display: flex; flex-direction: column; gap: 14px; }
+body.v2-shell .tk-insp-activity details.comment,
+body.v2-shell .tk-insp-activity .comment {
+    background: transparent; border: 0; padding: 0; margin: 0;
+}
+body.v2-shell .tk-insp-activity .comment summary { list-style: none; }
+body.v2-shell .tk-insp-activity .comment summary::-webkit-details-marker { display: none; }
+body.v2-shell .tk-insp-activity .btn-primary,
+body.v2-shell .tk-insp-activity [data-bs-target="#task_commentModal"] { display: none !important; }
+body.v2-shell .tk-insp-activity .comment-body { font-size: 12.5px; color: var(--fg-1); }
+body.v2-shell .tk-insp-activity .comment-info,
+body.v2-shell .tk-insp-activity .comment-heading { font-size: 12px; color: var(--fg-2); }
+
+body.v2-shell .tk-inspector-foot { border-top: 1px solid var(--line); padding: 10px 12px; flex: none; }
+body.v2-shell .tk-insp-commentbar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2); padding: 4px 6px 4px 10px;
+}
+body.v2-shell .tk-insp-commentbar-ic { color: var(--fg-3); flex: none; }
+body.v2-shell .tk-insp-commentbar input {
+    flex: 1; border: 0; background: transparent; outline: none; color: var(--fg-0); font-size: 12.5px;
+}
+body.v2-shell .tk-insp-commentbar .btn { flex: none; }
+
+body.v2-shell .tk-insp-skel { height: 12px; border-radius: 6px; background: var(--bg-3); margin-bottom: 10px; opacity: 0.7; animation: tkSkel 1.1s ease-in-out infinite; }
+@keyframes tkSkel { 0%,100% { opacity: 0.45; } 50% { opacity: 0.85; } }
+
+/* ============================================================
+   DOCKED INSPECTOR LAYOUT  (board/list left + inspector right)
+   ============================================================ */
+body.v2-shell .tk-workspace { display: flex; gap: 16px; align-items: flex-start; }
+body.v2-shell .tk-workspace-main { flex: 1 1 auto; min-width: 0; }
+body.v2-shell .tk-inspector-dock {
+    flex: 0 0 400px; width: 400px; align-self: stretch;
+    position: sticky; top: 12px;
+    height: calc(100vh - 96px);
+    display: flex; flex-direction: column;
+    background: var(--bg-1); border: 1px solid var(--line);
+    border-radius: var(--r-2); box-shadow: var(--shadow-1); overflow: hidden;
+}
+@media (max-width: 1199.98px) {
+    body.v2-shell .tk-workspace { flex-direction: column; }
+    body.v2-shell .tk-inspector-dock { width: 100%; flex-basis: auto; position: static; height: auto; max-height: 70vh; }
+}
+body.v2-shell .tk-inspector-dock .tk-inspector-head { flex: none; }
+body.v2-shell .tk-inspector-scroll { flex: 1 1 auto; overflow-y: auto; padding: 16px; }
+
+/* selected card / row highlight */
+body.v2-shell .tcard.tk-card-active { box-shadow: 0 0 0 2px var(--signal); }
+body.v2-shell table tbody tr.tk-row-active > td { background: oklch(from var(--signal) l c h / 0.10); }
+
+/* inspector tabs */
+body.v2-shell .tk-insp-tabs {
+    display: flex; gap: 2px; margin: 16px 0 14px; border-bottom: 1px solid var(--line);
+    overflow-x: auto; scrollbar-width: none;
+}
+body.v2-shell .tk-insp-tabs::-webkit-scrollbar { display: none; }
+body.v2-shell .tk-insp-tab {
+    border: 0; background: transparent; cursor: pointer; white-space: nowrap;
+    font-size: 12px; font-weight: 500; color: var(--fg-2);
+    padding: 7px 10px; margin-bottom: -1px; border-bottom: 2px solid transparent;
+    transition: color var(--t-1), border-color var(--t-1);
+}
+body.v2-shell .tk-insp-tab:hover { color: var(--fg-0); }
+body.v2-shell .tk-insp-tab.active { color: var(--fg-0); border-bottom-color: var(--signal); }
+body.v2-shell .tk-insp-pane { display: none; }
+body.v2-shell .tk-insp-pane.active { display: block; }
+
+/* media grid (renders the server-built `file` HTML: image thumb or link) */
+body.v2-shell .tk-insp-media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+body.v2-shell .tk-insp-media {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--line); border-radius: var(--r-1); overflow: hidden; background: var(--bg-2);
+}
+body.v2-shell .tk-insp-media > a { display: block; line-height: 0; text-decoration: none; }
+body.v2-shell .tk-insp-media img { width: 100% !important; height: 72px; object-fit: cover; display: block; }
+body.v2-shell .tk-insp-media > a:not(:has(img)) {
+    line-height: 1.3; min-height: 56px; padding: 10px 8px; display: flex; align-items: center;
+    font-size: 11px; color: var(--signal); word-break: break-word;
+}
+body.v2-shell .tk-insp-media-name {
+    font-size: 10.5px; color: var(--fg-2); padding: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* task status timeline inside the dock */
+body.v2-shell .tk-insp-timeline { font-size: 12.5px; }
+body.v2-shell .tk-insp-timeline .card { border: 0; box-shadow: none; background: transparent; padding: 0; margin: 0; }

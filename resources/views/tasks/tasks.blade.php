@@ -7,6 +7,46 @@
 @endsection
 @section('content')
     <div class="container-fluid">
+    @isset($project->id)
+        {{-- ===== Project list view: same kit header + toolbar as the board, with a docked task inspector ===== --}}
+        <header class="tk-proj-head mt-4 mb-3">
+            <div class="tk-proj-headmain">
+                <div class="tk-proj-eyebrow mono">
+                    <span class="kcol-dot kcol-dot-{{ $project->status->color }}"></span>
+                    {{ strtoupper(str_replace(' ', '-', $project->title)) }}@if($project->clients->isNotEmpty()) · {{ strtoupper($project->clients->first()->first_name.' '.$project->clients->first()->last_name) }}@endif
+                </div>
+                <h1 class="tk-proj-title">
+                    {{ $project->title }}
+                    <a href="javascript:void(0);" class="tk-proj-ic">
+                        <i class='bx {{getFavoriteStatus($project->id) ? "bxs" : "bx"}}-star favorite-icon text-warning' data-id="{{$project->id}}" data-favorite="{{getFavoriteStatus($project->id) ? 1 : 0}}"></i>
+                    </a>
+                    <a href="javascript:void(0);" class="tk-proj-ic">
+                        <i class='bx {{getPinnedStatus($project->id) ? "bxs" : "bx"}}-pin pinned-icon text-success' data-id="{{$project->id}}" data-pinned="{{getPinnedStatus($project->id)}}" data-require_reload="0"></i>
+                    </a>
+                </h1>
+                <div class="tk-proj-meta">
+                    <span><x-tk-icon name="check" size="13" /> {{ $project->tasks->count() }} {{ get_label('tasks', 'tasks') }}</span>
+                    <span><x-tk-icon name="users" size="13" /> {{ $project->users->count() }} {{ get_label('members', 'members') }}</span>
+                    @if($project->end_date)<span><x-tk-icon name="calendar" size="13" /> {{ get_label('due', 'Due') }} {{ format_date($project->end_date) }}</span>@endif
+                </div>
+            </div>
+            <div class="tk-proj-headside">
+                @if (getAuthenticatedUser() && getAuthenticatedUser()->can('manage_tasks'))
+                <a href="javascript:void(0);" class="btn btn-sm btn-primary" data-bs-toggle="offcanvas" data-bs-target="#create_task_offcanvas" aria-controls="create_task_offcanvas"><x-tk-icon name="plus" class="me-1" />{{ get_label('new_task', 'New task') }}</a>
+                @endif
+            </div>
+        </header>
+        <div class="tk-board-toolbar mb-3">
+            <div class="tk-seg">
+                <a href="{{ url('projects/information/'.$project->id) }}" class="tk-seg-item"><x-tk-icon name="kanban" size="14" /> {{ get_label('board', 'Board') }}</a>
+                <a href="javascript:void(0);" class="tk-seg-item active"><x-tk-icon name="list" size="14" /> {{ get_label('list', 'List') }}</a>
+                <a href="{{ url('projects/tasks/calendar/'.$project->id) }}" class="tk-seg-item"><x-tk-icon name="calendar" size="14" /> {{ get_label('timeline', 'Timeline') }}</a>
+            </div>
+            <span class="tk-toolbar-spacer"></span>
+        </div>
+        <?php $id = 'project_' . $project->id; ?>
+        <x-tasks-card :tasks="$tasks" :id="$id" :project="$project" :favorites="$is_favorites" :customFields="$taskCustomFields" />
+    @else
         <div class="d-flex justify-content-between mb-2 mt-4">
             <div>
                 <nav aria-label="breadcrumb">
@@ -140,5 +180,6 @@
         $id = isset($project->id) ? 'project_' . $project->id : '';
         ?>
         <x-tasks-card :tasks="$tasks" :id="$id" :project="$project" :favorites="$is_favorites" :customFields="$taskCustomFields" />
+    @endisset
     </div>
 @endsection
