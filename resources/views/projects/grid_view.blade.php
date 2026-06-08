@@ -152,10 +152,10 @@
                 $canDuplicateProjects = $user->can('create_projects');
                 $webGuard = Auth::guard('web')->check();
             @endphp
-            <div class="d-flex row mt-4">
+            <div class="row g-4 mt-1 tk-project-grid">
                 @foreach ($projects as $project)
-                    <div class="col-md-6">
-                        <div class="card mb-3">
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card tk-project-card h-100">
                             <div class="card-body card-body-project-grid">
                                 @if ($project->tags->isNotEmpty())
                                     <div class="mb-3">
@@ -169,52 +169,46 @@
                                             href="{{ url('projects/information/' . $project->id) }}"><strong>{{ $project->title }}</strong></a>
                                     </h4>
                                     <div class="d-flex align-items-center justify-content-center">
-                                        <a href="javascript:void(0);" class="quick-view" data-id="{{ $project->id }}"
-                                            data-type="project">
-                                            <i class='bx bx bx-info-circle text-info' data-bs-toggle="tooltip"
-                                                data-bs-placement="right"
-                                                data-bs-original-title="{{ get_label('quick_view', 'Quick View') }}"></i>
+                                        <a href="javascript:void(0);" class="quick-view tk-ic-btn" data-id="{{ $project->id }}"
+                                            data-type="project" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            data-bs-original-title="{{ get_label('quick_view', 'Quick View') }}">
+                                            <x-tk-icon name="info" />
                                         </a>
-                                        <a href="javascript:void(0);" class="mx-2">
-                                            <i class='bx {{ getFavoriteStatus($project->id) ? 'bxs' : 'bx' }}-star favorite-icon text-warning'
-                                                data-id="{{ $project->id }}" data-bs-toggle="tooltip"
-                                                data-bs-placement="right"
-                                                data-bs-original-title="{{ getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}"
-                                                data-favorite="{{ getFavoriteStatus($project->id) }}"></i>
+                                        <a href="javascript:void(0);" class="favorite-icon tk-ic-btn tk-ic-fav"
+                                            data-id="{{ $project->id }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            data-favorite="{{ getFavoriteStatus($project->id) ? 1 : 0 }}"
+                                            data-bs-original-title="{{ getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}">
+                                            <x-tk-icon name="star" />
                                         </a>
-                                        <a href="javascript:void(0);">
-                                            <i class='bx {{ getPinnedStatus($project->id) ? 'bxs' : 'bx' }}-pin pinned-icon text-success'
-                                                data-id="{{ $project->id }}" data-bs-toggle="tooltip"
-                                                data-bs-placement="right"
-                                                data-bs-original-title="{{ getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}"
-                                                data-pinned="{{ getPinnedStatus($project->id) }}"></i>
+                                        <a href="javascript:void(0);" class="pinned-icon tk-ic-btn tk-ic-pin"
+                                            data-id="{{ $project->id }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            data-pinned="{{ getPinnedStatus($project->id) ? 1 : 0 }}"
+                                            data-bs-original-title="{{ getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}">
+                                            <x-tk-icon name="pin" />
                                         </a>
                                         @if ($webGuard || $project->client_can_discuss)
                                             <a href="{{ route('projects.info', ['id' => $project->id]) }}#navs-top-discussions"
-                                                class="ms-2">
-                                                <i class='bx bx-message-rounded-dots text-danger' data-bs-toggle="tooltip"
-                                                    data-bs-placement="right"
-                                                    data-bs-original-title="{{ get_label('discussions', 'Discussions') }}"></i>
+                                                class="tk-ic-btn" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                data-bs-original-title="{{ get_label('discussions', 'Discussions') }}">
+                                                <x-tk-icon name="msg" />
                                             </a>
                                         @endif
                                         <a href="{{ url('projects/mind-map/' . $project->id) }}"
-                                            class="@if ($showSettings) mx-2 @else ms-2 @endif">
-                                            <i class="bx bx-sitemap text-primary" data-bs-toggle="tooltip"
-                                                data-bs-placement="right"
-                                                data-bs-original-title="<?= get_label('mind_map', 'Mind Map') ?>"></i>
+                                            class="tk-ic-btn" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            data-bs-original-title="<?= get_label('mind_map', 'Mind Map') ?>">
+                                            <x-tk-icon name="sitemap" />
                                         </a>
                                         @if ($showSettings)
-                                            <a href="javascript:void(0);" class="mr-2" data-bs-toggle="dropdown"
+                                            <a href="javascript:void(0);" class="tk-ic-btn" data-bs-toggle="dropdown"
                                                 aria-expanded="false">
-                                                <i class='bx bx-cog' id="settings-icon"></i>
+                                                <x-tk-icon name="moreV" id="settings-icon" />
                                             </a>
                                             <ul class="dropdown-menu">
                                                 @if ($canEditProjects)
                                                     <a href="javascript:void(0);" class="edit-project" data-offcanvas="true"
                                                         data-id="{{ $project->id }}">
                                                         <li class="dropdown-item">
-                                                            <i
-                                                                class='menu-icon tf-icons bx bx-edit text-primary'></i><?= get_label('update', 'Update') ?>
+                                                            <x-tk-icon name="edit" /> <?= get_label('update', 'Update') ?>
                                                         </li>
                                                     </a>
                                                 @endif
@@ -222,8 +216,7 @@
                                                     <a href="javascript:void(0);" class="delete" data-reload="true"
                                                         data-type="projects" data-id="{{ $project->id }}">
                                                         <li class="dropdown-item">
-                                                            <i
-                                                                class='menu-icon tf-icons bx bx-trash text-danger'></i><?= get_label('delete', 'Delete') ?>
+                                                            <x-tk-icon name="trash" class="tk-ic-danger" /> <?= get_label('delete', 'Delete') ?>
                                                         </li>
                                                     </a>
                                                 @endif
@@ -232,8 +225,7 @@
                                                         data-id="{{ $project->id }}" data-title="{{ $project->title }}"
                                                         data-reload="true">
                                                         <li class="dropdown-item">
-                                                            <i
-                                                                class='menu-icon tf-icons bx bx-copy text-warning'></i><?= get_label('duplicate', 'Duplicate') ?>
+                                                            <x-tk-icon name="copy" /> <?= get_label('duplicate', 'Duplicate') ?>
                                                         </li>
                                                     </a>
                                                 @endif
@@ -270,9 +262,9 @@
                                                     @endforeach
                                                 </select>
                                                 @if ($project->note)
-                                                    <i class="bx bx-notepad text-primary ms-1" data-bs-toggle="tooltip"
+                                                    <x-tk-icon name="note" class="tk-ic-muted ms-2" data-bs-toggle="tooltip"
                                                         data-bs-offset="0,4" data-bs-placement="top"
-                                                        data-bs-original-title="{{ $project->note }}"></i>
+                                                        data-bs-original-title="{{ $project->note }}" />
                                                 @endif
                                             </div>
                                         </div>
@@ -299,7 +291,7 @@
                                 </div>
 
                                 <div class="d-flex justify-content-between my-4">
-                                    <span><i class='bx bx-task text-primary'></i>
+                                    <span><x-tk-icon name="task" class="tk-ic-muted" />
                                         <b><?= isAdminOrHasAllDataAccess() ? count($project->tasks) : $auth_user->project_tasks($project->id)->count() ?></b>
                                         <?= get_label('tasks', 'Tasks') ?></span>
                                     <a href="{{ url('projects/tasks/draggable/' . $project->id) }}"><button
@@ -323,7 +315,8 @@
                                                 title="<?= $user->first_name ?> <?= $user->last_name ?>">
                                                 <a href="{{ url('/users/profile/' . $user->id) }}">
                                                     <img src="<?= $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg') ?>"
-                                                        class="rounded-circle"
+                                                        class="rounded-circle" loading="lazy"
+                                                        onerror="this.onerror=null;this.src='<?= asset('storage/photos/no-image.jpg') ?>'"
                                                         alt="<?= $user->first_name ?> <?= $user->last_name ?>">
                                                 </a>
                                             </li>
@@ -337,12 +330,12 @@
                                                                                     }
                                                                                 }
                                                                                 // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a>';
+                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
                                                                             } else {
                                                                                 // Case 3: Not assigned
                                                                                 echo '<span class="badge bg-primary">' . get_label('not_assigned', 'Not assigned') . '</span>';
                                                                                 // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a>';
+                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
                                                                             }
                                                                             ?>
                                         </ul>
@@ -363,7 +356,8 @@
                                                 title="<?= $client->first_name ?> <?= $client->last_name ?>">
                                                 <a href="{{ url('/clients/profile/' . $client->id) }}">
                                                     <img src="<?= $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg') ?>"
-                                                        class="rounded-circle"
+                                                        class="rounded-circle" loading="lazy"
+                                                        onerror="this.onerror=null;this.src='<?= asset('storage/photos/no-image.jpg') ?>'"
                                                         alt="<?= $client->first_name ?> <?= $client->last_name ?>">
                                                 </a>
                                             </li>
@@ -376,12 +370,12 @@
                                                                                     }
                                                                                 }
                                                                                 // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a>';
+                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
                                                                             } else {
                                                                                 // Display "Not assigned" badge
                                                                                 echo '<span class="badge bg-primary">' . get_label('not_assigned', 'Not assigned') . '</span>';
                                                                                 // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><span class="bx bx-edit"></span></a>';
+                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
                                                                             }
                                                                             ?>
                                         </ul>
@@ -392,16 +386,14 @@
                                     <div class="row mt-2">
                                         <div class="col-md-6 text-start">
                                             @if ($project->start_date)
-                                                <i
-                                                    class='bx bx-calendar text-success'></i><?= get_label('starts_at', 'Starts at') ?>
+                                                <x-tk-icon name="calendar" class="tk-ic-ok" /> <?= get_label('starts_at', 'Starts at') ?>
                                                 : {{ format_date($project->start_date) }}
                                             @endif
                                         </div>
 
                                         @if ($project->end_date)
                                             <div class="col-md-6 text-end">
-                                                <i
-                                                    class='bx bx-calendar text-danger'></i><?= get_label('ends_at', 'Ends at') ?>
+                                                <x-tk-icon name="calendar" class="tk-ic-err" /> <?= get_label('ends_at', 'Ends at') ?>
                                                 : {{ format_date($project->end_date) }}
                                             </div>
                                         @endif
@@ -412,7 +404,7 @@
                         </div>
                     </div>
                 @endforeach
-                <div>
+                <div class="col-12 mt-3 tk-project-pager">
                     {{ $projects->links() }}
                 </div>
             </div>

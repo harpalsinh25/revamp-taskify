@@ -6396,15 +6396,20 @@ body.v2-shell .tk-kanban {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
+    /* The whole board is one scroll area (vertical for tall columns +
+       horizontal for many columns). Each column grows to its content but
+       has its own clip boundary (overflow:hidden below) which fixes the
+       "covered" paint bug. Scrollbars are hidden. */
+    overflow: auto;
+    max-height: calc(100vh - 160px);
     padding: 2px 2px 14px;
     background: transparent;
     border: 0;
     border-radius: 0;
 }
 
-/* column = kit .kcol */
+/* column = kit .kcol — grows to its content, clips to its own rounded box
+   (the clip boundary stops the cards painting over each other on scroll) */
 body.v2-shell .tk-kanban .kcol {
     display: flex;
     flex-direction: column;
@@ -6417,7 +6422,6 @@ body.v2-shell .tk-kanban .kcol {
     border: 1px solid var(--line);
     border-radius: var(--r-2);
     overflow: hidden;
-    max-height: calc(100vh - 220px);
 }
 
 body.v2-shell .tk-kanban .kcol-head {
@@ -6484,7 +6488,8 @@ body.v2-shell .tk-kanban .kcol-count {
     font-family: var(--font-mono);
 }
 
-/* droppable body = kit .kcol-body (keeps id + data-status for dragula) */
+/* droppable body = kit .kcol-body (keeps id + data-status for dragula).
+   Grows to its content; the board (above) provides the scroll. */
 body.v2-shell .tk-kanban .kanban-tasks {
     padding: 8px;
     margin: 0;
@@ -6492,8 +6497,7 @@ body.v2-shell .tk-kanban .kanban-tasks {
     flex-direction: column;
     gap: 8px;
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
     min-height: 64px;
 }
 
@@ -6678,6 +6682,8 @@ body.v2-shell .tk-av-stack .av img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    color: transparent;
+    font-size: 0;
 }
 
 body.v2-shell .tk-av-stack .av-more {
@@ -6730,28 +6736,18 @@ body.v2-shell .tk-kanban .kanban-tasks.drag-over {
     border-radius: var(--r-2);
 }
 
-/* thin kit scrollbars inside the board */
+/* Hide the board scrollbars — the board still scrolls (wheel / trackpad /
+   drag), just with no visible scroller. */
 body.v2-shell .tk-kanban,
 body.v2-shell .tk-kanban .kanban-tasks {
-    scrollbar-width: thin;
-    scrollbar-color: var(--line-2) transparent;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
-
 body.v2-shell .tk-kanban::-webkit-scrollbar,
 body.v2-shell .tk-kanban .kanban-tasks::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-body.v2-shell .tk-kanban::-webkit-scrollbar-thumb,
-body.v2-shell .tk-kanban .kanban-tasks::-webkit-scrollbar-thumb {
-    background: var(--line-2);
-    border-radius: 99px;
-}
-
-body.v2-shell .tk-kanban::-webkit-scrollbar-track,
-body.v2-shell .tk-kanban .kanban-tasks::-webkit-scrollbar-track {
-    background: transparent;
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 /* =====================================================================
@@ -6871,3 +6867,194 @@ body.v2-shell .card .card-title {
 
 /* Fix button alignment */
 .create-project-btn { display: flex !important; justify-content: center !important; align-items: center !important; gap: 4px; }
+
+/* =====================================================================
+   Taskify v2 — Project grid cards (design system). Restyle only — all
+   data, status/priority controls, avatars and actions are preserved.
+   ===================================================================== */
+body.v2-shell .tk-project-grid > [class*="col-"] { margin-bottom: 0; }
+body.v2-shell .tk-project-card.card {
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-2);
+    box-shadow: none; margin: 0; transition: border-color var(--t-1), box-shadow var(--t-1);
+}
+body.v2-shell .tk-project-card.card:hover { border-color: var(--line-2); box-shadow: var(--shadow-2); }
+body.v2-shell .tk-project-card .card-body-project-grid {
+    padding: 16px; display: flex; flex-direction: column; gap: 12px;
+}
+/* normalise utility margins so the flex gap controls vertical rhythm */
+body.v2-shell .tk-project-card .card-body-project-grid > div,
+body.v2-shell .tk-project-card .card-body-project-grid > span,
+body.v2-shell .tk-project-card .card-body-project-grid > p { margin: 0 !important; }
+
+/* title + action icons */
+body.v2-shell .tk-project-card .card-title { font-size: 15px; font-weight: 600; margin: 0; line-height: var(--lh-snug); }
+body.v2-shell .tk-project-card .card-title a { color: var(--fg-0); text-decoration: none; }
+body.v2-shell .tk-project-card .card-title a:hover { color: var(--signal); }
+body.v2-shell .tk-project-card .card-title + div { gap: 6px; }
+body.v2-shell .tk-project-card .card-title + div a { margin: 0 !important; display: inline-flex; align-items: center; }
+body.v2-shell .tk-project-card .card-body i.bx { font-size: 16px; line-height: 1; }
+
+/* budget chip sits left, not stretched */
+body.v2-shell .tk-project-card .card-body-project-grid > .badge { align-self: flex-start; }
+
+/* field labels above the status / priority selects */
+body.v2-shell .tk-project-card .form-label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--fg-3); font-weight: 600; margin-bottom: 4px;
+}
+body.v2-shell .tk-project-card .form-select-sm { height: var(--ctrl-h-sm); font-size: var(--fs-sm); }
+
+/* tasks count row */
+body.v2-shell .tk-project-card .card-text {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--fg-3); font-weight: 600; margin-bottom: 6px;
+}
+body.v2-shell .tk-project-card .card-body-project-grid > .d-flex.justify-content-between > span { font-size: var(--fs-base); color: var(--fg-1); display: inline-flex; align-items: center; gap: 4px; }
+body.v2-shell .tk-project-card .card-body-project-grid > .d-flex.justify-content-between b { color: var(--fg-0); }
+
+/* user / client avatars -> clean overlapping kit stack. Broken/missing
+   photos are clipped to a circle with a neutral placeholder, so the alt
+   text can never spill out (the messy case in the report). */
+body.v2-shell .tk-project-card .users-list { flex-wrap: wrap; gap: 0; align-items: center; row-gap: 4px; }
+body.v2-shell .tk-project-card .avatar,
+body.v2-shell .tk-project-card .avatar-sm {
+    width: 28px; height: 28px; border-radius: 50%; overflow: hidden;
+    background: var(--bg-3); flex: none; position: relative; margin: 0;
+}
+body.v2-shell .tk-project-card .avatar-group .avatar { margin-left: -6px; border: 1.5px solid var(--bg-1); }
+body.v2-shell .tk-project-card .avatar-group .avatar:first-child { margin-left: 0; }
+body.v2-shell .tk-project-card .avatar > a { display: block; width: 100%; height: 100%; }
+body.v2-shell .tk-project-card .avatar img,
+body.v2-shell .tk-project-card .avatar .rounded-circle {
+    width: 100% !important; height: 100% !important; object-fit: cover; border-radius: 50%;
+    color: transparent; font-size: 0; border: 0; vertical-align: top;
+}
+body.v2-shell .tk-project-card .users-list .btn-icon {
+    width: 28px; height: 28px; margin-left: 6px; border-radius: 50% !important; flex: none;
+}
+body.v2-shell .tk-project-card .users-list .badge { margin-left: 4px; align-self: center; }
+
+/* start / end dates */
+body.v2-shell .tk-project-card .card-body-project-grid > .row:last-child { font-size: 11.5px; color: var(--fg-2); margin: 0; }
+body.v2-shell .tk-project-card .card-body-project-grid > .row:last-child i.bx { font-size: 14px; margin-right: 3px; }
+
+/* Laravel paginator -> kit pagination */
+body.v2-shell .tk-project-pager .pagination { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; margin: 0; padding: 0; }
+body.v2-shell .tk-project-pager .pagination .page-item { margin: 0; }
+body.v2-shell .tk-project-pager .pagination .page-link {
+    border: 0; background: transparent; color: var(--fg-1);
+    min-width: 30px; height: 30px; padding: 0 8px; border-radius: var(--r-2);
+    font-size: var(--fs-sm); display: inline-flex; align-items: center; justify-content: center;
+    transition: background var(--t-1);
+}
+body.v2-shell .tk-project-pager .pagination .page-link:hover { background: var(--bg-2); color: var(--fg-0); }
+body.v2-shell .tk-project-pager .pagination .page-item.active .page-link { background: var(--bg-3); color: var(--fg-0); font-weight: 600; }
+body.v2-shell .tk-project-pager .pagination .page-item.disabled .page-link { color: var(--fg-3); background: transparent; }
+
+/* =====================================================================
+   Taskify v2 — Design-system icons (<x-tk-icon>) used in the project card
+   (and reusable elsewhere). Thin-stroke SVGs that inherit currentColor.
+   ===================================================================== */
+body.v2-shell .tk-ic { display: inline-block; vertical-align: -0.18em; flex: none; }
+body.v2-shell .tk-ic-danger { color: var(--err) !important; }
+body.v2-shell .tk-ic-ok  { color: var(--ok); }
+body.v2-shell .tk-ic-err { color: var(--err); }
+body.v2-shell .tk-ic-muted { color: var(--fg-3); }
+/* dropdown menu item icons */
+body.v2-shell .dropdown-item > .tk-ic { width: 15px; height: 15px; margin-right: 8px; vertical-align: -0.2em; color: var(--fg-2); }
+
+/* project card: header action icon buttons (quick-view/fav/pin/msg/map/more) */
+body.v2-shell .tk-project-card .card-title + div { gap: 2px; }
+body.v2-shell .tk-project-card .tk-ic-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 5px; color: var(--fg-3);
+    text-decoration: none; transition: background var(--t-1), color var(--t-1);
+}
+body.v2-shell .tk-project-card .tk-ic-btn:hover { background: var(--bg-2); color: var(--fg-0); }
+body.v2-shell .tk-project-card .tk-ic-btn .tk-ic { width: 17px; height: 17px; }
+/* favorite + pin filled states (driven by data-favorite / data-pinned) */
+body.v2-shell .tk-project-card .tk-ic-fav:hover { color: var(--warn); }
+body.v2-shell .tk-project-card .tk-ic-fav[data-favorite="1"] { color: var(--warn); }
+body.v2-shell .tk-project-card .tk-ic-fav[data-favorite="1"] .tk-ic { fill: currentColor; }
+body.v2-shell .tk-project-card .tk-ic-pin:hover { color: var(--ok); }
+body.v2-shell .tk-project-card .tk-ic-pin[data-pinned="1"] { color: var(--ok); }
+body.v2-shell .tk-project-card .tk-ic-pin[data-pinned="1"] .tk-ic { fill: currentColor; }
+/* tasks-count + date icons sized to their text */
+body.v2-shell .tk-project-card .card-body-project-grid > .d-flex.justify-content-between > span .tk-ic { width: 16px; height: 16px; color: var(--fg-2); }
+body.v2-shell .tk-project-card .card-body-project-grid > .row:last-child .tk-ic { width: 13px; height: 13px; vertical-align: -0.15em; }
+body.v2-shell .tk-project-card .users-list .btn-icon .tk-ic { width: 13px; height: 13px; }
+
+/* =====================================================================
+   Taskify v2 — Kanban .tcard design-system icons (projects + tasks cards)
+   ===================================================================== */
+body.v2-shell .tcard .tcard-ic .tk-ic { width: 15px; height: 15px; }
+body.v2-shell .tcard .tcard-stats .tk-ic { width: 15px; height: 15px; }
+body.v2-shell .tcard .tcard-tags .tag .tk-ic { width: 12px; height: 12px; vertical-align: -0.12em; }
+body.v2-shell .tcard .av-add .tk-ic { width: 13px; height: 13px; }
+/* favorite + pin filled states (data-favorite / data-pinned drive the fill) */
+body.v2-shell .tcard .favorite-icon:hover { color: var(--warn); }
+body.v2-shell .tcard .favorite-icon[data-favorite="1"] { color: var(--warn); }
+body.v2-shell .tcard .favorite-icon[data-favorite="1"] .tk-ic { fill: currentColor; }
+body.v2-shell .tcard .pinned-icon:hover { color: var(--ok); }
+body.v2-shell .tcard .pinned-icon[data-pinned="1"] { color: var(--ok); }
+body.v2-shell .tcard .pinned-icon[data-pinned="1"] .tk-ic { fill: currentColor; }
+/* create-project / add-status buttons in columns */
+body.v2-shell .tk-kanban .create-project-btn .tk-ic,
+body.v2-shell .tk-kanban .kcol-head .btn .tk-ic { width: 14px; height: 14px; }
+
+/* =====================================================================
+   Taskify v2 — Projects kanban card foot: kit single-row layout —
+   Users + Clients avatar groups on the left, action stats on the right
+   (matches core-design.html .tcard-foot align-items:center +
+   .tcard-stats margin-left:auto). Broken avatars already clip to a
+   neutral circle via .tk-av-stack; the blade adds an onerror fallback.
+   ===================================================================== */
+body.v2-shell .tcard .tk-pfoot {
+    display: flex !important; flex-direction: row !important;
+    align-items: flex-end; justify-content: space-between; gap: 10px;
+}
+body.v2-shell .tcard .tk-pfoot-people {
+    display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; min-width: 0;
+}
+body.v2-shell .tcard .tk-pgroup { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+body.v2-shell .tcard .tk-pgroup-lbl {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--fg-3); font-weight: 600; font-family: var(--font-mono);
+}
+body.v2-shell .tcard .tk-pfoot .tcard-stats { margin-left: auto; gap: 2px; align-self: flex-end; flex: none; }
+
+/* =====================================================================
+   Taskify v2 — Dropdown menu (Bootstrap .dropdown-menu) -> design system.
+   Also fixes cards that nest items as <a><li.dropdown-item> — those <a>
+   wrappers are inline, so force the menu's direct children to stack
+   vertically (was rendering the items in a horizontal row).
+   ===================================================================== */
+body.v2-shell .dropdown-menu {
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-2);
+    box-shadow: var(--shadow-3); padding: 4px; min-width: 184px;
+    font-family: var(--font-sans); color: var(--fg-1);
+}
+/* stack the menu's direct children vertically (covers <a>, <li>, <button>) */
+body.v2-shell .dropdown-menu > a,
+body.v2-shell .dropdown-menu > li,
+body.v2-shell .dropdown-menu > button { display: block; width: 100%; text-decoration: none; }
+body.v2-shell .dropdown-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 4px; font-size: 12.5px; line-height: 1.4;
+    color: var(--fg-1); text-align: left; width: 100%; white-space: nowrap;
+    background: transparent; border: 0;
+    transition: background var(--t-1), color var(--t-1);
+}
+body.v2-shell .dropdown-item:hover,
+body.v2-shell .dropdown-item:focus,
+body.v2-shell .dropdown-menu > a:hover .dropdown-item { background: var(--bg-2); color: var(--fg-0); }
+body.v2-shell .dropdown-item.active,
+body.v2-shell .dropdown-item:active { background: var(--bg-3); color: var(--fg-0); }
+body.v2-shell .dropdown-item i { font-size: 15px; line-height: 1; flex: none; }
+body.v2-shell .dropdown-item > .tk-ic { width: 15px; height: 15px; margin: 0; color: var(--fg-2); }
+body.v2-shell .dropdown-item .tk-ic-danger { color: var(--err); }
+body.v2-shell .dropdown-divider { border-color: var(--line); margin: 4px 2px; }
+body.v2-shell .dropdown-header {
+    color: var(--fg-3); font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 6px 10px 4px; font-family: var(--font-mono);
+}
