@@ -146,11 +146,7 @@
                                         <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center flex-wrap">
                                             @foreach($users as $user)
                                             <li class="avatar avatar-sm pull-up" title="{{ $user->first_name }} {{ $user->last_name }}"><a href="{{ url('/users/profile/' . $user->id) }}">
-                                                    @if(!empty($user->photo) && $user->photo !== 'photos/no-image.jpg')
-                                                        <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($user->first_name, 0, 1) }}</span>'" alt="{{$user->first_name}} {{$user->last_name}}">
-                                                    @else
-                                                        <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(substr($user->first_name, 0, 1)) }}</span>
-                                                    @endif
+                                                    <img src="{{ $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg') }}" class="rounded-circle" alt="{{$user->first_name}} {{$user->last_name}}">
                                                 </a></li>
                                             @endforeach
                                             <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
@@ -167,11 +163,7 @@
                                         <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center flex-wrap">
                                             @foreach($clients as $client)
                                             <li class="avatar avatar-sm pull-up" title="{{ $client->first_name }} {{ $client->last_name }}"><a href="{{ url('/clients/profile/' . $client->id) }}">
-                                                    @if(!empty($client->photo) && $client->photo !== 'photos/no-image.jpg')
-                                                        <img src="{{ asset('storage/' . $client->photo) }}" class="rounded-circle" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($client->first_name, 0, 1) }}</span>'" alt="{{$client->first_name}} {{$client->last_name}}">
-                                                    @else
-                                                        <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(substr($client->first_name, 0, 1)) }}</span>
-                                                    @endif
+                                                    <img src="{{ $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg') }}" class="rounded-circle" alt="{{$client->first_name}} {{$client->last_name}}">
                                                 </a></li>
                                             @endforeach
                                             <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>

@@ -43,9 +43,7 @@
                     <div class="card-body">
                         <div class="d-flex flex-column align-items-center text-center">
                             <div class="avatar avatar-xl mb-3">
-                                <span class="avatar-initial rounded-circle bg-primary text-white">
-                                    {{ substr($lead->first_name, 0, 1) . substr($lead->last_name, 0, 1) }}
-                                </span>
+                                <img src="{{ asset('storage/photos/no-image.jpg') }}" alt="{{ $lead->first_name }}" class="rounded-circle">
                             </div>
                             <h4>{{ ucwords($lead->first_name . ' ' . $lead->last_name) }}</h4>
                             <p class="text-muted mb-1">{{ $lead->job_title }}</p>

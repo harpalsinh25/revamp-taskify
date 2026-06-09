@@ -57,9 +57,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <!-- Avatar -->
                                 <div class="avatar avatar-md me-2">
-                                    <span class="avatar-initial rounded-circle bg-primary text-white">
-                                        {{ substr($lead->first_name, 0, 1) . substr($lead->last_name, 0, 1) }}
-                                    </span>
+                                    <img src="{{ asset('storage/photos/no-image.jpg') }}" alt="{{ $lead->first_name }}" class="rounded-circle">
                                 </div>
                                 <!-- Lead Source Badge -->
                                 @php

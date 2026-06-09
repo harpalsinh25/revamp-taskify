@@ -1,4 +1,23 @@
 "use strict";
+
+if ($.fn.bootstrapTable) {
+    $.extend($.fn.bootstrapTable.defaults, {
+        formatNoMatches: function () {
+            // Using the global label if available, otherwise fallback
+            var msg = typeof label_data_does_not_exists !== 'undefined' ? label_data_does_not_exists : 'No matching records found';
+            var title = typeof label_not_found !== 'undefined' ? label_not_found : 'Nothing found';
+            return `
+            <div class="empty">
+                <div class="empty-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h4l2 3h6l2-3h4M3 13l3-7h12l3 7M3 13v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6"/></svg>
+                </div>
+                <div class="empty-title">${title}</div>
+                <div class="empty-sub">${msg}</div>
+            </div>`;
+        }
+    });
+}
+
 toastr.options = {
     positionClass: toastPosition,
     timeOut: parseFloat(toastTimeOut) * 1000,

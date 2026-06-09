@@ -12,12 +12,12 @@ $auth_user = getAuthenticatedUser();
             @if(isAdminOrHasAllDataAccess() && !isset($viewAssigned))
             @if(!isset($id) || (explode('_',$id)[0] !='client' && explode('_',$id)[0] !='user'))
             <div class="col-md-4 mb-3">
-                <select class="form-control users_select" id="project_user_filter" name="user_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                <select class="form-select tom_users_select" id="project_user_filter" name="user_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                 </select>
             </div>
 
             <div class="col-md-4 mb-3">
-                <select class="form-control clients_select" id="project_client_filter" name="client_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">>
+                <select class="form-select tom_clients_select" id="project_client_filter" name="client_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
                 </select>
             </div>
             @endif
@@ -31,18 +31,18 @@ $auth_user = getAuthenticatedUser();
             $tags = \App\Models\Tag::whereIn('id', $selectedTags)->get();
             @endphp
             <div class="col-md-4 mb-3">
-                <select class="form-control statuses_filter" id="project_status_filter" name="status_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                <select class="form-select tom_statuses_filter" id="project_status_filter" name="status_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                     @foreach($statuses as $status)
                     <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-4 mb-3">
-                <select class="form-control priorities_filter" id="project_priority_filter" name="priority_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                <select class="form-select tom_priorities_filter" id="project_priority_filter" name="priority_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
                 </select>
             </div>
             <div class="col-md-4 mb-3">
-                <select class="form-control tags_select" id="project_tag_filter" name="tag_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
+                <select class="form-select tom_tags_select" id="project_tag_filter" name="tag_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
                     @foreach($tags as $tag)
                     <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
                     @endforeach

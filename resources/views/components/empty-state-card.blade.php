@@ -11,10 +11,13 @@
     @if ($flag == 1)
         <div class="card-body">
     @endif
-    <div class="misc-wrapper">
-        <h2 class="mx-2 mb-2"><?= get_label(strtolower($type), $type) . ' ' . get_label('not_found', 'Not Found') ?></h2>
-        <p class="mx-2 mb-4"><?= get_label('oops!', 'Oops!') ?> 😖
-            <?= get_label('data_does_not_exists', 'Data does not exists') ?>.</p>
+    <div class="empty">
+        <div class="empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h4l2 3h6l2-3h4M3 13l3-7h12l3 7M3 13v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6"/></svg>
+        </div>
+        <div class="empty-title"><?= get_label(strtolower($type), $type) . ' ' . get_label('not_found', 'Not Found') ?></div>
+        <div class="empty-sub"><?= get_label('data_does_not_exists', 'Data does not exists') ?>.</div>
+        <div class="empty-actions">
         @if ($type != 'Notifications' && $showCreateButton)
             @php
                 $typeSlug = strtolower(str_replace(' ', '-', $type));
@@ -65,10 +68,6 @@
                 {{ get_label('create_now', 'Create now') }}
             </a>
         @endif
-        <div class="mt-3">
-            <img src="{{ asset('/storage/no-result.png') }}" alt="page-misc-error-light" width="500" class="img-fluid"
-                data-app-dark-img="illustrations/page-misc-error-dark.png"
-                data-app-light-img="illustrations/page-misc-error-light.png" />
         </div>
     </div>
     @if ($flag == 1)

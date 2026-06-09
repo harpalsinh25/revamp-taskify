@@ -95,31 +95,31 @@ $(document).ready(function () {
         filters: [
             {
                 selector: '#project_status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'status_ids',
                 ajaxType: 'statuses'
             },
             {
                 selector: '#project_priority_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'priority_ids',
                 ajaxType: 'priorities'
             },
             {
                 selector: '#project_user_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
                 ajaxType: 'users'
             },
             {
                 selector: '#project_client_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'client_ids',
                 ajaxType: 'clients'
             },
             {
                 selector: '#project_tag_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'tag_ids',
                 ajaxType: 'tags'
             },

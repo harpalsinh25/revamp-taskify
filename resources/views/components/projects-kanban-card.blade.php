@@ -79,12 +79,8 @@
                                 @if ($userCount > 0)
                                     @foreach ($users as $u)
                                         @if ($displayed < 3)
-                                            <a href="{{ url('/users/profile/' . $u->id) }}" target="_blank">
-                                                @if(!empty($u->photo) && $u->photo !== 'photos/no-image.jpg')
-                                                    <img src="{{ asset('storage/' . $u->photo) }}" loading="lazy" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($u->first_name, 0, 1) }}</span>'" alt="{{ $u->first_name }}">
-                                                @else
-                                                    <span class="avatar-initial rounded-circle bg-label-primary" title="{{ $u->first_name }} {{ $u->last_name }}">{{ strtoupper(substr($u->first_name, 0, 1)) }}</span>
-                                                @endif
+                                            <a href="{{ url('/users/profile/' . $u->id) }}" target="_blank" class="av">
+                                                <img src="{{ $u->photo ? asset('storage/' . $u->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" alt="{{ $u->first_name }}" class="rounded-circle" title="{{ $u->first_name }} {{ $u->last_name }}">
                                             </a>
                                         @php $displayed++; @endphp
                                         @else @break @endif
@@ -101,12 +97,8 @@
                                 @if ($clientCount > 0)
                                     @foreach ($clients as $c)
                                         @if ($displayedClients < 3)
-                                            <a href="{{ url('/clients/profile/' . $c->id) }}" target="_blank">
-                                                @if(!empty($c->photo) && $c->photo !== 'photos/no-image.jpg')
-                                                    <img src="{{ asset('storage/' . $c->photo) }}" loading="lazy" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>{{ substr($c->first_name, 0, 1) }}</span>'" alt="{{ $c->first_name }}">
-                                                @else
-                                                    <span class="avatar-initial rounded-circle bg-label-primary" title="{{ $c->first_name }} {{ $c->last_name }}">{{ strtoupper(substr($c->first_name, 0, 1)) }}</span>
-                                                @endif
+                                            <a href="{{ url('/clients/profile/' . $c->id) }}" target="_blank" class="av">
+                                                <img src="{{ $c->photo ? asset('storage/' . $c->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" alt="{{ $c->first_name }}" class="rounded-circle" title="{{ $c->first_name }} {{ $c->last_name }}">
                                             </a>
                                         @php $displayedClients++; @endphp
                                         @else @break @endif

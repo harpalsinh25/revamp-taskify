@@ -53,7 +53,7 @@
                             const post = full.post || '';
                             const avatar = full.avatar ?
                                 `<img src="/img/avatars/${full.avatar}" class="rounded-circle" alt="Avatar">` :
-                                `<span class="avatar-initial rounded-circle bg-label-info">${name.slice(0, 1)}</span>`;
+                                `<img src="/storage/photos/no-image.jpg" class="rounded-circle" alt="Avatar">`;
                             return `
               <div class="d-flex align-items-center">
                 <div class="avatar me-2">${avatar}</div>

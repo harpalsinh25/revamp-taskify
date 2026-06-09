@@ -1,13 +1,8 @@
 /* =====================================================================
    Taskify v2 — Design-system table (one source for ALL tables).
-   Restyles the app-wide `bootstrap-table` plugin DOM to the kit table
-   look — one bordered card: toolbar (top) · table · pagination (footer).
-   Authored once; every table (the <x-tk-table> component + any raw
-   data-toggle="table") inherits it. Light + dark via tokens. Server-side
-   pagination/search/sort/refresh are untouched.
    ===================================================================== */
 body.v2-shell .bootstrap-table {
-    font-family: var(--font-sans);
+    font-family: var(--bs-font-sans-serif, sans-serif);
     color: var(--fg-1);
     background: var(--bg-1);
     border: 1px solid var(--line);
@@ -16,22 +11,29 @@ body.v2-shell .bootstrap-table {
     box-shadow: var(--shadow-1);
 }
 
-/* --- Toolbar bar: flex row, NO floats (overrides bootstrap-table.min.css).
-   Left = custom text buttons (delete/clear/save) · middle = search ·
-   right = icon buttons (refresh / column toggle). --- */
+/* --- Toolbar bar: flex row, NO floats (overrides bootstrap-table.min.css). --- */
 body.v2-shell .bootstrap-table .fixed-table-toolbar {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--line);
+    padding: 14px 20px;
+    border-bottom: 0 !important;
+    /* Removed the messy double line! */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-toolbar::after,
-body.v2-shell .bootstrap-table .fixed-table-toolbar::before {
+body.v2-shell .bootstrap-table .fixed-table-toolbar::after {
     display: none !important;
     content: none !important;
+}
+
+/* Bulletproof spacer to push everything after it to the right */
+body.v2-shell .bootstrap-table .fixed-table-toolbar::before {
+    content: "" !important;
+    display: block !important;
+    flex: 1 1 auto !important;
+    order: 1 !important;
+    /* Sits between columns-left and search */
 }
 
 body.v2-shell .bootstrap-table .fixed-table-toolbar>* {
@@ -39,73 +41,65 @@ body.v2-shell .bootstrap-table .fixed-table-toolbar>* {
     margin: 0 !important;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-toolbar .bars,
-body.v2-shell .bootstrap-table .fixed-table-toolbar .bs-bars,
 body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left {
     order: 0;
-    display: inline-flex;
+    /* Keep them first (Left side) */
+    display: flex;
     align-items: center;
     gap: 8px;
+    margin-left: 0 !important;
 }
 
 body.v2-shell .bootstrap-table .fixed-table-toolbar .search {
-    order: 1;
-    flex: 1 1 200px;
-    min-width: 160px;
+    order: 2;
+    /* Sits after the flex spacer (Right side) */
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    margin: 0 !important;
 }
 
 body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right {
-    order: 2;
-    margin-left: auto !important;
-    display: inline-flex;
+    order: 3;
+    /* Refresh and Column menu last (Right side) */
+    margin-left: 0 !important;
+    display: flex;
     align-items: center;
     gap: 4px;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-toolbar .search input,
-body.v2-shell .bootstrap-table .fixed-table-toolbar .search .form-control {
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search input {
     height: var(--ctrl-h-sm);
+    /* Using smaller design system size */
     width: 100%;
-    min-width: 0;
     max-width: 250px;
     padding: 0 10px;
     background: var(--bg-1);
     border: 1px solid var(--line);
     color: var(--fg-0);
     border-radius: var(--r-2);
-    font-size: var(--fs-base);
-    font-family: var(--font-sans);
-    box-shadow: none;
+    font-size: 13px;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-toolbar .search input::placeholder {
-    color: var(--fg-3);
-}
-
-body.v2-shell .bootstrap-table .fixed-table-toolbar .search input:focus,
-body.v2-shell .bootstrap-table .fixed-table-toolbar .search .form-control:focus {
+body.v2-shell .bootstrap-table .fixed-table-toolbar .search input:focus {
     border-color: var(--signal);
     box-shadow: var(--shadow-focus);
     outline: none;
 }
 
-/* Custom TEXT buttons (Delete Selected · Clear Filters · Save) = kit secondary
-   button, AUTO width (this was the overlap bug — they were forced to 32px). */
 body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left .btn {
-    width: auto !important;
     height: var(--ctrl-h-sm);
+    /* Smaller design system buttons */
     padding: 0 10px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    white-space: nowrap;
     background: var(--bg-1) !important;
     border: 1px solid var(--line) !important;
     color: var(--fg-1) !important;
     border-radius: var(--r-2) !important;
-    font-size: var(--fs-sm);
+    font-size: 12.5px;
     font-weight: 500;
-    box-shadow: none !important;
 }
 
 body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left .btn:hover {
@@ -113,26 +107,6 @@ body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left .btn:hover {
     color: var(--fg-0) !important;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-left .btn i {
-    font-size: 15px;
-    line-height: 1;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-toolbar .delete-selected {
-    color: var(--err) !important;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-toolbar .delete-selected:hover {
-    background: oklch(from var(--err) l c h / 0.10) !important;
-    border-color: oklch(from var(--err) l c h / 0.30) !important;
-    color: var(--err) !important;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-toolbar .save-column-visibility i {
-    color: var(--signal);
-}
-
-/* ICON-ONLY buttons (refresh, column toggle) = kit .icon-btn (square, borderless) */
 body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn {
     width: var(--ctrl-h-sm);
     height: var(--ctrl-h-sm);
@@ -144,140 +118,91 @@ body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn {
     border: 0 !important;
     color: var(--fg-2) !important;
     border-radius: var(--r-2) !important;
-    box-shadow: none !important;
-    font-size: 14px;
 }
 
 body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn:hover {
-    color: var(--fg-0) !important;
     background: var(--bg-2) !important;
+    color: var(--fg-0) !important;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn i {
-    font-size: 16px;
-    line-height: 1;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-toggle::after {
-    display: none;
-}
-
-/* column-toggle menu = kit .dropdown-menu */
-body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-menu {
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-radius: var(--r-2);
-    box-shadow: var(--shadow-3);
-    color: var(--fg-1);
-    padding: 4px;
-    min-width: 180px;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-item,
-body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-menu label {
-    color: var(--fg-1);
-    font-size: 12.5px;
-    border-radius: 4px;
-    padding: 7px 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-toolbar .dropdown-item:hover {
-    background: var(--bg-2);
-    color: var(--fg-0);
-}
-
-/* --- Table surface --- */
-body.v2-shell .bootstrap-table .fixed-table-container,
-body.v2-shell .bootstrap-table .fixed-table-container.fixed-height,
-body.v2-shell .bootstrap-table .fixed-table-container.fixed-height.has-card-view,
-body.v2-shell .bootstrap-table .fixed-table-container.fixed-height.has-footer {
+/* --- Table surface & Layout --- */
+body.v2-shell .bootstrap-table .fixed-table-container {
     border: 0 !important;
     padding: 0 !important;
     clear: none !important;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-border {
-    display: none !important;
+body.v2-shell .bootstrap-table .fixed-table-header {
     border: 0 !important;
+    border-bottom: 0 !important;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-body,
-body.v2-shell .bootstrap-table .fixed-table-header,
-body.v2-shell .bootstrap-table .fixed-table-footer {
-    background: var(--bg-1);
+body.v2-shell .bootstrap-table .fixed-table-body {
     border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
 }
 
 body.v2-shell .bootstrap-table table.table {
     margin: 0 !important;
     background: transparent;
     border: 0 !important;
+    border-top: 0 !important;
     border-collapse: collapse;
     color: var(--fg-1);
-    font-size: var(--fs-base, 13px);
+    font-size: 13px;
+    /* Compact size */
+    width: 100%;
 }
 
-body.v2-shell .bootstrap-table table.table>thead,
-body.v2-shell .bootstrap-table table.table>tbody {
+/* Clean Header styling */
+body.v2-shell .bootstrap-table table.table>thead {
+    border: 0 !important;
+}
+
+body.v2-shell .bootstrap-table table.table>thead>tr {
     border: 0 !important;
 }
 
 body.v2-shell .bootstrap-table table.table>thead>tr>th {
-    background: var(--bg-1);
+    background: transparent !important;
     color: var(--fg-3);
-    text-transform: uppercase;
-    font-size: var(--fs-xs);
+    font-size: 10.5px;
+    /* var(--fs-xs) */
     font-weight: 600;
-    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    /* var(--tracking-wide) */
     white-space: nowrap;
     text-align: left;
+    vertical-align: middle;
     border: 0 !important;
-    border-bottom: 1px solid var(--line) !important;
-    padding: 16px 20px;
-    vertical-align: middle;
-}
-
-body.v2-shell .bootstrap-table table.table>thead>tr>th .th-inner {
-    padding: 0;
-}
-
-body.v2-shell .bootstrap-table table.table>tbody>tr.selected>td {
-    background: var(--signal-soft) !important;
-}
-
-[data-theme="dark"] body.v2-shell .bootstrap-table table.table>tbody>tr.selected>td {
-    background: oklch(from var(--signal) l c h / 0.08) !important;
-}
-
-body.v2-shell .bootstrap-table table.table .bs-checkbox {
-    text-align: center;
-    vertical-align: middle;
-    width: 40px;
-}
-
-body.v2-shell .bootstrap-table table.table .bs-checkbox input[type="checkbox"] {
-    accent-color: var(--signal);
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-    margin: 0;
-    position: relative;
-    top: 2px;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    padding: 8px 12px;
 }
 
 body.v2-shell .bootstrap-table table.table>tbody>tr>td {
     border: 0 !important;
     border-bottom: 1px solid var(--line) !important;
-    padding: 14px 20px;
+    padding: 10px 20px;
+    /* Compact padding */
     color: var(--fg-1);
     vertical-align: middle;
-    background: transparent;
-    font-size: 13px;
-    transition: background var(--t-1) ease;
+    white-space: nowrap;
+    /* Prevent messy line breaking */
+}
+
+/* Fix for links (like project titles) being bright blue */
+body.v2-shell .bootstrap-table table.table>tbody>tr>td a:not(.btn):not(.quick-view):not(.edit-project):not(.duplicate) {
+    color: var(--fg-0);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+body.v2-shell .bootstrap-table table.table>tbody>tr>td a:not(.btn):not(.quick-view):not(.edit-project):not(.duplicate):hover {
+    color: var(--signal);
 }
 
 body.v2-shell .bootstrap-table table.table>tbody>tr:hover>td {
@@ -288,67 +213,56 @@ body.v2-shell .bootstrap-table table.table>tbody>tr:last-child>td {
     border-bottom: 0 !important;
 }
 
-body.v2-shell .bootstrap-table table.table>tbody>tr.no-records-found:hover>td,
-body.v2-shell .bootstrap-table table.table>tbody>tr.no-records-found>td {
-    color: var(--fg-3);
-    text-align: center;
-    padding: 24px 12px;
-    background: transparent;
-}
-
-body.v2-shell .bootstrap-table table.table a {
-    color: var(--fg-0);
-}
-
-body.v2-shell .bootstrap-table table.table a:hover {
-    color: var(--signal);
-}
-
-/* Selected row = kit .table tr[data-selected] */
-body.v2-shell .bootstrap-table table.table>tbody>tr.selected>td,
-body.v2-shell .bootstrap-table table.table>tbody>tr.selected:hover>td {
-    background: var(--signal-soft) !important;
-}
-
-[data-theme="dark"] body.v2-shell .bootstrap-table table.table>tbody>tr.selected>td,
-[data-theme="dark"] body.v2-shell .bootstrap-table table.table>tbody>tr.selected:hover>td {
-    background: oklch(from var(--signal) l c h / 0.08) !important;
-}
-
-/* Checkbox column (kit .table-checkbox) + kit .check checkbox */
+/* Utility column widths */
 body.v2-shell .bootstrap-table table.table th.bs-checkbox,
 body.v2-shell .bootstrap-table table.table td.bs-checkbox {
-    width: 40px;
+    width: 54px;
     text-align: center;
-    padding-right: 0;
+    padding: 16px 0 16px 24px;
 }
 
-body.v2-shell .bootstrap-table table.table input[type="checkbox"] {
+body.v2-shell .bootstrap-table table.table th[data-field="actions"],
+body.v2-shell .bootstrap-table table.table td[data-field="actions"] {
+    width: 80px;
+    text-align: right;
+}
+
+/* Restyled Checkboxes */
+body.v2-shell .bootstrap-table .fixed-table-body {
+    scrollbar-width: none;
+}
+
+body.v2-shell .bootstrap-table .fixed-table-body::-webkit-scrollbar {
+    display: none;
+}
+
+body.v2-shell .bootstrap-table table.table input[type="checkbox"],
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-menu input[type="checkbox"] {
     -webkit-appearance: none;
     appearance: none;
     width: 16px;
+    /* Compact size */
     height: 16px;
     margin: 0;
     vertical-align: middle;
     border: 1.5px solid var(--line-2);
+    /* Softer border */
     background: var(--bg-1);
     border-radius: 3px;
+    /* Slightly softer rounded corners */
     cursor: pointer;
     display: inline-grid;
     place-content: center;
-    transition: background var(--t-1), border-color var(--t-1);
 }
 
-body.v2-shell .bootstrap-table table.table input[type="checkbox"]:hover {
-    border-color: var(--fg-2);
-}
-
-body.v2-shell .bootstrap-table table.table input[type="checkbox"]:checked {
+body.v2-shell .bootstrap-table table.table input[type="checkbox"]:checked,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-menu input[type="checkbox"]:checked {
     background: var(--signal);
     border-color: var(--signal);
 }
 
-body.v2-shell .bootstrap-table table.table input[type="checkbox"]:checked::after {
+body.v2-shell .bootstrap-table table.table input[type="checkbox"]:checked::after,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-menu input[type="checkbox"]:checked::after {
     content: '';
     width: 9px;
     height: 9px;
@@ -356,28 +270,70 @@ body.v2-shell .bootstrap-table table.table input[type="checkbox"]:checked::after
     clip-path: polygon(14% 50%, 0 64%, 36% 100%, 100% 22%, 86% 8%, 36% 72%);
 }
 
-/* Actions column right-aligned (kit .table-actions) */
-body.v2-shell .bootstrap-table table.table th[data-field="actions"],
-body.v2-shell .bootstrap-table table.table td[data-field="actions"] {
-    text-align: right;
+/* Custom Column Menu Dropdown Styling */
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-menu {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    box-shadow: var(--shadow-2);
+    padding: 8px 0;
+    margin-top: 8px;
+    min-width: 180px;
 }
 
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-menu label {
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--fg-1);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-menu li:hover label {
+    background: var(--bg-2);
+    color: var(--fg-0);
+}
+
+/* Fix ugly column menu icon */
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right button[name="columns"] i,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-toggle i {
+    display: none !important;
+}
+
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right button[name="columns"]::after,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-toggle::after {
+    display: none !important;
+}
+
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right button[name="columns"]::before,
+body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-toggle::before {
+    content: '\edc2';
+    /* TRUE bx-menu (three lines) */
+    font-family: 'boxicons' !important;
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* Action Buttons */
 body.v2-shell .bootstrap-table table.table td[data-field="actions"] a,
 body.v2-shell .bootstrap-table table.table td[data-field="actions"] button {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--r-2);
     color: var(--fg-2);
-    transition: background var(--t-1), color var(--t-1);
     background: transparent;
     border: none;
-    box-shadow: none;
-    text-decoration: none;
-    font-size: 14px;
+    font-size: 15px;
+    /* Compact icons */
 }
 
 body.v2-shell .bootstrap-table table.table td[data-field="actions"] a:hover,
@@ -386,150 +342,114 @@ body.v2-shell .bootstrap-table table.table td[data-field="actions"] button:hover
     color: var(--fg-0);
 }
 
-body.v2-shell .bootstrap-table table.table td[data-field="actions"] button.delete:hover,
-body.v2-shell .bootstrap-table table.table td[data-field="actions"] a.delete:hover,
-body.v2-shell .bootstrap-table table.table td[data-field="actions"] .text-danger:hover {
-    color: var(--err) !important;
-    background: oklch(from var(--err) l c h / 0.10);
+/* Badges */
+body.v2-shell .bootstrap-table .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-transform: capitalize;
 }
 
-/* Sort indicators = kit th[data-sort]::after (↕ neutral · ↑ asc · ↓ desc),
-   replacing bootstrap-table's default caret background images. */
-body.v2-shell .bootstrap-table table.table th .sortable {
-    cursor: pointer;
-    user-select: none;
-    background-image: none !important;
-    padding-right: 18px !important;
-    position: relative;
+/* Icons Fix */
+body.v2-shell .bootstrap-table .favorite-icon[data-favorite="1"] {
+    color: var(--warn);
 }
 
-body.v2-shell .bootstrap-table table.table th .sortable::after {
-    content: '↕';
-    position: absolute;
-    right: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 9px;
-    opacity: 0.5;
-    color: var(--fg-3);
-    font-weight: 400;
+body.v2-shell .bootstrap-table .pinned-icon[data-pinned="1"] {
+    color: var(--ok);
 }
 
-body.v2-shell .bootstrap-table table.table th .sortable.asc::after {
-    content: '↑';
-    opacity: 1;
-    color: var(--fg-0);
+/* Fix dark separate line between header and body */
+body.v2-shell .bootstrap-table table.table>tbody {
+    border-top: 0 !important;
 }
 
-body.v2-shell .bootstrap-table table.table th .sortable.desc::after {
-    content: '↓';
-    opacity: 1;
-    color: var(--fg-0);
-}
-
-body.v2-shell .bootstrap-table table.table>thead>tr>th.asc,
-body.v2-shell .bootstrap-table table.table>thead>tr>th.desc {
-    color: var(--fg-0);
-}
-
-/* --- Pagination footer = kit .table-footer (flex: detail left, pages right) --- */
+/* Pagination mapped exactly from Taskify Revamp Kit system.css */
 body.v2-shell .bootstrap-table .fixed-table-pagination {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 8px 12px;
-    padding: 14px 20px;
-    border-top: 1px solid var(--line);
-    color: var(--fg-2);
-    font-size: var(--fs-sm);
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 0 !important;
+    color: var(--fg-1);
+    font-size: 13px;
+    width: 100%;
 }
 
 body.v2-shell .bootstrap-table .fixed-table-pagination>div {
     float: none !important;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination-detail {
-    color: var(--fg-2);
-    font-size: var(--fs-sm);
-    margin: 0;
+/* Force the pagination container to the right */
+body.v2-shell .bootstrap-table .fixed-table-pagination>div.pagination,
+body.v2-shell .bootstrap-table .fixed-table-pagination>div.pull-right {
+    margin-left: auto !important;
     display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination-detail .pagination-info {
-    color: var(--fg-2);
-}
-
-body.v2-shell .bootstrap-table .fixed-table-pagination>.pagination,
-body.v2-shell .bootstrap-table .fixed-table-pagination ul.pagination {
-    margin: 0 0 0 auto !important;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-pagination .page-list .btn,
-body.v2-shell .bootstrap-table .fixed-table-pagination .page-list .dropdown-toggle {
-    background: var(--bg-1) !important;
-    border: 1px solid var(--line) !important;
-    color: var(--fg-1) !important;
-    box-shadow: none !important;
-    border-radius: var(--r-2);
-    height: 26px;
-    font-size: var(--fs-sm);
-}
-
-/* pagination = kit .pagination (borderless, .on = bg-3 bold) */
 body.v2-shell .bootstrap-table .fixed-table-pagination .pagination {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: 4px;
-}
-
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item {
     margin: 0;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-link {
-    border: 0;
-    background: transparent;
-    color: var(--fg-1);
+body.v2-shell .bootstrap-table .fixed-table-pagination .page-link {
     min-width: 28px;
     height: 28px;
     padding: 0 8px;
-    margin: 0;
     border-radius: var(--r-2);
-    font-size: var(--fs-sm);
+    font-size: 13px;
+    color: var(--fg-1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background var(--t-1);
+    transition: background 0.2s;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-link:hover {
+body.v2-shell .bootstrap-table .fixed-table-pagination .page-link:hover {
     background: var(--bg-2);
     color: var(--fg-0);
 }
 
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item.active .page-link,
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item.active .page-link:hover {
+/* Active link styling (.on equivalent) */
+body.v2-shell .bootstrap-table .fixed-table-pagination .page-item.active .page-link {
     background: var(--bg-3);
     color: var(--fg-0);
     font-weight: 600;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-pagination .pagination .page-item.disabled .page-link {
-    color: var(--fg-3);
-    background: transparent;
+/* Disabled styling */
+body.v2-shell .bootstrap-table .fixed-table-pagination .page-item.disabled .page-link {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
-body.v2-shell .bootstrap-table .fixed-table-loading {
-    background: var(--bg-1);
-    color: var(--fg-2);
+/* ---- EMPTY STATE ---- */
+body.v2-shell .empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  gap: 12px;
+  color: var(--fg-2);
 }
-/* Table design-system icons */
-body.v2-shell .bootstrap-table .favorite-icon:hover { color: var(--warn); }
-body.v2-shell .bootstrap-table .favorite-icon[data-favorite="1"] { color: var(--warn); }
-body.v2-shell .bootstrap-table .favorite-icon[data-favorite="1"] .tk-ic { fill: currentColor; }
-body.v2-shell .bootstrap-table .pinned-icon:hover { color: var(--ok); }
-body.v2-shell .bootstrap-table .pinned-icon[data-pinned="1"] { color: var(--ok); }
-body.v2-shell .bootstrap-table .pinned-icon[data-pinned="1"] .tk-ic { fill: currentColor; }
-body.v2-shell .bootstrap-table .btn-icon .tk-ic { width: 14px; height: 14px; }
-
+body.v2-shell .empty-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--r-3);
+  background: var(--bg-2);
+  display: grid; place-items: center;
+  color: var(--fg-3);
+}
+body.v2-shell .empty-title { font-size: var(--fs-md); font-weight: 600; color: var(--fg-0); }
+body.v2-shell .empty-sub   { font-size: var(--fs-base); color: var(--fg-2); max-width: 360px; }
+body.v2-shell .empty-actions { display: flex; gap: 8px; margin-top: 4px; }

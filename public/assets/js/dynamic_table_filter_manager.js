@@ -44,6 +44,8 @@ class TableFilterSync {
                 const $selector = this.getCachedSelector(filter.selector);
                 if (filter.type === 'select2' && !$selector.hasClass('select2-hidden-accessible')) {
                     allReady = false;
+                } else if (filter.type === 'tom-select' && !$selector[0].tomselect) {
+                    allReady = false;
                 } else if (filter.type === 'daterangepicker' && !$selector.data('daterangepicker')) {
                     allReady = false;
                 }
@@ -74,9 +76,11 @@ class TableFilterSync {
 
         for (const filter of this.filters) {
             const $selector = this.getCachedSelector(filter.selector);
-            if (filter.type === 'select2') {
-                const values = $selector.val() || [];
-                values.forEach(value => params.append(`${filter.name} []`, value));
+            if (filter.type === 'select2' || filter.type === 'tom-select') {
+                let values = $selector.val() || [];
+                // If it's tom-select it might be an array or string
+                const valuesArray = Array.isArray(values) ? values : (typeof values === 'string' && values ? values.split(',') : []);
+                valuesArray.forEach(value => params.append(`${filter.name}[]`, value));
             } else if (filter.type === 'daterangepicker') {
                 const from = this.getCachedSelector(filter.hiddenFrom).val();
                 const to = this.getCachedSelector(filter.hiddenTo).val();
@@ -118,15 +122,30 @@ class TableFilterSync {
 
             const promises = this.filters.map(filter => new Promise(resolve => {
                 const $selector = this.getCachedSelector(filter.selector);
-                if (filter.type === 'select2') {
-                    const values = urlParams.getAll(`${filter.name} []`);
+                if (filter.type === 'select2' || filter.type === 'tom-select') {
+                    const values = urlParams.getAll(`${filter.name}[]`);
                     if (values.length) {
-                        this.preFetchSelect2Options(filter, values, () => {
-                            $selector.val(values).trigger('change');
+                        this.preFetchSelect2Options(filter, values, (data) => {
+                            if (filter.type === 'tom-select' && $selector[0].tomselect) {
+                                if (data && data.results) {
+                                    data.results.forEach(item => {
+                                        $selector[0].tomselect.addOption({ id: item.id, text: item.text });
+                                    });
+                                }
+                                $selector[0].tomselect.setValue(values, true);
+                                $selector.trigger('change');
+                            } else {
+                                $selector.val(values).trigger('change');
+                            }
                             resolve();
                         });
                     } else {
-                        $selector.val(null).trigger('change');
+                        if (filter.type === 'tom-select' && $selector[0].tomselect) {
+                            $selector[0].tomselect.clear(true);
+                            $selector.trigger('change');
+                        } else {
+                            $selector.val(null).trigger('change');
+                        }
                         resolve();
                     }
                 } else if (filter.type === 'daterangepicker') {
@@ -196,8 +215,14 @@ class TableFilterSync {
             },
             success: data => {
                 const $selector = this.getCachedSelector(filter.selector);
-                data.results.forEach(item => $selector.append(new Option(item.text, item.id, true, true)));
-                callback();
+                if (filter.type === 'select2') {
+                    data.results.forEach(item => {
+                        if ($selector.find(`option[value='${item.id}']`).length === 0) {
+                            $selector.append(new Option(item.text, item.id, true, true));
+                        }
+                    });
+                }
+                callback(data);
             },
             error: () => callback()
         });
@@ -206,7 +231,7 @@ class TableFilterSync {
     attachEventListeners() {
         for (const filter of this.filters) {
             const $selector = this.getCachedSelector(filter.selector);
-            if (filter.type === 'select2') {
+            if (filter.type === 'select2' || filter.type === 'tom-select') {
                 $selector.on('change', () => this.debounceUpdate(true));
             } else if (filter.type === 'daterangepicker') {
                 $selector.on('apply.daterangepicker cancel.daterangepicker', () => this.debounceUpdate(true));
@@ -244,8 +269,10 @@ class TableFilterSync {
         };
         for (const filter of this.filters) {
             const $selector = this.getCachedSelector(filter.selector);
-            if (filter.type === 'select2') {
-                params[filter.name] = $selector.val() || [];
+            if (filter.type === 'select2' || filter.type === 'tom-select') {
+                let values = $selector.val() || [];
+                const valuesArray = Array.isArray(values) ? values : (typeof values === 'string' && values ? values.split(',') : []);
+                params[filter.name] = valuesArray;
             } else if (filter.type === 'daterangepicker') {
                 params[filter.hiddenFrom.replace('#', '')] = this.getCachedSelector(filter.hiddenFrom).val();
                 params[filter.hiddenTo.replace('#', '')] = this.getCachedSelector(filter.hiddenTo).val();

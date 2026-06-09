@@ -749,19 +749,10 @@ class ProjectsController extends Controller
         $projects = $projectsQuery->paginate($filters['limit'])
             ->through(
                 function ($project) use ($statuses, $priorities, $canEdit, $canDelete, $canCreate, $isHome, $webGuard) {
-                    $statusOptions = '';
-                    foreach ($statuses as $status) {
-                        // Determine if the option should be disabled
-                        $disabled = canSetStatus($status) ? '' : 'disabled';
-                    // Render the option with appropriate attributes
-                    $selected = $project->status_id == $status->id ? 'selected' : '';
-                    $statusOptions .= "<option value='{$status->id}' class='badge bg-label-$status->color' $selected $disabled>$status->title</option>";
-                    }
-                    $priorityOptions = "<option value='' class='badge bg-label-secondary'>-</option>";
-                    foreach ($priorities as $priority) {
-                    $selected = $project->priority_id == $priority->id ? 'selected' : '';
-                    $priorityOptions .= "<option value='{$priority->id}' class='badge bg-label-$priority->color' $selected>$priority->title</option>";
-                    }
+                    // Status and priority dropdown options removed as per request to only display data.
+                    $isFavorite = getFavoriteStatus($project->id);
+                    $isPinned = !is_null($project->pinned_id) ? 1 : 0; // Use pinned_id from the query
+
                     $actions = '';
                     if ($canEdit) {
                     $actions .= '<a href="javascript:void(0);" class="edit-project" data-offcanvas="true" data-id="' . $project->id . '" title="' . get_label('update', 'Update') . '">' .
@@ -779,43 +770,43 @@ class ProjectsController extends Controller
                             '</a>';
                     }
                     $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $project->id . '" data-type="project" title="' . get_label('quick_view', 'Quick View') . '">' .
-                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="tk-ic-info mx-3" />') .
+                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="tk-ic-info mx-1" />') .
                         '</a>';
                 $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" title="' . get_label('mind_map', 'Mind Map') . '">' .
-                    \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="sitemap" class="ms-2" />') .
+                    \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="map" class="tk-ic-primary mx-1" />') .
                     '</a>';
+                    
+                    // Quick Action Buttons (Moved from Title)
+                    $actions .= "<a href='javascript:void(0);' class='mx-1 btn-icon favorite-icon " . ($isFavorite ? 'text-warning' : 'text-muted') . "' data-favorite='{$isFavorite}' data-id='{$project->id}' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'>" .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="star" />') . "</a>";
+                    $actions .= "<a href='javascript:void(0);' class='mx-1 btn-icon pinned-icon " . ($isPinned ? 'text-success' : 'text-muted') . "' data-pinned='{$isPinned}' data-id='{$project->id}' data-require_reload='0' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'>" .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="pin" />') . "</a>";
+                    if ($webGuard || $project->client_can_discuss) {
+                        $actions .= "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions' class='mx-1 btn-icon text-danger' title='" . get_label('discussions', 'Discussions') . "'>" .
+                                \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="msg" />') . "</a>";
+                    }
                 $actions = $actions ?: '-';
                     $userHtml = '';
                 if (!empty($project->users) && count($project->users) > 0) {
                         $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->users as $user) {
-                            if (!empty($user->photo) && $user->photo !== 'photos/no-image.jpg') {
-                                $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target='_blank' title='{$user->first_name} {$user->last_name}'><img src='" . asset('storage/' . $user->photo) . "' alt='Avatar' class='rounded-circle' onerror=\"this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>" . strtoupper(substr($user->first_name, 0, 1)) . "</span>'\" /></a></li>";
-                            } else {
-                                $initial = strtoupper(substr($user->first_name, 0, 1));
-                                $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target='_blank' title='{$user->first_name} {$user->last_name}'><span class='avatar-initial rounded-circle bg-label-primary'>{$initial}</span></a></li>";
-                            }
+                            $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' target='_blank' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
 
                     $userHtml .= '</ul>';
                     } else {
-                    $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                    $userHtml = '<span class="badge bg-label-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                 }
                     $clientHtml = '';
                 if (!empty($project->clients) && count($project->clients) > 0) {
                         $clientHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';
                         foreach ($project->clients as $client) {
-                            if (!empty($client->photo) && $client->photo !== 'photos/no-image.jpg') {
-                                $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . asset('storage/' . $client->photo) . "' alt='Avatar' class='rounded-circle' onerror=\"this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary\'>" . strtoupper(substr($client->first_name, 0, 1)) . "</span>'\" /></a></li>";
-                            } else {
-                                $initial = strtoupper(substr($client->first_name, 0, 1));
-                                $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><span class='avatar-initial rounded-circle bg-label-primary'>{$initial}</span></a></li>";
-                            }
+                            $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}' target='_blank'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                         }
 
                     $clientHtml .= '</ul>';
                     } else {
-                    $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                    $clientHtml = '<span class="badge bg-label-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                 }
                     $tagHtml = '';
                     foreach ($project->tags as $tag) {
@@ -825,30 +816,19 @@ class ProjectsController extends Controller
                 $isPinned = !is_null($project->pinned_id) ? 1 : 0; // Use pinned_id from the query
                 return [
                         'id' => $project->id,
-                    'title' => "<a href='" . url("/projects/information/{$project->id}") . "' target='_blank'><strong>{$project->title}</strong></a>
-                        <a href='javascript:void(0);' class='mx-2 btn-icon favorite-icon " . ($isFavorite ? 'text-warning' : 'text-muted') . "' data-favorite='{$isFavorite}' data-id='{$project->id}' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'>" .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="star" />') . "
-                        </a><a href='javascript:void(0);' class='mr-2 btn-icon pinned-icon " . ($isPinned ? 'text-success' : 'text-muted') . "' data-pinned='{$isPinned}' data-id='{$project->id}' data-require_reload='0' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'>" .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="pin" />') . "
-            </a>" . ($webGuard || $project->client_can_discuss ?
-                            "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions'  class='ms-2 btn-icon text-danger'>" .
-                                \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="msg" />') . "
-                            </a>"
-                        : ""),
+                    'title' => "<a href='" . url("/projects/information/{$project->id}") . "' target='_blank'><strong>{$project->title}</strong></a>",
                         'users' => $userHtml,
                         'clients' => $clientHtml,
                         'start_date' => format_date($project->start_date),
                         'end_date' => format_date($project->end_date),
                     'budget' => !empty($project->budget) && $project->budget !== null ? format_currency($project->budget) : '-',
                         'status_id' => "<div class='d-flex align-items-center'>
-                            <select class='form-select form-select-sm select-bg-label-{$project->status->color} fixed-width-select' id='statusSelect' data-id='{$project->id}' data-original-status-id='{$project->status->id}' data-original-color-class='select-bg-label-{$project->status->color}'" . ($isHome ? ' data-reload="true"' : '') . ">
-                                {$statusOptions}
-                            </select>
+                            <span class='badge bg-label-{$project->status->color}'>{$project->status->title}</span>
                             " . ($project->note ?
                             "<i class='bx bx-notepad ms-2 text-primary' title='{$project->note}'></i>"
                         : "") . "
                         </div>",
-                        'priority_id' => "<select class='form-select form-select-sm select-bg-label-" . ($project->priority ? $project->priority->color : 'secondary') . "' id='prioritySelect' data-id='{$project->id}' data-original-priority-id='" . ($project->priority ? $project->priority->id : '') . "' data-original-color-class='select-bg-label-" . ($project->priority ? $project->priority->color : 'secondary') . "'>{$priorityOptions}</select>",
+                        'priority_id' => "<span class='badge bg-label-" . ($project->priority ? $project->priority->color : 'secondary') . "'>" . ($project->priority ? $project->priority->title : '-') . "</span>",
                     'task_accessibility' => get_label($project->task_accessibility, ucwords(str_replace("_", " ", $project->task_accessibility))),
                     'tags' => $tagHtml ?: ' - ',
                         'created_at' => format_date($project->created_at, true),
