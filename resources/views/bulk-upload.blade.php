@@ -28,11 +28,11 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="text-center mt-3">
-                        <a href="{{ $sample_file_url }}" class="btn btn-success" download>
-                            <i class="bx bx-download"></i> <?= get_label('download_sample_file', 'Download Sample File') ?>
+                        <a href="{{ $sample_file_url }}" class="btn btn-outline-primary" download>
+                            <i class="bx bx-download me-1"></i> <?= get_label('download_sample_file', 'Download Sample File') ?>
                         </a>
-                        <a href="{{ $help_url }}" class="btn btn-info" download>
-                            <i class="bx bx-download"></i> <?= ($entity === 'projects' || $entity === 'tasks') ? get_label('instructions', 'Instructions') : get_label('help_instructions', 'Help & Instructions') ?>
+                        <a href="{{ $help_url }}" class="btn btn-outline-secondary" download>
+                            <i class="bx bx-info-circle me-1"></i> <?= ($entity === 'projects' || $entity === 'tasks') ? get_label('instructions', 'Instructions') : get_label('help_instructions', 'Help & Instructions') ?>
                         </a>
                     </div>
 
@@ -42,7 +42,7 @@
                             <div class="dropzone dz-clickable bulk-upload-dropzone" id="bulk-upload-dropzone">
                             </div>
                             <div class="form-group mt-4 text-center">
-                                <button class="btn btn-primary" type="submit" id="submit_btn"><?= get_label('upload', 'Upload') ?></button>
+                                <button class="btn btn-primary" type="submit" id="submit_btn"><i class='bx bx-upload me-1'></i><?= get_label('upload', 'Upload') ?></button>
                             </div>
                             <div id="validation-errors" class="text-danger text-center mt-3"></div>
                         </div>

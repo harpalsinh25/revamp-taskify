@@ -118,8 +118,8 @@
         <div class="tk-dock-body">
         <div class="row">
         <div class="col-md-12">
-            <div class="card mb-4">
-                <div class="card-body">
+            <div class="mb-4">
+                <div>
                     <div class="row">
                         <div class="col-md-12">
                             @if ($projectTags->isNotEmpty())
@@ -205,12 +205,12 @@
                         </div>
                     </div>
                 </div>
-                <hr class="my-0" />
-                <div class="card-body">
+                <hr class="my-0 mb-4" />
+                <div>
                     <div class="row">
                         <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
-                            <div class="card overflow-hidden mb-4 statisticsDiv">
-                                <div class="card-header pt-3 pb-1">
+                            <div class="overflow-hidden mb-4 statisticsDiv">
+                                <div class="pt-3 pb-1">
                                     <div class="card-title mb-0">
                                         <h5 class="m-0 me-2"><?= get_label('task_statistics', 'Task statistics') ?></h5>
                                     </div>
@@ -329,8 +329,8 @@
                             </div>
                         </div>
                         <div class="col-md-12 mb-4">
-                            <div class="card">
-                                <div class="card-body">
+                            <div>
+                                <div>
                                     <div class="card-title">
                                         <h5><?= get_label('description', 'Description') ?></h5>
                                     </div>
@@ -343,11 +343,11 @@
                         </div>
 
 
-                        <div class="card mt-4">
-                        <div class="card-header">
+                        <div class="mt-4">
+                        <div>
                             <h5 class="card-title mb-0">{{ get_label('additional_fields', 'Additional Fields') }}</h5>
                         </div>
-                        <div class="card-body">
+                        <div class="mt-3">
 
                             {{-- @dd($customFields); --}}
                             @php
@@ -504,8 +504,8 @@
         <input type="hidden" id="media_type_id" value="{{$project->id}}">
         @if($auth_user->can('manage_tasks') || Auth::guard('web')->check() || $project->client_can_discuss || $auth_user->can('manage_milestones') || $auth_user->can('manage_media') || $auth_user->can('manage_activity_log'))
         <!-- Tabs -->
-        <div class="nav-align-top mt-2">
-            <ul class="nav nav-tabs" role="tablist">
+        <div class="mt-2">
+            <ul class="nav nav-tabs tk-tabs" role="tablist">
                 @php
                 // First available module becomes the active tab inside the details offcanvas.
                 if (Auth::guard('web')->check() || $project->client_can_discuss) {

@@ -11,29 +11,26 @@
         <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
             <!-- Left Side: Breadcrumbs and Badge -->
             <div class="d-flex align-items-center gap-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1 mb-0">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                        </li>
-                        <li class="breadcrumb-item"><a
-                                href="{{ url(getUserPreferences('projects', 'default_view')) }}"><?= get_label('projects', 'Projects') ?></a>
-                        </li>
-                        @if ($is_favorite == 1)
-                            <li class="breadcrumb-item"><?= get_label('favorite', 'Favorite') ?></li>
-                        @endif
-                        <li class="breadcrumb-item active"><?= get_label('grid', 'Grid') ?></li>
-                    </ol>
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    <span class="breadcrumb-sep">/</span>
+                    <a class="breadcrumb-item" href="{{ url(getUserPreferences('projects', 'default_view')) }}"><?= get_label('projects', 'Projects') ?></a>
+                    @if ($is_favorite == 1)
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item"><?= get_label('favorite', 'Favorite') ?></span>
+                    @endif
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current"><?= get_label('grid', 'Grid') ?></span>
                 </nav>
                 
                 @php
                     $projectDefaultView = getUserPreferences('projects', 'default_view');
                 @endphp
                 @if (!$projectDefaultView || $projectDefaultView === 'projects')
-                    <span class="badge badge-primary"><?= get_label('default_view', 'Default View') ?></span>
+                    <span class="badge bg-primary"><?= get_label('default_view', 'Default View') ?></span>
                 @else
                     <a href="javascript:void(0);" id="set-default-view" data-type="projects" data-view="grid">
-                        <span class="badge badge-neutral"><?= get_label('set_as_default_view', 'Set as Default View') ?></span>
+                        <span class="badge bg-secondary"><?= get_label('set_as_default_view', 'Set as Default View') ?></span>
                     </a>
                 @endif
             </div>
@@ -91,8 +88,8 @@
         <div class="row">
             <div class="col-md-4 mb-3">
                 <select class="form-select tom-select-sort" id="sort" aria-label="Default select example"
-                    data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">
-                    <option></option>
+                    data-placeholder="<?= get_label('sort_by', 'Sort By') ?>" data-allow-clear="true">
+                    <option value=""></option>
                     <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
                         <?= get_label('newest', 'Newest') ?></option>
                     <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? 'selected' : '' ?>>
@@ -144,251 +141,129 @@
             <div class="row g-4 mt-1 tk-project-grid">
                 @foreach ($projects as $project)
                     <div class="col-md-6 col-xl-4">
-                        <div class="card tk-project-card h-100">
-                            <div class="card-body card-body-project-grid">
-                                @if ($project->tags->isNotEmpty())
-                                    <div class="mb-3">
-                                        @foreach ($project->tags as $tag)
-                                            <span class="badge bg-{{ $tag->color }} mt-1">{{ $tag->title }}</span>
-                                        @endforeach
-                                    </div>
-                                @endif
-                                <div class="d-flex justify-content-between">
-                                    <h4 class="card-title"><a
-                                            href="{{ url('projects/information/' . $project->id) }}"><strong>{{ $project->title }}</strong></a>
-                                    </h4>
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <a href="javascript:void(0);" class="quick-view tk-ic-btn" data-id="{{ $project->id }}"
-                                            data-type="project" data-bs-toggle="tooltip" data-bs-placement="top"
-                                            data-bs-original-title="{{ get_label('quick_view', 'Quick View') }}">
-                                            <x-tk-icon name="info" />
-                                        </a>
-                                        <a href="javascript:void(0);" class="favorite-icon tk-ic-btn tk-ic-fav"
-                                            data-id="{{ $project->id }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                                            data-favorite="{{ getFavoriteStatus($project->id) ? 1 : 0 }}"
-                                            data-bs-original-title="{{ getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}">
-                                            <x-tk-icon name="star" />
-                                        </a>
-                                        <a href="javascript:void(0);" class="pinned-icon tk-ic-btn tk-ic-pin"
-                                            data-id="{{ $project->id }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                                            data-pinned="{{ getPinnedStatus($project->id) ? 1 : 0 }}"
-                                            data-bs-original-title="{{ getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}">
-                                            <x-tk-icon name="pin" />
-                                        </a>
-                                        @if ($webGuard || $project->client_can_discuss)
-                                            <a href="{{ route('projects.info', ['id' => $project->id]) }}#navs-top-discussions"
-                                                class="tk-ic-btn" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                data-bs-original-title="{{ get_label('discussions', 'Discussions') }}">
-                                                <x-tk-icon name="msg" />
-                                            </a>
-                                        @endif
-                                        <a href="{{ url('projects/mind-map/' . $project->id) }}"
-                                            class="tk-ic-btn" data-bs-toggle="tooltip" data-bs-placement="top"
-                                            data-bs-original-title="<?= get_label('mind_map', 'Mind Map') ?>">
-                                            <x-tk-icon name="sitemap" />
-                                        </a>
-                                        @if ($showSettings)
-                                            <a href="javascript:void(0);" class="tk-ic-btn" data-bs-toggle="dropdown"
-                                                aria-expanded="false">
-                                                <x-tk-icon name="moreV" id="settings-icon" />
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                @if ($canEditProjects)
-                                                    <a href="javascript:void(0);" class="edit-project" data-offcanvas="true"
-                                                        data-id="{{ $project->id }}">
-                                                        <li class="dropdown-item">
-                                                            <x-tk-icon name="edit" /> <?= get_label('update', 'Update') ?>
-                                                        </li>
-                                                    </a>
-                                                @endif
-                                                @if ($canDeleteProjects)
-                                                    <a href="javascript:void(0);" class="delete" data-reload="true"
-                                                        data-type="projects" data-id="{{ $project->id }}">
-                                                        <li class="dropdown-item">
-                                                            <x-tk-icon name="trash" class="tk-ic-danger" /> <?= get_label('delete', 'Delete') ?>
-                                                        </li>
-                                                    </a>
-                                                @endif
-                                                @if ($canDuplicateProjects)
-                                                    <a href="javascript:void(0);" class="duplicate" data-type="projects"
-                                                        data-id="{{ $project->id }}" data-title="{{ $project->title }}"
-                                                        data-reload="true">
-                                                        <li class="dropdown-item">
-                                                            <x-tk-icon name="copy" /> <?= get_label('duplicate', 'Duplicate') ?>
-                                                        </li>
-                                                    </a>
-                                                @endif
-                                            </ul>
-                                        @endif
-                                    </div>
-                                </div>
-                                @if ($project->budget != '')
-                                    <span class='badge bg-label-primary me-1'>
-                                        {{ format_currency($project->budget) }}</span>
-                                @endif
-                                <div class="my-{{ $project->budget != '' ? '3' : '2' }}">
-                                    <div class="row align-items-center">
-                                        <!-- Status Select Column -->
-                                        <div class="col-md-{{ $project->note ? '7' : '6' }}">
-                                            <label for="statusSelect"
-                                                class="form-label"><?= get_label('status', 'Status') ?></label>
-                                            <div class="d-flex align-items-center">
-                                                <select
-                                                    class="form-select form-select-sm select-bg-label-{{ $project->status->color }}"
-                                                    id="statusSelect" data-id="{{ $project->id }}"
-                                                    data-original-status-id="{{ $project->status->id }}"
-                                                    data-original-color-class="select-bg-label-{{ $project->status->color }}">
-                                                    @foreach ($statuses as $status)
-                                                        @php
-                                                            $disabled = canSetStatus($status) ? '' : 'disabled';
-                                                        @endphp
-                                                        <option value="{{ $status->id }}"
-                                                            class="badge bg-label-{{ $status->color }}"
-                                                            {{ $project->status->id == $status->id ? 'selected' : '' }}
-                                                            {{ $disabled }}>
-                                                            {{ $status->title }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @if ($project->note)
-                                                    <x-tk-icon name="note" class="tk-ic-muted ms-2" data-bs-toggle="tooltip"
-                                                        data-bs-offset="0,4" data-bs-placement="top"
-                                                        data-bs-original-title="{{ $project->note }}" />
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <!-- Priority Select Column -->
-                                        <div class="col-md-{{ $project->note ? '5' : '6' }}">
-                                            <label for="prioritySelect"
-                                                class="form-label"><?= get_label('priority', 'Priority') ?></label>
-                                            <select
-                                                class="form-select form-select-sm select-bg-label-{{ $project->priority ? $project->priority->color : 'secondary' }}"
-                                                id="prioritySelect" data-id="{{ $project->id }}"
-                                                data-original-priority-id="{{ $project->priority ? $project->priority->id : '' }}"
-                                                data-original-color-class="select-bg-label-{{ $project->priority ? $project->priority->color : 'secondary' }}">
-                                                <option value="" class="badge bg-label-secondary">-</option>
-                                                @foreach ($priorities as $priority)
-                                                    <option value="{{ $priority->id }}"
-                                                        class="badge bg-label-{{ $priority->color }}"
-                                                        {{ $project->priority && $project->priority->id == $priority->id ? 'selected' : '' }}>
-                                                        {{ $priority->title }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-between my-4">
-                                    <span><x-tk-icon name="task" class="tk-ic-muted" />
-                                        <b><?= isAdminOrHasAllDataAccess() ? count($project->tasks) : $auth_user->project_tasks($project->id)->count() ?></b>
-                                        <?= get_label('tasks', 'Tasks') ?></span>
-                                    <a href="{{ url('projects/tasks/draggable/' . $project->id) }}"><button
-                                            type="button"
-                                            class="btn btn-sm rounded-pill btn-outline-primary"><?= get_label('tasks', 'Tasks') ?></button></a>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-6">
-                                        <p class="card-text">
-                                            <?= get_label('users', 'Users') ?>:
-                                        <ul class="list-unstyled users-list avatar-group d-flex align-items-center m-0">
-                                            <?php
-                                                                            $users = $project->users;
-                                                                            $count = count($users);
-                                                                            $displayed = 0;
-                                                                            if ($count > 0) {
-                                                                                // Case 1: Users are less than or equal to 10
-                                                                                foreach ($users as $user) {
-                                                                                    if ($displayed < 10) { ?>
-                                            <li class="avatar avatar-sm pull-up"
-                                                title="<?= $user->first_name ?> <?= $user->last_name ?>">
-                                                <a href="{{ url('/users/profile/' . $user->id) }}">
-                                                    <img src="<?= $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg') ?>"
-                                                        class="rounded-circle" loading="lazy"
-                                                        onerror="this.onerror=null;this.src='<?= asset('storage/photos/no-image.jpg') ?>'"
-                                                        alt="<?= $user->first_name ?> <?= $user->last_name ?>">
-                                                </a>
-                                            </li>
-                                            <?php
-                                                                                        $displayed++;
-                                                                                    } else {
-                                                                                        // Case 2: Users are greater than 10
-                                                                                        $remaining = $count - $displayed;
-                                                                                        echo '<span class="badge badge-center rounded-pill bg-primary mx-1">+' . $remaining . '</span>';
-                                                                                        break;
-                                                                                    }
-                                                                                }
-                                                                                // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
-                                                                            } else {
-                                                                                // Case 3: Not assigned
-                                                                                echo '<span class="badge bg-primary">' . get_label('not_assigned', 'Not assigned') . '</span>';
-                                                                                // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
-                                                                            }
-                                                                            ?>
-                                        </ul>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p class="card-text">
-                                            <?= get_label('clients', 'Clients') ?>:
-                                        <ul class="list-unstyled users-list avatar-group d-flex align-items-center m-0">
-                                            <?php
-                                                                            $clients = $project->clients;
-                                                                            $count = $clients->count();
-                                                                            $displayed = 0;
-                                                                            if ($count > 0) {
-                                                                                foreach ($clients as $client) {
-                                                                                    if ($displayed < 10) { ?>
-                                            <li class="avatar avatar-sm pull-up"
-                                                title="<?= $client->first_name ?> <?= $client->last_name ?>">
-                                                <a href="{{ url('/clients/profile/' . $client->id) }}">
-                                                    <img src="<?= $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg') ?>"
-                                                        class="rounded-circle" loading="lazy"
-                                                        onerror="this.onerror=null;this.src='<?= asset('storage/photos/no-image.jpg') ?>'"
-                                                        alt="<?= $client->first_name ?> <?= $client->last_name ?>">
-                                                </a>
-                                            </li>
-                                            <?php
-                                                                                        $displayed++;
-                                                                                    } else {
-                                                                                        $remaining = $count - $displayed;
-                                                                                        echo '<span class="badge badge-center rounded-pill bg-primary mx-1">+' . $remaining . '</span>';
-                                                                                        break;
-                                                                                    }
-                                                                                }
-                                                                                // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
-                                                                            } else {
-                                                                                // Display "Not assigned" badge
-                                                                                echo '<span class="badge bg-primary">' . get_label('not_assigned', 'Not assigned') . '</span>';
-                                                                                // Add edit option at the end
-                                                                                echo '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="' . $project->id . '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="tk-ic"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>';
-                                                                            }
-                                                                            ?>
-                                        </ul>
-                                        </p>
-                                    </div>
-                                </div>
-                                @if ($project->start_date || $project->end_date)
-                                    <div class="row mt-2">
-                                        <div class="col-md-6 text-start">
-                                            @if ($project->start_date)
-                                                <x-tk-icon name="calendar" class="tk-ic-ok" /> <?= get_label('starts_at', 'Starts at') ?>
-                                                : {{ format_date($project->start_date) }}
+                        <div class="tcard h-100 tk-project-card" data-card-id="{{ $project->id }}">
+                            <div class="tcard-meta">
+                                <a href="{{ url('projects/information/' . $project->id) }}" class="tcard-code mono" target="_blank">#{{ $project->id }}</a>
+                                <div class="tcard-actions">
+                                    <i class='bx {{ getFavoriteStatus($project->id) ? "bxs-star text-warning" : "bx-star" }} favorite-icon tcard-ic tk-ic-fav' data-id="{{ $project->id }}" data-favorite="{{ getFavoriteStatus($project->id) ? 1 : 0 }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}" style="cursor:pointer"></i>
+                                    <i class='bx {{ getPinnedStatus($project->id) ? "bxs-pin text-danger" : "bx-pin" }} pinned-icon tcard-ic tk-ic-pin' data-id="{{ $project->id }}" data-pinned="{{ getPinnedStatus($project->id) ? 1 : 0 }}" data-type="projects" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}" style="cursor:pointer"></i>
+                                    @if ($showSettings)
+                                    <div class="dropdown tcard-ic">
+                                        <a href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"><x-tk-icon name="moreV" /></a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            @if ($canEditProjects)
+                                            <li><a href="javascript:void(0);" class="dropdown-item edit-project" data-offcanvas="true" data-id="{{ $project->id }}"><x-tk-icon name="edit" /> {{ get_label('update', 'Update') }}</a></li>
                                             @endif
-                                        </div>
-
-                                        @if ($project->end_date)
-                                            <div class="col-md-6 text-end">
-                                                <x-tk-icon name="calendar" class="tk-ic-err" /> <?= get_label('ends_at', 'Ends at') ?>
-                                                : {{ format_date($project->end_date) }}
-                                            </div>
-                                        @endif
+                                            @if ($canDuplicateProjects)
+                                            <li><a href="javascript:void(0);" class="dropdown-item duplicate" data-type="projects" data-id="{{ $project->id }}" data-title="{{ $project->title }}" data-reload="true"><x-tk-icon name="copy" /> {{ get_label('duplicate', 'Duplicate') }}</a></li>
+                                            @endif
+                                            @if ($canDeleteProjects)
+                                            <li><a href="javascript:void(0);" class="dropdown-item delete" data-reload="true" data-type="projects" data-id="{{ $project->id }}"><x-tk-icon name="trash" class="tk-ic-danger" /> {{ get_label('delete', 'Delete') }}</a></li>
+                                            @endif
+                                        </ul>
                                     </div>
-                                @endif
+                                    @endif
+                                </div>
+                            </div>
 
+                            <h4 class="tcard-title"><a href="{{ url('projects/information/' . $project->id) }}" target="_blank">{{ $project->title }}</a></h4>
+
+                            <div class="tcard-tags">
+                                <span class="tag tag-priority" style="background: var(--bg-1); color: var(--fg-1);">
+                                    <strong class="text-muted fw-normal me-1"><?= get_label('status', 'Status') ?>:</strong>
+                                    <span class="text-{{ $project->status->color }}">●</span> {{ $project->status->title }}
+                                </span>
+                                @if ($project->priority)
+                                @php
+                                    $pColorMap = [
+                                        'success' => 'var(--ok)', 'danger' => 'var(--err)', 'warning' => 'var(--warn)',
+                                        'info' => 'var(--info)', 'primary' => 'var(--signal)', 'secondary' => 'var(--fg-3)',
+                                    ];
+                                    $pColor = $pColorMap[$project->priority->color] ?? 'var(--fg-3)';
+                                @endphp
+                                <span class="tag tag-priority" style="color: {{ $pColor }};">
+                                    <strong class="text-muted fw-normal me-1"><?= get_label('priority', 'Priority') ?>:</strong>
+                                    ● {{ $project->priority->title }}
+                                </span>
+                                @endif
+                                @foreach ($project->tags as $tag)
+                                <span class="tag"><span class="text-{{$tag->color}}">●</span> {{$tag->title}}</span>
+                                @endforeach
+                                @if ($project->start_date)
+                                <span class="tag tag-due" style="color: var(--ok);">
+                                    <strong class="text-muted fw-normal me-1"><?= get_label('starts_at', 'Starts at') ?>:</strong>
+                                    <x-tk-icon name="calendar" size="12" /> {{ format_date($project->start_date) }}
+                                </span>
+                                @endif
+                                @if ($project->end_date)
+                                <span class="tag tag-due">
+                                    <strong class="text-muted fw-normal me-1"><?= get_label('ends_at', 'Ends at') ?>:</strong>
+                                    <x-tk-icon name="calendar" size="12" /> {{ format_date($project->end_date) }}
+                                </span>
+                                @endif
+                                @if ($project->budget != '')
+                                <span class="tag tag-note">
+                                    <strong class="text-muted fw-normal me-1"><?= get_label('budget', 'Budget') ?>:</strong>
+                                    {{ format_currency($project->budget) }}
+                                </span>
+                                @endif
+                            </div>
+
+                            <div class="d-flex align-items-center mt-2 mb-2 flex-grow-1" style="font-size: 13px; color: var(--fg-2);">
+                                <x-tk-icon name="task" class="me-1 tk-ic-muted" />
+                                <b style="font-family: monospace; font-size: 14px; margin-right: 4px;"><?= isAdminOrHasAllDataAccess() ? count($project->tasks) : $auth_user->project_tasks($project->id)->count() ?></b>
+                                <?= get_label('tasks', 'Tasks') ?>
+                                <a href="{{ url('projects/tasks/draggable/' . $project->id) }}" class="ms-auto"><button type="button" class="btn btn-sm rounded-pill btn-outline-primary" style="padding: 2px 10px; font-size: 11px;"><?= get_label('tasks', 'Tasks') ?></button></a>
+                            </div>
+
+                            <div class="tcard-foot tk-pfoot mt-1">
+                                <div class="tk-pfoot-people">
+                                    <div class="tk-pgroup">
+                                        <span class="tk-pgroup-lbl">{{ get_label('users', 'Users') }}</span>
+                                        <span class="av-stack tk-av-stack">
+                                            @php $users = $project->users; $userCount = count($users); $displayed = 0; @endphp
+                                            @if ($userCount > 0)
+                                                @foreach ($users as $u)
+                                                    @if ($displayed < 3)
+                                                        <a href="{{ url('/users/profile/' . $u->id) }}" target="_blank" class="av">
+                                                            <img src="{{ $u->photo ? asset('storage/' . $u->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" alt="{{ $u->first_name }}" class="rounded-circle" title="{{ $u->first_name }} {{ $u->last_name }}">
+                                                        </a>
+                                                    @php $displayed++; @endphp
+                                                    @else @break @endif
+                                                @endforeach
+                                                @if ($userCount > 3) <span class="av av-more">+{{ $userCount - 3 }}</span> @endif
+                                            @else
+                                                <span class="text-muted small">{{ get_label('not_assigned', 'Not assigned') }}</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div class="tk-pgroup">
+                                        <span class="tk-pgroup-lbl">{{ get_label('clients', 'Clients') }}</span>
+                                        <span class="av-stack tk-av-stack">
+                                            @php $clients = $project->clients; $clientCount = $clients->count(); $displayedClients = 0; @endphp
+                                            @if ($clientCount > 0)
+                                                @foreach ($clients as $c)
+                                                    @if ($displayedClients < 3)
+                                                        <a href="{{ url('/clients/profile/' . $c->id) }}" target="_blank" class="av">
+                                                            <img src="{{ $c->photo ? asset('storage/' . $c->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" alt="{{ $c->first_name }}" class="rounded-circle" title="{{ $c->first_name }} {{ $c->last_name }}">
+                                                        </a>
+                                                    @php $displayedClients++; @endphp
+                                                    @else @break @endif
+                                                @endforeach
+                                                @if ($clientCount > 3) <span class="av av-more">+{{ $clientCount - 3 }}</span> @endif
+                                            @else
+                                                <span class="text-muted small">{{ get_label('not_assigned', 'Not assigned') }}</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="tcard-stats mono">
+                                    <a href="javascript:void(0);" class="quick-view tcard-ic" data-id="{{ $project->id }}" data-type="project" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('quick_view', 'Quick View') }}"><x-tk-icon name="info" /></a>
+                                    @if ($webGuard || $project->client_can_discuss)
+                                    <a href="{{ route('projects.info', ['id' => $project->id]) }}#navs-top-discussions" class="tcard-ic" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('discussions', 'Discussions') }}"><x-tk-icon name="msg" /></a>
+                                    @endif
+                                    <a href="{{ url('projects/mind-map/' . $project->id) }}" class="tcard-ic" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('mind_map', 'Mind Map') }}"><x-tk-icon name="sitemap" /></a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -407,5 +282,7 @@
         var add_favorite = '<?= get_label('add_favorite', 'Click to mark as favorite') ?>';
         var remove_favorite = '<?= get_label('remove_favorite', 'Click to remove from favorite') ?>';
     </script>
+@endsection
+@section('page_scripts')
     <script src="{{ asset('assets/js/pages/project-grid.js') }}"></script>
 @endsection

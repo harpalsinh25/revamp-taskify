@@ -5,7 +5,7 @@ return [
         'id' => 'Assets Management',
         'label' => get_label('assets', 'Assets'),
         'class' => 'menu-item' . (request()->is('assets/*') ? ' active open' : ''),
-        'category' => 'utilities',
+        'category' => 'asset',
         'show' => getAuthenticatedUser()->hasRole('admin') || auth()->guard('web')->check() ? 1 : 0,
         'badge' => '<span class="badge rounded-pill bg-label-info text-uppercase ms-2">' . get_label('plugin', 'Plugin') . '</span>',
         'icon' => 'bx bx-desktop',

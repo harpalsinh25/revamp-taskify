@@ -35,82 +35,7 @@
             </div>
         </div>
 
-        <!-- Filter Card -->
-        <!-- <div class="card mb-4 mt-4 shadow-sm">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-9">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="daterange" class="form-label fw-semibold">
-                                    {{ get_label('select_period', 'Select Period') }}
-                                    <i class="bx bx-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-                                        data-bs-placement="top"
-                                        title="{{ get_label('date_range_filter', 'Select a date range to filter data. Projects and tasks are included if their start/end dates overlap with the range or are undefined (ongoing). Other data (clients, meetings, todos, activities) is filtered by creation date. Defaults to the last 7 days.') }}"></i>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bx bx-calendar"></i>
-                                    </span>
-                                    <input type="text" id="daterange" name="daterange" class="form-control" readonly
-                                        placeholder="{{ get_label('select_date_range', 'Select date range') }}..."
-                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                        title="{{ get_label('date_picker', 'Click to select a custom date range for filtering dashboard data.') }}">
-                                    <input type="hidden" id="filter_date_range_from" name="start_date">
-                                    <input type="hidden" id="filter_date_range_to" name="end_date">
-                                </div>
-                                <div class="form-text">
-                                    <i class="bx bx-time-five me-1"></i>
-                                    {{ get_label('quick_select', 'Quick select') }}:
-                                    <span class="badge bg-light text-dark quick-date-btn ms-1 cursor-pointer"
-                                        data-range="today" data-bs-toggle="tooltip"
-                                        title="{{ get_label('today_filter', 'Show data for today only, based on creation dates or overlapping project/task dates.') }}">{{ get_label('today', 'Today') }}</span>
-                                    <span class="badge bg-light text-dark quick-date-btn ms-1 cursor-pointer"
-                                        data-range="yesterday" data-bs-toggle="tooltip"
-                                        title="{{ get_label('yesterday_filter', 'Show data for yesterday only, based on creation dates or overlapping project/task dates.') }}">{{ get_label('yesterday', 'Yesterday') }}</span>
-                                    <span class="badge bg-light text-dark quick-date-btn ms-1 cursor-pointer"
-                                        data-range="last7days" data-bs-toggle="tooltip"
-                                        title="{{ get_label('last_7_days_filter', 'Show data for the last 7 days, including projects/tasks active during this period or without defined dates.') }}">{{ get_label('last_7_days', 'Last 7 days') }}</span>
-                                    <span class="badge bg-light text-dark quick-date-btn ms-1 cursor-pointer"
-                                        data-range="last30days" data-bs-toggle="tooltip"
-                                        title="{{ get_label('last_30_days_filter', 'Show data for the last 30 days, including projects/tasks active during this period or without defined dates.') }}">{{ get_label('last_30_days', 'Last 30 days') }}</span>
-                                    <span class="badge bg-light text-dark quick-date-btn ms-1 cursor-pointer"
-                                        data-range="thismonth" data-bs-toggle="tooltip"
-                                        title="{{ get_label('current_month_filter', 'Show data for the current month, including projects/tasks active during this period or without defined dates.') }}">{{ get_label('current_month', 'Current Month') }}</span>
-                                </div>
-                            </div>
-                            @if (isAdminOrHasAllDataAccess())
-                                <div class="col-md-6">
-                                    <label for="userFilter" class="form-label fw-semibold">
-                                        {{ get_label('select_team_members', 'Select Team Member(s)') }}
-                                        <i class="bx bx-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            title="{{ get_label('user_filter', 'Filter todos and activities by specific team members (based on creator_id or actor_id). Leave empty to include all team members in the workspace.') }}"></i>
-                                    </label>
-                                    <select id="userFilter" name="user_ids[]"
-                                        class="form-select js-example-basic-multiple users_select" multiple
-                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                        title="{{ get_label('user_select', 'Start typing to select team members for filtering dashboard data.') }}">
-                                        <option value="">
-                                            {{ get_label('loading_team_members', 'Loading team members...') }}</option>
-                                    </select>
-                                    <div class="form-text">
-                                        <span class="ms-2">
-                                            <a class="text-decoration-none small clear-user-selection-btn"
-                                                href="javascript:void(0)">{{ get_label('clear', 'Clear') }}</a>
-                                        </span>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="col-md-3 d-none d-md-block text-center">
-                        <img src="{{ asset('storage/Work_3.jpg') }}" alt="Dashboard illustration"
-                            class="h-px-250 img-fluid">
-                    </div>
-                </div>
-            </div>
-        </div> -->
+
         <!-- Alert for Reset Warning -->
         @if (config('constants.ALLOW_MODIFICATION') === 0)
             <x-dashboard.alert type="warning" classes="container mb-0 mt-4" icon="bx bx-timer"
@@ -308,7 +233,7 @@
                 </div>
             </div>
         </div>
-        <x-dashboard.statistics :statuses="[]" :todos="[]" :activities="[]" />
+
 
         <x-dashboard.tabs />
         <!-- Dependencies -->

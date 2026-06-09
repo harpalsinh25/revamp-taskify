@@ -620,15 +620,15 @@ class TasksController extends Controller
             // Actions
             $actions = '';
                 if ($canEdit) {
-                $actions .= '<a href="javascript:void(0);" class="edit-task" data-id="' . $task->id . '" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
+                $actions .= '<a href="javascript:void(0);" class="edit-task" data-id="' . $task->id . '" title="' . get_label('update', 'Update') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="edit" class="mx-1" />') . '</a>';
                 }
                 if ($canDelete) {
-                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '"><i class="bx bx-trash text-danger mx-1"></i></button>';
+                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete p-0" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="mx-1" />') . '</button>';
                 }
                 if ($canCreate) {
-                $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '"><i class="bx bx-copy text-warning mx-2"></i></a>';
+                $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="copy" class="mx-2" />') . '</a>';
                 }
-            $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $task->id . '" title="' . get_label('quick_view', 'Quick View') . '"><i class="bx bx-info-circle mx-3"></i></a>';
+            $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $task->id . '" title="' . get_label('quick_view', 'Quick View') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="mx-3" />') . '</a>';
             $actions = $actions ?: '-';
 
             // Users HTML

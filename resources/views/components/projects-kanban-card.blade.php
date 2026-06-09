@@ -12,12 +12,8 @@
                 <div class="tcard-meta">
                     <a href="{{ url('projects/information/' . $project->id) }}" class="tcard-code mono" target="_blank">#{{ $project->id }}</a>
                     <div class="tcard-actions">
-                        <a href="javascript:void(0);" class="favorite-icon tcard-ic tk-ic-fav" data-id="{{ $project->id }}" data-favorite="{{ getFavoriteStatus($project->id) ? 1 : 0 }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}">
-                            <x-tk-icon name="star" />
-                        </a>
-                        <a href="javascript:void(0);" class="pinned-icon tcard-ic tk-ic-pin" data-id="{{ $project->id }}" data-pinned="{{ getPinnedStatus($project->id) ? 1 : 0 }}" data-type="projects" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}">
-                            <x-tk-icon name="pin" />
-                        </a>
+                        <i class='bx {{ getFavoriteStatus($project->id) ? "bxs-star text-warning" : "bx-star" }} favorite-icon tcard-ic tk-ic-fav' data-id="{{ $project->id }}" data-favorite="{{ getFavoriteStatus($project->id) ? 1 : 0 }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}" style="cursor:pointer"></i>
+                        <i class='bx {{ getPinnedStatus($project->id) ? "bxs-pin text-danger" : "bx-pin" }} pinned-icon tcard-ic tk-ic-pin' data-id="{{ $project->id }}" data-pinned="{{ getPinnedStatus($project->id) ? 1 : 0 }}" data-type="projects" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}" style="cursor:pointer"></i>
                         @if ($showSettings)
                         <div class="dropdown tcard-ic">
                             <a href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"><x-tk-icon name="moreV" /></a>
@@ -48,19 +44,31 @@
                         ];
                         $pColor = $pColorMap[$project->priority->color] ?? 'var(--fg-3)';
                     @endphp
-                    <span class="tag tag-priority" style="color: {{ $pColor }};">● {{ $project->priority->title }}</span>
+                    <span class="tag tag-priority" style="color: {{ $pColor }};">
+                        <strong class="text-muted fw-normal me-1"><?= get_label('priority', 'Priority') ?>:</strong>
+                        ● {{ $project->priority->title }}
+                    </span>
                     @endif
                     @foreach ($project->tags as $tag)
                     <span class="tag"><span class="text-{{$tag->color}}">●</span> {{$tag->title}}</span>
                     @endforeach
                     @if ($project->start_date)
-                    <span class="tag tag-due" style="color: var(--ok);"><x-tk-icon name="calendar" size="12" /> {{ format_date($project->start_date) }}</span>
+                    <span class="tag tag-due" style="color: var(--ok);">
+                        <strong class="text-muted fw-normal me-1"><?= get_label('starts_at', 'Starts at') ?>:</strong>
+                        <x-tk-icon name="calendar" size="12" /> {{ format_date($project->start_date) }}
+                    </span>
                     @endif
                     @if ($project->end_date)
-                    <span class="tag tag-due"><x-tk-icon name="calendar" size="12" /> {{ format_date($project->end_date) }}</span>
+                    <span class="tag tag-due">
+                        <strong class="text-muted fw-normal me-1"><?= get_label('ends_at', 'Ends at') ?>:</strong>
+                        <x-tk-icon name="calendar" size="12" /> {{ format_date($project->end_date) }}
+                    </span>
                     @endif
                     @if ($project->budget != '')
-                    <span class="tag tag-note">{{ format_currency($project->budget) }}</span>
+                    <span class="tag tag-note">
+                        <strong class="text-muted fw-normal me-1"><?= get_label('budget', 'Budget') ?>:</strong>
+                        {{ format_currency($project->budget) }}
+                    </span>
                     @endif
                 </div>
 
@@ -86,8 +94,9 @@
                                         @else @break @endif
                                     @endforeach
                                     @if ($userCount > 3) <span class="av av-more">+{{ $userCount - 3 }}</span> @endif
+                                @else
+                                    <span class="text-muted small">{{ get_label('not_assigned', 'Not assigned') }}</span>
                                 @endif
-                                <a href="javascript:void(0)" class="av av-add edit-project update-users-clients" data-id="{{ $project->id }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('edit', 'Edit') }}"><x-tk-icon name="plus" size="13" /></a>
                             </span>
                         </div>
                         <div class="tk-pgroup">
@@ -104,8 +113,9 @@
                                         @else @break @endif
                                     @endforeach
                                     @if ($clientCount > 3) <span class="av av-more">+{{ $clientCount - 3 }}</span> @endif
+                                @else
+                                    <span class="text-muted small">{{ get_label('not_assigned', 'Not assigned') }}</span>
                                 @endif
-                                <a href="javascript:void(0)" class="av av-add edit-project update-users-clients" data-id="{{ $project->id }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('edit', 'Edit') }}"><x-tk-icon name="plus" size="13" /></a>
                             </span>
                         </div>
                     </div>

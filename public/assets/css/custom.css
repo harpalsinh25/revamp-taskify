@@ -86,21 +86,7 @@
     text-decoration: none;
 }
 
-.no-margin-p {
-    margin-bottom: 0;
-}
 
-.no-shadow {
-    box-shadow: none !important;
-}
-
-.h-2vh {
-    height: 2vh;
-}
-
-.top-13 {
-    top: -13px !important;
-}
 
 /* Hide/Show Classes */
 .tox-notification {
@@ -1171,7 +1157,6 @@
 
 /* Modal Z-Index Management */
 #confirmSaveColumnVisibility,
-#edit_project_modal,
 #edit_task_modal,
 #quickViewModal {
     z-index: 1091;
@@ -1408,18 +1393,7 @@ jmnode {
     border: 1px solid transparent;
 }
 
-.m-0 {
-    margin: 0;
-}
 
-.sr-only {
-    position: absolute;
-    left: -10000px;
-    top: auto;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-}
 
 .comment {
     position: relative;
@@ -2654,36 +2628,6 @@ html:not([dir="rtl"]) .timeline-item {
     border-radius: 8px;
 }
 
-#dashboard-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.draggable-item {
-    flex: 1 1 calc(33.333% - 15px);
-    box-sizing: border-box;
-    margin-bottom: 15px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.draggable-item:active {
-    cursor: grabbing;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-}
-
-@media (max-width: 768px) {
-    .draggable-item {
-        flex: 1 1 calc(50% - 15px);
-    }
-}
-
-@media (max-width: 576px) {
-    .draggable-item {
-        flex: 1 1 100%;
-    }
-}
-
 /* ============================================================================
    LEAD FORMS & EMBED COMPONENTS
    ============================================================================ */
@@ -3514,7 +3458,7 @@ html:not([dir="rtl"]) .timeline-item {
    body.v2-shell, so non-chrome pages (login, print) are untouched.
    ===================================================================== */
 :root {
-    --signal: oklch(0.88 0.20 130);
+    --signal: oklch(77.131% 0.17824 139.603);
     --signal-fg: oklch(0.18 0.02 130);
     --signal-glow: oklch(0.88 0.20 130 / 0.35);
     --ok: oklch(0.70 0.16 155);
@@ -5340,19 +5284,7 @@ body.v2-shell .tk-card-link:hover {
     padding: 16px 0;
 }
 
-/* =====================================================================
-   Taskify v2 — Dashboard layout: hide the OLD statistics cards that the
-   new kit grid replaces (no markup removed; dashboard.js still feeds the
-   hidden canvases harmlessly). Plus token-driven page background so dark
-   mode darkens the whole content area, not just the cards.
-   ===================================================================== */
-body.v2-shell [data-id="project-statistics"],
-body.v2-shell [data-id="task-statistics"],
-body.v2-shell [data-id="todos-overview"],
-body.v2-shell [data-id="income-vs-expense"],
-body.v2-shell [data-id="recent-activities"] {
-    display: none !important;
-}
+
 
 /* Equal-height dashboard columns: each column is a flex column whose last
    card grows to absorb slack, so the left and right bottoms line up. The
@@ -5523,9 +5455,11 @@ body.v2-shell .select2-container--default .select2-search__field::placeholder {
 body.v2-shell .select2-container--default.select2-container--focus .select2-selection--single,
 body.v2-shell .select2-container--default.select2-container--focus .select2-selection--multiple,
 body.v2-shell .select2-container--default.select2-container--open .select2-selection--single,
-body.v2-shell .select2-container--default.select2-container--open .select2-selection--multiple {
-    border-color: var(--signal) !important;
-    box-shadow: var(--shadow-focus);
+body.v2-shell .select2-container--default.select2-container--open .select2-selection--multiple,
+body.v2-shell .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--fg-1);
+    box-shadow: none;
+    outline: none;
 }
 
 /* tokens = kit .tag-token (bg-3, no border, 22px, × after) */
@@ -5792,9 +5726,11 @@ body.v2-shell .ts-wrapper:hover .ts-control {
     border-color: var(--line-2) !important;
 }
 
-body.v2-shell .ts-wrapper.focus .ts-control {
-    border-color: var(--signal) !important;
-    box-shadow: var(--shadow-focus) !important;
+body.v2-shell .ts-wrapper.focus .ts-control,
+body.v2-shell .ts-wrapper.input-active .ts-control {
+    border-color: var(--fg-1) !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 body.v2-shell .ts-control>.item {
@@ -5910,8 +5846,8 @@ body.v2-shell .form-select:hover {
 
 body.v2-shell .form-control:focus,
 body.v2-shell .form-select:focus {
-    border-color: var(--signal) !important;
-    box-shadow: var(--shadow-focus) !important;
+    border-color: var(--fg-1) !important;
+    box-shadow: none !important;
     outline: none !important;
 }
 
@@ -6646,6 +6582,26 @@ body.v2-shell .tcard-ic .tcard-star-on {
 body.v2-shell .tcard-ic .tcard-pin-on {
     color: var(--ok);
 }
+
+/* Suppress legacy Boxicons font injection when custom.js dynamically adds bx-star/bxs-star to the link */
+body.v2-shell .tcard-ic.bx-star::before,
+body.v2-shell .tcard-ic.bxs-star::before,
+body.v2-shell .tcard-ic.bx-pin::before,
+body.v2-shell .tcard-ic.bxs-pin::before {
+    content: none !important;
+}
+
+/* Style the new design system SVG icons based on the data attributes updated by custom.js */
+body.v2-shell .tcard-ic[data-favorite="1"] svg {
+    fill: var(--warn);
+    color: var(--warn);
+}
+
+body.v2-shell .tcard-ic[data-pinned="1"] svg {
+    fill: var(--signal);
+    color: var(--signal);
+}
+
 
 /* title */
 body.v2-shell .tcard-title {
@@ -7583,165 +7539,6 @@ body.v2-shell .tk-detail-toggle.active {
     color: var(--fg-0) !important;
 }
 
-/* inner cards already carry the design-system card styling; trim the doubled
-   outer chrome so the panel reads as one continuous surface */
-body.v2-shell .tk-dock-body>.row>.col-md-12>.card.mb-4 {
-    border: 0;
-    box-shadow: none;
-    background: transparent;
-}
-
-body.v2-shell .tk-dock-body>.row>.col-md-12>.card.mb-4>.card-body {
-    padding-left: 0;
-    padding-right: 0;
-}
-
-/* module tab strip inside the panel: horizontally scrollable so the
-   tabs never wrap or clip in the narrower panel width */
-body.v2-shell .tk-detail-canvas .nav-align-top .nav-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-}
-
-body.v2-shell .tk-detail-canvas .nav-align-top .nav-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-body.v2-shell .tk-detail-canvas .nav-align-top .nav-tabs .nav-link {
-    white-space: nowrap;
-}
-
-/* tables inside the panel keep their own horizontal scroll */
-body.v2-shell .tk-detail-canvas .table-responsive {
-    width: 100%;
-}
-
-/* ---- design-system styling for the project info block in the dock ----
-   Bootstrap cols size to the ~460px panel (not the viewport), so force a
-   clean single-column stack and retile the nested cards. */
-body.v2-shell #project_detail_panel .card-body .row {
-    margin-left: 0;
-    margin-right: 0;
-}
-
-body.v2-shell #project_detail_panel .card-body [class*="col-"] {
-    padding-left: 0;
-    padding-right: 0;
-    flex: 0 0 100%;
-    max-width: 100%;
-}
-
-/* outer info card is already transparent; strip its padding + dividers */
-body.v2-shell #project_detail_panel>.tk-dock-body>.row>.col-md-12>.card.mb-4>.card-body {
-    padding: 0 !important;
-}
-
-body.v2-shell #project_detail_panel>.tk-dock-body>.row>.col-md-12>.card.mb-4>hr {
-    margin: 16px 0;
-    border: 0;
-    border-top: 1px solid var(--line);
-    opacity: 1;
-}
-
-/* title + favourite/pin */
-body.v2-shell #project_detail_panel h2.fw-bold {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--fg-0);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0 0 14px;
-}
-
-body.v2-shell #project_detail_panel h2.fw-bold .mx-2 {
-    margin: 0 !important;
-    line-height: 0;
-}
-
-body.v2-shell #project_detail_panel h2.fw-bold .bx {
-    font-size: 18px;
-}
-
-/* meta field labels (Users / Clients / Status / Priority) */
-body.v2-shell #project_detail_panel .form-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--fg-3);
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-body.v2-shell #project_detail_panel .card-body .row>[class*="col-"] {
-    margin-top: 0 !important;
-    margin-bottom: 14px !important;
-}
-
-/* avatar groups */
-body.v2-shell #project_detail_panel .avatar-group .avatar img,
-body.v2-shell #project_detail_panel .avatar-sm img {
-    width: 28px;
-    height: 28px;
-}
-
-/* status / priority selects */
-body.v2-shell #project_detail_panel .form-select-sm {
-    font-size: 12.5px;
-}
-
-/* nested stat / statistics / description / fields cards -> design-system tiles */
-body.v2-shell #project_detail_panel .card-body .card {
-    border: 1px solid var(--line) !important;
-    box-shadow: none !important;
-    background: var(--bg-2) !important;
-    border-radius: var(--r-2) !important;
-    margin-top: 0 !important;
-    margin-bottom: 10px !important;
-}
-
-body.v2-shell #project_detail_panel .card-body .card .card-header,
-body.v2-shell #project_detail_panel .card-body .card>.card-body {
-    padding: 12px 14px !important;
-}
-
-body.v2-shell #project_detail_panel .card-body .card h3.card-title {
-    font-size: 17px;
-    margin: 0;
-    color: var(--fg-0);
-    font-weight: 700;
-}
-
-body.v2-shell #project_detail_panel .card-body .card .fw-semibold.d-block {
-    font-size: 10.5px;
-    color: var(--fg-3);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-body.v2-shell #project_detail_panel .card-body .card .card-title h5,
-body.v2-shell #project_detail_panel .card-body .card .card-title.mb-0 h5 {
-    font-size: 13px;
-    color: var(--fg-0);
-    margin: 0;
-}
-
-/* the stat tiles' icon chip */
-body.v2-shell #project_detail_panel .card-body .card .avatar .bx-md {
-    font-size: 22px;
-}
-
-/* task-statistics donut: fit the panel width */
-body.v2-shell #project_detail_panel #taskStatisticsChart {
-    max-width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-body.v2-shell #project_detail_panel #taskStatisticsChart .apexcharts-canvas {
-    max-width: 100% !important;
 }
 
 /* task-statistics status breakdown rows */
@@ -8960,11 +8757,13 @@ body.v2-shell .avatar {
     height: 32px;
     flex-shrink: 0;
 }
+
 body.v2-shell .tk-av-stack .av.av-add {
     background: var(--bg-2);
     border: 1px dashed var(--line);
     color: var(--fg-2);
 }
+
 body.v2-shell .tk-av-stack .av img,
 body.v2-shell .avatar img {
     width: 100%;
@@ -8972,24 +8771,69 @@ body.v2-shell .avatar img {
     object-fit: cover !important;
 }
 
+/* ============================================================================
+   TOM SELECT DESIGN SYSTEM OVERRIDES
+   ============================================================================ */
+body.v2-shell .ts-dropdown {
+    background-color: var(--bg-1);
+    border: 1px solid var(--line);
+    color: var(--fg-0);
+    border-radius: var(--r-2);
+    box-shadow: var(--shadow-2);
+}
+
+body.v2-shell .ts-dropdown .option {
+    color: var(--fg-1);
+}
+
+body.v2-shell .ts-dropdown .option:hover,
+body.v2-shell .ts-dropdown .active {
+    background-color: var(--bg-2);
+    color: var(--fg-0);
+}
+
+body.v2-shell .ts-control {
+    background-color: var(--bg-1);
+    border: 1px solid var(--line);
+    color: var(--fg-0);
+}
+
+
+
+body.v2-shell .ts-control input {
+    color: var(--fg-0);
+}
 
 /* ============================================================
    SEGMENTED CONTROL (from design system)
    ============================================================ */
 .seg {
-  display: inline-flex;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r-2);
-  padding: 2px;
-  gap: 2px;
+    display: inline-flex;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    padding: 2px;
+    gap: 2px;
 }
+
 .seg-btn {
-  height: 24px; padding: 0 10px;
-  border-radius: 3px;
-  font-size: var(--fs-sm); color: var(--fg-2);
-  display: inline-flex; align-items: center; gap: 5px;
-  transition: background var(--t-1), color var(--t-1);
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 3px;
+    font-size: var(--fs-sm);
+    color: var(--fg-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background var(--t-1), color var(--t-1);
 }
-.seg-btn:hover { color: var(--fg-0); }
-.seg-btn.on { background: var(--bg-0); color: var(--fg-0); box-shadow: var(--shadow-1); }
+
+.seg-btn:hover {
+    color: var(--fg-0);
+}
+
+.seg-btn.on {
+    background: var(--bg-0);
+    color: var(--fg-0);
+    box-shadow: var(--shadow-1);
+}

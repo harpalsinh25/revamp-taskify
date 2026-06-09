@@ -27,16 +27,25 @@
         <input type="hidden" name="is_favorite" id="is_favorite" value="0">
         <div class="ai-wrapper">
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12 mb-3">
                     <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                             class="asterisk">*</span></label>
                     <input class="form-control ai-title" type="text" name="title"
                         placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                         value="{{ old('title') }}">
                 </div>
+            </div>
+            
+            <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
-                            class="asterisk">*</span></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0" for="status"><?= get_label('status', 'Status') ?> <span
+                                class="asterisk">*</span></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreateStatusModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_status', 'Create status') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-control statusDropdown" name="status_id">
                         @isset($statuses)
                             @foreach ($statuses as $status)
@@ -48,21 +57,15 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreateStatusModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_status', 'Create status') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('status/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0"><?= get_label('priority', 'Priority') ?></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreatePriorityModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_priority', 'Create Priority') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-select priorityDropdown" name="priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
@@ -74,29 +77,9 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreatePriorityModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_priority', 'Create Priority') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('priority/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
-                    <div class="input-group input-group-merge">
-                        <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                        <input class="form-control currency" type="text" id="budget" name="budget"
-                            placeholder="<?= get_label('please_enter_budget', 'Please enter budget') ?>"
-                            value="{{ old('budget') }}">
-                    </div>
                 </div>
             </div>
+            
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
@@ -109,54 +92,63 @@
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
             </div>
+            
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" for="">
+                    <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
+                        <input class="form-control currency" type="text" id="budget" name="budget"
+                            placeholder="<?= get_label('please_enter_budget', 'Please enter budget') ?>"
+                            value="{{ old('budget') }}">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label mb-1" for="">
                         <?= get_label('task_accessibility', 'Task Accessibility') ?>
                         <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-offset="0,4"
                             data-bs-placement="top" data-bs-html="true" title=""
-                            data-bs-original-title="{{ get_label('assigned_users', 'Assigned Users') }}: {{ get_label('assigned_users_info', 'You Will Need to Manually Select Task Users When Creating Tasks Under This Project.') }} {{ get_label('project_users', 'Project Users') }}: {{ get_label('project_users_info', 'When Creating Tasks Under This Project, the Task Users Selection Will Be Automatically Filled With Project Users.') }}"
-                            data-bs-toggle="tooltip" data-bs-placement="top"></i>
+                            data-bs-original-title="{{ get_label('assigned_users', 'Assigned Users') }}: {{ get_label('assigned_users_info', 'You Will Need to Manually Select Task Users When Creating Tasks Under This Project.') }}<br/>{{ get_label('project_users', 'Project Users') }}: {{ get_label('project_users_info', 'When Creating Tasks Under This Project, the Task Users Selection Will Be Automatically Filled With Project Users.') }}"></i>
                     </label>
                     <select class="form-select" name="task_accessibility">
-                        <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?>
-                        </option>
-                        <option value="project_users"><?= get_label('project_users', 'Project Users') ?>
-                        </option>
+                        <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?></option>
+                        <option value="project_users"><?= get_label('project_users', 'Project Users') ?></option>
                     </select>
                 </div>
-                @if ($isAdminOrHasAllDataAccess)
-                    <div class="col-md-6 mb-3">
-                        <label class="form-check-label"
-                            for="clientCanDiscussProject">{{ get_label('client_can_discuss', 'Client Can Discuss') }}?</label>
-                        <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                            title="{{ get_label('client_can_discuss_info', 'Allows the client to participate in project discussions.') }}"></i>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="clientCanDiscussProject"
-                                name="clientCanDiscuss">
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" for="tasksTimeEntriesSwitch">
-                            <?= get_label('tasks_time_entries', 'Tasks Time Entries') ?>
-                            <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip" data-bs-offset="0,4"
-                                data-bs-placement="top" data-bs-html="true" title=""
-                                data-bs-original-title="<b>{{ get_label('tasks_time_entries', 'Tasks Time Entries') }}:</b> {{ get_label('tasks_time_entries_info', 'To use Time Entries in tasks, you need to enable this option. It allows time tracking and entry management for tasks under this project.') }}">
-                            </i>
-                        </label>
-                        <div class="form-check form-switch">
-                            <input type="hidden" name="enable_tasks_time_entries" value="0">
-                            <input class="form-check-input" type="checkbox" name="enable_tasks_time_entries"
-                                id="edit_tasks_time_entries" value="1">
-                            <label class="form-check-label" for="tasksTimeEntriesSwitch">
-                                <?= get_label('enable', 'Enable') ?>
-                            </label>
-                        </div>
-                    </div>
-                @endif
             </div>
+            
+            @if ($isAdminOrHasAllDataAccess)
             <div class="row">
-                <div class="mb-3">
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <label class="form-label mb-0" for="clientCanDiscussProject">{{ get_label('client_can_discuss', 'Client Can Discuss') }}?</label>
+                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('client_can_discuss_info', 'Allows the client to participate in project discussions.') }}"></i>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="clientCanDiscussProject" name="clientCanDiscuss">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <label class="form-label mb-0" for="edit_tasks_time_entries">
+                                <?= get_label('tasks_time_entries', 'Tasks Time Entries') ?>
+                            </label>
+                            <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip" data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true" title="" data-bs-original-title="<b>{{ get_label('tasks_time_entries', 'Tasks Time Entries') }}:</b> {{ get_label('tasks_time_entries_info', 'To use Time Entries in tasks, you need to enable this option. It allows time tracking and entry management for tasks under this project.') }}"></i>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input type="hidden" name="enable_tasks_time_entries" value="0">
+                            <input class="form-check-input" type="checkbox" name="enable_tasks_time_entries" id="edit_tasks_time_entries" value="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
                     <select class="form-control tom_users_select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
@@ -166,9 +158,7 @@
                         @endif
                     </select>
                 </div>
-            </div>
-            <div class="row">
-                <div class="mb-3">
+                <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
                     <select class="form-control tom_clients_select" name="client_id[]" multiple="multiple"
@@ -179,81 +169,70 @@
                         @endif
                     </select>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-12 mb-3">
-                    <label class="form-label" for=""><?= get_label('select_tags', 'Select tags') ?></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0" for=""><?= get_label('select_tags', 'Select tags') ?></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreateTagModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_tag', 'Create tag') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('tags/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_tags', 'Manage tags') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-control tom_tags_select" name="tag_ids[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreateTagModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_tags" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_tag', 'Create tag') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('tags/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_tags" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_tags', 'Manage tags') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
             </div>
-            <div class="row align-items-center mb-2">
-                <!-- Description Label -->
-                <div class="col-md-6">
-                    <label for="description" class="form-label mb-0">
-                        <?= get_label('description', 'Description') ?>
-                    </label>
-                </div>
-                <!-- Custom Prompt Switch + Generate Button -->
-                <div class="col-md-6 text-md-end mt-md-0 mt-2">
-                    <div class="d-inline-flex align-items-center">
-                        <div class="form-check form-switch me-3">
-                            <input class="form-check-input enableCustomPrompt" type="checkbox">
-                            <label class="form-check-label" for="enableCustomPrompt">
-                                <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
-                            </label>
-                        </div>
-                        <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
-                            <i class="fas fa-magic me-1"></i>
-                            <?= get_label('generate_with_ai', 'Generate with AI') ?>
-                        </button>
-                        <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip" data-bs-offset="0,4"
-                            data-bs-placement="top" data-bs-html="true" title=""
-                            data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
-                        </i>
-                        <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Custom Prompt Input (initially hidden) -->
-            <div class="customPromptContainer d-none mb-2 mt-2">
-                <textarea class="form-control ai-custom-prompt" rows="2"
-                    placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
-            </div>
-            <!-- Description Textarea -->
-            <div class="mb-3">
-                <textarea class="form-control description ai-output" rows="5" name="description"
-                    placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
-            </div>
+
             <div class="row">
-                <div class="mb-3">
+                <div class="col-md-12 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="description" class="form-label mb-0">
+                            <?= get_label('description', 'Description') ?>
+                        </label>
+                        <div class="d-inline-flex align-items-center">
+                            <div class="form-check form-switch me-3 mb-0">
+                                <input class="form-check-input enableCustomPrompt" type="checkbox" id="enableCustomPrompt_create">
+                                <label class="form-check-label" for="enableCustomPrompt_create">
+                                    <small><?= get_label('use_custom_prompt', 'Use Custom Prompt') ?></small>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
+                                <i class="fas fa-magic me-1"></i>
+                                <?= get_label('generate_with_ai', 'Generate with AI') ?>
+                            </button>
+                            <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}" data-bs-html="true"></i>
+                            <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Custom Prompt Input (initially hidden) -->
+                    <div class="customPromptContainer d-none mb-2">
+                        <textarea class="form-control ai-custom-prompt" rows="2"
+                            placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
+                    </div>
+                    <!-- Description Textarea -->
+                    <textarea class="form-control description ai-output" rows="5" name="description"
+                        placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
                     <label class="form-label"><?= get_label('note', 'Note') ?></label>
                     <textarea class="form-control" name="note" rows="3"
                         placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                 </div>
             </div>
+
             @php
                 $isEdit = true;
             @endphp
             <!-- Custom Fields Section -->
             <x-custom-fields :isEdit="$isEdit" :fields="$projectCustomFields" />
+
             @if (!$isAdminOrHasAllDataAccess)
-                <div class="alert alert-primary" role="alert">
+                <div class="alert alert-primary mt-2" role="alert">
                     <?= get_label('you_will_be_project_participant_automatically', 'You will be project participant automatically.') ?>
                 </div>
             @endif
@@ -285,16 +264,25 @@
         @csrf
         <div class="ai-wrapper">
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12 mb-3">
                     <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                             class="asterisk">*</span></label>
                     <input class="form-control ai-title" type="text" name="title" id="project_title"
                         placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                         value="{{ old('title') }}">
                 </div>
+            </div>
+
+            <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
-                            class="asterisk">*</span></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0" for="status"><?= get_label('status', 'Status') ?> <span
+                                class="asterisk">*</span></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreateStatusModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_status', 'Create status') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-control statusDropdown" name="status_id" id="project_status_id">
                         @isset($statuses)
                             @foreach ($statuses as $status)
@@ -304,21 +292,15 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreateStatusModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_status', 'Create status') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('status/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0"><?= get_label('priority', 'Priority') ?></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreatePriorityModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_priority', 'Create Priority') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-select priorityDropdown" name="priority_id" id="project_priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
@@ -329,29 +311,9 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreatePriorityModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_priority', 'Create Priority') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('priority/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
-                    <div class="input-group input-group-merge">
-                        <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                        <input class="form-control currency" type="text" id="project_budget" name="budget"
-                            placeholder="<?= get_label('please_enter_budget', 'Please enter budget') ?>"
-                            value="{{ old('budget') }}">
-                    </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
@@ -364,137 +326,131 @@
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" for="">
+                    <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
+                        <input class="form-control currency" type="text" id="project_budget" name="budget"
+                            placeholder="<?= get_label('please_enter_budget', 'Please enter budget') ?>"
+                            value="{{ old('budget') }}">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label mb-1" for="">
                         <?= get_label('task_accessibility', 'Task Accessibility') ?>
                         <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-offset="0,4"
                             data-bs-placement="top" data-bs-html="true" title=""
-                            data-bs-original-title="{{ get_label('assigned_users', 'Assigned Users') }}: {{ get_label('assigned_users_info', 'You Will Need to Manually Select Task Users When Creating Tasks Under This Project.') }}{{ get_label('project_users', 'Project Users') }}: {{ get_label('project_users_info', 'When Creating Tasks Under This Project, the Task Users Selection Will Be Automatically Filled With Project Users.') }}"
-                            data-bs-toggle="tooltip" data-bs-placement="top"></i>
+                            data-bs-original-title="{{ get_label('assigned_users', 'Assigned Users') }}: {{ get_label('assigned_users_info', 'You Will Need to Manually Select Task Users When Creating Tasks Under This Project.') }}<br/>{{ get_label('project_users', 'Project Users') }}: {{ get_label('project_users_info', 'When Creating Tasks Under This Project, the Task Users Selection Will Be Automatically Filled With Project Users.') }}"></i>
                     </label>
                     <select class="form-select" name="task_accessibility" id="task_accessibility">
-                        <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?>
-                        </option>
-                        <option value="project_users"><?= get_label('project_users', 'Project Users') ?>
-                        </option>
+                        <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?></option>
+                        <option value="project_users"><?= get_label('project_users', 'Project Users') ?></option>
                     </select>
                 </div>
-                @if ($isAdminOrHasAllDataAccess)
-                    <div class="col-md-6 mb-3">
-                        <label class="form-check-label"
-                            for="updateClientCanDiscussProject">{{ get_label('client_can_discuss', 'Client Can Discuss') }}?</label>
-                        <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                            title="{{ get_label('client_can_discuss_info', 'Allows the client to participate in project discussions.') }}"></i>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="updateClientCanDiscussProject"
-                                name="clientCanDiscuss">
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" for="tasksTimeEntriesSwitch">
-                            <?= get_label('tasks_time_entries', 'Tasks Time Entries') ?>
-                            <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip" data-bs-offset="0,4"
-                                data-bs-placement="top" data-bs-html="true" title=""
-                                data-bs-original-title="<b>{{ get_label('tasks_time_entries', 'Tasks Time Entries') }}:</b> {{ get_label('tasks_time_entries_info', 'To use Time Entries in tasks, you need to enable this option. It allows time tracking and entry management for tasks under this project.') }}">
-                            </i>
-                        </label>
-                        <div class="form-check form-switch">
-                            <input type="hidden" name="enable_tasks_time_entries" value="0">
-                            <input class="form-check-input" type="checkbox" name="enable_tasks_time_entries"
-                                id="tasks_time_entries" value="1"
-                                {{ old('tasks_time_entries') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="tasksTimeEntriesSwitch">
-                                {{ get_label('enable', 'Enable') }}
-                            </label>
-                        </div>
-                    </div>
-                @endif
             </div>
+
+            @if ($isAdminOrHasAllDataAccess)
             <div class="row">
-                <div class="mb-3">
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <label class="form-label mb-0" for="updateClientCanDiscussProject">{{ get_label('client_can_discuss', 'Client Can Discuss') }}?</label>
+                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('client_can_discuss_info', 'Allows the client to participate in project discussions.') }}"></i>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="updateClientCanDiscussProject" name="clientCanDiscuss">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <label class="form-label mb-0" for="tasks_time_entries">
+                                <?= get_label('tasks_time_entries', 'Tasks Time Entries') ?>
+                            </label>
+                            <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip" data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true" title="" data-bs-original-title="<b>{{ get_label('tasks_time_entries', 'Tasks Time Entries') }}:</b> {{ get_label('tasks_time_entries_info', 'To use Time Entries in tasks, you need to enable this option. It allows time tracking and entry management for tasks under this project.') }}"></i>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input type="hidden" name="enable_tasks_time_entries" value="0">
+                            <input class="form-check-input" type="checkbox" name="enable_tasks_time_entries" id="tasks_time_entries" value="1" {{ old('tasks_time_entries') ? 'checked' : '' }}>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
                     <select class="form-control tom_users_select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
-            </div>
-            <div class="row">
-                <div class="mb-3">
+                <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
                     <select class="form-control tom_clients_select" name="client_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-12 mb-3">
-                    <label class="form-label" for=""><?= get_label('select_tags', 'Select tags') ?></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0" for=""><?= get_label('select_tags', 'Select tags') ?></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreateTagModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_tag', 'Create tag') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('tags/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_tags', 'Manage tags') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-control tom_tags_select" name="tag_ids[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreateTagModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_tags" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_tag', 'Create tag') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('tags/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_tags" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_tags', 'Manage tags') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
             </div>
-            <div class="row align-items-center mb-2">
-                <!-- Description Label -->
-                <div class="col-md-6">
-                    <label for="description" class="form-label mb-0">
-                        <?= get_label('description', 'Description') ?>
-                    </label>
-                </div>
-                <!-- Custom Prompt Switch + Generate Button -->
-                <div class="col-md-6 text-md-end mt-md-0 mt-2">
-                    <div class="d-inline-flex align-items-center">
-                        <div class="form-check form-switch me-3">
-                            <input class="form-check-input enableCustomPrompt" type="checkbox">
-                            <label class="form-check-label" for="enableCustomPrompt">
-                                <?= get_label('use_custom_prompt', 'Use Custom Prompt') ?>
-                            </label>
-                        </div>
-                        <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
-                            <i class="fas fa-magic me-1"></i>
-                            <?= get_label('generate_with_ai', 'Generate with AI') ?>
-                        </button>
-                        <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip" data-bs-offset="0,4"
-                            data-bs-placement="top" data-bs-html="true" title=""
-                            data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}">
-                        </i>
-                        <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Custom Prompt Input (initially hidden) -->
-            <div class="customPromptContainer d-none mb-2 mt-2">
-                <textarea class="form-control ai-custom-prompt" rows="2"
-                    placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
-            </div>
-            <!-- Description Textarea -->
-            <div class="mb-3">
-                <textarea class="form-control description ai-output" rows="5" name="description" id="project_description"
-                    placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
-            </div>
+
             <div class="row">
-                <div class="mb-3">
+                <div class="col-md-12 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="description" class="form-label mb-0">
+                            <?= get_label('description', 'Description') ?>
+                        </label>
+                        <div class="d-inline-flex align-items-center">
+                            <div class="form-check form-switch me-3 mb-0">
+                                <input class="form-check-input enableCustomPrompt" type="checkbox" id="enableCustomPrompt_edit">
+                                <label class="form-check-label" for="enableCustomPrompt_edit">
+                                    <small><?= get_label('use_custom_prompt', 'Use Custom Prompt') ?></small>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary generate-ai btn-sm">
+                                <i class="fas fa-magic me-1"></i>
+                                <?= get_label('generate_with_ai', 'Generate with AI') ?>
+                            </button>
+                            <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('generate_with_ai_info', 'Enable custom prompt to write your own AI prompt. If disabled, the AI will use the title to generate the description. Max 255 characters will be used.') }}" data-bs-html="true"></i>
+                            <div class="spinner-border text-primary ai-loader d-none w-px-20 h-px-20 ms-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Custom Prompt Input (initially hidden) -->
+                    <div class="customPromptContainer d-none mb-2">
+                        <textarea class="form-control ai-custom-prompt" rows="2"
+                            placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
+                    </div>
+                    <!-- Description Textarea -->
+                    <textarea class="form-control description ai-output" rows="5" name="description" id="project_description"
+                        placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
                     <label class="form-label"><?= get_label('note', 'Note') ?></label>
-                    <textarea class="form-control" name="note" id="projectNote" rows="3"
+                    <textarea class="form-control" name="note" id="project_note" rows="3"
                         placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                 </div>
             </div>
+
             @php
                 $isEdit = true;
             @endphp
@@ -544,8 +500,14 @@
                         value="{{ old('title') }}">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
-                            class="asterisk">*</span></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0" for="status"><?= get_label('status', 'Status') ?> <span
+                                class="asterisk">*</span></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreateStatusModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_status', 'Create status') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-select statusDropdown" name="status_id">
                         @isset($statuses)
                             @foreach ($statuses as $status)
@@ -557,21 +519,15 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreateStatusModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_status', 'Create status') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('status/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0"><?= get_label('priority', 'Priority') ?></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreatePriorityModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_priority', 'Create Priority') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-select priorityDropdown" name="priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
@@ -582,18 +538,6 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreatePriorityModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_priority', 'Create Priority') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('priority/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
             </div>
             <div class="row">
@@ -943,8 +887,14 @@
                         value="{{ old('title') }}">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" for="status"><?= get_label('status', 'Status') ?> <span
-                            class="asterisk">*</span></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0" for="status"><?= get_label('status', 'Status') ?> <span
+                                class="asterisk">*</span></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreateStatusModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_status', 'Create status') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-select statusDropdown" name="status_id" id="task_status_id">
                         @isset($statuses)
                             @foreach ($statuses as $status)
@@ -954,21 +904,15 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreateStatusModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_status', 'Create status') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('status/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_statuses" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label"><?= get_label('priority', 'Priority') ?></label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label mb-0"><?= get_label('priority', 'Priority') ?></label>
+                        <div class="ms-2 small">
+                            <a href="javascript:void(0);" class="openCreatePriorityModal text-muted" data-bs-toggle="tooltip" title="<?= get_label('create_priority', 'Create Priority') ?>"><i class="bx bx-plus"></i></a>
+                            <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
+                        </div>
+                    </div>
                     <select class="form-select priorityDropdown" name="priority_id" id="priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
@@ -979,18 +923,6 @@
                             @endforeach
                         @endisset
                     </select>
-                    <div class="mt-2">
-                        <a href="javascript:void(0);" class="openCreatePriorityModal"><button type="button"
-                                class="btn btn-sm btn-primary action_create_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title=" <?= get_label('create_priority', 'Create Priority') ?>"><i
-                                    class="bx bx-plus"></i></button></a>
-                        <a href="{{ url('priority/manage') }}"><button type="button"
-                                class="btn btn-sm btn-primary action_manage_priorities" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                data-bs-original-title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i
-                                    class="bx bx-list-ul"></i></button></a>
-                    </div>
                 </div>
             </div>
             <div class="row">

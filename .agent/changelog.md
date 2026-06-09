@@ -119,3 +119,20 @@ All notable changes to the Taskify project will be documented in this folder.
 - Updated CSS to remove the white background from the Kanban footer and styled the 'Create Project' button appropriately for dark mode.
 
 - Fixed 'Create Project' button text and icon alignment to be perfectly centered.
+
+## [2026-06-09] - Layout & Dashboard Legacy CSS Cleanup
+### Removed
+- **`resources/views/dashboard.blade.php`**: Deleted the unused, hidden `Filter Card` and `<x-dashboard.statistics>` Blade component to clean up the DOM since the new toolkit SVGs fetch their own data directly.
+- **`public/assets/css/custom.css`**: Removed CSS overrides hiding the legacy dashboard cards (`#project-statistics`, `#task-statistics`, etc.) since the DOM elements are no longer generated. Removed legacy `#dashboard-items` and `.draggable-item` styling. Kept necessary design system layout wrappers (`body.v2-shell .layout-page`).
+
+## [2026-06-09] - Project Page UI Refactoring
+### Modified
+- **`resources/views/projects/project_information.blade.php`**: Stripped the obsolete Bootstrap `.card` and `.card-body` wrappers from within the `.tk-dock-body` offcanvas to ensure content renders flush and natively within the Graphite Studio design system (fixes white background bugs in dark mode). Converted `.nav-tabs` to design-system styled `.tk-tabs`.
+- **`resources/views/projects/projects.blade.php`**: Upgraded legacy `.breadcrumb-style1` to the new design system `<nav class="breadcrumb">` component. Replaced `.badge-primary` with `.badge bg-primary`.
+- **`resources/views/projects/grid_view.blade.php`**: Standardized breadcrumb structure and badges to match the new design system.
+- **`resources/views/projects/kanban.blade.php`**: Standardized breadcrumb structure and badges to match the new design system.
+- **`public/assets/css/custom.css`**: Removed the obsolete `z-index` rule for the legacy `#edit_project_modal`.
+- **`public/assets/css/custom.css`**: Removed 160+ lines of dead CSS overrides that targeted `.card` wrappers inside `#project_detail_panel` (since the `.card` wrappers were deleted in the previous step).
+- **`public/assets/css/custom.css`**: Removed redundant utility classes (`.m-0`, `.sr-only`, `.no-margin-p`, `.no-shadow`, `.h-2vh`, `.top-13`) that are natively handled by Bootstrap 5 or design system tokens.
+- **`resources/views/estimates-invoices/view.blade.php`**: Replaced the custom `.no-margin-p` class with Bootstrap's native `.mb-0`.
+- **`resources/views/components/dashboard/calendar-tab.blade.php`**: Replaced the custom `.no-shadow` class with Bootstrap's native `.shadow-none`.

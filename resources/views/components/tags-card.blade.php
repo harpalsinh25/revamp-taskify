@@ -1,6 +1,6 @@
 <div class="card">
     
-        <div class="table-responsive text-nowrap">
+        <div class="card-datatable table-responsive text-nowrap">
             {{$slot}}
             @if (is_countable($tags) && count($tags) > 0)
             <input type="hidden" id="data_type" value="tags">

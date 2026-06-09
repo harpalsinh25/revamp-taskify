@@ -11,29 +11,26 @@
         <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
             <!-- Left Side: Breadcrumbs and Badge -->
             <div class="d-flex align-items-center gap-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1 mb-0">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{{ url(getUserPreferences('projects', 'default_view')) }}"><?= get_label('projects', 'Projects') ?></a>
-                        </li>
-                        @if ($is_favorite == 1)
-                            <li class="breadcrumb-item"><?= get_label('favorite', 'Favorite') ?></li>
-                        @endif
-                        <li class="breadcrumb-item active"><?= get_label('kanban', 'Kanban') ?></li>
-                    </ol>
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    <span class="breadcrumb-sep">/</span>
+                    <a class="breadcrumb-item" href="{{ url(getUserPreferences('projects', 'default_view')) }}"><?= get_label('projects', 'Projects') ?></a>
+                    @if ($is_favorite == 1)
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item"><?= get_label('favorite', 'Favorite') ?></span>
+                    @endif
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current"><?= get_label('kanban', 'Kanban') ?></span>
                 </nav>
                 
                 @php
                     $projectDefaultView = getUserPreferences('projects', 'default_view');
                 @endphp
                 @if ($projectDefaultView && $projectDefaultView === 'projects/kanban')
-                    <span class="badge badge-primary"><?= get_label('default_view', 'Default View') ?></span>
+                    <span class="badge bg-primary"><?= get_label('default_view', 'Default View') ?></span>
                 @else
                     <a href="javascript:void(0);" id="set-default-view" data-type="projects" data-view="kanban">
-                        <span class="badge badge-neutral"><?= get_label('set_as_default_view', 'Set as Default View') ?></span>
+                        <span class="badge bg-secondary"><?= get_label('set_as_default_view', 'Set as Default View') ?></span>
                     </a>
                 @endif
             </div>
@@ -91,8 +88,8 @@
         <div class="row">
             <div class="col-md-4 mb-3">
                 <select class="form-select tom-select-sort" id="sort" aria-label="Default select example"
-                    data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">
-                    <option></option>
+                    data-placeholder="<?= get_label('sort_by', 'Sort By') ?>" data-allow-clear="true">
+                    <option value=""></option>
                     <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
                         <?= get_label('newest', 'Newest') ?></option>
                     <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? 'selected' : '' ?>>
@@ -152,5 +149,7 @@
         var add_favorite = '<?= get_label('add_favorite', 'Click to mark as favorite') ?>';
         var remove_favorite = '<?= get_label('remove_favorite', 'Click to remove from favorite') ?>';
     </script>
+@endsection
+@section('page_scripts')
     <script src="{{ asset('assets/js/pages/project-kanban.js') }}"></script>
 @endsection

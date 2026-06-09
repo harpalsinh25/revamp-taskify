@@ -197,7 +197,7 @@ class MenuService
                 'id' => 'email',
                 'label' => get_label('email', 'Email'),
                 'class' => 'menu-item' . (Request::is('emails') || Request::is('emails/create') || Request::is('email-templates') ? ' active open' : ''),
-                'category' => 'utilities',
+                'category' => 'email',
                 'show' => ($user->can('send_email') || $user->can('manage_email_template')) ? 1 : 0,
                 'icon' => 'bx bx-mail-send',
                 'submenus' => [
@@ -224,7 +224,7 @@ class MenuService
                 'icon' => 'bx bx-list-check',
                 'class' => 'menu-item' . (Request::is('todos') || Request::is('todos/*') ? ' active' : ''),
                 'badge' => ($pending_todos_count > 0) ? '<span class="flex-shrink-0 badge badge-center bg-danger w-px-20 h-px-20">' . $pending_todos_count . '</span>' : '',
-                'category' => 'utilities',
+                'category' => 'todos',
             ],
             [
                 'id' => 'meetings',
@@ -387,7 +387,7 @@ class MenuService
                 'icon' => 'bx bx-file',
                 'class' => 'menu-item' . (Request::is('reports') || Request::is('reports/*') ? ' active open' : ''),
                 'show' => $user->hasRole('admin') || Auth::guard('web')->check() || checkPermission('manage_projects') || checkPermission('manage_tasks') || checkPermission('manage_estimates_invoices') ? 1 : 0,
-                'category' => 'utilities',
+                'category' => 'reports',
                 'submenus' => [
                     [
                         'id' => 'projects_report',
@@ -432,7 +432,7 @@ class MenuService
                 'icon' => 'bx bx-group',
                 'class' => 'menu-item' . (Request::is('candidate*') || Request::is('candidate_status*') || Request::is('interviews*') ? ' active open' : ''),
                 'show' => ($user->can('manage_candidate') || $user->can('manage_candidate_status') || $user->can('manage_interview')) ? 1 : 0,
-                'category' => 'utilities',
+                'category' => 'hrms',
                 'submenus' => [
                     [
                         'id' => 'candidates',
@@ -463,7 +463,7 @@ class MenuService
                 'url' => url('notes'),
                 'icon' => 'bx bx-notepad',
                 'class' => 'menu-item' . (Request::is('notes') || Request::is('notes/*') ? ' active' : ''),
-                'category' => 'utilities',
+                'category' => 'notes',
             ],
             [
                 'id' => 'leave_requests',
@@ -508,7 +508,7 @@ class MenuService
                 'icon' => 'bx bx-folder-open',
                 'class' => 'menu-item' . (Request::is('file-manager') || Request::is('file-manager/*') ? ' active' : ''),
                 'show' => isAdminOrHasAllDataAccess() ? 1 : 0,
-                'category' => 'utilities',
+                'category' => 'file_manager',
             ],
             [
                 'id' => 'settings',

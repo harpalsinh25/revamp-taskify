@@ -760,20 +760,20 @@ class ProjectsController extends Controller
                         '</a>';
                     }
                     if ($canDelete) {
-                        $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $project->id . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '">' .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="tk-ic-danger mx-1" />') .
+                        $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete p-0" data-id="' . $project->id . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '">' .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="mx-1" />') .
                             '</button>';
                     }
                     if ($canCreate) {
                         $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $project->id . '" data-title="' . $project->title . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="copy" class="tk-ic-warning mx-2" />') .
+                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="copy" class="mx-2" />') .
                             '</a>';
                     }
                     $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $project->id . '" data-type="project" title="' . get_label('quick_view', 'Quick View') . '">' .
-                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="tk-ic-info mx-1" />') .
+                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="mx-1" />') .
                         '</a>';
                 $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" title="' . get_label('mind_map', 'Mind Map') . '">' .
-                    \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="map" class="tk-ic-primary mx-1" />') .
+                    \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="sitemap" class="mx-1" />') .
                     '</a>';
                     
                     // Quick Action Buttons (Moved from Title)
@@ -782,7 +782,7 @@ class ProjectsController extends Controller
                     $actions .= "<a href='javascript:void(0);' class='mx-1 btn-icon pinned-icon " . ($isPinned ? 'text-success' : 'text-muted') . "' data-pinned='{$isPinned}' data-id='{$project->id}' data-require_reload='0' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'>" .
                             \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="pin" />') . "</a>";
                     if ($webGuard || $project->client_can_discuss) {
-                        $actions .= "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions' class='mx-1 btn-icon text-danger' title='" . get_label('discussions', 'Discussions') . "'>" .
+                        $actions .= "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions' class='mx-1 btn-icon' title='" . get_label('discussions', 'Discussions') . "'>" .
                                 \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="msg" />') . "</a>";
                     }
                 $actions = $actions ?: '-';

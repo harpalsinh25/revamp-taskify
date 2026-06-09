@@ -123,12 +123,12 @@ class TagsController extends Controller
             $actions = '';
                 if ($canEdit) {
                     $actions .= '<a href="javascript:void(0);" class="edit-tag" data-bs-toggle="modal" data-bs-target="#edit_tag_modal" data-id="' . $tag->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
+                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="edit" class="mx-1" />') .
                         '</a>';
             }
                 if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $tag->id . '" data-type="tags">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
+                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete p-0" data-id="' . $tag->id . '" data-type="tags">' .
+                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="mx-1" />') .
                         '</button>';
                 }
                 $actions = $actions ?: '-';

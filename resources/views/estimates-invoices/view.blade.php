@@ -54,12 +54,12 @@ use App\Models\Tax; // Adjust the namespace and path according to your applicati
                 <div class="row">
                     <!-- Company details -->
                     <div class="col-md-4">
-                        <p class="no-margin-p">
+                        <p class="mb-0">
                             <strong>{{ $general_settings['company_title'] }}</strong>
                         </p>
                         <!-- Company address and contact details -->
                         @if($company_info['companyAddress'])
-                        <p class="no-margin-p">{{ $company_info['companyAddress'] }}</p>
+                        <p class="mb-0">{{ $company_info['companyAddress'] }}</p>
                         @endif
                         @php
                         $addressParts = [
@@ -72,19 +72,19 @@ use App\Models\Tax; // Adjust the namespace and path according to your applicati
                         $city_state_country_zip = implode(', ', $addressParts);
                         @endphp
                         @if($city_state_country_zip)
-                        <p class="no-margin-p">{{ $city_state_country_zip }}</p>
+                        <p class="mb-0">{{ $city_state_country_zip }}</p>
                         @endif
                         @if($company_info['companyPhone'])
-                        <p class="no-margin-p">{{get_label('phone','Phone')}}: {{ $company_info['companyPhone'] }}</p>
+                        <p class="mb-0">{{get_label('phone','Phone')}}: {{ $company_info['companyPhone'] }}</p>
                         @endif
                         @if($company_info['companyEmail'])
-                        <p class="no-margin-p">{{get_label('email','Email')}}: {{ $company_info['companyEmail'] }}</p>
+                        <p class="mb-0">{{get_label('email','Email')}}: {{ $company_info['companyEmail'] }}</p>
                         @endif
                         @if($company_info['companyWebsite'])
-                        <p class="no-margin-p">{{get_label('website','Website')}}: {{ $company_info['companyWebsite'] }}</p>
+                        <p class="mb-0">{{get_label('website','Website')}}: {{ $company_info['companyWebsite'] }}</p>
                         @endif
                         @if($company_info['companyVatNumber'])
-                        <p class="no-margin-p">{{get_label('vat_number','VAT Number')}}: {{ $company_info['companyVatNumber'] }}</p>
+                        <p class="mb-0">{{get_label('vat_number','VAT Number')}}: {{ $company_info['companyVatNumber'] }}</p>
                         @endif
                     </div>
 
@@ -93,16 +93,16 @@ use App\Models\Tax; // Adjust the namespace and path according to your applicati
                         <strong>{{ get_label('billing_details', 'Billing details') }}</strong>
                         <hr>
                         @if($estimate_invoice->name)
-                        <p class="no-margin-p"><strong>{{ $estimate_invoice->name }}</strong></p>
+                        <p class="mb-0"><strong>{{ $estimate_invoice->name }}</strong></p>
                         @endif
                         @if($estimate_invoice->address)
-                        <p class="no-margin-p">{{ $estimate_invoice->address }}</p>
+                        <p class="mb-0">{{ $estimate_invoice->address }}</p>
                         @endif
                         @if($city_state_country_zip)
-                        <p class="no-margin-p">{{ $city_state_country_zip }}</p>
+                        <p class="mb-0">{{ $city_state_country_zip }}</p>
                         @endif
                         @if($estimate_invoice->phone)
-                        <p class="no-margin-p">{{ $estimate_invoice->phone }}</p>
+                        <p class="mb-0">{{ $estimate_invoice->phone }}</p>
                         @endif
                     </div>
 
@@ -110,10 +110,10 @@ use App\Models\Tax; // Adjust the namespace and path according to your applicati
                     <div class="col-md-4">
                         <strong>{{ get_label('estimate_details', 'Estimate details') }}</strong>
                         <hr>
-                        <p class="no-margin-p"><strong>{{ get_label('estimate_no', 'Estimate No.') }}:</strong> #{{ $estimate_invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-') }} {{$estimate_invoice->id}}</p>
-                        <p class="no-margin-p"><strong>{{ get_label('from_date', 'From date') }}:</strong> {{$estimate_invoice->from_date}}</p>
-                        <p class="no-margin-p"><strong>{{ get_label('to_date', 'To date') }}:</strong> {{$estimate_invoice->to_date}}</p>
-                        <p class="no-margin-p"><strong>{{ get_label('status', 'Status') }}:</strong> <?= $estimate_invoice->status ?></p>
+                        <p class="mb-0"><strong>{{ get_label('estimate_no', 'Estimate No.') }}:</strong> #{{ $estimate_invoice->type == 'estimate' ? get_label('estimate_id_prefix', 'ESTMT-') : get_label('invoice_id_prefix', 'INVC-') }} {{$estimate_invoice->id}}</p>
+                        <p class="mb-0"><strong>{{ get_label('from_date', 'From date') }}:</strong> {{$estimate_invoice->from_date}}</p>
+                        <p class="mb-0"><strong>{{ get_label('to_date', 'To date') }}:</strong> {{$estimate_invoice->to_date}}</p>
+                        <p class="mb-0"><strong>{{ get_label('status', 'Status') }}:</strong> <?= $estimate_invoice->status ?></p>
                     </div>
                 </div>
                 <hr>

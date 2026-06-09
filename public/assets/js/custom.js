@@ -2632,26 +2632,31 @@ $(document).ready(function () {
                     data_table !== "wa_table"
                     ? 1
                     : 0;
+            var $actionBar = $toolbar.find('.custom-action-bar');
+            if ($actionBar.length === 0) {
+                $actionBar = $('<div class="custom-action-bar bs-bars float-left d-flex flex-wrap gap-2 align-items-center mb-3"></div>');
+                $toolbar.prepend($actionBar);
+            } else {
+                $actionBar.empty();
+            }
+
             // Create the "Delete selected" button
             if (showDelete) {
                 var $deleteButton = $(
-                    '<div class="columns columns-left btn-group float-left ' +
+                    '<button type="button" class="btn btn-outline-danger delete-selected ' +
                     action_class +
-                    '">' +
-                    '<button type="button" class="btn btn-outline-danger float-left delete-selected" data-type="' +
+                    '" data-type="' +
                     data_type +
                     '" data-table="' +
                     data_table +
                     '" data-reload="' +
                     data_reload +
                     '">' +
-                    '<i class="bx bx-trash"></i> ' +
+                    '<i class="bx bx-trash me-1"></i>' +
                     label_delete_selected +
-                    "</button>" +
-                    "</div>"
+                    "</button>"
                 );
-                // Add the "Delete selected" button before the first element in the toolbar
-                $toolbar.prepend($deleteButton);
+                $actionBar.append($deleteButton);
             }
             if (multi_select) {
                 // Use multi_select value for clear button class if available, else use data_type
@@ -2660,20 +2665,31 @@ $(document).ready(function () {
                     : "clear-" + data_type + "-filters";
                 // Create the "Clear Filters" button
                 var $clearFiltersButton = $(
-                    '<div class="columns columns-left btn-group float-left">' +
-                    '<button type="button" class="btn btn-outline-secondary ' +
+                    '<button type="button" class="btn btn-outline-secondary w-100 ' +
                     clearButtonClass +
                     '">' +
-                    '<i class="bx bx-x-circle"></i> ' +
+                    '<i class="bx bx-x-circle me-1"></i>' +
                     label_clear_filters +
-                    "</button>" +
-                    "</div>"
+                    "</button>"
                 );
-            }
-            if (showDelete) {
-                $deleteButton.after($clearFiltersButton);
-            } else {
-                $toolbar.prepend($clearFiltersButton);
+                
+                // Try to find the filter row
+                var $filterRow = $toolbar.closest('.card-body, .card, .container-fluid, .mt-2').find('.row').filter(function() {
+                    return $(this).find('select[multiple="multiple"]').length > 0 || $(this).hasClass('tk-filter-row');
+                }).last();
+
+                if ($filterRow.length > 0) {
+                    var $existingContainer = $filterRow.find('.clear-filters-container');
+                    if ($existingContainer.length > 0) {
+                        $existingContainer.empty().append($clearFiltersButton);
+                    } else {
+                        var $filterCol = $('<div class="col-md-auto mb-3 d-flex align-items-end clear-filters-container"></div>');
+                        $filterCol.append($clearFiltersButton);
+                        $filterRow.append($filterCol);
+                    }
+                } else {
+                    $actionBar.append($clearFiltersButton);
+                }
             }
             if ($save_column_visibility.length > 0) {
                 // Extract data-type and data-table from $save_column_visibility if they exist
@@ -2682,25 +2698,16 @@ $(document).ready(function () {
                 var saveTable =
                     $save_column_visibility.data("table") || data_table;
                 var $savePreferencesButton = $(
-                    '<div class="columns columns-left btn-group float-left">' +
                     '<button type="button" class="btn btn-outline-primary save-column-visibility" data-type="' +
                     saveType +
                     '" data-table="' +
                     saveTable +
                     '">' +
-                    '<i class="bx bx-save"></i> ' +
+                    '<i class="bx bx-save me-1"></i>' +
                     label_save_column_visibility +
-                    "</button>" +
-                    "</div>"
+                    "</button>"
                 );
-                // Add the Save Preferences button to the toolbar in the appropriate location
-                if ($deleteButton) {
-                    $deleteButton.after($savePreferencesButton);
-                } else if ($clearFiltersButton) {
-                    $clearFiltersButton.after($savePreferencesButton);
-                } else {
-                    $toolbar.prepend($savePreferencesButton);
-                }
+                $actionBar.append($savePreferencesButton);
             }
         }
     });
@@ -2771,6 +2778,40 @@ $(document).on("click", "#mark-all-notifications-as-read", function (e) {
             });
         }
     );
+});
+
+// Global Table Style Normalizer
+// Applies the design system badge styles (bg-label-*) and uncolored action icons to ALL tables automatically
+$(document).on('post-body.bs.table', 'table[data-toggle="table"]', function () {
+    var $table = $(this);
+    
+    // 1. Convert all standard bg-* badges to bg-label-*
+    $table.find('.badge').each(function() {
+        var $badge = $(this);
+        var classes = $badge.attr('class').split(' ');
+        var originalBgClass = '';
+        var hasLabelClass = false;
+
+        for (var i = 0; i < classes.length; i++) {
+            if (classes[i].startsWith('bg-label-')) {
+                hasLabelClass = true;
+                break;
+            }
+            if (classes[i].startsWith('bg-') && classes[i] !== 'bg-transparent' && classes[i] !== 'bg-white') {
+                originalBgClass = classes[i];
+            }
+        }
+
+        if (!hasLabelClass && originalBgClass) {
+            var color = originalBgClass.substring(3); // extracts 'primary', 'danger', etc.
+            $badge.removeClass(originalBgClass).addClass('bg-label-' + color);
+        }
+    });
+
+    // 2. Normalize Action Icons (remove hardcoded colors like text-danger, text-primary from action columns)
+    $table.find('a i.bx, button i.bx').each(function() {
+        $(this).removeClass('text-danger text-primary text-success text-warning text-info text-dark text-secondary text-muted');
+    });
 });
 $(document).on("click", ".update-notification-status", function (e) {
     var notificationId = $(this).data("id");
@@ -3113,10 +3154,20 @@ $(document).ready(function () {
             $form.find($('.selectTaskProject[name="project"]')).trigger("change");
         }
         if ($('.statusDropdown[name="status_id"]').length) {
-            $form.find($('.statusDropdown[name="status_id"]')).trigger("change");
+            var $s = $form.find($('.statusDropdown[name="status_id"]'));
+            if ($s.length && $s[0].tomselect) {
+                $s[0].tomselect.sync();
+            } else {
+                $s.trigger("change");
+            }
         }
         if ($('.priorityDropdown[name="priority_id"]').length) {
-            $form.find($('.priorityDropdown[name="priority_id"]')).trigger("change");
+            var $p = $form.find($('.priorityDropdown[name="priority_id"]'));
+            if ($p.length && $p[0].tomselect) {
+                $p[0].tomselect.sync();
+            } else {
+                $p.trigger("change");
+            }
         }
         $("#users_associated_with_project, #task_update_users_associated_with_project").text("");
         $(container)
@@ -4515,92 +4566,67 @@ function formatTag(tag) {
  */
 $(document).ready(function () {
     /**
-     * Formats status dropdown options with a colored badge.
-     *
-     * @param {Object} status - The Select2 option object containing id, text, and data attributes.
-     * @returns {jQuery|string} - A jQuery element with a colored badge or the plain text if no id is present.
-     */
-    function formatStatus(status) {
-        if (!status.id) {
-            return status.text;
-        }
-        var color = $(status.element).data("color") || "primary"; // Fallback to 'primary' if no color
-        return $('<span class="badge bg-label-' + color + '">' + status.text + "</span>");
-    }
-    /**
-     * Formats priority dropdown options with a colored badge.
-     *
-     * @param {Object} priority - The Select2 option object containing id, text, and data attributes.
-     * @returns {jQuery|string} - A jQuery element with a colored badge or the plain text if no id is present.
-     */
-    function formatPriority(priority) {
-        if (!priority.id) {
-            return priority.text;
-        }
-        var color = $(priority.element).data("color") || "primary"; // Fallback to 'primary' if no color
-        return $('<span class="badge bg-label-' + color + '">' + priority.text + "</span>");
-    }
-    /**
-     * Initializes Select2 for elements with class 'statusDropdown'.
+     * Initializes TomSelect for elements with class 'statusDropdown'.
      */
     $(".statusDropdown").each(function () {
         var $this = $(this);
-        var dropdownParent = $this.closest(".modal, .offcanvas").length
-            ? $this.closest(".modal, .offcanvas")
-            : $(document.body); // Fallback to body if no modal/offcanvas
-        $this.select2({
-            dropdownParent: dropdownParent,
-            templateResult: formatStatus,
-            templateSelection: formatStatus,
-            escapeMarkup: function (markup) {
-                return markup;
-            },
-            language: {
-                noResults: function () {
-                    return label_no_results_found;
+        if ($this[0].tomselect) {
+            $this[0].tomselect.destroy();
+        }
+        new TomSelect($this[0], {
+            allowEmptyOption: true,
+            controlInput: null,
+            render: {
+                option: function(data, escape) {
+                    if (!data.value) {
+                        return '<div>' + escape(data.text || 'Please select') + '</div>';
+                    }
+                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
+                    if (!color) color = 'primary';
+                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 },
-                searching: function () {
-                    return label_searching;
-                },
-            },
+                item: function(data, escape) {
+                    if (!data.value) {
+                        return '<div class="item">' + escape(data.text || 'Please select') + '</div>';
+                    }
+                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
+                    if (!color) color = 'primary';
+                    return '<div class="item"><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                }
+            }
         });
     });
+
     /**
-     * Initializes Select2 for elements with class 'priorityDropdown', with clearable options.
+     * Initializes TomSelect for elements with class 'priorityDropdown'.
      */
     $(".priorityDropdown").each(function () {
         var $this = $(this);
-        var dropdownParent = $this.closest(".modal, .offcanvas").length
-            ? $this.closest(".modal, .offcanvas")
-            : $(document.body); // Fallback to body if no modal/offcanvas
-        $this.select2({
-            dropdownParent: dropdownParent,
-            templateResult: formatPriority,
-            templateSelection: formatPriority,
-            allowClear: true,
-            escapeMarkup: function (markup) {
-                return markup;
-            },
-            language: {
-                noResults: function () {
-                    return label_no_results_found;
+        if ($this[0].tomselect) {
+            $this[0].tomselect.destroy();
+        }
+        new TomSelect($this[0], {
+            allowEmptyOption: true,
+            controlInput: null,
+            render: {
+                option: function(data, escape) {
+                    if (!data.value) {
+                        return '<div>' + escape(data.text || 'Please select') + '</div>';
+                    }
+                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
+                    if (!color) color = 'primary';
+                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 },
-                searching: function () {
-                    return label_searching;
-                },
-            },
-        });
-        // Prevent dropdown from opening when clear button is clicked
-        $this
-            .on("select2:unselecting", function (e) {
-                $(this).data("state", "unselecting");
-            })
-            .on("select2:open", function (e) {
-                if ($(this).data("state") === "unselecting") {
-                    $(this).removeData("state");
-                    $this.select2("close");
+                item: function(data, escape) {
+                    if (!data.value) {
+                        return '<div class="item">' + escape(data.text || 'Please select') + '</div>';
+                    }
+                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
+                    if (!color) color = 'primary';
+                    return '<div class="item"><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 }
-            });
+            }
+        });
     });
 });
 $(document).on("change", 'select[name="color"]', function (e) {
@@ -5446,7 +5472,11 @@ $("#create_project_offcanvas").on("shown.bs.offcanvas", function (event) {
         // Check if the dropdown contains the option with the given status ID
         if ($statusDropdown.find(`option[value="${statusId}"]`).length) {
             // Set the selected status in the dropdown
-            $statusDropdown.val(statusId).trigger("change");
+            if ($statusDropdown[0].tomselect) {
+                $statusDropdown[0].tomselect.setValue(statusId);
+            } else {
+                $statusDropdown.val(statusId).trigger("change");
+            }
         }
     }
 });

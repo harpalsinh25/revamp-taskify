@@ -23,7 +23,7 @@
     </button>
 </div>
 
-<div class="tab-content no-shadow p-0">
+<div class="tab-content shadow-none p-0">
     <div class="tab-pane fade active show" id="{{ $calendarId }}-list" role="tabpanel">
         @if ($alert)
             <div class="alert alert-primary alert-dismissible" role="alert">

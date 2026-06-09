@@ -1,6 +1,7 @@
 if ($('.tom-select-sort').length > 0) {
+    var placeholderText = $('.tom-select-sort').data('placeholder') || 'Sort By';
     new TomSelect('.tom-select-sort', {
-        allowEmptyOption: true,
+        placeholder: placeholderText
     });
 }
 
