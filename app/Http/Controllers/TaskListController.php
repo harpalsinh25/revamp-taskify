@@ -461,22 +461,33 @@ class TaskListController extends Controller
         $canEdit = true;  // Replace with your actual condition
         $canDelete = true; // Replace with your actual condition
 
+        if ($canEdit || $canDelete) {
+            $actions = '<div class="dropdown">';
+            $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+            $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+            $actions .= '</button>';
+            $actions .= '<ul class="dropdown-menu">';
 
-        if ($canEdit) {
-            $actions .= '<a href="javascript:void(0);" class="edit-task-list" data-id="' . $task_list->id . '" title="' . get_label('update', 'Update') . '">' .
-                \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="edit" class="mx-1" />') .
-                '</a>';
+            if ($canEdit) {
+                $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-task-list d-block" data-id="' . $task_list->id . '">';
+                $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+            }
+
+            if ($canDelete) {
+                if ($canEdit) {
+                    $actions .= '<li><hr class="dropdown-divider"></li>';
+                }
+                $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $task_list->id . '" data-type="task-lists" data-table="table">';
+                $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+            }
+
+            $actions .= '</ul>';
+            $actions .= '</div>';
+        } else {
+            $actions = '-';
         }
 
-        if ($canDelete) {
-            $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete p-0" data-id="' . $task_list->id . '" data-type="task-lists" data-table="table">' .
-                \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="mx-1" />') .
-                '</button>';
-        }
-
-
-
-        return $actions ?: '-';
+        return $actions;
     }
     public function destroy_multiple(Request $request)
     {

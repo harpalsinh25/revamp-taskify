@@ -753,39 +753,46 @@ class ProjectsController extends Controller
                     $isFavorite = getFavoriteStatus($project->id);
                     $isPinned = !is_null($project->pinned_id) ? 1 : 0; // Use pinned_id from the query
 
-                    $actions = '';
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow " type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu  project-actions-dropdown">';
+
                     if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-project" data-offcanvas="true" data-id="' . $project->id . '" title="' . get_label('update', 'Update') . '">' .
-                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="edit" class="mx-1" />') .
-                        '</a>';
-                    }
-                    if ($canDelete) {
-                        $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete p-0" data-id="' . $project->id . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '">' .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="mx-1" />') .
-                            '</button>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-project d-block" data-offcanvas="true" data-id="' . $project->id . '">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
                     }
                     if ($canCreate) {
-                        $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $project->id . '" data-title="' . $project->title . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="copy" class="mx-2" />') .
-                            '</a>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item duplicate d-block" data-id="' . $project->id . '" data-title="' . $project->title . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '">';
+                        $actions .= '<i class="bx bx-copy text-warning me-2"></i>' . get_label('duplicate', 'Duplicate') . '</a></li>';
                     }
-                    $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $project->id . '" data-type="project" title="' . get_label('quick_view', 'Quick View') . '">' .
-                        \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="mx-1" />') .
-                        '</a>';
-                $actions .= '<a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" title="' . get_label('mind_map', 'Mind Map') . '">' .
-                    \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="sitemap" class="mx-1" />') .
-                    '</a>';
-                    
-                    // Quick Action Buttons (Moved from Title)
-                    $actions .= "<a href='javascript:void(0);' class='mx-1 btn-icon favorite-icon " . ($isFavorite ? 'text-warning' : 'text-muted') . "' data-favorite='{$isFavorite}' data-id='{$project->id}' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'>" .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="star" />') . "</a>";
-                    $actions .= "<a href='javascript:void(0);' class='mx-1 btn-icon pinned-icon " . ($isPinned ? 'text-success' : 'text-muted') . "' data-pinned='{$isPinned}' data-id='{$project->id}' data-require_reload='0' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'>" .
-                            \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="pin" />') . "</a>";
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item quick-view d-block" data-id="' . $project->id . '" data-type="project">';
+                    $actions .= '<i class="bx bx-info-circle text-info me-2"></i>' . get_label('quick_view', 'Quick View') . '</a></li>';
+
+                    $actions .= '<li><a href="' . url('projects/mind-map/' . $project->id) . '" target="_blank" class="dropdown-item d-block">';
+                    $actions .= '<i class="bx bx-sitemap text-secondary me-2"></i>' . get_label('mind_map', 'Mind Map') . '</a></li>';
+
+                    // Favorite & Pin in Dropdown (Static Labels)
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item favorite-icon d-block" data-favorite="' . $isFavorite . '" data-id="' . $project->id . '">';
+                    $actions .= '<i class="bx ' . ($isFavorite ? 'bxs-star text-warning' : 'bx-star text-muted') . ' me-2"></i>' . get_label('favorite', 'Favorite') . '</a></li>';
+
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item pinned-icon d-block" data-pinned="' . $isPinned . '" data-id="' . $project->id . '" data-require_reload="0">';
+                    $actions .= '<i class="bx ' . ($isPinned ? 'bxs-pin text-success' : 'bx-pin text-muted') . ' me-2"></i>' . get_label('pin', 'Pin') . '</a></li>';
+
                     if ($webGuard || $project->client_can_discuss) {
-                        $actions .= "<a href='" . route('projects.info', ['id' => $project->id]) . "#navs-top-discussions' class='mx-1 btn-icon' title='" . get_label('discussions', 'Discussions') . "'>" .
-                                \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="msg" />') . "</a>";
+                        $actions .= '<li><a href="' . route('projects.info', ['id' => $project->id]) . '#navs-top-discussions" class="dropdown-item d-block">';
+                        $actions .= '<i class="bx bx-chat text-success me-2"></i>' . get_label('discussions', 'Discussions') . '</a></li>';
                     }
-                $actions = $actions ?: '-';
+
+                    if ($canDelete) {
+                        $actions .= '<li><hr class="dropdown-divider"></li>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block  " data-id="' . $project->id . '" data-type="projects" data-table="projects_table" data-reload="' . ($isHome ? 'true' : '') . '">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
                     $userHtml = '';
                 if (!empty($project->users) && count($project->users) > 0) {
                         $userHtml .= '<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">';

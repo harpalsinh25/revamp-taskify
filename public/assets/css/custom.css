@@ -3458,7 +3458,7 @@ html:not([dir="rtl"]) .timeline-item {
    body.v2-shell, so non-chrome pages (login, print) are untouched.
    ===================================================================== */
 :root {
-    --signal: oklch(77.131% 0.17824 139.603);
+    --signal: oklch(81.99% 0.11932 142.474);
     --signal-fg: oklch(0.18 0.02 130);
     --signal-glow: oklch(0.88 0.20 130 / 0.35);
     --ok: oklch(0.70 0.16 155);
@@ -6004,15 +6004,17 @@ body.v2-shell .badge.bg-label-primary {
 /* success / ok (soft) */
 body.v2-shell .badge.bg-success,
 body.v2-shell .badge.text-bg-success,
-body.v2-shell .badge.bg-label-success {
-    background: oklch(from var(--ok) l c h / 0.18) !important;
-    color: var(--ok) !important;
+body.v2-shell .badge.bg-label-success,
+body.v2-shell .badge.badge-ok {
+    background: rgba(40, 199, 111, 0.12) !important;
+    color: #28c76f !important;
 }
 
 /* warning / warn (soft) */
 body.v2-shell .badge.bg-warning,
 body.v2-shell .badge.text-bg-warning,
-body.v2-shell .badge.bg-label-warning {
+body.v2-shell .badge.bg-label-warning,
+body.v2-shell .badge.badge-warn {
     background: oklch(from var(--warn) l c h / 0.18) !important;
     color: var(--warn) !important;
 }
@@ -6020,7 +6022,8 @@ body.v2-shell .badge.bg-label-warning {
 /* danger / err (soft) */
 body.v2-shell .badge.bg-danger,
 body.v2-shell .badge.text-bg-danger,
-body.v2-shell .badge.bg-label-danger {
+body.v2-shell .badge.bg-label-danger,
+body.v2-shell .badge.badge-err {
     background: oklch(from var(--err) l c h / 0.18) !important;
     color: var(--err) !important;
 }
@@ -6028,9 +6031,123 @@ body.v2-shell .badge.bg-label-danger {
 /* info (soft) */
 body.v2-shell .badge.bg-info,
 body.v2-shell .badge.text-bg-info,
-body.v2-shell .badge.bg-label-info {
+body.v2-shell .badge.bg-label-info,
+body.v2-shell .badge.badge-info {
     background: oklch(from var(--info) l c h / 0.18) !important;
     color: var(--info) !important;
+}
+
+/* primary (solid/soft) */
+body.v2-shell .badge.badge-primary {
+    background: var(--signal) !important;
+    color: var(--signal-fg) !important;
+}
+
+/* Design System - Chips, Tags, Status Pills, KBD, and Dots */
+body.v2-shell .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 3px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--fg-1);
+    font-weight: 500;
+}
+
+body.v2-shell .chip-on {
+    background: var(--signal-soft) !important;
+    color: var(--signal-fg) !important;
+    border-color: transparent !important;
+}
+
+[data-theme="dark"] body.v2-shell .chip-on {
+    color: var(--signal) !important;
+}
+
+body.v2-shell .tag {
+    font-size: 10px;
+    color: var(--fg-2);
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-weight: 500;
+}
+
+body.v2-shell .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 7px;
+    border-radius: 3px;
+    background: var(--bg-2);
+    color: var(--fg-1);
+}
+
+body.v2-shell .status-progress {
+    color: var(--signal-fg);
+    background: var(--signal-soft);
+}
+
+[data-theme="dark"] body.v2-shell .status-progress {
+    color: var(--signal);
+    background: oklch(from var(--signal) l c h / 0.12);
+}
+
+body.v2-shell .status-review {
+    color: var(--warn);
+    background: oklch(from var(--warn) l c h / 0.15);
+}
+
+body.v2-shell .status-done {
+    color: var(--ok);
+    background: oklch(from var(--ok) l c h / 0.15);
+}
+
+body.v2-shell .status-blocked {
+    color: var(--err);
+    background: oklch(from var(--err) l c h / 0.15);
+}
+
+body.v2-shell .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--fg-3);
+    flex-shrink: 0;
+}
+
+body.v2-shell .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 3px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 0 var(--line);
+    font-size: 10.5px;
+    color: var(--fg-2);
+}
+
+body.v2-shell .dot-indicator {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--err);
+    border: 1.5px solid var(--bg-0);
 }
 
 /* secondary / dark / light / white -> neutral kit badge */

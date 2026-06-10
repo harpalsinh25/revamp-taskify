@@ -2,6 +2,46 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-10] - Tasks Status & Priority UI Standardization
+### Modified
+- **`app/Http/Controllers/TasksController.php`**: Converted the inline-editable `select` dropdowns for the Status and Priority columns in the Tasks list view to static read-only badges to match the data display pattern found in the Projects controller.
+
+## [2026-06-10] - Save Column Visibility Feature
+### Added
+- **`resources/views/components/tags-card.blade.php`**: Implemented the "Save Column Visibility" feature by adding user preference injection, a hidden tracker input, and conditional `data-visible` attributes for the Tags table.
+- **`resources/views/components/status-card.blade.php`**: Added "Save Column Visibility" functionality with conditional column rendering based on user preferences.
+- **`resources/views/components/priority-card.blade.php`**: Integrated "Save Column Visibility" into the `<x-tk-table>` component to persist user column display preferences.
+- **`resources/views/task_lists/index.blade.php`**: Added the "Save Column Visibility" button logic and user preference tracking for Task Lists.
+
+## [2026-06-10] - Action Columns UI Standardization
+### Modified
+- **`app/Http/Controllers/TaskListController.php`**: Refactored the action buttons in the task list view into a clean three-dots dropdown menu, matching the project's standard pattern.
+- **`app/Http/Controllers/TagsController.php`**: Replaced inline edit/delete action buttons in the list view with a dropdown menu featuring a vertical three-dots trigger icon, aligning with the project's design system pattern.
+- **`app/Http/Controllers/StatusController.php`**: Standardized the list view actions column to use the three-dots dropdown menu pattern.
+- **`app/Http/Controllers/PriorityController.php`**: Updated the list view actions column to match the three-dots dropdown menu pattern used in projects.
+- **`app/Http/Controllers/TasksController.php`**: Refactored the inline task actions (edit, delete, duplicate, quick view) into a streamlined three-dots dropdown menu for improved UI consistency.
+
+## [2026-06-10] - Design System Badges and Components
+### Added
+- **`resources/views/components/badges/badge.blade.php`**: Exposed the design system badge component with mapping logic to support standard Bootstrap colors as tones.
+- **`resources/views/components/badges/chip.blade.php`**: Added the design system chip component supporting active and removable states.
+- **`resources/views/components/badges/kbd.blade.php`**: Exposed the design system keyboard shortcut (`kbd`) component.
+- **`resources/views/components/badges/status-pill.blade.php`**: Exposed the design system status-pill component.
+- **`resources/views/components/badges/tag.blade.php`**: Exposed the design system tag component.
+
+### Modified
+- **`public/assets/css/custom.css`**: Added revamp classes for `.chip`, `.tag`, `.status`, `.kbd`, `.dot`, and `.dot-indicator` under `body.v2-shell`. Defined revamp design system badge tone styles (`.badge-primary`, `.badge-ok`, `.badge-warn`, `.badge-err`, `.badge-info`). Removed the custom layout overrides (padding, border-radius, font-weight) from standard success badges (`bg-success`, `bg-label-success`) to let them fallback to default design system dimensions (18px height, 3px border-radius, 0 6px padding).
+- **`public/assets/css/table.css`**: Removed the legacy `body.v2-shell .bootstrap-table .badge` override block, ensuring badges inside tables correctly fallback to design-system standard sizes.
+- **`resources/views/components/badges/status-pill.blade.php`**: Enhanced the status-pill Blade component to dynamically map dynamic database status color keys (`success`, `warning`, `danger`, `primary`) to standard revamp keys (`done`, `review`, `blocked`, `progress`).
+- **`resources/views/projects/project_information.blade.php`**: Refactored the tags, user/client assignment check messages, and priority badges to use the `<x-badges.badge>` component, and converted the project status display to use the `<x-badges.status-pill>` component with automatic tone mapping.
+
+## [2026-06-10] - Actions Column Dropdown Menu
+### Modified
+- **`app/Http/Controllers/ProjectsController.php`**: Refactored the `actions` output in the `list` method to render a Bootstrap dropdown menu triggered by a three-dot menu icon with a custom class `project-actions-dropdown`, improving space and clean aesthetics.
+- **`public/assets/js/custom.js`**: Enhanced the `.favorite-icon` and `.pinned-icon` AJAX success callbacks to dynamically toggle child icon classes (`bx-*`/`bxs-*`) and preserve static text labels (preventing verbose action tooltips from overwriting them) when clicked inside a dropdown menu.
+- **`public/assets/css/table.css`**: Styled the actions three-dots dropdown trigger button as a light rounded block, refined the dropdown menu layout with rounded corners and soft box-shadows, styled dropdown list items to have margins and inset hover states, converted icons to neutral gray, and custom-styled the delete action with red text/icons and soft red hover backgrounds. Added explicit left-alignment and start-justified flex overrides on dropdown list items and nodes to bypass cell text-alignment inheritance.
+- **`public/assets/css/custom.css`**: Overrote the success badge overrides (`bg-success`, `bg-label-success`) to use a modern emerald green palette (`#28c76f` text, soft `12%` opacity background) and spacious styling (`6px` padding, `6px` border-radius) matching the reference design.
+
 ## [2026-06-10] - Table Header and Footer Consistency
 ### Modified
 - **`resources/views/layout.blade.php`**: Added a cache-buster query parameter to the `bootstrap-table.min.css` stylesheet link to prevent browsers from loading cached versions of the stylesheet.

@@ -1968,12 +1968,22 @@ $(document).on("click", ".favorite-icon", function () {
                     icon.removeClass("bxs-star");
                     icon.addClass("bx-star");
                     icon.attr(temp, add_favorite); // Update the tooltip text
+                    icon.find("i").removeClass("bxs-star text-warning").addClass("bx-star text-muted");
                 } else {
                     icon.removeClass("bx-star");
                     icon.addClass("bxs-star");
                     icon.attr(temp, remove_favorite); // Update the tooltip text
+                    icon.find("i").removeClass("bx-star text-muted").addClass("bxs-star text-warning");
                 }
                 icon.attr("data-favorite", isFavorite);
+                var textNode = icon.contents().filter(function() {
+                    return this.nodeType === 3 && this.nodeValue.trim() !== "";
+                });
+                if (textNode.length) {
+                    if (!icon.hasClass("dropdown-item")) {
+                        textNode[0].nodeValue = isFavorite == 0 ? " " + add_favorite : " " + remove_favorite;
+                    }
+                }
                 if (isFavorite == 0) {
                     toastr.success(label_removed_from_favorite_successfully);
                 } else {
@@ -2018,10 +2028,21 @@ $(document).on("click", ".pinned-icon", function () {
                     icon.removeClass("bxs-pin");
                     icon.addClass("bx-pin");
                     icon.attr(temp, label_click_pin); // Update the tooltip text
+                    icon.find("i").removeClass("bxs-pin text-success").addClass("bx-pin text-muted");
                 } else {
                     icon.removeClass("bx-pin");
                     icon.addClass("bxs-pin");
                     icon.attr(temp, label_click_unpin); // Update the tooltip text
+                    icon.find("i").removeClass("bx-pin text-muted").addClass("bxs-pin text-success");
+                }
+                icon.attr("data-pinned", isPinned);
+                var textNode = icon.contents().filter(function() {
+                    return this.nodeType === 3 && this.nodeValue.trim() !== "";
+                });
+                if (textNode.length) {
+                    if (!icon.hasClass("dropdown-item")) {
+                        textNode[0].nodeValue = isPinned == 0 ? " " + label_click_pin : " " + label_click_unpin;
+                    }
                 }
                 if (requireReload) {
                     // Show success message
@@ -2673,10 +2694,17 @@ $(document).ready(function () {
                     "</button>"
                 );
                 
-                // Try to find the filter row
-                var $filterRow = $toolbar.closest('.card-body, .card, .container-fluid, .mt-2').find('.row').filter(function() {
-                    return $(this).find('select[multiple="multiple"]').length > 0 || $(this).hasClass('tk-filter-row');
-                }).last();
+                // Try to find the filter row by checking parents from closest to furthest
+                var $filterRow = $();
+                $toolbar.parents('.card-body, .card, .mt-2, .container-fluid').each(function() {
+                    var $row = $(this).find('.row').filter(function() {
+                        return $(this).find('select[multiple="multiple"]').length > 0 || $(this).hasClass('tk-filter-row');
+                    }).last();
+                    if ($row.length > 0) {
+                        $filterRow = $row;
+                        return false; // Break the loop once we find the filter row
+                    }
+                });
 
                 if ($filterRow.length > 0) {
                     var $existingContainer = $filterRow.find('.clear-filters-container');

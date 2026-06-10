@@ -602,34 +602,35 @@ class TasksController extends Controller
         // Paginate and format tasks (query already has sorting and pinned join applied)
         $tasks = $tasksQuery->paginate($filters['limit'])
             ->through(function ($task) use ($statuses, $priorities, $canEdit, $canDelete, $canCreate, $isHome, $webGuard, $canManageProjects, $customFields) {
-                // Status options
-                $statusOptions = '';
-                foreach ($statuses as $status) {
-                $disabled = canSetStatus($status) ? '' : 'disabled';
-                $selected = $task->status_id == $status->id ? 'selected' : '';
-                    $statusOptions .= "<option value='{$status->id}' class='badge bg-label-{$status->color}' {$selected} {$disabled}>{$status->title}</option>";
-                }
 
-            // Priority options
-            $priorityOptions = "<option value='' class='badge bg-label-secondary'>-</option>";
-                foreach ($priorities as $priority) {
-                $selectedPriority = $task->priority_id == $priority->id ? 'selected' : '';
-                    $priorityOptions .= "<option value='{$priority->id}' class='badge bg-label-{$priority->color}' {$selectedPriority}>{$priority->title}</option>";
-                }
 
             // Actions
-            $actions = '';
-                if ($canEdit) {
-                $actions .= '<a href="javascript:void(0);" class="edit-task" data-id="' . $task->id . '" title="' . get_label('update', 'Update') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="edit" class="mx-1" />') . '</a>';
-                }
-                if ($canDelete) {
-                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete p-0" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="trash" class="mx-1" />') . '</button>';
-                }
-                if ($canCreate) {
-                $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '" title="' . get_label('duplicate', 'Duplicate') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="copy" class="mx-2" />') . '</a>';
-                }
-            $actions .= '<a href="javascript:void(0);" class="quick-view" data-id="' . $task->id . '" title="' . get_label('quick_view', 'Quick View') . '">' . \Illuminate\Support\Facades\Blade::render('<x-tk-icon name="info" class="mx-3" />') . '</a>';
-            $actions = $actions ?: '-';
+            $actions = '<div class="dropdown">';
+            $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+            $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+            $actions .= '</button>';
+            $actions .= '<ul class="dropdown-menu">';
+
+            if ($canEdit) {
+                $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-task d-block" data-id="' . $task->id . '">';
+                $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+            }
+            if ($canCreate) {
+                $actions .= '<li><a href="javascript:void(0);" class="dropdown-item duplicate d-block" data-id="' . $task->id . '" data-title="' . $task->title . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '">';
+                $actions .= '<i class="bx bx-copy text-warning me-2"></i>' . get_label('duplicate', 'Duplicate') . '</a></li>';
+            }
+            
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item quick-view d-block" data-id="' . $task->id . '">';
+            $actions .= '<i class="bx bx-info-circle text-info me-2"></i>' . get_label('quick_view', 'Quick View') . '</a></li>';
+
+            if ($canDelete) {
+                $actions .= '<li><hr class="dropdown-divider"></li>';
+                $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $task->id . '" data-type="tasks" data-table="task_table" data-reload="' . ($isHome ? 'true' : '') . '">';
+                $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+            }
+
+            $actions .= '</ul>';
+            $actions .= '</div>';
 
             // Users HTML
             $userHtml = '';
@@ -699,9 +700,11 @@ class TasksController extends Controller
                     'clients' => $clientHtml,
                     'start_date' => format_date($task->start_date),
                     'due_date' => format_date($task->due_date),
-                'status_id' => "<div class='d-flex align-items-center'><select class='form-select form-select-sm select-bg-label-{$task->status->color} fixed-width-select' id='statusSelect' data-id='{$task->id}' data-original-status-id='{$task->status->id}' data-original-color-class='select-bg-label-{$task->status->color}' data-type='task'" . ($isHome ? " data-reload='true'" : "") . ">{$statusOptions}</select>" . ($task->note ?
-                    "<i class='bx bx-notepad ms-2 text-primary' title='{$task->note}'></i>" : "") . "</div>",
-                    'priority_id' => "<select class='form-select form-select-sm select-bg-label-" . ($task->priority ? $task->priority->color : 'secondary') . "' id='prioritySelect' data-id='{$task->id}' data-original-priority-id='" . ($task->priority ? $task->priority->id : '') . "' data-original-color-class='select-bg-label-" . ($task->priority ? $task->priority->color : 'secondary') . "' data-type='task'>{$priorityOptions}</select>",
+                'status_id' => "<div class='d-flex align-items-center'>
+                    <span class='badge bg-label-{$task->status->color}'>{$task->status->title}</span>
+                    " . ($task->note ? "<i class='bx bx-notepad ms-2 text-primary' title='{$task->note}'></i>" : "") . "
+                </div>",
+                'priority_id' => "<span class='badge bg-label-" . ($task->priority ? $task->priority->color : 'secondary') . "'>" . ($task->priority ? $task->priority->title : '-') . "</span>",
                     'created_at' => format_date($task->created_at, true),
                     'updated_at' => format_date($task->updated_at, true),
                 'actions' => $actions

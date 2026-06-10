@@ -126,7 +126,7 @@ body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .btn:hover {
 }
 
 /* --- Table surface & Layout --- */
-body.v2-shell .bootstrap-table > div:not(.fixed-table-toolbar) {
+body.v2-shell .bootstrap-table>div:not(.fixed-table-toolbar) {
     border-top: 0 !important;
     border-bottom: 0 !important;
     box-shadow: none !important;
@@ -157,8 +157,8 @@ body.v2-shell .bootstrap-table .fixed-table-border {
 }
 
 body.v2-shell .bootstrap-table table.table,
-body.v2-shell .bootstrap-table table.table > tbody,
-body.v2-shell .bootstrap-table table.table > tfoot {
+body.v2-shell .bootstrap-table table.table>tbody,
+body.v2-shell .bootstrap-table table.table>tfoot {
     margin: 0 !important;
     background: transparent;
     border: 0 !important;
@@ -205,6 +205,7 @@ body.v2-shell .bootstrap-table table.table>thead>tr>th {
     box-shadow: none !important;
     padding: 12px 14px;
 }
+
 body.v2-shell .bootstrap-table table.table>thead>tr>th:last-child {
     border-right: 0 !important;
 }
@@ -220,6 +221,7 @@ body.v2-shell .bootstrap-table table.table>tbody>tr>td {
     white-space: nowrap;
     /* Prevent messy line breaking */
 }
+
 body.v2-shell .bootstrap-table table.table>tbody>tr>td:last-child {
     border-right: 0 !important;
 }
@@ -373,18 +375,6 @@ body.v2-shell .bootstrap-table table.table td[data-field="actions"] button:hover
     color: var(--fg-0);
 }
 
-/* Badges */
-body.v2-shell .bootstrap-table .badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 12px;
-    border-radius: 5px;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1.2;
-    text-transform: capitalize;
-}
 
 /* Icons Fix */
 body.v2-shell .bootstrap-table .favorite-icon[data-favorite="1"] {
@@ -468,22 +458,43 @@ body.v2-shell .bootstrap-table .fixed-table-pagination .page-item.disabled .page
 
 /* ---- EMPTY STATE ---- */
 body.v2-shell .empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center;
-  padding: 48px 24px;
-  gap: 12px;
-  color: var(--fg-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 24px;
+    gap: 12px;
+    color: var(--fg-2);
 }
+
 body.v2-shell .empty-icon {
-  width: 48px; height: 48px;
-  border-radius: var(--r-3);
-  background: var(--bg-2);
-  display: grid; place-items: center;
-  color: var(--fg-3);
+    width: 48px;
+    height: 48px;
+    border-radius: var(--r-3);
+    background: var(--bg-2);
+    display: grid;
+    place-items: center;
+    color: var(--fg-3);
 }
-body.v2-shell .empty-title { font-size: var(--fs-md); font-weight: 600; color: var(--fg-0); }
-body.v2-shell .empty-sub   { font-size: var(--fs-base); color: var(--fg-2); max-width: 360px; }
-body.v2-shell .empty-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+body.v2-shell .empty-title {
+    font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--fg-0);
+}
+
+body.v2-shell .empty-sub {
+    font-size: var(--fs-base);
+    color: var(--fg-2);
+    max-width: 360px;
+}
+
+body.v2-shell .empty-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
 
 /* Core resets to completely eliminate plugin wrapper default dark lines */
 .fixed-table-container,

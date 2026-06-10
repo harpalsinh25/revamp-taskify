@@ -30,8 +30,12 @@
     <div class="card">
        
             <div class="card-datatable table-responsive text-nowrap">
+@php
+    $visibleColumns = getUserPreferences('task-lists');
+@endphp
                 @if ($taskLists->count() > 0)
                     <input type="hidden" id="data_type" value="task-lists">
+                    <input type="hidden" id="save_column_visibility">
 
                     <table id="table" data-toggle="table" data-loading-template="loadingTemplate"
                         data-url="{{ route('task_lists.list') }}" data-icons-prefix="bx" data-icons="icons"
@@ -42,16 +46,16 @@
                         <thead>
                             <tr>
                                 <th data-checkbox="true"></th>
-                                <th data-sortable="true" data-field="id"> {{get_label('id', 'ID') }}</th>
-                                <th data-sortable="true" data-field="name">{{get_label('title', 'Title')}} </th>
-                                <th data-sortable="false" data-field="project">{{get_label('project', 'Project')}}</th>
-                                <th data-sortable="true" data-field="created_at" data-visible="false">
+                                <th data-sortable="true" data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}"> {{get_label('id', 'ID') }}</th>
+                                <th data-sortable="true" data-field="name" data-visible="{{ (in_array('name', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{get_label('title', 'Title')}} </th>
+                                <th data-sortable="false" data-field="project" data-visible="{{ (in_array('project', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{get_label('project', 'Project')}}</th>
+                                <th data-sortable="true" data-field="created_at" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}">
                                     {{get_label('created_at', 'Created at')}}
                                 </th>
-                                <th data-sortable="true" data-field="updated_at" data-visible="false">
+                                <th data-sortable="true" data-field="updated_at" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}">
                                     {{ get_label('updated_at', 'Updated at')}}
                                 </th>
-                                <th data-field="actions">{{get_label('actions', 'Actions')}}</th>
+                                <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{get_label('actions', 'Actions')}}</th>
                             </tr>
                         </thead>
                     </table>

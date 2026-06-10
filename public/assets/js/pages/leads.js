@@ -45,19 +45,19 @@ $(document).ready(function () {
         filters: [
             {
                 selector: '#sort',
-                type: 'select',
+                type: 'tom-select',
                 name: 'sort',
                 ajaxType: null
             },
             {
                 selector: '#selected_sources',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'source_ids',
                 ajaxType: 'lead_sources'
             },
             {
                 selector: '#selected_stages',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'stage_ids',
                 ajaxType: 'lead_stages'
             },

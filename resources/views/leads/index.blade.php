@@ -50,46 +50,43 @@
             @php
                 $visibleColumns = getUserPreferences('leads');
             @endphp
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <select class="form-select js-example-basic-multiple" id="sort"
-                                aria-label="Default select example"
-                                data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>"
-                                data-allow-clear="true">
-                                <option></option>
-                                <option value="newest"> {{ get_label('newest', 'Newest') }}</option>
-                                <option value="oldest">{{ get_label('oldest', 'Oldest') }}</option>
-                                <option value="recently-updated">
-                                    {{ get_label('most_recently_updated', 'Most recently updated') }}</option>
-                                <option value="earliest-updated">
-                                    {{ get_label('least_recently_updated', 'Least recently updated') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <select class="form-select" id="selected_sources" name="sources[]"
-                                aria-label="Default select example"
-                                data-placeholder="{{ get_label('filter_by_sources', 'Filter by sources') }}"
-                                data-allow-clear="true" multiple>
-                            </select>
-                        </div>
-                        <x-advanced-date-filters prefix="lead" :filters="['date_range']" colClass="col-md-3" />
-                        <div class="col-md-3 mb-3">
-                            <select class="form-select" id="selected_stages" name="stages[]"
-                                aria-label="Default select example"
-                                data-placeholder="{{ get_label('filter_by_stages', 'Filter by stages') }}"
-                                data-allow-clear="true" multiple>
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3 d-flex align-items-center">
-                            <button class="btn btn-secondary clear-leads-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
-                                <i class="bx bx-refresh"></i>
-                            </button>
-                        </div>
-
+            <div class="mt-2">
+                <div class="row g-3 align-items-end tk-filter-row mb-3">
+                    <div class="col-md-3 mb-3">
+                        <label class="tk-filter-label">{{ get_label('sort_by', 'Sort By') }}</label>
+                        <select class="form-select" id="sort"
+                            aria-label="Default select example"
+                            data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>"
+                            data-allow-clear="true">
+                            <option></option>
+                            <option value="newest"> {{ get_label('newest', 'Newest') }}</option>
+                            <option value="oldest">{{ get_label('oldest', 'Oldest') }}</option>
+                            <option value="recently-updated">
+                                {{ get_label('most_recently_updated', 'Most recently updated') }}</option>
+                            <option value="earliest-updated">
+                                {{ get_label('least_recently_updated', 'Least recently updated') }}</option>
+                        </select>
                     </div>
-                    <div class="table-responsive text-nowrap">
+                    <div class="col-md-3 mb-3">
+                        <label class="tk-filter-label">{{ get_label('sources', 'Sources') }}</label>
+                        <select class="form-select" id="selected_sources" name="sources[]"
+                            aria-label="Default select example"
+                            data-placeholder="{{ get_label('filter_by_sources', 'Filter by sources') }}"
+                            data-allow-clear="true" multiple>
+                        </select>
+                    </div>
+                    <x-advanced-date-filters prefix="lead" :filters="['date_range']" colClass="col-md-3 mb-3" />
+                    <div class="col-md-3 mb-3">
+                        <label class="tk-filter-label">{{ get_label('stages', 'Stages') }}</label>
+                        <select class="form-select" id="selected_stages" name="stages[]"
+                            aria-label="Default select example"
+                            data-placeholder="{{ get_label('filter_by_stages', 'Filter by stages') }}"
+                            data-allow-clear="true" multiple>
+                        </select>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-datatable table-responsive text-nowrap">
                         <input type="hidden" id="data_type" value="leads">
                         <input type="hidden" id="data-table" value="leads_table">
                         <input type="hidden" id="save_column_visibility">

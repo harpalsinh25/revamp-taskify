@@ -40,13 +40,13 @@ $(document).ready(function () {
         filters: [
             {
                 selector: '#workspace_user_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
                 ajaxType: 'users'
             },
             {
                 selector: '#workspace_client_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'client_ids',
                 ajaxType: 'clients'
             },

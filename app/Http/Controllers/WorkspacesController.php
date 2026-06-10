@@ -216,25 +216,38 @@ class WorkspacesController extends Controller
 
                 $actions = '';
 
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-workspace" data-id="' . $workspace->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
-                }
+                if ($canEdit || $canDelete || $canCreate) {
+                    $actions .= '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu">';
 
-                if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $workspace->id . '" data-type="workspaces" data-reload="true">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
-                }
+                    if ($canEdit) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-workspace d-block" data-id="' . $workspace->id . '">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
 
-                if ($canCreate) {
-                    $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $workspace->id . '" data-title="' . $workspace->title . '" data-type="workspaces" data-reload="true" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                        '<i class="bx bx-copy text-warning mx-2"></i>' .
-                        '</a>';
-                }
+                    if ($canCreate) {
+                        if ($canEdit) {
+                            $actions .= '<li><hr class="dropdown-divider"></li>';
+                        }
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item duplicate d-block" data-id="' . $workspace->id . '" data-title="' . htmlspecialchars($workspace->title) . '" data-type="workspaces" data-reload="true">';
+                        $actions .= '<i class="bx bx-copy text-warning me-2"></i>' . get_label('duplicate', 'Duplicate') . '</a></li>';
+                    }
 
-                $actions = $actions ?: '-';
+                    if ($canDelete) {
+                        if ($canEdit || $canCreate) {
+                            $actions .= '<li><hr class="dropdown-divider"></li>';
+                        }
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $workspace->id . '" data-type="workspaces" data-reload="true">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul></div>';
+                } else {
+                    $actions = '-';
+                }
 
                 $userHtml = '';
                 if (!empty($workspace->users) && count($workspace->users) > 0) {

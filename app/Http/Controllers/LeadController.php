@@ -976,47 +976,36 @@ class LeadController extends Controller
      */
     private function getActions($lead)
     {
-        $actions = '';
         $canEdit = checkPermission('edit_leads');
         $canDelete = checkPermission('delete_leads');
         $isConverted = $lead->is_converted == 1 ? true : false;
 
-        $actions = '<div class="d-flex align-items-center">';
+        $actions = '<div class="dropdown">';
+        $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+        $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+        $actions .= '</button>';
+        $actions .= '<ul class="dropdown-menu">';
 
-        $actions .= '<a href="' . route('leads.show', ['id' => $lead->id]) . '"
-                class="text-info btn btn-sm p-1 me-1"
-                data-id="' . $lead->id . '"
-                title="' . get_label('view', 'View') . '">
-                <i class="bx bx-show"></i>
-            </a>';
+        $actions .= '<li><a href="' . route('leads.show', ['id' => $lead->id]) . '" class="dropdown-item text-info d-block" data-id="' . $lead->id . '">';
+        $actions .= '<i class="bx bx-show me-2"></i>' . get_label('view', 'View') . '</a></li>';
 
         if ($canEdit) {
-            $actions .= '<a href="' . route('leads.edit', ['id' => $lead->id]) . '"
-                    class="text-primary btn btn-sm  p-1 me-1"
-                    data-id="' . $lead->id . '"
-                    title="' . get_label('update', 'Update') . '">
-                    <i class="bx bx-edit"></i>
-                </a>';
+            $actions .= '<li><a href="' . route('leads.edit', ['id' => $lead->id]) . '" class="dropdown-item edit-lead d-block" data-id="' . $lead->id . '">';
+            $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+        }
+
+        if (!$isConverted) {
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item text-primary convert-to-client d-block" data-id="' . $lead->id . '">';
+            $actions .= '<i class="bx bxs-analyse me-2"></i>' . get_label('convert_to_client', 'Convert To Client') . '</a></li>';
         }
 
         if ($canDelete) {
-            $actions .= '<button title="' . get_label('delete', 'Delete') . '"
-                    type="button"
-                    class="btn btn-sm p-1 delete text-danger"
-                    data-id="' . $lead->id . '"
-                    data-type="leads"
-                    data-table="table">
-                    <i class="bx bx-trash"></i>
-                </button>';
-        }
-        if (!$isConverted) {
-            $actions .= '<button class="btn btn-sm text-primary convert-to-client" title="' . get_label('convert_to_client', 'Convert To Client') . '"
-                             data-id="' . $lead->id . '"><i
-                            class="bx bxs-analyse me-1 p-1"></i>
-                        </button>';
+            $actions .= '<li><hr class="dropdown-divider"></li>';
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $lead->id . '" data-type="leads" data-table="table">';
+            $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
         }
 
-        $actions .= '</div>';
+        $actions .= '</ul></div>';
         return $actions;
     }
 }

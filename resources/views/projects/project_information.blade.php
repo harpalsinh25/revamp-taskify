@@ -125,7 +125,7 @@
                             @if ($projectTags->isNotEmpty())
                             <div class="mb-2">
                                 @foreach ($projectTags as $tag)
-                                <span class="badge bg-{{ $tag->color }}">{{ $tag->title }}</span>
+                                <x-badges.badge tone="{{ $tag->color }}">{{ $tag->title }}</x-badges.badge>
                                 @endforeach
                             </div>
                             @endif
@@ -154,7 +154,7 @@
                                             @endforeach
                                         </ul>
                                     <?php } else { ?>
-                                        <p class="mb-0"><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span></p>
+                                        <p class="mb-0"><x-badges.badge tone="primary"><?= get_label('not_assigned', 'Not assigned') ?></x-badges.badge></p>
                                     <?php } ?>
                                 </div>
                                 <div class="col-md-6  mt-3 mb-3">
@@ -173,13 +173,13 @@
                                             @endforeach
                                         </ul>
                                     <?php } else { ?>
-                                        <p class="mb-0"><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span></p>
+                                        <p class="mb-0"><x-badges.badge tone="primary"><?= get_label('not_assigned', 'Not assigned') ?></x-badges.badge></p>
                                     <?php } ?>
                                 </div>
                                 <div class="col-md-{{$project->note ? '7' : '6'}} mb-3">
                                     <label class="form-label text-muted"><?= get_label('status', 'Status') ?></label>
                                     <div class="d-flex align-items-center gap-1 mt-1">
-                                        <span class="badge bg-label-{{$project->status->color}}">{{$project->status->title}}</span>
+                                        <x-badges.status-pill :status="$project->status->color">{{$project->status->title}}</x-badges.status-pill>
                                         @if($project->note)
                                         <div class="ms-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{$project->note}}">
                                             <x-tk-icon name="note" size="15" />
@@ -191,9 +191,9 @@
                                     <label class="form-label text-muted"><?= get_label('priority', 'Priority') ?></label>
                                     <div class="mt-1">
                                         @if($project->priority)
-                                        <span class="badge bg-label-{{$project->priority->color}}">{{$project->priority->title}}</span>
+                                        <x-badges.badge tone="{{$project->priority->color}}">{{$project->priority->title}}</x-badges.badge>
                                         @else
-                                        <span class="badge bg-label-secondary">-</span>
+                                        <x-badges.badge>-</x-badges.badge>
                                         @endif
                                     </div>
                                 </div>

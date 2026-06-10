@@ -147,20 +147,31 @@ class StatusController extends Controller
                     return ucfirst($roleName);
                 })->implode(', ');
 
-                $actions = '';
+                if ($canEdit || $canDelete) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu">';
 
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-status" data-bs-toggle="modal" data-bs-target="#edit_status_modal" data-id="' . $status->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
-                }
+                    if ($canEdit) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-status d-block" data-bs-toggle="modal" data-bs-target="#edit_status_modal" data-id="' . $status->id . '">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
 
-                if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $status->id . '" data-type="status">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
+                    if ($canDelete) {
+                        if ($canEdit) {
+                            $actions .= '<li><hr class="dropdown-divider"></li>';
+                        }
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $status->id . '" data-type="status">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                } else {
+                    $actions = '-';
                 }
-                $actions = $actions ?: '-';
                 return [
                     'id' => $status->id,
                     'title' => $status->title . ($status->id == 0 ? ' <span class="badge bg-success">' . get_label('default', 'Default') . '</span>' : ''),
