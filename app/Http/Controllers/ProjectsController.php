@@ -795,7 +795,7 @@ class ProjectsController extends Controller
 
                     $userHtml .= '</ul>';
                     } else {
-                    $userHtml = '<span class="badge bg-label-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                    $userHtml = '<span class="text-muted small">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                 }
                     $clientHtml = '';
                 if (!empty($project->clients) && count($project->clients) > 0) {
@@ -806,11 +806,11 @@ class ProjectsController extends Controller
 
                     $clientHtml .= '</ul>';
                     } else {
-                    $clientHtml = '<span class="badge bg-label-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                    $clientHtml = '<span class="text-muted small">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                 }
                     $tagHtml = '';
                     foreach ($project->tags as $tag) {
-                        $tagHtml .= "<span class='badge bg-label-{$tag->color}'>{$tag->title}</span> ";
+                        $tagHtml .= "<span class='text-muted small me-1'>#{$tag->title}</span>";
                     }
                     $isFavorite = getFavoriteStatus($project->id);
                 $isPinned = !is_null($project->pinned_id) ? 1 : 0; // Use pinned_id from the query

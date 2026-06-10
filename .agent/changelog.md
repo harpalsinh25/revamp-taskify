@@ -136,3 +136,23 @@ All notable changes to the Taskify project will be documented in this folder.
 - **`public/assets/css/custom.css`**: Removed redundant utility classes (`.m-0`, `.sr-only`, `.no-margin-p`, `.no-shadow`, `.h-2vh`, `.top-13`) that are natively handled by Bootstrap 5 or design system tokens.
 - **`resources/views/estimates-invoices/view.blade.php`**: Replaced the custom `.no-margin-p` class with Bootstrap's native `.mb-0`.
 - **`resources/views/components/dashboard/calendar-tab.blade.php`**: Replaced the custom `.no-shadow` class with Bootstrap's native `.shadow-none`.
+
+## [2026-06-10] - Project Details Offcanvas Refactoring
+### Modified
+- **`resources/views/projects/project_information.blade.php`**: Converted the custom docked aside panel (`.tk-detail-dock`) into a standard Bootstrap offcanvas component (`.offcanvas.offcanvas-end`) to align with the core design system. Removed the task statistics chart and reorganized structural layout tags for cleaner code.
+
+## [2026-06-10] - Offcanvas Details UI Polish
+### Modified
+- **`resources/views/projects/project_information.blade.php`**: Polished the project details offcanvas. Replaced the oversized `<h2>` title with a more compact `<h5>` and aligned the action icons. Standardized the Description and Additional Fields headers. Corrected checkbox layout and sizing, applying form-control-sm and form-select-sm where appropriate.
+
+### Modified
+- **`resources/views/projects/project_information.blade.php`**: Removed direct editing dropdowns for Status and Priority in the offcanvas, converting them to read-only badges. Replaced standard Boxicons with design system `<x-tk-icon>` components for Edit, File, Note, and Info icons for consistency.
+
+## [2026-06-10] - Submenu Icons and Menu Search Improvements
+### Added
+- Added icons to all sidebar submenus inside `app/Services/MenuService.php`.
+- Added keyboard shortcut `/` to focus the sidebar menu search.
+- Highlighted search query in sidebar search results.
+### Modified
+- **`resources/views/components/menu.blade.php`**: Rendered submenu icons and updated the menu search input layout to use a native clear icon.
+- **`public/assets/js/custom.js`**: Replaced legacy search logic with v2 search logic supporting text highlighting and shortcut.

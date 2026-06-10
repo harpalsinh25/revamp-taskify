@@ -5488,46 +5488,7 @@ $("#create_task_offcanvas").on("shown.bs.offcanvas", function (event) {
     }
 });
 
-$(document).ready(function () {
-    $("#menu-search").on("input", function () {
-        var searchQuery = $(this).val().toLowerCase();
-        var menuItems = $(".menu-item");
-        if (searchQuery === "") {
-            // If search is empty, reset everything
-            menuItems.show(); // Show all menu items
-            $(".menu-inner > li").removeClass("open"); // Remove 'open' class from all main menus
-            return; // Exit the function
-        }
-        menuItems.each(function () {
-            var item = $(this);
-            var itemText = item.text().toLowerCase();
-            var parentMenu = item.closest("li"); // Get the parent <li>
-            // Check if the item text or any submenu text matches the query
-            if (itemText.includes(searchQuery)) {
-                item.show(); // Show the menu item
-                if (item.closest("ul").hasClass("menu-sub")) {
-                    // If it's a submenu and its parent menu has submenus, add 'open'
-                    parentMenu
-                        .closest(".menu-inner > li:has(.menu-sub)")
-                        .addClass("open");
-                }
-            } else {
-                item.hide(); // Hide the menu item
-            }
-        });
-        // Loop through parent menus with submenus and open them if any of their submenus are visible
-        $(".menu-inner > li:has(.menu-sub)").each(function () {
-            var parentMenu = $(this);
-            var submenus = parentMenu.find(".menu-sub");
-            var anyVisible = submenus.find(".menu-item:visible").length > 0;
-            if (anyVisible) {
-                parentMenu.addClass("open"); // Add 'open' to parent if any submenu is visible
-            } else {
-                parentMenu.removeClass("open"); // Remove 'open' if no submenu is visible
-            }
-        });
-    });
-});
+    // Legacy menu search logic removed
 function addClearButtonFunctionality() {
     $(".custom-search-input").each(function () {
         const $inputField = $(this); // Current input field
@@ -6962,14 +6923,35 @@ $(document).ready(function () {
 
         // Menu search: filter items inside the visible pane.
         var search = document.getElementById("menu-search");
+        var searchClear = document.getElementById("menu-search-clear");
         if (search) {
             search.addEventListener("input", function () {
                 var q = this.value.trim().toLowerCase();
+                if (searchClear) searchClear.style.display = q.length > 0 ? "block" : "none";
                 var pane = panel.querySelector(".tk-panel-pane:not([hidden])");
                 if (!pane) return;
                 pane.querySelectorAll(".tk-panel-item").forEach(function (item) {
-                    var text = item.textContent.trim().toLowerCase();
-                    item.style.display = (!q || text.indexOf(q) !== -1) ? "" : "none";
+                    var span = item.querySelector("span");
+                    if (!span) return;
+                    
+                    if (!span.hasAttribute("data-original-text")) {
+                        span.setAttribute("data-original-text", span.textContent);
+                    }
+                    var text = span.getAttribute("data-original-text");
+                    var lowerText = text.toLowerCase();
+                    
+                    if (!q) {
+                        span.innerHTML = text;
+                        item.style.display = "";
+                    } else if (lowerText.indexOf(q) !== -1) {
+                        item.style.display = "";
+                        var startIndex = lowerText.indexOf(q);
+                        var endIndex = startIndex + q.length;
+                        span.innerHTML = text.substring(0, startIndex) + "<span style=\"color: var(--signal); font-weight: 600;\">" + text.substring(startIndex, endIndex) + "</span>" + text.substring(endIndex);
+                    } else {
+                        item.style.display = "none";
+                        span.innerHTML = text;
+                    }
                 });
                 pane.querySelectorAll(".tk-panel-group").forEach(function (group) {
                     var anyVisible = Array.prototype.some.call(
@@ -6979,7 +6961,26 @@ $(document).ready(function () {
                     group.style.display = anyVisible ? "" : "none";
                 });
             });
+
+            if (searchClear) {
+                searchClear.addEventListener("click", function() {
+                    search.value = "";
+                    search.dispatchEvent(new Event("input"));
+                    search.focus();
+                });
+            }
         }
+
+        // Keyboard shortcut '/' to focus menu search
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+                var searchInput = document.getElementById("menu-search");
+                if (searchInput) {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            }
+        });
     }
 
     if (document.readyState === "loading") {

@@ -71,7 +71,7 @@
             <input type="text" id="tk_board_search" placeholder="{{ get_label('search_tasks', 'Search tasks…') }}" autocomplete="off">
         </div>
         <span class="tk-toolbar-spacer"></span>
-        <button type="button" class="btn btn-sm btn-outline-secondary tk-detail-toggle active" id="tk_detail_toggle">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#project_detail_panel" aria-controls="project_detail_panel">
             <x-tk-icon name="info" size="14" class="me-1" />{{ get_label('project_details', 'Project details') }}
         </button>
     </div>
@@ -110,12 +110,12 @@
     </div>{{-- /.tk-workspace-main --}}
 
     {{-- ===== DOCKED PROJECT DETAIL PANEL (always open; project info + module tabs) ===== --}}
-    <aside class="tk-dock tk-detail-dock tk-detail-canvas" id="project_detail_panel">
-        <div class="tk-dock-head">
-            <span class="tk-dock-title"><x-tk-icon name="info" size="14" />{{ get_label('project_details', 'Project details') }}</span>
-            <button type="button" class="tk-iconbtn" id="tk_detail_close" aria-label="{{ get_label('close', 'Close') }}"><x-tk-icon name="close" /></button>
+    <div class="offcanvas offcanvas-end offcanvas-responsive" id="project_detail_panel" tabindex="-1" aria-labelledby="projectDetailPanelLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="projectDetailPanelLabel"><x-tk-icon name="info" size="14" class="me-1" />{{ get_label('project_details', 'Project details') }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ get_label('close', 'Close') }}"></button>
         </div>
-        <div class="tk-dock-body">
+        <div class="offcanvas-body">
         <div class="row">
         <div class="col-md-12">
             <div class="mb-4">
@@ -123,23 +123,26 @@
                     <div class="row">
                         <div class="col-md-12">
                             @if ($projectTags->isNotEmpty())
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 @foreach ($projectTags as $tag)
                                 <span class="badge bg-{{ $tag->color }}">{{ $tag->title }}</span>
                                 @endforeach
                             </div>
                             @endif
-                            <h2 class="fw-bold">{{ $project->title }}
-                                <a href="javascript:void(0);" class="mx-2">
+                            <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">{{ $project->title }}
+                                <a href="javascript:void(0);">
                                     <i class='bx {{getFavoriteStatus($project->id) ? "bxs" : "bx"}}-star favorite-icon text-warning' data-id="{{$project->id}}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="{{getFavoriteStatus($project->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')}}" data-favorite="{{getFavoriteStatus($project->id) ? 1 : 0}}"></i>
                                 </a>
                                 <a href="javascript:void(0);">
                                     <i class='bx {{getPinnedStatus($project->id) ? "bxs" : "bx"}}-pin pinned-icon text-success' data-id="{{$project->id}}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="{{getPinnedStatus($project->id) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')}}" data-pinned="{{getPinnedStatus($project->id)}}" data-require_reload="0"></i>
                                 </a>
-                            </h2>
+                            </h5>
                             <div class="row">
                                 <div class="col-md-6 mt-3 mb-3">
-                                    <label class="form-label" for="start_date"><?= get_label('users', 'Users') ?></label>
+                                    <label class="form-label text-muted d-flex align-items-center gap-2" for="start_date">
+                                        <?= get_label('users', 'Users') ?>
+                                        <a href="javascript:void(0)" class="edit-project update-users-clients text-muted" data-offcanvas="true" data-id="{{$project->id}}"><x-tk-icon name="edit" size="14" /></a>
+                                    </label>
                                     <?php
                                     $users = $project->users;
                                     if (count($users) > 0) { ?>
@@ -149,14 +152,16 @@
                                                     <img src="{{ $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg') }}" class="rounded-circle" alt="{{$user->first_name}} {{$user->last_name}}">
                                                 </a></li>
                                             @endforeach
-                                            <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
                                         </ul>
                                     <?php } else { ?>
-                                        <p><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a></p>
+                                        <p class="mb-0"><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span></p>
                                     <?php } ?>
                                 </div>
                                 <div class="col-md-6  mt-3 mb-3">
-                                    <label class="form-label" for="end_date"><?= get_label('clients', 'Clients') ?></label>
+                                    <label class="form-label text-muted d-flex align-items-center gap-2" for="end_date">
+                                        <?= get_label('clients', 'Clients') ?>
+                                        <a href="javascript:void(0)" class="edit-project update-users-clients text-muted" data-offcanvas="true" data-id="{{$project->id}}"><x-tk-icon name="edit" size="14" /></a>
+                                    </label>
                                     <?php
                                     $clients = $project->clients;
                                     if (count($clients) > 0) { ?>
@@ -166,40 +171,31 @@
                                                     <img src="{{ $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg') }}" class="rounded-circle" alt="{{$client->first_name}} {{$client->last_name}}">
                                                 </a></li>
                                             @endforeach
-                                            <a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a>
                                         </ul>
                                     <?php } else { ?>
-                                        <p><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-project update-users-clients" data-offcanvas="true" data-id="{{$project->id}}"><span class="bx bx-edit"></span></a></p>
+                                        <p class="mb-0"><span class="badge bg-primary"><?= get_label('not_assigned', 'Not assigned') ?></span></p>
                                     <?php } ?>
                                 </div>
                                 <div class="col-md-{{$project->note ? '7' : '6'}} mb-3">
-                                    <label class="form-label"><?= get_label('status', 'Status') ?></label>
-                                    <div class="d-flex align-items-center">
-                                        <select class="form-select form-select-sm select-bg-label-{{$project->status->color}}" id="statusSelect" data-id="{{ $project->id }}" data-original-status-id="{{$project->status->id}}" data-original-color-class="select-bg-label-{{$project->status->color}}">
-                                            @foreach($statuses as $status)
-                                            @php
-                                            $disabled = canSetStatus($status) ? '' : 'disabled';
-                                            @endphp
-                                            <option value="{{ $status->id }}" class="badge bg-label-{{ $status->color }}" {{ $project->status->id == $status->id ? 'selected' : '' }} {{ $disabled }}>
-                                                {{ $status->title }}
-                                            </option>
-                                            @endforeach
-                                        </select>
+                                    <label class="form-label text-muted"><?= get_label('status', 'Status') ?></label>
+                                    <div class="d-flex align-items-center gap-1 mt-1">
+                                        <span class="badge bg-label-{{$project->status->color}}">{{$project->status->title}}</span>
                                         @if($project->note)
-                                        <i class="bx bx-notepad ms-1 text-primary" data-bs-toggle="tooltip" data-bs-offset="0,4" data-bs-placement="top" data-bs-original-title="{{$project->note}}"></i>
+                                        <div class="ms-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{$project->note}}">
+                                            <x-tk-icon name="note" size="15" />
+                                        </div>
                                         @endif
                                     </div>
                                 </div>
                                 <div class="col-md-{{$project->note ? '5' : '6'}} mb-3">
-                                    <label for="prioritySelect" class="form-label"><?= get_label('priority', 'Priority') ?></label>
-                                    <select class="form-select form-select-sm select-bg-label-{{$project->priority?$project->priority->color:'secondary'}}" id="prioritySelect" data-id="{{ $project->id }}" data-original-priority-id="{{$project->priority ? $project->priority->id : ''}}" data-original-color-class="select-bg-label-{{$project->priority?$project->priority->color:'secondary'}}">
-                                        <option value="" class="badge bg-label-secondary">-</option>
-                                        @foreach($priorities as $priority)
-                                        <option value="{{$priority->id}}" class="badge bg-label-{{$priority->color}}" {{ $project->priority && $project->priority->id == $priority->id ? 'selected' : '' }}>
-                                            {{$priority->title}}
-                                        </option>
-                                        @endforeach
-                                    </select>
+                                    <label class="form-label text-muted"><?= get_label('priority', 'Priority') ?></label>
+                                    <div class="mt-1">
+                                        @if($project->priority)
+                                        <span class="badge bg-label-{{$project->priority->color}}">{{$project->priority->title}}</span>
+                                        @else
+                                        <span class="badge bg-label-secondary">-</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -208,84 +204,7 @@
                 <hr class="my-0 mb-4" />
                 <div>
                     <div class="row">
-                        <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
-                            <div class="overflow-hidden mb-4 statisticsDiv">
-                                <div class="pt-3 pb-1">
-                                    <div class="card-title mb-0">
-                                        <h5 class="m-0 me-2"><?= get_label('task_statistics', 'Task statistics') ?></h5>
-                                    </div>
-                                    <div class="my-3">
-                                        <div id="taskStatisticsChart"></div>
-                                    </div>
-                                </div>
-                                <div class="card-body" id="task-statistics">
-                                    <?php
-                                    // Calculate status counts
-                                    $statusCounts = [];
-                                    $total_tasks_count = 0;
-                                    foreach ($statuses as $status) {
-                                        $statusCount = 0;
-                                        if (isAdminOrHasAllDataAccess()) {
-                                            $statusCount = $project->tasks->where('status_id', $status->id)->count();
-                                        } else {
-                                            if (isClient()) {
-                                                $statusCount = $project->tasks()
-                                                    ->whereIn('project_id', getAuthenticatedUser()->projects->pluck('id'))
-                                                    ->where('status_id', $status->id)
-                                                    ->count();
-                                            } else {
-                                                $statusCount = $project->tasks()
-                                                    ->whereIn('id', getAuthenticatedUser()->tasks->pluck('id'))
-                                                    ->where('status_id', $status->id)
-                                                    ->count();
-                                            }
-                                        }
-                                        $statusCounts[$status->id] = $statusCount;
-                                        $total_tasks_count += $statusCount;
-                                    }
-                                    // Sort statuses by count in descending order
-                                    arsort($statusCounts);
-                                    ?>
-                                    <ul class="p-0 m-0">
-                                        @foreach ($statusCounts as $statusId => $count)
-                                        <?php $status = $statuses->where('id', $statusId)->first(); ?>
-                                        <li class="d-flex mb-4 pb-1">
-                                            <div class="avatar flex-shrink-0 me-3">
-                                                <span class="avatar-initial rounded bg-label-{{$status->color}}"><i class="bx bx-task"></i></span>
-                                            </div>
-                                            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                                <div class="me-2">
-                                                    <a href="{{ url(getUserPreferences('tasks', 'default_view')) }}?project={{ $project->id }}&status={{ $status->id }}">
-                                                        <h6 class="mb-0">{{ $status->title }}</h6>
-                                                    </a>
-                                                </div>
-                                                <div class="user-progress">
-                                                    <div class="status-count">
-                                                        <small class="fw-semibold">{{$count}}</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        @endforeach
-                                    </ul>
-                                    <li class="d-flex mb-4 pb-1">
-                                        <div class="avatar flex-shrink-0 me-3">
-                                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-menu"></i></span>
-                                        </div>
-                                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                            <div class="me-2">
-                                                <h5 class="mb-0"><?= get_label('total', 'Total') ?></h5>
-                                            </div>
-                                            <div class="user-progress">
-                                                <div class="status-count">
-                                                    <h5 class="mb-0">{{$total_tasks_count}}</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </div>
-                            </div>
-                        </div>
+
                         @php
                             $fromDate = $project->start_date ? \Carbon\Carbon::parse($project->start_date) : null;
                             $toDate = $project->end_date ? \Carbon\Carbon::parse($project->end_date) : null;
@@ -329,24 +248,16 @@
                             </div>
                         </div>
                         <div class="col-md-12 mb-4">
-                            <div>
-                                <div>
-                                    <div class="card-title">
-                                        <h5><?= get_label('description', 'Description') ?></h5>
-                                    </div>
-                                    <p>
-                                        <!-- Add your project description here -->
-                                        <?= (filled($project->description)) ? $project->description : '-' ?>
-                                    </p>
-                                </div>
-                            </div>
+                            <h6 class="text-muted fw-semibold mb-2"><?= get_label('description', 'Description') ?></h6>
+                            <p class="{{ filled($project->description) ? '' : 'text-muted mb-0' }}">
+                                <!-- Add your project description here -->
+                                <?= (filled($project->description)) ? $project->description : '-' ?>
+                            </p>
                         </div>
 
 
                         <div class="mt-4">
-                        <div>
-                            <h5 class="card-title mb-0">{{ get_label('additional_fields', 'Additional Fields') }}</h5>
-                        </div>
+                        <h6 class="text-muted fw-semibold mb-3">{{ get_label('additional_fields', 'Additional Fields') }}</h6>
                         <div class="mt-3">
 
                             {{-- @dd($customFields); --}}
@@ -368,7 +279,7 @@
                                                 $fieldValue = $project->getCustomFieldValue($field->id);
                                             @endphp
                                             @if ($fieldValue)
-                                                <div class="col-md-6 mb-3">
+                                                <div class="col-12 col-sm-6 mb-3">
                                                     <label class="form-label">{{ $field->field_label }}</label>
 
                                                     @switch($field->field_type)
@@ -377,7 +288,7 @@
 
                                                         @case('password')
                                                         @case('email')
-                                                            <input class="form-control" value="{{ $fieldValue }}" readonly>
+                                                            <input class="form-control form-control-sm" value="{{ $fieldValue }}" readonly>
                                                         @break
 
                                                         @case('textarea')
@@ -391,7 +302,7 @@
                                                                 $currentValue = $fieldValue;
                                                             @endphp
                                                             @if ($field->field_type == 'select')
-                                                                <select class="form-control" disabled>
+                                                                <select class="form-select form-select-sm" disabled>
                                                                     <option value="">Select an option</option>
                                                                     @foreach ($options as $option)
                                                                         <option value="{{ $option }}"
@@ -400,14 +311,14 @@
                                                                     @endforeach
                                                                 </select>
                                                             @else
-                                                                <div>
+                                                                <div class="d-flex flex-column gap-1">
                                                                     @foreach ($options as $option)
-                                                                        <div class="form-check">
+                                                                        <div class="form-check mb-0">
                                                                             <input class="form-check-input" type="radio"
                                                                                 value="{{ $option }}"
                                                                                 {{ $currentValue == $option ? 'checked' : '' }}
                                                                                 disabled>
-                                                                            <label class="form-check-label">
+                                                                            <label class="form-check-label text-muted">
                                                                                 {{ $option }}
                                                                             </label>
                                                                         </div>
@@ -417,7 +328,7 @@
                                                         @break
 
                                                         @case('date')
-                                                            <input type="text" class="form-control"
+                                                            <input type="text" class="form-control form-control-sm"
                                                                 value="{{ $fieldValue ? $fieldValue : '' }}" readonly>
                                                         @break
 
@@ -431,14 +342,14 @@
                                                                     $currentValues = [$currentValues];
                                                                 }
                                                             @endphp
-                                                            <div>
+                                                            <div class="d-flex flex-column gap-1">
                                                                 @foreach ($options as $option)
-                                                                    <div class="form-check">
+                                                                    <div class="form-check mb-0">
                                                                         <input class="form-check-input" type="checkbox"
                                                                             value="{{ $option }}"
                                                                             {{ in_array($option, $currentValues) ? 'checked' : '' }}
                                                                             disabled>
-                                                                        <label class="form-check-label">
+                                                                        <label class="form-check-label text-muted">
                                                                             {{ $option }}
                                                                         </label>
                                                                     </div>
@@ -451,7 +362,7 @@
                                                                 <div>
                                                                     <a href="{{ asset('storage/' . $fieldValue) }}" target="_blank"
                                                                         class="btn btn-sm btn-outline-primary">
-                                                                        <i class='bx bx-file'></i> View File
+                                                                        <x-tk-icon name="file" size="14" /> View File
                                                                     </a>
                                                                 </div>
                                                             @else
@@ -464,7 +375,7 @@
                                                                 <div class="me-2"
                                                                     style="width: 25px; height: 25px; background-color: {{ $fieldValue ?? '#FFFFFF' }}; border: 1px solid #ddd; border-radius: 4px;">
                                                                 </div>
-                                                                <input type="text" class="form-control"
+                                                                <input type="text" class="form-control form-control-sm"
                                                                     value="{{ $fieldValue }}" readonly>
                                                             </div>
                                                         @break
@@ -480,13 +391,13 @@
                                     </div>
                                 @else
                                     <p class="text-muted mb-0">
-                                        <i class='bx bx-info-circle me-1'></i>
+                                        <x-tk-icon name="info" size="15" class="me-1" />
                                         {{ get_label('no_custom_fields', 'No custom fields for this project') }}
                                     </p>
                                 @endif
                             @else
                                 <p class="text-muted mb-0">
-                                    <i class='bx bx-info-circle me-1'></i>
+                                    <x-tk-icon name="info" size="15" class="me-1" />
                                     {{ get_label('no_custom_fields', 'No custom fields for this project') }}
                                 </p>
                             @endif
@@ -787,9 +698,9 @@
             </div>
         </div>
         @endif
-        </div>{{-- /.row inside dock-body --}}
-        </div>{{-- /.tk-detail-dock-body --}}
-    </aside>{{-- /.tk-detail-dock --}}
+        </div>{{-- /.row inside offcanvas-body --}}
+        </div>{{-- /.offcanvas-body --}}
+    </div>{{-- /.offcanvas --}}
     </div>{{-- /.tk-workspace --}}
 
         <div class="modal fade" id="create_milestone_modal" tabindex="-1" aria-hidden="true">

@@ -336,9 +336,10 @@ $pendingLeaveRequestsCount = $query->count();
     </div>
 
     {{-- Menu search (filters the active pane, behaviour wired in custom.js) --}}
-    <div class="tk-panel-search">
-        <input type="text" id="menu-search" class="custom-search-input" autocomplete="off"
-            placeholder="{{ get_label('search_menu', 'Search Menu...') }}">
+    <div class="tk-panel-search" style="position: relative;">
+        <input type="text" id="menu-search" autocomplete="off"
+            placeholder="{{ get_label('search_menu', 'Search Menu...') }} (/)">
+        <i class="bx bx-x" id="menu-search-clear" style="display: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; color: var(--bs-body-color);"></i>
     </div>
 
     {{-- Per-category panes --}}
@@ -362,6 +363,7 @@ $pendingLeaveRequestsCount = $query->count();
                                 @php $subActive = isset($sub['class']) && strpos($sub['class'], 'active') !== false; @endphp
                                 <a class="tk-panel-item" href="{{ $sub['url'] ?? 'javascript:void(0)' }}"
                                     data-active="{{ $subActive ? 'true' : 'false' }}">
+                                    @if (!empty($sub['icon']))<i class="{{ $sub['icon'] }}"></i>@endif
                                     <span>{{ $sub['label'] }}</span>
                                 </a>
                             @endforeach
