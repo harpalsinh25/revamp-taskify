@@ -8209,7 +8209,7 @@ body.v2-shell table[data-toggle="table"]>tbody>tr>td {
 
 body.v2-shell .bootstrap-table table>tbody>tr:last-child>td,
 body.v2-shell table[data-toggle="table"]>tbody>tr:last-child>td {
-    border-bottom-width: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
 }
 
 /* the plugin's container/body box borders that draw the dark top + bottom lines */

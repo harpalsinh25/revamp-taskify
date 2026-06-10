@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to the Taskify project will be documented in this folder.
+
+## [2026-06-10] - Table Header and Footer Consistency
+### Modified
+- **`resources/views/layout.blade.php`**: Added a cache-buster query parameter to the `bootstrap-table.min.css` stylesheet link to prevent browsers from loading cached versions of the stylesheet.
+- **`public/assets/css/bootstrap-table.min.css`**: Replaced all native `#dee2e6` dark borders with `var(--line)` to ensure consistency with the design system.
+- **`public/assets/css/table.css`**: Configured last-row table cells to have a light brown bottom border (`border-bottom: 1px solid var(--line) !important`) and set pagination `border-top` to 0. Added global resets to remove any potential default dark wrapper borders/box-shadows.
+- **`public/assets/css/custom.css`**: Updated last-row table cells to use `border-bottom: 1px solid var(--line) !important` and set pagination `border-top` to 0.
+- **`public/assets/css/tk-design-system.css`**: Updated `.tk-table` last-row td borders to use `border-bottom: 1px solid var(--line) !important`.
+
 ## [2026-06-09] - Table Aesthetics Refinement
 ### Modified
 - **`public/assets/css/table.css`**: Refined the table design system to match a cleaner, more spacious aesthetic. Removed `table-layout: fixed` to eliminate unwanted horizontal scrollbars. Removed the messy double-line border from the toolbar. Updated header typography to use normal case fonts. Adjusted toolbar alignment using flexbox to perfectly align search and refresh buttons to the right. Scaled down overall font sizes (13px), paddings, checkboxes, and buttons to maintain consistency with the compact design system. Fixed default blue link colors in table cells so project titles inherit the strong text color (`var(--fg-0)`) instead of looking out of place.

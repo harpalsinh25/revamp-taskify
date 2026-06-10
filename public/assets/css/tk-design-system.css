@@ -308,7 +308,7 @@
 }
 .tk-table tbody tr { transition: background var(--t-1) var(--ease); }
 .tk-table tbody tr:hover td { background: var(--bg-2) !important; }
-.tk-table tbody tr:last-child td { border-bottom: 0 !important; }
+.tk-table tbody tr:last-child td { border-bottom: 1px solid var(--line) !important; }
 .tk-table tbody tr.selected td { background: oklch(from var(--signal) l c h / 0.10) !important; }
 
 /* sort indicators */
