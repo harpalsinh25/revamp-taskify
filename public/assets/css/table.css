@@ -14,8 +14,8 @@ body.v2-shell .bootstrap-table {
 /* --- Toolbar bar: flex row, NO floats (overrides bootstrap-table.min.css). --- */
 body.v2-shell .bootstrap-table .fixed-table-toolbar {
     padding: 14px 20px;
-    border-bottom: 0 !important;
-    /* Removed the messy double line! */
+    border-bottom: 1px solid var(--line) !important;
+    /* Clean light line */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -139,8 +139,10 @@ body.v2-shell .bootstrap-table .fixed-table-header {
 
 body.v2-shell .bootstrap-table .fixed-table-body {
     border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
+}
+
+body.v2-shell .bootstrap-table .fixed-table-border {
+    display: none !important;
 }
 
 body.v2-shell .bootstrap-table table.table {
@@ -157,11 +159,11 @@ body.v2-shell .bootstrap-table table.table {
 
 /* Clean Header styling */
 body.v2-shell .bootstrap-table table.table>thead {
-    border: 0 !important;
+    border-color: var(--line) !important;
 }
 
 body.v2-shell .bootstrap-table table.table>thead>tr {
-    border: 0 !important;
+    border-color: var(--line) !important;
 }
 
 body.v2-shell .bootstrap-table table.table>thead>tr>th {
@@ -176,9 +178,8 @@ body.v2-shell .bootstrap-table table.table>thead>tr>th {
     white-space: nowrap;
     text-align: left;
     vertical-align: middle;
-    border: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
+    border-color: var(--line) !important;
+    border-bottom: 1px solid var(--line) !important;
     box-shadow: none !important;
     padding: 8px 12px;
 }
@@ -375,7 +376,7 @@ body.v2-shell .bootstrap-table .fixed-table-pagination {
     align-items: center;
     justify-content: space-between;
     padding: 12px 20px;
-    border-top: 0 !important;
+    border-top: 1px solid var(--line) !important;
     color: var(--fg-1);
     font-size: 13px;
     width: 100%;
