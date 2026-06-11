@@ -4,29 +4,29 @@
 $visibleColumns = getUserPreferences('meetings');
 $user = getAuthenticatedUser();
 @endphp
+{{$slot}}
+<div class="row g-3 align-items-end tk-filter-row mb-3">
+    <x-advanced-date-filters prefix="meeting" />
+    @if(isAdminOrHasAllDataAccess())
+    <div class="col-md-4 mb-3">
+        <select class="form-select users_select tom_select" id="meeting_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
+        </select>
+    </div>
+    <div class="col-md-4 mb-3">
+        <select class="form-select clients_select tom_select" id="meeting_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+        </select>
+    </div>
+    @endif
+    <div class="col-md-3 mb-3">
+        <select class="form-select tom_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>" data-allow-clear="true" multiple>
+            <option value="ongoing"><?= get_label('ongoing', 'Ongoing') ?></option>
+            <option value="yet_to_start"><?= get_label('yet_to_start', 'Yet to start') ?></option>
+            <option value="ended"><?= get_label('ended', 'Ended') ?></option>
+        </select>
+    </div>
+</div>
 <div class="card">
     <div class="card-body">
-        {{$slot}}
-        <div class="row">
-            <x-advanced-date-filters prefix="meeting" />
-            @if(isAdminOrHasAllDataAccess())
-            <div class="col-md-4 mb-3">
-                <select class="form-select users_select" id="meeting_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
-                </select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <select class="form-select clients_select" id="meeting_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
-                </select>
-            </div>
-            @endif
-            <div class="col-md-4 mb-3">
-                <select class="form-select js-example-basic-multiple" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>" data-allow-clear="true" multiple>
-                    <option value="ongoing"><?= get_label('ongoing', 'Ongoing') ?></option>
-                    <option value="yet_to_start"><?= get_label('yet_to_start', 'Yet to start') ?></option>
-                    <option value="ended"><?= get_label('ended', 'Ended') ?></option>
-                </select>
-            </div>
-        </div>
         <div class="table-responsive text-nowrap">
             <input type="hidden" id="data_type" value="meetings">
             <input type="hidden" id="data_table" value="meetings_table">

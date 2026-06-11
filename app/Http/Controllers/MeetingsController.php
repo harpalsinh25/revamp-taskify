@@ -314,33 +314,33 @@ class MeetingsController extends Controller
                 $status = 'Ongoing';
             }
 
-                $actions = '';
+                $actions = '<div class="dropdown">';
+                $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                $actions .= '</button>';
+                $actions .= '<ul class="dropdown-menu">';
 
                 if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-meeting" data-id="' . $meeting->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-meeting d-block" data-id="' . $meeting->id . '">';
+                    $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
                 }
 
                 if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $meeting->id . '" data-type="meetings" data-table="meetings_table">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete d-block" data-id="' . $meeting->id . '" data-type="meetings" data-table="meetings_table">';
+                    $actions .= '<i class="bx bx-trash text-danger me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
                 }
 
                 if ($canCreate) {
-                    $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $meeting->id . '" data-title="' . $meeting->title . '" data-type="meetings" data-table="meetings_table" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                        '<i class="bx bx-copy text-warning mx-2"></i>' .
-                        '</a>';
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item duplicate d-block" data-id="' . $meeting->id . '" data-title="' . $meeting->title . '" data-type="meetings" data-table="meetings_table">';
+                    $actions .= '<i class="bx bx-copy text-warning me-2"></i>' . get_label('duplicate', 'Duplicate') . '</a></li>';
                 }
 
             if ($status == 'Ongoing') {
-                    $actions .= '<a href="' . url("/meetings/join/{$meeting->id}") . '" title="Join">' .
-                        '<i class="bx bx-arrow-to-right text-success mx-3"></i>' .
-                        '</a>';
+                    $actions .= '<li><a href="' . url("/meetings/join/{$meeting->id}") . '" class="dropdown-item d-block">';
+                    $actions .= '<i class="bx bx-video text-success me-2"></i>' . get_label('join', 'Join') . '</a></li>';
                 }
 
-            $actions = $actions ?: '-';
+            $actions .= '</ul></div>';
 
                 $userHtml = '';
             if (!empty($meeting->users) && count($meeting->users) > 0) {

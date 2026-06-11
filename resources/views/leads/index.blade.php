@@ -69,7 +69,7 @@
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="tk-filter-label">{{ get_label('sources', 'Sources') }}</label>
-                        <select class="form-select" id="selected_sources" name="sources[]"
+                        <select class="form-select tom_select" id="selected_sources" name="sources[]"
                             aria-label="Default select example"
                             data-placeholder="{{ get_label('filter_by_sources', 'Filter by sources') }}"
                             data-allow-clear="true" multiple>
@@ -78,7 +78,7 @@
                     <x-advanced-date-filters prefix="lead" :filters="['date_range']" colClass="col-md-3 mb-3" />
                     <div class="col-md-3 mb-3">
                         <label class="tk-filter-label">{{ get_label('stages', 'Stages') }}</label>
-                        <select class="form-select" id="selected_stages" name="stages[]"
+                        <select class="form-select tom_select" id="selected_stages" name="stages[]"
                             aria-label="Default select example"
                             data-placeholder="{{ get_label('filter_by_stages', 'Filter by stages') }}"
                             data-allow-clear="true" multiple>

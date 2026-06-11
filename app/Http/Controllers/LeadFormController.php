@@ -729,7 +729,11 @@ class LeadFormController extends Controller
             ->skip($offset)
             ->get()
             ->map(function ($leadForm) use ($canDelete, $canEdit) {
-                $actions = '';
+                $actions = '<div class="dropdown">';
+                $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                $actions .= '</button>';
+                $actions .= '<ul class="dropdown-menu">';
 
             if ($leadForm->leadStage) {
                 $stage = '<span class="badge bg-' . $leadForm->leadStage->color . '">' . $leadForm->leadStage->name . '</span>';
@@ -738,29 +742,19 @@ class LeadFormController extends Controller
             }
 
             if ($canEdit) {
-                $actions .= '
-                    <a href="' . route('lead-forms.edit', $leadForm->id) . '"
-                       class="mx-1"
-                       title="' . get_label('update', 'Update') . '">
-                        <i class="bx bx-edit text-primary"></i>
-                    </a>
-                    <a href="' . route('lead-forms.embed', $leadForm->id) . '"
-                       class="mx-1"
-                       title="' . get_label('embed_code', 'Embed Code') . '">
-                        <i class="bx bx-code-alt text-info"></i>
-                    </a>';
+                $actions .= '<li><a href="' . route('lead-forms.edit', $leadForm->id) . '" class="dropdown-item d-block">';
+                $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                
+                $actions .= '<li><a href="' . route('lead-forms.embed', $leadForm->id) . '" class="dropdown-item d-block">';
+                $actions .= '<i class="bx bx-code-alt text-success me-2"></i>' . get_label('embed', 'Embed') . '</a></li>';
             }
 
                 if ($canDelete) {
-                $actions .= '
-                    <a href="javascript:void(0);"
-                       class="delete"
-                       data-id="' . $leadForm->id . '"
-                       data-type="lead-forms"
-                       title="' . get_label('delete', 'Delete') . '">
-                        <i class="bx bx-trash mx-1 text-danger"></i>
-                    </a>';
+                $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete d-block" data-id="' . $leadForm->id . '" data-type="lead-forms">';
+                $actions .= '<i class="bx bx-trash text-danger me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
                 }
+
+                $actions .= '</ul></div>';
 
             $responses = '<div class="text-center">
                 <a href="' . route('lead-forms.responses', $leadForm->id) . '"

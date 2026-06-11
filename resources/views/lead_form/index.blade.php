@@ -31,9 +31,9 @@
         @if ($forms->count() > 0)
             @php $visibleColumns = getUserPreferences('lead_forms'); @endphp
             <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive text-nowrap">
+                <div class="card-datatable table-responsive text-nowrap">
                         <input type="hidden" id="data_type" value="lead-forms">
+                        <input type="hidden" id="save_column_visibility">
                         <table id="table" data-toggle="table" data-url="{{ route('lead-forms.list') }}"
                             data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total"
                             data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]"
@@ -80,7 +80,6 @@
                             </thead>
                         </table>
                     </div>
-                </div>
             </div>
         @else
             @php $type = 'Lead Forms'; @endphp

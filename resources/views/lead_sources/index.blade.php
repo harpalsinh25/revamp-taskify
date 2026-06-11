@@ -33,11 +33,7 @@
                 $visibleColumns = getUserPreferences('lead_sources');
             @endphp
             <div class="card">
-                <div class="card-body">
-                    <div class="row">
-
-                    </div>
-                    <div class="table-responsive text-nowrap">
+                    <div class="card-datatable table-responsive text-nowrap">
                         <input type="hidden" id="data_type" value="lead-sources">
                         <input type="hidden" id="save_column_visibility">
                         <table id="table" data-toggle="table" data-loading-template="loadingTemplate"
@@ -63,7 +59,6 @@
                             </thead>
                         </table>
                     </div>
-                </div>
             </div>
         @else
             <?php

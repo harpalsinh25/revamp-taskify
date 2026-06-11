@@ -33,16 +33,17 @@
                 $visibleColumns = getUserPreferences('lead_stages');
             @endphp
             <div class="card">
-                <div class="card-body">
+                <div class="card-body pb-0">
                     <div class="row">
-                        <div class="alert alert-primary d-flex align-items-center">
+                        <div class="alert alert-primary d-flex align-items-center mb-0">
                             <i class="bx bx-move fs-4 me-2"></i>
                             <span class="fw-semibold">{{get_label('lead_stages_reorder_info','Drag and drop the rows below to change the order of your lead
                                 stages.')}}</span>
                         </div>
 
                     </div>
-                    <div class="table-responsive text-nowrap">
+                </div>
+                <div class="card-datatable table-responsive text-nowrap">
                         <input type="hidden" id="data_type" value="lead-stages">
                         <input type="hidden" id="save_column_visibility">
                         <table id="table" data-toggle="table" data-loading-template="loadingTemplate"
@@ -74,7 +75,6 @@
                             </thead>
                         </table>
                     </div>
-                </div>
             </div>
         @else
             <?php

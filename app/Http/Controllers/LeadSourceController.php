@@ -493,22 +493,31 @@ class LeadSourceController extends Controller
      */
     private function getActions($lead_source)
     {
-        $actions = '';
         $canEdit = checkPermission('manage_leads');
         $canDelete = checkPermission('manage_leads');
 
+        if (!$canEdit && !$canDelete) {
+            return '-';
+        }
+
+        $actions = '<div class="dropdown">';
+        $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+        $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+        $actions .= '</button>';
+        $actions .= '<ul class="dropdown-menu">';
+
         if ($canEdit) {
-            $actions .= '<a href="javascript:void(0);" class="edit-lead-source" data-id="' . $lead_source->id . '" title="' . get_label('update', 'Update') . '">' .
-                '<i class="bx bx-edit mx-1"></i>' .
-                '</a>';
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-lead-source d-block" data-id="' . $lead_source->id . '">';
+            $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
         }
 
         if ($canDelete) {
-            $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $lead_source->id . '" data-type="lead-sources" data-table="table">' .
-                '<i class="bx bx-trash text-danger mx-1"></i>' .
-                '</button>';
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete d-block" data-id="' . $lead_source->id . '" data-type="lead-sources" data-table="table">';
+            $actions .= '<i class="bx bx-trash text-danger me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
         }
 
-        return $actions ?: '-';
+        $actions .= '</ul></div>';
+
+        return $actions;
     }
 }
