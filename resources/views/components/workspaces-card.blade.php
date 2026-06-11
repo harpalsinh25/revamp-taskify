@@ -4,24 +4,25 @@
 $visibleColumns = getUserPreferences('workspaces');
 $auth_user = getAuthenticatedUser();
 @endphp
-<div class="mt-2">
-    {{$slot}}
-    <div class="row g-3 align-items-end tk-filter-row mb-3">
+<div class="card">
+    <div class="card-body">
+        {{$slot}}
+        <div class="row g-3 align-items-end tk-filter-row mb-3">
             @if(isAdminOrHasAllDataAccess())
             <div class="col-md-4 mb-3">
                 <label class="tk-filter-label">{{ get_label('users', 'Users') }}</label>
-                <select class="form-select tom_users_select" id="workspace_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" data-consider-workspace="false" multiple="multiple">
+                <select class="form-control users_select" id="workspace_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" data-consider-workspace="false" multiple="multiple">
                 </select>
             </div>
             <div class="col-md-4 mb-3">
                 <label class="tk-filter-label">{{ get_label('clients', 'Clients') }}</label>
-                <select class="form-select tom_clients_select" id="workspace_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" data-consider-workspace="false" multiple="multiple">
+                <select class="form-control clients_select" id="workspace_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" data-consider-workspace="false" multiple="multiple">
                 </select>
             </div>
             @endif
         </div>
-    <div class="card">
-        <div class="card-datatable table-responsive text-nowrap">
+    </div>
+    <div class="card-datatable table-responsive text-nowrap">
         <input type="hidden" id="data_type" value="workspaces">
             <input type="hidden" id="data_reload" value="1">
             <input type="hidden" id="save_column_visibility">
