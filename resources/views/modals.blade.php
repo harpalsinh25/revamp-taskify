@@ -3676,149 +3676,127 @@
         Request::is('projects/information/*') ||
         Request::is('users') ||
         Request::is('clients'))
-    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1"><span id="typePlaceholder"></span>
-                        <?= get_label('quick_view', 'Quick View') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <h5 id="quickViewTitlePlaceholder" class="text-muted"></h5>
-                    <div class="nav-align-top">
-                        <ul class="nav nav-tabs" role="tablist">
-                            @if ($auth_user->can('manage_users'))
-                                <li class="nav-item">
-                                    <button type="button" class="nav-link active" role="tab"
-                                        data-bs-toggle="tab" data-bs-target="#navs-top-quick-view-users"
-                                        aria-controls="navs-top-quick-view-users">
-                                        <i
-                                            class="menu-icon tf-icons bx bx-group text-primary"></i><?= get_label('users', 'Users') ?>
-                                    </button>
-                                </li>
-                            @endif
-                            @if ($auth_user->can('manage_clients'))
-                                <li class="nav-item">
-                                    <button type="button"
-                                        class="nav-link {{ !$auth_user->can('manage_users') ? 'active' : '' }}"
-                                        role="tab" data-bs-toggle="tab"
-                                        data-bs-target="#navs-top-quick-view-clients"
-                                        aria-controls="navs-top-quick-view-clients">
-                                        <i
-                                            class="menu-icon tf-icons bx bx-group text-warning"></i><?= get_label('clients', 'Clients') ?>
-                                    </button>
-                                </li>
-                            @endif
-                            <li class="nav-item">
-                                <button type="button"
-                                    class="nav-link {{ !$auth_user->can('manage_users') && !$auth_user->can('manage_clients') ? 'active' : '' }}"
-                                    role="tab" data-bs-toggle="tab"
-                                    data-bs-target="#navs-top-quick-view-description"
-                                    aria-controls="navs-top-quick-view-description">
-                                    <i
-                                        class="menu-icon tf-icons bx bx-notepad text-success"></i><?= get_label('description', 'Description') ?>
-                                </button>
-                            </li>
-                        </ul>
-                        <input type="hidden" id="type">
-                        <input type="hidden" id="typeId">
-                        <div class="tab-content">
-                            @if ($auth_user->can('manage_users'))
-                                <div class="tab-pane fade active show" id="navs-top-quick-view-users"
-                                    role="tabpanel">
-                                    <div class="table-responsive text-nowrap">
-                                        <!-- <input type="hidden" id="data_type" value="users">
-                                <input type="hidden" id="data_table" value="usersTable"> -->
-                                        <table id="usersTable" data-toggle="table"
-                                            data-loading-template="loadingTemplate"
-                                            data-url="{{ url('/users/list') }}" data-icons-prefix="bx"
-                                            data-icons="icons" data-show-refresh="true" data-total-field="total"
-                                            data-trim-on-search="false" data-data-field="rows"
-                                            data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
-                                            data-side-pagination="server" data-show-columns="true"
-                                            data-pagination="true" data-sort-name="id" data-sort-order="desc"
-                                            data-mobile-responsive="true"
-                                            data-query-params="queryParamsUsersClients">
-                                            <thead>
-                                                <tr>
-                                                    <th data-checkbox="true"></th>
-                                                    <th data-sortable="true" data-field="id">
-                                                        <?= get_label('id', 'ID') ?></th>
-                                                    <th data-field="profile"><?= get_label('users', 'Users') ?></th>
-                                                    <th data-field="role"><?= get_label('role', 'Role') ?></th>
-                                                    <th data-field="phone" data-sortable="true"
-                                                        data-visible="false">
-                                                        <?= get_label('phone_number', 'Phone number') ?></th>
-                                                    <th data-sortable="true" data-field="created_at"
-                                                        data-visible="false">
-                                                        <?= get_label('created_at', 'Created at') ?></th>
-                                                    <th data-sortable="true" data-field="updated_at"
-                                                        data-visible="false">
-                                                        <?= get_label('updated_at', 'Updated at') ?></th>
-                                                    {{-- <th data-formatter="actionFormatterUsers"><?= get_label('actions', 'Actions') ?></th> --}}
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            @endif
-                            @if ($auth_user->can('manage_clients'))
-                                <div class="tab-pane fade {{ !$auth_user->can('manage_users') ? 'active show' : '' }}"
-                                    id="navs-top-quick-view-clients" role="tabpanel">
-                                    <div class="table-responsive text-nowrap">
-                                        <!-- <input type="hidden" id="data_type" value="clients">
-                            <input type="hidden" id="data_table" value="clientsTable"> -->
-                                        <table id="clientsTable" data-toggle="table"
-                                            data-loading-template="loadingTemplate"
-                                            data-url="{{ url('/clients/list') }}" data-icons-prefix="bx"
-                                            data-icons="icons" data-show-refresh="true" data-total-field="total"
-                                            data-trim-on-search="false" data-data-field="rows"
-                                            data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
-                                            data-side-pagination="server" data-show-columns="true"
-                                            data-pagination="true" data-sort-name="id" data-sort-order="desc"
-                                            data-mobile-responsive="true"
-                                            data-query-params="queryParamsUsersClients">
-                                            <thead>
-                                                <tr>
-                                                    <th data-checkbox="true"></th>
-                                                    <th data-sortable="true" data-field="id">
-                                                        <?= get_label('id', 'ID') ?></th>
-                                                    <th data-field="profile"><?= get_label('client', 'Client') ?></th>
-                                                    <th data-field="company" data-sortable="true"
-                                                        data-visible="false"><?= get_label('company', 'Company') ?>
-                                                    </th>
-                                                    <th data-field="phone" data-sortable="true"
-                                                        data-visible="false">
-                                                        <?= get_label('phone_number', 'Phone number') ?></th>
-                                                    <th data-sortable="true" data-field="created_at"
-                                                        data-visible="false">
-                                                        <?= get_label('created_at', 'Created at') ?></th>
-                                                    <th data-sortable="true" data-field="updated_at"
-                                                        data-visible="false">
-                                                        <?= get_label('updated_at', 'Updated at') ?></th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            @endif
-                            <div class="tab-pane fade {{ !$auth_user->can('manage_users') && !$auth_user->can('manage_clients') ? 'active show' : '' }}"
-                                id="navs-top-quick-view-description" role="tabpanel">
-                                <p class="pt-3" id="quickViewDescPlaceholder"></p>
-                            </div>
+    <div class="offcanvas offcanvas-end offcanvas-responsive" id="quickViewOffcanvas" tabindex="-1" aria-hidden="true">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="exampleModalLabel1" style="display:flex;align-items:center;gap:6px;">
+                <span id="typePlaceholder" class="mono" style="font-size:11px;color:var(--fg-1);font-weight:600;"></span>
+                <?= get_label('quick_view', 'Quick View') ?>
+            </h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h3 id="quickViewTitlePlaceholder" style="font-size:16px;margin:0 0 12px;" class="text-muted"></h3>
+            
+            <div class="nav-align-top">
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    @if ($auth_user->can('manage_users'))
+                        <li class="nav-item">
+                            <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-quick-view-users" aria-controls="navs-top-quick-view-users">
+                                <i class='bx bx-user me-1'></i> <?= get_label('users', 'Users') ?>
+                            </button>
+                        </li>
+                    @endif
+                    @if ($auth_user->can('manage_clients'))
+                        <li class="nav-item">
+                            <button type="button" class="nav-link {{ !$auth_user->can('manage_users') ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-quick-view-clients" aria-controls="navs-top-quick-view-clients">
+                                <i class='bx bx-buildings me-1'></i> <?= get_label('clients', 'Clients') ?>
+                            </button>
+                        </li>
+                    @endif
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ !$auth_user->can('manage_users') && !$auth_user->can('manage_clients') ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-quick-view-description" aria-controls="navs-top-quick-view-description">
+                            <i class='bx bx-align-left me-1'></i> <?= get_label('description', 'Description') ?>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <input type="hidden" id="type">
+            <input type="hidden" id="typeId">
+            <div class="tab-content mt-3">
+                @if ($auth_user->can('manage_users'))
+                    <div class="tab-pane fade active show" id="navs-top-quick-view-users" role="tabpanel">
+                        <div class="table-wrap" style="width:100%;">
+                            <table id="usersTable" class="table" data-toggle="table"
+                                data-loading-template="loadingTemplate"
+                                data-url="{{ url('/users/list') }}" data-icons-prefix="bx"
+                                data-icons="icons" data-show-refresh="true" data-total-field="total"
+                                data-trim-on-search="false" data-data-field="rows"
+                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
+                                data-side-pagination="server" data-show-columns="true"
+                                data-pagination="true" data-sort-name="id" data-sort-order="desc"
+                                data-mobile-responsive="true"
+                                data-query-params="queryParamsUsersClients">
+                                <thead>
+                                    <tr>
+                                        <th data-checkbox="true"></th>
+                                        <th data-sortable="true" data-field="id">
+                                            <?= get_label('id', 'ID') ?></th>
+                                        <th data-field="profile"><?= get_label('users', 'Users') ?></th>
+                                        <th data-field="role"><?= get_label('role', 'Role') ?></th>
+                                        <th data-field="phone" data-sortable="true"
+                                            data-visible="false">
+                                            <?= get_label('phone_number', 'Phone number') ?></th>
+                                        <th data-sortable="true" data-field="created_at"
+                                            data-visible="false">
+                                            <?= get_label('created_at', 'Created at') ?></th>
+                                        <th data-sortable="true" data-field="updated_at"
+                                            data-visible="false">
+                                            <?= get_label('updated_at', 'Updated at') ?></th>
+                                    </tr>
+                                </thead>
+                            </table>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <?= get_label('close', 'Close') ?>
-                    </button>
-                </div>
-            </div>
+                @endif
+                @if ($auth_user->can('manage_clients'))
+                    <div class="tab-pane fade {{ !$auth_user->can('manage_users') ? 'active show' : '' }}" id="navs-top-quick-view-clients" role="tabpanel">
+                        <div class="table-wrap" style="width:100%;">
+                            <table id="clientsTable" class="table" data-toggle="table"
+                                data-loading-template="loadingTemplate"
+                                data-url="{{ url('/clients/list') }}" data-icons-prefix="bx"
+                                data-icons="icons" data-show-refresh="true" data-total-field="total"
+                                data-trim-on-search="false" data-data-field="rows"
+                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
+                                data-side-pagination="server" data-show-columns="true"
+                                data-pagination="true" data-sort-name="id" data-sort-order="desc"
+                                data-mobile-responsive="true"
+                                data-query-params="queryParamsUsersClients">
+                                <thead>
+                                    <tr>
+                                        <th data-checkbox="true"></th>
+                                        <th data-sortable="true" data-field="id">
+                                            <?= get_label('id', 'ID') ?></th>
+                                        <th data-field="profile"><?= get_label('client', 'Client') ?></th>
+                                        <th data-field="company" data-sortable="true"
+                                            data-visible="false"><?= get_label('company', 'Company') ?>
+                                        </th>
+                                        <th data-field="phone" data-sortable="true"
+                                            data-visible="false">
+                                            <?= get_label('phone_number', 'Phone number') ?></th>
+                                        <th data-sortable="true" data-field="created_at"
+                                            data-visible="false">
+                                            <?= get_label('created_at', 'Created at') ?></th>
+                                        <th data-sortable="true" data-field="updated_at"
+                                            data-visible="false">
+                                            <?= get_label('updated_at', 'Updated at') ?></th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+                <div class="tab-pane fade {{ !$auth_user->can('manage_users') && !$auth_user->can('manage_clients') ? 'active show' : '' }}" id="navs-top-quick-view-description" role="tabpanel">
+                    <p class="pt-3 txt-mute" id="quickViewDescPlaceholder"></p>
+                </div> <!-- closes navs-top-quick-view-description -->
+            </div> <!-- closes tab-content -->
+        </div> <!-- closes offcanvas-body -->
+        <div class="p-3 border-top text-end">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+                <?= get_label('close', 'Close') ?>
+            </button>
         </div>
-    </div>
+    </div> <!-- closes offcanvas -->
 @endif
 <div class="modal fade" id="createWorkspaceModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">

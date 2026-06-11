@@ -32,14 +32,14 @@
     stroke-width: 1.4;
   }
   .gantt .bar {
-    fill: #b8c2cc;
-    stroke: #8D99A6;
+    fill: rgba(105, 108, 255, 0.4);
+    stroke: var(--bs-primary, #696cff);
     stroke-width: 0;
     transition: stroke-width 0.3s ease;
     user-select: none;
   }
   .gantt .bar-progress {
-    fill: #a3a3ff;
+    fill: var(--bs-primary, #696cff);
   }
   .gantt .bar-invalid {
     fill: transparent;
@@ -131,4 +131,57 @@
     border: 5px solid transparent;
     border-top-color: rgba(0, 0, 0, 0.8);
   }
+
+/* Dark Theme Support */
+[data-bs-theme="dark"] .gantt .grid-header,
+[data-theme="dark"] .gantt .grid-header,
+.dark-style .gantt .grid-header {
+  fill: #2b2c40;
+  stroke: #444564;
+}
+
+[data-bs-theme="dark"] .gantt .grid-row,
+[data-theme="dark"] .gantt .grid-row,
+.dark-style .gantt .grid-row {
+  fill: #2b2c40;
+}
+
+[data-bs-theme="dark"] .gantt .grid-row:nth-child(even),
+[data-theme="dark"] .gantt .grid-row:nth-child(even),
+.dark-style .gantt .grid-row:nth-child(even) {
+  fill: #323249;
+}
+
+[data-bs-theme="dark"] .gantt .row-line,
+[data-theme="dark"] .gantt .row-line,
+.dark-style .gantt .row-line {
+  stroke: #444564;
+}
+
+[data-bs-theme="dark"] .gantt .tick,
+[data-theme="dark"] .gantt .tick,
+.dark-style .gantt .tick {
+  stroke: #444564;
+}
+
+[data-bs-theme="dark"] .gantt .today-highlight,
+[data-theme="dark"] .gantt .today-highlight,
+.dark-style .gantt .today-highlight {
+  fill: rgba(163, 163, 255, 0.2);
+}
+
+[data-bs-theme="dark"] .gantt .upper-text,
+[data-bs-theme="dark"] .gantt .lower-text,
+[data-theme="dark"] .gantt .upper-text,
+[data-theme="dark"] .gantt .lower-text,
+.dark-style .gantt .upper-text,
+.dark-style .gantt .lower-text {
+  fill: #a1b0cb;
+}
+
+[data-bs-theme="dark"] .gantt .bar-label.big,
+[data-theme="dark"] .gantt .bar-label.big,
+.dark-style .gantt .bar-label.big {
+  fill: #a1b0cb;
+}
   

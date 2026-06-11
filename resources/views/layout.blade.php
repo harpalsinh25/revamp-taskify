@@ -78,7 +78,7 @@
         <link rel="stylesheet" href="{{ asset('assets/css/mind-map.css') }}" />
     @endif
     @if (Request::is('projects/gantt-chart') || Request::is('projects/gantt-chart/favorite'))
-        <link rel="stylesheet" href="{{ asset('assets/css/frappe-gantt.css') }}" />
+        <link rel="stylesheet" href="{{ asset('assets/css/frappe-gantt.css') }}?v={{ rand() }}" />
     @endif
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->

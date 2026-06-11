@@ -266,6 +266,7 @@ class TaskCalendarManager {
                     this.state.calendar.refetchEvents();
                 }
             },
+            eventContent: (info) => this.handleEventContent(info),
             eventDidMount: (info) => this.handleEventDidMount(info),
             eventClick: (info) => this.handleEventClick(info),
             dateClick: (info) => this.handleDateClick(info),
@@ -356,6 +357,48 @@ class TaskCalendarManager {
         if (priority?.color) {
             element.style.borderLeft = `4px solid ${priority.color}`;
         }
+    }
+
+    handleEventContent(info) {
+        if (info.view.type.startsWith('list')) {
+            const start = moment(info.event.start);
+            const timeStr = info.event.allDay ? 'All Day' : start.format('HH:mm');
+            const diffDuration = info.event.end ? moment.duration(moment(info.event.end).diff(start)) : null;
+            const durationStr = diffDuration && !info.event.allDay ? `${diffDuration.hours()}h ${diffDuration.minutes()}m` : '';
+            
+            const isSoon = start.isBetween(moment(), moment().add(24, 'hours'));
+            const soonBadge = isSoon ? `<span class="sched-soon mono">soon</span>` : '';
+            
+            const priority = this.state.taskPriorities.find(p => p.id.toString() === info.event.extendedProps.priority_id?.toString());
+            const status = this.state.taskStatuses.find(s => s.id.toString() === info.event.extendedProps.status_id?.toString());
+            
+            let tagsHtml = '';
+            if (priority) {
+                tagsHtml += `<span class="badge bg-label-${priority.color || 'primary'} me-1">${priority.title}</span>`;
+            }
+            if (status) {
+                tagsHtml += `<span class="badge bg-label-${status.color || 'secondary'}">${status.title}</span>`;
+            }
+
+            return {
+                html: `
+                <div class="custom-sched-wrapper">
+                    <div class="sched-row" data-soon="${isSoon ? 'true' : 'false'}">
+                        <div class="sched-time">
+                            <span class="mono sched-t">${timeStr}</span>
+                            <span class="mono sched-d">${durationStr}</span>
+                        </div>
+                        <div class="sched-content">
+                            <div class="sched-name">${info.event.title}</div>
+                            ${tagsHtml}
+                        </div>
+                        ${soonBadge}
+                    </div>
+                </div>
+                `
+            };
+        }
+        return undefined; // Use default rendering for grid view
     }
 
     async handleEventClick(info) {

@@ -6803,7 +6803,7 @@ $(document).ready(function () {
             type: "GET",
             success: function (response) {
                 if (response.error === false) {
-                    $("#quickViewModal").modal("show");
+                    $("#quickViewOffcanvas").offcanvas("show");
                     if (type === "task" && response.task) {
                         $("#quickViewTitlePlaceholder").text(response.task.title);
                         $("#quickViewDescPlaceholder").html(response.task.description);
@@ -6851,7 +6851,7 @@ $(document).ready(function () {
         }
     }
     // Handle modal close to clear URL parameters (optional)
-    $("#quickViewModal").on("hidden.bs.modal", function () {
+    $("#quickViewOffcanvas").on("hidden.bs.offcanvas", function () {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get("modal") === "quickview") {
             urlParams.delete("modal");
@@ -6873,7 +6873,7 @@ $(document).ready(function () {
                 openQuickViewModal(type, id, false);
             }
         } else {
-            $("#quickViewModal").modal("hide");
+            $("#quickViewOffcanvas").offcanvas("hide");
         }
     });
     // Initialize by checking URL for modal parameters

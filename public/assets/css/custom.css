@@ -1158,7 +1158,7 @@
 /* Modal Z-Index Management */
 #confirmSaveColumnVisibility,
 #edit_task_modal,
-#quickViewModal {
+#quickViewOffcanvas {
     z-index: 1091;
 }
 
@@ -2067,22 +2067,28 @@ html:not([dir="rtl"]) .timeline-item {
 
 .calendar-wrapper {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 1.5rem;
 }
 
 .calendar-sidebar {
     width: 250px;
-    background-color: #fff;
-    border-radius: 1rem;
-    box-shadow: var(--shadow-md);
-    padding: 1.5rem;
     flex-shrink: 0;
+}
+
+/* On mobile screens, offcanvas will naturally take over if Bootstrap offcanvas classes are used */
+@media (max-width: 767.98px) {
+    .calendar-sidebar {
+        width: 320px; /* Offcanvas width */
+        max-width: 100vw;
+    }
 }
 
 .calendar-main {
     flex: 1;
     min-width: 0;
+    overflow-x: auto;
+
 }
 
 .fc-event {
@@ -8482,4 +8488,88 @@ body.v2-shell .ts-control input {
     background: var(--bg-0);
     color: var(--fg-0);
     box-shadow: var(--shadow-1);
+}
+
+/* ============================================================
+   CALENDAR REVAMP & SCHEDULE ROW OVERRIDES
+   ============================================================ */
+
+/* ---- SCHEDULE ROW ---- */
+.sched-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--bs-border-color);
+  position: relative;
+  transition: background var(--t-1, 0.2s ease);
+  background: var(--bs-card-bg);
+}
+.sched-row:first-child { border-top: 0; }
+.sched-row:hover { background: var(--bs-body-bg); }
+.sched-row[data-soon="true"]::before {
+  content: ''; position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 2px;
+  background: var(--bs-primary);
+  border-radius: 0 2px 2px 0;
+}
+.sched-time { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+.sched-t { font-size: 12.5px; font-weight: 600; color: var(--bs-heading-color); }
+.sched-d { font-size: 10px; color: var(--bs-secondary-color); }
+.sched-content { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sched-name {
+  font-size: 12.5px; color: var(--bs-body-color); font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0; flex: 0 1 auto;
+}
+.sched-row[data-soon="true"] .sched-name { color: var(--bs-heading-color); }
+.sched-soon {
+  font-size: 10px; color: var(--bs-primary);
+  font-weight: 600;
+  padding: 3px 6px; border-radius: 3px;
+  background: rgba(var(--bs-primary-rgb), 0.1); white-space: nowrap;
+}
+
+/* ---- FullCalendar Design System Skin ---- */
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: var(--bs-border-color) !important;
+}
+.fc-theme-standard .fc-scrollgrid {
+    border-color: var(--bs-border-color) !important;
+}
+.fc-button-primary {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+.fc-button-primary:not(:disabled).fc-button-active, .fc-button-primary:not(:disabled):active {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+    opacity: 0.85;
+}
+.fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number {
+    color: var(--bs-heading-color) !important;
+    text-decoration: none !important;
+}
+.fc-theme-standard .fc-list-day-cushion {
+    background-color: var(--bs-body-bg) !important;
+}
+.fc .fc-list-event:hover td {
+    background-color: var(--bs-body-bg) !important;
+}
+
+/* Injecting sched-row into list view */
+.fc-list-event td {
+    padding: 0 !important;
+    border: none !important;
+}
+.fc-list-event .fc-list-event-dot,
+.fc-list-event .fc-list-event-time,
+.fc-list-event .fc-list-event-title {
+    display: none !important;
+}
+.fc-list-event .custom-sched-wrapper {
+    display: block !important;
+    width: 100%;
 }
