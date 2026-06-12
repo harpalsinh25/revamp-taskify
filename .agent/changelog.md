@@ -2,6 +2,58 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-12] - Leads, Candidates & Tasks Kanban Drag & Drop Fixes
+### Fixed
+- **`public/assets/js/pages/leads-kanban.js`**:
+  - Restricted Dragula movement to elements with `.kanban-card` class, preventing non-card buttons or footer controls from being dragged.
+  - Simplified status update AJAX payload from stringified JSON to standard form POST variables.
+- **`public/assets/js/pages/candidate-kanban.js`**:
+  - Restricted Dragula movement to elements with `.kanban-card` class, preventing non-card buttons or footer controls from being dragged.
+  - Simplified status update AJAX payload from stringified JSON to standard form POST variables.
+- **`public/assets/js/pages/task-board.js`**:
+  - Restricted Dragula movement to elements with `.tcard` class, preventing non-card elements from being dragged.
+  - Updated AJAX request method to POST with `_method: "PUT"` and set the `X-CSRF-TOKEN` headers to ensure 100% reliable CSRF verification.
+
+## [2026-06-12] - Project Kanban Drag & Drop Fix
+### Fixed
+- **`public/assets/js/pages/project-kanban.js`**:
+  - Corrected Dragula `moves`, `accepts`, and `invalid` validation handlers to restrict movement exclusively to elements containing the `.kanban-card` class. This prevents the `.kanban-footer` container (Create project button) from being dragged or accepted as a draggable card.
+  - Simplified and standardized the status update AJAX request to send standard POST parameter key-values instead of JSON-stringified raw data, ensuring smooth integration with Laravel request validators and headers.
+
+## [2026-06-12] - To-Do Drag & Drop AJAX Status & Routing Fix
+### Fixed
+- **`public/assets/js/pages/todos.js`**:
+  - Prefixed AJAX URLs `/todos/update_status` and `/todos/store` with `baseUrl` to ensure correct sub-directory routing.
+  - Rewrote the AJAX configuration for the status update request to use `type: 'POST'`, set headers to include `X-CSRF-TOKEN`, and send the PUT directive as `_method: 'PUT'` in the payload (matching the working pattern in `custom.js`), preventing CSRF validation failures.
+- **`resources/views/todos/list.blade.php`**:
+  - Appended `todo-priority-{{ $completed_todo->priority }}` to completed items so their original priority badge class is preserved and correctly restored when dragged back to the incomplete column.
+
+## [2026-06-12] - To-Do Drag & Drop Status Fix
+### Fixed
+- **`public/assets/js/pages/todos.js`**:
+  - Fixed selector checks to use `.todo-card-complete` and `.todo-card-incomplete` classes (instead of the deprecated `.todo-gradient-` classes) when resolving drop targets.
+  - Corrected `updateCounters()` to query layout elements and header labels using the redesigned class selectors, resolving null pointer script crashes.
+  - Updated DOM replacement templates inside drop handlers to output standard design system badges (`.badge.badge-ok`, `.badge.badge-err`, `.badge.badge-warn`, `.badge.badge-info`) instead of the deprecated custom class elements.
+  - Standardized the dynamic inline add action AJAX markup templates to match the new drag handles, edit/delete buttons, and styling standards.
+
+## [2026-06-12] - To-Do Color Alignment
+### Fixed
+- **`public/assets/css/custom.css`**:
+  - Replaced legacy references to `var(--primary)` with the system design primary color variable `var(--signal)` in `.todo-card.todo-card-incomplete`, `.todo-card-incomplete .todo-header-icon i`, `.todo-item:hover`, and `.todo-progress .progress-bar`.
+
+## [2026-06-12] - To-Do Redesign
+### Modified
+- **`resources/views/todos/list.blade.php`**:
+  - Replaced legacy color gradient header classes with flat top border accents for status columns.
+  - Standardized custom inline priority tags to utilize standard design system badges (`badge-err`, `badge-warn`, `badge-info`).
+  - Swapped custom completed tags with design system soft-green badges (`badge-ok`).
+  - Modernized the reordering drag-handle icons and layout spacing.
+- **`public/assets/css/custom.css`**:
+  - Removed previous legacy `.todo-card`, `.todo-gradient-primary`, `.todo-gradient-success`, and related styling blocks entirely.
+  - Wrote a new clean, system-compliant CSS block for To-Dos using CSS variables (`var(--bg-1)`, `var(--line)`, etc.) to support both light and dark modes natively.
+  - Styled `.todo-card` and `.todo-item` as flat bordered components with dynamic border color transitions on hover.
+  - Refined the progress completion tracker to use theme variables.
+
 ## [2026-06-12] - Client Management Redesign & Alignment
 ### Modified
 - **`resources/views/clients/clients.blade.php`**:
@@ -316,14 +368,16 @@ All notable changes to the Taskify project will be documented in this folder.
 - **`public/assets/js/custom.js`**: Replaced legacy search logic with v2 search logic supporting text highlighting and shortcut.
 
 ## 2026-06-12 (Tom Select in Contract Modals)
-- Upgraded the Select dropdowns in the Create/Edit Contract modals to use Tom Select for better UI design (esources/views/modals.blade.php).
+- Upgraded the Select dropdowns in the Create/Edit Contract modals to use Tom Select for better UI design (
+esources/views/modals.blade.php).
 - Updated public/assets/js/custom.js to correctly populate Tom Select inputs for the Edit Contract modal via the .edit-contract click event.
 
 ## 2026-06-12 (Three Dots Menu for Contract Types)
 - Converted inline action icons to a three-dot dropdown menu in ContractsController.php inside contract_types_list() method for UI consistency.
 
 ## 2026-06-12 (Payslips UI Improvements)
-- Extracted filter dropdowns into a separate card layout in esources/views/payslips/list.blade.php.
+- Extracted filter dropdowns into a separate card layout in 
+esources/views/payslips/list.blade.php.
 - Converted select dropdowns in Payslip filters to use Tom Select (	om_users_select, 	om_clients_select, 	om_static_select).
 - Upgraded the action column in PayslipsController.php's list method to use the consistent three-dots dropdown menu.
 
@@ -335,25 +389,29 @@ All notable changes to the Taskify project will be documented in this folder.
 - Converted inline action icons to a three-dot dropdown menu in AllowancesController.php's list method to maintain UI consistency across the application.
 
 ## 2026-06-12 (Contracts List UI Consistency)
-- Updated esources/views/contracts/list.blade.php to wrap the filter panel and table in proper Bootstrap card and card-body classes instead of custom 	k-filter-panel and 	k-table-card classes.
+- Updated 
+esources/views/contracts/list.blade.php to wrap the filter panel and table in proper Bootstrap card and card-body classes instead of custom 	k-filter-panel and 	k-table-card classes.
 
 ## 2026-06-12 (Global Table Standard Update)
 - Standardized llowances/list.blade.php, deductions/list.blade.php, contracts/list.blade.php, and payslips/list.blade.php to use the x-tk-table component instead of manually written 	able markup, matching the global standard used in pages like units/list.blade.php.
 - Corrected the table wrapper structure to <div class="card border shadow-none"><div class="card-body p-0"> for a proper flat, bordered UI.
 
 ## 2026-06-12 (Deductions UI Updates)
-- Converted the traditional multi-select in esources/views/deductions/list.blade.php to a Tom Select (	om_static_select) for a more modern appearance.
+- Converted the traditional multi-select in 
+esources/views/deductions/list.blade.php to a Tom Select (	om_static_select) for a more modern appearance.
 - Refactored the ctions column in pp/Http/Controllers/DeductionsController.php to use the standard "three dots" Bootstrap dropdown menu instead of inline buttons.
 
 ## 2026-06-12 (Expenses UI Updates)
-- Standardized the Expenses list (esources/views/expenses/list.blade.php) to use the <x-tk-table> component structure.
+- Standardized the Expenses list (
+esources/views/expenses/list.blade.php) to use the <x-tk-table> component structure.
 - Extracted filters in the Expenses list outside of the table card.
 - Converted standard dropdowns to Tom Select (	om_users_select and 	om_expense_types_select).
 - Updated public/assets/js/custom.js to initialize 	om_expense_types_select.
 - Changed the inline action buttons in pp/Http/Controllers/ExpensesController.php to use the standard "three dots" dropdown menu.
 
 ## 2026-06-12 (Expenses Bug Fixes)
-- Removed the duplicated "Clear Filters" button from the top filter row in esources/views/expenses/list.blade.php to clean up the UI layout.
+- Removed the duplicated "Clear Filters" button from the top filter row in 
+esources/views/expenses/list.blade.php to clean up the UI layout.
 - Initialized the daterangepicker properly in public/assets/js/pages/expenses.js so the Date Between filter functions as expected.
 - Refactored TableFilterSync config in expenses.js to correctly target 	omselect instead of select2 for syncing state.
 
@@ -363,33 +421,42 @@ All notable changes to the Taskify project will be documented in this folder.
 - Added missing click handler for .clear-deductions-filters in deductions.js to ensure the table correctly resets.
 
 ## 2026-06-12 (Expenses Modal UI Fixes)
-- Converted standard dropdowns to use Tom Select (	om_expense_types_select and 	om_users_select) inside the "Create Expense" and "Edit Expense" modals located in esources/views/modals.blade.php.
+- Converted standard dropdowns to use Tom Select (	om_expense_types_select and 	om_users_select) inside the "Create Expense" and "Edit Expense" modals located in 
+esources/views/modals.blade.php.
 - Fixed layout alignment of the form fields in both modals by upgrading .col to .col-md-6 to ensure proper side-by-side rendering on desktop.
 - Refactored .edit-expense modal populator logic in public/assets/js/custom.js to correctly assign loaded values using the 	omselect API instead of standard select modifications.
 
 ## 2026-06-12 (Expense Types Table Standardization)
-- Standardized the Expense Types table (esources/views/expenses/expense_types.blade.php) to use the <x-tk-table> component framework for UI consistency.
+- Standardized the Expense Types table (
+esources/views/expenses/expense_types.blade.php) to use the <x-tk-table> component framework for UI consistency.
 - Updated the action buttons in pp/Http/Controllers/ExpensesController.php (expense_types_list) to use the standard three-dots dropdown menu.
 
 ## 2026-06-12 (Payments Standardization)
-- Standardized the Payments list (esources/views/payments/list.blade.php) to use the <x-tk-table> component framework.
+- Standardized the Payments list (
+esources/views/payments/list.blade.php) to use the <x-tk-table> component framework.
 - Extracted filters from the table card to a dedicated filter card at the top.
 - Updated action buttons in pp/Http/Controllers/PaymentsController.php (list method) to use the standard three-dots dropdown menu.
-- Converted the create and edit payment modals (esources/views/modals.blade.php) to use col-md-6 layout grid and replaced Select2 with Tom Select.
+- Converted the create and edit payment modals (
+esources/views/modals.blade.php) to use col-md-6 layout grid and replaced Select2 with Tom Select.
 - Added 	om_invoices_select initialization and updated .edit-payment population logic in public/assets/js/custom.js to correctly interface with TomSelect.
 - Updated TableFilterSync setup and enabled Date Range Picker init in public/assets/js/pages/payments.js.
 
 ## 2026-06-12 (Payment Methods Standardization)
-- Standardized the Payment Methods list (esources/views/payment_methods/list.blade.php) to use the <x-tk-table> component framework.
+- Standardized the Payment Methods list (
+esources/views/payment_methods/list.blade.php) to use the <x-tk-table> component framework.
 - Updated action buttons in pp/Http/Controllers/PaymentMethodsController.php to use the standard three-dots dropdown menu.
 
 ## 2026-06-12 (Taxes, Units, and Items Standardization)
-- Standardized the Taxes list (esources/views/taxes/list.blade.php), Units list (esources/views/units/list.blade.php), and Items list (esources/views/items/list.blade.php) to use the <x-tk-table> component framework.
+- Standardized the Taxes list (
+esources/views/taxes/list.blade.php), Units list (
+esources/views/units/list.blade.php), and Items list (
+esources/views/items/list.blade.php) to use the <x-tk-table> component framework.
 - Extracted filters from the table cards in Taxes and Items to a dedicated filter card at the top, replacing Select2 with Tom Select (	om_static_select).
 - Updated action buttons in TaxesController, UnitsController, and ItemsController list methods to use the standard three-dots dropdown menu.
 
 ## 2026-06-12 (Item Modals Standardization)
-- Converted the unit_id Select2 input to Tom Select (	om_static_select) in both the Create and Edit Item modals (esources/views/modals.blade.php).
+- Converted the unit_id Select2 input to Tom Select (	om_static_select) in both the Create and Edit Item modals (
+esources/views/modals.blade.php).
 - Updated the .edit-item logic in public/assets/js/pages/items.js to seamlessly use Tom Select's .setValue() and .clear() methods to populate the modal fields.
 
 ## 2026-06-12 (Social Media Scheduler Standardization)

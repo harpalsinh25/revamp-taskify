@@ -53,13 +53,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const drake = dragula(columns, {
         direction: 'vertical',
         moves: function (el, container, handle) {
-            return !el.classList.contains('create-project-btn') && !el.classList.contains('create-candidate-btn');
+            return el.classList.contains('kanban-card'); // Only drag actual cards
         },
         accepts: function (el, target) {
-            return !el.classList.contains('create-project-btn') && !el.classList.contains('create-candidate-btn');
+            return el.classList.contains('kanban-card'); // Only drop inside columns
         },
         invalid: function (el, handle) {
-            return el.classList.contains('create-project-btn') || el.classList.contains('create-candidate-btn');
+            // Do not drag if clicking form inputs, buttons, or links
+            if (el.tagName === 'A' || el.tagName === 'BUTTON' || el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA' || el.isContentEditable) {
+                return true;
+            }
+            // Do not drag if clicking anything inside the footer or settings dropdown
+            if (el.closest('.kanban-footer') || el.closest('.dropdown-menu') || el.classList.contains('create-candidate-btn') || el.classList.contains('create-project-btn')) {
+                return true;
+            }
+            return false;
         }
     });
 
@@ -90,20 +98,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // When dropped
     drake.on('drop', function (el, target, source, sibling) {
-        const newStatusId = target.closest('.kanban-column').dataset.statusId;
-        const candidateId = el.dataset.cardId;
+        // Drop inside the same column is a reorder, bypass AJAX status update
+        if (target === source) {
+            return;
+        }
+
+        const newStatusId = target.closest('.kanban-column').getAttribute('data-status-id');
+        const candidateId = el.getAttribute('data-card-id');
 
         $.ajax({
             url: baseUrl + '/candidate/' + candidateId + '/update_status',
             type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            data: JSON.stringify({
+            data: {
                 status_id: newStatusId
-            }),
+            },
             success: function (response) {
                 if (response.error === false) {
                     toastr.success(response.message);
@@ -114,6 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             error: function (xhr, status, error) {
                 console.error('Error:', error);
+                toastr.error('Failed to update candidate status.');
             }
         });
     });

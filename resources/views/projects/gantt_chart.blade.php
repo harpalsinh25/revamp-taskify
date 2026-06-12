@@ -101,13 +101,13 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-4 mb-3">
+        <!-- <div class="col-md-4 mb-3">
             <select id="selected_tags" class="form-control tags_select" name="tag[]" multiple="multiple" data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true" multiple>
                 @foreach($filterTags as $tag)
                 <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
                 @endforeach
             </select>
-        </div>
+        </div> -->
         <div class="col-md-1">
             <div>
                 <button type="button" id="filter" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('filter', 'Filter') ?>"><i class='bx bx-filter-alt'></i></button>

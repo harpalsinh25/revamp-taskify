@@ -80,17 +80,25 @@ document.addEventListener('DOMContentLoaded', function () {
     // Get the create project button
     const createProjectBtn = document.querySelector('.create-project-btn');
 
-    // Exclude the create project button from drag-and-drop
+    // Exclude the create project button and other non-card elements from drag-and-drop
     const drake = dragula(columns, {
         direction: 'vertical',
         moves: function (el, container, handle) {
-            return !el.classList.contains('create-project-btn'); // Exclude the button
+            return el.classList.contains('kanban-card'); // Only drag actual kanban project cards
         },
         accepts: function (el, target) {
-            return !el.classList.contains('create-project-btn'); // Exclude the button
+            return el.classList.contains('kanban-card'); // Only drop into columns
         },
         invalid: function (el, handle) {
-            return el.classList.contains('create-project-btn'); // Exclude the button
+            // Do not drag if clicking form inputs, buttons, or links
+            if (el.tagName === 'A' || el.tagName === 'BUTTON' || el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA' || el.isContentEditable) {
+                return true;
+            }
+            // Do not drag if clicking anything inside the footer or settings dropdown
+            if (el.closest('.kanban-footer') || el.closest('.dropdown-menu') || el.classList.contains('create-project-btn')) {
+                return true;
+            }
+            return false;
         }
     });
     // Event when dragging starts
@@ -117,25 +125,28 @@ document.addEventListener('DOMContentLoaded', function () {
         container.classList.remove('drop-target'); // Remove highlight from the container
     });
     drake.on('drop', function (el, target, source, sibling) {
+        // Drop inside the same column is a reorder, bypass AJAX status update
+        if (target === source) {
+            return;
+        }
+
         // Get the new status based on the target column's data attribute
-        const newStatus = target.closest('.kanban-column').dataset.statusId;
+        const newStatus = target.closest('.kanban-column').getAttribute('data-status-id');
 
         // Extract card ID from the element
-        const cardId = el.dataset.cardId;
+        const cardId = el.getAttribute('data-card-id');
 
         // Update project status in the backend using jQuery AJAX
         $.ajax({
             url: baseUrl + '/update-project-status',
             type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            data: JSON.stringify({
+            data: {
                 id: cardId,
                 statusId: newStatus
-            }),
+            },
             success: function (response) {
                 if (response.error === false) {
                     toastr.success(response.message);
@@ -149,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             error: function (xhr, status, error) {
                 console.error('Error:', error);
+                toastr.error('Failed to update project status.');
             }
         });
     });

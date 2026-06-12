@@ -14,7 +14,24 @@ for (var i = 0; i < statusArray.length; i++) {
 
 $(function () {
     var drake = dragula(elements, {
-        revertOnSpill: true
+        revertOnSpill: true,
+        moves: function (el, container, handle) {
+            return el.classList.contains('tcard'); // Only drag task cards
+        },
+        accepts: function (el, target) {
+            return el.classList.contains('tcard'); // Only drop inside columns
+        },
+        invalid: function (el, handle) {
+            // Do not drag if clicking form inputs, buttons, or links
+            if (el.tagName === 'A' || el.tagName === 'BUTTON' || el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA' || el.isContentEditable) {
+                return true;
+            }
+            // Do not drag if clicking anything inside settings dropdown
+            if (el.closest('.dropdown-menu')) {
+                return true;
+            }
+            return false;
+        }
     });
 
     if (!drake) {
@@ -36,10 +53,13 @@ $(function () {
 
         // Make an AJAX call to update the task status
         $.ajax({
-            method: "PUT",
+            method: "POST",
             url: baseUrl + '/tasks/' + taskId + '/update-status/' + newStatus,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
+                _method: "PUT",
                 'flash_message_only': 1,
             },
             success: function (response) {

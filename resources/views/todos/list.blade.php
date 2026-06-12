@@ -43,15 +43,14 @@
         <div class="row g-4">
             <!-- Unfinished Tasks Column -->
             <div class="col-lg-6">
-                <div class="todo-card">
-                    <div class="todo-card-header todo-gradient-primary">
-                        <div class="todo-header-decoration"></div>
+                <div class="todo-card todo-card-incomplete">
+                    <div class="todo-card-header todo-card-incomplete">
                         <div class="d-flex justify-content-between align-items-center position-relative z-2">
                             <div class="d-flex align-items-center">
                                 <div class="todo-header-icon">
                                     <i class="bx bx-list-check"></i>
                                 </div>
-                                <h5 class="fw-bold mb-0 text-white">
+                                <h5 class="fw-bold mb-0 text-body">
                                     {{ get_label('incomplete_todos', 'Incomplete Todo\'s') }}</h5>
                             </div>
                             <span class="todo-counter">{{ $todos->where('is_completed', 0)->count() }}</span>
@@ -61,10 +60,20 @@
                         <div class="todo-list-container">
                             @if ($todos->where('is_completed', 0)->count() > 0)
                                 @foreach ($todos->where('is_completed', 0) as $incomplete_todo)
-                                    <div class="todo-item todo-priority-{{ $incomplete_todo->priority }} d-flex align-items-center"
+                                    @php
+                                        $priorityClass = 'badge-primary';
+                                        if ($incomplete_todo->priority == 'high') {
+                                            $priorityClass = 'badge-err';
+                                        } elseif ($incomplete_todo->priority == 'medium') {
+                                            $priorityClass = 'badge-warn';
+                                        } elseif ($incomplete_todo->priority == 'low') {
+                                            $priorityClass = 'badge-info';
+                                        }
+                                    @endphp
+                                    <div class="todo-item d-flex align-items-center"
                                         data-todo-id="{{ $incomplete_todo->id }}">
                                         <div class="todo-drag-handle me-2">
-                                            <i class="bx bx-menu"></i>
+                                            <i class="bx bx-grid-vertical fs-4"></i>
                                         </div>
                                         <div class="todo-check me-3">
                                             <input type="checkbox" class="todo-check-input border-2"
@@ -77,22 +86,22 @@
                                                 <span class="todo-meta-item"><i class="bx bx-calendar-alt"></i>
                                                     {{ format_date($incomplete_todo->created_at) }}
                                                 </span>
-                                                <span
-                                                    class="todo-priority-badge todo-bg-{{ config('taskhub.priority_labels')[$incomplete_todo->priority] }}-subtle">
-                                                    {{ ucfirst($incomplete_todo->priority) }}</span>
+                                                <span class="badge {{ $priorityClass }}">
+                                                    {{ ucfirst($incomplete_todo->priority) }}
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="todo-actions-container">
                                             <div class="d-flex">
-                                                <a href="javascript:void(0);" class="edit-todo" data-bs-toggle="modal"
+                                                <a href="javascript:void(0);" class="edit-todo me-2" data-bs-toggle="modal"
                                                     data-bs-target="#edit_todo_modal" data-id="{{ $incomplete_todo->id }}"
-                                                    title="<?= get_label('update', 'Update') ?>" class="card-link"><i
-                                                        class='bx bx-edit mx-1'></i></a>
+                                                    title="<?= get_label('update', 'Update') ?>"><i
+                                                        class='bx bx-edit fs-5'></i></a>
                                                 <a href="javascript:void(0);" type="button"
                                                     data-id="{{ $incomplete_todo->id }}" data-type="todos"
                                                     data-reload="true" title="<?= get_label('delete', 'Delete') ?>"
-                                                    class="card-link delete mx-4"><i
-                                                        class='bx bx-trash text-danger mx-1'></i></a>
+                                                    class="delete text-danger"><i
+                                                        class='bx bx-trash fs-5'></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -103,9 +112,6 @@
                             <div class="todo-add-wrapper mt-3">
                                 <div class="todo-add-item d-flex align-items-center border-light bg-light hover-shadow-sm rounded border border-2 p-2"
                                     data-list="incomplete">
-                                    {{-- <div class="todo-drag-handle text-muted me-2">
-                                        <i class="bx bx-menu fs-5"></i>
-                                    </div> --}}
                                     <div class="todo-check me-3"></div>
                                     <div class="flex-grow-1">
                                         <input type="text"
@@ -113,25 +119,22 @@
                                             placeholder="{{ get_label('add_todo_info', 'Add todo (Enter to save)') }}"
                                             data-list="incomplete">
                                     </div>
-
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Completed Tasks Column -->
             <div class="col-lg-6">
-                <div class="todo-card">
-                    <div class="todo-card-header todo-gradient-success text-white">
-                        <div class="todo-header-decoration"></div>
+                <div class="todo-card todo-card-complete">
+                    <div class="todo-card-header todo-card-complete">
                         <div class="d-flex justify-content-between align-items-center position-relative z-2">
                             <div class="d-flex align-items-center">
                                 <div class="todo-header-icon">
                                     <i class="bx bx-check-double"></i>
                                 </div>
-                                <h5 class="fw-bold mb-0 text-white">
+                                <h5 class="fw-bold mb-0 text-body">
                                     {{ get_label('completed_todos', 'Completed Todo\'s') }}</h5>
                             </div>
                             <span class="todo-counter">{{ $todos->where('is_completed', '1')->count() }}</span>
@@ -144,7 +147,7 @@
                                     <div class="todo-item todo-completed todo-priority-{{ $completed_todo->priority }} d-flex align-items-center"
                                         data-todo-id="{{ $completed_todo->id }}">
                                         <div class="todo-drag-handle me-2">
-                                            <i class="bx bx-menu"></i>
+                                            <i class="bx bx-grid-vertical fs-4"></i>
                                         </div>
                                         <div class="todo-check me-3">
                                             <input type="checkbox" class="todo-check-input border-2"
@@ -157,21 +160,21 @@
                                                 <span class="todo-meta-item"><i class="bx bx-calendar-alt"></i>
                                                     {{ format_date($completed_todo->created_at) }}
                                                 </span>
-                                                <span class="todo-completed-tag"><i class="bx bx-check-double me-1"></i>
+                                                <span class="badge badge-ok"><i class="bx bx-check-double me-1"></i>
                                                     {{ get_label('completed', 'Completed') }}</span>
                                             </div>
                                         </div>
                                         <div class="todo-actions-container">
                                             <div class="d-flex">
-                                                <a href="javascript:void(0);" class="edit-todo" data-bs-toggle="modal"
+                                                <a href="javascript:void(0);" class="edit-todo me-2" data-bs-toggle="modal"
                                                     data-bs-target="#edit_todo_modal" data-id="{{ $completed_todo->id }}"
-                                                    title="<?= get_label('update', 'Update') ?>" class="card-link"><i
-                                                        class='bx bx-edit mx-1'></i></a>
+                                                    title="<?= get_label('update', 'Update') ?>"><i
+                                                        class='bx bx-edit fs-5'></i></a>
                                                 <a href="javascript:void(0);" type="button"
                                                     data-id="{{ $completed_todo->id }}" data-type="todos"
                                                     data-reload="true" title="<?= get_label('delete', 'Delete') ?>"
-                                                    class="card-link delete mx-4"><i
-                                                        class='bx bx-trash text-danger mx-1'></i></a>
+                                                    class="delete text-danger"><i
+                                                        class='bx bx-trash fs-5'></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -182,9 +185,6 @@
                             <div class="todo-add-wrapper mt-3">
                                 <div class="todo-add-item d-flex align-items-center border-light bg-light hover-shadow-sm rounded border border-2 p-2"
                                     data-list="complete">
-                                    {{-- <div class="todo-drag-handle text-muted me-2">
-                                        <i class="bx bx-menu fs-5"></i>
-                                    </div> --}}
                                     <div class="todo-check me-3"></div>
                                     <div class="flex-grow-1">
                                         <input type="text"
@@ -192,7 +192,6 @@
                                             placeholder="{{ get_label('add_todo_info', 'Add todo (Enter to save)') }}"
                                             data-list="complete">
                                     </div>
-
                                 </div>
                             </div>
                         </div>

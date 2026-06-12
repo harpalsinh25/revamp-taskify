@@ -85,24 +85,7 @@
                 </a>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <select class="form-select tom-select-sort" id="sort" aria-label="Default select example"
-                    data-placeholder="<?= get_label('sort_by', 'Sort By') ?>" data-allow-clear="true">
-                    <option value=""></option>
-                    <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
-                        <?= get_label('newest', 'Newest') ?></option>
-                    <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? 'selected' : '' ?>>
-                        <?= get_label('oldest', 'Oldest') ?></option>
-                    <option value="recently-updated"
-                        <?= request()->sort && request()->sort == 'recently-updated' ? 'selected' : '' ?>>
-                        <?= get_label('most_recently_updated', 'Most recently updated') ?></option>
-                    <option value="earliest-updated"
-                        <?= request()->sort && request()->sort == 'earliest-updated' ? 'selected' : '' ?>>
-                        <?= get_label('least_recently_updated', 'Least recently updated') ?></option>
-                </select>
-            </div>
-            @php
+        @php
                 // Get selected statuses and tags from the request
                 $selectedStatuses = request()->input('statuses', []);
                 $selectedTags = request()->input('tags', []);
@@ -110,23 +93,45 @@
                 $filterStatuses = \App\Models\Status::whereIn('id', $selectedStatuses)->get();
                 $filterTags = \App\Models\Tag::whereIn('id', $selectedTags)->get();
             @endphp
-            <div class="col-md-4 mb-3">
-                <select class="form-select tom_statuses_filter" id="selected_statuses" name="statuses[]"
-                    aria-label="Default select example"
-                    data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true"
-                    multiple>
-                    @foreach ($filterStatuses as $status)
-                        <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <select id="selected_tags" class="form-control tom_tags_filter" name="tag[]" multiple="multiple"
-                    data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true">
-                    @foreach ($filterTags as $tag)
-                        <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
-                    @endforeach
-                </select>
+        <div class="card mb-4">
+            
+            <div class="card-body py-3">
+                <div class="row g-3 align-items-end justify-content-center">
+                    <div class="col-md-4">
+                        <select class="form-select tom-select-sort" id="sort" aria-label="Default select example"
+                            data-placeholder="<?= get_label('sort_by', 'Sort By') ?>" data-allow-clear="true">
+                            <option value=""></option>
+                            <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
+                                <?= get_label('newest', 'Newest') ?></option>
+                            <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? 'selected' : '' ?>>
+                                <?= get_label('oldest', 'Oldest') ?></option>
+                            <option value="recently-updated"
+                                <?= request()->sort && request()->sort == 'recently-updated' ? 'selected' : '' ?>>
+                                <?= get_label('most_recently_updated', 'Most recently updated') ?></option>
+                            <option value="earliest-updated"
+                                <?= request()->sort && request()->sort == 'earliest-updated' ? 'selected' : '' ?>>
+                                <?= get_label('least_recently_updated', 'Least recently updated') ?></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select tom_statuses_filter" id="selected_statuses" name="statuses[]"
+                            aria-label="Default select example"
+                            data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true"
+                            multiple>
+                            @foreach ($filterStatuses as $status)
+                                <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="selected_tags" class="form-select tom_tags_filter" name="tag[]" multiple="multiple"
+                            data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true">
+                            @foreach ($filterTags as $tag)
+                                <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
         @if (is_countable($projects) && count($projects) > 0)

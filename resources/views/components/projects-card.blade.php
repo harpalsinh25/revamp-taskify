@@ -7,91 +7,121 @@ $auth_user = getAuthenticatedUser();
 <div class="mt-2">
         {{$slot}}
         @if ((isset($projects) && is_countable($projects) && count($projects) > 0) || (isset($viewAssigned) && $viewAssigned == 1))
-        <div class="row g-3 align-items-end tk-filter-row mb-3">
-            <x-advanced-date-filters prefix="project" />
-            @if(isAdminOrHasAllDataAccess() && !isset($viewAssigned))
-            @if(!isset($id) || (explode('_',$id)[0] !='client' && explode('_',$id)[0] !='user'))
-            <div class="col-md-4 mb-3">
-                <select class="form-select tom_users_select" id="project_user_filter" name="user_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
-                </select>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <select class="form-select tom_clients_select" id="project_client_filter" name="client_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
-                </select>
-            </div>
-            @endif
-            @endif
-            @php
+        @php
             // Get selected statuses and tags from the request
             $selectedStatuses = request()->input('statuses', []);
             $selectedTags = request()->input('tags', []);
 
             $statuses = \App\Models\Status::whereIn('id', $selectedStatuses)->get();
             $tags = \App\Models\Tag::whereIn('id', $selectedTags)->get();
-            @endphp
-            <div class="col-md-4 mb-3">
-                <select class="form-select tom_statuses_filter" id="project_status_filter" name="status_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
-                    @foreach($statuses as $status)
-                    <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <select class="form-select tom_priorities_filter" id="project_priority_filter" name="priority_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
-                </select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <select class="form-select tom_tags_select" id="project_tag_filter" name="tag_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
-                    @foreach($tags as $tag)
-                    <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
-                    @endforeach
-                </select>
+        @endphp
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end tk-filter-row">
+                    <x-advanced-date-filters prefix="project" />
+                    @if(isAdminOrHasAllDataAccess() && !isset($viewAssigned))
+                    @if(!isset($id) || (explode('_',$id)[0] !='client' && explode('_',$id)[0] !='user'))
+                    <div class="col-md-4">
+                        <label class="form-label"><?= get_label('users', 'Users') ?></label>
+                        <select class="form-select tom_users_select" id="project_user_filter" name="user_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label"><?= get_label('clients', 'Clients') ?></label>
+                        <select class="form-select tom_clients_select" id="project_client_filter" name="client_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
+                        </select>
+                    </div>
+                    @endif
+                    @endif
+                    <div class="col-md-4">
+                        <label class="form-label"><?= get_label('statuses', 'Statuses') ?></label>
+                        <select class="form-select tom_statuses_filter" id="project_status_filter" name="status_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                            @foreach($statuses as $status)
+                            <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><?= get_label('priorities', 'Priorities') ?></label>
+                        <select class="form-select tom_priorities_filter" id="project_priority_filter" name="priority_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><?= get_label('tags', 'Tags') ?></label>
+                        <select class="form-select tom_tags_select" id="project_tag_filter" name="tag_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
+                            @foreach($tags as $tag)
+                            <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
 
         <input type="hidden" id="is_favorites" value="{{$favorites??''}}">
-        <div class="table-responsive text-nowrap">
-            <input type="hidden" id="data_type" value="projects">
-            <input type="hidden" id="data_table" value="projects_table">
-            <input type="hidden" id="data_reload" value="{{request()->is('home') ? '1' : '0'}}">
-            <input type="hidden" id="save_column_visibility">
-            <input type="hidden" id="multi_select">
-            <table id="projects_table" data-toggle="table" data-url="{{ isset($viewAssigned) && $viewAssigned == 1 ? '' : (!empty($id) ? url('/projects/listing/' . $id . '?from_home=' . (request()->is('home') ? '1' : '0')) : url('/projects/listing?from_home=' . (request()->is('home') ? '1' : '0'))) }}" data-loading-template="loadingTemplate" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParamsProjects">
-                <thead>
-                    <tr>
-                        <th data-checkbox="true"></th>
-                        <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('id', 'ID') ?></th>
-                        <th data-field="title" data-visible="{{ (in_array('title', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('title', 'Title') ?></th>
-                        <th data-field="users" data-visible="{{ (in_array('users', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('users', 'Users') }}</th>
-                        <th data-field="clients" data-visible="{{ (in_array('clients', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('clients', 'Clients') }}</th>
-                        <th data-field="status_id" data-visible="{{ (in_array('status_id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true" class="status-column"><?= get_label('status', 'Status') ?></th>
-                        <th data-field="priority_id" data-visible="{{ (in_array('priority_id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true" class="priority-column"><?= get_label('priority', 'Priority') ?></th>
-                        <th data-field="start_date" data-visible="{{ (in_array('start_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('starts_at', 'Starts at') ?></th>
-                        <th data-field="end_date" data-visible="{{ (in_array('end_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('ends_at', 'Ends at') ?></th>
-                        <th data-field="budget" data-visible="{{ (in_array('budget', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('budget', 'Budget') ?></th>
-                        <th data-field="tags" data-visible="{{ (in_array('tags', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}"><?= get_label('tags', 'Tags') ?></th>
-                        <th data-field="created_at" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('created_at', 'Created at') ?></th>
-                        <th data-field="updated_at" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('updated_at', 'Updated at') ?></th>
-                        @if(isset($customFields) && $customFields->isNotEmpty())
-                        @foreach ($customFields as $customField)
-                            {{-- @dd($customFields); --}}
-                            @if($customField->visibility !== null)
-                                <th data-field="custom_field_{{ $customField->id }}"
-                                    data-visible="{{ (in_array('custom_field_' . $customField->id, $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}"
-                                    data-sortable="false"
-                                    data-formatter="{{ $customField->field_type === 'checkbox' ? 'customFieldFormatter' : '' }}"
-                                    class="truncate-col"
-                                    title="{{ $customField->field_label }}">
-                                    {{ $customField->field_label }}
-                                </th>
-                            @endif
-                        @endforeach
-                    @endif
-                        <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('actions', 'Actions') }}</th>
-                    </tr>
-                </thead>
-            </table>
+        @php
+            $columns = [
+                ['checkbox' => true],
+                ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true, 'visible' => (in_array('id', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'title', 'label' => get_label('title', 'Title'), 'sortable' => true, 'visible' => (in_array('title', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'users', 'label' => get_label('users', 'Users'), 'visible' => (in_array('users', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'clients', 'label' => get_label('clients', 'Clients'), 'visible' => (in_array('clients', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'status_id', 'label' => get_label('status', 'Status'), 'sortable' => true, 'visible' => (in_array('status_id', $visibleColumns) || empty($visibleColumns)), 'class' => 'status-column'],
+                ['field' => 'priority_id', 'label' => get_label('priority', 'Priority'), 'sortable' => true, 'visible' => (in_array('priority_id', $visibleColumns) || empty($visibleColumns)), 'class' => 'priority-column'],
+                ['field' => 'start_date', 'label' => get_label('starts_at', 'Starts at'), 'sortable' => true, 'visible' => (in_array('start_date', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'end_date', 'label' => get_label('ends_at', 'Ends at'), 'sortable' => true, 'visible' => (in_array('end_date', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'budget', 'label' => get_label('budget', 'Budget'), 'sortable' => true, 'visible' => (in_array('budget', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'tags', 'label' => get_label('tags', 'Tags'), 'visible' => (in_array('tags', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'created_at', 'label' => get_label('created_at', 'Created at'), 'sortable' => true, 'visible' => in_array('created_at', $visibleColumns)],
+                ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated at'), 'sortable' => true, 'visible' => in_array('updated_at', $visibleColumns)],
+            ];
+
+            // Add custom fields dynamically
+            if (isset($customFields) && $customFields->isNotEmpty()) {
+                foreach ($customFields as $customField) {
+                    if ($customField->visibility !== null) {
+                        $col = [
+                            'field' => 'custom_field_' . $customField->id,
+                            'label' => $customField->field_label,
+                            'visible' => (in_array('custom_field_' . $customField->id, $visibleColumns) || empty($visibleColumns)),
+                            'class' => 'truncate-col',
+                        ];
+                        if ($customField->field_type === 'checkbox') {
+                            $col['formatter'] = 'customFieldFormatter';
+                        }
+                        $columns[] = $col;
+                    }
+                }
+            }
+
+            $columns[] = ['field' => 'actions', 'label' => get_label('actions', 'Actions'), 'visible' => (in_array('actions', $visibleColumns) || empty($visibleColumns))];
+
+            $projectUrl = isset($viewAssigned) && $viewAssigned == 1
+                ? ''
+                : (!empty($id)
+                    ? url('/projects/listing/' . $id . '?from_home=' . (request()->is('home') ? '1' : '0'))
+                    : url('/projects/listing?from_home=' . (request()->is('home') ? '1' : '0')));
+        @endphp
+        <div class="card border shadow-none">
+            <div class="card-body p-0">
+                <x-tk-table
+                    id="projects_table"
+                    :url="$projectUrl"
+                    :columns="$columns"
+                    data-sort-name="id"
+                    data-sort-order="desc"
+                    data-query-params="queryParamsProjects"
+                >
+                    <x-slot:before>
+                        <input type="hidden" id="data_type" value="projects">
+                        <input type="hidden" id="data_table" value="projects_table">
+                        <input type="hidden" id="data_reload" value="{{request()->is('home') ? '1' : '0'}}">
+                        <input type="hidden" id="save_column_visibility">
+                        <input type="hidden" id="multi_select">
+                    </x-slot:before>
+                </x-tk-table>
+            </div>
         </div>
         @else
         <?php

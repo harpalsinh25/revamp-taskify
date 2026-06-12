@@ -774,7 +774,7 @@ $(document).on("click", ".edit-contract", function () {
                 $("#title").val(response.contract.title);
                 $("#value").val(response.contract.value);
                 if ($("#client_id")[0].tomselect) {
-                    $("#client_id")[0].tomselect.addOption({id: response.contract.client.id, text: response.contract.client.first_name + " " + response.contract.client.last_name});
+                    $("#client_id")[0].tomselect.addOption({ id: response.contract.client.id, text: response.contract.client.first_name + " " + response.contract.client.last_name });
                     $("#client_id")[0].tomselect.setValue(response.contract.client.id);
                 } else {
                     var clientOption = new Option(
@@ -787,9 +787,9 @@ $(document).on("click", ".edit-contract", function () {
                     );
                     $("#client_id").append(clientOption).trigger("change");
                 }
-                
+
                 if ($("#project_id")[0].tomselect) {
-                    $("#project_id")[0].tomselect.addOption({id: response.contract.project.id, text: response.contract.project.title});
+                    $("#project_id")[0].tomselect.addOption({ id: response.contract.project.id, text: response.contract.project.title });
                     $("#project_id")[0].tomselect.setValue(response.contract.project.id);
                 } else {
                     var projectOption = new Option(
@@ -800,9 +800,9 @@ $(document).on("click", ".edit-contract", function () {
                     );
                     $("#project_id").append(projectOption).trigger("change");
                 }
-                
+
                 if ($("#contract_type_id")[0].tomselect) {
-                    $("#contract_type_id")[0].tomselect.addOption({id: response.contract.contract_type.id, text: response.contract.contract_type.type});
+                    $("#contract_type_id")[0].tomselect.addOption({ id: response.contract.contract_type.id, text: response.contract.contract_type.type });
                     $("#contract_type_id")[0].tomselect.setValue(response.contract.contract_type.id);
                 } else {
                     var contractTypeOption = new Option(
@@ -866,13 +866,13 @@ $(document).on("click", ".edit-expense", function () {
             $("#expense_title").val(response.exp.title);
             if (response.exp.expense_type && response.exp.expense_type.title) {
                 if ($("#expense_type_id")[0].tomselect) {
-                    $("#expense_type_id")[0].tomselect.addOption({id: response.exp.expense_type.id, text: response.exp.expense_type.title});
+                    $("#expense_type_id")[0].tomselect.addOption({ id: response.exp.expense_type.id, text: response.exp.expense_type.title });
                     $("#expense_type_id")[0].tomselect.setValue(response.exp.expense_type.id);
                 }
             }
             if (response.exp.user && response.exp.user.id) {
                 if ($("#expense_user_id")[0].tomselect) {
-                    $("#expense_user_id")[0].tomselect.addOption({id: response.exp.user.id, text: response.exp.user.first_name + " " + response.exp.user.last_name});
+                    $("#expense_user_id")[0].tomselect.addOption({ id: response.exp.user.id, text: response.exp.user.first_name + " " + response.exp.user.last_name });
                     $("#expense_user_id")[0].tomselect.setValue(response.exp.user.id);
                 }
             }
@@ -1974,7 +1974,7 @@ $(document).on("click", ".favorite-icon", function () {
                     icon.find("i").removeClass("bx-star text-muted").addClass("bxs-star text-warning");
                 }
                 icon.attr("data-favorite", isFavorite);
-                var textNode = icon.contents().filter(function() {
+                var textNode = icon.contents().filter(function () {
                     return this.nodeType === 3 && this.nodeValue.trim() !== "";
                 });
                 if (textNode.length) {
@@ -2034,7 +2034,7 @@ $(document).on("click", ".pinned-icon", function () {
                     icon.find("i").removeClass("bx-pin text-muted").addClass("bxs-pin text-success");
                 }
                 icon.attr("data-pinned", isPinned);
-                var textNode = icon.contents().filter(function() {
+                var textNode = icon.contents().filter(function () {
                     return this.nodeType === 3 && this.nodeValue.trim() !== "";
                 });
                 if (textNode.length) {
@@ -2691,11 +2691,11 @@ $(document).ready(function () {
                     label_clear_filters +
                     "</button>"
                 );
-                
+
                 // Try to find the filter row by checking parents from closest to furthest
                 var $filterRow = $();
-                $toolbar.parents('.card-body, .card, .mt-2, .container-fluid').each(function() {
-                    var $row = $(this).find('.row').filter(function() {
+                $toolbar.parents('.card-body, .card, .mt-2, .container-fluid').each(function () {
+                    var $row = $(this).find('.row').filter(function () {
                         return $(this).find('select[multiple="multiple"]').length > 0 || $(this).hasClass('tk-filter-row');
                     }).last();
                     if ($row.length > 0) {
@@ -2709,7 +2709,7 @@ $(document).ready(function () {
                     if ($existingContainer.length > 0) {
                         $existingContainer.empty().append($clearFiltersButton);
                     } else {
-                        var $filterCol = $('<div class="col-md-auto mb-3 d-flex align-items-end clear-filters-container"></div>');
+                        var $filterCol = $('<div class="col-md-auto  d-flex align-items-end clear-filters-container"></div>');
                         $filterCol.append($clearFiltersButton);
                         $filterRow.append($filterCol);
                     }
@@ -2810,9 +2810,9 @@ $(document).on("click", "#mark-all-notifications-as-read", function (e) {
 // Applies the design system badge styles (bg-label-*) and uncolored action icons to ALL tables automatically
 $(document).on('post-body.bs.table', 'table[data-toggle="table"]', function () {
     var $table = $(this);
-    
+
     // 1. Convert all standard bg-* badges to bg-label-*
-    $table.find('.badge').each(function() {
+    $table.find('.badge').each(function () {
         var $badge = $(this);
         var classes = $badge.attr('class').split(' ');
         var originalBgClass = '';
@@ -2835,7 +2835,7 @@ $(document).on('post-body.bs.table', 'table[data-toggle="table"]', function () {
     });
 
     // 2. Normalize Action Icons (remove hardcoded colors like text-danger, text-primary from action columns)
-    $table.find('a i.bx, button i.bx').each(function() {
+    $table.find('a i.bx, button i.bx').each(function () {
         $(this).removeClass('text-danger text-primary text-success text-warning text-info text-dark text-secondary text-muted');
     });
 });
@@ -4603,7 +4603,7 @@ $(document).ready(function () {
             allowEmptyOption: true,
             controlInput: null,
             render: {
-                option: function(data, escape) {
+                option: function (data, escape) {
                     if (!data.value) {
                         return '<div>' + escape(data.text || 'Please select') + '</div>';
                     }
@@ -4611,7 +4611,7 @@ $(document).ready(function () {
                     if (!color) color = 'primary';
                     return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 },
-                item: function(data, escape) {
+                item: function (data, escape) {
                     if (!data.value) {
                         return '<div class="item">' + escape(data.text || 'Please select') + '</div>';
                     }
@@ -4635,7 +4635,7 @@ $(document).ready(function () {
             allowEmptyOption: true,
             controlInput: null,
             render: {
-                option: function(data, escape) {
+                option: function (data, escape) {
                     if (!data.value) {
                         return '<div>' + escape(data.text || 'Please select') + '</div>';
                     }
@@ -4643,7 +4643,7 @@ $(document).ready(function () {
                     if (!color) color = 'primary';
                     return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 },
-                item: function(data, escape) {
+                item: function (data, escape) {
                     if (!data.value) {
                         return '<div class="item">' + escape(data.text || 'Please select') + '</div>';
                     }
@@ -5518,7 +5518,7 @@ $("#create_task_offcanvas").on("shown.bs.offcanvas", function (event) {
     }
 });
 
-    // Legacy menu search logic removed
+// Legacy menu search logic removed
 function addClearButtonFunctionality() {
     $(".custom-search-input").each(function () {
         const $inputField = $(this); // Current input field
@@ -6963,13 +6963,13 @@ $(document).ready(function () {
                 pane.querySelectorAll(".tk-panel-item").forEach(function (item) {
                     var span = item.querySelector("span");
                     if (!span) return;
-                    
+
                     if (!span.hasAttribute("data-original-text")) {
                         span.setAttribute("data-original-text", span.textContent);
                     }
                     var text = span.getAttribute("data-original-text");
                     var lowerText = text.toLowerCase();
-                    
+
                     if (!q) {
                         span.innerHTML = text;
                         item.style.display = "";
@@ -6993,7 +6993,7 @@ $(document).ready(function () {
             });
 
             if (searchClear) {
-                searchClear.addEventListener("click", function() {
+                searchClear.addEventListener("click", function () {
                     search.value = "";
                     search.dispatchEvent(new Event("input"));
                     search.focus();
@@ -7877,11 +7877,11 @@ $(document).ready(function () {
         document.addEventListener("DOMContentLoaded", initDashboardTableFilters);
     } else {
         initDashboardTableFilters();
-$(function(){
-    if (typeof window.initAdvancedDateRangePicker === 'function' && $('#task_date_between').length) {
-        window.initAdvancedDateRangePicker('#task_date_between', '#task_date_between_from', '#task_date_between_to');
-    }
-});
+        $(function () {
+            if (typeof window.initAdvancedDateRangePicker === 'function' && $('#task_date_between').length) {
+                window.initAdvancedDateRangePicker('#task_date_between', '#task_date_between_from', '#task_date_between_to');
+            }
+        });
     }
 })();
 
@@ -7900,7 +7900,7 @@ $(function(){
             var target = jQuery(e.target).attr('data-bs-target');
             if (target) {
                 jQuery(target).find('table[data-toggle="table"]').each(function () {
-                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) {}
+                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) { }
                 });
             }
         });
@@ -7909,9 +7909,9 @@ $(function(){
         // the statistics chart once the layout has settled.
         jQuery(function () {
             setTimeout(function () {
-                try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+                try { window.dispatchEvent(new Event('resize')); } catch (e) { }
                 jQuery(SEL + ' .tab-pane.active table[data-toggle="table"]').each(function () {
-                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) {}
+                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) { }
                 });
             }, 300);
         });
@@ -7933,14 +7933,14 @@ $(function(){
     var $dock = $('#task_inspector');
     if (!$dock.length) return;
 
-    var listUrl    = $dock.data('tasks-list-url');
-    var infoUrl    = $dock.data('task-info-url');
-    var mediaUrl   = $dock.data('task-media-url');
-    var getUrl     = $dock.data('task-get-url');
-    var commentBase= $dock.data('comment-url');
+    var listUrl = $dock.data('tasks-list-url');
+    var infoUrl = $dock.data('task-info-url');
+    var mediaUrl = $dock.data('task-media-url');
+    var getUrl = $dock.data('task-get-url');
+    var commentBase = $dock.data('comment-url');
     var storageUrl = $dock.data('storage-url');
-    var noImage    = $dock.data('no-image');
-    var tasksBase  = String(listUrl || '').replace(/\/list$/, '');
+    var noImage = $dock.data('no-image');
+    var tasksBase = String(listUrl || '').replace(/\/list$/, '');
 
     var currentTaskId = null;
     var loaded = {};
@@ -7948,33 +7948,33 @@ $(function(){
 
     function csrf() {
         return $('meta[name="csrf-token"]').attr('content') ||
-               $dock.find('input[name="_token"]').val() || '';
+            $dock.find('input[name="_token"]').val() || '';
     }
-    function statuses()  { return window.statusArray   || []; }
-    function priorities(){ return window.priorityArray || []; }
-    function byId(arr, id) { for (var i=0;i<arr.length;i++){ if (String(arr[i].id)===String(id)) return arr[i]; } return null; }
-    function statusTitleById(id){ var s=byId(statuses(),id); return s?s.title:''; }
-    function doneStatusId(){ var s=statuses(); return s.length?s[s.length-1].id:null; }
-    function todoStatusId(){ var s=statuses(); return s.length?s[0].id:null; }
-    function esc(t){ return $('<div>').text(t==null?'':t).html(); }
-    var COLORVAR = { success:'var(--ok)', danger:'var(--err)', warning:'var(--warn)', info:'var(--info)', primary:'var(--signal)', secondary:'var(--fg-3)' };
-    function colorVar(c){ return COLORVAR[c] || 'var(--fg-3)'; }
-    function parseStatusId(html){ var m=/data-original-status-id=['"]?(\d+)/.exec(html||''); return m?m[1]:null; }
-    function parseTitle(html){ var $h=$('<div>').html(html||''); var t=$h.find('strong').first().text(); return t||$.trim($h.text()); }
-    function row(lbl, val){ return '<div class="tk-insp-lbl">'+esc(lbl)+'</div><div class="tk-insp-val">'+val+'</div>'; }
+    function statuses() { return window.statusArray || []; }
+    function priorities() { return window.priorityArray || []; }
+    function byId(arr, id) { for (var i = 0; i < arr.length; i++) { if (String(arr[i].id) === String(id)) return arr[i]; } return null; }
+    function statusTitleById(id) { var s = byId(statuses(), id); return s ? s.title : ''; }
+    function doneStatusId() { var s = statuses(); return s.length ? s[s.length - 1].id : null; }
+    function todoStatusId() { var s = statuses(); return s.length ? s[0].id : null; }
+    function esc(t) { return $('<div>').text(t == null ? '' : t).html(); }
+    var COLORVAR = { success: 'var(--ok)', danger: 'var(--err)', warning: 'var(--warn)', info: 'var(--info)', primary: 'var(--signal)', secondary: 'var(--fg-3)' };
+    function colorVar(c) { return COLORVAR[c] || 'var(--fg-3)'; }
+    function parseStatusId(html) { var m = /data-original-status-id=['"]?(\d+)/.exec(html || ''); return m ? m[1] : null; }
+    function parseTitle(html) { var $h = $('<div>').html(html || ''); var t = $h.find('strong').first().text(); return t || $.trim($h.text()); }
+    function row(lbl, val) { return '<div class="tk-insp-lbl">' + esc(lbl) + '</div><div class="tk-insp-val">' + val + '</div>'; }
 
-    function photoSrc(p){ return p ? (storageUrl + '/' + p) : noImage; }
-    function avatarsFromUsers(users){
+    function photoSrc(p) { return p ? (storageUrl + '/' + p) : noImage; }
+    function avatarsFromUsers(users) {
         users = users || [];
         if (!users.length) return '<span style="font-size:12px;color:var(--fg-3)">—</span>';
         var h = '<span class="av-stack tk-av-stack">', n = 0;
-        users.forEach(function(u){
+        users.forEach(function (u) {
             if (n < 5) {
-                h += '<span class="av" title="'+esc((u.first_name||'')+' '+(u.last_name||''))+'"><img src="'+esc(photoSrc(u.photo))+'" onerror="this.onerror=null;this.src=DEFAULT_IMG" alt=""></span>';
+                h += '<span class="av" title="' + esc((u.first_name || '') + ' ' + (u.last_name || '')) + '"><img src="' + esc(photoSrc(u.photo)) + '" onerror="this.onerror=null;this.src=DEFAULT_IMG" alt=""></span>';
                 n++;
             }
         });
-        if (users.length > 5) h += '<span class="av av-more">+'+(users.length-5)+'</span>';
+        if (users.length > 5) h += '<span class="av av-more">+' + (users.length - 5) + '</span>';
         h = h.replace(/DEFAULT_IMG/g, "'" + String(noImage).replace(/'/g, "%27") + "'");
         return h + '</span>';
     }
@@ -8011,9 +8011,9 @@ $(function(){
         $('#tk_insp_status').html('<span class="dot"></span>' + esc(stTitle));
         $('#tk_insp_title').text(title);
         var html = '';
-        if (prioTxt) html += row('Priority', '<span class="mono" style="color:'+prioColor+'">'+esc(prioTxt)+'</span>');
+        if (prioTxt) html += row('Priority', '<span class="mono" style="color:' + prioColor + '">' + esc(prioTxt) + '</span>');
         html += row('Assignees', '<span id="tk_insp_assignees"></span>');
-        if (dueTxt) html += row('Due', '<span class="mono">'+esc(dueTxt)+'</span>');
+        if (dueTxt) html += row('Due', '<span class="mono">' + esc(dueTxt) + '</span>');
         if (stTitle) html += row('Status', esc(stTitle));
         $('#tk_insp_meta').html(html);
         if ($assignees.length) $('#tk_insp_assignees').replaceWith($assignees); else $('#tk_insp_assignees').text('—');
@@ -8033,17 +8033,17 @@ $(function(){
             $('#tk_insp_title').text(t.title || '');
             var html = '';
             var pr = byId(priorities(), t.priority_id);
-            if (pr) html += row('Priority', '<span class="mono" style="color:'+colorVar(pr.color)+'">● '+esc(pr.title)+'</span>');
+            if (pr) html += row('Priority', '<span class="mono" style="color:' + colorVar(pr.color) + '">● ' + esc(pr.title) + '</span>');
             html += row('Assignees', avatarsFromUsers(t.users));
-            if (t.due_date) html += row('Due', '<span class="mono">'+esc(t.due_date)+'</span>');
+            if (t.due_date) html += row('Due', '<span class="mono">' + esc(t.due_date) + '</span>');
             if (stTitle) html += row('Status', esc(stTitle));
             $('#tk_insp_meta').html(html);
-        }).fail(function(){ $('#tk_insp_meta').html(''); });
+        }).fail(function () { $('#tk_insp_meta').html(''); });
     }
 
     function activateTab(name) {
-        $('#tk_insp_tabs .tk-insp-tab').removeClass('active').filter('[data-insp-tab="'+name+'"]').addClass('active');
-        $('#tk_insp_panes .tk-insp-pane').removeClass('active').filter('[data-insp-pane="'+name+'"]').addClass('active');
+        $('#tk_insp_tabs .tk-insp-tab').removeClass('active').filter('[data-insp-tab="' + name + '"]').addClass('active');
+        $('#tk_insp_panes .tk-insp-pane').removeClass('active').filter('[data-insp-pane="' + name + '"]').addClass('active');
     }
     $dock.on('click', '.tk-insp-tab', function () {
         var name = $(this).data('insp-tab');
@@ -8056,8 +8056,8 @@ $(function(){
         if (loaded[name]) return;
         loaded[name] = true;
         if (name === 'subtask') return loadSubtasks(currentTaskId);
-        if (name === 'media')   return loadMedia(currentTaskId);
-        if (name === 'activity')return fillActivity(currentTaskId);
+        if (name === 'media') return loadMedia(currentTaskId);
+        if (name === 'activity') return fillActivity(currentTaskId);
         if (name === 'comments' || name === 'timeline') return loadTaskPage(currentTaskId);
     }
 
@@ -8078,21 +8078,21 @@ $(function(){
             var sid = parseStatusId(r.status_id);
             var isDone = dId && String(sid) === String(dId);
             if (isDone) done++;
-            items += '<label class="tk-subtask'+(isDone?' is-done':'')+'" data-sub-id="'+r.id+'">';
-            items += '<input type="checkbox" '+(isDone?'checked':'')+'>';
-            items += '<span class="tk-subtask-title">'+esc(parseTitle(r.title))+'</span></label>';
+            items += '<label class="tk-subtask' + (isDone ? ' is-done' : '') + '" data-sub-id="' + r.id + '">';
+            items += '<input type="checkbox" ' + (isDone ? 'checked' : '') + '>';
+            items += '<span class="tk-subtask-title">' + esc(parseTitle(r.title)) + '</span></label>';
         });
-        var pct = total ? Math.round(done/total*100) : 0;
-        $p.html('<div class="tk-insp-sechead"><strong>Subtasks</strong><span class="tk-insp-count" id="tk_insp_subcount">'+done+'/'+total+'</span></div>'
-              + '<div class="tk-insp-progress"><span id="tk_insp_progress" style="width:'+pct+'%"></span></div>'
-              + '<div class="tk-subtask-list">'+items+'</div>');
+        var pct = total ? Math.round(done / total * 100) : 0;
+        $p.html('<div class="tk-insp-sechead"><strong>Subtasks</strong><span class="tk-insp-count" id="tk_insp_subcount">' + done + '/' + total + '</span></div>'
+            + '<div class="tk-insp-progress"><span id="tk_insp_progress" style="width:' + pct + '%"></span></div>'
+            + '<div class="tk-subtask-list">' + items + '</div>');
     }
     function updateSubCount() {
         var $list = $('#tk_insp_pane_subtask');
         var total = $list.find('.tk-subtask').length;
         var done = $list.find('.tk-subtask input:checked').length;
         $('#tk_insp_subcount').text(done + '/' + total);
-        $('#tk_insp_progress').css('width', (total ? Math.round(done/total*100) : 0) + '%');
+        $('#tk_insp_progress').css('width', (total ? Math.round(done / total * 100) : 0) + '%');
     }
     $dock.on('change', '.tk-subtask input[type=checkbox]', function () {
         var $r = $(this).closest('.tk-subtask');
@@ -8155,15 +8155,15 @@ $(function(){
                 h += '<div class="tk-insp-media">' + (m.file || '') + '<span class="tk-insp-media-name">' + esc(m.file_name || '') + '</span></div>';
             });
             $p.html(h + '</div>');
-        }).fail(function(){ $p.html('<div class="tk-insp-emptyline">Could not load media.</div>'); });
+        }).fail(function () { $p.html('<div class="tk-insp-emptyline">Could not load media.</div>'); });
     }
 
     function fillActivity(taskId) {
         $('#tk_insp_pane_activity').html(
             '<div class="tk-insp-emptyline" style="text-align:center;padding:18px 8px;">'
-          + 'Activity log opens in the full task view.<br>'
-          + '<a class="btn btn-sm btn-outline-secondary mt-2" target="_blank" href="' + esc(infoUrl + '/' + taskId) + '#navs-top-activity-log">Open activity</a>'
-          + '</div>');
+            + 'Activity log opens in the full task view.<br>'
+            + '<a class="btn btn-sm btn-outline-secondary mt-2" target="_blank" href="' + esc(infoUrl + '/' + taskId) + '#navs-top-activity-log">Open activity</a>'
+            + '</div>');
     }
 
     $('#tk_insp_comment_form').on('submit', function (e) {
@@ -8249,7 +8249,7 @@ $(function(){
     function setCollapsed(collapsed) {
         $('#tk_workspace').toggleClass('tk-detail-collapsed', collapsed);
         $('#tk_detail_toggle').toggleClass('active', !collapsed);
-        try { localStorage.setItem('tkProjectDetailCollapsed', collapsed ? '1' : '0'); } catch (e) {}
+        try { localStorage.setItem('tkProjectDetailCollapsed', collapsed ? '1' : '0'); } catch (e) { }
     }
     $(document).on('click', '#tk_detail_toggle', function () {
         setCollapsed(!$('#tk_workspace').hasClass('tk-detail-collapsed'));
@@ -8258,7 +8258,7 @@ $(function(){
     $(function () {
         if (!$('#tk_workspace').length) return;
         var saved = null;
-        try { saved = localStorage.getItem('tkProjectDetailCollapsed'); } catch (e) {}
+        try { saved = localStorage.getItem('tkProjectDetailCollapsed'); } catch (e) { }
         if (saved === '1') setCollapsed(true);
     });
 })();

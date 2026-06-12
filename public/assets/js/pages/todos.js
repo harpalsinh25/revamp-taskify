@@ -20,7 +20,7 @@ $(document).ready(function () {
                     const todoId = $(item).data('todo-id');
 
                     // If item was moved to completed list
-                    if ($(to).closest('.todo-card').find('.todo-card-header').hasClass('todo-gradient-success')) {
+                    if ($(to).closest('.todo-card').hasClass('todo-card-complete')) {
                         // Add completed class to the item
                         $(item).addClass('todo-completed');
 
@@ -29,8 +29,8 @@ $(document).ready(function () {
 
                         // Replace priority badge with completed tag
                         const metaContainer = $(item).find('.todo-meta');
-                        metaContainer.find('.todo-priority-badge').replaceWith(
-                            '<span class="todo-completed-tag"><i class="bx bx-check-double me-1"></i>' +
+                        metaContainer.find('.badge').replaceWith(
+                            '<span class="badge badge-ok"><i class="bx bx-check-double me-1"></i>' +
                             'Completed</span>'
                         );
 
@@ -51,13 +51,13 @@ $(document).ready(function () {
                             ($(item).hasClass('todo-priority-medium') ? 'medium' : 'low');
 
                         // Get proper color class based on priority
-                        const colorClass = priority === 'high' ? 'danger' :
-                            (priority === 'medium' ? 'warning' : 'success');
+                        const colorClass = priority === 'high' ? 'badge-err' :
+                            (priority === 'medium' ? 'badge-warn' : 'badge-info');
 
                         // Replace completed tag with priority badge
                         const metaContainer = $(item).find('.todo-meta');
-                        metaContainer.find('.todo-completed-tag').replaceWith(
-                            '<span class="todo-priority-badge todo-bg-' + colorClass + '-subtle">' +
+                        metaContainer.find('.badge').replaceWith(
+                            '<span class="badge ' + colorClass + '">' +
                             priority.charAt(0).toUpperCase() + priority.slice(1) +
                             '</span>'
                         );
@@ -75,8 +75,10 @@ $(document).ready(function () {
 
     // Function to update the counters after drag and drop
     function updateCounters() {
-        const incompleteContainer = document.querySelector('.todo-gradient-primary').closest('.todo-card').querySelector('.todo-list-container');
-        const completeContainer = document.querySelector('.todo-gradient-success').closest('.todo-card').querySelector('.todo-list-container');
+        const incompleteContainer = document.querySelector('.todo-card-incomplete .todo-list-container');
+        const completeContainer = document.querySelector('.todo-card-complete .todo-list-container');
+
+        if (!incompleteContainer || !completeContainer) return;
 
         // Count todos (excluding add-item divs)
         const incompleteCount = incompleteContainer.querySelectorAll('.todo-item').length;
@@ -84,8 +86,15 @@ $(document).ready(function () {
         const totalCount = incompleteCount + completeCount;
 
         // Update counters
-        document.querySelector('.todo-gradient-primary').closest('.todo-card-header').querySelector('.todo-counter').textContent = incompleteCount;
-        document.querySelector('.todo-gradient-success').closest('.todo-card-header').querySelector('.todo-counter').textContent = completeCount;
+        const incompleteHeader = document.querySelector('.todo-card-incomplete .todo-card-header');
+        const completeHeader = document.querySelector('.todo-card-complete .todo-card-header');
+        
+        if (incompleteHeader) {
+            incompleteHeader.querySelector('.todo-counter').textContent = incompleteCount;
+        }
+        if (completeHeader) {
+            completeHeader.querySelector('.todo-counter').textContent = completeCount;
+        }
 
         // Calculate progress
         let progress = totalCount > 0 ? (completeCount / totalCount) * 100 : 0;
@@ -100,12 +109,15 @@ $(document).ready(function () {
     // Function to send AJAX request to update todo status
     function updateTodoStatus(todoId, isCompleted) {
         $.ajax({
-            url: '/todos/update_status', // Replace with your route
-            type: 'PUT',
+            url: baseUrl + '/todos/update_status',
+            type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: {
+                _method: 'PUT',
                 id: todoId,
-                status: isCompleted ? 1 : 0,
-                _token: $('meta[name="csrf-token"]').attr('content') // Laravel CSRF token
+                status: isCompleted ? 1 : 0
             },
             success: function (response) {
                 if (response.error == false) {
@@ -133,30 +145,32 @@ $(document).ready(function () {
         if (!title) return;
 
         $.ajax({
-            url: '/todos/store', // Adjust to your create route
+            url: baseUrl + '/todos/store', // Adjust to your create route
             type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: {
                 title: title,
                 priority: 'low', // Default; add UI select if needed
-                is_completed: listType === 'completed' ? 1 : 0,
-                _token: $('meta[name="csrf-token"]').attr('content')
+                is_completed: listType === 'completed' ? 1 : 0
             },
             success: function (response) {
                 if (response.error === false) {
                     const todo = response.data;
                     const priorityColors = {
-                        low: 'success',
-                        medium: 'warning',
-                        high: 'danger'
+                        low: 'badge-info',
+                        medium: 'badge-warn',
+                        high: 'badge-err'
                     };
-                    const colorClass = priorityColors[todo.priority] || 'success';
+                    const colorClass = priorityColors[todo.priority] || 'badge-info';
                     const formattedDate = new Date(todo.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     const ucfirstPriority = todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1);
 
                     const html = `
                         <div class="todo-item ${todo.is_completed ? 'todo-completed' : ''} todo-priority-${todo.priority} d-flex align-items-center" data-todo-id="${todo.id}">
                             <div class="todo-drag-handle me-2">
-                                <i class="bx bx-menu"></i>
+                                <i class="bx bx-grid-vertical fs-4"></i>
                             </div>
                             <div class="todo-check me-3">
                                 <input type="checkbox" class="todo-check-input border-2" id="${todo.id}" onclick="update_status(this)" name="${todo.id}" ${todo.is_completed ? 'checked' : ''}>
@@ -166,15 +180,15 @@ $(document).ready(function () {
                                 <div class="todo-meta">
                                     <span class="todo-meta-item"><i class="bx bx-calendar-alt"></i> ${formattedDate}</span>
                                     ${todo.is_completed ?
-                            '<span class="todo-completed-tag"><i class="bx bx-check-double me-1"></i>Completed</span>' :
-                            `<span class="todo-priority-badge todo-bg-${colorClass}-subtle">${ucfirstPriority}</span>`
+                            '<span class="badge badge-ok"><i class="bx bx-check-double me-1"></i>Completed</span>' :
+                            `<span class="badge ${colorClass}">${ucfirstPriority}</span>`
                         }
                                 </div>
                             </div>
                             <div class="todo-actions-container">
                                 <div class="d-flex">
-                                    <a href="javascript:void(0);" class="edit-todo" data-bs-toggle="modal" data-bs-target="#edit_todo_modal" data-id="${todo.id}" title="Update" class="card-link"><i class='bx bx-edit mx-1'></i></a>
-                                    <a href="javascript:void(0);" type="button" data-id="${todo.id}" data-type="todos" data-reload="true" title="Delete" class="card-link delete mx-4"><i class='bx bx-trash text-danger mx-1'></i></a>
+                                    <a href="javascript:void(0);" class="edit-todo me-2" data-bs-toggle="modal" data-bs-target="#edit_todo_modal" data-id="${todo.id}" title="Update"><i class='bx bx-edit fs-5'></i></a>
+                                    <a href="javascript:void(0);" type="button" data-id="${todo.id}" data-type="todos" data-reload="true" title="Delete" class="delete text-danger"><i class='bx bx-trash fs-5'></i></a>
                                 </div>
                             </div>
                         </div>

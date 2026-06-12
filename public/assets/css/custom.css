@@ -2206,85 +2206,71 @@ html:not([dir="rtl"]) .timeline-item {
 /* ============================================================================
    TODO ENHANCEMENT COMPONENTS
    ============================================================================ */
+/* ============================================================================
+   TODO ENHANCEMENT COMPONENTS
+   ============================================================================ */
 .todo-card {
-    border-radius: 16px;
+    border-radius: var(--r-3);
     overflow: hidden;
-    transition: all 0.3s ease;
-    border: none;
-    box-shadow: var(--bs-body-color);
+    transition: border-color var(--t-1) var(--ease);
+    border: 1px solid var(--line) !important;
+    background-color: var(--bg-1) !important;
+    box-shadow: none !important;
     height: 100%;
-    background-color: #fff;
-}
-
-.todo-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
 }
 
 .todo-card-header {
-    border-bottom: none;
-    padding: 25px;
+    border-bottom: 1px solid var(--line) !important;
+    padding: 20px !important;
     position: relative;
-    overflow: hidden;
+    background-color: var(--bg-1) !important;
 }
 
-.todo-gradient-primary {
-    background: linear-gradient(135deg, var(--bs-primary), var(--bs-dark));
+.todo-card.todo-card-incomplete {
+    border-top: 3px solid var(--signal) !important;
 }
 
-.todo-gradient-success {
-    background: linear-gradient(135deg, var(--bs-success), #059669);
+.todo-card.todo-card-complete {
+    border-top: 3px solid var(--success) !important;
 }
 
 .todo-header-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    margin-right: 15px;
-    background-color: rgba(255, 255, 255, 0.2);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--r-2);
+    margin-right: 12px;
+    background-color: rgba(105, 108, 255, 0.08) !important;
 }
 
-.todo-header-icon i {
-    font-size: 24px;
-    color: white;
+.todo-card-incomplete .todo-header-icon i {
+    font-size: 20px;
+    color: var(--signal) !important;
 }
 
-.todo-header-decoration {
-    position: absolute;
-    right: -20px;
-    top: -20px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
-    z-index: 1;
+.todo-card-complete .todo-header-icon {
+    background-color: rgba(40, 199, 111, 0.08) !important;
 }
 
-.todo-header-decoration:before {
-    content: "";
-    position: absolute;
-    right: -40px;
-    top: 40px;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
+.todo-card-complete .todo-header-icon i {
+    font-size: 20px;
+    color: var(--success) !important;
 }
 
 .todo-counter {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 6px 12px;
+    background-color: var(--bg-2) !important;
+    color: var(--fg-1) !important;
+    padding: 4px 10px;
     border-radius: 50px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
+    border: 1px solid var(--line);
 }
 
 .todo-card-body {
-    padding: 25px;
+    padding: 20px !important;
 }
 
 .todo-list-container {
@@ -2295,250 +2281,146 @@ html:not([dir="rtl"]) .timeline-item {
 }
 
 .todo-list-container::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 
 .todo-list-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 6px;
+    background: transparent;
 }
 
 .todo-list-container::-webkit-scrollbar-thumb {
-    background: #ddd;
-    border-radius: 6px;
-}
-
-.todo-list-container::-webkit-scrollbar-thumb:hover {
-    background: #ccc;
+    background: var(--line);
+    border-radius: 4px;
 }
 
 .todo-item {
-    padding: 16px;
-    margin-bottom: 16px;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    background-color: var(--bs-body-bg);
-    border-left: 5px solid transparent;
-    box-shadow: var(--bs-secondary);
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border-radius: var(--r-2);
+    transition: all var(--t-1) var(--ease);
+    background-color: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
     position: relative;
-    overflow: hidden;
 }
 
 .todo-item:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--bs-body-color);
+    border-color: var(--signal) !important;
 }
 
 .todo-item:last-child {
     margin-bottom: 0;
 }
 
-.todo-item.todo-priority-high {
-    border-left-color: var(--bs-danger);
-}
-
-.todo-item.todo-priority-medium {
-    border-left-color: var(--bs-warning);
-}
-
-.todo-item.todo-priority-low {
-    border-left-color: var(--bs-success);
-}
-
 .todo-check-input {
-    width: 22px;
-    height: 22px;
-    border: 2px solid #d1d5db;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--line) !important;
+    border-radius: 4px !important;
     margin-top: 0;
+    cursor: pointer;
 }
 
 .todo-check-input:checked {
-    background-color: var(--bs-success);
-    border-color: var(--bs-success);
-}
-
-.todo-check-input:focus {
-    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25);
+    background-color: var(--success) !important;
+    border-color: var(--success) !important;
 }
 
 .todo-title {
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #1f2937;
-    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--fg-0);
+    font-size: var(--fs-base);
 }
 
 .todo-item.todo-completed .todo-title {
     text-decoration: line-through;
-    color: #6b7280;
+    color: var(--fg-3);
 }
 
 .todo-meta {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .todo-meta-item {
     display: flex;
     align-items: center;
-    font-size: 13px;
-    color: #6b7280;
+    font-size: var(--fs-sm);
+    color: var(--fg-3);
 }
 
 .todo-meta-item i {
-    margin-right: 5px;
-    font-size: 16px;
-}
-
-.todo-priority-badge {
-    padding: 4px 10px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.todo-bg-danger-subtle {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--bs-danger);
-}
-
-.todo-bg-warning-subtle {
-    background-color: rgba(245, 158, 11, 0.1);
-    color: var(--bs-warning);
-}
-
-.todo-bg-success-subtle {
-    background-color: rgba(16, 185, 129, 0.1);
-    color: var(--bs-success);
+    margin-right: 4px;
+    font-size: 14px;
 }
 
 .todo-actions-container {
-    opacity: 0.7;
-    transition: opacity 0.2s;
+    opacity: 0.6;
+    transition: opacity var(--t-1) var(--ease);
 }
 
 .todo-item:hover .todo-actions-container {
     opacity: 1;
 }
 
-.todo-action-btn {
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background-color: white;
-    border: 1px solid #e5e7eb;
-    color: #6b7280;
-    transition: all 0.2s;
-}
-
-.todo-action-btn:hover {
-    background-color: #f3f4f6;
-}
-
-.todo-action-btn.todo-delete:hover {
-    background-color: #fee2e2;
-    color: var(--bs-danger);
-}
-
-.todo-action-btn.todo-edit:hover {
-    background-color: #e0e7ff;
-    color: var(--bs-primary);
-}
-
-.todo-add-btn {
-    background: linear-gradient(135deg, var(--bs-primary), var(--bs-body-color));
-    border: none;
-    padding: 12px 24px;
-    font-weight: 600;
-    border-radius: 12px;
-    transition: all 0.3s;
-    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
-}
-
-.todo-add-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(99, 102, 241, 0.4);
-}
-
 .todo-drag-handle {
-    cursor: move;
-    color: #9ca3af;
-}
-
-.todo-completed-tag {
+    cursor: grab;
+    color: var(--fg-3);
+    transition: color var(--t-1) var(--ease);
     display: flex;
     align-items: center;
-    color: var(--bs-success);
-    font-weight: 500;
-    font-size: 13px;
 }
 
-.todo-view-all-btn {
-    background-color: transparent;
-    border: 2px solid var(--bs-success);
-    color: var(--bs-success);
-    padding: 10px 24px;
-    font-weight: 600;
-    border-radius: 12px;
-    transition: all 0.3s;
+.todo-drag-handle:hover {
+    color: var(--fg-1);
 }
 
-.todo-view-all-btn:hover {
-    background-color: var(--bs-success);
-    color: white;
+.todo-drag-handle:active {
+    cursor: grabbing;
 }
 
 .todo-progress {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important;
+    padding: 16px !important;
 }
 
-.todo-progress-bar {
-    height: 8px;
-    border-radius: 4px;
+.todo-progress .progress {
+    height: 6px !important;
+    border-radius: 3px !important;
     overflow: hidden;
-    background-color: #e5e7eb;
+    background-color: var(--line) !important;
+}
+
+.todo-progress .progress-bar {
+    background-color: var(--signal) !important;
 }
 
 .todo-progress-label {
-    font-size: 14px;
-    margin-bottom: 8px;
+    font-size: var(--fs-sm);
+    margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
+    color: var(--fg-2);
 }
 
 .todo-progress-value {
     font-weight: 600;
-}
-
-.todo-empty-state {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.todo-empty-state-icon {
-    font-size: 48px;
-    color: #d1d5db;
-    margin-bottom: 16px;
-}
-
-.todo-empty-state-text {
-    color: #6b7280;
-    margin-bottom: 20px;
+    color: var(--fg-1);
 }
 
 @media (max-width: 768px) {
     .todo-item {
-        padding: 14px;
+        padding: 10px 12px;
     }
 
     .todo-card-header,
     .todo-card-body {
-        padding: 20px;
+        padding: 16px !important;
     }
 }
 
@@ -8464,16 +8346,63 @@ body.v2-shell .ts-dropdown .active {
     color: var(--fg-0);
 }
 
-body.v2-shell .ts-control {
-    background-color: var(--bg-1);
-    border: 1px solid var(--line);
-    color: var(--fg-0);
+body.v2-shell .ts-wrapper.form-select,
+body.v2-shell .ts-wrapper.form-control {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
 }
 
+body.v2-shell .ts-control.form-select,
+body.v2-shell .ts-control.form-control {
+    background-image: none !important;
+    box-shadow: none !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+    min-height: auto !important;
+    border: 1px solid var(--line) !important;
+    background-color: var(--bg-1) !important;
+}
 
+body.v2-shell .ts-control {
+    background-color: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-0) !important;
+    border-radius: var(--r-2) !important;
+    padding: 8px 12px !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
 
 body.v2-shell .ts-control input {
-    color: var(--fg-0);
+    color: var(--fg-0) !important;
+}
+/* 
+body.v2-shell .ts-wrapper.focus .ts-control {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+} */
+
+body.v2-shell .ts-control .item {
+    background: var(--bg-2) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-1) !important;
+    border-radius: 4px !important;
+    padding: 2px 8px !important;
+    font-size: 13px !important;
+}
+
+body.v2-shell .ts-control .item .remove {
+    border-left: 1px solid var(--line) !important;
+    margin-left: 6px !important;
+    color: var(--fg-2) !important;
+}
+
+body.v2-shell .ts-control .item .remove:hover {
+    background: rgba(255, 0, 0, 0.1) !important;
+    color: var(--bs-danger) !important;
 }
 
 /* ============================================================
@@ -8553,30 +8482,263 @@ body.v2-shell .ts-control input {
 }
 
 /* ---- FullCalendar Design System Skin ---- */
-.fc-theme-standard td, .fc-theme-standard th {
-    border-color: var(--bs-border-color) !important;
+body.v2-shell .calendar-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
 }
-.fc-theme-standard .fc-scrollgrid {
-    border-color: var(--bs-border-color) !important;
+
+@media (max-width: 991.98px) {
+    body.v2-shell .calendar-wrapper {
+        flex-direction: column;
+    }
 }
-.fc-button-primary {
+
+body.v2-shell .calendar-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important;
+    box-shadow: var(--shadow-1) !important;
+    height: auto;
+}
+
+@media (max-width: 991.98px) {
+    body.v2-shell .calendar-sidebar {
+        width: 100%;
+    }
+}
+
+body.v2-shell .calendar-main {
+    flex-grow: 1;
+    background-color: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important;
+    box-shadow: var(--shadow-1) !important;
+    padding: 20px !important;
+}
+
+/* Sidebar Custom Switches / Checkboxes & Headers */
+body.v2-shell .calendar-sidebar .offcanvas-header {
+    border-bottom: 1px solid var(--line) !important;
+}
+
+body.v2-shell .calendar-sidebar h5,
+body.v2-shell .calendar-sidebar h6 {
+    color: var(--fg-0) !important;
+    font-weight: 600;
+}
+
+body.v2-shell .calendar-sidebar .form-check-input {
+    border-color: var(--line) !important;
+    background-color: var(--bg-2) !important;
+}
+
+body.v2-shell .calendar-sidebar .form-check-input:checked {
     background-color: var(--bs-primary) !important;
     border-color: var(--bs-primary) !important;
 }
-.fc-button-primary:not(:disabled).fc-button-active, .fc-button-primary:not(:disabled):active {
-    background-color: var(--bs-primary) !important;
-    border-color: var(--bs-primary) !important;
-    opacity: 0.85;
+
+body.v2-shell .calendar-sidebar .form-check-label {
+    color: var(--fg-1) !important;
+    font-size: 13.5px;
+    font-weight: 500;
 }
-.fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number {
-    color: var(--bs-heading-color) !important;
+
+body.v2-shell .calendar-sidebar .filter-section.mt-auto {
+    border-top: 1px solid var(--line) !important;
+}
+
+body.v2-shell .calendar-sidebar .small.text-muted {
+    font-size: 13px !important;
+    color: var(--fg-2) !important;
+}
+
+body.v2-shell .calendar-sidebar [id^="total-"],
+body.v2-shell .calendar-sidebar [id^="visible-"],
+body.v2-shell .calendar-sidebar [id^="filtered-"] {
+    font-family: var(--bs-font-monospace) !important;
+    color: var(--fg-0) !important;
+    font-weight: 600;
+}
+
+/* FullCalendar Component Overrides */
+body.v2-shell .fc-theme-standard td, 
+body.v2-shell .fc-theme-standard th {
+    border-color: var(--line) !important;
+}
+
+body.v2-shell .fc-theme-standard .fc-scrollgrid {
+    border-color: var(--line) !important;
+}
+
+/* Day, Week, Month Button Group */
+body.v2-shell .fc-button-group {
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+body.v2-shell .fc-button-primary {
+    background-color: var(--bg-0) !important;
+    border: none !important;
+    color: var(--fg-1) !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+    padding: 6px 14px !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    font-size: 13px !important;
+    transition: background-color var(--t-1), color var(--t-1) !important;
+}
+
+body.v2-shell .fc-button-primary:hover {
+    background-color: var(--bg-2) !important;
+    color: var(--fg-0) !important;
+}
+
+body.v2-shell .fc-button-primary:not(:disabled).fc-button-active, 
+body.v2-shell .fc-button-primary:not(:disabled):active {
+    background-color: var(--fg-0) !important;
+    color: var(--bg-0) !important;
+    box-shadow: none !important;
+}
+
+body.v2-shell .fc-toolbar-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: var(--fg-0) !important;
+}
+
+/* SUN, MON, TUE Header Bar */
+body.v2-shell .fc .fc-col-header-cell {
+    background-color: var(--bg-2) !important;
+    border: 1px solid var(--line) !important;
+    padding: 8px 0 !important;
+}
+
+body.v2-shell .fc .fc-col-header-cell-cushion {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    color: var(--fg-2) !important;
     text-decoration: none !important;
 }
-.fc-theme-standard .fc-list-day-cushion {
-    background-color: var(--bs-body-bg) !important;
+
+/* Day Numbers at Top-Left */
+body.v2-shell .fc .fc-daygrid-day-number {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: var(--fg-2) !important;
+    text-decoration: none !important;
+    margin: 6px 8px !important;
+    display: inline-block;
 }
-.fc .fc-list-event:hover td {
-    background-color: var(--bs-body-bg) !important;
+
+body.v2-shell .fc-theme-standard .fc-list-day-cushion {
+    background-color: var(--bg-2) !important;
+}
+
+body.v2-shell .fc .fc-list-event:hover td {
+    background-color: var(--bg-2) !important;
+}
+
+/* Today Cell Highlight */
+body.v2-shell .fc-day-today {
+    background-color: var(--signal-glow) !important;
+}
+
+html[data-theme="dark"] body.v2-shell .fc-day-today {
+    background-color: oklch(0.32 0.10 130 / 0.35) !important;
+}
+
+body.v2-shell .fc-day-today .fc-daygrid-day-number {
+    color: var(--bs-success) !important;
+    font-weight: 700 !important;
+}
+
+/* Other Month Days Shaded Background */
+body.v2-shell .fc-day-other {
+    background-color: var(--bg-2) !important;
+    opacity: 0.75;
+}
+
+html[data-theme="dark"] body.v2-shell .fc-day-other {
+    background-color: var(--bg-0) !important;
+    opacity: 0.4;
+}
+
+/* Event Capsule Badge Layout - Left Accent Lines */
+body.v2-shell .fc-event {
+    border: 1px solid var(--line) !important;
+    background-color: var(--bg-0) !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    margin-bottom: 4px !important;
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+body.v2-shell .fc-event:hover {
+    background-color: var(--bg-2) !important;
+    transform: translateY(-0.5px);
+}
+
+html[data-theme="dark"] body.v2-shell .fc-event:hover {
+    background-color: var(--bg-3) !important;
+}
+
+body.v2-shell .fc-event-main {
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+}
+
+body.v2-shell .fc-event-title, 
+body.v2-shell .fc-event-time,
+body.v2-shell .fc-event a,
+body.v2-shell .fc-event span {
+    color: var(--fg-0) !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+
+body.v2-shell .fc-event.bg-light-primary {
+    border-left: 3px solid var(--bs-primary) !important;
+    background-color: var(--bg-0) !important;
+}
+body.v2-shell .fc-event.bg-light-secondary {
+    border-left: 3px solid var(--bs-secondary) !important;
+    background-color: var(--bg-0) !important;
+}
+body.v2-shell .fc-event.bg-light-success {
+    border-left: 3px solid var(--bs-success) !important;
+    background-color: var(--bg-0) !important;
+}
+body.v2-shell .fc-event.bg-light-danger {
+    border-left: 3px solid var(--bs-danger) !important;
+    background-color: var(--bg-0) !important;
+}
+body.v2-shell .fc-event.bg-light-warning {
+    border-left: 3px solid var(--bs-warning) !important;
+    background-color: var(--bg-0) !important;
+}
+body.v2-shell .fc-event.bg-light-info {
+    border-left: 3px solid var(--bs-info) !important;
+    background-color: var(--bg-0) !important;
 }
 
 /* Injecting sched-row into list view */
@@ -8592,4 +8754,89 @@ body.v2-shell .ts-control input {
 .fc-list-event .custom-sched-wrapper {
     display: block !important;
     width: 100%;
+}
+
+/* ============================================================================
+   BULK UPLOAD - DROPZONE THEME OVERRIDES
+   Fixes Dropzone.js hardcoded white background & borders for dark mode
+   ============================================================================ */
+
+/* Base dropzone - override the hardcoded white background */
+body.v2-shell .dropzone,
+body.v2-shell .bulk-upload-dropzone {
+    background-color: var(--bg-1) !important;
+    border: 2px dashed var(--line-2) !important;
+    border-radius: var(--r-2) !important;
+    min-height: 180px !important;
+    transition: border-color 0.2s ease, background-color 0.2s ease !important;
+}
+
+/* Hover & drag-over state */
+body.v2-shell .dropzone:hover,
+body.v2-shell .bulk-upload-dropzone:hover,
+body.v2-shell .dropzone.dz-drag-hover,
+body.v2-shell .bulk-upload-dropzone.dz-drag-hover {
+    background-color: var(--bg-2) !important;
+    border-color: var(--bs-primary) !important;
+}
+
+/* Message text inside dropzone */
+body.v2-shell .dropzone .dz-message,
+body.v2-shell .dropzone .dz-message span,
+body.v2-shell .dropzone .dz-message .dz-button {
+    color: var(--fg-1) !important;
+}
+
+/* File preview items inside dropzone */
+body.v2-shell .dropzone .dz-preview.dz-image-preview {
+    background: var(--bg-2) !important;
+}
+
+body.v2-shell .dropzone .dz-preview .dz-details {
+    color: var(--fg-0) !important;
+}
+
+body.v2-shell .dropzone .dz-preview .dz-details .dz-filename span,
+body.v2-shell .dropzone .dz-preview .dz-details .dz-size span {
+    background-color: var(--bg-3) !important;
+    color: var(--fg-0) !important;
+}
+
+/* Upload progress bar */
+body.v2-shell .dropzone .dz-preview .dz-progress {
+    background: var(--bg-3) !important;
+}
+
+body.v2-shell .dropzone .dz-preview .dz-progress .dz-upload {
+    background: var(--bs-primary) !important;
+}
+
+/* Dark mode specific - stronger override for dark bg */
+html[data-theme="dark"] body.v2-shell .dropzone,
+html[data-theme="dark"] body.v2-shell .bulk-upload-dropzone {
+    background-color: var(--bg-1) !important;
+    border-color: var(--line-2) !important;
+}
+
+html[data-theme="dark"] body.v2-shell .dropzone:hover,
+html[data-theme="dark"] body.v2-shell .bulk-upload-dropzone:hover,
+html[data-theme="dark"] body.v2-shell .dropzone.dz-drag-hover {
+    background-color: var(--bg-2) !important;
+    border-color: var(--bs-primary) !important;
+}
+
+/* border-dashed utility class */
+body.v2-shell .border-dashed {
+    border: 2px dashed var(--line-2) !important;
+    border-radius: var(--r-2) !important;
+}
+
+/* ============================================================================
+   FILTER FIELD HOVER - subtle gray background on hover
+   ============================================================================ */
+body.v2-shell .form-select:hover,
+body.v2-shell .form-control:hover,
+body.v2-shell .ts-control:hover {
+    background-color: var(--bg-2) !important;
+    transition: background-color 0.15s ease;
 }

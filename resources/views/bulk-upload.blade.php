@@ -39,7 +39,7 @@
                     <form class="form-horizontal form-submit-event mt-4" action="{{ $form_action }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="card-body">
-                            <div class="dropzone dz-clickable bulk-upload-dropzone" id="bulk-upload-dropzone">
+                            <div class="dropzone dz-clickable bulk-upload-dropzone border-dashed" id="bulk-upload-dropzone">
                             </div>
                             <div class="form-group mt-4 text-center">
                                 <button class="btn btn-primary" type="submit" id="submit_btn"><i class='bx bx-upload me-1'></i><?= get_label('upload', 'Upload') ?></button>
