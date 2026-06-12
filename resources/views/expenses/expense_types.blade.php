@@ -26,24 +26,31 @@
         </div>
     </div>
     @if ($expense_types > 0)
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive text-nowrap">
-                <input type="hidden" id="data_type" value="expense-types">
-                <table id="table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/expenses/expense-types-list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParamsExpenseTypes">
-                    <thead>
-                        <tr>
-                            <th data-checkbox="true"></th>
-                            <th data-sortable="true" data-field="id"><?= get_label('id', 'ID') ?></th>
-                            <th data-sortable="true" data-field="title"><?= get_label('title', 'Title') ?></th>
-                            <th data-sortable="true" data-field="description" data-visible="false"><?= get_label('description', 'Description') ?></th>
-                            <th data-sortable="true" data-field="created_at" data-visible="false"><?= get_label('created_at', 'Created at') ?></th>
-                            <th data-sortable="true" data-field="updated_at" data-visible="false"><?= get_label('updated_at', 'Updated at') ?></th>
-                            <th data-field="actions"><?= get_label('actions', 'Actions') ?></th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
+    <div class="card border shadow-none">
+        <div class="card-body p-0">
+            @php
+            $columns = [
+                ['checkbox' => true],
+                ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true],
+                ['field' => 'title', 'label' => get_label('title', 'Title'), 'sortable' => true],
+                ['field' => 'description', 'label' => get_label('description', 'Description'), 'sortable' => true, 'visible' => false],
+                ['field' => 'created_at', 'label' => get_label('created_at', 'Created at'), 'sortable' => true, 'visible' => false],
+                ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated at'), 'sortable' => true, 'visible' => false],
+                ['field' => 'actions', 'label' => get_label('actions', 'Actions')]
+            ];
+            @endphp
+            <x-tk-table 
+                id="table"
+                url="{{ url('/expenses/expense-types-list') }}"
+                :columns="$columns"
+                data-sort-name="id"
+                data-sort-order="desc"
+                data-query-params="queryParamsExpenseTypes"
+            >
+                <x-slot name="before">
+                    <input type="hidden" id="data_type" value="expense-types">
+                </x-slot>
+            </x-tk-table>
         </div>
     </div>
     @else

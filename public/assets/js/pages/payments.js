@@ -46,33 +46,45 @@ $(document).on('click', '.clear-payments-filters', function (e) {
 })
 
 $(document).ready(function () {
-    // Initialize TableFilterSync for users
+    if (typeof initAdvancedDateRangePicker !== 'undefined') {
+        initAdvancedDateRangePicker({
+            configs: [
+                {
+                    target: '#payment_date_between',
+                    hiddenFrom: '#payment_date_between_from',
+                    hiddenTo: '#payment_date_between_to'
+                }
+            ]
+        });
+    }
+
+    // Initialize TableFilterSync
     const paymentFilterSync = new TableFilterSync({
         tableId: 'table',
-        dataType: 'estimates-invoices',
+        dataType: 'payments',
         filters: [
             {
                 selector: '#payment_date_between',
                 type: 'daterangepicker',
                 name: 'payment_date_between',
-                hiddenFrom: '#payment_date_from',
-                hiddenTo: '#payment_date_to'
+                hiddenFrom: '#payment_date_between_from',
+                hiddenTo: '#payment_date_between_to'
             },
             {
                 selector: '#user_filter',
-                type: 'select2',
+                type: 'tomselect',
                 name: 'user_id',
                 ajaxType: 'users'
             },
             {
                 selector: '#invoice_filter',
-                type: 'select2',
+                type: 'tomselect',
                 name: 'invoice_id',
                 ajaxType: 'invoices'
             },
             {
                 selector: '#payment_method_filter',
-                type: 'select2',
+                type: 'tomselect',
                 name: 'pm_id',
                 ajaxType: null
             },

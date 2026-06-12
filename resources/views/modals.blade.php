@@ -2075,7 +2075,7 @@
                         @if (isset($units) && is_iterable($units))
                             <div class="col-md-6 mb-3">
                                 <label for="nameBasic" class="form-label"><?= get_label('unit', 'Unit') ?></label>
-                                <select class="form-select js-example-basic-multiple" name="unit_id"
+                                <select class="form-select tom_static_select" name="unit_id"
                                     data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                     data-allow-clear="true">
                                     <option></option>
@@ -2131,7 +2131,7 @@
                         @if (isset($units) && is_iterable($units))
                             <div class="col-md-6 mb-3">
                                 <label for="nameBasic" class="form-label"><?= get_label('unit', 'Unit') ?></label>
-                                <select class="form-select js-example-basic-multiple" id="item_unit_id"
+                                <select class="form-select tom_static_select" id="item_unit_id"
                                     name="unit_id"
                                     data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                     data-allow-clear="true">
@@ -2829,25 +2829,25 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label"><?= get_label('user', 'User') ?></label>
-                            <select class="form-select users_select" name="user_id"
+                            <select class="form-select tom_users_select" name="user_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label"><?= get_label('invoice', 'Invoice') ?></label>
-                            <select class="form-select invoices_select" name="invoice_id"
+                            <select class="form-select tom_invoices_select" name="invoice_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label"><?= get_label('payment_method', 'Payment method') ?></label>
-                            <select class="form-select js-example-basic-multiple" name="payment_method_id"
+                            <select class="form-select tom_static_select" name="payment_method_id"
                                 data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                 data-allow-clear="true">
                                 <option></option>
@@ -2858,7 +2858,7 @@
                                 @endisset
                             </select>
                         </div>
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
                             <div class="input-group input-group-merge">
@@ -2869,7 +2869,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="nameBasic"
                                 class="form-label"><?= get_label('payment_date', 'Payment date') ?> <span
                                     class="asterisk">*</span></label>
@@ -2877,7 +2877,7 @@
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
                         </div>
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
                             <textarea class="form-control" name="note"
                                 placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
@@ -2907,25 +2907,25 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label"><?= get_label('user', 'User') ?></label>
-                            <select class="form-select users_select" name="user_id" id="payment_user_id"
+                            <select class="form-select tom_users_select" name="user_id" id="payment_user_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label"><?= get_label('invoice', 'Invoice') ?></label>
-                            <select class="form-select invoices_select" name="invoice_id" id="payment_invoice_id"
+                            <select class="form-select tom_invoices_select" name="invoice_id" id="payment_invoice_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label"><?= get_label('payment_method', 'Payment method') ?></label>
-                            <select class="form-select js-example-basic-multiple" name="payment_method_id"
+                            <select class="form-select tom_static_select" name="payment_method_id"
                                 id="payment_pm_id"
                                 data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                 data-allow-clear="true">
@@ -2937,7 +2937,7 @@
                                 @endisset
                             </select>
                         </div>
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
                             <div class="input-group input-group-merge">
@@ -2949,14 +2949,14 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="nameBasic"
                                 class="form-label"><?= get_label('payment_date', 'Payment date') ?> <span
                                     class="asterisk">*</span></label>
                             <input type="text" name="payment_date" class="form-control"
                                 id="update_payment_date" placeholder="" autocomplete="off">
                         </div>
-                        <div class="col mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
                             <textarea class="form-control" name="note" id="payment_note"
                                 placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>

@@ -285,3 +285,28 @@ All notable changes to the Taskify project will be documented in this folder.
 - Converted standard dropdowns to use Tom Select (	om_expense_types_select and 	om_users_select) inside the "Create Expense" and "Edit Expense" modals located in esources/views/modals.blade.php.
 - Fixed layout alignment of the form fields in both modals by upgrading .col to .col-md-6 to ensure proper side-by-side rendering on desktop.
 - Refactored .edit-expense modal populator logic in public/assets/js/custom.js to correctly assign loaded values using the 	omselect API instead of standard select modifications.
+
+## 2026-06-12 (Expense Types Table Standardization)
+- Standardized the Expense Types table (esources/views/expenses/expense_types.blade.php) to use the <x-tk-table> component framework for UI consistency.
+- Updated the action buttons in pp/Http/Controllers/ExpensesController.php (expense_types_list) to use the standard three-dots dropdown menu.
+
+## 2026-06-12 (Payments Standardization)
+- Standardized the Payments list (esources/views/payments/list.blade.php) to use the <x-tk-table> component framework.
+- Extracted filters from the table card to a dedicated filter card at the top.
+- Updated action buttons in pp/Http/Controllers/PaymentsController.php (list method) to use the standard three-dots dropdown menu.
+- Converted the create and edit payment modals (esources/views/modals.blade.php) to use col-md-6 layout grid and replaced Select2 with Tom Select.
+- Added 	om_invoices_select initialization and updated .edit-payment population logic in public/assets/js/custom.js to correctly interface with TomSelect.
+- Updated TableFilterSync setup and enabled Date Range Picker init in public/assets/js/pages/payments.js.
+
+## 2026-06-12 (Payment Methods Standardization)
+- Standardized the Payment Methods list (esources/views/payment_methods/list.blade.php) to use the <x-tk-table> component framework.
+- Updated action buttons in pp/Http/Controllers/PaymentMethodsController.php to use the standard three-dots dropdown menu.
+
+## 2026-06-12 (Taxes, Units, and Items Standardization)
+- Standardized the Taxes list (esources/views/taxes/list.blade.php), Units list (esources/views/units/list.blade.php), and Items list (esources/views/items/list.blade.php) to use the <x-tk-table> component framework.
+- Extracted filters from the table cards in Taxes and Items to a dedicated filter card at the top, replacing Select2 with Tom Select (	om_static_select).
+- Updated action buttons in TaxesController, UnitsController, and ItemsController list methods to use the standard three-dots dropdown menu.
+
+## 2026-06-12 (Item Modals Standardization)
+- Converted the unit_id Select2 input to Tom Select (	om_static_select) in both the Create and Edit Item modals (esources/views/modals.blade.php).
+- Updated the .edit-item logic in public/assets/js/pages/items.js to seamlessly use Tom Select's .setValue() and .clear() methods to populate the modal fields.

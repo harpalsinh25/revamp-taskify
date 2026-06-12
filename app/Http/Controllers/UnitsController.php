@@ -135,15 +135,26 @@ class UnitsController extends Controller
             ->paginate(request("limit"))
             ->through(function ($unit) use ($canEdit, $canDelete) {
             $actions = '';
+            if ($canEdit || $canDelete) {
+                $actions .= '<div class="d-flex align-items-center">
+                                <div class="dropdown">
+                                    <a href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end">';
+                
                 if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-unit" data-id="' . $unit->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
+                    $actions .= '<a href="javascript:void(0);" class="dropdown-item edit-unit" data-id="' . $unit->id . '">' .
+                        '<i class="bx bx-edit mx-1"></i> ' . get_label('update', 'Update') .
                         '</a>';
-            }
+                }
                 if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $unit->id . '" data-type="units">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
+                    $actions .= '<a href="javascript:void(0);" class="dropdown-item text-danger delete" data-id="' . $unit->id . '" data-type="units">' .
+                        '<i class="bx bx-trash mx-1"></i> ' . get_label('delete', 'Delete') .
+                        '</a>';
+                }
+                
+                $actions .= '</div></div></div>';
             }
             $actions = $actions ?: '-';
                 return [

@@ -915,44 +915,41 @@ $(document).on("click", ".edit-payment", function () {
             $("#update_payment_id").val(response.payment.id);
             // Update payment_user_id with user details
             if (response.payment.user && response.payment.user.id) {
-                var userOption = new Option(
-                    response.payment.user.first_name +
-                    " " +
-                    response.payment.user.last_name,
-                    response.payment.user.id,
-                    true,
-                    true
-                );
-                $("#payment_user_id")
-                    .empty()
-                    .append(userOption)
-                    .trigger("change");
+                var ts = document.querySelector('#payment_user_id').tomselect;
+                ts.addOption({
+                    value: response.payment.user.id,
+                    text: response.payment.user.first_name + " " + response.payment.user.last_name
+                });
+                ts.setValue(response.payment.user.id);
+            } else {
+                if (document.querySelector('#payment_user_id').tomselect) {
+                    document.querySelector('#payment_user_id').tomselect.clear();
+                }
             }
             // Update payment_invoice_id with invoice details
             if (response.payment.invoice && response.payment.invoice.id) {
-                var invoiceOption = new Option(
-                    label_invoice_id_prefix + "" + response.payment.invoice.id,
-                    response.payment.invoice.id,
-                    true,
-                    true
-                );
-                $("#payment_invoice_id")
-                    .empty()
-                    .append(invoiceOption)
-                    .trigger("change");
+                var ts = document.querySelector('#payment_invoice_id').tomselect;
+                ts.addOption({
+                    value: response.payment.invoice.id,
+                    text: label_invoice_id_prefix + "" + response.payment.invoice.id
+                });
+                ts.setValue(response.payment.invoice.id);
+            } else {
+                if (document.querySelector('#payment_invoice_id').tomselect) {
+                    document.querySelector('#payment_invoice_id').tomselect.clear();
+                }
             }
             // Update payment_pm_id with payment method details
             if (
                 response.payment.payment_method &&
                 response.payment.payment_method.title
             ) {
-                var pmOption = new Option(
-                    response.payment.payment_method.title,
-                    response.payment.payment_method.id,
-                    true,
-                    true
-                );
-                $("#payment_pm_id").empty().append(pmOption).trigger("change");
+                var ts = document.querySelector('#payment_pm_id').tomselect;
+                ts.setValue(response.payment.payment_method_id);
+            } else {
+                if (document.querySelector('#payment_pm_id').tomselect) {
+                    document.querySelector('#payment_pm_id').tomselect.clear();
+                }
             }
             $("#payment_amount").val(response.payment.amount);
             $("#update_payment_date").val(formattedExpDate);
@@ -5323,6 +5320,7 @@ $(document).ready(function () {
     initTomSelectWithAjax(".tom_allowances_select", "allowances");
     initTomSelectWithAjax(".tom_deductions_select", "deductions");
     initTomSelectWithAjax(".tom_expense_types_select", "expense_types");
+    initTomSelectWithAjax(".tom_invoices_select", "invoices");
     initTomSelectStatic(".tom_static_select");
 
     initSelect2WithAjax(".clients_select", "clients");

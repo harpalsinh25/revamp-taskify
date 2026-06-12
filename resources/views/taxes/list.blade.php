@@ -25,34 +25,49 @@
         </div>
     </div>
     @if ($taxes > 0)
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <select class="form-select js-example-basic-multiple" id="types_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <select class="form-select tom_static_select" id="types_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
                         <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
                         <option value="amount"><?= get_label('amount', 'Amount') ?></option>
                     </select>
                 </div>
+                <div class="col-md-8 d-flex justify-content-md-end">
+                    <button type="button" class="btn btn-sm btn-secondary" id="clear_filters"
+                        style="height: 38px;"><i class='bx bx-refresh'></i> <?= get_label('clear_filters', 'Clear filters') ?></button>
+                </div>
             </div>
-            <div class="table-responsive text-nowrap">
-                <input type="hidden" id="data_type" value="taxes">
-                <table id="table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/taxes/list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParams">
-                    <thead>
-                        <tr>
-                            <th data-checkbox="true"></th>
-                            <th data-sortable="true" data-field="id"><?= get_label('id', 'ID') ?></th>
-                            <th data-sortable="true" data-field="title"><?= get_label('title', 'Title') ?></th>
-                            <th data-sortable="true" data-field="type"><?= get_label('type', 'Type') ?></th>
-                            <th data-sortable="true" data-field="amount"><?= get_label('amount', 'Amount') ?></th>
-                            <th data-sortable="true" data-field="percentage"><?= get_label('percentage', 'Percentage') ?></th>
-                            <th data-sortable="true" data-field="created_at" data-visible="false"><?= get_label('created_at', 'Created at') ?></th>
-                            <th data-sortable="true" data-field="updated_at" data-visible="false"><?= get_label('updated_at', 'Updated at') ?></th>
-                            <th data-field="actions"><?= get_label('actions', 'Actions') ?></th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
+        </div>
+    </div>
+    <div class="card border shadow-none">
+        <div class="card-body p-0">
+            @php
+            $columns = [
+                ['checkbox' => true],
+                ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true],
+                ['field' => 'title', 'label' => get_label('title', 'Title'), 'sortable' => true],
+                ['field' => 'type', 'label' => get_label('type', 'Type'), 'sortable' => true],
+                ['field' => 'amount', 'label' => get_label('amount', 'Amount'), 'sortable' => true],
+                ['field' => 'percentage', 'label' => get_label('percentage', 'Percentage'), 'sortable' => true],
+                ['field' => 'created_at', 'label' => get_label('created_at', 'Created at'), 'sortable' => true, 'visible' => false],
+                ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated at'), 'sortable' => true, 'visible' => false],
+                ['field' => 'actions', 'label' => get_label('actions', 'Actions')]
+            ];
+            @endphp
+            <x-tk-table 
+                id="table"
+                url="{{ url('/taxes/list') }}"
+                :columns="$columns"
+                data-sort-name="id"
+                data-sort-order="desc"
+                data-query-params="queryParams"
+            >
+                <x-slot name="before">
+                    <input type="hidden" id="data_type" value="taxes">
+                </x-slot>
+            </x-tk-table>
         </div>
     </div>
     @else

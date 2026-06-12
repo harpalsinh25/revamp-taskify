@@ -237,15 +237,26 @@ class PaymentsController extends Controller
             ->paginate(request("limit"))
             ->through(function ($payment) use ($canEdit, $canDelete) {
                 $actions = '';
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-payment" data-id="' . $payment->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
-                }
-                if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $payment->id . '" data-type="payments">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
+                if ($canEdit || $canDelete) {
+                    $actions .= '<div class="d-flex align-items-center">
+                                    <div class="dropdown">
+                                        <a href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end">';
+                    
+                    if ($canEdit) {
+                        $actions .= '<a href="javascript:void(0);" class="dropdown-item edit-payment" data-id="' . $payment->id . '">' .
+                            '<i class="bx bx-edit mx-1"></i> ' . get_label('update', 'Update') .
+                            '</a>';
+                    }
+                    if ($canDelete) {
+                        $actions .= '<a href="javascript:void(0);" class="dropdown-item text-danger delete" data-id="' . $payment->id . '" data-type="payments">' .
+                            '<i class="bx bx-trash mx-1"></i> ' . get_label('delete', 'Delete') .
+                            '</a>';
+                    }
+                    
+                    $actions .= '</div></div></div>';
                 }
                 $actions = $actions ?: '-';
                 return [

@@ -42,7 +42,15 @@ $(document).on('click', '.edit-item', function () {
             $('#item_id').val(response.item.id);
             $('#item_title').val(response.item.title);
             $('#item_price').val(response.item.price);
-            $('#item_unit_id').val(response.item.unit_id).trigger('change');
+            if (document.querySelector('#item_unit_id').tomselect) {
+                if (response.item.unit_id) {
+                    document.querySelector('#item_unit_id').tomselect.setValue(response.item.unit_id);
+                } else {
+                    document.querySelector('#item_unit_id').tomselect.clear();
+                }
+            } else {
+                $('#item_unit_id').val(response.item.unit_id).trigger('change');
+            }
             $('#item_description').val(response.item.description);
         },
 
