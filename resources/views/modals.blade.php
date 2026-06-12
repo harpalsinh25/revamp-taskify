@@ -1436,7 +1436,7 @@
                                 for=""><?= get_label('select_client', 'Select client') ?> <span
                                     class="asterisk">*</span></label>
                             <div class="col-12 mb-3">
-                                <select class="form-select clients_select" name="client_id"
+                                <select class="form-select tom_clients_select" name="client_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-allow-clear="false" data-single-select="true">
                                 </select>
@@ -1446,7 +1446,7 @@
                             for=""><?= get_label('select_project', 'Select project') ?> <span
                                 class="asterisk">*</span></label>
                         <div class="col-12 mb-3">
-                            <select class="form-select projects_select" name="project_id"
+                            <select class="form-select tom_projects_select" name="project_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
@@ -1455,7 +1455,7 @@
                             for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
                                 class="asterisk">*</span></label>
                         <div class="col-12 mb-3">
-                            <select class="form-select contract_types_select" name="contract_type_id"
+                            <select class="form-select tom_contract_types_select" name="contract_type_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
@@ -1534,7 +1534,7 @@
                         <label class="form-label" for=""><?= get_label('select_client', 'Select client') ?>
                             <span class="asterisk">*</span></label>
                         <div class="col-12 mb-3">
-                            <select class="form-select clients_select" id="client_id" name="client_id"
+                            <select class="form-select tom_clients_select" id="client_id" name="client_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
@@ -1543,7 +1543,7 @@
                             for=""><?= get_label('select_project', 'Select project') ?> <span
                                 class="asterisk">*</span></label>
                         <div class="col-12 mb-3">
-                            <select class="form-select projects_select" id="project_id" name="project_id"
+                            <select class="form-select tom_projects_select" id="project_id" name="project_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
@@ -1552,7 +1552,7 @@
                             for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
                                 class="asterisk">*</span></label>
                         <div class="col-12 mb-3">
-                            <select class="form-select contract_types_select" id="contract_type_id"
+                            <select class="form-select tom_contract_types_select" id="contract_type_id"
                                 name="contract_type_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
@@ -2682,30 +2682,30 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                         class="asterisk">*</span></label>
                                 <input type="text" class="form-control" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                             </div>
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label"><?= get_label('expense_type', 'Expense type') ?> <span
                                         class="asterisk">*</span></label>
-                                <select class="form-select expense_types_select" name="expense_type_id"
+                                <select class="form-select tom_expense_types_select" name="expense_type_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true" data-allow-clear="false">
                                 </select>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label"><?= get_label('user', 'User') ?></label>
-                                <select class="form-select users_select" name="user_id"
+                                <select class="form-select tom_users_select" name="user_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true">
                                 </select>
                             </div>
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                         class="asterisk">*</span></label>
                                 <div class="input-group input-group-merge">
@@ -2716,14 +2716,14 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="nameBasic"
                                     class="form-label"><?= get_label('expense_date', 'Expense date') ?> <span
                                         class="asterisk">*</span></label>
                                 <input type="text" id="expense_date" name="expense_date" class="form-control"
                                     placeholder="" autocomplete="off">
                             </div>
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
                                 <textarea class="form-control" name="note"
                                     placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
@@ -2754,16 +2754,16 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                         class="asterisk">*</span></label>
                                 <input type="text" class="form-control" id="expense_title" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                             </div>
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label"><?= get_label('expense_type', 'Expense type') ?> <span
                                         class="asterisk">*</span></label>
-                                <select class="form-select expense_types_select" id="expense_type_id"
+                                <select class="form-select tom_expense_types_select" id="expense_type_id"
                                     name="expense_type_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true" data-allow-clear="false">
@@ -2771,14 +2771,14 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label"><?= get_label('user', 'User') ?></label>
-                                <select class="form-select users_select" id="expense_user_id" name="user_id"
+                                <select class="form-select tom_users_select" id="expense_user_id" name="user_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true">
                                 </select>
                             </div>
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                         class="asterisk">*</span></label>
                                 <div class="input-group input-group-merge">
@@ -2790,14 +2790,14 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="nameBasic"
                                     class="form-label"><?= get_label('expense_date', 'Expense date') ?> <span
                                         class="asterisk">*</span></label>
                                 <input type="text" id="update_expense_date" name="expense_date"
                                     class="form-control" placeholder="" autocomplete="off">
                             </div>
-                            <div class="col mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
                                 <textarea class="form-control" id="expense_note" name="note"
                                     placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>

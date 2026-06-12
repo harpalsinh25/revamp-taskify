@@ -54,6 +54,18 @@ $(document).on('click', '.clear-expenses-filters', function (e) {
 })
 
 $(document).ready(function () {
+    if (typeof initAdvancedDateRangePicker !== 'undefined') {
+        initAdvancedDateRangePicker({
+            configs: [
+                {
+                    target: '#expense_date_between',
+                    hiddenFrom: '#expense_date_between_from',
+                    hiddenTo: '#expense_date_between_to'
+                }
+            ]
+        });
+    }
+
     // Initialize TableFilterSync for users
     const expenseFilterSync = new TableFilterSync({
         tableId: 'table',
@@ -68,14 +80,14 @@ $(document).ready(function () {
             },
             {
                 selector: '#user_filter',
-                type: 'select2',
+                type: 'tomselect',
                 name: 'user_ids',
                 ajaxType: 'users'
             },
 
             {
                 selector: '#type_filter',
-                type: 'select2',
+                type: 'tomselect',
                 name: 'type_ids',
                 ajaxType: 'expense_types'
             }

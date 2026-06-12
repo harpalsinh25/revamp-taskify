@@ -4,325 +4,355 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mb-2 mt-4">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
-                    <li class="breadcrumb-item">
-                        <a href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <?= get_label('settings', 'Settings') ?>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        <?= get_label('messaging_and_integrations', 'Messaging & Integrations') ?>
-                    </li>
-                </ol>
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+        <h4 class="fw-bold mb-0" style="font-size: 1.35rem;"><?= get_label('messaging_integrations_settings', 'Messaging & Integrations Settings') ?></h4>
+        <div class="d-flex align-items-center gap-3">
+            <nav class="breadcrumb mb-0" aria-label="breadcrumb">
+                <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                <span class="breadcrumb-sep">/</span>
+                <span class="breadcrumb-item"><?= get_label('settings', 'Settings') ?></span>
+                <span class="breadcrumb-sep">/</span>
+                <span class="breadcrumb-current"><?= get_label('messaging_and_integrations', 'Messaging & Integrations') ?></span>
             </nav>
         </div>
     </div>
     @php
     $sms_gateway_settings = get_settings('sms_gateway_settings');
+    $whatsapp_settings = get_settings('whatsapp_settings');
+    $slack_settings = get_settings('slack_settings');
     @endphp
-    <div class="card">
-        <div class="card-body">
-            <div class="list-group list-group-horizontal-md text-md-center">
-                <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#sms-gateway-settings"><?= get_label('sms_gateway', 'SMS Gateway') ?></a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#whatsapp-settings"><?= get_label('whatsapp', 'WhatsApp') ?></a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#slack-settings"><?= get_label('slack', 'Slack') ?></a>
-            </div>
-            <div class="tab-content px-0">
-                <div class="tab-pane fade show active" id="sms-gateway-settings">
-                    <div class="alert alert-primary" role="alert"><?= get_label('important_settings_for_SMS_feature_to_be_work', 'Important settings for SMS feature to be work') ?>, <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#sms_instuction_modal"><?= get_label('click_for_sms_gateway_settings_help', 'Click Here for Help with SMS Gateway Settings.') ?></a></div>
+
+    <div class="row">
+        <!-- Left Column - SMS Gateway Settings -->
+        <div class="col-xl-8 col-lg-8 col-md-12">
+            <div class="card mb-3 shadow-none border">
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center py-2 px-3">
+                    <h6 class="card-title mb-0 text-secondary" style="font-size: 0.9rem;">
+                        <i class='bx bx-message-square-detail me-2 text-secondary'></i><?= get_label('sms_gateway', 'SMS Gateway') ?>
+                    </h6>
+                    <button type="button" class="btn btn-xs btn-outline-primary py-1 px-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#sms_instuction_modal">
+                        <i class='bx bx-help-circle me-1'></i><?= get_label('click_for_sms_gateway_settings_help', 'Help') ?>
+                    </button>
+                </div>
+                <div class="card-body pt-3 px-3 pb-3">
+                    <div class="alert alert-light-primary border-0 shadow-none d-flex align-items-center py-2 px-3 mb-3" style="font-size: 0.8rem; border-radius: 6px;" role="alert">
+                        <i class="bx bx-info-circle me-2 fs-5 text-primary"></i>
+                        <div>
+                            <?= get_label('important_settings_for_SMS_feature_to_be_work', 'Important settings for SMS feature to be work') ?>
+                        </div>
+                    </div>
+                    
                     <form action="{{url('settings/store_sms_gateway')}}" class="form-submit-event" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="dnr">
                         @csrf
                         @method('PUT')
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="base_url" class="form-label">{{get_label('base_url','Base URL')}} <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="base_url" value="{{$sms_gateway_settings['base_url'] ?? ''}}">
+                        
+                        <div class="row mb-2">
+                            <div class="col-md-6 mb-2">
+                                <label for="base_url" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('base_url','Base URL')}} <span class="asterisk">*</span></label>
+                                <input type="text" class="form-control form-control-sm" name="base_url" value="{{$sms_gateway_settings['base_url'] ?? ''}}" placeholder="e.g. https://api.gateway.com/sms">
                             </div>
-                            <div class="col-md-6">
-                                <label for="sms_gateway_method" class="form-label">{{get_label('method','Method')}} <span class="asterisk">*</span></label>
-                                <select class="form-select" name="sms_gateway_method">
+                            <div class="col-md-6 mb-2">
+                                <label for="sms_gateway_method" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('method','Method')}} <span class="asterisk">*</span></label>
+                                <select class="form-select form-select-sm" name="sms_gateway_method">
                                     <option value="POST" {{ ($sms_gateway_settings && isset($sms_gateway_settings['sms_gateway_method']) && $sms_gateway_settings['sms_gateway_method'] == 'POST') ? 'selected' : '' }}>POST</option>
                                     <option value="GET" {{ ($sms_gateway_settings && isset($sms_gateway_settings['sms_gateway_method']) && $sms_gateway_settings['sms_gateway_method'] == 'GET') ? 'selected' : '' }}>GET</option>
                                 </select>
                             </div>
                         </div>
-                        <h4 class="mb-3 mt-4">{{get_label('create_authorization_token','Create authorization token')}}</h4>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="base_url" class="form-label">{{get_label('account_sid','Account SID')}}</label>
-                                <input type="text" class="form-control" id="converterInputAccountSID">
+
+                        <div class="border-top pt-3 mb-3 mt-2">
+                            <h6 class="text-secondary mb-2" style="font-size: 0.85rem;"><i class='bx bx-key me-1'></i> {{get_label('create_authorization_token','Create authorization token')}}</h6>
+                            <div class="row mb-2">
+                                <div class="col-md-6 mb-2">
+                                    <label for="converterInputAccountSID" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('account_sid','Account SID')}}</label>
+                                    <input type="text" class="form-control form-control-sm" id="converterInputAccountSID" placeholder="Enter Account SID">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label for="converterInputAuthToken" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('auth_token','Auth token')}}</label>
+                                    <input type="text" class="form-control form-control-sm" id="converterInputAuthToken" placeholder="Enter Auth Token">
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label for="base_url" class="form-label">{{get_label('auth_token','Auth token')}}</label>
-                                <input type="text" class="form-control" id="converterInputAuthToken">
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" id="createBasicToken"><?= get_label('create', 'Create') ?></button>
+                                <span class="mb-0 text-success" id="basicToken" style="font-size: 0.8rem; font-weight: 500;"></span>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-primary me-2 mb-3" id="createBasicToken"><?= get_label('create', 'Create') ?></button>
-                        <h4 class="mb-4" id="basicToken"></h4>
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="nav-align-top mb-4">
-                                    <ul class="nav nav-tabs" role="tablist">
-                                        <li class="nav-item">
-                                            <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-header" aria-controls="navs-top-header" aria-selected="true">
-                                                {{get_label('header','Header')}}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item">
-                                            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-body" aria-controls="navs-top-body" aria-selected="false">
-                                                {{get_label('body','Body')}}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item">
-                                            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-params" aria-controls="navs-top-params" aria-selected="false">
-                                                {{get_label('params','Params')}}
-                                            </button>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content">
-                                        <div class="tab-pane fade show active" id="navs-top-header" role="tabpanel">
-                                            <h6 class="text-muted">{{get_label('add_header_data','Add header data')}}</h6>
-                                            <div class="row">
-                                                <div class="col-md-12" id="header-rows">
-                                                    <div class="d-flex">
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <label class="form-label text-muted" for="">{{get_label('key','Key')}}</label>
-                                                            <input type="text" id="header_key" class="form-control">
+
+                        <div class="border-top pt-3 mb-3">
+                            <div class="nav-align-top mb-2">
+                                <ul class="nav nav-tabs" role="tablist" style="font-size: 0.8rem;">
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link py-1 px-3 active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-header" aria-controls="navs-top-header" aria-selected="true">
+                                            {{get_label('header','Header')}}
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link py-1 px-3" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-body" aria-controls="navs-top-body" aria-selected="false">
+                                            {{get_label('body','Body')}}
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link py-1 px-3" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-params" aria-controls="navs-top-params" aria-selected="false">
+                                            {{get_label('params','Params')}}
+                                        </button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content bg-transparent shadow-none px-0 pt-2 pb-0">
+                                    <div class="tab-pane fade show active" id="navs-top-header" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-12" id="header-rows">
+                                                <div class="d-flex align-items-end mb-2">
+                                                    <div class="col-md-5 mx-1">
+                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="header_key">{{get_label('key','Key')}}</label>
+                                                        <input type="text" id="header_key" class="form-control form-control-sm" placeholder="Header Key">
+                                                    </div>
+                                                    <div class="col-md-5 mx-1">
+                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="header_value">{{get_label('value','Value')}}</label>
+                                                        <input type="text" id="header_value" class="form-control form-control-sm" placeholder="Header Value">
+                                                    </div>
+                                                    <div class="col-md-1 mx-3 text-center">
+                                                        <label class="form-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-header"><?= get_label('action', 'Action') ?></label>
+                                                        <button type="button" class="btn btn-xs btn-success" id="add-header" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-check"></i></button>
+                                                    </div>
+                                                </div>
+                                                @foreach ($sms_gateway_settings['header_data'] ?? [] as $key => $value)
+                                                <div class="d-flex header-row mb-2">
+                                                    <div class="col-md-5 mx-1">
+                                                        <input type="text" class="form-control form-control-sm" name="header_key[]" value="{{ $key }}">
+                                                    </div>
+                                                    <div class="col-md-5 mx-1">
+                                                        <input type="text" class="form-control form-control-sm" name="header_value[]" value="{{ $value }}">
+                                                    </div>
+                                                    <div class="col-md-1 mx-3 text-center">
+                                                        <button type="button" class="btn btn-xs btn-danger remove-header" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-trash"></i></button>
+                                                    </div>
+                                                </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="navs-top-body" role="tabpanel">
+                                        <ul class="nav nav-tabs" role="tablist" style="font-size: 0.75rem;">
+                                            <li class="nav-item">
+                                                <button type="button" class="nav-link py-1 px-3 active" role="tab" data-bs-toggle="tab" data-bs-target="#text-json-tab" aria-controls="text-json-tab" aria-selected="true">
+                                                    text/JSON
+                                                </button>
+                                            </li>
+                                            <li class="nav-item">
+                                                <button type="button" class="nav-link py-1 px-3" role="tab" data-bs-toggle="tab" data-bs-target="#formdata-tab" aria-controls="formdata-tab" aria-selected="false">
+                                                    FormData
+                                                </button>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content bg-transparent shadow-none px-0 pt-2 pb-0">
+                                            <div class="tab-pane fade show active" id="text-json-tab" role="tabpanel">
+                                                <div class="col-md-12">
+                                                    <textarea name="text_format_data" class="text_format_data form-control form-control-sm" rows="3" placeholder='{"to": "{only_mobile_number}", "message": "{message}"}' style="font-size: 0.8rem;">{{$sms_gateway_settings['text_format_data'] ?? ''}}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade" id="formdata-tab" role="tabpanel">
+                                                <div class="col-md-12" id="body-formdata-rows">
+                                                    <div class="d-flex align-items-end mb-2">
+                                                        <div class="col-md-5 mx-1">
+                                                            <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="body_formdata_key">{{get_label('key','Key')}}</label>
+                                                            <input type="text" id="body_formdata_key" class="form-control form-control-sm" placeholder="Body Key">
                                                         </div>
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <label class="form-label text-muted" for="">{{get_label('value','Value')}}</label>
-                                                            <input type="text" id="header_value" class="form-control">
+                                                        <div class="col-md-5 mx-1">
+                                                            <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="body_formdata_value">{{get_label('value','Value')}}</label>
+                                                            <input type="text" id="body_formdata_value" class="form-control form-control-sm" placeholder="Body Value">
                                                         </div>
-                                                        <div class="mb-3 col-md-1 mx-3">
-                                                            <label class="form-label text-muted" for=""><?= get_label('action', 'Action') ?></label>
-                                                            <button type="button" class="btn btn-sm btn-success" id="add-header"><i class="bx bx-check"></i></button>
+                                                        <div class="col-md-1 mx-3 text-center">
+                                                            <label class="form-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-body-formdata"><?= get_label('action', 'Action') ?></label>
+                                                            <button type="button" class="btn btn-xs btn-success" id="add-body-formdata" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-check"></i></button>
                                                         </div>
                                                     </div>
-                                                    @foreach ($sms_gateway_settings['header_data'] ?? [] as $key => $value)
-                                                    <div class="d-flex header-row">
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <input type="text" class="form-control" name="header_key[]" value="{{ $key }}">
+                                                    @foreach ($sms_gateway_settings['body_formdata'] ?? [] as $key => $value)
+                                                    <div class="d-flex body-formdata-row mb-2">
+                                                        <div class="col-md-5 mx-1">
+                                                            <input type="text" class="form-control form-control-sm" name="body_key[]" value="{{ $key }}">
                                                         </div>
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <input type="text" class="form-control" name="header_value[]" value="{{ $value }}">
+                                                        <div class="col-md-5 mx-1">
+                                                            <input type="text" class="form-control form-control-sm" name="body_value[]" value="{{ $value }}">
                                                         </div>
-                                                        <div class="mb-3 col-md-1 mx-3">
-                                                            <button type="button" class="btn btn-sm btn-danger remove-header"><i class="bx bx-trash"></i></button>
+                                                        <div class="col-md-1 mx-3 text-center">
+                                                            <button type="button" class="btn btn-xs btn-danger remove-body-formdata" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-trash"></i></button>
                                                         </div>
                                                     </div>
                                                     @endforeach
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="navs-top-body" role="tabpanel">
-                                            <ul class="nav nav-tabs" role="tablist">
-                                                <li class="nav-item">
-                                                    <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#text-json-tab" aria-controls="text-json-tab" aria-selected="true">
-                                                        text/JSON
-                                                    </button>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#formdata-tab" aria-controls="formdata-tab" aria-selected="false">
-                                                        FormData
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                            <div class="tab-content">
-                                                <div class="tab-pane fade show active" id="text-json-tab" role="tabpanel">
-                                                    <div class="col-md-12">
-                                                        <textarea name="text_format_data" class="text_format_data">{{$sms_gateway_settings['text_format_data'] ?? ''}}</textarea>
+                                    </div>
+                                    <div class="tab-pane fade" id="navs-top-params" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-12" id="params-rows">
+                                                <div class="d-flex align-items-end mb-2">
+                                                    <div class="col-md-5 mx-1">
+                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="params_key">{{get_label('key','Key')}}</label>
+                                                        <input type="text" id="params_key" class="form-control form-control-sm" placeholder="Param Key">
+                                                    </div>
+                                                    <div class="col-md-5 mx-1">
+                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="params_value">{{get_label('value','Value')}}</label>
+                                                        <input type="text" id="params_value" class="form-control form-control-sm" placeholder="Param Value">
+                                                    </div>
+                                                    <div class="col-md-1 mx-3 text-center">
+                                                        <label class="form-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-params"><?= get_label('action', 'Action') ?></label>
+                                                        <button type="button" class="btn btn-xs btn-success" id="add-params" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-check"></i></button>
                                                     </div>
                                                 </div>
-                                                <div class="tab-pane fade" id="formdata-tab" role="tabpanel">
-                                                    <h6 class="text-muted">{{get_label('add_body_data_parameters_and_values','Add body data parameter and values')}}</h6>
-                                                    <div class="col-md-12" id="body-formdata-rows">
-                                                        <div class="d-flex">
-                                                            <div class="mb-3 col-md-5 mx-1">
-                                                                <label class="form-label text-muted" for="">{{get_label('key','Key')}}</label>
-                                                                <input type="text" id="body_formdata_key" class="form-control">
-                                                            </div>
-                                                            <div class="mb-3 col-md-5 mx-1">
-                                                                <label class="form-label text-muted" for="">{{get_label('value','Value')}}</label>
-                                                                <input type="text" id="body_formdata_value" class="form-control">
-                                                            </div>
-                                                            <div class="mb-3 col-md-1 mx-3">
-                                                                <label class="form-label text-muted" for=""><?= get_label('action', 'Action') ?></label>
-                                                                <button type="button" class="btn btn-sm btn-success" id="add-body-formdata"><i class="bx bx-check"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        @foreach ($sms_gateway_settings['body_formdata'] ?? [] as $key => $value)
-                                                        <div class="d-flex body-formdata-row">
-                                                            <div class="mb-3 col-md-5 mx-1">
-                                                                <input type="text" class="form-control" name="body_key[]" value="{{ $key }}">
-                                                            </div>
-                                                            <div class="mb-3 col-md-5 mx-1">
-                                                                <input type="text" class="form-control" name="body_value[]" value="{{ $value }}">
-                                                            </div>
-                                                            <div class="mb-3 col-md-1 mx-3">
-                                                                <button type="button" class="btn btn-sm btn-danger remove-body-formdata"><i class="bx bx-trash"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        @endforeach
+                                                @foreach ($sms_gateway_settings['params_data'] ?? [] as $key => $value)
+                                                <div class="d-flex params-row mb-2">
+                                                    <div class="col-md-5 mx-1">
+                                                        <input type="text" class="form-control form-control-sm" name="params_key[]" value="{{ $key }}">
+                                                    </div>
+                                                    <div class="col-md-5 mx-1">
+                                                        <input type="text" class="form-control form-control-sm" name="params_value[]" value="{{ $value }}">
+                                                    </div>
+                                                    <div class="col-md-1 mx-3 text-center">
+                                                        <button type="button" class="btn btn-xs btn-danger remove-params" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-trash"></i></button>
                                                     </div>
                                                 </div>
+                                                @endforeach
                                             </div>
-                                        </div>
-                                        <div class="tab-pane fade" id="navs-top-params" role="tabpanel">
-                                            <h6 class="text-muted">{{get_label('add_params','Add params')}}</h6>
-                                            <div class="row">
-                                                <div class="col-md-12" id="params-rows">
-                                                    <div class="d-flex">
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <label class="form-label text-muted" for="">{{get_label('key','Key')}}</label>
-                                                            <input type="text" id="params_key" class="form-control">
-                                                        </div>
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <label class="form-label text-muted" for="">{{get_label('value','Value')}}</label>
-                                                            <input type="text" id="params_value" class="form-control">
-                                                        </div>
-                                                        <div class="mb-3 col-md-1 mx-3">
-                                                            <label class="form-label text-muted" for=""><?= get_label('action', 'Action') ?></label>
-                                                            <button type="button" class="btn btn-sm btn-success" id="add-params"><i class="bx bx-check"></i></button>
-                                                        </div>
-                                                    </div>
-                                                    @foreach ($sms_gateway_settings['params_data'] ?? [] as $key => $value)
-                                                    <div class="d-flex params-row">
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <input type="text" class="form-control" name="params_key[]" value="{{ $key }}">
-                                                        </div>
-                                                        <div class="mb-3 col-md-5 mx-1">
-                                                            <input type="text" class="form-control" name="params_value[]" value="{{ $value }}">
-                                                        </div>
-                                                        <div class="mb-3 col-md-1 mx-3">
-                                                            <button type="button" class="btn btn-sm btn-danger remove-params"><i class="bx bx-trash"></i></button>
-                                                        </div>
-                                                    </div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="table-responsive text-nowrap">
-                                            <h5 class="mt-5">{{get_label('available_placeholders', 'Available placeholders')}}</h5>
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>{{get_label('placeholder','Placeholder')}}</th>
-                                                        <th>{{get_label('action','Action')}}</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="copyText">{only_mobile_number}</td>
-                                                        <td>
-                                                            <a href="javascript:void(0);" onclick="copyToClipboard(0)" title="{{get_label('copy_to_clipboard','Copy to clipboard')}}">
-                                                                <i class="bx bx-copy text-warning mx-2"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                    <!-- <tr>
-                                                            <td class="copyText">{mobile_number_with_country_code}</td>
-                                                            <td>
-                                                                <a href="javascript:void(0);" onclick="copyToClipboard(1)" title="{{get_label('copy_to_clipboard','Copy to clipboard')}}">
-                                                                    <i class="bx bx-copy text-warning mx-2"></i>
-                                                                </a>
-                                                            </td>
-                                                        </tr> -->
-                                                    <tr>
-                                                        <td class="copyText">{country_code}</td>
-                                                        <td>
-                                                            <a href="javascript:void(0);" onclick="copyToClipboard(1)" title="{{get_label('copy_to_clipboard','Copy to clipboard')}}">
-                                                                <i class="bx bx-copy text-warning mx-2"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="copyText">{message}</td>
-                                                        <td>
-                                                            <a href="javascript:void(0);" onclick="copyToClipboard(2)" title="{{get_label('copy_to_clipboard','Copy to clipboard')}}">
-                                                                <i class="bx bx-copy text-warning mx-2"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>
-                            <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+
+                        <div class="border-top pt-3 mb-3">
+                            <h6 class="text-secondary mb-2" style="font-size: 0.8rem;">{{get_label('available_placeholders', 'Available placeholders')}}</h6>
+                            <div class="table-responsive text-nowrap">
+                                <table class="table table-sm table-bordered" style="font-size: 0.8rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>{{get_label('placeholder','Placeholder')}}</th>
+                                            <th class="text-center" style="width: 80px;">{{get_label('action','Action')}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="copyText">{only_mobile_number}</td>
+                                            <td class="text-center">
+                                                <a href="javascript:void(0);" onclick="copyToClipboard(0)" title="{{get_label('copy_to_clipboard','Copy to clipboard')}}">
+                                                    <i class="bx bx-copy text-warning fs-6"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="copyText">{country_code}</td>
+                                            <td class="text-center">
+                                                <a href="javascript:void(0);" onclick="copyToClipboard(1)" title="{{get_label('copy_to_clipboard','Copy to clipboard')}}">
+                                                    <i class="bx bx-copy text-warning fs-6"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="copyText">{message}</td>
+                                            <td class="text-center">
+                                                <a href="javascript:void(0);" onclick="copyToClipboard(2)" title="{{get_label('copy_to_clipboard','Copy to clipboard')}}">
+                                                    <i class="bx bx-copy text-warning fs-6"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                            <button type="reset" class="btn btn-xs btn-outline-secondary py-1 px-3" style="font-size: 0.8rem;"><?= get_label('cancel', 'Cancel') ?></button>
                             @if (config('constants.ALLOW_MODIFICATION') === 1)
-                            <button type="button" class="btn btn-success me-2" id="testSmsSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
+                            <button type="button" class="btn btn-xs btn-success py-1 px-3" style="font-size: 0.8rem;" id="testSmsSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
                             @endif
+                            <button type="submit" class="btn btn-xs btn-primary py-1 px-3" style="font-size: 0.8rem;" id="submit_btn"><i class='bx bx-save me-1'></i> <?= get_label('update', 'Update') ?></button>
                         </div>
                     </form>
                 </div>
-                @php
-                $whatsapp_settings = get_settings('whatsapp_settings');
-                @endphp
-                <div class="tab-pane fade show" id="whatsapp-settings">
-                    <div class="alert alert-primary" role="alert"><?= get_label('important_settings_for_whatsapp_notification_feature_to_be_work', 'Important settings for WhatsApp notification feature to be work.') ?> <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#whatsapp_instuction_modal"><?= get_label('click_for_help', 'Click here for help.') ?></a></div>
+            </div>
+        </div>
+
+        <!-- Right Column - WhatsApp & Slack Settings -->
+        <div class="col-xl-4 col-lg-4 col-md-12">
+            
+            <!-- WhatsApp Settings -->
+            <div class="card mb-3 shadow-none border">
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center py-2 px-3">
+                    <h6 class="card-title mb-0 text-secondary" style="font-size: 0.9rem;">
+                        <i class='bx bxl-whatsapp me-2 text-secondary fs-5'></i><?= get_label('whatsapp', 'WhatsApp') ?>
+                    </h6>
+                    <button type="button" class="btn btn-xs btn-outline-primary py-1 px-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#whatsapp_instuction_modal">
+                        <i class='bx bx-help-circle me-1'></i><?= get_label('click_for_help', 'Help') ?>
+                    </button>
+                </div>
+                <div class="card-body pt-3 px-3 pb-3">
+                    <div class="alert alert-light-primary border-0 shadow-none d-flex align-items-center py-2 px-3 mb-3" style="font-size: 0.8rem; border-radius: 6px;" role="alert">
+                        <i class="bx bx-info-circle me-2 fs-5 text-primary"></i>
+                        <div>
+                            <?= get_label('important_settings_for_whatsapp_notification_feature_to_be_work', 'Important settings for WhatsApp notification feature to be work.') ?>
+                        </div>
+                    </div>
+                    
                     <form action="{{url('settings/store_whatsapp')}}" class="form-submit-event" method="POST">
                         <input type="hidden" name="dnr">
                         @csrf
                         @method('PUT')
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="whatsapp_access_token" class="form-label">{{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }} <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="whatsapp_access_token" value="{{$whatsapp_settings['whatsapp_access_token'] ?? ''}}" placeholder="{{ get_label('please_enter', 'Please Enter') }} {{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="whatsapp_phone_number_id" class="form-label">{{get_label('whatsapp_phone_number_id', 'WhatsApp Phone Number ID')}} <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="whatsapp_phone_number_id" value="{{$whatsapp_settings['whatsapp_phone_number_id'] ?? ''}}" placeholder="{{ get_label('please_enter', 'Please Enter') }} {{ get_label('whatsapp_phone_number_id', 'WhatsApp phone number ID') }}">
-                            </div>
+                        
+                        <div class="mb-2">
+                            <label for="whatsapp_access_token" class="form-label mb-1" style="font-size: 0.8rem;">{{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }} <span class="asterisk">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="whatsapp_access_token" value="{{$whatsapp_settings['whatsapp_access_token'] ?? ''}}" placeholder="Enter Access Token">
                         </div>
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>
-                            <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+                        <div class="mb-3">
+                            <label for="whatsapp_phone_number_id" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('whatsapp_phone_number_id', 'WhatsApp Phone Number ID')}} <span class="asterisk">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="whatsapp_phone_number_id" value="{{$whatsapp_settings['whatsapp_phone_number_id'] ?? ''}}" placeholder="Enter Phone Number ID">
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                            <button type="reset" class="btn btn-xs btn-outline-secondary py-1 px-3" style="font-size: 0.8rem;"><?= get_label('cancel', 'Cancel') ?></button>
                             @if (config('constants.ALLOW_MODIFICATION') === 1)
-                            <button type="button" class="btn btn-success me-2" id="testWhatsappSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
+                            <button type="button" class="btn btn-xs btn-success py-1 px-3" style="font-size: 0.8rem;" id="testWhatsappSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
                             @endif
+                            <button type="submit" class="btn btn-xs btn-primary py-1 px-3" style="font-size: 0.8rem;" id="submit_btn"><i class='bx bx-save me-1'></i> <?= get_label('update', 'Update') ?></button>
                         </div>
                     </form>
                 </div>
-                @php
-                $slack_settings = get_settings('slack_settings');
-                @endphp
-                <div class="tab-pane fade show" id="slack-settings">
-                    <div class="alert alert-primary" role="alert">
-                        <?= get_label('important_settings_for_slack_notification_feature_to_be_work', 'Important settings for Slack notification feature to be work.') ?>
-                        <a href="javascript:void(0)" data-bs-toggle="modal"
-                            data-bs-target="#slack_instruction_modal"><?= get_label('click_for_help', 'Click here for help.') ?></a>
+            </div>
+
+            <!-- Slack Settings -->
+            <div class="card mb-3 shadow-none border">
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center py-2 px-3">
+                    <h6 class="card-title mb-0 text-secondary" style="font-size: 0.9rem;">
+                        <i class='bx bxl-slack me-2 text-secondary fs-5'></i><?= get_label('slack', 'Slack') ?>
+                    </h6>
+                    <button type="button" class="btn btn-xs btn-outline-primary py-1 px-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#slack_instruction_modal">
+                        <i class='bx bx-help-circle me-1'></i><?= get_label('click_for_help', 'Help') ?>
+                    </button>
+                </div>
+                <div class="card-body pt-3 px-3 pb-3">
+                    <div class="alert alert-light-primary border-0 shadow-none d-flex align-items-center py-2 px-3 mb-3" style="font-size: 0.8rem; border-radius: 6px;" role="alert">
+                        <i class="bx bx-info-circle me-2 fs-5 text-primary"></i>
+                        <div>
+                            <?= get_label('important_settings_for_slack_notification_feature_to_be_work', 'Important settings for Slack notification feature to be work.') ?>
+                        </div>
                     </div>
+                    
                     <form action="{{ route('slack_settings.store') }}" class="form-submit-event" method="POST">
                         <input type="hidden" name="dnr">
                         @csrf
                         @method('PUT')
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label for="slack_bot_token"
-                                    class="form-label">{{ get_label('slack_bot_token', 'Slack bot token') }}
-                                    <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="slack_bot_token"
-                                    value="{{ $slack_settings['slack_bot_token'] ?? '' }}"
-                                    placeholder="{{ get_label('slack_bot_token', 'Slack bot token') }}">
-                            </div>
+                        
+                        <div class="mb-3">
+                            <label for="slack_bot_token" class="form-label mb-1" style="font-size: 0.8rem;">{{ get_label('slack_bot_token', 'Slack bot token') }} <span class="asterisk">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="slack_bot_token" value="{{ $slack_settings['slack_bot_token'] ?? '' }}" placeholder="Enter Slack Bot Token">
                         </div>
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary me-2"
-                                id="submit_btn"><?= get_label('update', 'Update') ?></button>
-                            <button type="reset"
-                                class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+                        
+                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                            <button type="reset" class="btn btn-xs btn-outline-secondary py-1 px-3" style="font-size: 0.8rem;"><?= get_label('cancel', 'Cancel') ?></button>
                             @if (config('constants.ALLOW_MODIFICATION') === 1)
-                            <button type="button" class="btn btn-success me-2" id="testSlackSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
+                            <button type="button" class="btn btn-xs btn-success py-1 px-3" style="font-size: 0.8rem;" id="testSlackSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
                             @endif
+                            <button type="submit" class="btn btn-xs btn-primary py-1 px-3" style="font-size: 0.8rem;" id="submit_btn"><i class='bx bx-save me-1'></i> <?= get_label('update', 'Update') ?></button>
                         </div>
                     </form>
                 </div>
@@ -330,11 +360,13 @@
         </div>
     </div>
 </div>
+
+<!-- Modals -->
 <div class="modal fade" id="sms_instuction_modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('sms_gateway_configuration', 'Sms Gateway Configuration') ?></h5>
+                <h5 class="modal-title" id="smsModalLabel"><?= get_label('sms_gateway_configuration', 'Sms Gateway Configuration') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -375,11 +407,12 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="whatsapp_instuction_modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel1">
+                <h5 class="modal-title" id="whatsappModalLabel">
                     <?= get_label('whatsapp_configuration', 'WhatsApp Configuration') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -399,7 +432,6 @@
                                     alt="Facebook Developer Dashboard" class="img-fluid mb-3 mt-2">
                             </a>
                         </div>
-
                     </li>
                     <li>
                         <strong>Create or Select an App:</strong>
@@ -413,7 +445,6 @@
                                     alt="Create App Process" class="img-fluid mb-3 mt-2">
                             </a>
                         </div>
-
                     </li>
                     <li>
                         <strong>Set up WhatsApp:</strong>
@@ -427,7 +458,6 @@
                                     alt="WhatsApp Setup in Developer Dashboard" class="img-fluid mb-3 mt-2">
                             </a>
                         </div>
-
                     </li>
                     <li>
                         <strong>Get Access Token and Phone Number ID:</strong>
@@ -442,13 +472,7 @@
                                     <li>Click <strong>Generate New Token</strong> and select your app with <em>whatsapp_business_messaging</em> and <em>business_management</em> permissions</li>
                                     <li><strong>Select "Never Expiration" to ensure the token does not expire automatically</strong></li>
                                     <li><strong>Alternatively, you can generate a long-lived token using the Graph API:</strong>
-                                        <pre>
-https://graph.facebook.com/v16.0/oauth/access_token?
-grant_type=fb_exchange_token&
-client_id={app-id}&
-client_secret={app-secret}&
-fb_exchange_token={short-lived-token}
-                    </pre>
+                                        <pre>https://graph.facebook.com/v16.0/oauth/access_token?grant_type=fb_exchange_token&client_id={app-id}&client_secret={app-secret}&fb_exchange_token={short-lived-token}</pre>
                                         <strong>Note:</strong> Replace the placeholders with your actual credentials. This method returns a long-lived token that you can refresh periodically.
                                     </li>
                                     <li>Use the generated token in your application as a permanent access token</li>
@@ -462,7 +486,6 @@ fb_exchange_token={short-lived-token}
                             </a>
                         </div>
                     </li>
-
                     <li>
                         <strong>Create Message Template (Important):</strong>
                         <ul>
@@ -478,8 +501,7 @@ Please take necessary actions if required.
 Thank you,
 @{{ 2 }}</pre>
                             </li>
-                            <li>Provide sample content for the @{{ 1 }} , @{{ 2 }} variable
-                            </li>
+                            <li>Provide sample content for the @{{ 1 }} , @{{ 2 }} variable</li>
                             <li>Submit the template for review</li>
                         </ul>
                         <div class="simplelightbox-gallery">
@@ -494,7 +516,6 @@ Thank you,
                     work correctly. The @{{ 1 }} , @{{ 2 }} represents a variable in the
                     WhatsApp template, not a Blade variable.</p>
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <?= get_label('close', 'Close') ?>
@@ -508,7 +529,7 @@ Thank you,
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel2">
+                <h5 class="modal-title" id="slackModalLabel">
                     <?= get_label('slack_bot_configuration', 'Slack Bot Configuration') ?>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

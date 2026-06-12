@@ -4,56 +4,39 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <?= get_label('settings', 'Settings') ?>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            <?= get_label('ai_models', 'AI Models') ?>
-                        </li>
-                    </ol>
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+            <h4 class="fw-bold mb-0"><?= get_label('ai_model_settings', 'AI Model Settings') ?></h4>
+            <div class="d-flex align-items-center gap-3">
+                <nav class="breadcrumb mb-0" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-item"><?= get_label('settings', 'Settings') ?></span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current"><?= get_label('ai_models', 'AI Models') ?></span>
                 </nav>
             </div>
         </div>
-        <div class="alert alert-primary" role="alert">
-            <?= get_label('configure_ai_model_settings', 'Configure settings for various AI models and select the active model.') ?>
-        </div>
+
         <form action="{{ route('settings.store_ai_models') }}" class="form-submit-event" method="POST">
             <input type="hidden" name="dnr">
             @csrf
             @method('PUT')
-            <div class="nav-align-top nav-tabs-shadow mb-6">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic"
-                            type="button" role="tab" aria-controls="basic"
-                            aria-selected="true">{{ get_label('basic_settings', 'Basic Settings') }}</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced"
-                            type="button" role="tab" aria-controls="advanced"
-                            aria-selected="false">{{ get_label('advanced_settings', 'Advanced Settings') }}</button>
-                    </li>
-                </ul>
-                <div class="tab-content">
-                    <!-- Basic Settings Tab -->
-                    <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
-                        <!-- OpenRouter Section -->
-                        <div class="mb-4">
-                            <div class="align-items-baseline d-flex gap-3">
-                                <h5><?= get_label('openrouter_settings', 'OpenRouter Settings') ?></h5>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                    data-bs-target="#openRouterHelpModal">
-                                    {{ get_label('how_to_get_api_key', 'How to get API Key?') }}
-                                </button>
-                            </div>
-                            <div class="row">
+            
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-xl-8 col-lg-8 col-md-12">
+                    
+                    <!-- OpenRouter Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0 text-secondary"><i class='bx bx-bot me-2'></i> <?= get_label('openrouter_settings', 'OpenRouter Settings') ?></h6>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#openRouterHelpModal">
+                                {{ get_label('how_to_get_api_key', 'How to get API Key?') }}
+                            </button>
+                        </div>
+                        <div class="card-body pt-4">
+                            <h6 class="text-primary mb-3"><i class='bx bx-slider-alt me-1'></i> <?= get_label('basic_settings', 'Basic Settings') ?></h6>
+                            <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label for="openrouter_api_key" class="form-label">
                                         <?= get_label('openrouter_api_key', 'OpenRouter API Key') ?>
@@ -100,10 +83,10 @@
                                         value="<?= $ai_model_settings['openrouter_endpoint'] ?? '' ?>">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="openrouter_is_active" class="form-label">
+                                    <label for="openrouter_is_active" class="form-label d-block">
                                         <?= get_label('is_active', 'Is Active') ?>
                                     </label>
-                                    <div class="form-check form-switch">
+                                    <div class="form-check form-switch mt-2">
                                         <input class="form-check-input is_active_ai_model" type="radio" name="is_active"
                                             id="openrouter_is_active" value="openrouter"
                                             <?= isset($ai_model_settings['is_active']) && $ai_model_settings['is_active'] === 'openrouter' ? 'checked' : '' ?>>
@@ -113,17 +96,79 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Gemini Section -->
-                        <div class="mb-4">
-                            <div class="align-items-baseline d-flex gap-3">
-                                <h5><?= get_label('gemini_settings', 'Gemini Settings') ?></h5>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                    data-bs-target="#geminiHelpModal">
-                                    {{ get_label('how_to_get_api_key', 'How to get API Key?') }}
-                                </button>
-                            </div>
+                            
+                            <hr class="mb-4">
+                            <h6 class="text-primary mb-3"><i class='bx bx-cog me-1'></i> <?= get_label('advanced_settings', 'Advanced Settings') ?></h6>
                             <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="openrouter_system_prompt" class="form-label">
+                                        <?= get_label('system_prompt', 'System Prompt') ?>
+                                    </label>
+                                    <textarea class="form-control" name="openrouter_system_prompt" id="openrouter_system_prompt" rows="3"><?= $ai_model_settings['openrouter_system_prompt'] ?? 'You are a helpful assistant that writes concise, professional project or task descriptions.' ?></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="openrouter_temperature" class="form-label">
+                                        <?= get_label('temperature', 'Temperature') ?>
+                                        <i class="bx bx-info-circle text-primary ms-1" data-bs-toggle="tooltip"
+                                            title="Controls randomness: 0 = deterministic, 2 = maximum randomness"></i>
+                                    </label>
+                                    <input type="range" class="form-range" name="openrouter_temperature"
+                                        id="openrouter_temperature" min="0" max="2" step="0.1"
+                                        value="<?= $ai_model_settings['openrouter_temperature'] ?? '0.7' ?>">
+                                    <div class="d-flex justify-content-between">
+                                        <small>0</small>
+                                        <small
+                                            id="openrouter_temperature_value"><?= $ai_model_settings['openrouter_temperature'] ?? '0.7' ?></small>
+                                        <small>2</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="openrouter_max_tokens" class="form-label">
+                                        <?= get_label('max_tokens', 'Max Tokens') ?>
+                                    </label>
+                                    <input type="number" class="form-control" name="openrouter_max_tokens"
+                                        id="openrouter_max_tokens" min="1" max="4096"
+                                        value="<?= $ai_model_settings['openrouter_max_tokens'] ?? '1024' ?>">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="openrouter_top_p" class="form-label">
+                                        <?= get_label('top_p', 'Top P') ?>
+                                    </label>
+                                    <input type="number" class="form-control" name="openrouter_top_p"
+                                        id="openrouter_top_p" min="0" max="1" step="0.01"
+                                        value="<?= $ai_model_settings['openrouter_top_p'] ?? '0.95' ?>">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="openrouter_frequency_penalty" class="form-label">
+                                        <?= get_label('frequency_penalty', 'Frequency Penalty') ?>
+                                    </label>
+                                    <input type="number" class="form-control" name="openrouter_frequency_penalty"
+                                        id="openrouter_frequency_penalty" min="-2" max="2" step="0.1"
+                                        value="<?= $ai_model_settings['openrouter_frequency_penalty'] ?? '0' ?>">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="openrouter_presence_penalty" class="form-label">
+                                        <?= get_label('presence_penalty', 'Presence Penalty') ?>
+                                    </label>
+                                    <input type="number" class="form-control" name="openrouter_presence_penalty"
+                                        id="openrouter_presence_penalty" min="-2" max="2" step="0.1"
+                                        value="<?= $ai_model_settings['openrouter_presence_penalty'] ?? '0' ?>">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gemini Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0 text-secondary"><i class='bx bxl-google me-2'></i> <?= get_label('gemini_settings', 'Gemini Settings') ?></h6>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#geminiHelpModal">
+                                {{ get_label('how_to_get_api_key', 'How to get API Key?') }}
+                            </button>
+                        </div>
+                        <div class="card-body pt-4">
+                            <h6 class="text-primary mb-3"><i class='bx bx-slider-alt me-1'></i> <?= get_label('basic_settings', 'Basic Settings') ?></h6>
+                            <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label for="gemini_api_key" class="form-label">
                                         <?= get_label('gemini_api_key', 'Gemini API Key') ?>
@@ -161,10 +206,10 @@
                                         value="<?= $ai_model_settings['gemini_endpoint'] ?? '' ?>">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="gemini_is_active" class="form-label">
+                                    <label for="gemini_is_active" class="form-label d-block">
                                         <?= get_label('is_active', 'Is Active') ?>
                                     </label>
-                                    <div class="form-check form-switch">
+                                    <div class="form-check form-switch mt-2">
                                         <input class="form-check-input is_active_ai_model" type="radio"
                                             name="is_active" id="gemini_is_active" value="gemini"
                                             <?= isset($ai_model_settings['is_active']) && $ai_model_settings['is_active'] === 'gemini' ? 'checked' : '' ?>>
@@ -174,73 +219,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <!-- Advanced Settings Tab -->
-                    <div class="tab-pane fade" id="advanced" role="tabpanel" aria-labelledby="advanced-tab">
-                        <!-- OpenRouter Advanced Settings -->
-                        <div class="mb-4">
-                            <h5><?= get_label('openrouter_advanced_settings', 'OpenRouter Advanced Settings') ?></h5>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_system_prompt" class="form-label">
-                                        <?= get_label('system_prompt', 'System Prompt') ?>
-                                    </label>
-                                    <textarea class="form-control" name="openrouter_system_prompt" id="openrouter_system_prompt" rows="3"><?= $ai_model_settings['openrouter_system_prompt'] ?? 'You are a helpful assistant that writes concise, professional project or task descriptions.' ?></textarea>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_temperature" class="form-label">
-                                        <?= get_label('temperature', 'Temperature') ?>
-                                        <i class="fas fa-info-circle" data-bs-toggle="tooltip"
-                                            title="Controls randomness: 0 = deterministic, 2 = maximum randomness"></i>
-                                    </label>
-                                    <input type="range" class="form-range" name="openrouter_temperature"
-                                        id="openrouter_temperature" min="0" max="2" step="0.1"
-                                        value="<?= $ai_model_settings['openrouter_temperature'] ?? '0.7' ?>">
-                                    <div class="d-flex justify-content-between">
-                                        <small>0</small>
-                                        <small
-                                            id="openrouter_temperature_value"><?= $ai_model_settings['openrouter_temperature'] ?? '0.7' ?></small>
-                                        <small>2</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="openrouter_max_tokens" class="form-label">
-                                        <?= get_label('max_tokens', 'Max Tokens') ?>
-                                    </label>
-                                    <input type="number" class="form-control" name="openrouter_max_tokens"
-                                        id="openrouter_max_tokens" min="1" max="4096"
-                                        value="<?= $ai_model_settings['openrouter_max_tokens'] ?? '1024' ?>">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="openrouter_top_p" class="form-label">
-                                        <?= get_label('top_p', 'Top P') ?>
-                                    </label>
-                                    <input type="number" class="form-control" name="openrouter_top_p"
-                                        id="openrouter_top_p" min="0" max="1" step="0.01"
-                                        value="<?= $ai_model_settings['openrouter_top_p'] ?? '0.95' ?>">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="openrouter_frequency_penalty" class="form-label">
-                                        <?= get_label('frequency_penalty', 'Frequency Penalty') ?>
-                                    </label>
-                                    <input type="number" class="form-control" name="openrouter_frequency_penalty"
-                                        id="openrouter_frequency_penalty" min="-2" max="2" step="0.1"
-                                        value="<?= $ai_model_settings['openrouter_frequency_penalty'] ?? '0' ?>">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="openrouter_presence_penalty" class="form-label">
-                                        <?= get_label('presence_penalty', 'Presence Penalty') ?>
-                                    </label>
-                                    <input type="number" class="form-control" name="openrouter_presence_penalty"
-                                        id="openrouter_presence_penalty" min="-2" max="2" step="0.1"
-                                        value="<?= $ai_model_settings['openrouter_presence_penalty'] ?? '0' ?>">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Gemini Advanced Settings -->
-                        <div class="mb-4">
-                            <h5><?= get_label('gemini_advanced_settings', 'Gemini Advanced Settings') ?></h5>
+                            
+                            <hr class="mb-4">
+                            <h6 class="text-primary mb-3"><i class='bx bx-cog me-1'></i> <?= get_label('advanced_settings', 'Advanced Settings') ?></h6>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="gemini_temperature" class="form-label">
@@ -282,21 +263,30 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Global Settings -->
-                        <div class="mb-4">
-                            <h5><?= get_label('global_settings', 'Global Settings') ?></h5>
+                    </div>
+                </div> <!-- End Left Column -->
+
+                <!-- Right Column -->
+                <div class="col-xl-4 col-lg-4 col-md-12">
+                    
+                    <!-- Global Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom">
+                            <h6 class="card-title mb-0 text-secondary"><i class='bx bx-globe me-2'></i> <?= get_label('global_settings', 'Global Settings') ?></h6>
+                        </div>
+                        <div class="card-body pt-4">
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check form-switch">
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-check-label d-block mb-2" for="enable_fallback">
+                                        <?= get_label('enable_fallback', 'Enable Fallback Between Providers') ?>
+                                    </label>
+                                    <div class="form-check form-switch mt-2">
                                         <input class="form-check-input" type="checkbox" name="enable_fallback"
                                             id="enable_fallback" value="1"
                                             <?= isset($ai_model_settings['enable_fallback']) && $ai_model_settings['enable_fallback'] ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="enable_fallback">
-                                            <?= get_label('enable_fallback', 'Enable Fallback Between Providers') ?>
-                                        </label>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-12 mb-3">
                                     <label for="fallback_provider" class="form-label">
                                         <?= get_label('fallback_provider', 'Fallback Provider') ?>
                                     </label>
@@ -320,14 +310,14 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="retry_delay" class="form-label">
-                                        <?= get_label('retry_delay', 'Retry Delay (seconds)') ?>
+                                        <?= get_label('retry_delay', 'Retry Delay (s)') ?>
                                     </label>
                                     <input type="number" class="form-control" name="retry_delay" id="retry_delay"
                                         min="1" value="<?= $ai_model_settings['retry_delay'] ?? '5' ?>">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="rate_limit_per_minute" class="form-label">
-                                        <?= get_label('rate_limit_per_minute', 'Rate Limit Per Minute') ?>
+                                        <?= get_label('rate_limit_per_minute', 'Limit / Min') ?>
                                     </label>
                                     <input type="number" class="form-control" name="rate_limit_per_minute"
                                         id="rate_limit_per_minute" min="1" max="60"
@@ -335,7 +325,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="rate_limit_per_day" class="form-label">
-                                        <?= get_label('rate_limit_per_day', 'Rate Limit Per Day') ?>
+                                        <?= get_label('rate_limit_per_day', 'Limit / Day') ?>
                                     </label>
                                     <input type="number" class="form-control" name="rate_limit_per_day"
                                         id="rate_limit_per_day" min="1"
@@ -343,7 +333,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="request_timeout" class="form-label">
-                                        <?= get_label('request_timeout', 'Request Timeout (seconds)') ?>
+                                        <?= get_label('request_timeout', 'Timeout (s)') ?>
                                     </label>
                                     <input type="number" class="form-control" name="request_timeout"
                                         id="request_timeout" min="1" max="60"
@@ -351,7 +341,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="max_prompt_length" class="form-label">
-                                        <?= get_label('max_prompt_length', 'Max Prompt Length') ?>
+                                        <?= get_label('max_prompt_length', 'Max Length') ?>
                                     </label>
                                     <input type="number" class="form-control" name="max_prompt_length"
                                         id="max_prompt_length" min="100" max="10000"
@@ -359,11 +349,16 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Custom Prompt Settings -->
-                        <div class="mb-4">
-                            <h5><?= get_label('prompt_settings', 'Prompt Settings') ?></h5>
+                    </div>
+                    
+                    <!-- Custom Prompt Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom">
+                            <h6 class="card-title mb-0 text-secondary"><i class='bx bx-edit me-2'></i> <?= get_label('prompt_settings', 'Prompt Settings') ?></h6>
+                        </div>
+                        <div class="card-body pt-4">
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-12 mb-3">
                                     <label for="default_prompt_prefix" class="form-label">
                                         <?= get_label('default_prompt_prefix', 'Default Prompt Prefix') ?>
                                     </label>
@@ -372,7 +367,7 @@
                                         value="<?= $ai_model_settings['default_prompt_prefix'] ?? '' ?>">
                                     <small class="text-muted">Added before every prompt</small>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-12 mb-3">
                                     <label for="default_prompt_suffix" class="form-label">
                                         <?= get_label('default_prompt_suffix', 'Default Prompt Suffix') ?>
                                     </label>
@@ -384,14 +379,13 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Submit Button -->
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary me-2" id="submit_btn">
-                            <?= get_label('update', 'Update') ?>
-                        </button>
-                        <button type="reset" class="btn btn-outline-secondary">
-                            <?= get_label('cancel', 'Cancel') ?>
-                        </button>
+                </div> <!-- End Right Column -->
+
+                <!-- Full Width Action Buttons -->
+                <div class="col-12 mt-3">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+                        <button type="submit" class="btn btn-primary" id="submit_btn"><i class='bx bx-save me-1'></i> <?= get_label('update', 'Update') ?></button>
                     </div>
                 </div>
             </div>
@@ -524,5 +518,4 @@
             </div>
         </div>
     </div>
-
 @endsection

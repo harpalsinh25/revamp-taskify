@@ -469,21 +469,38 @@ class ContractsController extends Controller
                     $statusBadge = '<span class="badge bg-danger">' . get_label('not_signed', 'Not signed') . '</span>';
                 }
 
-                $actions = '';
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-contract" data-bs-toggle="modal" data-bs-target="#edit_contract_modal" data-id="' . $contract->id . '" title="' . get_label('update', 'Update') . '"><i class="bx bx-edit mx-1"></i></a>';
+                $hasActions = $canEdit || $canCreate || $canDelete || (isset($contract->signed_pdf) && !empty($contract->signed_pdf) && Storage::disk('public')->exists('contracts/' . $contract->signed_pdf));
+                
+                if ($hasActions) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow " type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
+
+                    if ($canEdit) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-contract d-block" data-bs-toggle="modal" data-bs-target="#edit_contract_modal" data-id="' . $contract->id . '">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
+                    if ($canCreate) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item duplicate d-block" data-id="' . $contract->id . '" data-title="' . $contract->title . '" data-type="contracts" data-table="contracts_table">';
+                        $actions .= '<i class="bx bx-copy text-warning me-2"></i>' . get_label('duplicate', 'Duplicate') . '</a></li>';
+                    }
+                    if (isset($contract->signed_pdf) && !empty($contract->signed_pdf) && Storage::disk('public')->exists('contracts/' . $contract->signed_pdf)) {
+                        $actions .= '<li><a href="' . Storage::url('contracts/' . $contract->signed_pdf) . '" class="dropdown-item d-block" target="_blank">';
+                        $actions .= '<i class="bx bx-file text-success me-2"></i>' . get_label('contract_pdf', 'Contract PDF') . '</a></li>';
+                    }
+                    if ($canDelete) {
+                        $actions .= '<li><hr class="dropdown-divider"></li>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $contract->id . '" data-type="contracts" data-table="contracts_table">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+                    
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                } else {
+                    $actions = '-';
                 }
-                if ($canDelete) {
-                    $actions .= '<button title=' . get_label('delete', 'Delete') . ' type="button" class="btn delete" data-id="' . $contract->id . '" data-type="contracts" data-table="contracts_table"><i class="bx bx-trash text-danger"></i></button>';
-                }
-                if ($canCreate) {
-                    $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $contract->id . '" data-title="' . $contract->title . '" data-type="contracts" data-table="contracts_table" title=' . get_label('duplicate', 'Duplicate') . '><i class="bx bx-copy text-warning mx-2"></i></a>';
-                }
-            // Check if signed PDF exists
-            if (isset($contract->signed_pdf) && !empty($contract->signed_pdf) && Storage::disk('public')->exists('contracts/' . $contract->signed_pdf)) {
-                    $actions .= '<a href="' . Storage::url('contracts/' . $contract->signed_pdf) . '" title="' . get_label('contract_pdf', 'Contract PDF') . '" target="_blank"><i class="bx bx-file text-success ms-4"></i></a>';
-                }
-            $actions = $actions ?: '-';
                 return [
                     'id' => $contract->id,
                     'title' => $contract->title,
@@ -1292,19 +1309,31 @@ class ContractsController extends Controller
             ->through(function ($contract_type) use ($canEdit, $canDelete) {
                 $actions = '';
 
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-contract-type" data-bs-target="#edit_contract_type_modal" data-id="' . $contract_type->id . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
-                }
+                $hasActions = $canEdit || $canDelete;
 
-                if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $contract_type->id . '" data-type="contract-type">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
-                }
+                if ($hasActions) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow " type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
 
-            $actions = $actions ?: '-';
+                    if ($canEdit) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-contract-type d-block" data-bs-target="#edit_contract_type_modal" data-id="' . $contract_type->id . '">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
+
+                    if ($canDelete) {
+                        $actions .= '<li><hr class="dropdown-divider"></li>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $contract_type->id . '" data-type="contract-type">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                } else {
+                    $actions = '-';
+                }
 
                 return [
                     'id' => $contract_type->id,

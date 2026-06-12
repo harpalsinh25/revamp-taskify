@@ -25,71 +25,86 @@
     @php
     $visibleColumns = getUserPreferences('payslips');
     @endphp
-    <div class="card">
-   
+    <div class="card mb-4">
+        <div class="card-body">
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <input class="form-control" type="month" id="filter_payslip_month" name="month">
                 </div>
                 @if(isAdminOrHasAllDataAccess())
                 <div class="col-md-4 mb-3">
-                    <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
+                    <select class="form-select tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <select class="form-select users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>                                                
+                    <select class="form-select tom_users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>                                                
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <select class="form-select clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>                        
+                    <select class="form-select tom_clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>                        
                     </select>
                 </div>
                 @endif
                 <div class="col-md-4 mb-3">
-                    <select class="form-select js-example-basic-multiple" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+                    <select class="form-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
                         <option value="1"><?= get_label('paid', 'Paid') ?></option>
                         <option value="0"><?= get_label('unpaid', 'Unpaid') ?></option>
                     </select>
                 </div>
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+                    <button class="btn btn-secondary clear-payslips-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
+                    </button>
+                </div>
             </div>
-            <div class="table-responsive text-nowrap">
-                <input type="hidden" id="data_type" value="payslips">
-                <input type="hidden" id="data_table" value="payslips_table">
-                <input type="hidden" id="save_column_visibility">
-                <input type="hidden" id="multi_select">
-                <table id="payslips_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/payslips/list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParams">
-                    <thead>
-                        <tr>
-                            <th data-checkbox="true"></th>
-                            <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true" data-formatter="idFormatter"><?= get_label('id', 'ID') ?></th>
-                            <th data-field="user" data-visible="{{ (in_array('user', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="false"><?= get_label('user', 'User') ?></th>
-                            <th data-field="month" data-visible="{{ (in_array('month', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('month', 'Month') ?></th>
-                            <th data-field="basic_salary" data-visible="{{ (in_array('basic_salary', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('basic_salary', 'Basic salary') ?></th>
-                            <th data-field="working_days" data-sortable="true" data-visible="{{ (in_array('working_days', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('working_days', 'Working days') ?></th>
-                            <th data-field="lop_days" data-sortable="true" data-visible="{{ (in_array('lop_days', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('lop_days', 'Loss of pay days') ?></th>
-                            <th data-field="paid_days" data-sortable="true" data-visible="{{ (in_array('paid_days', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('paid_days', 'Paid days') ?></th>
-                            <th data-field="leave_deduction" data-sortable="true" data-visible="{{ (in_array('leave_deduction', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('leave_deduction', 'Leave deduction') ?></th>
-                            <th data-field="ot_hours" data-sortable="true" data-visible="{{ (in_array('ot_hours', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('over_time_hours', 'Over time hours') ?></th>
-                            <th data-field="ot_rate" data-sortable="true" data-visible="{{ (in_array('ot_rate', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('over_time_rate', 'Over time rate') ?></th>
-                            <th data-field="ot_payment" data-sortable="true" data-visible="{{ (in_array('ot_payment', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('over_time_payment', 'Over time payment') ?></th>
-                            <th data-field="incentives" data-sortable="true" data-visible="{{ (in_array('incentives', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('incentives', 'Incentives') ?></th>
-                            <th data-field="bonus" data-sortable="true" data-visible="{{ (in_array('bonus', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('bonus', 'Bonus') ?></th>
-                            <th data-field="total_allowance" data-sortable="true" data-visible="{{ (in_array('total_allowance', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('total_allowance', 'Total allowance') ?></th>
-                            <th data-field="total_deductions" data-sortable="true" data-visible="{{ (in_array('total_deductions', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('total_deductions', 'Total deductions') ?></th>
-                            <th data-field="net_pay" data-visible="{{ (in_array('net_pay', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('net_pay', 'Net pay') ?></th>
-                            <th data-field="payment_method" data-sortable="true" data-visible="{{ (in_array('payment_method', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('payment_method', 'Payment method') ?></th>
-                            <th data-field="payment_date" data-sortable="true" data-visible="{{ (in_array('payment_date', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('payment_date', 'Payment date') ?></th>
-                            <th data-field="status" data-visible="{{ (in_array('status', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('status', 'Status') ?></th>
-                            <th data-field="note" data-sortable="true" data-visible="{{ (in_array('note', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('note', 'Note') ?></th>
-                            <th data-field="created_by" data-sortable="false" data-visible="{{ (in_array('created_by', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_by', 'Created by') }}</th>
-                            <th data-field="created_at" data-sortable="true" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('created_at', 'Created at') ?></th>
-                            <th data-field="updated_at" data-sortable="true" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}"><?= get_label('updated_at', 'Updated at') ?></th>
-                            <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('actions', 'Actions') }}</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-       
+        </div>
+    </div>
+    <div class="card border shadow-none">
+        <div class="card-body p-0">
+            @php
+            $columns = [
+                ['checkbox' => true],
+                ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true, 'visible' => (in_array('id', $visibleColumns) || empty($visibleColumns)), 'formatter' => 'idFormatter'],
+                ['field' => 'user', 'label' => get_label('user', 'User'), 'sortable' => false, 'visible' => (in_array('user', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'month', 'label' => get_label('month', 'Month'), 'sortable' => true, 'visible' => (in_array('month', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'basic_salary', 'label' => get_label('basic_salary', 'Basic salary'), 'sortable' => true, 'visible' => (in_array('basic_salary', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'working_days', 'label' => get_label('working_days', 'Working days'), 'sortable' => true, 'visible' => in_array('working_days', $visibleColumns)],
+                ['field' => 'lop_days', 'label' => get_label('lop_days', 'Loss of pay days'), 'sortable' => true, 'visible' => in_array('lop_days', $visibleColumns)],
+                ['field' => 'paid_days', 'label' => get_label('paid_days', 'Paid days'), 'sortable' => true, 'visible' => in_array('paid_days', $visibleColumns)],
+                ['field' => 'leave_deduction', 'label' => get_label('leave_deduction', 'Leave deduction'), 'sortable' => true, 'visible' => in_array('leave_deduction', $visibleColumns)],
+                ['field' => 'ot_hours', 'label' => get_label('over_time_hours', 'Over time hours'), 'sortable' => true, 'visible' => in_array('ot_hours', $visibleColumns)],
+                ['field' => 'ot_rate', 'label' => get_label('over_time_rate', 'Over time rate'), 'sortable' => true, 'visible' => in_array('ot_rate', $visibleColumns)],
+                ['field' => 'ot_payment', 'label' => get_label('over_time_payment', 'Over time payment'), 'sortable' => true, 'visible' => in_array('ot_payment', $visibleColumns)],
+                ['field' => 'incentives', 'label' => get_label('incentives', 'Incentives'), 'sortable' => true, 'visible' => in_array('incentives', $visibleColumns)],
+                ['field' => 'bonus', 'label' => get_label('bonus', 'Bonus'), 'sortable' => true, 'visible' => in_array('bonus', $visibleColumns)],
+                ['field' => 'total_allowance', 'label' => get_label('total_allowance', 'Total allowance'), 'sortable' => true, 'visible' => in_array('total_allowance', $visibleColumns)],
+                ['field' => 'total_deductions', 'label' => get_label('total_deductions', 'Total deductions'), 'sortable' => true, 'visible' => in_array('total_deductions', $visibleColumns)],
+                ['field' => 'net_pay', 'label' => get_label('net_pay', 'Net pay'), 'sortable' => true, 'visible' => (in_array('net_pay', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'payment_method', 'label' => get_label('payment_method', 'Payment method'), 'sortable' => true, 'visible' => in_array('payment_method', $visibleColumns)],
+                ['field' => 'payment_date', 'label' => get_label('payment_date', 'Payment date'), 'sortable' => true, 'visible' => in_array('payment_date', $visibleColumns)],
+                ['field' => 'status', 'label' => get_label('status', 'Status'), 'sortable' => true, 'visible' => (in_array('status', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'note', 'label' => get_label('note', 'Note'), 'sortable' => true, 'visible' => in_array('note', $visibleColumns)],
+                ['field' => 'created_by', 'label' => get_label('created_by', 'Created by'), 'sortable' => false, 'visible' => in_array('created_by', $visibleColumns)],
+                ['field' => 'created_at', 'label' => get_label('created_at', 'Created at'), 'sortable' => true, 'visible' => in_array('created_at', $visibleColumns)],
+                ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated at'), 'sortable' => true, 'visible' => in_array('updated_at', $visibleColumns)],
+                ['field' => 'actions', 'label' => get_label('actions', 'Actions'), 'visible' => (in_array('actions', $visibleColumns) || empty($visibleColumns))]
+            ];
+            @endphp
+            <x-tk-table 
+                id="payslips_table"
+                url="{{ url('/payslips/list') }}"
+                :columns="$columns"
+                data-sort-name="id"
+                data-sort-order="desc"
+                data-query-params="queryParams"
+            >
+                <x-slot name="before">
+                    <input type="hidden" id="data_type" value="payslips">
+                    <input type="hidden" id="data_table" value="payslips_table">
+                    <input type="hidden" id="save_column_visibility">
+                </x-slot>
+            </x-tk-table>
+        </div>
     </div>
     @else
     <?php

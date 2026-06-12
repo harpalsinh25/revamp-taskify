@@ -130,9 +130,12 @@ if (!function_exists('get_settings')) {
         static $requestCache = null;
 
         if ($requestCache === null) {
+            //  dd("Loading from Laravel Cache / DB");
+
             // Use Laravel Cache to store settings persistently (e.g. for 24 hours)
             // This prevents DB queries on every single request across all users
             $requestCache = \Illuminate\Support\Facades\Cache::remember('app_settings_global', 86400, function () {
+                //   dd("Fetching from Database");
                 return \App\Models\Setting::pluck('value', 'variable')->toArray();
             });
         }

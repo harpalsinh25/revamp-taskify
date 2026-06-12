@@ -68,7 +68,7 @@
                     </div>
                     <div class="mb-3 col-md-4">
                         <label class="form-label" for="user_id"><?= get_label('select_user', 'Select user') ?> <span class="asterisk">*</span></label>
-                        <select class="form-select users_select" name="user_id" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false">
+                        <select class="form-select tom_users_select" name="user_id" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false">
                             <option value="{{ $payslip->user_id }}" selected>{{ $payslip->user->first_name }} {{ $payslip->user->last_name }}</option>
                         </select>
                     </div>
@@ -149,7 +149,7 @@
                     </div>
                     <div class="mb-3 col-md-4">
                         <label class="form-label" for="payment_method_id"><?= get_label('payment_method', 'Payment method') ?></label>
-                        <select name="payment_method_id" class="form-select js-example-basic-multiple" data-placeholder="<?= get_label('Please select', 'Please select') ?>" data-allow-clear="true">
+                        <select name="payment_method_id" class="form-select tom_static_select" data-placeholder="<?= get_label('Please select', 'Please select') ?>" data-allow-clear="true">
                             <option value=""><?= get_label('Please select', 'Please select') ?></option>
                             @foreach ($payment_methods as $payment_method)
                             <option value="{{$payment_method->id}}" {{ old('payment_method_id', $payslip->payment_method_id ?? '') == $payment_method->id ? 'selected' : '' }}>{{$payment_method->title}}</option>
@@ -162,7 +162,7 @@
                     </div>
                     <div class="mb-3 col-md-5">
                         <label class="form-label" for="allowance_id"><?= get_label('allowance', 'Allowance') ?></label>
-                        <select id="allowance_id" name="allowance_id" class="form-select allowances_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
+                        <select id="allowance_id" name="allowance_id" class="form-select tom_allowances_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
                         </select>
                         <div class="mt-2">
                             <a href="javascript:void(0);" class="openCreateAllowanceModal"><button type="button" class="btn btn-sm btn-primary action_create_allowances" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_allowance', 'Create allowance') ?>"><i class="bx bx-plus"></i></button></a>
@@ -171,7 +171,7 @@
                     </div>
                     <div class="mb-3 col-md-7">
                         <label class="form-label" for="deduction_id"><?= get_label('deduction', 'Deduction') ?></label>
-                        <select id="deduction_id" name="deduction_id" class="form-select deductions_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
+                        <select id="deduction_id" name="deduction_id" class="form-select tom_deductions_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
                         </select>
                         <div class="mt-2">
                             <a href="javascript:void(0);" class="openCreateDeductionModal"><button type="button" class="btn btn-sm btn-primary action_create_deductions" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_deduction', 'Create deduction') ?>"><i class="bx bx-plus"></i></button></a>

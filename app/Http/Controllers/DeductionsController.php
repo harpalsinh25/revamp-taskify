@@ -178,21 +178,33 @@ class DeductionsController extends Controller
         $deductions = $deductions->orderBy($sort, $order)
             ->paginate(request("limit"))
             ->through(function ($deduction) use ($canEdit, $canDelete) {
-                $actions = '';
+                $hasActions = $canEdit || $canDelete;
 
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-deduction" data-id="' . $deduction->id . '" title="' . get_label('update', 'Update') . '" class="card-link">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
+                if ($hasActions) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
+
+                    if ($canEdit) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-deduction d-block" data-id="' . $deduction->id . '">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
+
+                    if ($canDelete) {
+                        if ($canEdit) {
+                            $actions .= '<li><hr class="dropdown-divider"></li>';
+                        }
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $deduction->id . '" data-type="deductions">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                } else {
+                    $actions = '-';
                 }
-
-                if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $deduction->id . '" data-type="deductions">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
-                }
-
-                $actions = $actions ?: '-';
 
                 return [
                     'id' => $deduction->id,

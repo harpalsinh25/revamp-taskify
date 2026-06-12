@@ -457,27 +457,36 @@ class PayslipsController extends Controller
                 $month = Carbon::parse($payslip->month);
                 $payment_date = $payslip->payment_date !== null ? Carbon::parse($payslip->payment_date) : '';
 
-                $actions = '';
+                $hasActions = $canEdit || $canDelete || $canCreate;
 
-                if ($canEdit) {
-                    $actions .= '<a href="' . url("/payslips/edit/{$payslip->id}") . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
+                if ($hasActions) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow " type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
+
+                    if ($canEdit) {
+                        $actions .= '<li><a href="' . url("/payslips/edit/{$payslip->id}") . '" class="dropdown-item d-block">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
+
+                    if ($canCreate) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item duplicate d-block" data-id="' . $payslip->id . '" data-type="payslips" data-table="payslips_table">';
+                        $actions .= '<i class="bx bx-copy text-warning me-2"></i>' . get_label('duplicate', 'Duplicate') . '</a></li>';
+                    }
+
+                    if ($canDelete) {
+                        $actions .= '<li><hr class="dropdown-divider"></li>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $payslip->id . '" data-type="payslips" data-table="payslips_table">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                } else {
+                    $actions = '-';
                 }
-
-                if ($canDelete) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $payslip->id . '" data-type="payslips" data-table="payslips_table">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
-                }
-
-                if ($canCreate) {
-                    $actions .= '<a href="javascript:void(0);" class="duplicate" data-id="' . $payslip->id . '" data-type="payslips" data-table="payslips_table" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                        '<i class="bx bx-copy text-warning mx-2"></i>' .
-                        '</a>';
-                }
-
-                $actions = $actions ?: '-';
 
 
                 return [

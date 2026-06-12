@@ -2,6 +2,24 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-12] - UI & Table Standardization
+### Modified
+- **`resources/views/settings/permission_settings.blade.php`**: Standardized the permission roles table by allowing the `tk-table` component to properly initialize as a bootstrap-table (removed `data-toggle=""`), removed all custom inline styles (`font-size`, `border-radius`, etc.), and converted custom badge colors to standard `bg-primary` and `bg-secondary` badges.
+- **`resources/views/settings/languages.blade.php`**: Fixed invalid `<form>` tag nesting that was causing layout issues and wrapping around flex-box containers incorrectly. Added correct layout containers (`mb-3 mt-4` flex) for the header and right-aligned buttons. Kept all logic identical.
+- **`resources/views/units/list.blade.php`**: Replaced the custom raw HTML `<table id="table"...>` markup with the core `<x-tk-table>` blade component, defining the `$columns` configuration array in PHP, thereby keeping the system table designs entirely uniform.
+
+## [2026-06-12] - Settings & Integrations UI Redesigns (Minimalist Overhaul)
+### Modified
+- **`resources/views/settings/sms_gateway_settings.blade.php`**: Restructured the page from a single-card tabbed layout to a modern 2-column layout. Placed the SMS Gateway settings (using transparent-background inner tab-contents to fix dark mode issues) in the left column (`col-xl-8`). Placed WhatsApp and Slack settings cards in the right column (`col-xl-4`). Standardized the breadcrumbs and header layout. Repositioned action buttons to be right-aligned with standard design system gap spacing. Preserved all logical IDs, attributes, class configurations, and input name arrays (`header_key[]`, etc.) to ensure JS operations and forms submit perfectly. Applied a compact, minimalist spacing and style.
+- **`resources/views/settings/google_calendar_settings.blade.php`**: Redesigned the settings view to match the compact minimalist design system. Added standard header and breadcrumbs. Overhauled the alert banner to be borderless and light. Compacted form controls and buttons and right-aligned actions. All variable names and form actions were preserved.
+- **`resources/views/settings/pusher_settings.blade.php`**: Applied standard headers, breadcrumbs, borderless light alert banners, compact inputs (`.form-control-sm`), and right-aligned actions (`.btn-xs`).
+- **`resources/views/settings/media_storage_settings.blade.php`**: Redesigned to use standard header/breadcrumbs and card layouts. Integrated compact form selects, AWS fields row alignments, and right-aligned buttons while preserving the dynamic JS toggles.
+- **`resources/views/settings/terms_privacy_about.blade.php`**: Refined tab layout to avoid shadow backgrounds. Sized textareas to be compact, styled forms to be minimalist, and right-aligned update/cancel controls.
+- **`resources/views/pwa/index.blade.php`**: Overhauled page container, titles, breadcrumbs, alert containers, file upload preview panel, and form elements. Preserved input IDs, validation targets, and dataset variables utilized by the reset script.
+- **`resources/views/settings/security_settings.blade.php`**: Cleaned up top-level breadcrumb gaps. Redesigned to use flat, border-only minimalist card structures (`shadow-none border`), scaled-down inputs (`.form-control-sm`), custom flat alerts, and right-aligned footer actions (`.btn-xs`).
+- **`resources/views/components/tk-table.blade.php`**: Added a `{{ $slot ?? '' }}` slot placeholder inside the main `<table>` element to support static server-side rendered table rows.
+- **`resources/views/settings/permission_settings.blade.php`**: Replaced custom HTML table layout with the system's `<x-tk-table>` component, defining the `$columns` configurations in PHP, passing the `<tbody>` inside the default slot, and overriding standard dynamic AJAX data-attributes to align with the server-side rendering logic. All individual permission badges were unified to use the soft green `badge-ok` style.
+
 ## [2026-06-11] - Lead View Header Redesign
 ### Modified
 - **`resources/views/leads/show.blade.php`**: Redesigned the header and breadcrumb section to conform to the new design system (matched with `projects.blade.php`). Removed `ol > li` based breadcrumbs in favor of `nav > a/span` structure and updated gap spacing classes. Removed duplicate 'Create Follow-up' button in the empty state. Fixed dark-mode empty state background bug. Added `modal-dialog-centered` to follow-up modals to align with the design system. Refined profile card typography and button alignments to perfectly center the contact action buttons using `btn-icon` and `rounded-circle`.
@@ -215,3 +233,55 @@ All notable changes to the Taskify project will be documented in this folder.
 ### Modified
 - **`resources/views/components/menu.blade.php`**: Rendered submenu icons and updated the menu search input layout to use a native clear icon.
 - **`public/assets/js/custom.js`**: Replaced legacy search logic with v2 search logic supporting text highlighting and shortcut.
+
+## 2026-06-12 (Tom Select in Contract Modals)
+- Upgraded the Select dropdowns in the Create/Edit Contract modals to use Tom Select for better UI design (esources/views/modals.blade.php).
+- Updated public/assets/js/custom.js to correctly populate Tom Select inputs for the Edit Contract modal via the .edit-contract click event.
+
+## 2026-06-12 (Three Dots Menu for Contract Types)
+- Converted inline action icons to a three-dot dropdown menu in ContractsController.php inside contract_types_list() method for UI consistency.
+
+## 2026-06-12 (Payslips UI Improvements)
+- Extracted filter dropdowns into a separate card layout in esources/views/payslips/list.blade.php.
+- Converted select dropdowns in Payslip filters to use Tom Select (	om_users_select, 	om_clients_select, 	om_static_select).
+- Upgraded the action column in PayslipsController.php's list method to use the consistent three-dots dropdown menu.
+
+## 2026-06-12 (Payslips Forms UI Improvements)
+- Converted Select2 dropdowns to Tom Select (	om_users_select, 	om_static_select, 	om_allowances_select, 	om_deductions_select) in payslips/create.blade.php and payslips/update.blade.php for a more modern UI while preserving existing fetched data and JS logic.
+- Added Tom Select initializers for .tom_allowances_select and .tom_deductions_select in public/assets/js/custom.js.
+
+## 2026-06-12 (Allowances UI Consistency)
+- Converted inline action icons to a three-dot dropdown menu in AllowancesController.php's list method to maintain UI consistency across the application.
+
+## 2026-06-12 (Contracts List UI Consistency)
+- Updated esources/views/contracts/list.blade.php to wrap the filter panel and table in proper Bootstrap card and card-body classes instead of custom 	k-filter-panel and 	k-table-card classes.
+
+## 2026-06-12 (Global Table Standard Update)
+- Standardized llowances/list.blade.php, deductions/list.blade.php, contracts/list.blade.php, and payslips/list.blade.php to use the x-tk-table component instead of manually written 	able markup, matching the global standard used in pages like units/list.blade.php.
+- Corrected the table wrapper structure to <div class="card border shadow-none"><div class="card-body p-0"> for a proper flat, bordered UI.
+
+## 2026-06-12 (Deductions UI Updates)
+- Converted the traditional multi-select in esources/views/deductions/list.blade.php to a Tom Select (	om_static_select) for a more modern appearance.
+- Refactored the ctions column in pp/Http/Controllers/DeductionsController.php to use the standard "three dots" Bootstrap dropdown menu instead of inline buttons.
+
+## 2026-06-12 (Expenses UI Updates)
+- Standardized the Expenses list (esources/views/expenses/list.blade.php) to use the <x-tk-table> component structure.
+- Extracted filters in the Expenses list outside of the table card.
+- Converted standard dropdowns to Tom Select (	om_users_select and 	om_expense_types_select).
+- Updated public/assets/js/custom.js to initialize 	om_expense_types_select.
+- Changed the inline action buttons in pp/Http/Controllers/ExpensesController.php to use the standard "three dots" dropdown menu.
+
+## 2026-06-12 (Expenses Bug Fixes)
+- Removed the duplicated "Clear Filters" button from the top filter row in esources/views/expenses/list.blade.php to clean up the UI layout.
+- Initialized the daterangepicker properly in public/assets/js/pages/expenses.js so the Date Between filter functions as expected.
+- Refactored TableFilterSync config in expenses.js to correctly target 	omselect instead of select2 for syncing state.
+
+## 2026-06-12 (Clear Filters UI Fix)
+- Removed #multi_select from all <x-tk-table> components across expenses, payslips, and contracts to eliminate the duplicated 'Clear Filters' button inside the table toolbar. The table toolbar now cleanly only shows 'Delete Selected' and 'Save Column Visibility'.
+- Added properly aligned 'Clear Filters' buttons directly next to the filters inside the top filter cards across expenses, payslips, and deductions.
+- Added missing click handler for .clear-deductions-filters in deductions.js to ensure the table correctly resets.
+
+## 2026-06-12 (Expenses Modal UI Fixes)
+- Converted standard dropdowns to use Tom Select (	om_expense_types_select and 	om_users_select) inside the "Create Expense" and "Edit Expense" modals located in esources/views/modals.blade.php.
+- Fixed layout alignment of the form fields in both modals by upgrading .col to .col-md-6 to ensure proper side-by-side rendering on desktop.
+- Refactored .edit-expense modal populator logic in public/assets/js/custom.js to correctly assign loaded values using the 	omselect API instead of standard select modifications.

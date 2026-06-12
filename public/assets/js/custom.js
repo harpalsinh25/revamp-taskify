@@ -773,31 +773,48 @@ $(document).on("click", ".edit-contract", function () {
                 $("#contract_id").val(response.contract.id);
                 $("#title").val(response.contract.title);
                 $("#value").val(response.contract.value);
-                var clientOption = new Option(
-                    response.contract.client.first_name +
-                    " " +
-                    response.contract.client.last_name,
-                    response.contract.client.id,
-                    true,
-                    true
-                );
-                $("#client_id").append(clientOption).trigger("change");
-                var projectOption = new Option(
-                    response.contract.project.title,
-                    response.contract.project.id,
-                    true,
-                    true
-                );
-                $("#project_id").append(projectOption).trigger("change");
-                var contractTypeOption = new Option(
-                    response.contract.contract_type.type,
-                    response.contract.contract_type.id,
-                    true,
-                    true
-                );
-                $("#contract_type_id")
-                    .append(contractTypeOption)
-                    .trigger("change");
+                if ($("#client_id")[0].tomselect) {
+                    $("#client_id")[0].tomselect.addOption({id: response.contract.client.id, text: response.contract.client.first_name + " " + response.contract.client.last_name});
+                    $("#client_id")[0].tomselect.setValue(response.contract.client.id);
+                } else {
+                    var clientOption = new Option(
+                        response.contract.client.first_name +
+                        " " +
+                        response.contract.client.last_name,
+                        response.contract.client.id,
+                        true,
+                        true
+                    );
+                    $("#client_id").append(clientOption).trigger("change");
+                }
+                
+                if ($("#project_id")[0].tomselect) {
+                    $("#project_id")[0].tomselect.addOption({id: response.contract.project.id, text: response.contract.project.title});
+                    $("#project_id")[0].tomselect.setValue(response.contract.project.id);
+                } else {
+                    var projectOption = new Option(
+                        response.contract.project.title,
+                        response.contract.project.id,
+                        true,
+                        true
+                    );
+                    $("#project_id").append(projectOption).trigger("change");
+                }
+                
+                if ($("#contract_type_id")[0].tomselect) {
+                    $("#contract_type_id")[0].tomselect.addOption({id: response.contract.contract_type.id, text: response.contract.contract_type.type});
+                    $("#contract_type_id")[0].tomselect.setValue(response.contract.contract_type.id);
+                } else {
+                    var contractTypeOption = new Option(
+                        response.contract.contract_type.type,
+                        response.contract.contract_type.id,
+                        true,
+                        true
+                    );
+                    $("#contract_type_id")
+                        .append(contractTypeOption)
+                        .trigger("change");
+                }
                 var description =
                     response.contract.description !== null
                         ? response.contract.description
@@ -847,33 +864,17 @@ $(document).on("click", ".edit-expense", function () {
             );
             $("#update_expense_id").val(response.exp.id);
             $("#expense_title").val(response.exp.title);
-            if (response.exp.expense_type) {
-                if (response.exp.expense_type.title) {
-                    var expenseTypeOption = new Option(
-                        response.exp.expense_type.title,
-                        response.exp.expense_type.id,
-                        true, // Default selected
-                        true // Selected
-                    );
-                    $("#expense_type_id")
-                        .empty()
-                        .append(expenseTypeOption)
-                        .trigger("change");
+            if (response.exp.expense_type && response.exp.expense_type.title) {
+                if ($("#expense_type_id")[0].tomselect) {
+                    $("#expense_type_id")[0].tomselect.addOption({id: response.exp.expense_type.id, text: response.exp.expense_type.title});
+                    $("#expense_type_id")[0].tomselect.setValue(response.exp.expense_type.id);
                 }
             }
             if (response.exp.user && response.exp.user.id) {
-                var userOption = new Option(
-                    response.exp.user.first_name +
-                    " " +
-                    response.exp.user.last_name, // Text for the option
-                    response.exp.user.id, // Value for the option
-                    true, // Default selected
-                    true // Selected
-                );
-                $("#expense_user_id")
-                    .empty()
-                    .append(userOption)
-                    .trigger("change");
+                if ($("#expense_user_id")[0].tomselect) {
+                    $("#expense_user_id")[0].tomselect.addOption({id: response.exp.user.id, text: response.exp.user.first_name + " " + response.exp.user.last_name});
+                    $("#expense_user_id")[0].tomselect.setValue(response.exp.user.id);
+                }
             }
             $("#expense_amount").val(response.exp.amount);
             $("#update_expense_date").val(formattedExpDate);
@@ -5319,6 +5320,9 @@ $(document).ready(function () {
     initTomSelectWithAjax(".tom_priorities_filter", "priorities");
     initTomSelectWithAjax(".tom_tags_filter", "tags");
     initTomSelectWithAjax(".tom_tags_select", "tags");
+    initTomSelectWithAjax(".tom_allowances_select", "allowances");
+    initTomSelectWithAjax(".tom_deductions_select", "deductions");
+    initTomSelectWithAjax(".tom_expense_types_select", "expense_types");
     initTomSelectStatic(".tom_static_select");
 
     initSelect2WithAjax(".clients_select", "clients");

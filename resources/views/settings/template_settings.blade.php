@@ -4,25 +4,23 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mb-2 mt-4">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
-                    <li class="breadcrumb-item">
-                        <a href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <?= get_label('settings', 'Settings') ?>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        <?= get_label('notification_templates', 'Notification Templates') ?>
-                    </li>
-                </ol>
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+        <h4 class="fw-bold mb-0 fs-4"><?= get_label('notification_templates', 'Notification Templates') ?></h4>
+        <div class="d-flex align-items-center gap-3">
+            <nav class="breadcrumb mb-0" aria-label="breadcrumb">
+                <a class="breadcrumb-item" href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
+                <span class="breadcrumb-sep">/</span>
+                <span class="breadcrumb-item"><?= get_label('settings', 'Settings') ?></span>
+                <span class="breadcrumb-sep">/</span>
+                <span class="breadcrumb-current"><?= get_label('notification_templates', 'Notification Templates') ?></span>
             </nav>
         </div>
     </div>
-    <div class="alert alert-primary" role="alert"><?= get_label('wishes_noti_info', 'To send wish notifications automatically, you need to set up a cron job on your server.') ?>, <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#cron_job_instruction_modal"><?= get_label('click_for_help', 'Click Here for Help.') ?></a></div>
-    <div class="card mb-4">
+    <div class="alert alert-primary d-flex align-items-center mb-3 shadow-none border border-primary border-opacity-25 bg-primary bg-opacity-10 text-primary rounded" role="alert">
+        <i class='bx bx-info-circle me-2 fs-5'></i>
+        <span><?= get_label('wishes_noti_info', 'To send wish notifications automatically, you need to set up a cron job on your server.') ?> <a href="javascript:void(0)" class="fw-bold text-primary" data-bs-toggle="modal" data-bs-target="#cron_job_instruction_modal"><?= get_label('click_for_help', 'Click Here for Help.') ?></a></span>
+    </div>
+    <div class="card mb-4 shadow-none border">
         <div class="card-body">
             <div class="row">
                 <div class="col-lg-12">

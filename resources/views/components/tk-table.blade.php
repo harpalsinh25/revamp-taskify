@@ -72,5 +72,6 @@
                 @endforeach
             </tr>
         </thead>
+        {{ $slot ?? '' }}
     </table>
 </div>

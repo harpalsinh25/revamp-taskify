@@ -26,73 +26,82 @@ $visibleColumns = getUserPreferences('contracts');
         </div>
     </div>
     @if ($contracts > 0)
-    <div class="tk-filter-panel mb-4">
-        <div class="row g-3 align-items-end tk-filter-row">
-            <x-advanced-date-filters prefix="contract" />
-            <div class="col-md-4">
-                <label class="tk-filter-label"><?= get_label('projects', 'Projects') ?></label>
-                <select class="form-select tom_projects_select" id="project_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>" multiple>
-                </select>
-            </div>
-            @if (!isClient() || isAdminOrHasAllDataAccess())
-            <div class="col-md-4">
-                <label class="tk-filter-label"><?= get_label('clients', 'Clients') ?></label>
-                <select class="form-select tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
-                </select>
-            </div>
-            @endif
-            <div class="col-md-4">
-                <label class="tk-filter-label"><?= get_label('types', 'Types') ?></label>
-                <select class="form-select tom_contract_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="tk-filter-label"><?= get_label('status', 'Status') ?></label>
-                <select class="form-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
-                    <option value="signed"><?= get_label('signed', 'Signed') ?></option>
-                    <option value="not_signed"><?= get_label('not_signed', 'Not signed') ?></option>
-                    <option value="partially_signed"><?= get_label('partially_signed', 'Partially signed') ?></option>
-                </select>
-            </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button class="btn btn-secondary clear-contracts-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
-                    <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
-                </button>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <x-advanced-date-filters prefix="contract" />
+                <div class="col-md-4">
+                    <label class="form-label"><?= get_label('projects', 'Projects') ?></label>
+                    <select class="form-select tom_projects_select" id="project_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>" multiple>
+                    </select>
+                </div>
+                @if (!isClient() || isAdminOrHasAllDataAccess())
+                <div class="col-md-4">
+                    <label class="form-label"><?= get_label('clients', 'Clients') ?></label>
+                    <select class="form-select tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+                    </select>
+                </div>
+                @endif
+                <div class="col-md-4">
+                    <label class="form-label"><?= get_label('types', 'Types') ?></label>
+                    <select class="form-select tom_contract_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label"><?= get_label('status', 'Status') ?></label>
+                    <select class="form-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+                        <option value="signed"><?= get_label('signed', 'Signed') ?></option>
+                        <option value="not_signed"><?= get_label('not_signed', 'Not signed') ?></option>
+                        <option value="partially_signed"><?= get_label('partially_signed', 'Partially signed') ?></option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-secondary clear-contracts-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                        <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    <div class="tk-table-card">
-            <div class="table-responsive text-nowrap">
-                <input type="hidden" id="data_type" value="contracts">
-                <input type="hidden" id="data_table" value="contracts_table">
-                <input type="hidden" id="save_column_visibility">
-                <input type="hidden" id="multi_select">
-                <table id="contracts_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/contracts/list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParams">
-                    <thead>
-                        <tr>
-                            <th data-checkbox="true"></th>
-                            <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true" data-formatter="idFormatter"><?= get_label('id', 'ID') ?></th>
-                            <th data-field="title" data-visible="{{ (in_array('title', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('title', 'Title') ?></th>
-                            <th data-field="client" data-visible="{{ (in_array('client', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="false"><?= get_label('client', 'Client') ?></th>
-                            <th data-field="project" data-visible="{{ (in_array('project', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="false"><?= get_label('project', 'Project') ?></th>
-                            <th data-field="contract_type" data-visible="{{ (in_array('contract_type', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="false"><?= get_label('type', 'Type') ?></th>
-                            <th data-field="start_date" data-visible="{{ (in_array('start_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('starts_at', 'Starts at') ?></th>
-                            <th data-field="end_date" data-visible="{{ (in_array('end_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('ends_at', 'Ends at') ?></th>
-                            <th data-field="duration" data-visible="{{ (in_array('duration', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="false"><?= get_label('duration', 'Duration') ?></th>
-                            <th data-field="value" data-visible="{{ (in_array('value', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('value', 'Value') ?></th>
-                            <th data-field="promisor_sign" data-visible="{{ (in_array('promisor_sign', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('promisor_sign_status', 'Promisor sign status') ?></th>
-                            <th data-field="promisee_sign" data-visible="{{ (in_array('promisee_sign', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('promisee_sign_status', 'Promisee sign status') ?></th>
-                            <th data-field="status" data-visible="{{ (in_array('status', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}"><?= get_label('status', 'Status') ?></th>
-                            <th data-field="description" data-visible="{{ (in_array('description', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('description', 'Description') ?></th>
-                            <th data-field="created_by" data-visible="{{ (in_array('created_by', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="false"><?= get_label('created_by', 'Created by') ?></th>
-                            <th data-field="created_at" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('created_at', 'Created at') ?></th>
-                            <th data-field="updated_at" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('updated_at', 'Updated at') ?></th>
-                            <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}"><?= get_label('actions', 'Actions') ?></th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-        
+    <div class="card border shadow-none">
+        <div class="card-body p-0">
+            @php
+            $columns = [
+                ['checkbox' => true],
+                ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true, 'visible' => (in_array('id', $visibleColumns) || empty($visibleColumns)), 'formatter' => 'idFormatter'],
+                ['field' => 'title', 'label' => get_label('title', 'Title'), 'sortable' => true, 'visible' => (in_array('title', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'client', 'label' => get_label('client', 'Client'), 'sortable' => false, 'visible' => (in_array('client', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'project', 'label' => get_label('project', 'Project'), 'sortable' => false, 'visible' => (in_array('project', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'contract_type', 'label' => get_label('type', 'Type'), 'sortable' => false, 'visible' => (in_array('contract_type', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'start_date', 'label' => get_label('starts_at', 'Starts at'), 'sortable' => true, 'visible' => (in_array('start_date', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'end_date', 'label' => get_label('ends_at', 'Ends at'), 'sortable' => true, 'visible' => (in_array('end_date', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'duration', 'label' => get_label('duration', 'Duration'), 'sortable' => false, 'visible' => in_array('duration', $visibleColumns)],
+                ['field' => 'value', 'label' => get_label('value', 'Value'), 'sortable' => true, 'visible' => (in_array('value', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'promisor_sign', 'label' => get_label('promisor_sign_status', 'Promisor sign status'), 'sortable' => true, 'visible' => in_array('promisor_sign', $visibleColumns)],
+                ['field' => 'promisee_sign', 'label' => get_label('promisee_sign_status', 'Promisee sign status'), 'sortable' => true, 'visible' => in_array('promisee_sign', $visibleColumns)],
+                ['field' => 'status', 'label' => get_label('status', 'Status'), 'visible' => (in_array('status', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'description', 'label' => get_label('description', 'Description'), 'sortable' => true, 'visible' => in_array('description', $visibleColumns)],
+                ['field' => 'created_by', 'label' => get_label('created_by', 'Created by'), 'sortable' => false, 'visible' => (in_array('created_by', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'created_at', 'label' => get_label('created_at', 'Created at'), 'sortable' => true, 'visible' => in_array('created_at', $visibleColumns)],
+                ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated at'), 'sortable' => true, 'visible' => in_array('updated_at', $visibleColumns)],
+                ['field' => 'actions', 'label' => get_label('actions', 'Actions'), 'visible' => (in_array('actions', $visibleColumns) || empty($visibleColumns))]
+            ];
+            @endphp
+            <x-tk-table 
+                id="contracts_table"
+                url="{{ url('/contracts/list') }}"
+                :columns="$columns"
+                data-sort-name="id"
+                data-sort-order="desc"
+                data-query-params="queryParams"
+            >
+                <x-slot name="before">
+                    <input type="hidden" id="data_type" value="contracts">
+                    <input type="hidden" id="data_table" value="contracts_table">
+                    <input type="hidden" id="save_column_visibility">
+                </x-slot>
+            </x-tk-table>
+        </div>
     </div>
     @else
     <?php

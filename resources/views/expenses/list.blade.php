@@ -26,51 +26,61 @@
     @php
     $visibleColumns = getUserPreferences('expenses');
     @endphp
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body">
             <div class="row">
                 <x-advanced-date-filters prefix="expense" :filters="['date_between']" />
                 @if(isAdminOrHasAllDataAccess())
                 <div class="col-md-4 mb-3">
-                    <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
+                    <select class="form-select tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
                     </select>
                 </div>
                 @endif
                 <div class="col-md-4 mb-3">
-                    <select class="form-select expense_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
+                    <select class="form-select tom_expense_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3 d-flex align-items-center">
+                <div class="col-md-4 mb-3 d-flex align-items-end">
                     <button class="btn btn-secondary clear-expenses-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
-                        <i class="bx bx-refresh"></i>
+                        <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
                     </button>
                 </div>
             </div>
-            <div class="table-responsive text-nowrap">
-                <input type="hidden" id="data_type" value="expenses">
-                <input type="hidden" id="save_column_visibility">
-                <input type="hidden" id="multi_select">
-                <table id="table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/expenses/list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParams">
-                    <thead>
-                        <tr>
-                            <th data-checkbox="true"></th>
-                            <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('id', 'ID') ?></th>
-                            <th data-field="title" data-visible="{{ (in_array('title', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('title', 'Title') ?></th>
-                            <th data-field="expense_type_id" data-visible="{{ (in_array('expense_type_id', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('expense_type_id', 'Expense type ID') ?></th>
-                            <th data-field="expense_type" data-visible="{{ (in_array('expense_type', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('expense_type', 'Expense type') ?></th>
-                            <th data-field="user_id" data-visible="{{ (in_array('user_id', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('user_id', 'User ID') ?></th>
-                            <th data-field="user" data-visible="{{ (in_array('user', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('user', 'User') ?></th>
-                            <th data-field="amount" data-visible="{{ (in_array('amount', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('amount', 'Amount') ?></th>
-                            <th data-field="expense_date" data-visible="{{ (in_array('expense_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('expense_date', 'Expense date') ?></th>
-                            <th data-field="note" data-visible="{{ (in_array('note', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('note', 'Note') ?></th>
-                            <th data-field="created_by" data-visible="{{ (in_array('created_by', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="false"><?= get_label('created_by', 'Created by') ?></th>
-                            <th data-field="created_at" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('created_at', 'Created at') ?></th>
-                            <th data-field="updated_at" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('updated_at', 'Updated at') ?></th>
-                            <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}"><?= get_label('actions', 'Actions') ?></th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
+        </div>
+    </div>
+    <div class="card border shadow-none">
+        <div class="card-body p-0">
+            @php
+            $columns = [
+                ['checkbox' => true],
+                ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true, 'visible' => (in_array('id', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'title', 'label' => get_label('title', 'Title'), 'sortable' => true, 'visible' => (in_array('title', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'expense_type_id', 'label' => get_label('expense_type_id', 'Expense type ID'), 'sortable' => true, 'visible' => in_array('expense_type_id', $visibleColumns)],
+                ['field' => 'expense_type', 'label' => get_label('expense_type', 'Expense type'), 'sortable' => true, 'visible' => (in_array('expense_type', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'user_id', 'label' => get_label('user_id', 'User ID'), 'sortable' => true, 'visible' => in_array('user_id', $visibleColumns)],
+                ['field' => 'user', 'label' => get_label('user', 'User'), 'sortable' => true, 'visible' => (in_array('user', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'amount', 'label' => get_label('amount', 'Amount'), 'sortable' => true, 'visible' => (in_array('amount', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'expense_date', 'label' => get_label('expense_date', 'Expense date'), 'sortable' => true, 'visible' => (in_array('expense_date', $visibleColumns) || empty($visibleColumns))],
+                ['field' => 'note', 'label' => get_label('note', 'Note'), 'sortable' => true, 'visible' => in_array('note', $visibleColumns)],
+                ['field' => 'created_by', 'label' => get_label('created_by', 'Created by'), 'sortable' => false, 'visible' => in_array('created_by', $visibleColumns)],
+                ['field' => 'created_at', 'label' => get_label('created_at', 'Created at'), 'sortable' => true, 'visible' => in_array('created_at', $visibleColumns)],
+                ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated at'), 'sortable' => true, 'visible' => in_array('updated_at', $visibleColumns)],
+                ['field' => 'actions', 'label' => get_label('actions', 'Actions'), 'visible' => (in_array('actions', $visibleColumns) || empty($visibleColumns))]
+            ];
+            @endphp
+            <x-tk-table 
+                id="table"
+                url="{{ url('/expenses/list') }}"
+                :columns="$columns"
+                data-sort-name="id"
+                data-sort-order="desc"
+                data-query-params="queryParams"
+            >
+                <x-slot name="before">
+                    <input type="hidden" id="data_type" value="expenses">
+                    <input type="hidden" id="save_column_visibility">
+                </x-slot>
+            </x-tk-table>
         </div>
     </div>
     @else

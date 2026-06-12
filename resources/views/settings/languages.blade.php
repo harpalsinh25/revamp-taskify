@@ -4,7 +4,7 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
             <div>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb breadcrumb-style1">
@@ -20,7 +20,7 @@
                     </ol>
                 </nav>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-3">
                 @if (app()->getLocale() == $default_language)
                     <span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="left"
                         data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>"><?= get_label('primary', 'Primary') ?></span>
@@ -29,25 +29,20 @@
                             data-lang="{{ app()->getLocale() }}" data-bs-toggle="tooltip" data-bs-placement="left"
                             data-bs-original-title="<?= get_label('set_current_language_as_your_primary_language', 'Set current language as your primary language') ?>"><?= get_label('set_as_primary', 'Set as primary') ?></span></a>
                 @endif
-            </div>
-            <form action="{{ url('settings/languages/save_labels') }}" class="form-submit-event" method="POST">
-                <input type="hidden" name="redirect_url" value="{{ url('settings/languages') }}">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="langcode" value="{{ Session::get('locale') }}">
                 <div>
-                    <button type="submit" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left"
+                    <button type="submit" form="language_labels_form" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left"
                         data-bs-original-title="<?= get_label('save_language', 'Save language') ?>"><i
                             class='bx bx-save'></i></button>
-                    <span data-bs-toggle="modal" data-bs-target="#create_language_modal"><a href="javascript:void(0);"
+                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_language_modal"
                             class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left"
                             data-bs-original-title="<?= get_label('create_language', 'Create language') ?>"><i
-                                class='bx bx-plus'></i></a></span>
+                                class='bx bx-plus'></i></a>
                     <a href="{{ url('settings/languages/manage') }}"><button type="button" class="btn btn-sm btn-primary"
                             data-bs-toggle="tooltip" data-bs-placement="right"
                             data-bs-original-title="<?= get_label('manage_languages', 'Manage languages') ?>"><i
                                 class="bx bx-list-ul"></i></button></a>
                 </div>
+            </div>
         </div>
         <?php
         $mainAdminId = getMainAdminId();
@@ -70,8 +65,13 @@
                 </div>
             @endif
         @endif
-        <div class="card mb-4">
+        <div class="card mb-4 shadow-none border">
             <div class="card-body">
+                <form id="language_labels_form" action="{{ url('settings/languages/save_labels') }}" class="form-submit-event" method="POST">
+                    <input type="hidden" name="redirect_url" value="{{ url('settings/languages') }}">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="langcode" value="{{ Session::get('locale') }}">
                 <div class="row">
                     <div class="col-lg-2 mb-xl-0 mb-4">
                         <small class="text-light fw-semibold"><?= get_label('jump_to', 'Jump to') ?></small>

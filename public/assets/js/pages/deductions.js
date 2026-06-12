@@ -55,3 +55,9 @@ $('#types_filter').on('change', function (e) {
     e.preventDefault();
     $('#table').bootstrapTable('refresh');
 });
+
+$(document).on('click', '.clear-deductions-filters', function (e) {
+    e.preventDefault();
+    $('#types_filter').val('').trigger('change', [0]);
+    $('#table').bootstrapTable('refresh');
+});
