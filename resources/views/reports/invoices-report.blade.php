@@ -21,98 +21,105 @@
             </nav>
         </div>
     </div>
-    <!-- Summary Cards -->
-    <div class="d-flex mb-4 flex-wrap gap-3">
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-receipt fs-2 text-primary me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('total', 'Total') }}</h6>
-                    <p class="card-text mb-0" id="total-invoices">{{ get_label('loading', 'Loading...') }}</p>
-                </div>
+    <!-- Summary Tiles -->
+    <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:12px;" class="mb-4 tk-stats-grid">
+        <!-- Total -->
+        <div class="tk-fact">
+            <i class="bx bx-receipt" style="font-size:22px; color:var(--signal);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('total', 'Total') }}</span>
+                <span class="tk-fact-v" id="total-invoices">—</span>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-money fs-2 text-success me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('total_amount', 'Total Amount') }}</h6>
-                    <p class="card-text mb-0" id="total-amount">{{ get_label('loading', 'Loading...') }}</p>
-                </div>
+        <!-- Total Amount -->
+        <div class="tk-fact">
+            <i class="bx bx-money" style="font-size:22px; color:var(--ok);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('total_amount', 'Total Amount') }}</span>
+                <span class="tk-fact-v" id="total-amount">—</span>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-purchase-tag fs-2 text-warning me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('total_tax', 'Total Tax') }}</h6>
-                    <p class="card-text mb-0" id="total-tax">{{ get_label('loading', 'Loading...') }}</p>
-                </div>
+        <!-- Total Tax -->
+        <div class="tk-fact">
+            <i class="bx bx-purchase-tag" style="font-size:22px; color:var(--warn);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('total_tax', 'Total Tax') }}</span>
+                <span class="tk-fact-v" id="total-tax">—</span>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-money fs-2 text-info me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('final_total', 'Final Total') }}</h6>
-                    <p class="card-text mb-0" id="total-final">{{ get_label('loading', 'Loading...') }}</p>
-                </div>
+        <!-- Final Total -->
+        <div class="tk-fact">
+            <i class="bx bx-money" style="font-size:22px; color:var(--info);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('final_total', 'Final Total') }}</span>
+                <span class="tk-fact-v" id="total-final">—</span>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-trending-up fs-2 text-danger me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('average_value', 'Average Value') }}</h6>
-                    <p class="card-text mb-0" id="average-invoice-value">{{ get_label('loading', 'Loading...') }}</p>
-                </div>
+        <!-- Average Value -->
+        <div class="tk-fact">
+            <i class="bx bx-trending-up" style="font-size:22px; color:var(--fg-1);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('average_value', 'Average Value') }}</span>
+                <span class="tk-fact-v" id="average-invoice-value">—</span>
             </div>
         </div>
     </div>
-    <div class="card">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+               
+                <div>
+                    <h5 class="card-title mb-1">{{ get_label('estimates_invoices_report', 'Estimates/Invoices Report') }}</h5>
+                    <p class="text-muted mb-0 small">{{ get_label('filter_estimates_invoices_report', 'Filter estimates and invoices by date, type, client and creator') }}</p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_report', 'Export Report') }}">
+                    <i class="bx bx-export"></i> {{ get_label('export', 'Export') }}
+                </button>
+                <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                    <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
+                </button>
+            </div>
+        </div>
         <div class="card-body">
             <!-- Filters Row -->
-            <div class="row">
+            <div class="row g-3 align-items-end">
                 <x-advanced-date-filters prefix="report" />
-                <div class="col-md-4 mb-3">
-                    <select class="form-select js-example-basic-multiple" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
-                        <option value="estimate"><?= get_label('estimates', 'Estimates') ?></option>
-                        <option value="invoice"><?= get_label('invoices', 'Invoices') ?></option>
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('types', 'Types') }}</label>
+                    <select class="form-select tom_static_select" id="type_filter" aria-label="{{ get_label('select_types', 'Select types') }}" data-placeholder="<?= get_label('select_types', 'Select types') ?>" multiple>
+                        <option value="estimate">{{ get_label('estimates', 'Estimates') }}</option>
+                        <option value="invoice">{{ get_label('invoices', 'Invoices') }}</option>
                     </select>
                 </div>
                 @if (!isClient() || isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-3">
-                    <select class="form-select clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('clients', 'Clients') }}</label>
+                    <select class="form-select tom_clients_select" id="client_filter" aria-label="{{ get_label('select_clients', 'Select Clients') }}" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
                     </select>
                 </div>
                 @endif
                 @if(isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-3">
-                    <select class="form-select users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('user_creators', 'User Creators') }}</label>
+                    <select class="form-select tom_users_select" id="user_creators_filter" aria-label="{{ get_label('select_user_creators', 'Select User Creators') }}" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <select class="form-select clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('client_creators', 'Client Creators') }}</label>
+                    <select class="form-select tom_clients_select" id="client_creators_filter" aria-label="{{ get_label('select_client_creators', 'Select Client Creators') }}" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>
                     </select>
                 </div>
                 @endif
             </div>
-            <div class="row mb-2">
-                <!-- Export Button -->
-                <div class="col-md-12 col-lg-12 d-flex align-items-center justify-content-md-end mb-md-0 mb-2 gap-2">
-                    <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_report', 'Export Report') }}">
-                        <i class="bx bx-export"></i>
-                    </button>
-                    <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
-                        <i class="bx bx-refresh"></i>
-                    </button>
-                </div>
-            </div>
-            @php
-            $visibleColumns = getUserPreferences('estimates_invoices_report');
-            @endphp
-            <!-- Table -->
-            <div class="table-responsive text-nowrap">
+        </div>
+    @php
+        $visibleColumns = getUserPreferences('estimates_invoices_report');
+    @endphp
+    <div class="card border shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive text-nowrap tk-table">
                 <input type="hidden" id="multi_select">
                 <input type="hidden" id="data_type" value="report">
                 <input type="hidden" id="save_column_visibility" data-type="estimates_invoices_report" data-table="invoices_report_table">
@@ -140,7 +147,6 @@
                             <th data-field="final_total" data-visible="{{ (in_array('final_total', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('final_total', 'Final Total') }}</th>
                             <th data-field="from_date" data-visible="{{ (in_array('from_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('from', 'From') }}</th>
                             <th data-field="to_date" data-visible="{{ (in_array('to_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true">{{ get_label('to', 'To') }}</th>
-                            <!-- Subheadings for Timestamps -->
                             <th data-field="created_at" data-visible="{{ (in_array('created_at', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_at', 'Created At') }}</th>
                             <th data-field="updated_at" data-visible="{{ (in_array('updated_at', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('updated_at', 'Updated At') }}</th>
                         </tr>

@@ -99,25 +99,25 @@ $(document).ready(function () {
             },
             {
                 selector: '#type_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'type_filter',
                 ajaxType: null,
             },
             {
                 selector: '#user_creators_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'created_by_user_ids',
                 ajaxType: 'users'
             },
             {
                 selector: '#client_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'client_ids',
                 ajaxType: 'clients'
             },
             {
                 selector: '#client_creators_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'created_by_client_ids',
                 ajaxType: 'clients'
             },

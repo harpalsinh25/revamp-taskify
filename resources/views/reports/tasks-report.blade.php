@@ -22,107 +22,145 @@
         </div>
     </div>
     <!-- Summary Cards -->
-    <div class="d-flex mb-4 flex-wrap gap-3">
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-task fs-2 text-primary me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('total_tasks', 'Total Tasks') }}</h6>
-                    <p class="card-text mb-0" id="total-tasks">{{ get_label('loading', 'Loading...') }}</p>
+    <div class="row g-3 mb-4">
+        <div class="col-xl col-lg-4 col-md-6">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="text-body-secondary small fw-semibold text-uppercase">{{ get_label('total_tasks', 'Total Tasks') }}</span>
+                        <div class="avatar avatar-sm">
+                            <i class="bx bx-task"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-0 fw-bold lh-sm" id="total-tasks">{{ get_label('loading', 'Loading...') }}</h3>
                 </div>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-calendar-exclamation fs-2 text-warning me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('due_tasks', 'Due Tasks') }}</h6>
-                    <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('due_tasks_info', 'Tasks have deadline today.') }}"></i>
-                    <p class="card-text mb-0" id="due-tasks">{{ get_label('loading', 'Loading...') }}</p>
+        <div class="col-xl col-lg-4 col-md-6">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-body-secondary small fw-semibold text-uppercase">{{ get_label('due_tasks', 'Due Tasks') }}</span>
+                            <i class="bx bx-info-circle ms-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('due_tasks_info', 'Tasks have deadline today.') }}"></i>
+                        </div>
+                        <div class="avatar avatar-sm">
+                            <i class="bx bx-calendar-exclamation"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-0 fw-bold lh-sm" id="due-tasks">{{ get_label('loading', 'Loading...') }}</h3>
                 </div>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-calendar-exclamation fs-2 text-danger me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('overdue_tasks', 'Overdue Tasks') }}</h6>
-                    <p class="card-text mb-0" id="overdue-tasks">{{ get_label('loading', 'Loading...') }}</p>
+        <div class="col-xl col-lg-4 col-md-6">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="text-body-secondary small fw-semibold text-uppercase">{{ get_label('overdue_tasks', 'Overdue Tasks') }}</span>
+                        <div class="avatar avatar-sm">
+                            <i class="bx bx-calendar-exclamation"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-0 fw-bold lh-sm" id="overdue-tasks">{{ get_label('loading', 'Loading...') }}</h3>
                 </div>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-time-five fs-2 text-warning me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">{{ get_label('average_task_completion_days', 'Avg. Task Completion Days') }}</h6>
-                    <p class="card-text mb-0" id="average-task-completion-time">{{ get_label('loading', 'Loading...') }}</p>
+        <div class="col-xl col-lg-4 col-md-6">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="text-body-secondary small fw-semibold text-uppercase">{{ get_label('average_task_completion_days', 'Avg. Task Completion Days') }}</span>
+                        <div class="avatar avatar-sm">
+                            <i class="bx bx-time-five"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-0 fw-bold lh-sm" id="average-task-completion-time">{{ get_label('loading', 'Loading...') }}</h3>
                 </div>
             </div>
         </div>
-        <div class="card flex-grow-1 border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center">
-                <i class="bx bx-calendar fs-2 text-danger me-3"></i>
-                <div>
-                    <h6 class="card-title mb-1">
-                        {{ get_label('urgent_tasks', 'Urgent Tasks') }}
-                        <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('urgent_tasks_info', 'Tasks with a \'Danger\' priority color that have passed their due date are considered urgent.') }}"></i>
-                    </h6>
-                    <p class="card-text mb-0" id="urgent-tasks">{{ get_label('loading', 'Loading...') }}</p>
+        <div class="col-xl col-lg-4 col-md-6">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-body-secondary small fw-semibold text-uppercase">{{ get_label('urgent_tasks', 'Urgent Tasks') }}</span>
+                            <i class="bx bx-info-circle ms-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('urgent_tasks_info', 'Tasks with a \'Danger\' priority color that have passed their due date are considered urgent.') }}"></i>
+                        </div>
+                        <div class="avatar avatar-sm">
+                            <i class="bx bx-calendar"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-0 fw-bold lh-sm" id="urgent-tasks">{{ get_label('loading', 'Loading...') }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
 
-    <div class="card">
-        <div class="card-body">
-        <div class="row">
-            <x-advanced-date-filters prefix="report" />
-            <div class="col-md-4 mb-3">
-                <select class="form-control projects_select" id="project_filter" multiple="multiple" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
-                </select>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                
+                <div>
+                    <h5 class="card-title mb-1">{{ get_label('tasks_report', 'Tasks Report') }}</h5>
+                    <p class="text-muted mb-0 small">{{ get_label('filter_tasks_report', 'Filter tasks by date, project, user, client, status and priority') }}</p>
+                </div>
             </div>
-            @if(isAdminOrHasAllDataAccess())
-            <!-- User Filter -->
-            <div class="col-md-4 mb-3">
-                <select class="form-control users_select" id="user_filter" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
-                </select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <select class="form-control clients_select" id="client_filter" multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
-                </select>
-            </div>
-            @endif
-            <!-- Status Filter -->
-            <div class="col-md-4 mb-3">
-                <select class="form-control statuses_filter" id="status_filter" multiple="multiple" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
-                </select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <select class="form-control priorities_filter" id="priority_filter" multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
-                </select>
-            </div>
-        </div>
-        <div class="row mb-2">
-            <!-- Export Button -->
-            <div class="col-md-12 col-lg-12 d-flex align-items-center justify-content-md-end mb-md-0 mb-2">
+            <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_tasks_report', 'Export Tasks Report') }}">
-                    <i class="bx bx-export"></i>
+                    <i class="bx bx-export"></i> {{ get_label('export', 'Export') }}
+                </button>
+                <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                    <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
                 </button>
             </div>
         </div>
-        @php
-        $visibleColumns = getUserPreferences('tasks_report');
-        @endphp
-        <!-- Table -->
-        <div class="table-responsive text-nowrap">
-            <input type="hidden" id="multi_select">
-            <input type="hidden" id="data_type" value="report">
-            <input type="hidden" id="save_column_visibility" data-type="tasks_report" data-table="tasks_report_table">
-            <table id="tasks_report_table" class="table table-striped table-bordered"
-                data-toggle="table"
-                data-url="{{ route('reports.tasks-report-data') }}"
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <x-advanced-date-filters prefix="report" />
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('projects', 'Projects') }}</label>
+                    <select class="form-select tom_projects_select" id="project_filter" aria-label="{{ get_label('select_projects', 'Select Projects') }}" multiple data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
+                    </select>
+                </div>
+                @if(isAdminOrHasAllDataAccess())
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('users', 'Users') }}</label>
+                    <select class="form-select tom_users_select" id="user_filter" aria-label="{{ get_label('select_users', 'Select Users') }}" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('clients', 'Clients') }}</label>
+                    <select class="form-select tom_clients_select" id="client_filter" aria-label="{{ get_label('select_clients', 'Select Clients') }}" multiple data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
+                    </select>
+                </div>
+                @endif
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('status', 'Status') }}</label>
+                    <select class="form-select tom_statuses_filter" id="status_filter" aria-label="{{ get_label('select_statuses', 'Select Statuses') }}" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('priority', 'Priority') }}</label>
+                    <select class="form-select tom_priorities_filter" id="priority_filter" aria-label="{{ get_label('select_priorities', 'Select Priorities') }}" multiple data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    @php
+    $visibleColumns = getUserPreferences('tasks_report');
+    @endphp
+    <div class="card border shadow-sm">
+        <div class="card-body p-0">
+            <!-- Table -->
+            <div class="table-responsive text-nowrap">
+                <input type="hidden" id="multi_select">
+                <input type="hidden" id="data_type" value="report">
+                <input type="hidden" id="save_column_visibility" data-type="tasks_report" data-table="tasks_report_table">
+                <table id="tasks_report_table" class="table table-striped table-bordered"
+                    data-toggle="table"
+                    data-url="{{ route('reports.tasks-report-data') }}"
                 data-loading-template="loadingTemplate"
                 data-icons-prefix="bx"
                 data-icons="icons"

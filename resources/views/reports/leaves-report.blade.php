@@ -21,161 +21,127 @@
             </nav>
         </div>
     </div>
-    <!-- Summary Cards -->
-    <div class="row g-3 mb-4">
-        <!-- Total Leaves Tile -->
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-calendar fs-2 text-success me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('total', 'Total') }}</h6>
-                        <p class="card-text mb-0" id="total-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
+    <!-- Summary Tiles -->
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;" class="mb-4 tk-stats-grid">
+        <!-- Total -->
+        <div class="tk-fact">
+            <i class="bx bx-calendar" style="font-size:22px; color:var(--signal);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('total', 'Total') }}</span>
+                <span class="tk-fact-v" id="total-leaves">—</span>
             </div>
         </div>
-
-        <!-- Full Leaves Tile -->
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-check-circle fs-2 text-danger me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('full', 'Full') }}</h6>
-                        <p class="card-text mb-0" id="full-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
+        <!-- Full -->
+        <div class="tk-fact">
+            <i class="bx bx-check-circle" style="font-size:22px; color:var(--err);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('full', 'Full') }}</span>
+                <span class="tk-fact-v" id="full-leaves">—</span>
             </div>
         </div>
-
-        <!-- Partial Leaves Tile -->
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-minus-circle fs-2 text-primary me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('partial', 'Partial') }}</h6>
-                        <p class="card-text mb-0" id="partial-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
+        <!-- Partial -->
+        <div class="tk-fact">
+            <i class="bx bx-minus-circle" style="font-size:22px; color:var(--warn);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('partial', 'Partial') }}</span>
+                <span class="tk-fact-v" id="partial-leaves">—</span>
             </div>
         </div>
-    </div>
-
-    <!-- Approved, Pending, and Rejected Leaves Tiles -->
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-check-circle fs-2 text-warning me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('approved', 'Approved') }}</h6>
-                        <p class="card-text mb-0" id="approved-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
+        <!-- Approved -->
+        <div class="tk-fact">
+            <i class="bx bx-check-circle" style="font-size:22px; color:var(--ok);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('approved', 'Approved') }}</span>
+                <span class="tk-fact-v" id="approved-leaves">—</span>
             </div>
         </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-time fs-2 text-info me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('pending', 'Pending') }}</h6>
-                        <p class="card-text mb-0" id="pending-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
+        <!-- Pending -->
+        <div class="tk-fact">
+            <i class="bx bx-time" style="font-size:22px; color:var(--warn);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('pending', 'Pending') }}</span>
+                <span class="tk-fact-v" id="pending-leaves">—</span>
             </div>
         </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-x-circle fs-2 text-danger me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('rejected', 'Rejected') }}</h6>
-                        <p class="card-text mb-0" id="rejected-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
+        <!-- Rejected -->
+        <div class="tk-fact">
+            <i class="bx bx-x-circle" style="font-size:22px; color:var(--err);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('rejected', 'Rejected') }}</span>
+                <span class="tk-fact-v" id="rejected-leaves">—</span>
+            </div>
+        </div>
+        <!-- Paid -->
+        <div class="tk-fact">
+            <i class="bx bx-check-double" style="font-size:22px; color:var(--ok);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('paid_leaves', 'Paid Leaves') }}</span>
+                <span class="tk-fact-v" id="paid-leaves">—</span>
+            </div>
+        </div>
+        <!-- Unpaid -->
+        <div class="tk-fact">
+            <i class="bx bx-x" style="font-size:22px; color:var(--fg-3);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('unpaid_leaves', 'Unpaid Leaves') }}</span>
+                <span class="tk-fact-v" id="unpaid-leaves">—</span>
+            </div>
+        </div>
+        <!-- Avg. Utilization -->
+        <div class="tk-fact">
+            <i class="bx bx-pie-chart-alt" style="font-size:22px; color:var(--info);"></i>
+            <div class="tk-fact-txt">
+                <span class="tk-fact-k">{{ get_label('avg_utilization', 'Avg. Utilization') }}</span>
+                <span class="tk-fact-v" id="avg-utilization">—</span>
             </div>
         </div>
     </div>
 
-    <!-- Paid/Unpaid Analytics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-check-double fs-2 text-success me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('paid_leaves', 'Paid Leaves') }}</h6>
-                        <p class="card-text mb-0" id="paid-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div>
+                    <h5 class="card-title mb-1">{{ get_label('leaves_report', 'Leaves Report') }}</h5>
+                    <p class="text-muted mb-0 small">{{ get_label('filter_leaves_report', 'Filter leaves report by date, user and status') }}</p>
                 </div>
             </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-x fs-2 text-warning me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('unpaid_leaves', 'Unpaid Leaves') }}</h6>
-                        <p class="card-text mb-0" id="unpaid-leaves">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-info" id="view_charts_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('view_charts', 'View Charts') }}">
+                    <i class="bx bx-bar-chart"></i> {{ get_label('view_charts', 'View Charts') }}
+                </button>
+                <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_leaves_report', 'Export Leaves Report') }}">
+                    <i class="bx bx-export"></i> {{ get_label('export', 'Export') }}
+                </button>
+                <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                    <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
+                </button>
             </div>
         </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bx bx-pie-chart-alt fs-2 text-info me-3"></i>
-                    <div>
-                        <h6 class="card-title mb-1">{{ get_label('avg_utilization', 'Avg. Utilization') }}</h6>
-                        <p class="card-text mb-0" id="avg-utilization">{{ get_label('loading', 'Loading...') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
         <div class="card-body">
-            <!-- Filters Row: Dates and Actions -->
-            <div class="row">
+            <div class="row g-3 align-items-end">
                 <x-advanced-date-filters prefix="report" />
-                <!-- User Filter -->
-                <div class="col-12 col-md-4 mb-3">
-                    <select class="form-control users_select" id="user_filter" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('users', 'Users') }}</label>
+                    <select class="form-select tom_users_select" id="user_filter" aria-label="{{ get_label('select_users', 'Select Users') }}" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                     </select>
                 </div>
-                <!-- Status Filter -->
-                <div class="col-12 col-md-4 mb-3">
-                    <select class="form-select js-example-basic-multiple" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+                <div class="col-md-4">
+                    <label class="form-label">{{ get_label('status', 'Status') }}</label>
+                    <select class="form-select tom_statuses_filter" id="status_filter" aria-label="{{ get_label('select_statuses', 'Select Statuses') }}" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                         <option value="approved">{{ get_label('approved', 'Approved') }}</option>
                         <option value="pending">{{ get_label('pending', 'Pending') }}</option>
                         <option value="rejected">{{ get_label('rejected', 'Rejected') }}</option>
                     </select>
                 </div>
-                <!-- Actions (aligned right) -->
-                <div class="col-12 col-md-4 mb-3 d-flex align-items-end justify-content-md-end gap-2 flex-wrap text-md-end">
-                    <button class="btn btn-info" id="view_charts_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('view_charts', 'View Charts') }}">
-                        <i class="bx bx-bar-chart"></i> {{ get_label('view_charts', 'View Charts') }}
-                    </button>
-                    <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_leaves_report', 'Export Leaves Report') }}">
-                        <i class="bx bx-export"></i>
-                    </button>
-                    <button class="btn btn-secondary clear-report-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
-                        <i class="bx bx-refresh"></i>
-                    </button>
-                </div>
             </div>
-            <!-- Additional Filters Row removed: actions moved into the grid above for alignment -->
-            @php
-            $visibleColumns = getUserPreferences('leaves_report');
-            @endphp
+        </div>
+    </div>
+
+    @php
+    $visibleColumns = getUserPreferences('leaves_report');
+    @endphp
+    <div class="card border shadow-sm">
+        <div class="card-body p-0">
             <!-- Table -->
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="multi_select">

@@ -192,41 +192,41 @@ function formatLeaveDuration(totalLeaves, days, hours) {
 }
 
 $(document).ready(function () {
-    // Initialize TableFilterSync for users
+    // Initialize TableFilterSync for leaves report filters
     const leaveReportFilterSync = new TableFilterSync({
         tableId: 'leaves_report_table',
         dataType: 'report',
         filters: [
             {
-                selector: '#filter_date_range',
+                selector: '#report_date_between',
                 type: 'daterangepicker',
-                name: 'filter_date_range',
-                hiddenFrom: '#filter_date_range_from',
-                hiddenTo: '#filter_date_range_to'
+                name: 'report_date_between',
+                hiddenFrom: '#report_date_between_from',
+                hiddenTo: '#report_date_between_to'
             },
             {
                 selector: '#report_start_date_between',
                 type: 'daterangepicker',
                 name: 'report_start_date_between',
-                hiddenFrom: '#filter_start_date_from',
-                hiddenTo: '#filter_start_date_to'
+                hiddenFrom: '#report_start_date_from',
+                hiddenTo: '#report_start_date_to'
             },
             {
                 selector: '#report_end_date_between',
                 type: 'daterangepicker',
                 name: 'report_end_date_between',
-                hiddenFrom: '#filter_end_date_from',
-                hiddenTo: '#filter_end_date_to'
+                hiddenFrom: '#report_end_date_from',
+                hiddenTo: '#report_end_date_to'
             },
             {
                 selector: '#user_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
-                ajaxType: 'users',
+                ajaxType: 'users'
             },
             {
                 selector: '#status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'statuses',
                 ajaxType: null
             }

@@ -114,31 +114,31 @@ $(document).ready(function () {
             },
             {
                 selector: '#project_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'project_ids',
                 ajaxType: 'projects'
             },
             {
                 selector: '#user_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
                 ajaxType: 'users'
             },
             {
                 selector: '#client_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'client_ids',
                 ajaxType: 'clients'
             },
             {
                 selector: '#status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'statuses',
                 ajaxType: 'statuses'
             },
             {
                 selector: '#priority_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'priority_ids',
                 ajaxType: 'priorities'
             }
