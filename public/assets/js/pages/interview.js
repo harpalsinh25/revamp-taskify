@@ -66,7 +66,7 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    // Initialize TableFilterSync for users
+    // Initialize TableFilterSync for interviews
     const interviewFilterSync = new TableFilterSync({
         tableId: 'interviews_table',
         dataType: 'interview',
@@ -80,13 +80,13 @@ $(document).ready(function () {
             },
             {
                 selector: '#sort',
-                type: 'select',
+                type: 'tom-select',
                 name: 'sort',
                 ajaxType: null
             },
             {
                 selector: '#interview_status',
-                type: 'select',
+                type: 'tom-select',
                 name: 'status',
                 ajaxType: null
             },
@@ -95,4 +95,27 @@ $(document).ready(function () {
         preserveParams: [''],
         queryParamsFn: queryParams // Reuse existing function
     });
+});
+
+$(document).on('click', '.clear-interview-filters', function (e) {
+    e.preventDefault();
+    const picker = $('#interview_date_between').data('daterangepicker');
+    if (picker) {
+        picker.setStartDate(moment());
+        picker.setEndDate(moment());
+        picker.updateElement();
+    }
+    $('#interview_date_between').val('');
+    $('#interview_date_between_from').val('');
+    $('#interview_date_between_to').val('');
+    
+    if ($('#sort')[0] && $('#sort')[0].tomselect) {
+        $('#sort')[0].tomselect.setValue('', true);
+    }
+    if ($('#interview_status')[0] && $('#interview_status')[0].tomselect) {
+        // clear multiple selection for tomselect
+        $('#interview_status')[0].tomselect.clear(true);
+    }
+    
+    $('#interviews_table').bootstrapTable('refresh');
 });

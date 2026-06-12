@@ -153,7 +153,7 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    // Initialize TableFilterSync for users
+    // Initialize TableFilterSync for candidates
     const candidateFilterSync = new TableFilterSync({
         tableId: 'candidates_table',
         dataType: 'candidate',
@@ -167,13 +167,13 @@ $(document).ready(function () {
             },
             {
                 selector: '#sort',
-                type: 'select',
+                type: 'tom-select',
                 name: 'sort',
                 ajaxType: null
             },
             {
                 selector: '#select_candidate_statuses',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'candidate_status',
                 ajaxType: 'candidate_statuses'
             },
@@ -182,4 +182,26 @@ $(document).ready(function () {
         preserveParams: [''],
         queryParamsFn: queryParams // Reuse existing function
     });
+});
+
+$(document).on('click', '.clear-candidate-filters', function (e) {
+    e.preventDefault();
+    const picker = $('#candidate_date_between').data('daterangepicker');
+    if (picker) {
+        picker.setStartDate(moment());
+        picker.setEndDate(moment());
+        picker.updateElement();
+    }
+    $('#candidate_date_between').val('');
+    $('#candidate_date_between_from').val('');
+    $('#candidate_date_between_to').val('');
+    
+    if ($('#sort')[0] && $('#sort')[0].tomselect) {
+        $('#sort')[0].tomselect.setValue('', true);
+    }
+    if ($('#select_candidate_statuses')[0] && $('#select_candidate_statuses')[0].tomselect) {
+        $('#select_candidate_statuses')[0].tomselect.clear(true);
+    }
+    
+    $('#candidates_table').bootstrapTable('refresh');
 });

@@ -360,25 +360,29 @@ class CandidateStatusController extends Controller
             ->get()
             ->map(function ($status) use ($canDelete, $canEdit) {
 
-            $actions = '';
+            $actions = '-';
+            if ($canEdit || $canDelete) {
+                $actions = '<div class="dropdown">';
+                $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                $actions .= '</button>';
+                $actions .= '<ul class="dropdown-menu">';
 
-            if ($canEdit) {
-                $actions .= '<a href="javascript:void(0);" class="edit-candidate-status-btn"
-                                        data-candidate-status=\'' . htmlspecialchars(json_encode($status), ENT_QUOTES, 'UTF-8') . '\'
-                                        title="' . get_label('update', 'Update') . '">
-                                        <i class="bx bx-edit mx-1"></i>
-                                        </a>';
-            }
+                if ($canEdit) {
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-candidate-status-btn d-block" data-candidate-status=\'' . htmlspecialchars(json_encode($status), ENT_QUOTES, 'UTF-8') . '\'>';
+                    $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                }
 
+                if ($canDelete) {
+                    if ($canEdit) {
+                        $actions .= '<li><hr class="dropdown-divider"></li>';
+                    }
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $status->id . '" data-type="candidate_status">';
+                    $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                }
 
-            if ($canDelete) {
-                $actions .= '<button type="button"
-                                        class="btn delete"
-                                        data-id="' . $status->id . '"
-                                        data-type="candidate_status"
-                                        title="' . get_label('delete', 'Delete') . '">
-                                        <i class="bx bx-trash text-danger mx-1"></i>
-                                        </button>';
+                $actions .= '</ul>';
+                $actions .= '</div>';
             }
 
             return [

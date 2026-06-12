@@ -5321,6 +5321,7 @@ $(document).ready(function () {
     initTomSelectWithAjax(".tom_deductions_select", "deductions");
     initTomSelectWithAjax(".tom_expense_types_select", "expense_types");
     initTomSelectWithAjax(".tom_invoices_select", "invoices");
+    initTomSelectWithAjax(".tom_candidate_statuses_select", "candidate_statuses");
     initTomSelectStatic(".tom_static_select");
 
     initSelect2WithAjax(".clients_select", "clients");
