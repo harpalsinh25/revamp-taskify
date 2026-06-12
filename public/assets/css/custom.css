@@ -1042,7 +1042,7 @@
    FORM CONTROL FOCUS BEHAVIOR - SNEAT STANDARD
    ============================================================================ */
 /* Ensure form controls match Sneat's 2px border focus behavior */
-.form-control:not(.iti__tel-input):focus {
+.form-control:not(.iti__tel-input):not(#phone):focus {
     border-width: 2px !important;
     padding-block: calc(0.543rem - 1px) !important;
     padding-inline: calc(0.9375rem - 1px) !important;
@@ -1062,13 +1062,13 @@
 }
 
 /* Form controls inside input groups */
-.input-group .form-control:not(.iti__tel-input),
+.input-group .form-control:not(.iti__tel-input):not(#phone),
 .input-group .form-select {
     padding-inline: calc(0.9375rem - 1px) !important;
 }
 
 /* Input group focus - keep 1px border (no 2px like standalone inputs) */
-.input-group .form-control:not(.iti__tel-input):focus,
+.input-group .form-control:not(.iti__tel-input):not(#phone):focus,
 .input-group .form-select:focus {
     border-width: 1px !important;
     padding-block: calc(0.543rem - 1px) !important;
@@ -1270,9 +1270,8 @@
 }
 
 /* Phone input field - maintain standard styling */
-.iti input.iti__tel-input {
+.iti input {
     width: 100% !important;
-    padding-left: 84px !important;
     padding-right: 0.9375rem !important;
     padding-top: 0.543rem !important;
     padding-bottom: 0.543rem !important;
@@ -1283,11 +1282,10 @@
 }
 
 /* Focus state for phone input - keep 1px border */
-.iti input.iti__tel-input:focus {
+.iti input:focus {
     border-width: 1px !important;
     border-color: #696cff !important;
     box-shadow: 0 0.125rem 0.25rem 0 rgba(105, 108, 255, 0.4) !important;
-    padding-left: 84px !important;
     padding-right: 0.9375rem !important;
     padding-top: 0.543rem !important;
     padding-bottom: 0.543rem !important;
@@ -5810,7 +5808,7 @@ body.v2-shell .ts-control input::placeholder {
 /* =====================================================================
    Taskify v2 — Global Form Controls / Inputs & Focus Rings
    ===================================================================== */
-body.v2-shell .form-control,
+body.v2-shell .form-control:not(#phone),
 body.v2-shell .form-select {
     box-sizing: border-box !important;
     height: var(--ctrl-h-md) !important;
@@ -5820,6 +5818,22 @@ body.v2-shell .form-select {
     padding-right: 10px !important;
     line-height: 30px !important;
     /* matches ctrl-h-md (32px) - borders (2px) */
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-0) !important;
+    border-radius: var(--r-2) !important;
+    font-size: var(--fs-base) !important;
+    box-shadow: none !important;
+    transition: border-color var(--t-1) var(--ease) !important;
+}
+
+body.v2-shell #phone {
+    box-sizing: border-box !important;
+    height: var(--ctrl-h-md) !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-right: 10px !important;
+    line-height: 30px !important;
     background: var(--bg-1) !important;
     border: 1px solid var(--line) !important;
     color: var(--fg-0) !important;
@@ -5873,10 +5887,16 @@ body.v2-shell .input-group-merge {
     height: auto !important;
 }
 
-body.v2-shell .input-group .form-control,
+body.v2-shell .input-group .form-control:not(#phone),
 body.v2-shell .input-group .form-select {
     padding-block: 0 !important;
     padding-inline: 10px !important;
+    border-width: 1px !important;
+}
+
+body.v2-shell .input-group #phone {
+    padding-block: 0 !important;
+    padding-right: 10px !important;
     border-width: 1px !important;
 }
 

@@ -30,18 +30,18 @@ $visibleColumns = getUserPreferences('users');
         </div>
     </div>
     @if (is_countable($users) && count($users) > 0)
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <select class="form-select js-example-basic-multiple" id="user_status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+            <div class="row g-3 align-items-end tk-filter-row">
+                <div class="col-md-3 mb-3">
+                    <select class="form-select tom_static_select" id="user_status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
                         <option value="1">{{get_label('active','Active')}}</option>
                         <option value="0">{{get_label('deactive','Deactive')}}</option>
                     </select>
                 </div>
                 @isset($roles)
-                <div class="col-md-4 mb-3">
-                    <select class="form-control js-example-basic-multiple" id="user_roles_filter" data-placeholder="<?= get_label('select_roles', 'Select Roles') ?>" data-allow-clear="true" multiple>
+                <div class="col-md-3 mb-3">
+                    <select class="form-select tom_static_select" id="user_roles_filter" data-placeholder="<?= get_label('select_roles', 'Select Roles') ?>" data-allow-clear="true" multiple>
                         @foreach ($roles as $role)
                         <option value="{{$role->id}}">{{ucfirst($role->name)}}</option>
                         @endforeach
@@ -49,13 +49,17 @@ $visibleColumns = getUserPreferences('users');
                     </select>
                 </div>
                 @endisset
-                <div class="col-md-4 mb-3">
-                    <select class="form-select js-example-basic-multiple" id="user_ev_status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_ev_statuses', 'Select Email Verification Statuses') ?>" data-allow-clear="true" multiple>
+                <div class="col-md-3 mb-3">
+                    <select class="form-select tom_static_select" id="user_ev_status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_ev_statuses', 'Select Email Verification Statuses') ?>" data-allow-clear="true" multiple>
                         <option value="1">{{get_label('verified','Verified')}}</option>
                         <option value="0">{{get_label('not_verified','Not Verified')}}</option>
                     </select>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="card border shadow-none">
+        <div class="card-body p-0">
             <div class="table-responsive text-nowrap">
                 <input type="hidden" id="data_type" value="users">
                 <input type="hidden" id="data_table" value="user_table">

@@ -13,14 +13,17 @@ function queryParams(params) {
 
 
 $(document).ready(function () {
-    $("#select_social_platforms").on("change", function () {
-        $('#table').bootstrapTable('refresh');
-    });
+    if (typeof TableFilterSync === 'function') {
+        TableFilterSync('table', ['select_social_platforms', 'select_social_stastuses']);
+    } else {
+        $("#select_social_platforms").on("change", function () {
+            $('#table').bootstrapTable('refresh');
+        });
 
-    $('#select_social_stastuses').on('change', function () {
-        $('#table').bootstrapTable('refresh');
-    })
-
+        $('#select_social_stastuses').on('change', function () {
+            $('#table').bootstrapTable('refresh');
+        });
+    }
 });
 
 

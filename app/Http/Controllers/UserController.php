@@ -1138,20 +1138,30 @@ class UserController extends Controller
             ->paginate(request("limit"))
             ->through(
                 function ($user) use ($workspace, $canEdit, $canDelete, $canManageProjects, $canManageTasks, $mainAdminId, $guardName, $authUserId) {
-                    $actions = '';
-                    if ($canEdit) {
-                        $actions .= '<a href="' . url("/users/edit/{$user->id}") . '" title="' . get_label('update', 'Update') . '">' .
-                            '<i class="bx bx-edit mx-1"></i>' .
-                            '</a>';
-                    }
+                    $actions = '-';
+                    if ($canEdit || ($canDelete && $user->id != $mainAdminId)) {
+                        $actions = '<div class="dropdown">';
+                        $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                        $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                        $actions .= '</button>';
+                        $actions .= '<ul class="dropdown-menu">';
 
-                if ($canDelete && $user->id != $mainAdminId) {
-                    $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $user->id . '" data-type="users" data-table="user_table">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
-                    }
+                        if ($canEdit) {
+                            $actions .= '<li><a href="' . url("/users/edit/{$user->id}") . '" class="dropdown-item d-block">';
+                            $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                        }
 
-                $actions = $actions ?: '-';
+                        if ($canDelete && $user->id != $mainAdminId) {
+                            if ($canEdit) {
+                                $actions .= '<li><hr class="dropdown-divider"></li>';
+                            }
+                            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $user->id . '" data-type="users" data-table="user_table">';
+                            $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                        }
+
+                        $actions .= '</ul>';
+                        $actions .= '</div>';
+                    }
 
                     $projectsBadge = '<span class="badge rounded-pill bg-primary">' . (isAdminOrHasAllDataAccess('user', $user->id) ? count($workspace->projects) : count($user->projects)) . '</span>';
                     if ($canManageProjects) {

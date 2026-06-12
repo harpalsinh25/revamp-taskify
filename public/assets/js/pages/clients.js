@@ -45,26 +45,26 @@ $(document).on('click', '.clear-clients-filters', function (e) {
 
 
 $(document).ready(function () {
-    // Initialize TableFilterSync for users
+    // Initialize TableFilterSync for clients
     new TableFilterSync({
-        tableId: 'clients_table', // Your users table ID
+        tableId: 'clients_table', // Your clients table ID
         dataType: 'clients',
         filters: [
             {
                 selector: '#client_status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'statuses',
                 ajaxType: null // No AJAX needed for static options
             },
             {
                 selector: '#client_internal_purpose_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'clientTypes',
-                ajaxType: 'roles' // If you need to fetch roles dynamically
+                ajaxType: null // No AJAX needed for static options
             },
             {
                 selector: '#client_ev_status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'ev_statuses',
                 ajaxType: null // No AJAX needed for static options
             }

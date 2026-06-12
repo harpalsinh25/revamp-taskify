@@ -110,24 +110,29 @@
                     @endif
                     <div class="mb-3 col-md-6">
                         <label for="photo" class="form-label"><?= get_label('profile_picture', 'Profile picture') ?></label>
-                        <div class="d-flex gap-4">
-                            <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')}}" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
-                            <div class="button-wrapper">
-                                <div class="input-group d-flex">
-                                    <input type="file" class="form-control" id="inputGroupFile02" name="profile">
-                                </div>
+                        <div class="d-flex align-items-center gap-3 p-3 border border-dashed rounded" style="border-style: dashed !important; border-width: 2px !important; border-color: var(--line) !important; min-height: 110px;">
+                            <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')}}" alt="user-avatar" class="d-block rounded-circle object-fit-cover" height="75" width="75" id="uploadedAvatar" />
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control form-control-sm account-file-input" id="photo" name="profile" accept="image/*">
+                                <small class="text-muted mt-1 d-block">Allowed JPG, JPEG, PNG, GIF, BMP or WEBP.</small>
                             </div>
                         </div>
                     </div>
                     @if(isAdminOrHasAllDataAccess())
                     <div class="mb-3 col-md-6">
                         <label class="form-label" for=""><?= get_label('status', 'Status') ?> (<small class="text-muted mt-2"><?= get_label('deactivated_user_login_restricted', 'If Deactivated, the User Won\'t Be Able to Log In to Their Account') ?></small>)</label>
-                        <div class="">
-                            <div class="btn-group btn-group d-flex justify-content-center" role="group" aria-label="Basic radio toggle button group">
-                                <input type="radio" class="btn-check" id="user_active" name="status" value="1" <?= $user->status == 1 ? 'checked' : '' ?>>
-                                <label class="btn btn-outline-primary" for="user_active"><?= get_label('active', 'Active') ?></label>
-                                <input type="radio" class="btn-check" id="user_deactive" name="status" value="0" <?= $user->status == 0 ? 'checked' : '' ?>>
-                                <label class="btn btn-outline-primary" for="user_deactive"><?= get_label('deactive', 'Deactive') ?></label>
+                        <div class="d-flex gap-3 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="user_active" value="1" {{ old('status', $user->status) == '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="user_active">
+                                    <?= get_label('active', 'Active') ?>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="user_deactive" value="0" {{ old('status', $user->status) == '0' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="user_deactive">
+                                    <?= get_label('deactive', 'Deactive') ?>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -147,13 +152,26 @@
                         </div>
                     @endif
 
-                    <div class="mt-4">
-                        <button type="submit" id="submit_btn" class="btn btn-primary me-2"><?= get_label('update', 'Update') ?></button>
+                    <div class="d-flex justify-content-end mt-4 gap-2">
                         <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+                        <button type="submit" id="submit_btn" class="btn btn-primary"><?= get_label('update', 'Update') ?></button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.querySelector('.account-file-input');
+        const avatarImage = document.getElementById('uploadedAvatar');
+        if (fileInput && avatarImage) {
+            fileInput.onchange = () => {
+                if (fileInput.files[0]) {
+                    avatarImage.src = window.URL.createObjectURL(fileInput.files[0]);
+                }
+            };
+        }
+    });
+</script>
 @endsection

@@ -840,20 +840,30 @@ class ClientController extends Controller
             ->orderBy($sort, $order)
             ->paginate(request('limit'))
             ->through(function ($client) use ($workspace, $canEdit, $canDelete, $authUserId, $guardName) {
-                $actions = '';
-                if ($canEdit) {
-                    $actions .= '<a href="' . url("/clients/edit/{$client->id}") . '" title="' . get_label('update', 'Update') . '">' .
-                        '<i class="bx bx-edit mx-1"></i>' .
-                        '</a>';
-                }
+                $actions = '-';
+                if ($canEdit || $canDelete) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu">';
 
-                if ($canDelete) {
-                $actions .= '<button title="' . get_label('delete', 'Delete') . '" type="button" class="btn delete" data-id="' . $client->id . '" data-type="clients" data-table="clients_table">' .
-                    '<i class="bx bx-trash text-danger mx-1"></i>' .
-                    '</button>';
-                }
+                    if ($canEdit) {
+                        $actions .= '<li><a href="' . url("/clients/edit/{$client->id}") . '" class="dropdown-item d-block">';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
 
-            $actions = $actions ?: '-';
+                    if ($canDelete) {
+                        if ($canEdit) {
+                            $actions .= '<li><hr class="dropdown-divider"></li>';
+                        }
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $client->id . '" data-type="clients" data-table="clients_table">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                }
 
                 $badge = $client->status === 1
                     ? '<span class="badge bg-success">' . get_label('active', 'Active') . '</span>'

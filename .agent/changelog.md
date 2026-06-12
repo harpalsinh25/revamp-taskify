@@ -2,6 +2,87 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-12] - Client Management Redesign & Alignment
+### Modified
+- **`resources/views/clients/clients.blade.php`**:
+  - Moved the table filters into their own card container (`card mb-4` with `card-body`) at the top of the page.
+  - Converted filter inputs to `tom-select` static components using class `tom_static_select`.
+  - Upgraded table layout wrapper to flat, border-only minimalist card (`card border shadow-none` with `card-body p-0`).
+  - Fixed data table ID from hyphenated `data-table` to `data_table`.
+- **`public/assets/js/pages/clients.js`**:
+  - Reconfigured `TableFilterSync` to synchronize status, internal purpose, and email verification filters using `tom-select` instead of `select2`.
+  - Disabled AJAX mapping (`ajaxType: null`) for internal purpose filters.
+- **`app/Http/Controllers/ClientController.php`**:
+  - Converted table action column buttons to standard Bootstrap vertical dots (`bx-dots-vertical-rounded`) actions dropdown.
+- **`resources/views/clients/create_client.blade.php`**:
+  - Restructured profile upload field to support standard dashed outline box styling and live preview container.
+  - Converted Active/Deactive and Email Verification button groups to standard Bootstrap inline check radios (`form-check-input`) with `old()` fallback values.
+  - Right-aligned bottom action buttons and added dynamic file change listener script.
+- **`resources/views/clients/update_client.blade.php`**:
+  - Restructured profile upload field to support standard dashed outline box styling and live preview container (renamed file input ID to `profile`).
+  - Converted Active/Deactive and Email Verification button groups to standard Bootstrap inline check radios (`form-check-input`) with default checked values.
+  - Right-aligned bottom action buttons and added dynamic file change listener script.
+
+## [2026-06-12] - Country Code & Phone Number Overlap Fix
+### Fixed
+- **`public/assets/css/custom.css`**:
+  - Excluded `#phone` from global `.form-control` and `.input-group .form-control` styling rules that override padding properties using `!important`.
+  - Added specific styling rule block for `#phone` in the `body.v2-shell` layout context, preserving dynamic padding control for `intl-tel-input`.
+  - Excluded `#phone` from standard focus and group-merge focus rules overriding padding properties.
+  - Adjusted `.iti input` general styles to omit hardcoded `padding-left: 84px !important`, letting `intl-tel-input` dynamically calculate start position spacing based on selected country code.
+
+## [2026-06-12] - Users Forms Layout & Preview Design Upgrades
+### Modified
+- **`resources/views/users/create_user.blade.php`**:
+  - Replaced the simple file input with a modern dashed border upload block featuring a circular image preview.
+  - Added a dynamic JavaScript listener at the bottom to update the image preview instantly when a file is selected.
+  - Converted status and require email verification button groups to standard Bootstrap inline check radios (`form-check-input`) to fix vertical stretching and ensure selection states are clearly visible.
+- **`resources/views/users/edit_user.blade.php`**:
+  - Upgraded the file upload row block to match the dashed border outline style with preview.
+  - Added the dynamic JavaScript image preview listener.
+  - Converted the status button group to standard inline Bootstrap check radios.
+
+## [2026-06-12] - Users Form Radio Selections Fix
+### Fixed
+- **`resources/views/users/create_user.blade.php`**:
+  - Implemented dynamic checked values using the `old()` helper for the Active/Deactive (status) and Yes/No (require_ev) radio fields.
+  - Standardized the wrapper class of radio button groups to `btn-group d-flex w-100` for proper layout formatting.
+- **`resources/views/users/edit_user.blade.php`**:
+  - Implemented dynamic checked values using the `old()` helper (retaining database values as fallbacks) for the Active/Deactive (status) radio fields.
+  - Standardized the wrapper class of status radio button group to `btn-group d-flex w-100` for proper layout formatting.
+
+## [2026-06-12] - Users Create/Edit Forms Alignment
+### Modified
+- **`resources/views/users/create_user.blade.php`**:
+  - Right-aligned the action buttons (Cancel/Create) using Bootstrap's flexbox utilities (`d-flex justify-content-end gap-2 mt-4`).
+- **`resources/views/users/edit_user.blade.php`**:
+  - Right-aligned the action buttons (Cancel/Update) using Bootstrap's flexbox utilities (`d-flex justify-content-end gap-2 mt-4`).
+
+## [2026-06-12] - Users Duplicate Clear Filters Button Fix
+### Fixed
+- **`resources/views/users/users.blade.php`**:
+  - Removed the duplicate manual "Clear Filters" button markup, relying entirely on the automated filter button injection logic from `custom.js`.
+  - Preserved the `col-md-3` column widths for the three dropdown filters, allowing the dynamically generated filter button to align perfectly alongside them.
+
+## [2026-06-12] - Users Filter Card Wrapper
+### Modified
+- **`resources/views/users/users.blade.php`**:
+  - Wrapped the user page filter row in a proper Bootstrap Card container (`card mb-4` with `card-body`) at the top of the page.
+  - Added a "Clear Filters" button inside the filter row and adjusted column classes to `col-md-3`.
+  - Updated the user table card container to use the standard flat styling (`card border shadow-none` with `card-body p-0`).
+
+## [2026-06-12] - Users Table & Filters Redesign
+### Modified
+- **`resources/views/users/users.blade.php`**:
+  - Moved the table filters outside and above the table card.
+  - Converted the three filters (Status, Roles, Email Verification Status) from Select2/standard selects to Tom Select by replacing the class `js-example-basic-multiple` / `form-control` with `form-select tom_static_select`.
+  - Upgraded the filters row wrapper to use the standard design system classes: `row g-3 align-items-end tk-filter-row mb-3`.
+- **`public/assets/js/pages/users.js`**:
+  - Configured `TableFilterSync` to synchronize the user list filters using the `tom-select` filter type instead of `select2`.
+  - Set `ajaxType: null` for the roles filter, as options are statically loaded via Blade.
+- **`app/Http/Controllers/UserController.php`**:
+  - Refactored the `list` method to render a Bootstrap vertical three-dot (`bx-dots-vertical-rounded`) action dropdown menu instead of raw inline icons, matching the standard system design.
+
 ## [2026-06-12] - UI & Table Standardization
 ### Modified
 - **`resources/views/settings/permission_settings.blade.php`**: Standardized the permission roles table by allowing the `tk-table` component to properly initialize as a bootstrap-table (removed `data-toggle=""`), removed all custom inline styles (`font-size`, `border-radius`, etc.), and converted custom badge colors to standard `bg-primary` and `bg-secondary` badges.
@@ -310,3 +391,9 @@ All notable changes to the Taskify project will be documented in this folder.
 ## 2026-06-12 (Item Modals Standardization)
 - Converted the unit_id Select2 input to Tom Select (	om_static_select) in both the Create and Edit Item modals (esources/views/modals.blade.php).
 - Updated the .edit-item logic in public/assets/js/pages/items.js to seamlessly use Tom Select's .setValue() and .clear() methods to populate the modal fields.
+
+## 2026-06-12 (Social Media Scheduler Standardization)
+- Standardized the Social Media Scheduler list view (plugins/SocialMediaManagement/Resources/views/social-media-scheduler/index.blade.php) to use the <x-tk-table> component structure.
+- Extracted select_social_platforms and select_social_stastuses filters out of the table card into a standalone filter card and replaced Select2 with Tom Select (	om_static_select).
+- Updated the table action buttons in SocialMediaController.php's list method to be bundled within the standard three-dots dropdown menu.
+- Added TableFilterSync configuration in social.js to ensure proper refreshing and functionality of the "Clear filters" button.

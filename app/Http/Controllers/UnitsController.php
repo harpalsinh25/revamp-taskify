@@ -136,25 +136,24 @@ class UnitsController extends Controller
             ->through(function ($unit) use ($canEdit, $canDelete) {
             $actions = '';
             if ($canEdit || $canDelete) {
-                $actions .= '<div class="d-flex align-items-center">
-                                <div class="dropdown">
-                                    <a href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">';
+                $actions .= '<div class="dropdown">
+                    <button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded fs-5"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">';
                 
                 if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="dropdown-item edit-unit" data-id="' . $unit->id . '">' .
-                        '<i class="bx bx-edit mx-1"></i> ' . get_label('update', 'Update') .
-                        '</a>';
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-unit" data-id="' . $unit->id . '">' .
+                        '<i class="bx bx-edit text-primary me-2"></i> ' . get_label('update', 'Update') .
+                        '</a></li>';
                 }
                 if ($canDelete) {
-                    $actions .= '<a href="javascript:void(0);" class="dropdown-item text-danger delete" data-id="' . $unit->id . '" data-type="units">' .
-                        '<i class="bx bx-trash mx-1"></i> ' . get_label('delete', 'Delete') .
-                        '</a>';
+                    $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete" data-id="' . $unit->id . '" data-type="units">' .
+                        '<i class="bx bx-trash text-danger me-2"></i> ' . get_label('delete', 'Delete') .
+                        '</a></li>';
                 }
                 
-                $actions .= '</div></div></div>';
+                $actions .= '</ul></div>';
             }
             $actions = $actions ?: '-';
                 return [

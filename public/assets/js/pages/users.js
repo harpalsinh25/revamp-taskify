@@ -48,19 +48,19 @@ $(document).ready(function () {
         filters: [
             {
                 selector: '#user_status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'status',
                 ajaxType: null // No AJAX needed for static options
             },
             {
                 selector: '#user_roles_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'roles',
-                ajaxType: 'roles' // If you need to fetch roles dynamically
+                ajaxType: null // No AJAX needed for static options
             },
             {
                 selector: '#user_ev_status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'ev_status',
                 ajaxType: null // No AJAX needed for static options
             }

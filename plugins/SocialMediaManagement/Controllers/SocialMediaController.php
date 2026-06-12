@@ -385,41 +385,31 @@ class SocialMediaController extends Controller
         $canDelete = (isAdminOrHasAllDataAccess() || auth()->user()->can('delete_posts'));
 
         $rows = $posts->map(function ($post) use ($canDelete, $canEdit) {
-            $actions = '';
-
-            // Delete button
-            if ($canDelete) {
-                $actions .= '<button type="button" class="btn delete btn-sm"
-                                    data-id="' . $post->id . '"
-                                    data-type="social-media-scheduler"
-                                    title="' . get_label('delete', 'Delete') . '">
-                                    <i class="bx bx-trash text-danger"></i>
-                                </button>';
-            }
-
-            $actions .= '<a href="' . route('social.post.detail', $post->id) . '"
-                class="btn btn-sm me-1"
-                title="View Details">
-                <i class="bx bx-info-circle text-primary"></i>
-            </a>';
-
-            // Quick View button
-            $actions .= '<button type="button" class="btn btn-sm me-1"
-                data-bs-toggle="modal"
-                data-bs-target="#quickViewModal"
-                onclick="showPostQuickView(' . $post->id . ')"
-                title="Quick View">
-                <i class="bx bx-show-alt text-info"></i>
-            </button>';
-
-            // Edit button (only for pending and scheduled posts)
+            $actions = '<div class="dropdown">
+                <button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="bx bx-dots-vertical-rounded fs-5"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">';
+            
+            $actions .= '<li><a href="' . route('social.post.detail', $post->id) . '" class="dropdown-item">
+                            <i class="bx bx-info-circle text-primary me-2"></i> ' . get_label('view_details', 'View Details') .
+                        '</a></li>';
+                        
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#quickViewModal" onclick="showPostQuickView(' . $post->id . ')">
+                            <i class="bx bx-show-alt text-info me-2"></i> ' . get_label('quick_view', 'Quick View') .
+                        '</a></li>';
+                        
             if ($canEdit && in_array($post->status, ['pending', 'scheduled'])) {
-                $actions .= '<a href="' . route('social.edit', $post->id) . '" class="edit-candidate-btn"
-                data-post=\'' . htmlspecialchars(json_encode($post), ENT_QUOTES, 'UTF-8') . '\'
-                title="' . get_label('update', 'Update') . '">
-                <i class="bx bx-edit mx-1"></i>
-            </a>';
+                $actions .= '<li><a href="' . route('social.edit', $post->id) . '" class="dropdown-item edit-candidate-btn" data-post=\'' . htmlspecialchars(json_encode($post), ENT_QUOTES, 'UTF-8') . '\'>
+                            <i class="bx bx-edit text-primary me-2"></i> ' . get_label('update', 'Update') .
+                        '</a></li>';
             }
+            if ($canDelete) {
+                $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete" data-id="' . $post->id . '" data-type="social-media-scheduler">
+                            <i class="bx bx-trash text-danger me-2"></i> ' . get_label('delete', 'Delete') .
+                        '</a></li>';
+            }
+            $actions .= '</ul></div>';
 
             // Format platforms display
             $platformsDisplay = collect($post->platforms)->map(function ($platform) {

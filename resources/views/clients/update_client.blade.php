@@ -119,45 +119,54 @@
                     </div>
                     @endif
                     <div class="mb-3 col-md-6">
-                        <label for="photo" class="form-label"><?= get_label('profile_picture', 'Profile picture') ?></label>
-                        <div class="d-flex gap-4">
-                            <img src="{{$client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')}}" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
-                            <div class="button-wrapper">
-                                <div class="input-group d-flex">
-                                    <input type="file" class="form-control" id="inputGroupFile02" name="profile">
-                                </div>
+                        <label for="profile" class="form-label"><?= get_label('profile_picture', 'Profile picture') ?></label>
+                        <div class="d-flex align-items-center gap-3 p-3 border border-dashed rounded" style="border-style: dashed !important; border-width: 2px !important; border-color: var(--line) !important; min-height: 110px;">
+                            <img src="{{$client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')}}" alt="client-avatar" class="d-block rounded-circle object-fit-cover" height="75" width="75" id="uploadedAvatar" />
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control form-control-sm account-file-input" id="profile" name="profile" accept="image/*">
+                                <small class="text-muted mt-1 d-block">Allowed JPG, JPEG, PNG, GIF, BMP or WEBP.</small>
                             </div>
                         </div>
                     </div>
                     @if(isAdminOrHasAllDataAccess())
                     <div class="mb-3 col-md-6 {{$client->internal_purpose==1?'d-none':''}}" id="statusDiv">
                         <label class="form-label" for=""><?= get_label('status', 'Status') ?> (<small class="text-muted mt-2"><?= get_label('deactivated_client_login_restricted', 'If Deactivated, the Client Won\'t Be Able to Log In to Their Account') ?></small>)</label>
-                        <div class="">
-                            <div class="btn-group btn-group d-flex justify-content-center" role="group" aria-label="Basic radio toggle button group">
-                                <input type="radio" class="btn-check" id="client_active" name="status" value="1" <?= $client->status == 1 ? 'checked' : '' ?>>
-                                <label class="btn btn-outline-primary" for="client_active"><?= get_label('active', 'Active') ?></label>
-                                <input type="radio" class="btn-check" id="client_deactive" name="status" value="0" <?= $client->status == 0 ? 'checked' : '' ?>>
-                                <label class="btn btn-outline-primary" for="client_deactive"><?= get_label('deactive', 'Deactive') ?></label>
+                        <div class="d-flex gap-3 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="client_active" value="1" {{ old('status', $client->status) == '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="client_active">
+                                    <?= get_label('active', 'Active') ?>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="client_deactive" value="0" {{ old('status', $client->status) == '0' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="client_deactive">
+                                    <?= get_label('deactive', 'Deactive') ?>
+                                </label>
                             </div>
                         </div>
                     </div>
                     @if ($client->email_verification_mail_sent==0 && empty($client->email_verified_at))
-
                     <div class="mb-3 col-md-6 {{$client->internal_purpose==1?'d-none':''}}" id="requireEvDiv">
                         <label class="form-label" for="">
                             <?= get_label('require_email_verification', 'Require email verification?') ?>
                             <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('client_require_email_verification_info', 'If Yes is selected, client will receive a verification link via email. Please ensure that email settings are configured and operational.') ?>"></i>
                         </label>
-                        <div class="">
-                            <div class="btn-group btn-group d-flex justify-content-center" role="group" aria-label="Basic radio toggle button group">
-                                <input type="radio" class="btn-check" id="require_ev_yes" name="require_ev" value="1" checked>
-                                <label class="btn btn-outline-primary" for="require_ev_yes"><?= get_label('yes', 'Yes') ?></label>
-                                <input type="radio" class="btn-check" id="require_ev_no" name="require_ev" value="0">
-                                <label class="btn btn-outline-primary" for="require_ev_no"><?= get_label('no', 'No') ?></label>
+                        <div class="d-flex gap-3 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="require_ev" id="require_ev_yes" value="1" {{ old('require_ev') == '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="require_ev_yes">
+                                    <?= get_label('yes', 'Yes') ?>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="require_ev" id="require_ev_no" value="0" {{ old('require_ev') == '0' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="require_ev_no">
+                                    <?= get_label('no', 'No') ?>
+                                </label>
                             </div>
                         </div>
                     </div>
-
                     @endif
                     @endif
 
@@ -175,14 +184,22 @@
                         </div>
                     @endif
 
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
                         <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+                        <button type="submit" class="btn btn-primary" id="submit_btn"><?= get_label('update', 'Update') ?></button>
                     </div>
                 </div>
-
             </form>
         </div>
     </div>
 </div>
+<script>
+    document.getElementById('profile').addEventListener('change', function(e) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('uploadedAvatar').src = e.target.result;
+        }
+        reader.readAsDataURL(this.files[0]);
+    });
+</script>
 @endsection
