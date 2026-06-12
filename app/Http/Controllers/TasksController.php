@@ -642,7 +642,7 @@ class TasksController extends Controller
 
                 $userHtml .= '</ul>';
                 } else {
-                $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                $userHtml = '<span class="">' . get_label('not_assigned', 'Not Assigned') . '</span>';
             }
 
             // Clients HTML
@@ -654,7 +654,7 @@ class TasksController extends Controller
                     }
                     $clientHtml .= '</ul>';
                 } else {
-                    $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
+                    $clientHtml = '<span class="">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                 }
 
             // Favorite and pinned status

@@ -4,36 +4,25 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}">
-                                {{ get_label('home', 'Home') }}
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            {{ get_label('leads_management', 'Leads Management') }}
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{{ route('leads.index') }}">
-                                {{ get_label('leads', 'Leads') }}
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            {{ ucwords($lead->first_name . ' ' . $lead->last_name) }}
-                        </li>
-                    </ol>
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+            <!-- Left Side: Breadcrumbs and Badge -->
+            <div class="d-flex align-items-center gap-3">
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-item">{{ get_label('leads_management', 'Leads Management') }}</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <a class="breadcrumb-item" href="{{ route('leads.index') }}">{{ get_label('leads', 'Leads') }}</a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current">{{ ucwords($lead->first_name . ' ' . $lead->last_name) }}</span>
                 </nav>
             </div>
-            <div>
-                <div class="btn-group">
-                    <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-primary btn-sm">
-                        <i class="bx bx-edit-alt"></i> {{ get_label('update', 'Update') }}
-                    </a>
-
-                </div>
+            
+            <!-- Right Side: Actions -->
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="{{ get_label('update', 'Update') }}">
+                    <i class="bx bx-edit-alt"></i> {{ get_label('update', 'Update') }}
+                </a>
             </div>
         </div>
         <div class="row">
@@ -41,23 +30,23 @@
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex flex-column align-items-center text-center">
+                        <div class="d-flex flex-column align-items-start text-start">
                             <div class="avatar avatar-xl mb-3">
                                 <img src="{{ asset('storage/photos/no-image.jpg') }}" alt="{{ $lead->first_name }}" class="rounded-circle">
                             </div>
-                            <h4>{{ ucwords($lead->first_name . ' ' . $lead->last_name) }}</h4>
-                            <p class="text-muted mb-1">{{ $lead->job_title }}</p>
-                            <p class="text-muted">{{ $lead->company }}</p>
-                            <div class="d-flex mb-3 gap-2">
+                            <h5 class="mb-1">{{ ucwords($lead->first_name . ' ' . $lead->last_name) }}</h5>
+                            <span class="text-muted d-block mb-1">{{ $lead->job_title }}</span>
+                            <span class="text-muted d-block mb-3">{{ $lead->company }}</span>
+                            <div class="d-flex mb-3 gap-2 justify-content-center">
                                 @if ($lead->email)
                                     <a href="mailto:{{ $lead->email }}"
-                                        class="btn btn-sm btn-outline-primary rounded-pill hover-action">
+                                        class="btn btn-icon btn-outline-primary rounded-circle hover-action" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('email', 'Email') }}">
                                         <i class="bx bx-envelope"></i>
                                     </a>
                                 @endif
                                 @if ($lead->phone)
                                     <a href="tel:{{ $lead->phone }}"
-                                        class="btn btn-sm btn-outline-success rounded-pill hover-action">
+                                        class="btn btn-icon btn-outline-success rounded-circle hover-action" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('phone', 'Phone') }}">
                                         <i class="bx bx-phone"></i>
                                     </a>
                                 @endif
@@ -336,16 +325,12 @@
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="bg-light rounded p-5 text-center">
+                                    <div class="rounded p-5 text-center empty-state">
                                         <i class="bx bx-calendar-exclamation fs-1 text-secondary mb-3"></i>
                                         <h6 class="mb-2">{{ get_label('no_follow_ups_found','No follow-ups found') }}</h6>
                                         <p class="text-muted mb-3">
                                             {{ get_label('create_your_first_follow_up_to_track_interactions_with_this_lead','Create your first follow-up to track interactions with this lead.') }}
                                         </p>
-                                        <button class="btn btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#create_lead_follow_up_modal">
-                                            <i class="bx bx-plus me-1"></i> {{ get_label('create_follow_up','Create Follow-up') }}
-                                        </button>
                                     </div>
                                 @endforelse
                             </div>
@@ -424,7 +409,7 @@
     </div>
     <!--- Follow Ups Modal -->
     <div class="modal fade" id="create_lead_follow_up_modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <form class="modal-content form-submit-event" action="{{ route('lead_follow_up.store') }}" method="POST">
                 {{-- <input type="hidden" name="dnr"> --}}
                 <input type="hidden" name="lead_id" value="{{ $lead->id }}" />
@@ -499,7 +484,7 @@
         </div>
     </div>
     <div class="modal fade" id="edit_lead_follow_up_modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <form class="modal-content form-submit-event" action="{{ route('lead_follow_up.update') }}" method="POST">
                 {{-- <input type="hidden" name="dnr"> --}}
                 <input type="hidden" name="id" />

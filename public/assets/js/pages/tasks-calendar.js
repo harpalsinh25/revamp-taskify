@@ -365,13 +365,13 @@ class TaskCalendarManager {
             const timeStr = info.event.allDay ? 'All Day' : start.format('HH:mm');
             const diffDuration = info.event.end ? moment.duration(moment(info.event.end).diff(start)) : null;
             const durationStr = diffDuration && !info.event.allDay ? `${diffDuration.hours()}h ${diffDuration.minutes()}m` : '';
-            
+
             const isSoon = start.isBetween(moment(), moment().add(24, 'hours'));
             const soonBadge = isSoon ? `<span class="sched-soon mono">soon</span>` : '';
-            
+
             const priority = this.state.taskPriorities.find(p => p.id.toString() === info.event.extendedProps.priority_id?.toString());
             const status = this.state.taskStatuses.find(s => s.id.toString() === info.event.extendedProps.status_id?.toString());
-            
+
             let tagsHtml = '';
             if (priority) {
                 tagsHtml += `<span class="badge bg-label-${priority.color || 'primary'} me-1">${priority.title}</span>`;

@@ -4,139 +4,152 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <?= get_label('settings', 'Settings') ?>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            <?= get_label('security', 'Security') ?>
-                        </li>
-                    </ol>
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+            <h4 class="fw-bold mb-0"><?= get_label('security_settings', 'Security Settings') ?></h4>
+            <div class="d-flex align-items-center gap-3">
+                <nav class="breadcrumb mb-0" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-item"><?= get_label('settings', 'Settings') ?></span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current"><?= get_label('security', 'Security') ?></span>
                 </nav>
             </div>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <form action="{{ url('settings/store_security') }}" class="form-submit-event" method="POST">
-                    <input type="hidden" name="dnr">
-                    @csrf
-                    @method('PUT')
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-check-label"
-                                for="allowSignup"><?= get_label('enable_disable_signup', 'Enable/Disable Signup') ?></label>
-                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="<?= get_label('enable_disable_signup_info', 'If disabled, team member and client will not be able to create an account by themselves.') ?>"></i>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="allowSignup" name="allowSignup"
-                                    @if (!isset($general_settings['allowSignup']) || $general_settings['allowSignup'] == 1) checked @endif>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="" class="form-label"><?= get_label('max_attempts', 'Max Attempts') ?> <small
-                                    class="text-muted">(<?= get_label('max_attempts_info', 'Fill in if you want to set a limit; otherwise, leave it blank') ?>)</small></label>
-                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="<?= get_label('max_attempts_info_1', 'The maximum number of login attempts allowed before the account is locked.') ?>"></i>
-                            <input class="form-control" type="number" name="max_attempts" step="1" placeholder="5"
-                                value="{{ $general_settings['max_attempts'] ?? 5 }}" min="1">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="" class="form-label"><?= get_label('lock_time', 'Lock Time (minutes)') ?>
-                                <small
-                                    class="text-muted">(<?= get_label('lock_time_info', 'This will not apply if Max Attempts is left blank') ?>)</small>
-                            </label>
-                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="<?= get_label('lock_time_info_1', 'The duration in minutes for which the account will be locked after exceeding the maximum login attempts.') ?>"></i>
-                            <input class="form-control" type="number" name="lock_time" step="1" placeholder="1"
-                                value="{{ $general_settings['lock_time'] ?? 1 }}" min="1">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for=""
-                                class="form-label"><?= get_label('allowed_max_upload_size_in_mb_default_512', 'Allowed Max Upload Size (MB) - Default: 512') ?></label>
-                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="<?= get_label('allowed_max_upload_size_info', 'Also, set the `upload_max_filesize` and `post_max_size` PHP configurations on your server accordingly to ensure the maximum upload size works as expected.') ?>"></i>
-                            <input class="form-control" type="number" name="allowed_max_upload_size" step="1"
-                                placeholder="512"
-                                value="{{ !isset($general_settings['allowed_max_upload_size']) ? '512' : $general_settings['allowed_max_upload_size'] }}"
-                                min="1">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="max_files"
-                                class="form-label"><?= get_label('max_files_allowed', 'Max Files Allowed') ?></label>
-                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="<?= get_label('max_files_allowed_info', 'Set the maximum number of files that can be uploaded at a time. Also, set the `max_file_uploads` PHP configurations on your server accordingly to ensure the Max Files Allowed works as expected.') ?>"></i>
-                            <input class="form-control" type="number" id="max_files" name="max_files" step="1"
-                                placeholder="10"
-                                value="{{ !isset($general_settings['max_files']) ? '10' : $general_settings['max_files'] }}"
-                                min="1">
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="allowed_file_types"
-                                class="form-label"><?= get_label('allowed_file_types', 'Allowed File Types') ?></label>
-                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="<?= get_label('allowed_file_types_info', 'Specify the file types allowed for upload, separated by commas. Default: .pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt.') ?>"></i>
-                            <input class="form-control" type="text" id="allowed_file_types" name="allowed_file_types"
-                                placeholder=".pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt"
-                                value="{{ !isset($general_settings['allowed_file_types']) ? '.pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt' : $general_settings['allowed_file_types'] }}">
-                        </div>
-                        {{-- For reCAPATCHA --}}
-                        <div class="col-md-12 mb-3">
-                            <div class="alert alert-info">
 
-                                    {!! get_label(
-                                        'recaptcha_not_configured_info',
-                                        'If Google reCAPTCHA is not configured Please generate your keys from the <a href="https://www.google.com/recaptcha/admin" target="_blank" rel="noopener noreferrer">Google reCAPTCHA Admin Console</a> or contact the admin.',
-                                    ) !!}
+        <form action="{{ url('settings/store_security') }}" class="form-submit-event" method="POST">
+            <input type="hidden" name="dnr">
+            @csrf
+            @method('PUT')
+            
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-xl-8 col-lg-8 col-md-12">
+                    
+                    <!-- Access Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom">
+                            <h6 class="card-title mb-0 text-secondary"><i class="bx bx-lock-open-alt me-2"></i> <?= get_label('access_settings', 'Access Settings') ?></h6>
+                        </div>
+                        <div class="card-body pt-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <?= get_label('max_attempts', 'Max Attempts') ?> <small class="text-muted">(<?= get_label('max_attempts_info', 'Fill in if you want to set a limit; otherwise, leave it blank') ?>)</small>
+                                        <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('max_attempts_info_1', 'The maximum number of login attempts allowed before the account is locked.') ?>"></i>
+                                    </label>
+                                    <input class="form-control" type="number" name="max_attempts" step="1" placeholder="5" value="{{ $general_settings['max_attempts'] ?? 5 }}" min="1">
                                 </div>
-
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <label class="form-check-label" for="recaptcha_enabled">
-                                <?= get_label('enable_recaptcha', 'Enable Google reCAPTCHA') ?>
-                            </label>
-                            <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="<?= get_label('enable_recaptcha_info', 'If enabled, reCAPTCHA will be shown on login and signup pages.') ?>"></i>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="recaptcha_enabled"
-                                    name="recaptcha_enabled" @if (!isset($general_settings['recaptcha_enabled']) || $general_settings['recaptcha_enabled'] == 1) checked @endif>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <?= get_label('lock_time', 'Lock Time (minutes)') ?> <small class="text-muted">(<?= get_label('lock_time_info', 'This will not apply if Max Attempts is left blank') ?>)</small>
+                                        <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('lock_time_info_1', 'The duration in minutes for which the account will be locked after exceeding the maximum login attempts.') ?>"></i>
+                                    </label>
+                                    <input class="form-control" type="number" name="lock_time" step="1" placeholder="1" value="{{ $general_settings['lock_time'] ?? 1 }}" min="1">
+                                </div>
                             </div>
-                        </div>
-
-
-
-                        <div class="col-md-6 mb-3">
-                            <label for="recaptcha_site_key"
-                                class="form-label"><?= get_label('recaptcha_site_key', 'Google reCAPTCHA Site Key') ?></label>
-                            <input class="form-control" type="text" id="recaptcha_site_key" name="recaptcha_site_key"
-                                placeholder="Enter your site key"
-                                value="{{ $general_settings['recaptcha_site_key'] ?? '' }}">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="recaptcha_secret_key"
-                                class="form-label"><?= get_label('recaptcha_secret_key', 'Google reCAPTCHA Secret Key') ?></label>
-                            <input class="form-control" type="text" id="recaptcha_secret_key"
-                                name="recaptcha_secret_key" placeholder="Enter your secret key"
-                                value="{{ $general_settings['recaptcha_secret_key'] ?? '' }}">
-                        </div>
-
-
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary me-2"
-                                id="submit_btn"><?= get_label('update', 'Update') ?></button>
-                            <button type="reset"
-                                class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
                         </div>
                     </div>
-                </form>
+
+                    <!-- Upload Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom">
+                            <h6 class="card-title mb-0 text-secondary"><i class="bx bx-upload me-2"></i> <?= get_label('upload_settings', 'Upload Settings') ?></h6>
+                        </div>
+                        <div class="card-body pt-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <?= get_label('allowed_max_upload_size_in_mb_default_512', 'Allowed Max Upload Size (MB) - Default: 512') ?>
+                                        <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('allowed_max_upload_size_info', 'Also, set the `upload_max_filesize` and `post_max_size` PHP configurations on your server accordingly to ensure the maximum upload size works as expected.') ?>"></i>
+                                    </label>
+                                    <input class="form-control" type="number" name="allowed_max_upload_size" step="1" placeholder="512" value="{{ !isset($general_settings['allowed_max_upload_size']) ? '512' : $general_settings['allowed_max_upload_size'] }}" min="1">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="max_files">
+                                        <?= get_label('max_files_allowed', 'Max Files Allowed') ?>
+                                        <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('max_files_allowed_info', 'Set the maximum number of files that can be uploaded at a time. Also, set the `max_file_uploads` PHP configurations on your server accordingly to ensure the Max Files Allowed works as expected.') ?>"></i>
+                                    </label>
+                                    <input class="form-control" type="number" id="max_files" name="max_files" step="1" placeholder="10" value="{{ !isset($general_settings['max_files']) ? '10' : $general_settings['max_files'] }}" min="1">
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label" for="allowed_file_types">
+                                        <?= get_label('allowed_file_types', 'Allowed File Types') ?>
+                                        <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('allowed_file_types_info', 'Specify the file types allowed for upload, separated by commas. Default: .pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt.') ?>"></i>
+                                    </label>
+                                    <input class="form-control" type="text" id="allowed_file_types" name="allowed_file_types" placeholder=".pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt" value="{{ !isset($general_settings['allowed_file_types']) ? '.pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt' : $general_settings['allowed_file_types'] }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Google reCAPTCHA Settings -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom">
+                            <h6 class="card-title mb-0 text-secondary"><i class="bx bxl-google me-2"></i> <?= get_label('google_recaptcha_settings', 'Google reCAPTCHA Settings') ?></h6>
+                        </div>
+                        <div class="card-body pt-4">
+                            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                                <i class="bx bx-info-circle me-2 fs-4"></i>
+                                <div>
+                                    {!! get_label('recaptcha_not_configured_info', 'If Google reCAPTCHA is not configured Please generate your keys from the <a href="https://www.google.com/recaptcha/admin" target="_blank" rel="noopener noreferrer">Google reCAPTCHA Admin Console</a> or contact the admin.') !!}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="recaptcha_site_key"><?= get_label('recaptcha_site_key', 'Google reCAPTCHA Site Key') ?></label>
+                                    <input class="form-control" type="text" id="recaptcha_site_key" name="recaptcha_site_key" placeholder="Enter your site key" value="{{ $general_settings['recaptcha_site_key'] ?? '' }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="recaptcha_secret_key"><?= get_label('recaptcha_secret_key', 'Google reCAPTCHA Secret Key') ?></label>
+                                    <input class="form-control" type="text" id="recaptcha_secret_key" name="recaptcha_secret_key" placeholder="Enter your secret key" value="{{ $general_settings['recaptcha_secret_key'] ?? '' }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- End Left Column -->
+
+                <!-- Right Column -->
+                <div class="col-xl-4 col-lg-4 col-md-12">
+                    
+                    <!-- Security Features -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header border-bottom">
+                            <h6 class="card-title mb-0 text-secondary"><i class='bx bx-shield-quarter me-2'></i> <?= get_label('security_features', 'Security Features') ?></h6>
+                        </div>
+                        <div class="card-body pt-4">
+                            <div class="mb-4">
+                                <label class="form-check-label mb-2 d-block" for="allowSignup">
+                                    <?= get_label('enable_disable_signup', 'Enable Signup') ?>
+                                    <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('enable_disable_signup_info', 'If disabled, team member and client will not be able to create an account by themselves.') ?>"></i>
+                                </label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="allowSignup" name="allowSignup" @if (!isset($general_settings['allowSignup']) || $general_settings['allowSignup'] == 1) checked @endif>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-check-label mb-2 d-block" for="recaptcha_enabled">
+                                    <?= get_label('enable_recaptcha', 'Enable Google reCAPTCHA') ?>
+                                    <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('enable_recaptcha_info', 'If enabled, reCAPTCHA will be shown on login and signup pages.') ?>"></i>
+                                </label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="recaptcha_enabled" name="recaptcha_enabled" @if (!isset($general_settings['recaptcha_enabled']) || $general_settings['recaptcha_enabled'] == 1) checked @endif>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End Right Column -->
+
+                <!-- Full Width Action Buttons -->
+                <div class="col-12 mt-3">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+                        <button type="submit" class="btn btn-primary" id="submit_btn"><i class='bx bx-save me-1'></i> <?= get_label('update', 'Update') ?></button>
+                    </div>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 @endsection

@@ -4,27 +4,17 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}">
-                                {{ get_label('home', 'Home') }}
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            {{ get_label('leads_management', 'Leads Management') }}
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{{ route('leads.index') }}">
-                                {{ get_label('leads', 'Leads') }}
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            {{ get_label('update', 'Update') }}
-                        </li>
-                    </ol>
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+            <!-- Left Side: Breadcrumbs and Badge -->
+            <div class="d-flex align-items-center gap-3">
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-item">{{ get_label('leads_management', 'Leads Management') }}</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <a class="breadcrumb-item" href="{{ route('leads.index') }}">{{ get_label('leads', 'Leads') }}</a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current">{{ get_label('update', 'Update') }}</span>
                 </nav>
             </div>
         </div>
@@ -93,8 +83,9 @@
                                 class="form-label">{{ get_label('lead_sources', 'Lead Sources') }}</label>
                             <select class="form-select" name="source_id" id="select_lead_source" data-single-select="true"
                                 data-allow-clear="false" data-consider-workspace="true">
-                                {{-- You can keep the default option if needed --}}
+                                @if($lead->source)
                                 <option value="{{ $lead->source->id }}">{{ ucwords($lead->source->name) }}</option>
+                                @endif
                             </select>
                             @error('source_id')
                                 <span class="text-danger">{{ $message }}</span>
@@ -121,8 +112,9 @@
                                     class="text-danger">*</span></label>
                             <select name="assigned_to" class="form-select" id="select_lead_assignee"
                                 data-single-select="true" data-allow-clear="false" data-consider-workspace="true" required>
+                                @if($lead->assigned_user)
                                 <option value="{{ $lead->assigned_user->id }}">{{ ucwords($lead->assigned_user->first_name . ' ' . $lead->assigned_user->last_name) }}</option>
-
+                                @endif
                             </select>
                             @error('assigned_to')
                                 <span class="text-danger">{{ $message }}</span>
@@ -272,7 +264,7 @@
 
                     </div>
                     <!-- Submit Button -->
-                    <div class="mt-4 text-start">
+                    <div class="mt-4 text-end">
                         <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>
                         <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
                     </div>

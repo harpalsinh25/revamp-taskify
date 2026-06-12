@@ -230,15 +230,16 @@ $(document).ready(function () {
 
 function customFieldActionsFormatter(value, row, index) {
     return [
-        '<a href="javascript:void(0);" class="edit-custom-field" data-id=' +
-        row.id +
-        ' title="Edit" class="card-link"><i class="bx bx-edit mx-1"></i></a>' +
-        '<button title="Delete" type="button" class="btn delete" data-type"settings/custom-fields" data-id=' +
-        row.id +
-        ">" +
-        '<i class="bx bx-trash text-danger mx-1"></i>' +
-        "</button>",
-    ];
+        '<div class="dropdown">' +
+            '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">' +
+                '<i class="bx bx-dots-vertical-rounded"></i>' +
+            '</button>' +
+            '<div class="dropdown-menu">' +
+                '<a class="dropdown-item edit-custom-field" href="javascript:void(0);" data-id="' + row.id + '"><i class="bx bx-edit mx-1"></i> ' + (APP_LABELS && APP_LABELS['edit'] ? APP_LABELS['edit'] : 'Edit') + '</a>' +
+                '<a class="dropdown-item delete" href="javascript:void(0);" data-id="' + row.id + '" data-type="settings/custom-fields"><i class="bx bx-trash text-danger mx-1"></i> ' + (APP_LABELS && APP_LABELS['delete'] ? APP_LABELS['delete'] : 'Delete') + '</a>' +
+            '</div>' +
+        '</div>'
+    ].join('');
 }
 
 function queryParams(params) {
