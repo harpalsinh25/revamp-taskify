@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="nav-align-top nav-tabs-shadow mb-6">
+        <div class="mb-6">
             <ul class="nav nav-tabs nav-fill" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
@@ -41,9 +41,9 @@
                 </li>
             </ul>
 
-            <div class="tab-content">
+            <div class="tab-content bg-transparent shadow-none p-0 mt-4">
                 <!-- Template Email Tab -->
-                <div class="tab-pane fade show active" id="navs-template-email" role="tabpanel">
+                <div class="tab-pane fade show active card border shadow-none p-4" id="navs-template-email" role="tabpanel">
                     <div class=" d-flex align-items-center justify-content-between ">
                         <h5 class="mb-0">{{ get_label('select_template', 'Select Template') }}</h5>
                     </div>
@@ -118,8 +118,8 @@
                                 <!-- Attachments and Scheduling -->
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-label-primary">
+                                        <div class="card h-100 border shadow-none">
+                                            <div class="card-header border-bottom py-2">
                                                 <h6 class="mb-0">{{ get_label('attachments', 'Attachments') }}</h6>
                                             </div>
                                             <div class="card-body">
@@ -137,8 +137,8 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-label-primary">
+                                        <div class="card h-100 border shadow-none">
+                                            <div class="card-header border-bottom py-2">
                                                 <h6 class="mb-0">{{ get_label('delivery_options', 'Delivery Options') }}
                                                 </h6>
                                             </div>
@@ -172,12 +172,12 @@
                 </div> <!-- end of template tab -->
 
                 <!-- Custom Email Tab -->
-                <div class="tab-pane fade" id="navs-custom-email" role="tabpanel">
-                    <div class="card-header d-flex align-items-center justify-content-between py-3">
+                <div class="tab-pane fade card border shadow-none p-4" id="navs-custom-email" role="tabpanel">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
                         <h5 class="mb-0">{{ get_label('compose_custom_email', 'Compose Custom Email') }}</h5>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <form method="POST" action="{{ route('emails.store') }}" id="customEmailForm"
                             enctype="multipart/form-data" class="form-submit-event">
                             @csrf
@@ -208,8 +208,8 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-header bg-label-primary">
+                                    <div class="card h-100 border shadow-none">
+                                        <div class="card-header border-bottom py-2">
                                             <h6 class="mb-0">{{ get_label('attachments', 'Attachments') }}</h6>
                                         </div>
                                         <div class="card-body">
@@ -227,8 +227,8 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-header bg-label-primary">
+                                    <div class="card h-100 border shadow-none">
+                                        <div class="card-header border-bottom py-2">
                                             <h6 class="mb-0">{{ get_label('delivery_options', 'Delivery Options') }}
                                             </h6>
                                         </div>

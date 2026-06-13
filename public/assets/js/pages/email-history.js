@@ -13,10 +13,13 @@ function queryParamsEmailHistory(params) {
 
 function emailHistoryActionsFormatter(value, row) {
     return `
-    <button class="btn btn-sm btn-outline-secondary preview-history-btn"
-        data-body="${encodeURIComponent(row.body)}">
-        <span>Preview</span>
-    </button>`;
+    <div class="d-flex justify-content-center">
+        <button class="btn btn-sm btn-outline-secondary preview-history-btn"
+            data-body="${encodeURIComponent(row.body)}"
+            data-bs-toggle="tooltip" data-bs-placement="top" title="Preview">
+            <i class="bx bx-envelope-open mx-1"></i>
+        </button>
+    </div>`;
 }
 
 // CSRF setup if not already done

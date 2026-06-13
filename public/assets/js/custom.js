@@ -4601,7 +4601,6 @@ $(document).ready(function () {
         }
         new TomSelect($this[0], {
             allowEmptyOption: true,
-            controlInput: null,
             render: {
                 option: function (data, escape) {
                     if (!data.value) {
@@ -4613,11 +4612,11 @@ $(document).ready(function () {
                 },
                 item: function (data, escape) {
                     if (!data.value) {
-                        return '<div class="item">' + escape(data.text || 'Please select') + '</div>';
+                        return '<div>' + escape(data.text || 'Please select') + '</div>';
                     }
                     var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
                     if (!color) color = 'primary';
-                    return '<div class="item"><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 }
             }
         });
@@ -4633,7 +4632,6 @@ $(document).ready(function () {
         }
         new TomSelect($this[0], {
             allowEmptyOption: true,
-            controlInput: null,
             render: {
                 option: function (data, escape) {
                     if (!data.value) {
@@ -4645,11 +4643,11 @@ $(document).ready(function () {
                 },
                 item: function (data, escape) {
                     if (!data.value) {
-                        return '<div class="item">' + escape(data.text || 'Please select') + '</div>';
+                        return '<div>' + escape(data.text || 'Please select') + '</div>';
                     }
                     var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
                     if (!color) color = 'primary';
-                    return '<div class="item"><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 }
             }
         });

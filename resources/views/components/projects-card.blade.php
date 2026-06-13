@@ -15,47 +15,81 @@ $auth_user = getAuthenticatedUser();
             $statuses = \App\Models\Status::whereIn('id', $selectedStatuses)->get();
             $tags = \App\Models\Tag::whereIn('id', $selectedTags)->get();
         @endphp
-        <div class="card mb-4">
-            <div class="card-body">
+        <div class="card mb-3 border shadow-none">
+            <div class="card-body p-3">
                 <div class="row g-3 align-items-end tk-filter-row">
-                    <x-advanced-date-filters prefix="project" />
+                    {{-- Date Between --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_date_between"><?= get_label('date_between', 'Date Between') ?></label>
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                            <input type="text" class="form-control form-control-sm" id="project_date_between" name="project_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
+                        </div>
+                    </div>
+                    {{-- Start Date Between --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_start_date_between"><?= get_label('start_date_between', 'Start Date Between') ?></label>
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                            <input type="text" class="form-control form-control-sm" id="project_start_date_between" name="project_start_date_between" placeholder="<?= get_label('start_date_between', 'Start Date Between') ?>" autocomplete="off">
+                        </div>
+                    </div>
+                    {{-- End Date Between --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_end_date_between"><?= get_label('end_date_between', 'Date Between') ?></label>
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                            <input type="text" class="form-control form-control-sm" id="project_end_date_between" name="project_end_date_between" placeholder="<?= get_label('end_date_between', 'End Date Between') ?>" autocomplete="off">
+                        </div>
+                    </div>
+                    {{-- Users --}}
                     @if(isAdminOrHasAllDataAccess() && !isset($viewAssigned))
                     @if(!isset($id) || (explode('_',$id)[0] !='client' && explode('_',$id)[0] !='user'))
-                    <div class="col-md-4">
-                        <label class="form-label"><?= get_label('users', 'Users') ?></label>
-                        <select class="form-select tom_users_select" id="project_user_filter" name="user_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_user_filter"><?= get_label('users', 'Users') ?></label>
+                        <select class="form-select form-select-sm tom_users_select" id="project_user_filter" name="user_ids[]" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                         </select>
                     </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label"><?= get_label('clients', 'Clients') ?></label>
-                        <select class="form-select tom_clients_select" id="project_client_filter" name="client_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
+                    {{-- Clients --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_client_filter"><?= get_label('clients', 'Clients') ?></label>
+                        <select class="form-select form-select-sm tom_clients_select" id="project_client_filter" name="client_ids[]" multiple data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
                         </select>
                     </div>
                     @endif
                     @endif
-                    <div class="col-md-4">
-                        <label class="form-label"><?= get_label('statuses', 'Statuses') ?></label>
-                        <select class="form-select tom_statuses_filter" id="project_status_filter" name="status_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                    {{-- Statuses --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_status_filter"><?= get_label('statuses', 'Statuses') ?></label>
+                        <select class="form-select form-select-sm tom_statuses_filter" id="project_status_filter" name="status_ids[]" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                             @foreach($statuses as $status)
                             <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label"><?= get_label('priorities', 'Priorities') ?></label>
-                        <select class="form-select tom_priorities_filter" id="project_priority_filter" name="priority_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                    {{-- Priorities --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_priority_filter"><?= get_label('priorities', 'Priorities') ?></label>
+                        <select class="form-select form-select-sm tom_priorities_filter" id="project_priority_filter" name="priority_ids[]" multiple data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label"><?= get_label('tags', 'Tags') ?></label>
-                        <select class="form-select tom_tags_select" id="project_tag_filter" name="tag_ids[]" multiple="multiple" data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
+                    {{-- Tags --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="project_tag_filter"><?= get_label('tags', 'Tags') ?></label>
+                        <select class="form-select form-select-sm tom_tags_select" id="project_tag_filter" name="tag_ids[]" multiple data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
                             @foreach($tags as $tag)
                             <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
+                {{-- Hidden fields for date range values --}}
+                <input type="hidden" id="project_date_between_from" name="project_date_from">
+                <input type="hidden" id="project_date_between_to" name="project_date_to">
+                <input type="hidden" id="project_start_date_between_from" name="project_start_date_from">
+                <input type="hidden" id="project_start_date_between_to" name="project_start_date_to">
+                <input type="hidden" id="project_end_date_between_from" name="project_end_date_from">
+                <input type="hidden" id="project_end_date_between_to" name="project_end_date_to">
             </div>
         </div>
 

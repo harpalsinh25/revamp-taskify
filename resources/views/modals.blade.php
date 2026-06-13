@@ -5160,104 +5160,94 @@
 @endif
 {{-- Modal for Creating New Email Templates --}}
 {{-- @if (Request::is('settings/email-templates*')) --}}
-<div class="modal fade" id="createTemplateModal" tabindex="-1" aria-labelledby="createTemplateLabel"
+<div class="offcanvas offcanvas-end" id="createTemplateOffcanvas" tabindex="-1" aria-labelledby="createTemplateLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form class="modal-content form-submit-event" method="POST"
-            action="{{ route('email.templates.store') }}">
-            @csrf
-            <input type="hidden" name="dnr" />
-            <input type="hidden" name="table" value="table " />
-            <div class="modal-header">
-                <h5 class="modal-title" id="createTemplateLabel">
-                    {{ get_label('create_email_template', 'Create Email Template') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="{{ get_label('close', 'Close') }}"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="template-name"
-                        class="form-label">{{ get_label('template_name', 'Template Name') }} <span
-                            class="text-danger">*</span></label>
-                    <input type="text" name="name" id="template-name" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="template-subject"
-                        class="form-label">{{ get_label('email_subject', 'Email Subject') }} <span
-                            class="text-danger">*</span></label>
-                    <input type="text" name="subject" id="template-subject" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="template-body" class="form-label">
-                        {{ get_label('email_body', 'Email Body') }} <span class="text-danger">*</span>
-                    </label>
-                    <div class="form-text text-dark alert alert-primary mb-2">
-                        {{ get_label('placeholder_note', 'Note: You can use placeholders like') }}
-                        <code>{{ '{name}' }}</code>, <code>{{ '{email}' }}</code>,
-                        <code>{{ '{project_title}' }}</code> etc. – these will be dynamically replaced when sending
-                        the email.
-                    </div>
-                    <textarea name="content" id="template-body" class="form-control" rows="6" required>
-                        @include('partials.default_email_template')
-                    </textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal">{{ get_label('cancel', 'Cancel') }}</button>
-                <button type="submit" id="submit_btn"
-                    class="btn btn-primary">{{ get_label('save_template', 'Save Template') }}</button>
-            </div>
-        </form>
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="createTemplateLabel">
+            {{ get_label('create_email_template', 'Create Email Template') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+            aria-label="{{ get_label('close', 'Close') }}"></button>
     </div>
+    <form class="offcanvas-body d-flex flex-column form-submit-event" method="POST"
+        action="{{ route('email.templates.store') }}">
+        @csrf
+        <input type="hidden" name="dnr" />
+        <input type="hidden" name="table" value="table " />
+        <div class="mb-3">
+            <label for="template-name"
+                class="form-label">{{ get_label('template_name', 'Template Name') }} <span
+                    class="text-danger">*</span></label>
+            <input type="text" name="name" id="template-name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="template-subject"
+                class="form-label">{{ get_label('email_subject', 'Email Subject') }} <span
+                    class="text-danger">*</span></label>
+            <input type="text" name="subject" id="template-subject" class="form-control" required>
+        </div>
+        <div class="mb-3 flex-grow-1">
+            <label for="template-body" class="form-label">
+                {{ get_label('email_body', 'Email Body') }} <span class="text-danger">*</span>
+            </label>
+            <div class="form-text text-dark alert alert-primary mb-2">
+                {{ get_label('placeholder_note', 'Note: You can use placeholders like') }}
+                <code>{{ '{name}' }}</code>, <code>{{ '{email}' }}</code>,
+                <code>{{ '{project_title}' }}</code> etc. – these will be dynamically replaced when sending
+                the email.
+            </div>
+            <textarea name="content" id="template-body" class="form-control" rows="6" required>
+                @include('partials.default_email_template')
+            </textarea>
+        </div>
+        <div class="mt-auto d-flex justify-content-end gap-2 pt-3">
+            <button type="button" class="btn btn-outline-secondary"
+                data-bs-dismiss="offcanvas">{{ get_label('cancel', 'Cancel') }}</button>
+            <button type="submit" id="submit_btn"
+                class="btn btn-primary">{{ get_label('save_template', 'Save Template') }}</button>
+        </div>
+    </form>
 </div>
 {{-- modal for editing emal template --}}
 <!-- Edit Email Template Modal -->
 <!-- Modal -->
-<div class="modal fade" id="editEmailTemplateModal" tabindex="-1" aria-labelledby="editEmailTemplateModalLabel"
+<div class="offcanvas offcanvas-end" id="editEmailTemplateOffcanvas" tabindex="-1" aria-labelledby="editEmailTemplateOffcanvasLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form method="POST" id="editEmailTemplateForm" class="form-submit-event">
-                @csrf
-                <input type="hidden" name="dnr" />
-                <input type="hidden" name="table" value="table " />
-                @method('PUT')
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editEmailTemplateModalLabel">Edit Email Template</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="editTemplateId">
-                    <div class="mb-3">
-                        <label for="editTemplateName" class="form-label">Template Name</label>
-                        <input type="text" class="form-control" id="editTemplateName" name="name"
-                            required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editSubject" class="form-label">Email Subject</label>
-                        <input type="text" class="form-control" id="editSubject" name="subject" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editBody" class="form-label">Email Body</label>
-                        <div class="form-text alert alert-primary text-dark mb-2">
-                            {{ get_label('placeholder_note', 'Note: You can use placeholders like') }}
-                            <code>{{ '{name}' }}</code>,
-                            <code>{{ '{email}' }}</code>,
-                            <code>{{ '{project_title}' }}</code>
-                            {{ get_label('placeholder_hint', 'etc. – these will be dynamically replaced when sending the email.') }}
-                        </div>
-                        <textarea class="form-control" id="editBody" name="content" required>@include('partials.default_email_template')</textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" id="submit_btn" class="btn btn-primary">Update Template</button>
-                </div>
-            </form>
-        </div>
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="editEmailTemplateOffcanvasLabel">Edit Email Template</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+            aria-label="Close"></button>
     </div>
+    <form method="POST" id="editEmailTemplateForm" class="offcanvas-body d-flex flex-column form-submit-event">
+        @csrf
+        <input type="hidden" name="dnr" />
+        <input type="hidden" name="table" value="table " />
+        @method('PUT')
+        <input type="hidden" id="editTemplateId">
+        <div class="mb-3">
+            <label for="editTemplateName" class="form-label">Template Name</label>
+            <input type="text" class="form-control" id="editTemplateName" name="name"
+                required>
+        </div>
+        <div class="mb-3">
+            <label for="editSubject" class="form-label">Email Subject</label>
+            <input type="text" class="form-control" id="editSubject" name="subject" required>
+        </div>
+        <div class="mb-3 flex-grow-1">
+            <label for="editBody" class="form-label">Email Body</label>
+            <div class="form-text alert alert-primary text-dark mb-2">
+                {{ get_label('placeholder_note', 'Note: You can use placeholders like') }}
+                <code>{{ '{name}' }}</code>,
+                <code>{{ '{email}' }}</code>,
+                <code>{{ '{project_title}' }}</code>
+                {{ get_label('placeholder_hint', 'etc. – these will be dynamically replaced when sending the email.') }}
+            </div>
+            <textarea class="form-control" id="editBody" name="content" required>@include('partials.default_email_template')</textarea>
+        </div>
+        <div class="mt-auto d-flex justify-content-end gap-2 pt-3">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            <button type="submit" id="submit_btn" class="btn btn-primary">Update Template</button>
+        </div>
+    </form>
 </div>
 {{-- modal for showing placeholders in email template table --}}
 <div class="modal fade" id="placeholdersModal" tabindex="-1" aria-labelledby="placeholdersModalLabel"
@@ -5278,35 +5268,31 @@
 {{-- Preview Modal --}}
 <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0">
+        <div class="modal-content">
             <!-- Modal Header with close button -->
-            <div class="modal-header border-bottom bg-light p-4 pb-3">
-                <h5 class="modal-title text-primary">
-                    <i class="bx bx-envelope-open me-2"></i>
+            <div class="modal-header">
+                <h5 class="modal-title">
                     {{ get_label('email_preview', 'Email Preview') }}
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                <button type="button" class="btn-close m-1" data-bs-dismiss="modal"
                     aria-label="{{ get_label('close', 'Close') }}"></button>
             </div>
             <!-- Modal Body -->
-            <div class="modal-body p-0">
-                <div class="p-4">
-                    <div id="previewContent" class="email-preview">
-                        <!-- Loading state -->
-                        <div class="py-5 text-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="text-muted mt-3">{{ get_label('loading_preview', 'Loading preview...') }}</p>
+            <div class="modal-body">
+                <div id="previewContent" class="email-preview">
+                    <!-- Loading state -->
+                    <div class="py-5 text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
+                        <p class="text-muted mt-3">{{ get_label('loading_preview', 'Loading preview...') }}</p>
                     </div>
                 </div>
             </div>
             <!-- Modal Footer with single action button -->
-            <div class="modal-footer border-top bg-light p-4 pt-3">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                    <i class="bx bx-check me-1"></i>
-                    {{ get_label('done', 'Done') }}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {{ get_label('close', 'Close') }}
                 </button>
             </div>
         </div>

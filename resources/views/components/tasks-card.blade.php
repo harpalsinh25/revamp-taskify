@@ -16,49 +16,85 @@
 @endif
 {{ $slot }}
 @if ((isset($tasks) && $tasks > 0) || (isset($emptyState) && $emptyState == 0))
-        <div class="card mb-4">
-            <div class="card-body">
+    <div class="card mb-3 border shadow-none">
+            <div class="card-body p-3">
                 <div class="row g-3 align-items-end tk-filter-row">
-                    <x-advanced-date-filters prefix="task" />
-                    @if (getAuthenticatedUser()->can('manage_projects'))
-                        <div class="col-md-4">
-                            <label class="form-label">{{ get_label('projects', 'Projects') }}</label>
-                            <select class="form-control tom_projects_select" id="task_project_filter" multiple="multiple"
-                                data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
-                            </select>
+                    {{-- Date Between --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="task_date_between"><?= get_label('date_between', 'Date Between') ?></label>
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                            <input type="text" class="form-control form-control-sm" id="task_date_between" name="task_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
                         </div>
+                    </div>
+                    {{-- Start Date Between --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="task_start_date_between"><?= get_label('start_date_between', 'Start Date Between') ?></label>
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                            <input type="text" class="form-control form-control-sm" id="task_start_date_between" name="task_start_date_between" placeholder="<?= get_label('start_date_between', 'Start Date Between') ?>" autocomplete="off">
+                        </div>
+                    </div>
+                    {{-- End Date Between --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="task_end_date_between"><?= get_label('end_date_between', 'End Date Between') ?></label>
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                            <input type="text" class="form-control form-control-sm" id="task_end_date_between" name="task_end_date_between" placeholder="<?= get_label('end_date_between', 'End Date Between') ?>" autocomplete="off">
+                        </div>
+                    </div>
+                    {{-- Projects --}}
+                    @if (getAuthenticatedUser()->can('manage_projects'))
+                    <div class="col-md-3">
+                        <label class="form-label" for="task_project_filter">{{ get_label('projects', 'Projects') }}</label>
+                        <select class="form-select form-select-sm tom_projects_select" id="task_project_filter" multiple
+                            data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
+                        </select>
+                    </div>
                     @endif
+                    {{-- Users --}}
                     @if (isAdminOrHasAllDataAccess() && !isset($viewAssigned))
                         @if (explode('_', $id)[0] != 'client' && explode('_', $id)[0] != 'user')
-                            <div class="col-md-4">
-                                <label class="form-label">{{ get_label('users', 'Users') }}</label>
-                                <select class="form-control tom_users_select" id="task_user_filter" name="user_ids[]"
-                                    multiple="multiple" data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">{{ get_label('clients', 'Clients') }}</label>
-                                <select class="form-control tom_clients_select" id="task_client_filter" name="client_ids[]"
-                                    multiple="multiple" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
-                                </select>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="task_user_filter">{{ get_label('users', 'Users') }}</label>
+                            <select class="form-select form-select-sm tom_users_select" id="task_user_filter" name="user_ids[]" multiple
+                                data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                            </select>
+                        </div>
+                        {{-- Clients --}}
+                        <div class="col-md-3">
+                            <label class="form-label" for="task_client_filter">{{ get_label('clients', 'Clients') }}</label>
+                            <select class="form-select form-select-sm tom_clients_select" id="task_client_filter" name="client_ids[]" multiple
+                                data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
+                            </select>
+                        </div>
                         @endif
                     @endif
-                    <div class="col-md-4">
-                        <label class="form-label">{{ get_label('statuses', 'Statuses') }}</label>
-                        <select class="form-control tom_statuses_filter" id="task_status_filter" name="status_ids[]" multiple="multiple"
+                    {{-- Statuses --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="task_status_filter">{{ get_label('statuses', 'Statuses') }}</label>
+                        <select class="form-select form-select-sm tom_statuses_filter" id="task_status_filter" name="status_ids[]" multiple
                             data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">{{ get_label('priorities', 'Priorities') }}</label>
-                        <select class="form-control tom_priorities_filter" id="task_priority_filter" name="priority_ids[]"
-                            multiple="multiple" data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                    {{-- Priorities --}}
+                    <div class="col-md-3">
+                        <label class="form-label" for="task_priority_filter">{{ get_label('priorities', 'Priorities') }}</label>
+                        <select class="form-select form-select-sm tom_priorities_filter" id="task_priority_filter" name="priority_ids[]" multiple
+                            data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
                         </select>
                     </div>
                 </div>
+                {{-- Hidden fields for date range values --}}
+                <input type="hidden" id="task_date_between_from" name="task_date_from">
+                <input type="hidden" id="task_date_between_to" name="task_date_to">
+                <input type="hidden" id="task_start_date_between_from" name="task_start_date_from">
+                <input type="hidden" id="task_start_date_between_to" name="task_start_date_to">
+                <input type="hidden" id="task_end_date_between_from" name="task_end_date_from">
+                <input type="hidden" id="task_end_date_between_to" name="task_end_date_to">
             </div>
         </div>
+
     <input type="hidden" id="is_favorites" value="{{ $favorites ?? '' }}">
     @php
         $columns = [

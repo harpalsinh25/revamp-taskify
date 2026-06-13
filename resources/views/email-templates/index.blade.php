@@ -23,7 +23,7 @@
             </nav>
         </div>
         <div>
-            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#createTemplateModal">
+            <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#createTemplateOffcanvas">
                 <button type="button" class="btn btn-sm btn-primary " data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="{{ get_label('create_template', 'Create Template') }}">
                     <i class='bx bx-plus'></i>
                 </button>

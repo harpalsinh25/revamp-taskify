@@ -505,14 +505,31 @@ class EmailSendController extends Controller
                 $canDelete = isAdminOrHasAllDataAccess() || ($email->user_id == auth()->id());
                 $status = $email->status == 'pending' ? '<span class="badge bg-warning">Pending</span>' : ($email->status == 'sent' ? '<span class="badge bg-success">Sent</span>' :
                         '<span class="badge bg-danger">Failed</span>');
-                $actions = $canDelete ? '<button type="button"
-                    class="btn delete"
-                    data-id="' . $email->id . '"
-                    data-type="emails/history"
-                    title="' . get_label('delete', 'Delete') . '">
-                    <i class="bx bx-trash text-danger mx-1"></i>
-                </button>' : '-';
-
+                $actions = '';
+                if ($canDelete) {
+                    $actions .= '
+                    <li>
+                        <a href="javascript:void(0);" class="dropdown-item delete" data-id="' . $email->id . '" data-type="emails/history">
+                            <i class="bx bx-trash text-danger mx-1"></i> ' . get_label('delete', 'Delete') . '
+                        </a>
+                    </li>';
+                }
+                
+                if (!empty($actions)) {
+                    $actions = '
+                    <div class="d-flex justify-content-center">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-icon rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                ' . $actions . '
+                            </ul>
+                        </div>
+                    </div>';
+                } else {
+                    $actions = '-';
+                }
                 return [
                     'id' => $email->id,
                     'to_email' => $email->to_email,

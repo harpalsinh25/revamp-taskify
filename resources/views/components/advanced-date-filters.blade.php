@@ -34,7 +34,8 @@
 {{-- Date Filter Inputs --}}
 @foreach ($filters as $filter)
     @if (isset($filterLabels[$filter]))
-        <div class="{{ $colClass }} mb-3">
+        <div class="{{ $colClass }}">
+            <label class="form-label small text-muted mb-1">{{ $filterLabels[$filter] }}</label>
             <div class="input-group input-group-merge">
                 @if ($showIcons)
                     <span class="input-group-text"><i class="bx bx-calendar"></i></span>

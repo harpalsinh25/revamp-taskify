@@ -9,14 +9,9 @@
         <div class="d-flex justify-content-between mb-2 mt-4">
             <div>
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            {{ get_label('assets', 'Assets') }}
-                        </li>
-                    </ol>
+                    <a href="{{ url('home') }}" class="text-muted small">{{ get_label('home', 'Home') }}</a>
+                    <span class="text-muted small mx-1">/</span>
+                    <span class="text-muted small">{{ get_label('assets', 'Assets') }}</span>
                 </nav>
             </div>
             <div>

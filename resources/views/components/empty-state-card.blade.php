@@ -50,7 +50,7 @@
                     'lead-stages' => ['target' => '#create_lead_stage_modal', 'toggle' => 'modal'],
                     'candidates' => ['target' => '#candidateModal', 'toggle' => 'modal'],
                     'interview' => ['target' => '#createInterviewModal', 'toggle' => 'modal'],
-                    'email-templates' => ['target' => '#createTemplateModal', 'toggle' => 'modal'],
+                    'email-templates' => ['target' => '#createTemplateOffcanvas', 'toggle' => 'offcanvas'],
                 ];
 
                 $hasModal = array_key_exists($typeSlug, $modalMap);

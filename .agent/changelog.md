@@ -2,6 +2,75 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-13] - Email & Email Template Standardization
+### Modified
+- **`resources/views/components/email-history-card.blade.php`** & **`resources/views/components/email-templates-card.blade.php`**:
+  - Swapped raw `<table>` with the modern `<x-tk-table>` blade component.
+  - Wrapped tables in `<div class="card border shadow-none">` to follow the flat border system guidelines.
+- **`public/assets/js/custom.js`**:
+  - Fixed `TomSelect` initialization for `.statusDropdown` and `.priorityDropdown` by removing `controlInput: null` to restore search functionality.
+  - Removed `class="item"` from the custom `item` render function to prevent `TomSelect` from erroneously applying an inner gray box/border around the selected badge.
+- **`public/assets/css/custom.css`**:
+  - Nullified `border`, `background`, and `box-shadow` on `body.v2-shell .ts-control input` to fix the double-border "overlapping" visual bug where the internal search input inherited `form-control` styles.
+- **`resources/views/offcanvas.blade.php`**:
+  - Standardized `.statusDropdown` wrapping classes to use `.form-select` consistently with `.priorityDropdown` for proper `TomSelect` alignment.
+- **`app/Http/Controllers/EmailSendController.php`** & **`app/Http/Controllers/EmailTemplateController.php`**:
+  - Updated actions columns to use the standard Bootstrap vertical three-dots dropdown menu (`bx-dots-vertical-rounded`).
+- **`public/assets/js/pages/email-history.js`**:
+  - Refactored `emailHistoryActionsFormatter` to return the standard UI actions button layout for previewing history.
+- **`resources/views/modals.blade.php`**:
+  - Converted `createTemplateModal` to `createTemplateOffcanvas` (`.offcanvas .offcanvas-end`) for standardized sliding form views.
+  - Converted `editEmailTemplateModal` to `editEmailTemplateOffcanvas`.
+  - Cleaned up `#previewModal` to match the system design standards by removing hardcoded `bg-light` borders, custom paddings, and `text-primary` classes.
+- **`resources/views/email/send.blade.php`**:
+  - Fixed dark mode UI layout bugs by removing legacy `.nav-align-top` and `.nav-tabs-shadow` wrappers to eliminate stark white backgrounds.
+  - Converted the internal attachment and delivery options sections to use standard flat borderless `.card.border.shadow-none` classes, dropping the hardcoded `.bg-label-primary` headers.
+  - Changed `.modal('show')` syntax to `bootstrap.Offcanvas().show()` for email templates edit form.
+- **`resources/views/email-templates/index.blade.php`** & **`resources/views/components/empty-state-card.blade.php`**:
+  - Updated standard button targets from `data-bs-toggle="modal"` to `data-bs-toggle="offcanvas"` for the email template create triggers.
+
+## [2026-06-13] - Task & Project Filter Design Consistency Fix
+### Modified
+- **`resources/views/components/tasks-card.blade.php`**:
+  - Replaced `x-advanced-date-filters` component usage with inline date filter fields matching `project_information.blade.php` pattern.
+  - Changed all `form-control` → `form-select form-select-sm` on select fields, `form-control-sm` on date inputs.
+  - Added `card border shadow-none` + `card-body p-3` wrapping (matching project_information reference).
+  - Added hidden fields for date range from/to values directly in the card (previously in the component).
+  - **Removed the duplicate Clear Filters button** — it already exists in Bootstrap Table's toolbar.
+- **`resources/views/components/projects-card.blade.php`**:
+  - Same inline date filter expansion + sm-size controls + removed duplicate Clear Filters button.
+  - Added proper hidden fields for date range values.
+
+## [2026-06-13] - Task & Project Filter Row Layout Fix
+### Modified
+- **`resources/views/components/tasks-card.blade.php`**:
+  - Changed all filter column classes from `col-md-4` to `col-md-3` — filters now render 4 per row (3 date + 5 dropdowns = 8 total, filling 2 clean rows of 4).
+  - Passed `colClass="col-md-3"` to `x-advanced-date-filters` so date filters match.
+  - Added a **Clear Filters** button (`col-md-3`) in the last slot of the filter row.
+- **`resources/views/components/projects-card.blade.php`**:
+  - Same `col-md-4` → `col-md-3` fix + `colClass="col-md-3"` for date filters.
+  - Added **Clear Filters** button to project filter row as well.
+- **`resources/views/components/advanced-date-filters.blade.php`**:
+  - Removed `mb-3` from filter divs (spacing handled by parent `row g-3`).
+  - Added a `<label>` above each date input for visual alignment with the dropdown filters.
+
+## [2026-06-13] - Bulk Assign & Import via Excel Offcanvas Redesign
+### Modified
+- **`plugins/AssetManagement/Resources/views/assets/offcanvas.blade.php`**:
+  - **Bulk Assign offcanvas**: Removed `w-50 style="max-width:..."` width hack → changed to `offcanvas-responsive`. Removed unnecessary `card > card-header > card-body` nesting. Restructured to flat sections with `h6` icons for "Assignment Details" and "Notes". Used `row g-3` for form fields. Standardized footer to `d-flex justify-content-end gap-2`.
+  - **Import via Excel offcanvas**: Fixed invisible header text (removed `text-white`, `btn-close-white`) — added `border-bottom`. Removed `bg-light` from body. Replaced `card border-0 shadow-sm` with `card border shadow-none`. Replaced `alert-info border-0` with flat card instructions block. Replaced `bg-light border-top p-3` footer with standard `d-flex justify-content-end gap-2 mt-3`. **Removed `@dd($errors)` debug call** (critical bug fix). Standardized both download buttons to `btn-outline-secondary`.
+
+## [2026-06-13] - Asset Module Create/Update Offcanvas UI Fix
+### Modified
+- **`plugins/AssetManagement/Resources/views/assets/offcanvas.blade.php`**:
+  - Fixed broken two-column (`col-lg-8` / `col-lg-4`) layout inside Create/Update Asset offcanvas that caused the image section to overflow and appear misaligned.
+  - Restructured both forms to a clean stacked single-column layout with the image upload card at the **top** (full-width).
+  - Added proper section headers: Asset Information and Purchase Details with `row g-3 col-md-6` grid.
+  - Used `general_settings['currency_symbol']` in the Purchase Cost input group.
+  - All Tom Select selects use `tom_static_select` class; all IDs preserved for JS compatibility.
+- **`plugins/AssetManagement/Resources/views/assets/index.blade.php`**:
+  - Upgraded breadcrumb to new design system `nav > a / span` format.
+
 ## [2026-06-13] - Task View Toggles Standardization
 ### Modified
 - **`resources/views/tasks/tasks.blade.php`**:

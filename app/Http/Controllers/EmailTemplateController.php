@@ -338,23 +338,39 @@ class EmailTemplateController extends Controller
                     $actions = '';
 
                     if ($canEdit) {
-                        $actions .= '<a href="javascript:void(0);" class="edit-template-btn"
-                            data-template=\'' . htmlspecialchars(json_encode($template), ENT_QUOTES, 'UTF-8') . '\'
-                            title="' . get_label('update', 'Update') . '">
-                            <i class="bx bx-edit mx-1"></i>
-                        </a>';
+                        $actions .= '
+                        <li>
+                            <a href="javascript:void(0);" class="dropdown-item edit-template-btn"
+                                data-template=\'' . htmlspecialchars(json_encode($template), ENT_QUOTES, 'UTF-8') . '\'>
+                                <i class="bx bx-edit mx-1"></i> ' . get_label('update', 'Update') . '
+                            </a>
+                        </li>';
                     }
 
                     if ($canDelete) {
-                        $actions .= '<button type="button"
-                            class="btn delete"
-                            data-id="' . $template->id . '"
-                            data-type="email-templates"
-                            title="' . get_label('delete', 'Delete') . '">
-                            <i class="bx bx-trash text-danger mx-1"></i>
-                        </button>';
+                        $actions .= '
+                        <li>
+                            <a href="javascript:void(0);" class="dropdown-item delete" data-id="' . $template->id . '" data-type="email-templates">
+                                <i class="bx bx-trash text-danger mx-1"></i> ' . get_label('delete', 'Delete') . '
+                            </a>
+                        </li>';
                     }
 
+                    if (!empty($actions)) {
+                        $actions = '
+                        <div class="d-flex justify-content-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-icon rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    ' . $actions . '
+                                </ul>
+                            </div>
+                        </div>';
+                    } else {
+                        $actions = '-';
+                    }
                     return [
                         'id' => $template->id,
                         'name' => $template->name,

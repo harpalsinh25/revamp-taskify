@@ -46,7 +46,7 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-control statusDropdown" name="status_id">
+                    <select class="form-select statusDropdown" name="status_id">
                         @isset($statuses)
                             @foreach ($statuses as $status)
                                 @if (canSetStatus($status))
@@ -150,7 +150,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                    <select class="form-control tom_users_select" name="user_id[]" multiple="multiple"
+                    <select class="form-select tom_users_select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'web')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -161,7 +161,7 @@
                 <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-control tom_clients_select" name="client_id[]" multiple="multiple"
+                    <select class="form-select tom_clients_select" name="client_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'client')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -177,7 +177,7 @@
                             <a href="{{ url('tags/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_tags', 'Manage tags') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-control tom_tags_select" name="tag_ids[]" multiple="multiple"
+                    <select class="form-select tom_tags_select" name="tag_ids[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -283,7 +283,7 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-control statusDropdown" name="status_id" id="project_status_id">
+                    <select class="form-select statusDropdown" name="status_id" id="project_status_id">
                         @isset($statuses)
                             @foreach ($statuses as $status)
                                 <option value="{{ $status->id }}" data-color="{{ $status->color }}"
@@ -391,7 +391,7 @@
                 <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-control tom_clients_select" name="client_id[]" multiple="multiple"
+                    <select class="form-select tom_clients_select" name="client_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -547,7 +547,7 @@
                 <div class="mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_project', 'Select project') ?>
                         <span class="asterisk">*</span></label>
-                    <select class="form-control selectTaskProject projects_select" name="project"
+                    <select class="form-select selectTaskProject projects_select" name="project"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                         data-single-select="true" data-allow-clear="false">
                     </select>
@@ -568,7 +568,7 @@
                         (<?= get_label('users_associated_with_project', 'Users associated with project') ?>
                         <b>{{ $project->title }}</b>)
                         <?php } ?></label>
-                    <select class="form-control" name="user_id[]" multiple="multiple"
+                    <select class="form-select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>

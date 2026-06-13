@@ -10,11 +10,15 @@ $(document).on('click', '.edit-template-btn', function () {
     $('#editTemplateName').val(template.name);
     $('#editSubject').val(template.subject);
     $('#editBody').val(template.body);
-    $('#editEmailTemplateModal').modal('show');
-    // Wait for modal to be fully shown before initializing TinyMCE
-    $('#editEmailTemplateModal').on('shown.bs.modal', function () {
+
+    const offcanvasElement = document.getElementById('editEmailTemplateOffcanvas');
+    const offcanvas = new bootstrap.Offcanvas(offcanvasElement);
+    offcanvas.show();
+
+    // Wait for offcanvas to be fully shown before initializing TinyMCE
+    offcanvasElement.addEventListener('shown.bs.offcanvas', function () {
         initTinyMCEForEdit();
-    });
+    }, { once: true });
 });
 
 // js for email template list
