@@ -35,46 +35,33 @@
             @php
                 $visibleColumns = getUserPreferences('asset_category');
             @endphp
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive text-nowrap">
-                        <input type="hidden" id="data_type" value="assets/category">
-                        <input type="hidden" id="save_column_visibility">
-                        <table id="table" data-toggle="table" data-loading-template="loadingTemplate"
-                            data-url="{{ route('assets.category.list') }}" data-icons-prefix="bx" data-icons="icons"
-                            data-show-refresh="true" data-total-field="total" data-trim-on-search="false"
-                            data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
-                            data-side-pagination="server" data-show-columns="true" data-pagination="true"
-                            data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true"
-                            data-query-params="queryParams">
-                            <thead>
-                                <tr>
-                                    <th data-checkbox="true"></th>
-                                    <th data-field="id"
-                                        data-visible="{{ in_array('id', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('id', 'ID') }}</th>
-                                    <th data-field="name"
-                                        data-visible="{{ in_array('name', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('name', 'Name') }}</th>
-                                    <th data-field="color"
-                                        data-visible="{{ in_array('color', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('color', 'Color') }}</th>
-                                    <th data-field="description"
-                                        data-visible="{{ in_array('description', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('description', 'Description') }}</th>
-                                    <th data-field="created_at"
-                                        data-visible="{{ in_array('created_at', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('created_at', 'Created At') }}</th>
-                                    <th data-field="updated_at"
-                                        data-visible="{{ in_array('updated_at', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('updated_at', 'Updated At') }}</th>
-                                    <th data-field="actions"
-                                        data-visible="{{ in_array('actions', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}">
-                                        {{ get_label('actions', 'Actions') }}</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
+            @php
+                $columns = [
+                    ['checkbox' => true],
+                    ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('id', $visibleColumns) ? false : true],
+                    ['field' => 'name', 'label' => get_label('name', 'Name'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('name', $visibleColumns) ? false : true],
+                    ['field' => 'color', 'label' => get_label('color', 'Color'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('color', $visibleColumns) ? false : true],
+                    ['field' => 'description', 'label' => get_label('description', 'Description'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('description', $visibleColumns) ? false : true],
+                    ['field' => 'created_at', 'label' => get_label('created_at', 'Created At'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('created_at', $visibleColumns) ? false : true],
+                    ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated At'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('updated_at', $visibleColumns) ? false : true],
+                    ['field' => 'actions', 'label' => get_label('actions', 'Actions'), 'visible' => !empty($visibleColumns) && !in_array('actions', $visibleColumns) ? false : true]
+                ];
+            @endphp
+            <div class="card border shadow-none">
+                <div class="card-body p-0">
+                    <x-tk-table
+                        id="table"
+                        url="{{ route('assets.category.list') }}"
+                        :columns="$columns"
+                        data-sort-name="id"
+                        data-sort-order="desc"
+                        data-query-params="queryParams"
+                    >
+                        <x-slot name="before">
+                            <input type="hidden" id="data_type" value="assets/category">
+                            <input type="hidden" id="save_column_visibility">
+                        </x-slot>
+                    </x-tk-table>
                 </div>
             </div>
         @else

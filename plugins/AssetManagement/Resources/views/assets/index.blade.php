@@ -64,10 +64,25 @@
         @if ($assets->count() > 0)
             @php
                 $visibleColumns = getUserPreferences('assets');
+                $columns = [
+                    ['checkbox' => true],
+                    ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('id', $visibleColumns) ? false : true],
+                    ['field' => 'name', 'label' => get_label('name', 'Name'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('name', $visibleColumns) ? false : true],
+                    ['field' => 'lent_to', 'label' => get_label('lent_to', 'Lent To'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('lent_to', $visibleColumns) ? false : true],
+                    ['field' => 'category', 'label' => get_label('category', 'Category'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('category', $visibleColumns) ? false : true],
+                    ['field' => 'description', 'label' => get_label('description', 'Description'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('description', $visibleColumns) ? false : true],
+                    ['field' => 'status', 'label' => get_label('status', 'Status'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('status', $visibleColumns) ? false : true],
+                    ['field' => 'asset_tag', 'label' => get_label('asset_tag', 'Asset Tag'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('asset_tag', $visibleColumns) ? false : true],
+                    ['field' => 'purchase_cost', 'label' => get_label('purchase_cost', 'Purchase Cost'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('purchase_cost', $visibleColumns) ? false : true],
+                    ['field' => 'purchase_date', 'label' => get_label('purchase_date', 'Purchase Date'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('purchase_date', $visibleColumns) ? false : true],
+                    ['field' => 'created_at', 'label' => get_label('created_at', 'Created At'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('created_at', $visibleColumns) ? false : true],
+                    ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated At'), 'sortable' => true, 'visible' => !empty($visibleColumns) && !in_array('updated_at', $visibleColumns) ? false : true],
+                    ['field' => 'actions', 'label' => get_label('actions', 'Actions'), 'visible' => !empty($visibleColumns) && !in_array('actions', $visibleColumns) ? false : true]
+                ];
             @endphp
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row g-3 align-items-end tk-filter-row">
                         <div class="col-md-4 mb-3">
                             <select class="form-select select-asset-category_in_filter" id="select_categories"
                                 name="categories[]" aria-label="Default select example"
@@ -83,11 +98,10 @@
                             </div>
                         @endif
                         <div class="col-md-4 mb-3">
-                            <select class="form-select asset_status" id="asset_status" name="asset_status"
+                            <select class="form-select asset_status tom_static_select" id="asset_status" name="asset_status"
                                 aria-label="Default select example"
                                 data-placeholder="{{ get_label('filter_by_statuses', 'Filter by statuses') }}"
                                 data-allow-clear="true" multiple>
-                                <option value=""></option>
                                 <option value="available">{{ get_label('available', 'Available') }}</option>
                                 <option value="non-functional">{{ get_label('non_functional', 'Non-Functional') }}</option>
                                 <option value="lost">{{ get_label('lost', 'Lost') }}</option>
@@ -97,60 +111,24 @@
                             </select>
                         </div>
                     </div>
-                    <div class="table-responsive text-nowrap">
-                        <input type="hidden" id="data_type" value="assets">
-                        <input type="hidden" id="save_column_visibility">
-                        <table id="table" data-toggle="table" data-loading-template="loadingTemplate"
-                            data-url="{{ route('assets.list') }}" data-icons-prefix="bx" data-icons="icons"
-                            data-show-refresh="true" data-total-field="total" data-trim-on-search="false"
-                            data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
-                            data-side-pagination="server" data-show-columns="true" data-pagination="true"
-                            data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true"
-                            data-query-params="queryParams">
-                            <thead>
-                                <tr>
-                                    <th data-checkbox="true"></th>
-                                    <th data-field="id"
-                                        data-visible="{{ in_array('id', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('id', 'ID') }}</th>
-                                    <th data-field="name"
-                                        data-visible="{{ in_array('name', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('name', 'Name') }}</th>
-                                    <th data-field="lent_to"
-                                        data-visible="{{ in_array('lent_to', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('lent_to', 'Lent To') }}</th>
-                                    <th data-field="category"
-                                        data-visible="{{ in_array('category', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('category', 'Category') }}</th>
-                                    <th data-field="description"
-                                        data-visible="{{ in_array('description', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('description', 'Description') }}</th>
-                                    <th data-field="status"
-                                        data-visible="{{ in_array('status', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('status', 'Status') }}</th>
-                                    <th data-field="asset_tag"
-                                        data-visible="{{ in_array('asset_tag', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('asset_tag', 'Asset Tag') }}</th>
-                                    <th data-field="purchase_cost"
-                                        data-visible="{{ in_array('purchase_cost', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('purchase_cost', 'Purchase Cost') }}</th>
-                                    <th data-field="purchase_date"
-                                        data-visible="{{ in_array('purchase_date', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('purchase_date', 'Purchase Date') }}</th>
-                                    <th data-field="created_at"
-                                        data-visible="{{ in_array('created_at', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('created_at', 'Created At') }}</th>
-                                    <th data-field="updated_at"
-                                        data-visible="{{ in_array('updated_at', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}"
-                                        data-sortable="true">{{ get_label('updated_at', 'Updated At') }}</th>
-                                    <th data-field="actions"
-                                        data-visible="{{ in_array('actions', $visibleColumns) || empty($visibleColumns) ? 'true' : 'false' }}">
-                                        {{ get_label('actions', 'Actions') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
+                </div>
+            </div>
+
+            <div class="card border shadow-none">
+                <div class="card-body p-0">
+                    <x-tk-table
+                        id="table"
+                        url="{{ route('assets.list') }}"
+                        :columns="$columns"
+                        data-sort-name="id"
+                        data-sort-order="desc"
+                        data-query-params="queryParams"
+                    >
+                        <x-slot name="before">
+                            <input type="hidden" id="data_type" value="assets">
+                            <input type="hidden" id="save_column_visibility">
+                        </x-slot>
+                    </x-tk-table>
                 </div>
             </div>
         @else

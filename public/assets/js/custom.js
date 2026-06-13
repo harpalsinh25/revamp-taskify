@@ -5342,8 +5342,8 @@ $(document).ready(function () {
     initSelect2WithAjax("#selected_sources", "lead_sources");
     initSelect2WithAjax("#selected_stages", "lead_stages");
     initSelect2WithAjax("#select_candidate_statuses", "candidate_statuses");
-    initSelect2WithAjax('.select-interview-candidate', "interview_candidates");
-    initSelect2WithAjax('.select-interview-interviewer', "interview_interviewer");
+    initTomSelectWithAjax('.select-interview-candidate', "interview_candidates");
+    initTomSelectWithAjax('.select-interview-interviewer', "interview_interviewer");
     $("#create_task_offcanvas, #edit_task_offcanvas")
         .find('select[name="user_id[]"]')
         .each(function () {

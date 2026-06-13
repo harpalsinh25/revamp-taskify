@@ -77,10 +77,15 @@ $(document).on("click", ".clear-activity-log-filters", function (e) {
     $("#activity_log_between_date_from").val("");
     $("#activity_log_between_date_to").val("");
     $("#activity_log_between_date").val("");
-    $("#user_filter").val("").trigger("change", [0]);
-    $("#client_filter").val("").trigger("change", [0]);
-    $("#activity_filter").val("").trigger("change", [0]);
-    $("#type_filter").val("").trigger("change", [0]);
+    const filters = ["#user_filter", "#client_filter", "#activity_filter", "#type_filter"];
+    filters.forEach(selector => {
+        var el = $(selector)[0];
+        if (el && el.tomselect) {
+            el.tomselect.clear();
+        } else {
+            $(selector).val("").trigger("change", [0]);
+        }
+    });
     $("#activity_log_table").bootstrapTable("refresh");
 });
 
@@ -114,7 +119,12 @@ $(document).on("click", ".clear-milestones-filters", function (e) {
     $("#start_date_to").val("");
     $("#end_date_from").val("");
     $("#end_date_to").val("");
-    $("#status_filter").val("").trigger("change", [0]);
+    var statusFilter = $("#status_filter")[0];
+    if (statusFilter && statusFilter.tomselect) {
+        statusFilter.tomselect.clear();
+    } else {
+        $("#status_filter").val("").trigger("change", [0]);
+    }
     $("#project_milestones_table").bootstrapTable("refresh");
 });
 
@@ -523,25 +533,40 @@ $(document).ready(function () {
     }
 });
 $(document).ready(function () {
-    // Check if the URL contains the specific hash
-    if (window.location.hash === "#navs-top-discussions") {
-        // Select the tab trigger
-        var discussionsTabTrigger = document.querySelector(
-            '[data-bs-target="#navs-top-discussions"]'
-        );
-        if (discussionsTabTrigger) {
-            // Activate the tab
-            var tabInstance = new bootstrap.Tab(discussionsTabTrigger);
-            tabInstance.show();
+    var projectDetailPanel = document.getElementById('project_detail_panel');
+    if (projectDetailPanel) {
+        // Check if the URL contains a tab hash
+        var hash = window.location.hash;
+        var hasTriggeredHash = false;
+        if (hash && hash.startsWith('#navs-top-')) {
+            // Select the tab trigger
+            var tabTrigger = document.querySelector('[data-bs-target="' + hash + '"]');
+            if (tabTrigger) {
+                hasTriggeredHash = true;
+                // Activate the tab
+                var tabInstance = new bootstrap.Tab(tabTrigger);
+                tabInstance.show();
 
-            // Scroll to the tab content after a slight delay
+                // Open the offcanvas
+                setTimeout(function () {
+                    $(projectDetailPanel).offcanvas('show');
+                }, 200);
+
+                // Scroll to the tab content after a slight delay
+                setTimeout(function () {
+                    tabTrigger.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    });
+                }, 300);
+            }
+        }
+
+        // By default, open the offcanvas when the page loads if no matching hash activated it
+        if (!hasTriggeredHash) {
             setTimeout(function () {
-                discussionsTabTrigger.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                });
-            }, 100); // Small delay to ensure tab transition is complete
-        } else {
+                $(projectDetailPanel).offcanvas('show');
+            }, 200);
         }
     }
 });

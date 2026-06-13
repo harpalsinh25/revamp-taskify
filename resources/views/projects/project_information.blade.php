@@ -512,67 +512,82 @@
                 @endphp
                 <div class="tab-pane fade {{ $activeTab == 'milestones' ? 'active show' : '' }}" id="navs-top-milestones" role="tabpanel">
                     <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div></div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0 fw-semibold"><?= get_label('milestones', 'Milestones') ?></h6>
                             <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_milestone_modal">
                                 <button type="button" class="btn btn-sm btn-primary action_create_milestones" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_milestone', 'Create milestone') ?>">
-                                    <i class="bx bx-plus"></i>
+                                    <i class="bx bx-plus me-1"></i><?= get_label('create_milestone', 'Create milestone') ?>
                                 </button>
                             </a>
                         </div>
-                        <div class="row mt-4">
-                            <div class="col-md-4 mb-3">
-                                <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control" id="ms_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
+                        
+                        <div class="card mb-3 border shadow-none">
+                            <div class="card-body p-3">
+                                <div class="row g-3 align-items-end tk-filter-row">
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="ms_date_between"><?= get_label('date_between', 'Date Between') ?></label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control form-control-sm" id="ms_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="status_filter"><?= get_label('status', 'Status') ?></label>
+                                        <select class="form-select form-select-sm tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+                                            <option value="incomplete"><?= get_label('incomplete', 'Incomplete') ?></option>
+                                            <option value="complete"><?= get_label('complete', 'Complete') ?></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="start_date_between"><?= get_label('start_date_between', 'Start date between') ?></label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" id="start_date_between" name="start_date_between" class="form-control form-control-sm" placeholder="<?= get_label('start_date_between', 'Start date between') ?>" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="end_date_between"><?= get_label('end_date_between', 'End date between') ?></label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" id="end_date_between" name="end_date_between" class="form-control form-control-sm" placeholder="<?= get_label('end_date_between', 'End date between') ?>" autocomplete="off">
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="input-group input-group-merge">
-                                    <input type="text" id="start_date_between" name="start_date_between" class="form-control" placeholder="<?= get_label('start_date_between', 'Start date between') ?>" autocomplete="off">
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="input-group input-group-merge">
-                                    <input type="text" id="end_date_between" name="end_date_between" class="form-control" placeholder="<?= get_label('end_date_between', 'End date between') ?>" autocomplete="off">
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <select class="form-select js-example-basic-multiple" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
-                                    <option value="incomplete"><?= get_label('incomplete', 'Incomplete') ?></option>
-                                    <option value="complete"><?= get_label('complete', 'Complete') ?></option>
-                                </select>
                             </div>
                         </div>
+
                         <input type="hidden" id="ms_date_between_from">
                         <input type="hidden" id="ms_date_between_to">
                         <input type="hidden" name="start_date_from" id="start_date_from">
                         <input type="hidden" name="start_date_to" id="start_date_to">
                         <input type="hidden" name="end_date_from" id="end_date_from">
                         <input type="hidden" name="end_date_to" id="end_date_to">
-                        <div class="table-responsive text-nowrap">
-                            <input type="hidden" id="data_type" value="milestones">
-                            <input type="hidden" id="data_table" value="project_milestones_table">
-                            <input type="hidden" id="save_column_visibility">
-                            <input type="hidden" id="multi_select">
-                            <table id="project_milestones_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/projects/get-milestones/' . $project->id) }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParamsProjectMilestones">
-                                <thead>
-                                    <tr>
-                                        <th data-checkbox="true"></th>
-                                        <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('id', 'ID') ?></th>
-                                        <th data-field="title" data-visible="{{ (in_array('title', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('title', 'Title') ?></th>
-                                        <th data-field="start_date" data-visible="{{ (in_array('start_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('start_date', 'Start date') ?></th>
-                                        <th data-field="end_date" data-visible="{{ (in_array('end_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('end_date', 'End date') ?></th>
-                                        <th data-field="cost" data-visible="{{ (in_array('cost', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('cost', 'Cost') ?></th>
-                                        <th data-field="progress" data-visible="{{ (in_array('progress', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('progress', 'Progress') ?></th>
-                                        <th data-field="status" data-visible="{{ (in_array('status', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('status', 'Status') ?></th>
-                                        <th data-field="description" data-sortable="true" data-visible="{{ (in_array('description', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('description', 'Description') }}</th>
-                                        <th data-field="created_by" data-sortable="true" data-visible="{{ (in_array('created_by', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_by', 'Created by') }}</th>
-                                        <th data-field="created_at" data-sortable="true" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_at', 'Created at') }}</th>
-                                        <th data-field="updated_at" data-sortable="true" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('updated_at', 'Updated at') }}</th>
-                                        <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('actions', 'Actions') }}</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                        
+                        <div class="card border shadow-none">
+                            <div class="card-body p-0">
+                                <div class="table-responsive text-nowrap">
+                                    <input type="hidden" id="data_type" value="milestones">
+                                    <input type="hidden" id="data_table" value="project_milestones_table">
+                                    <input type="hidden" id="save_column_visibility">
+                                    <input type="hidden" id="multi_select">
+                                    <table id="project_milestones_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/projects/get-milestones/' . $project->id) }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParamsProjectMilestones">
+                                        <thead>
+                                            <tr>
+                                                <th data-checkbox="true"></th>
+                                                <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('id', 'ID') ?></th>
+                                                <th data-field="title" data-visible="{{ (in_array('title', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('title', 'Title') ?></th>
+                                                <th data-field="start_date" data-visible="{{ (in_array('start_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('start_date', 'Start date') ?></th>
+                                                <th data-field="end_date" data-visible="{{ (in_array('end_date', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('end_date', 'End date') ?></th>
+                                                <th data-field="cost" data-visible="{{ (in_array('cost', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('cost', 'Cost') ?></th>
+                                                <th data-field="progress" data-visible="{{ (in_array('progress', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('progress', 'Progress') ?></th>
+                                                <th data-field="status" data-visible="{{ (in_array('status', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('status', 'Status') ?></th>
+                                                <th data-field="description" data-sortable="true" data-visible="{{ (in_array('description', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('description', 'Description') }}</th>
+                                                <th data-field="created_by" data-sortable="true" data-visible="{{ (in_array('created_by', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_by', 'Created by') }}</th>
+                                                <th data-field="created_at" data-sortable="true" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_at', 'Created at') }}</th>
+                                                <th data-field="updated_at" data-sortable="true" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('updated_at', 'Updated at') }}</th>
+                                                <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}">{{ get_label('actions', 'Actions') }}</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -580,35 +595,40 @@
                 @if ($auth_user->can('manage_media'))
                 <div class="tab-pane fade {{ $activeTab == 'media' ? 'active show' : '' }}" id="navs-top-media" role="tabpanel">
                     <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div></div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0 fw-semibold"><?= get_label('media', 'Media') ?></h6>
                             <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#add_media_modal">
                                 <button type="button" class="btn btn-sm btn-primary action_create_media" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('add_media', 'Add Media') ?>">
-                                    <i class="bx bx-plus"></i>
+                                    <i class="bx bx-plus me-1"></i><?= get_label('add_media', 'Add Media') ?>
                                 </button>
                             </a>
                         </div>
                         @php
                         $visibleColumns = getUserPreferences('project_media');
                         @endphp
-                        <div class="table-responsive text-nowrap">
-                            <input type="hidden" id="data_type" value="project-media">
-                            <input type="hidden" id="data_table" value="project_media_table">
-                            <input type="hidden" id="save_column_visibility">
-                            <table id="project_media_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/projects/get-media/' . $project->id) }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParamsProjectMedia">
-                                <thead>
-                                    <tr>
-                                        <th data-checkbox="true"></th>
-                                        <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('id', 'ID') ?></th>
-                                        <th data-field="file" data-visible="{{ (in_array('file', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('file', 'File') ?></th>
-                                        <th data-field="file_name" data-sortable="true" data-visible="{{ (in_array('file_name', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('file_name', 'File name') }}</th>
-                                        <th data-field="file_size" data-visible="{{ (in_array('file_size', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('file_size', 'File size') ?></th>
-                                        <th data-field="created_at" data-sortable="true" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_at', 'Created at') }}</th>
-                                        <th data-field="updated_at" data-sortable="true" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('updated_at', 'Updated at') }}</th>
-                                        <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="false">{{ get_label('actions', 'Actions') }}</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                        
+                        <div class="card border shadow-none">
+                            <div class="card-body p-0">
+                                <div class="table-responsive text-nowrap">
+                                    <input type="hidden" id="data_type" value="project-media">
+                                    <input type="hidden" id="data_table" value="project_media_table">
+                                    <input type="hidden" id="save_column_visibility">
+                                    <table id="project_media_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/projects/get-media/' . $project->id) }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParamsProjectMedia">
+                                        <thead>
+                                            <tr>
+                                                <th data-checkbox="true"></th>
+                                                <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('id', 'ID') ?></th>
+                                                <th data-field="file" data-visible="{{ (in_array('file', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('file', 'File') ?></th>
+                                                <th data-field="file_name" data-sortable="true" data-visible="{{ (in_array('file_name', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('file_name', 'File name') }}</th>
+                                                <th data-field="file_size" data-visible="{{ (in_array('file_size', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('file_size', 'File size') ?></th>
+                                                <th data-field="created_at" data-sortable="true" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('created_at', 'Created at') }}</th>
+                                                <th data-field="updated_at" data-sortable="true" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}">{{ get_label('updated_at', 'Updated at') }}</th>
+                                                <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="false">{{ get_label('actions', 'Actions') }}</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -620,56 +640,73 @@
                 @if ($auth_user->can('manage_activity_log'))
                 <div class="tab-pane fade {{ $activeTab == 'activity_log' ? 'active show' : '' }}" id="navs-top-activity-log" role="tabpanel">
                     <div class="col-12">
-                        <div class="row mt-4">
-                            <div class="mb-3 col-md-4">
-                                <div class="input-group input-group-merge">
-                                    <input type="text" id="activity_log_between_date" class="form-control" placeholder="<?= get_label('date_between', 'Date between') ?>" autocomplete="off">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0 fw-semibold"><?= get_label('activity_log', 'Activity log') ?></h6>
+                        </div>
+                        
+                        <div class="card mb-3 border shadow-none">
+                            <div class="card-body p-3">
+                                <div class="row g-3 align-items-end tk-filter-row">
+                                    <div class="col-6">
+                                        <label class="form-label" for="activity_log_between_date"><?= get_label('date_between', 'Date between') ?></label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" id="activity_log_between_date" class="form-control form-control-sm" placeholder="<?= get_label('date_between', 'Date between') ?>" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    @if ($auth_user->can('manage_users'))
+                                    <div class="col-6">
+                                        <label class="form-label" for="user_filter"><?= get_label('actioned_by_users', 'Actioned By Users') ?></label>
+                                        <select class="form-select form-select-sm tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?>" multiple>
+                                        </select>
+                                    </div>
+                                    @endif
+                                    @if ($auth_user->can('manage_clients'))
+                                    <div class="col-6">
+                                        <label class="form-label" for="client_filter"><?= get_label('actioned_by_clients', 'Actioned By Clients') ?></label>
+                                        <select class="form-select form-select-sm tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?>" multiple>
+                                        </select>
+                                    </div>
+                                    @endif
+                                    <div class="col-6">
+                                        <label class="form-label" for="activity_filter"><?= get_label('activities', 'Activities') ?></label>
+                                        <select class="form-select form-select-sm tom_static_select" id="activity_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_activities', 'Select Activities') ?>" data-allow-clear="true" multiple>
+                                            <option value="created"><?= get_label('created', 'Created') ?></option>
+                                            <option value="updated"><?= get_label('updated', 'Updated') ?></option>
+                                            <option value="duplicated"><?= get_label('duplicated', 'Duplicated') ?></option>
+                                            <option value="uploaded"><?= get_label('uploaded', 'Uploaded') ?></option>
+                                            <option value="deleted"><?= get_label('deleted', 'Deleted') ?></option>
+                                            <option value="updated_status"><?= get_label('updated_status', 'Updated status') ?></option>
+                                            <option value="updated_priority"><?= get_label('updated_priority', 'Updated priority') ?></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label" for="type_filter"><?= get_label('types', 'Types') ?></label>
+                                        <select class="form-select form-select-sm tom_static_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
+                                            <option value="task">{{ get_label('project', 'Project') }}</option>
+                                            <option value="task">{{ get_label('task', 'Task') }}</option>
+                                            <option value="milestone">{{ get_label('milestone', 'Milestone') }}</option>
+                                            <option value="media">{{ get_label('media', 'Media') }}</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            @if ($auth_user->can('manage_users'))
-                            <div class="col-md-4 mb-3">
-                                <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?>" multiple>
-                                </select>
-                            </div>
-                            @endif
-                            @if ($auth_user->can('manage_clients'))
-                            <div class="col-md-4 mb-3">
-                                <select class="form-select clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?>" multiple>
-                                </select>
-                            </div>
-                            @endif
-                            <div class="col-md-4 mb-3">
-                                <select class="form-select js-example-basic-multiple" id="activity_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_activities', 'Select Activities') ?>" data-allow-clear="true" multiple>
-                                    <option value="created"><?= get_label('created', 'Created') ?></option>
-                                    <option value="updated"><?= get_label('updated', 'Updated') ?></option>
-                                    <option value="duplicated"><?= get_label('duplicated', 'Duplicated') ?></option>
-                                    <option value="uploaded"><?= get_label('uploaded', 'Uploaded') ?></option>
-                                    <option value="deleted"><?= get_label('deleted', 'Deleted') ?></option>
-                                    <option value="updated_status"><?= get_label('updated_status', 'Updated status') ?></option>
-                                    <option value="updated_priority"><?= get_label('updated_priority', 'Updated priority') ?></option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <select class="form-select js-example-basic-multiple" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
-                                    <option value="task">{{ get_label('project', 'Project') }}</option>
-                                    <option value="task">{{ get_label('task', 'Task') }}</option>
-                                    <option value="milestone">{{ get_label('milestone', 'Milestone') }}</option>
-                                    <option value="media">{{ get_label('media', 'Media') }}</option>
-                                </select>
-                            </div>
                         </div>
+
                         @php
                         $visibleColumns = getUserPreferences('activity_log');
                         @endphp
-                        <div class="table-responsive text-nowrap">
-                            <input type="hidden" id="activity_log_between_date_from">
-                            <input type="hidden" id="activity_log_between_date_to">
-                            <input type="hidden" id="data_type" value="activity-log">
-                            <input type="hidden" id="data_table" value="activity_log_table">
-                            <input type="hidden" id="type_id" value="{{$project->id}}">
-                            <input type="hidden" id="save_column_visibility">
-                            <input type="hidden" id="multi_select">
-                            <table id="activity_log_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/activity-log/list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParams">
+                        
+                        <div class="card border shadow-none">
+                            <div class="card-body p-0">
+                                <div class="table-responsive text-nowrap">
+                                    <input type="hidden" id="activity_log_between_date_from">
+                                    <input type="hidden" id="activity_log_between_date_to">
+                                    <input type="hidden" id="data_type" value="activity-log">
+                                    <input type="hidden" id="data_table" value="activity_log_table">
+                                    <input type="hidden" id="type_id" value="{{$project->id}}">
+                                    <input type="hidden" id="save_column_visibility">
+                                    <input type="hidden" id="multi_select">
+                                    <table id="activity_log_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/activity-log/list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParams">
                                 <thead>
                                     <tr>
                                         <th data-checkbox="true"></th>

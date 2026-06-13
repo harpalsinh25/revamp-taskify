@@ -439,39 +439,42 @@ class AssetsController extends Controller
                 $currency_symbol = $general_settings['currency_symbol'] ?? '₹';
                 $actions = '';
 
-                // Edit button (icon)
-                if ($canEdit) {
-                    $assetData = $asset->toArray();
-                    $assetData['picture_url'] = $asset->getFirstMediaUrl('asset-media');
-                    $assetData['purchase_date'] = format_date($asset->purchase_date, false, 'Y-m-d\TH:i:s.u\Z', 'Y-m-d');
+                $hasActions = $canEdit || $canDelete || $canCreate;
 
-                    $actions .= '<a href="javascript:void(0);"
-    class="updateAssetOffcanvasBtn"
-    data-bs-toggle="offcanvas"
-    data-bs-target="#updateAssetOffcanvas"
-    data-asset=\'' . htmlspecialchars(json_encode($assetData), ENT_QUOTES, 'UTF-8') . '\'
-    title="' . get_label('update', 'Update') . '">
-    <i class="bx bx-edit text-primary mx-1"></i>
-</a>';
-                }
+                if ($hasActions) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
 
-                // Delete button (icon)
-                if ($canDelete) {
-                    $actions .= '<button type="button"
-        class="btn delete"
-        data-id="' . $asset->id . '"
-        data-type="assets"
-        title="' . get_label('delete', 'Delete') . '">
-        <i class="bx bx-trash text-danger mx-1"></i>
-    </button>';
-                }
+                    $assetData = [];
+                    if ($canEdit || $canCreate) {
+                        $assetData = $asset->toArray();
+                        $assetData['picture_url'] = $asset->getFirstMediaUrl('asset-media');
+                        $assetData['purchase_date'] = format_date($asset->purchase_date, false, 'Y-m-d\TH:i:s.u\Z', 'Y-m-d');
+                    }
 
-                // Duplicate Assets
+                    if ($canEdit) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item updateAssetOffcanvasBtn d-block" data-bs-toggle="offcanvas" data-bs-target="#updateAssetOffcanvas" data-asset=\'' . htmlspecialchars(json_encode($assetData), ENT_QUOTES, 'UTF-8') . '\'>';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
 
-                if ($canCreate) {
-                    $actions .= '<a href="javascript:void(0);" class="duplicateAsset" data-asset=\'' . htmlspecialchars(json_encode($assetData), ENT_QUOTES, 'UTF-8') . '\' data-id="' . $asset->id . '" data-title="' . $asset->title . '" data-type="asset" data-table="asset_table" data-reload="' . 'true' . '" title="' . get_label('duplicate', 'Duplicate') . '">' .
-                        '<i class="bx bx-copy text-warning mx-2"></i>' .
-                        '</a>';
+                    if ($canCreate) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item duplicateAsset d-block" data-asset=\'' . htmlspecialchars(json_encode($assetData), ENT_QUOTES, 'UTF-8') . '\' data-id="' . $asset->id . '" data-title="' . $asset->name . '" data-type="asset" data-table="table" data-reload="true">';
+                        $actions .= '<i class="bx bx-copy text-warning me-2"></i>' . get_label('duplicate', 'Duplicate') . '</a></li>';
+                    }
+
+                    if ($canDelete) {
+                        $actions .= '<li><hr class="dropdown-divider"></li>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $asset->id . '" data-type="assets">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                } else {
+                    $actions = '-';
                 }
 
                 // Helper function to get asset tag badge color (dynamic based on tag hash)

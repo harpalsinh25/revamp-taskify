@@ -2,6 +2,76 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-13] - Task View Toggles Standardization
+### Modified
+- **`resources/views/tasks/tasks.blade.php`**:
+  - Upgraded breadcrumbs to use design system `<nav class="breadcrumb">` structure.
+  - Replaced individual view toggles and create action buttons with the unified `.seg` segmented controller tab container.
+- **`resources/views/tasks/board_view.blade.php`**:
+  - Upgraded breadcrumbs to use design system `<nav class="breadcrumb">` structure.
+  - Replaced view toggles with the unified `.seg` segmented controller tab container.
+- **`resources/views/tasks/group_by_task_lists.blade.php`**:
+  - Upgraded breadcrumbs to use design system `<nav class="breadcrumb">` structure.
+  - Replaced view toggles with the unified `.seg` segmented controller tab container.
+- **`resources/views/tasks/calendar_view.blade.php`**:
+  - Upgraded breadcrumbs to use design system `<nav class="breadcrumb">` structure.
+  - Replaced view toggles with the unified `.seg` segmented controller tab container.
+
+## [2026-06-13] - Milestones, Media & Activity Log Redesign & UI Standardizations
+### Modified
+- **`resources/views/projects/project_information.blade.php`**:
+  - Restructured the Milestones tab to include a clean header section with a title and "+ Add milestone" button.
+  - Wrapped Milestone filter inputs inside a dedicated `.card` component with `row g-3 align-items-end tk-filter-row` layout utilizing 4-column grid spacing (`col-md-3`) to align filters in a single row.
+  - Converted the status selector filter from Select2 (`js-example-basic-multiple`) to Tom Select (`tom_static_select`).
+  - Wrapped the milestones bootstrap table container in a standard flat bordered card (`card border shadow-none`) with `p-0` body padding.
+  - Restructured the Media tab to include a clean header section with a title and "+ Add Media" button on the right.
+  - Wrapped the project media bootstrap table container inside a flat bordered card (`card border shadow-none`) with `p-0` body padding.
+  - Restructured the Activity Log tab to include a clean header section with an "Activity log" title.
+  - Wrapped Activity Log filter inputs inside a dedicated `.card` component with `row g-3 align-items-end tk-filter-row` layout utilizing 2-column grid spacing (`col-6`) to prevent label truncation.
+  - Converted the User, Client, Activities, and Types filters in the Activity Log tab to use Tom Select (`tom_users_select`, `tom_clients_select`, and `tom_static_select`).
+  - Wrapped the activity log bootstrap table container in a standard flat bordered card (`card border shadow-none`) with `p-0` body padding.
+- **`public/assets/js/pages/project-information.js`**:
+  - Updated the `.clear-milestones-filters` click handler to safely clear the status filter's Tom Select instance (`statusFilter.tomselect.clear()`) if it exists, falling back to triggering change event.
+  - Updated the `.clear-activity-log-filters` click handler to safely clear Tom Select instances for User, Client, Activities, and Types filters.
+
+## [2026-06-13] - Asset Module Redesign
+### Modified
+- **`plugins/AssetManagement/Controllers/AssetsController.php`**:
+  - Updated actions column inside `list()` to use standard Bootstrap vertical three-dots dropdown menu (`bx-dots-vertical-rounded`), incorporating Edit, Duplicate, and Delete options.
+- **`plugins/AssetManagement/Controllers/AssetsCategoryController.php`**:
+  - Updated actions column inside `list()` to use standard Bootstrap vertical three-dots dropdown menu, incorporating Edit and Delete options.
+- **`plugins/AssetManagement/Resources/views/assets/index.blade.php`**:
+  - Swapped raw `<table>` with the modern `<x-tk-table>` blade component.
+  - Wrapped table in `<div class="card border shadow-none">` to follow the flat border system guidelines.
+  - Wrapped filter selectors inside a dedicated `<div class="card mb-4">` card wrapper.
+- **`plugins/AssetManagement/Resources/views/assets/category/index.blade.php`**:
+  - Swapped raw `<table>` with `<x-tk-table>` blade component.
+  - Wrapped table in `<div class="card border shadow-none">`.
+- **`plugins/AssetManagement/public/js/assets.js`**:
+  - Implemented `initAssetTomSelectWithAjax()` to fetch categories, users, and assets via AJAX using Tom Select.
+  - Instantiated `TableFilterSync` to synchronize status, category, and assigned user filters, maintaining URL queries and table state automatically.
+
+## [2026-06-13] - Notes Module Redesign & UI Standardizations
+### Modified
+- **`public/assets/css/custom.css`**:
+  - Removed all legacy `.sticky-notes` and `.sticky-note-bg-` color styles to clean up and reduce CSS footprint.
+- **`resources/views/notes/list.blade.php`**:
+  - Redesigned notes display to use standard design-system `.tcard` grid layout matching candidate/task cards.
+  - Aligned page breadcrumbs and action controls to follow standard headers.
+  - Standardized color indicator badges and text styling.
+- **`resources/views/modals.blade.php`**:
+  - Redesigned create and edit note modals body layout to use `.row.g-3` for clean, responsive input alignment.
+  - Ensured all form labels use the `form-label` class.
+
+## [2026-06-13] - Interview Modals UI & Selector Upgrades
+### Modified
+- **`public/assets/js/custom.js`**:
+  - Replaced Select2 with Tom Select for Candidate and Interviewer select elements.
+- **`public/assets/js/pages/interview.js`**:
+  - Updated the `.edit-interview-btn` click handler to set select values on Tom Select instances using `.tomselect.setValue()`.
+- **`resources/views/modals.blade.php`**:
+  - Aligned form layouts inside Schedule and Edit Interview modals using `row g-3` and added standard `form-label` class to all form labels.
+
 ## [2026-06-12] - Leads, Candidates & Tasks Kanban Drag & Drop Fixes
 ### Fixed
 - **`public/assets/js/pages/leads-kanban.js`**:
@@ -464,3 +534,11 @@ esources/views/modals.blade.php).
 - Extracted select_social_platforms and select_social_stastuses filters out of the table card into a standalone filter card and replaced Select2 with Tom Select (	om_static_select).
 - Updated the table action buttons in SocialMediaController.php's list method to be bundled within the standard three-dots dropdown menu.
 - Added TableFilterSync configuration in social.js to ensure proper refreshing and functionality of the "Clear filters" button.
+
+## 2026-06-13 (Asset Module Redesign JS Bindings & Project Hash Routing)
+- Updated `plugins/AssetManagement/public/js/assets.js` and `public/assets/js/asset-plugin/assets.js` to correctly interface with static Tom Select dropdowns (`.tom_static_select`).
+- Updated the `updateAssetOffcanvasBtn` click event handler to use Tom Select's `.setValue()` for category, status, and assignment inputs rather than jquery `.trigger('change')`.
+- Updated the trigger from Bootstrap modal (`#updateAssetModal`) to offcanvas (`#updateAssetOffcanvas`) to match the revamped blade view component.
+- Updated reset logic to reset tomselect dropdowns on offcanvas hide/reset events (`hidden.bs.offcanvas`).
+- Completely eliminated Select2 calls and initialization function `initAssetSelect2` inside `public/assets/js/asset-plugin/assets.js` and replaced them with `initAssetTomSelectWithAjax` and filters sync configuration.
+- Updated `public/assets/js/pages/project-information.js` to automatically display the `#project_detail_panel` offcanvas when landing on the page with a tab hash target like `#navs-top-discussions` using jQuery's `.offcanvas('show')` with a 200ms delay, and configured it to open by default on all page loads when no tab hash is present.

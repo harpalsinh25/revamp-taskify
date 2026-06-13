@@ -120,12 +120,18 @@
     // Function to reset asset-specific form fields
     function resetAssetFormFields(form) {
         // Reset image previews
-        form.find('#create-current-picture-preview, #edit-current-picture-preview').hide();
-        form.find('#create-no-image-placeholder, #edit-no-image-placeholder').show();
-        form.find('#create-image-actions, #edit-image-actions').hide();
+        form.find('#create-current-picture-preview, #edit-current-picture-preview, #update-current-picture-preview').hide();
+        form.find('#create-no-image-placeholder, #edit-no-image-placeholder, #update-no-image-placeholder').show();
+        form.find('#create-image-actions, #edit-image-actions, #update-image-actions').hide();
         form.find('.asset-picture-input').val('');
         // Reset any select2 dropdowns
         form.find('.select2').trigger('change');
+        // Reset any tomselect dropdowns
+        form.find('.tom_static_select').each(function () {
+            if (this.tomselect) {
+                this.tomselect.clear();
+            }
+        });
         // Reset any other custom fields specific to assets
         form.find('input[type="date"]').val('');
         form.find('input[type="number"]').val('');
@@ -281,8 +287,16 @@
         $('#updateAssetForm').attr('action', actionUrl);
         $('#update-asset-name').val(asset.name);
         $('#update-asset-tag').val(asset.asset_tag);
-        $('#update-asset-category').val(asset.category_id).trigger('change');
-        $('#update-asset-assign-to').val(asset.assigned_to).trigger('change');
+        if ($('#update-asset-category')[0] && $('#update-asset-category')[0].tomselect) {
+            $('#update-asset-category')[0].tomselect.setValue(asset.category_id);
+        } else {
+            $('#update-asset-category').val(asset.category_id).trigger('change');
+        }
+        if ($('#update-asset-assign-to')[0] && $('#update-asset-assign-to')[0].tomselect) {
+            $('#update-asset-assign-to')[0].tomselect.setValue(asset.assigned_to);
+        } else {
+            $('#update-asset-assign-to').val(asset.assigned_to).trigger('change');
+        }
         $('#update-asset-purchase-date').val(asset.purchase_date);
         $('#update-asset-purchase-cost').val(asset.purchase_cost);
         $('#update-asset-description').val(asset.description);
@@ -300,11 +314,14 @@
         } else {
             $('#update_asset_status_field').show();
             $('#update-lent-status').remove();
-            // $('#update-asset-status').attr('name', 'status').val(asset.status);
-            $('#update-asset-status').val(asset.status).trigger('change');
+            if ($('#update-asset-status')[0] && $('#update-asset-status')[0].tomselect) {
+                $('#update-asset-status')[0].tomselect.setValue(asset.status);
+            } else {
+                $('#update-asset-status').val(asset.status).trigger('change');
+            }
         }
         $('#update-asset-picture').val('');
-        $('#updateAssetModal').modal('show');
+        $('#updateAssetOffcanvas').offcanvas('show');
     });
     // Handle file input change for both modals
     $(document).on('change', '.asset-picture-input', function () {
@@ -349,12 +366,12 @@
     $(document).on('mouseleave', '#create-preview-image, #update-preview-image', function () {
         $(this).siblings('.hover-overlay').removeClass('opacity-100').addClass('opacity-0');
     });
-    // Reset modal forms when they are hidden
-    $(document).on('hidden.bs.modal', '#createAssetModal', function () {
+    // Reset modal/offcanvas forms when they are hidden
+    $(document).on('hidden.bs.offcanvas', '#createAssetOffcanvas', function () {
         $('#assetForm')[0].reset();
         resetImagePreview('create');
     });
-    $(document).on('hidden.bs.modal', '#updateAssetModal', function () {
+    $(document).on('hidden.bs.offcanvas', '#updateAssetOffcanvas', function () {
         $('#updateAssetForm')[0].reset();
         resetImagePreview('update');
     });
@@ -444,133 +461,77 @@
             estimatedReturnDateInput.min = tomorrow.toISOString().slice(0, 16);
         }
     });
-    // index
-    $(document).ready(function () {
-        $('.asset_status').each(function () {
-            var $this = $(this);
-            var dropdownParent = $this.closest('.offcanvas').length
-                ? $this.closest('.offcanvas')
-                : $this.closest('.modal').length
-                    ? $this.closest('.modal')
-                    : undefined;
-            $this.select2({
-                allowClear: true,
-                dropdownParent: dropdownParent,
-                minimumResultsForSearch: 0, // Enable search even for few options
-                placeholder: $this.data('placeholder') || 'Select Status',
-                width: '100%' // Ensure full width
-            });
-        });
-    });
-    function initAssetSelect2(selector, type) {
-        $(selector).each(function () {
-            if (!$(this).length) return;
-            var $this = $(this);
-            var allowClear = $this.data("allow-clear") !== "false";
-            var singleSelect = $this.data("single-select") !== false;
-            // Determine the dropdown parent (modal or offcanvas)
-            var dropdownParent = undefined;
-            if ($this.closest(".modal").length && singleSelect) {
-                dropdownParent = $this.closest(".modal");
-            } else if ($this.closest(".offcanvas").length && singleSelect) {
-                dropdownParent = $this.closest(".offcanvas");
+    function initAssetTomSelectWithAjax(selector, type) {
+        document.querySelectorAll(selector).forEach(function (el) {
+            if (el.tomselect) {
+                el.tomselect.destroy();
             }
-            $this.select2({
-                data: $this.find('option').map(function () {
-                    return {
-                        id: this.value,
-                        text: $(this).text(),
-                    };
-                }).get(),
-                ajax: {
-                    url: "/assets/search-assets",
-                    dataType: "json",
-                    delay: 250,
-                    data: function (params) {
-                        return {
-                            q: params.term,
-                            type: type
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data.results.map(function (item) {
-                                return {
-                                    id: item.id,
-                                    text: item.text,
-                                };
-                            }),
-                        };
-                    },
-                    cache: true,
-                },
-                minimumInputLength: 0,
-                allowClear: allowClear,
-                closeOnSelect: singleSelect,
-                dropdownParent: dropdownParent, // Use the determined parent
-                language: {
-                    inputTooShort: function () {
-                        return "Please type at least 1 character";
-                    },
-                    searching: function () {
-                        return "Searching...";
-                    },
-                    noResults: function () {
-                        return "No results found";
-                    },
-                },
-            });
-            $(".cancel-button").on("click", function () {
-                $this.select2("close");
+
+            var allowClear = el.dataset.allowClear !== "false";
+
+            new TomSelect(el, {
+                valueField: 'id',
+                labelField: 'text',
+                searchField: 'text',
+                plugins: allowClear ? ['remove_button', 'clear_button'] : ['remove_button'],
+                preload: true,
+                load: function (query, callback) {
+                    var url = '/assets/search-assets?q=' + encodeURIComponent(query) + '&type=' + encodeURIComponent(type);
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(json => {
+                            callback(json.results);
+                        }).catch(() => {
+                            callback();
+                        });
+                }
             });
         });
     }
-    function updateURLQueryParam(param, value) {
-        const url = new URL(window.location);
-        if (value === null || value.length === 0) {
-            url.searchParams.delete(param);
-        } else {
-            const paramValue = Array.isArray(value) ? value.join(",") : value;
-            url.searchParams.set(param, paramValue);
-        }
-        window.history.replaceState({}, '', url);
-    }
+
     $(document).ready(function () {
-        initAssetSelect2('.select-asset-category', "asset_category");
-        initAssetSelect2('.select-asset-category_in_filter', "asset_category");
-        initAssetSelect2('.select-asset-assigned_to', "users");
-        initAssetSelect2('.select-asset-assigned_to_in_filter', "users");
-        initAssetSelect2('.select-assets', "assets");
-        // Update URL on select change
-        $('.select-asset-category_in_filter').on('change', function () {
-            const selected = $(this).val() || [];
-            updateURLQueryParam('categories', selected);
-        });
-        $('.select-asset-assigned_to_in_filter').on('change', function () {
-            const selected = $(this).val() || [];
-            updateURLQueryParam('users', selected);
-        });
-        $('#asset_status').on('change', function () {
-            const selected = $(this).val();
-            updateURLQueryParam('asset_status', selected ? [selected] : []);
-        });
-        // Preselect based on URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const categories = urlParams.get('categories');
-        if (categories) {
-            const selected = categories.split(',');
-            $('.select-asset-category').val(selected).trigger('change');
+        // Initialize dynamic Tom Select filters
+        initAssetTomSelectWithAjax('.select-asset-category', 'asset_category');
+        initAssetTomSelectWithAjax('.select-asset-category_in_filter', 'asset_category');
+        initAssetTomSelectWithAjax('.select-asset-assigned_to', 'users');
+        initAssetTomSelectWithAjax('.select-asset-assigned_to_in_filter', 'users');
+        initAssetTomSelectWithAjax('.select-assets', 'assets');
+
+        if (typeof initTomSelectStatic === 'function') {
+            initTomSelectStatic('.tom_static_select');
         }
-        const users = urlParams.get('users');
-        if (users) {
-            const selected = users.split(',');
-            $('.select-asset-assigned_to').val(selected).trigger('change');
-        }
-        const assetStatus = urlParams.get('asset_status');
-        if (assetStatus) {
-            $('#asset_status').val(assetStatus).trigger('change');
+
+        // Initialize TableFilterSync for assets
+        if (typeof TableFilterSync === 'function') {
+            new TableFilterSync({
+                tableId: 'table',
+                dataType: 'assets',
+                filters: [
+                    {
+                        selector: '#select_categories',
+                        type: 'tom-select',
+                        name: 'categories',
+                        ajaxType: null
+                    },
+                    {
+                        selector: '#select_assigned_to',
+                        type: 'tom-select',
+                        name: 'assigned_to',
+                        ajaxType: null
+                    },
+                    {
+                        selector: '#asset_status',
+                        type: 'tom-select',
+                        name: 'asset_status',
+                        ajaxType: null
+                    }
+                ],
+                preserveParams: [''],
+                queryParamsFn: queryParams
+            });
         }
     });
+
     // Assets plugin main functionality
     $(document).ready(function () {
         // Ensure CSRF token is included in AJAX requests

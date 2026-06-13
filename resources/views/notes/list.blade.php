@@ -8,77 +8,94 @@
 
 
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('/home') }}"><?= get_label('home', 'Home') ?></a>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            <?= get_label('notes', 'Notes') ?>
-                        </li>
-                    </ol>
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+            <!-- Left Side: Breadcrumbs -->
+            <div class="d-flex align-items-center gap-3">
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current"><?= get_label('notes', 'Notes') ?></span>
                 </nav>
             </div>
+            <!-- Right Side: Create Action -->
             <div>
-                <span data-bs-toggle="modal" data-bs-target="#create_note_modal">
-                    <a href="javascript:void(0);" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
-                        data-bs-placement="left" data-bs-original-title="<?= get_label('create_note', 'Create note') ?>">
-                        <i class='bx bx-plus'></i>
-                    </a>
-                </span>
+                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_note_modal" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" title="<?= get_label('create_note', 'Create note') ?>">
+                    <i class='bx bx-plus'></i>
+                </a>
             </div>
         </div>
-        @if ($notes->count() > 0)
-            <div class="card">
-                <div class="card-body">
-                    <button type="button" id="delete-selected" class="btn btn-outline-danger mx-4" data-type="notes">
-                        <i class="bx bx-trash"></i> {{ get_label('delete_selected', 'Delete Selected') }}
-                    </button>
-                    <div class="form-check mx-4 mt-3">
-                        <input type="checkbox" id="select-all" class="form-check-input">
-                        <label for="select-all" class="form-check-label">{{ get_label('select_all', 'Select All') }}</label>
-                    </div>
-                    <div class="row sticky-notes mt-3">
-                        @foreach ($notes as $note)
-                            <div class="col-md-4 sticky-note">
-                                <div class="sticky-content sticky-note-bg-<?= $note->color ?>">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <input type="checkbox" class="selected-items mx-2 ms-0"
-                                                value="{{ $note->id }}">
-                                            <span class="note-id">#{{ $note->id }}</span>
-                                        </div>
-                                        <div class="text-end">
-                                            <a href="javascript:void(0);" class="btn btn-primary btn-xs edit-note"
-                                                data-id="{{ $note->id }}" data-bs-toggle="tooltip"
-                                                data-bs-placement="left"
-                                                data-bs-original-title="{{ get_label('update', 'Update') }}">
-                                                <i class="bx bx-edit"></i>
-                                            </a>
-                                            <a href="javascript:void(0);" class="btn btn-danger btn-xs delete mx-1"
-                                                data-id="{{ $note->id }}" data-type="notes" data-reload="true"
-                                                data-bs-toggle="tooltip" data-bs-placement="left"
-                                                data-bs-original-title="{{ get_label('delete', 'Delete') }}">
-                                                <i class="bx bx-trash"></i>
-                                            </a>
-                                        </div>
-                                    </div>
 
-                                    <h4><?= $note->title ?></h4>
-                                    @if ($note->note_type == 'text')
-                                        <p><?= $note->description ?></p>
-                                    @else
-                                        {!! $note->drawing_data !!}
-                                    @endif
-                                    <b><?= get_label('created_at', 'Created at') ?> : </b><span
-                                        class="text-primary">{{ format_date($note->created_at, true) }}</span>
-                                </div>
+        @if ($notes->count() > 0)
+            <div class="card mb-4">
+                <div class="card-body py-3">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="form-check m-0">
+                                <input type="checkbox" id="select-all" class="form-check-input">
+                                <label for="select-all" class="form-check-label">{{ get_label('select_all', 'Select All') }}</label>
                             </div>
-                        @endforeach
+                            <button type="button" id="delete-selected" class="btn btn-outline-danger btn-sm" data-type="notes">
+                                <i class="bx bx-trash me-1"></i> {{ get_label('delete_selected', 'Delete Selected') }}
+                            </button>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                @foreach ($notes as $note)
+                    <div class="col-md-6 col-xl-4">
+                        <div class="tcard h-100 tk-note-card" data-card-id="{{ $note->id }}">
+                            <div class="tcard-meta">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="checkbox" class="selected-items form-check-input" value="{{ $note->id }}">
+                                    <span class="tcard-code mono">#{{ $note->id }}</span>
+                                    @php
+                                        $colorMap = [
+                                            'info' => 'success',
+                                            'warning' => 'warning',
+                                            'danger' => 'danger'
+                                        ];
+                                        $displayColor = $colorMap[$note->color] ?? 'primary';
+                                        $labelText = [
+                                            'info' => get_label('green', 'Green'),
+                                            'warning' => get_label('yellow', 'Yellow'),
+                                            'danger' => get_label('red', 'Red')
+                                        ][$note->color] ?? ucfirst($note->color);
+                                    @endphp
+                                    <span class="badge bg-{{ $displayColor }} badge-xs" style="font-size: 10px; padding: 2px 6px;">
+                                        {{ $labelText }}
+                                    </span>
+                                    <span class="badge bg-secondary badge-xs" style="font-size: 10px; padding: 2px 6px;">
+                                        {{ ucfirst($note->note_type) }}
+                                    </span>
+                                </div>
+                                <div class="tcard-actions">
+                                    <a href="javascript:void(0);" class="tcard-ic edit-note" data-id="{{ $note->id }}" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('update', 'Update') }}">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    <a href="javascript:void(0);" class="tcard-ic delete" data-id="{{ $note->id }}" data-type="notes" data-reload="true" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ get_label('delete', 'Delete') }}">
+                                        <i class="bx bx-trash text-danger"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <h4 class="tcard-title mt-2 mb-1"><?= $note->title ?></h4>
+                            <div class="tcard-description flex-grow-1" style="font-size: 13px; color: var(--fg-2);">
+                                @if ($note->note_type == 'text')
+                                    <p class="mb-0" style="white-space: pre-wrap;"><?= $note->description ?></p>
+                                @else
+                                    <div class="drawing-content">
+                                        {!! $note->drawing_data !!}
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="tcard-foot border-top pt-2 mt-auto" style="font-size: 11px; color: var(--fg-3); border-top: 1px solid var(--line) !important;">
+                                <span><?= get_label('created_at', 'Created at') ?>: {{ format_date($note->created_at, true) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         @else
             <?php
@@ -155,18 +172,18 @@
             display: none !important;
         }
 
-        .sticky-content svg {
+        .drawing-content svg {
             max-width: 100%;
             height: auto;
             display: block;
             object-fit: contain;
         }
 
-        .sticky-content {
+        .drawing-content {
             overflow: hidden;
             /* Prevents drawing overflow */
-            padding: 10px;
-            /* Optional: adds spacing around drawing */
+            padding: 5px 0;
+            max-height: 200px;
         }
     </style>
 @endsection

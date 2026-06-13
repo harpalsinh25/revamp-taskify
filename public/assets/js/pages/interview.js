@@ -22,9 +22,16 @@ $(document).on('click', '.edit-interview-btn', function () {
     // Construct the form action URL dynamically
     const actionUrl = `/interviews/update/${interview.id}`;
     $('#editInterviewForm').attr('action', actionUrl);
-    // Set form values
-    $('#candidate_id').val(interview.candidate_id).trigger('change');
-    $('#interviewer_id').val(interview.interviewer_id).trigger('change');
+    if ($('#candidate_id')[0] && $('#candidate_id')[0].tomselect) {
+        $('#candidate_id')[0].tomselect.setValue(interview.candidate_id);
+    } else {
+        $('#candidate_id').val(interview.candidate_id).trigger('change');
+    }
+    if ($('#interviewer_id')[0] && $('#interviewer_id')[0].tomselect) {
+        $('#interviewer_id')[0].tomselect.setValue(interview.interviewer_id);
+    } else {
+        $('#interviewer_id').val(interview.interviewer_id).trigger('change');
+    }
     $('#round').val(interview.round || '');
     $('#scheduled_at').val(interview.scheduled_at || '');
     $('#mode').val(interview.mode || '');

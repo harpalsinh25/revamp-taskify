@@ -161,98 +161,6 @@
     }
 }
 
-/* ============================================================================
-   STICKY NOTES
-   ============================================================================ */
-.sticky-note-bg-primary {
-    background: #007bff;
-}
-
-.sticky-note-bg-secondary {
-    background: #6c757d;
-    color: #fff;
-}
-
-.sticky-note-bg-success {
-    background: #28a745;
-    color: #fff;
-}
-
-.sticky-note-bg-dark {
-    background: #343a40;
-    color: #fff;
-}
-
-.sticky-note-bg-info {
-    background: #cfc;
-}
-
-.sticky-note-bg-warning {
-    background: #ffc;
-}
-
-.sticky-note-bg-danger {
-    background: #fcc;
-}
-
-.sticky-notes,
-.sticky-note {
-    list-style: none;
-}
-
-.sticky-notes {
-    overflow: hidden;
-    padding: 2em;
-}
-
-.sticky-notes .sticky-note .sticky-content {
-    text-decoration: none;
-    color: #000;
-    display: block;
-    padding: 1em;
-    overflow-wrap: break-word;
-    box-shadow: 5px 5px 7px rgba(33, 33, 33, 0.3);
-    transition: transform 0.15s linear;
-    transform: rotate(-2deg);
-}
-
-.sticky-notes .sticky-note {
-    margin: 1em 0;
-}
-
-.sticky-notes .sticky-note:nth-child(even) .sticky-content {
-    transform: rotate(2deg);
-    position: relative;
-    top: 5px;
-}
-
-.sticky-notes .sticky-note:nth-child(3n) .sticky-content {
-    transform: rotate(-2deg);
-    position: relative;
-    top: -5px;
-}
-
-.sticky-notes .sticky-note:nth-child(5n) .sticky-content {
-    transform: rotate(2deg);
-    position: relative;
-    top: -10px;
-}
-
-.sticky-notes .sticky-note .sticky-content:hover,
-.sticky-notes .sticky-note .sticky-content:focus {
-    box-shadow: 10px 10px 7px rgba(0, 0, 0, 0.3);
-    transform: scale(1.05);
-    position: relative;
-    z-index: 5;
-}
-
-.sticky-notes .sticky-note .sticky-content i {
-    font-size: 12px;
-    float: right;
-    vertical-align: top;
-    padding: 6px;
-    cursor: pointer;
-}
 
 /* ============================================================================
    FLOATING ACTION BUTTONS & ICONS
@@ -2077,7 +1985,8 @@ html:not([dir="rtl"]) .timeline-item {
 /* On mobile screens, offcanvas will naturally take over if Bootstrap offcanvas classes are used */
 @media (max-width: 767.98px) {
     .calendar-sidebar {
-        width: 320px; /* Offcanvas width */
+        width: 320px;
+        /* Offcanvas width */
         max-width: 100vw;
     }
 }
@@ -8379,6 +8288,7 @@ body.v2-shell .ts-control {
 body.v2-shell .ts-control input {
     color: var(--fg-0) !important;
 }
+
 /* 
 body.v2-shell .ts-wrapper.focus .ts-control {
     border-color: var(--bs-primary) !important;
@@ -8445,40 +8355,84 @@ body.v2-shell .ts-control .item .remove:hover {
 
 /* ---- SCHEDULE ROW ---- */
 .sched-row {
-  display: grid;
-  grid-template-columns: 56px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--bs-border-color);
-  position: relative;
-  transition: background var(--t-1, 0.2s ease);
-  background: var(--bs-card-bg);
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--bs-border-color);
+    position: relative;
+    transition: background var(--t-1, 0.2s ease);
+    background: var(--bs-card-bg);
 }
-.sched-row:first-child { border-top: 0; }
-.sched-row:hover { background: var(--bs-body-bg); }
+
+.sched-row:first-child {
+    border-top: 0;
+}
+
+.sched-row:hover {
+    background: var(--bs-body-bg);
+}
+
 .sched-row[data-soon="true"]::before {
-  content: ''; position: absolute;
-  left: 0; top: 8px; bottom: 8px;
-  width: 2px;
-  background: var(--bs-primary);
-  border-radius: 0 2px 2px 0;
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--bs-primary);
+    border-radius: 0 2px 2px 0;
 }
-.sched-time { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
-.sched-t { font-size: 12.5px; font-weight: 600; color: var(--bs-heading-color); }
-.sched-d { font-size: 10px; color: var(--bs-secondary-color); }
-.sched-content { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+.sched-time {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1;
+}
+
+.sched-t {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--bs-heading-color);
+}
+
+.sched-d {
+    font-size: 10px;
+    color: var(--bs-secondary-color);
+}
+
+.sched-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
 .sched-name {
-  font-size: 12.5px; color: var(--bs-body-color); font-weight: 500;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  min-width: 0; flex: 0 1 auto;
+    font-size: 12.5px;
+    color: var(--bs-body-color);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 0 1 auto;
 }
-.sched-row[data-soon="true"] .sched-name { color: var(--bs-heading-color); }
+
+.sched-row[data-soon="true"] .sched-name {
+    color: var(--bs-heading-color);
+}
+
 .sched-soon {
-  font-size: 10px; color: var(--bs-primary);
-  font-weight: 600;
-  padding: 3px 6px; border-radius: 3px;
-  background: rgba(var(--bs-primary-rgb), 0.1); white-space: nowrap;
+    font-size: 10px;
+    color: var(--bs-primary);
+    font-weight: 600;
+    padding: 3px 6px;
+    border-radius: 3px;
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    white-space: nowrap;
 }
 
 /* ---- FullCalendar Design System Skin ---- */
@@ -8564,7 +8518,7 @@ body.v2-shell .calendar-sidebar [id^="filtered-"] {
 }
 
 /* FullCalendar Component Overrides */
-body.v2-shell .fc-theme-standard td, 
+body.v2-shell .fc-theme-standard td,
 body.v2-shell .fc-theme-standard th {
     border-color: var(--line) !important;
 }
@@ -8599,7 +8553,7 @@ body.v2-shell .fc-button-primary:hover {
     color: var(--fg-0) !important;
 }
 
-body.v2-shell .fc-button-primary:not(:disabled).fc-button-active, 
+body.v2-shell .fc-button-primary:not(:disabled).fc-button-active,
 body.v2-shell .fc-button-primary:not(:disabled):active {
     background-color: var(--fg-0) !important;
     color: var(--bg-0) !important;
@@ -8703,7 +8657,7 @@ body.v2-shell .fc-event-main {
     max-width: 100% !important;
 }
 
-body.v2-shell .fc-event-title, 
+body.v2-shell .fc-event-title,
 body.v2-shell .fc-event-time,
 body.v2-shell .fc-event a,
 body.v2-shell .fc-event span {
@@ -8720,22 +8674,27 @@ body.v2-shell .fc-event.bg-light-primary {
     border-left: 3px solid var(--bs-primary) !important;
     background-color: var(--bg-0) !important;
 }
+
 body.v2-shell .fc-event.bg-light-secondary {
     border-left: 3px solid var(--bs-secondary) !important;
     background-color: var(--bg-0) !important;
 }
+
 body.v2-shell .fc-event.bg-light-success {
     border-left: 3px solid var(--bs-success) !important;
     background-color: var(--bg-0) !important;
 }
+
 body.v2-shell .fc-event.bg-light-danger {
     border-left: 3px solid var(--bs-danger) !important;
     background-color: var(--bg-0) !important;
 }
+
 body.v2-shell .fc-event.bg-light-warning {
     border-left: 3px solid var(--bs-warning) !important;
     background-color: var(--bg-0) !important;
 }
+
 body.v2-shell .fc-event.bg-light-info {
     border-left: 3px solid var(--bs-info) !important;
     background-color: var(--bg-0) !important;
@@ -8746,11 +8705,13 @@ body.v2-shell .fc-event.bg-light-info {
     padding: 0 !important;
     border: none !important;
 }
+
 .fc-list-event .fc-list-event-dot,
 .fc-list-event .fc-list-event-time,
 .fc-list-event .fc-list-event-title {
     display: none !important;
 }
+
 .fc-list-event .custom-sched-wrapper {
     display: block !important;
     width: 100%;

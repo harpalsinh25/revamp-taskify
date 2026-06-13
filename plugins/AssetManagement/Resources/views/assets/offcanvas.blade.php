@@ -1,14 +1,14 @@
 @if (isset($categories) && isset($users))
     <div class="offcanvas offcanvas-end offcanvas-responsive" tabindex="-1" id="createAssetOffcanvas"
         aria-labelledby="CreateAssetOffcanvasLabel" >
-        <div class="offcanvas-header text-white">
+        <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title" id="CreateAssetOffcanvasLabel">
-                <i class="bx bx-plus me-2"></i>{{ get_label('create_asset', 'Create Asset') }}
+                {{ get_label('create_asset', 'Create Asset') }}
             </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
                 aria-label="{{ get_label('close', 'Close') }}"></button>
         </div>
-        <div class="offcanvas-body bg-light p-4">
+        <div class="offcanvas-body p-4">
             <form id="assetForm" class="asset-form-submit-event" action="{{ route('assets.store') }}" method="POST"
                 enctype="multipart/form-data">
                 <input type="hidden" name="dnr" />
@@ -46,10 +46,13 @@
                                     <label for="create-asset-category" class="form-label fw-semibold">
                                         {{ get_label('category', 'Category') }} <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select select-asset-category" id="create-asset-category"
-                                        name="category_id"
-                                        data-placeholder="{{ get_label('select_category', 'Select Category') }}"
-                                        data-single-select="true">
+                                    <select class="form-select tom_static_select" id="create-asset-category"
+                                        name="category_id" required
+                                        data-placeholder="{{ get_label('select_category', 'Select Category') }}">
+                                        <option value=""></option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
                                     </select>
                                     <div class="d-flex mt-2 gap-2">
                                         <a href="javascript:void(0);" id="createCategoryModalBtn">
@@ -74,7 +77,7 @@
                                     <label for="create-asset-status" class="form-label fw-semibold">
                                         {{ get_label('status', 'Status') }} <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select asset_status" id="" name="status"
+                                    <select class="form-select tom_static_select" id="create-asset-status" name="status"
                                         data-placeholder="{{ get_label('select_statuse', 'Select Status') }}">
                                         <option value="available">{{ get_label('available', 'Available') }}</option>
                                         <option value="non-functional">
@@ -189,12 +192,12 @@
                 </div>
 
                 <!-- Offcanvas Footer -->
-                <div class="bg-light border-top mt-4 p-3">
+                <div class="d-flex justify-content-end mt-4 gap-2">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-                        <i class="bx bx-x me-1"></i> {{ get_label('close', 'Close') }}
+                        {{ get_label('close', 'Close') }}
                     </button>
-                    <button type="submit" id="create-submit-btn" class="btn btn-primary ms-2">
-                        <i class="bx bx-save me-1"></i> {{ get_label('create', 'Create') }}
+                    <button type="submit" id="create-submit-btn" class="btn btn-primary">
+                        {{ get_label('create', 'Create') }}
                     </button>
                 </div>
             </form>
@@ -204,14 +207,14 @@
     <!-- Update Asset Offcanvas -->
     <div class="offcanvas offcanvas-end offcanvas-responsive" tabindex="-1" id="updateAssetOffcanvas"
         aria-labelledby="UpdateAssetOffcanvasLabel">
-        <div class="offcanvas-header text-white">
+        <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title" id="UpdateAssetOffcanvasLabel">
-                <i class="bx bx-edit me-2"></i>{{ get_label('update_asset', 'Update Asset') }}
+                {{ get_label('update_asset', 'Update Asset') }}
             </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
                 aria-label="{{ get_label('close', 'Close') }}"></button>
         </div>
-        <div class="offcanvas-body bg-light p-4">
+        <div class="offcanvas-body p-4">
             <form id="updateAssetForm" class="asset-form-submit-event" action="" method="POST"
                 enctype="multipart/form-data">
                 @csrf
@@ -250,10 +253,10 @@
                                     <label for="update-asset-category" class="form-label fw-semibold">
                                         {{ get_label('category', 'Category') }} <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select select-asset-category" id="update-asset-category"
+                                    <select class="form-select tom_static_select" id="update-asset-category"
                                         name="category_id" required
-                                        data-placeholder="{{ get_label('select_category', 'Select Category') }}"
-                                        data-single-select="true">
+                                        data-placeholder="{{ get_label('select_category', 'Select Category') }}">
+                                        <option value=""></option>
                                         @foreach ($categories as $category)
                                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                                         @endforeach
@@ -281,7 +284,7 @@
                                     <label for="update-asset-status" class="form-label fw-semibold">
                                         {{ get_label('status', 'Status') }} <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select asset_status" id="update-asset-status" name="status"
+                                    <select class="form-select tom_static_select" id="update-asset-status" name="status"
                                         data-placeholder="{{ get_label('select_statuse', 'Select Status') }}">
                                         <option value="available">{{ get_label('available', 'Available') }}</option>
                                         <option value="non-functional">
@@ -400,12 +403,12 @@
                 </div>
 
                 <!-- Offcanvas Footer -->
-                <div class="bg-light border-top mt-4 p-3">
+                <div class="d-flex justify-content-end mt-4 gap-2">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-                        <i class="bx bx-x me-1"></i> {{ get_label('close', 'Close') }}
+                        {{ get_label('close', 'Close') }}
                     </button>
-                    <button type="submit" id="update-submit-btn" class="btn btn-primary ms-2">
-                        <i class="bx bx-save me-1"></i> {{ get_label('update', 'Update') }}
+                    <button type="submit" id="update-submit-btn" class="btn btn-primary">
+                        {{ get_label('update', 'Update') }}
                     </button>
                 </div>
             </form>
@@ -436,14 +439,14 @@
 <!-- Bulk Assign Assets Offcanvas -->
 <div class="offcanvas offcanvas-end w-50" tabindex="-1" id="bulkAssignOffcanvas"
     aria-labelledby="bulkAssignOffcanvasLabel" style="max-width: calc(100% - 250px);">
-    <div class="offcanvas-header text-white">
+    <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title" id="bulkAssignOffcanvasLabel">
-            <i class="bx bx-user-plus me-2"></i>{{ get_label('bulk_assign_asset', 'Bulk Assign Assets') }}
+            {{ get_label('bulk_assign_asset', 'Bulk Assign Assets') }}
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
             aria-label="{{ get_label('close', 'Close') }}"></button>
     </div>
-    <div class="offcanvas-body bg-light p-4">
+    <div class="offcanvas-body p-4">
         <form id="bulkAssignForm" class="asset-form-submit-event" method="POST"
             action="{{ route('assets.bulk-assign') }}">
             @csrf
@@ -452,10 +455,9 @@
 
             <div class="row g-4">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header text-white">
+                    <div class="card border shadow-none">
+                        <div class="card-header border-bottom">
                             <h6 class="card-title mb-0">
-                                <i class="bx bx-info-circle me-2"></i>
                                 {{ get_label('assignment_details', 'Assignment Details') }}
                             </h6>
                         </div>
@@ -466,10 +468,13 @@
                                     {{ get_label('assign_to_user', 'Assign To User') }} <span
                                         class="text-danger">*</span>
                                 </label>
-                                <select class="form-select select-asset-assigned_to" id="create-asset-assign-to"
+                                <select class="form-select tom_static_select" id="create-asset-assign-to"
                                     name="assigned_to"
-                                    data-placeholder="{{ get_label('select_user', 'Select User') }}"
-                                    data-single-select="true" required>
+                                    data-placeholder="{{ get_label('select_user', 'Select User') }}" required>
+                                    <option value=""></option>
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
+                                    @endforeach
                                 </select>
                                 <div class="form-text">
                                     <small
@@ -485,10 +490,15 @@
                                 </label>
 
                                 <div id="available-assets-list">
-                                    <select class="form-select select-assets" name="asset_ids[]"
-                                        aria-label="Default select example"
-                                        data-placeholder="<?= get_label('select_assets', 'Select Assets ') ?>"
-                                        data-allow-clear="true" multiple required></select>
+                                    <select class="form-select tom_static_select" name="asset_ids[]"
+                                        data-placeholder="{{ get_label('select_assets', 'Select Assets') }}"
+                                        multiple required>
+                                        @foreach ($assets as $asset)
+                                            @if ($asset->status === 'available')
+                                                <option value="{{ $asset->id }}">{{ $asset->name }} ({{ $asset->asset_tag }})</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="form-text">
@@ -515,12 +525,12 @@
             </div>
 
             <!-- Offcanvas Footer -->
-            <div class="bg-light border-top mt-4 p-3">
+            <div class="d-flex justify-content-end mt-4 gap-2">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-                    <i class="bx bx-x me-1"></i> {{ get_label('cancel', 'Cancel') }}
+                    {{ get_label('cancel', 'Cancel') }}
                 </button>
-                <button type="submit" id="bulk-assign-submit" class="btn btn-primary ms-2">
-                    <i class="bx bx-save me-1"></i> {{ get_label('assign_assets', 'Assign Assets') }}
+                <button type="submit" id="bulk-assign-submit" class="btn btn-primary">
+                    {{ get_label('assign_assets', 'Assign Assets') }}
                 </button>
             </div>
         </form>
@@ -598,14 +608,14 @@
 <!-- Create Category Offcanvas -->
 <div class="offcanvas offcanvas-end w-50" tabindex="-1" id="createCategoryOffcanvas"
     aria-labelledby="createCategoryOffcanvasLabel" style="max-width: calc(100% - 250px);">
-    <div class="offcanvas-header text-white">
+    <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title" id="createCategoryOffcanvasLabel">
-            <i class="bx bx-plus me-2"></i>{{ get_label('create_asset_category', 'Create Asset Category') }}
+            {{ get_label('create_asset_category', 'Create Asset Category') }}
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
             aria-label="{{ get_label('close', 'Close') }}"></button>
     </div>
-    <div class="offcanvas-body bg-light p-4">
+    <div class="offcanvas-body p-4">
         <form id="createCategoryForm" class="asset-form-submit-event" method="POST"
             action="{{ route('assets.category.store') }}">
             @csrf
@@ -622,33 +632,26 @@
                         <label for="color" class="form-label fw-semibold">
                             {{ get_label('color', 'Color') }} <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select select-bg-label-primary" id="color" name="color">
-                            <option class="badge bg-label-primary" value="primary"
-                                {{ old('color') == 'primary' ? 'selected' : '' }}>
+                        <select class="form-select tom_static_select" id="color" name="color">
+                            <option value="primary" {{ old('color') == 'primary' ? 'selected' : '' }}>
                                 {{ get_label('primary', 'Primary') }}
                             </option>
-                            <option class="badge bg-label-secondary" value="secondary"
-                                {{ old('color') == 'secondary' ? 'selected' : '' }}>
+                            <option value="secondary" {{ old('color') == 'secondary' ? 'selected' : '' }}>
                                 {{ get_label('secondary', 'Secondary') }}
                             </option>
-                            <option class="badge bg-label-success" value="success"
-                                {{ old('color') == 'success' ? 'selected' : '' }}>
+                            <option value="success" {{ old('color') == 'success' ? 'selected' : '' }}>
                                 {{ get_label('success', 'Success') }}
                             </option>
-                            <option class="badge bg-label-danger" value="danger"
-                                {{ old('color') == 'danger' ? 'selected' : '' }}>
+                            <option value="danger" {{ old('color') == 'danger' ? 'selected' : '' }}>
                                 {{ get_label('danger', 'Danger') }}
                             </option>
-                            <option class="badge bg-label-warning" value="warning"
-                                {{ old('color') == 'warning' ? 'selected' : '' }}>
+                            <option value="warning" {{ old('color') == 'warning' ? 'selected' : '' }}>
                                 {{ get_label('warning', 'Warning') }}
                             </option>
-                            <option class="badge bg-label-info" value="info"
-                                {{ old('color') == 'info' ? 'selected' : '' }}>
+                            <option value="info" {{ old('color') == 'info' ? 'selected' : '' }}>
                                 {{ get_label('info', 'Info') }}
                             </option>
-                            <option class="badge bg-label-dark" value="dark"
-                                {{ old('color') == 'dark' ? 'selected' : '' }}>
+                            <option value="dark" {{ old('color') == 'dark' ? 'selected' : '' }}>
                                 {{ get_label('dark', 'Dark') }}
                             </option>
                         </select>
@@ -661,12 +664,12 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-light border-top mt-4 p-3">
+            <div class="d-flex justify-content-end mt-4 gap-2">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-                    <i class="bx bx-x me-1"></i> {{ get_label('close', 'Close') }}
+                    {{ get_label('close', 'Close') }}
                 </button>
-                <button type="submit" id="submit_btn" class="btn btn-primary ms-2">
-                    <i class="bx bx-save me-1"></i> {{ get_label('create', 'Create') }}
+                <button type="submit" id="submit_btn" class="btn btn-primary">
+                    {{ get_label('create', 'Create') }}
                 </button>
             </div>
         </form>
@@ -676,14 +679,14 @@
 <!-- Update Category Offcanvas -->
 <div class="offcanvas offcanvas-end w-50" tabindex="-1" id="updateCategoryOffcanvas"
     aria-labelledby="updateCategoryOffcanvasLabel" style="max-width: calc(100% - 250px);">
-    <div class="offcanvas-header text-white">
+    <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title" id="updateCategoryOffcanvasLabel">
-            <i class="bx bx-edit me-2"></i>{{ get_label('update_asset_category', 'Update Asset Category') }}
+            {{ get_label('update_asset_category', 'Update Asset Category') }}
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
             aria-label="{{ get_label('close', 'Close') }}"></button>
     </div>
-    <div class="offcanvas-body bg-light p-4">
+    <div class="offcanvas-body p-4">
         <form id="updateCategoryForm" class="asset-form-submit-event" method="POST" action="">
             @csrf
             <input type="hidden" name="dnr">
@@ -699,33 +702,26 @@
                         <label for="category_color" class="form-label fw-semibold">
                             {{ get_label('color', 'Color') }} <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select select-bg-label-primary" id="category_color" name="color">
-                            <option class="badge bg-label-primary" value="primary"
-                                {{ old('color') == 'primary' ? 'selected' : '' }}>
+                        <select class="form-select tom_static_select" id="category_color" name="color">
+                            <option value="primary" {{ old('color') == 'primary' ? 'selected' : '' }}>
                                 {{ get_label('primary', 'Primary') }}
                             </option>
-                            <option class="badge bg-label-secondary" value="secondary"
-                                {{ old('color') == 'secondary' ? 'selected' : '' }}>
+                            <option value="secondary" {{ old('color') == 'secondary' ? 'selected' : '' }}>
                                 {{ get_label('secondary', 'Secondary') }}
                             </option>
-                            <option class="badge bg-label-success" value="success"
-                                {{ old('color') == 'success' ? 'selected' : '' }}>
+                            <option value="success" {{ old('color') == 'success' ? 'selected' : '' }}>
                                 {{ get_label('success', 'Success') }}
                             </option>
-                            <option class="badge bg-label-danger" value="danger"
-                                {{ old('color') == 'danger' ? 'selected' : '' }}>
+                            <option value="danger" {{ old('color') == 'danger' ? 'selected' : '' }}>
                                 {{ get_label('danger', 'Danger') }}
                             </option>
-                            <option class="badge bg-label-warning" value="warning"
-                                {{ old('color') == 'warning' ? 'selected' : '' }}>
+                            <option value="warning" {{ old('color') == 'warning' ? 'selected' : '' }}>
                                 {{ get_label('warning', 'Warning') }}
                             </option>
-                            <option class="badge bg-label-info" value="info"
-                                {{ old('color') == 'info' ? 'selected' : '' }}>
+                            <option value="info" {{ old('color') == 'info' ? 'selected' : '' }}>
                                 {{ get_label('info', 'Info') }}
                             </option>
-                            <option class="badge bg-label-dark" value="dark"
-                                {{ old('color') == 'dark' ? 'selected' : '' }}>
+                            <option value="dark" {{ old('color') == 'dark' ? 'selected' : '' }}>
                                 {{ get_label('dark', 'Dark') }}
                             </option>
                         </select>
@@ -738,12 +734,12 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-light border-top mt-4 p-3">
+            <div class="d-flex justify-content-end mt-4 gap-2">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-                    <i class="bx bx-x me-1"></i> {{ get_label('close', 'Close') }}
+                    {{ get_label('close', 'Close') }}
                 </button>
-                <button type="submit" id="submit_btn" class="btn btn-primary ms-2">
-                    <i class="bx bx-save me-1"></i> {{ get_label('update', 'Update') }}
+                <button type="submit" id="submit_btn" class="btn btn-primary">
+                    {{ get_label('update', 'Update') }}
                 </button>
             </div>
         </form>

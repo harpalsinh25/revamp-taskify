@@ -2168,81 +2168,45 @@
             <form class="modal-content form-submit-event" action="{{ url('notes/store') }}" method="POST"
                 enctype="multipart/form-data">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_note', 'Create note') ?>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_note', 'Create note') ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="noteType" class="form-label"><?= get_label('note_type', 'Note Type') ?>
-                                <span class="asterisk">*</span></label>
-                            <select id="noteType" class="form-select" name="note_type">
-                                <option value="text" selected><?= get_label('text_note', 'Text Note') ?></option>
-                                <option value="drawing"><?= get_label('drawing_note', 'Drawing Note') ?></option>
-                            </select>
-                        </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label for="noteType" class="form-label"><?= get_label('note_type', 'Note Type') ?> <span class="asterisk">*</span></label>
+                        <select id="noteType" class="form-select" name="note_type">
+                            <option value="text" selected><?= get_label('text_note', 'Text Note') ?></option>
+                            <option value="drawing"><?= get_label('drawing_note', 'Drawing Note') ?></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="noteColor" class="form-label"><?= get_label('color', 'Color') ?> <span class="asterisk">*</span></label>
+                        <select id="noteColor" class="form-select select-bg-label-success" name="color">
+                            <option class="badge bg-label-success" value="info" {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('green', 'Green') ?></option>
+                            <option class="badge bg-label-warning" value="warning" {{ old('color') == 'warning' ? 'selected' : '' }}><?= get_label('yellow', 'Yellow') ?></option>
+                            <option class="badge bg-label-danger" value="danger" {{ old('color') == 'danger' ? 'selected' : '' }}><?= get_label('red', 'Red') ?></option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span class="asterisk">*</span></label>
+                        <input type="text" id="nameBasic" class="form-control" name="title" placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
                     </div>
                     <!-- Text Note Section -->
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
-                                    class="asterisk">*</span></label>
-                            <input type="text" id="nameBasic" class="form-control" name="title"
-                                placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
-                        </div>
-                    </div>
-                    <div id="text-note-section">
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="noteDescription"
-                                    class="form-label"><?= get_label('description', 'Description') ?></label>
-                                <textarea id="noteDescription" class="form-control description" name="description"
-                                    placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
-                            </div>
-                        </div>
+                    <div id="text-note-section" class="col-12">
+                        <label for="noteDescription" class="form-label"><?= get_label('description', 'Description') ?></label>
+                        <textarea id="noteDescription" class="form-control description" name="description" placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                     </div>
                     <!-- Drawing Note Section (Hidden Initially) -->
-                    <div id="drawing-note-section" class="d-none">
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="drawing-container"
-                                    class="form-label"><?= get_label('drawing', 'Drawing') ?></label>
-                                <div id="drawing-container" class="drawing-container"></div>
-                                <input type="hidden" id="drawing_data" name="drawing_data" value="">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Color Selection -->
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="noteColor" class="form-label"><?= get_label('color', 'Color') ?> <span
-                                    class="asterisk">*</span></label>
-                            <select id="noteColor" class="form-select select-bg-label-success" name="color">
-                                <option class="badge bg-label-success" value="info"
-                                    {{ old('color') == 'info' ? 'selected' : '' }}>
-                                    <?= get_label('green', 'Green') ?>
-                                </option>
-                                <option class="badge bg-label-warning" value="warning"
-                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
-                                    <?= get_label('yellow', 'Yellow') ?>
-                                </option>
-                                <option class="badge bg-label-danger" value="danger"
-                                    {{ old('color') == 'danger' ? 'selected' : '' }}>
-                                    <?= get_label('red', 'Red') ?>
-                                </option>
-                            </select>
-                        </div>
+                    <div id="drawing-note-section" class="col-12 d-none">
+                        <label for="drawing-container" class="form-label"><?= get_label('drawing', 'Drawing') ?></label>
+                        <div id="drawing-container" class="drawing-container"></div>
+                        <input type="hidden" id="drawing_data" name="drawing_data" value="">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <?= get_label('close', 'Close') ?>
-                    </button>
-                    <button type="submit" class="btn btn-primary"
-                        id="submit_btn"><?= get_label('create', 'Create') ?></button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= get_label('close', 'Close') ?></button>
+                    <button type="submit" class="btn btn-primary" id="submit_btn"><?= get_label('create', 'Create') ?></button>
                 </div>
             </form>
         </div>
@@ -2252,74 +2216,42 @@
             <form class="modal-content form-submit-event" action="{{ url('notes/update') }}" method="POST">
                 <input type="hidden" name="id" id="note_id">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_note', 'Update note') ?>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_note', 'Update note') ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="noteType" class="form-label"><?= get_label('note_type', 'Note Type') ?>
-                                <span class="asterisk">*</span></label>
-                            <input type="hidden" id="editNoteType" name="note_type" value="">
-                            <input type="text" class="form-control" id="editNoteTypeDisplay" readonly>
-                        </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label for="noteType" class="form-label"><?= get_label('note_type', 'Note Type') ?> <span class="asterisk">*</span></label>
+                        <input type="hidden" id="editNoteType" name="note_type" value="">
+                        <input type="text" class="form-control" id="editNoteTypeDisplay" readonly>
                     </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
-                                    class="asterisk">*</span></label>
-                            <input type="text" class="form-control" id="note_title" name="title"
-                                placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
-                        </div>
+                    <div class="col-md-6">
+                        <label for="note_color" class="form-label"><?= get_label('color', 'Color') ?> <span class="asterisk">*</span></label>
+                        <select class="form-select select-bg-label-success" id="note_color" name="color">
+                            <option class="badge bg-label-info" value="info" {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('green', 'Green') ?></option>
+                            <option class="badge bg-label-warning" value="warning" {{ old('color') == 'warning' ? 'selected' : '' }}><?= get_label('yellow', 'Yellow') ?></option>
+                            <option class="badge bg-label-danger" value="danger" {{ old('color') == 'danger' ? 'selected' : '' }}><?= get_label('red', 'Red') ?></option>
+                        </select>
                     </div>
-                    <div id="edit-text-note-section">
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="nameBasic"
-                                    class="form-label"><?= get_label('description', 'Description') ?></label>
-                                <textarea class="form-control description" id="note_description" name="description"
-                                    placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
-                            </div>
-                        </div>
+                    <div class="col-12">
+                        <label for="note_title" class="form-label"><?= get_label('title', 'Title') ?> <span class="asterisk">*</span></label>
+                        <input type="text" class="form-control" id="note_title" name="title" placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
+                    </div>
+                    <div id="edit-text-note-section" class="col-12">
+                        <label for="note_description" class="form-label"><?= get_label('description', 'Description') ?></label>
+                        <textarea class="form-control description" id="note_description" name="description" placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                     </div>
                     <!-- Drawing Note Section (Hidden Initially) -->
-                    <div id="edit-drawing-note-section" class="d-none">
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="drawing-container"
-                                    class="form-label"><?= get_label('drawing', 'Drawing') ?></label>
-                                <div id="edit_drawing-container" class="drawing-container"></div>
-                                <input type="hidden" id="edit_drawing_data" name="drawing_data" value="">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
-                                    class="asterisk">*</span></label>
-                            <select class="form-select select-bg-label-success" id="note_color" name="color">
-                                <option class="badge bg-label-info" value="info"
-                                    {{ old('color') == 'info' ? 'selected' : '' }}><?= get_label('green', 'Green') ?>
-                                </option>
-                                <option class="badge bg-label-warning" value="warning"
-                                    {{ old('color') == 'warning' ? 'selected' : '' }}>
-                                    <?= get_label('yellow', 'Yellow') ?></option>
-                                <option class="badge bg-label-danger" value="danger"
-                                    {{ old('color') == 'danger' ? 'selected' : '' }}><?= get_label('red', 'Red') ?>
-                                </option>
-                            </select>
-                        </div>
+                    <div id="edit-drawing-note-section" class="col-12 d-none">
+                        <label for="edit_drawing-container" class="form-label"><?= get_label('drawing', 'Drawing') ?></label>
+                        <div id="edit_drawing-container" class="drawing-container"></div>
+                        <input type="hidden" id="edit_drawing_data" name="drawing_data" value="">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <?= get_label('close', 'Close') ?></label>
-                    </button>
-                    <button type="submit" class="btn btn-primary"
-                        id="submit_btn"><?= get_label('update', 'Update') ?></label></button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= get_label('close', 'Close') ?></button>
+                    <button type="submit" class="btn btn-primary" id="submit_btn"><?= get_label('update', 'Update') ?></button>
                 </div>
             </form>
         </div>
@@ -5927,7 +5859,7 @@
                     <div class="modal-body row g-3">
                         {{-- Candidate --}}
                         <div class="form-group col-md-6">
-                            <label for="candidate_id">Candidate <span class="text-danger">*</span></label>
+                            <label for="candidate_id" class="form-label">Candidate <span class="text-danger">*</span></label>
                             @if (Route::currentRouteName() == 'interviews.index')
                                 <select class="form-select select-interview-candidate"
                                     id="select_interview_candidate" name="candidate_id" required
@@ -5942,7 +5874,7 @@
                         </div>
                         {{-- Interviewer --}}
                         <div class="form-group col-md-6">
-                            <label for="interviewer_id">Interviewer <span class="text-danger">*</span></label>
+                            <label for="interviewer_id" class="form-label">Interviewer <span class="text-danger">*</span></label>
                             <select class="form-select select-interview-interviewer"
                                 id="select_interview_interviewer" name="interviewer_id" required
                                 data-placeholder="{{ get_label('select_interviewer', 'Select Interviewer') }}"
@@ -5951,18 +5883,18 @@
                         </div>
                         {{-- Round --}}
                         <div class="form-group col-md-6">
-                            <label for="round">Round <span class="text-danger">*</span></label>
+                            <label for="round" class="form-label">Round <span class="text-danger">*</span></label>
                             <input type="text" name="round" class="form-control"
                                 placeholder="e.g. Technical, HR" required>
                         </div>
                         {{-- Scheduled At --}}
                         <div class="form-group col-md-6">
-                            <label for="scheduled_at">Scheduled At <span class="text-danger">*</span></label>
+                            <label for="scheduled_at" class="form-label">Scheduled At <span class="text-danger">*</span></label>
                             <input type="datetime-local" name="scheduled_at" class="form-control" required>
                         </div>
                         {{-- Mode --}}
                         <div class="form-group col-md-6">
-                            <label for="mode">Mode <span class="text-danger">*</span></label>
+                            <label for="mode" class="form-label">Mode <span class="text-danger">*</span></label>
                             <select name="mode" class="form-select" required>
                                 <option value="">Select Mode</option>
                                 <option value="online">Online</option>
@@ -5971,13 +5903,13 @@
                         </div>
                         {{-- Location --}}
                         <div class="form-group col-md-6">
-                            <label for="location">Location</label>
+                            <label for="location" class="form-label">Location</label>
                             <input type="text" name="location" class="form-control"
                                 placeholder="e.g. Zoom link or Office Room No.">
                         </div>
                         {{-- Status --}}
                         <div class="form-group col-md-6">
-                            <label for="status">Status <span class="text-danger">*</span></label>
+                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
                             <select name="status" class="form-select" required>
                                 <option value="">Select Status</option>
                                 <option value="scheduled">Scheduled</option>
@@ -6012,9 +5944,9 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <div class="modal-body row">
+                    <div class="modal-body row g-3">
                         <div class="form-group col-md-6">
-                            <label for="candidate_id">Candidate</label>
+                            <label for="candidate_id" class="form-label">Candidate</label>
                             @if (Route::currentRouteName() == 'interviews.index')
                                 <select name="candidate_id" id="candidate_id"
                                     class="form-control select-interview-candidate" required
@@ -6033,7 +5965,7 @@
                             @endif
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="interviewer_id">Interviewer</label>
+                            <label for="interviewer_id" class="form-label">Interviewer</label>
                             <select name="interviewer_id" id="interviewer_id"
                                 class="form-control select-interview-interviewer" required
                                 data-placeholder="{{ get_label('select_interviewer', 'Select Interviewer') }}"
@@ -6046,17 +5978,17 @@
                             </select>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="round">Round</label>
+                            <label for="round" class="form-label">Round</label>
                             <input type="text" name="round" id="round" class="form-control"
                                 placeholder="e.g. Technical, HR" required>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="scheduled_at">Scheduled At</label>
+                            <label for="scheduled_at" class="form-label">Scheduled At</label>
                             <input type="datetime-local" name="scheduled_at" id="scheduled_at"
                                 class="form-control" required>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="mode">Mode</label>
+                            <label for="mode" class="form-label">Mode</label>
                             <select name="mode" id="mode" class="form-control" required>
                                 <option value="">Select Mode</option>
                                 <option value="online">Online</option>
@@ -6064,13 +5996,13 @@
                             </select>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="location">Location</label>
+                            <label for="location" class="form-label">Location</label>
                             <input type="text" name="location" id="location" class="form-control"
                                 placeholder="e.g. Zoom link or Office Room No.">
                         </div>
                         <!-- New Status Field for Editing -->
                         <div class="form-group col-md-6">
-                            <label for="status">Status</label>
+                            <label for="status" class="form-label">Status</label>
                             <select name="status" id="status" class="form-control" required>
                                 <option value="">Select Status</option>
                                 <option value="scheduled">Scheduled</option>
@@ -6080,7 +6012,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" id="submit_btn" id="submit_btn" class="btn btn-primary">Update
+                        <button type="submit" id="submit_btn" class="btn btn-primary">Update
                             Interview</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>

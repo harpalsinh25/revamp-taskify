@@ -134,24 +134,30 @@ class AssetsCategoryController extends Controller
             ->map(function ($assetCategory) use ($canEdit, $canDelete) {
                 $actions = '';
 
-                if ($canEdit) {
-                    $actions .= '<a href="javascript:void(0);" class="updateCategoryModal"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#updateCategoryOffcanvas"
-                        data-asset-category=\'' . htmlspecialchars(json_encode($assetCategory), ENT_QUOTES, 'UTF-8') . '\'
-                        title="' . get_label('update', 'Update') . '">
-                        <i class="bx bx-edit mx-1"></i>
-                    </a>';
-                }
+                $hasActions = $canEdit || $canDelete;
 
-                if ($canDelete) {
-                    $actions .= '<button type="button"
-                        class="btn delete"
-                        data-id="' . $assetCategory->id . '"
-                        data-type="assets/category"
-                        title="' . get_label('delete', 'Delete') . '">
-                        <i class="bx bx-trash text-danger mx-1"></i>
-                    </button>';
+                if ($hasActions) {
+                    $actions = '<div class="dropdown">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+                    $actions .= '</button>';
+                    $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
+
+                    if ($canEdit) {
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item updateCategoryModal d-block" data-bs-toggle="offcanvas" data-bs-target="#updateCategoryOffcanvas" data-asset-category=\'' . htmlspecialchars(json_encode($assetCategory), ENT_QUOTES, 'UTF-8') . '\'>';
+                        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+                    }
+
+                    if ($canDelete) {
+                        $actions .= '<li><hr class="dropdown-divider"></li>';
+                        $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $assetCategory->id . '" data-type="assets/category">';
+                        $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+                    }
+
+                    $actions .= '</ul>';
+                    $actions .= '</div>';
+                } else {
+                    $actions = '-';
                 }
 
                 return [
