@@ -2,6 +2,28 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-14] - Breadcrumbs Layout Standardization
+### Modified
+- **Projects, Tasks, Notes, and Leads Views**:
+  - Replaced legacy flat `<nav class="breadcrumb">` structure and hardcoded `/` span separators with the Sneat-native standard `<nav aria-label="breadcrumb"><ol class="breadcrumb breadcrumb-style1"><li class="breadcrumb-item">...</li></ol></nav>` breadcrumbs markup in 12 Blade view files:
+    - `resources/views/projects/projects.blade.php`
+    - `resources/views/projects/grid_view.blade.php`
+    - `resources/views/projects/kanban.blade.php`
+    - `resources/views/tasks/tasks.blade.php`
+    - `resources/views/tasks/board_view.blade.php`
+    - `resources/views/tasks/group_by_task_lists.blade.php`
+    - `resources/views/tasks/calendar_view.blade.php`
+    - `resources/views/notes/list.blade.php`
+    - `resources/views/leads/show.blade.php`
+    - `resources/views/leads/kanban.blade.php`
+    - `resources/views/leads/index.blade.php`
+    - `resources/views/leads/edit.blade.php`
+
+## [2026-06-14] - Recent Activities Scrollbar Hide
+### Modified
+- **`public/assets/css/custom.css`**:
+  - Added CSS properties (`scrollbar-width: none`, `-ms-overflow-style: none`, and `::-webkit-scrollbar { display: none; }`) to the Recent Activities feed container (`.tk-act-list`). This hides the browser's default scrollbar while maintaining full scrolling functionality on the dashboard's Recent Activities panel.
+
 ## [2026-06-14] - Dashboard Quick Access Sidebar Section
 ### Added
 - **`resources/views/components/menu.blade.php`**:
@@ -428,6 +450,11 @@ All notable changes to the Taskify project will be documented in this folder.
 # Changelog
 
 All notable changes to the Taskify project will be documented in this folder.
+
+## [2026-06-14] - Dark Mode Flash of Unstyled Content (FOUC) Fix
+### Fixed
+- **`resources/views/layout.blade.php`**:
+  - Updated the synchronous head initialization script to swap the `light-style` class with `dark-style` on `document.documentElement` if the user's stored theme is dark. This guarantees that dark mode styles are applied instantly before the browser does its first paint, eliminating the brief flash of the light theme on page load or refresh.
 
 ## [2026-06-14] - Dashboard Quick Access Sidebar Section
 ### Added

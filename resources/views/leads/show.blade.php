@@ -7,14 +7,21 @@
         <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
             <!-- Left Side: Breadcrumbs and Badge -->
             <div class="d-flex align-items-center gap-3">
-                <nav class="breadcrumb" aria-label="breadcrumb">
-                    <a class="breadcrumb-item" href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
-                    <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-item">{{ get_label('leads_management', 'Leads Management') }}</span>
-                    <span class="breadcrumb-sep">/</span>
-                    <a class="breadcrumb-item" href="{{ route('leads.index') }}">{{ get_label('leads', 'Leads') }}</a>
-                    <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-current">{{ ucwords($lead->first_name . ' ' . $lead->last_name) }}</span>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style1">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            {{ get_label('leads_management', 'Leads Management') }}
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('leads.index') }}">{{ get_label('leads', 'Leads') }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ ucwords($lead->first_name . ' ' . $lead->last_name) }}
+                        </li>
+                    </ol>
                 </nav>
             </div>
             

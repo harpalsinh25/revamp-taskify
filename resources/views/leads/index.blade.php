@@ -7,12 +7,18 @@
         <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
             <!-- Left Side: Breadcrumbs and Badge -->
             <div class="d-flex align-items-center gap-3">
-                <nav class="breadcrumb" aria-label="breadcrumb">
-                    <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                    <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-item"><?= get_label('leads_management', 'Leads Management') ?></span>
-                    <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-current"><?= get_label('leads', 'Leads') ?></span>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style1">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <?= get_label('leads_management', 'Leads Management') ?>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            <?= get_label('leads', 'Leads') ?>
+                        </li>
+                    </ol>
                 </nav>
 
                 @php

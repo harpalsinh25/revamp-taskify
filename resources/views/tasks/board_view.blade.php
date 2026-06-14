@@ -12,22 +12,31 @@
     <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
         <!-- Left Side: Breadcrumbs and Badge -->
         <div class="d-flex align-items-center gap-3">
-            <nav class="breadcrumb" aria-label="breadcrumb">
-                <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                @if (isset($project->id))
-                    <span class="breadcrumb-sep">/</span>
-                    <a class="breadcrumb-item" href="{{ url(getUserPreferences('projects', 'default_view')) }}"><?= get_label('projects', 'Projects') ?></a>
-                    <span class="breadcrumb-sep">/</span>
-                    <a class="breadcrumb-item" href="{{ url('projects/information/' . $project->id) }}">{{ $project->title }}</a>
-                @endif
-                <span class="breadcrumb-sep">/</span>
-                <a class="breadcrumb-item" href="{{ route('tasks.index') }}"><?= get_label('tasks', 'Tasks') ?></a>
-                @if ($is_favorites == 1)
-                    <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-item"><?= get_label('favorite', 'Favorite') ?></span>
-                @endif
-                <span class="breadcrumb-sep">/</span>
-                <span class="breadcrumb-current"><?= get_label('draggable', 'Draggable') ?></span>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    </li>
+                    @if (isset($project->id))
+                        <li class="breadcrumb-item">
+                            <a href="{{ url(getUserPreferences('projects', 'default_view')) }}"><?= get_label('projects', 'Projects') ?></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ url('projects/information/' . $project->id) }}">{{ $project->title }}</a>
+                        </li>
+                    @endif
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('tasks.index') }}"><?= get_label('tasks', 'Tasks') ?></a>
+                    </li>
+                    @if ($is_favorites == 1)
+                        <li class="breadcrumb-item">
+                            <a href="javascript:void(0);"><?= get_label('favorite', 'Favorite') ?></a>
+                        </li>
+                    @endif
+                    <li class="breadcrumb-item active">
+                        <?= get_label('draggable', 'Draggable') ?>
+                    </li>
+                </ol>
             </nav>
 
             @php
