@@ -783,403 +783,91 @@
     background: #a8a8a8;
 }
 
-/* quickview modal */
+/* ============================================================================
+   QUICK VIEW MODAL — Design-system-aware
+   Uses tk-* component classes from JS; these overrides handle only the
+   modal container and any remaining bespoke layout needs.
+   The scoped rules below use !important to override Bootstrap/Sneat core.css
+   cascade which can set background-color via --bs-body-bg on inner elements.
+   ============================================================================ */
 
-/* Quick View Modal Styles with Namespacing to Avoid Conflicts */
-.qv-container {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        sans-serif;
-    color: #2d3748;
-    line-height: 1.6;
-    max-width: 100%;
+/* --- Modal shell --- */
+#quickViewModal .modal-content {
+    background: var(--bg-1) !important;
+    background-color: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-3);
+    color: var(--fg-0);
+}
+#quickViewModal .modal-header {
+    background: var(--bg-1) !important;
+    background-color: var(--bg-1) !important;
+    border-bottom: 1px solid var(--line) !important;
+}
+#quickViewModal .modal-body {
+    background: var(--bg-1) !important;
+    background-color: var(--bg-1) !important;
+    color: var(--fg-0);
 }
 
-/* Loading State */
-.qv-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-    text-align: center;
+/* --- Surfaces inside modal --- */
+#quickViewModal .tk-card {
+    background: var(--bg-1) !important;
+    background-color: var(--bg-1) !important;
+    border-color: var(--line) !important;
+    color: var(--fg-0);
+}
+#quickViewModal .tk-card-head {
+    border-bottom: 1px solid var(--line);
+}
+#quickViewModal .tk-card-body {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+#quickViewModal .tk-tile {
+    background: var(--bg-2) !important;
+    background-color: var(--bg-2) !important;
+    border-color: var(--line) !important;
+    color: var(--fg-0);
+}
+#quickViewModal .tk-fact {
+    background: var(--bg-2) !important;
+    background-color: var(--bg-2) !important;
+    border-color: var(--line) !important;
+    color: var(--fg-0);
+}
+#quickViewModal .tk-meta dt {
+    color: var(--fg-3) !important;
+}
+#quickViewModal .tk-meta dd {
+    color: var(--fg-1) !important;
+}
+#quickViewModal .tk-muted {
+    color: var(--fg-3) !important;
+}
+#quickViewModal .tk-fact-k {
+    color: var(--fg-3) !important;
+}
+#quickViewModal .tk-fact-v {
+    color: var(--fg-0) !important;
+}
+#quickViewModal .tk-empty {
+    color: var(--fg-3) !important;
 }
 
-.qv-loading-spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #f1f5f9;
-    border-top: 3px solid #6366f1;
-    border-radius: 50%;
-    animation: qv-spin 1s linear infinite;
-    margin-bottom: 1rem;
+/* Dark-mode close button inversion */
+[data-theme="dark"] #quickViewModal .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }
 
-@keyframes qv-spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.qv-loading-text {
-    color: #64748b;
-    margin: 0;
-    font-size: 0.95rem;
-}
-
-/* Error State */
-.qv-error-state {
-    text-align: center;
-    padding: 2rem;
-    color: #dc3545; /* FIXED: Use consistent danger red */
-}
-
-.qv-error-icon {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.qv-error-message {
-    margin: 0;
-    font-size: 0.95rem;
-}
-
-/* Post Header */
-.qv-post-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-}
-
-.qv-post-title {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.75rem;
-}
-
-.qv-post-icon {
-    font-size: 1.25rem;
-    color: #6366f1;
-    margin-right: 0.5rem;
-}
-
-.qv-post-title h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.qv-post-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.qv-meta-item {
-    display: flex;
-    align-items: center;
-    font-size: 0.85rem;
-    color: #64748b;
-}
-
-.qv-meta-item i {
-    margin-right: 0.375rem;
-    font-size: 1rem;
-}
-
-.qv-post-status {
-    margin-left: 1rem;
-}
-
-/* Status Badges - CONSISTENT with main colors */
-.qv-status-badge {
-    padding: 0.375rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.qv-status-published {
-    background: #d1e7dd;
-    color: #0f5132;
-}
-
-.qv-status-scheduled {
-    background: #fff3cd;
-    color: #664d03;
-}
-
-.qv-status-failed {
-    background: #f8d7da;
-    color: #842029;
-}
-
-.qv-status-pending {
-    background: #e2e3e5;
-    color: #41464b;
-}
-
-.qv-status-partial {
-    background: #cff4fc;
-    color: #055160;
-}
-
-/* Content Sections */
-.qv-content-section {
-    margin-bottom: 2rem;
-}
-
-.qv-section-title {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #374151;
-}
-
-.qv-section-title i {
-    margin-right: 0.5rem;
-    color: #6366f1;
-    font-size: 1.2rem;
-}
-
-/* Caption Preview */
-.qv-caption-preview {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-.qv-caption-text {
-    margin: 0;
-    white-space: pre-line;
-    font-size: 0.95rem;
-    color: #374151;
-    line-height: 1.6;
-}
-
-.qv-caption-empty {
-    margin: 0;
-    font-style: italic;
-    font-size: 0.9rem;
-}
-
-/* Platform Cards */
-.qv-platforms-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.qv-platform-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1rem;
-    transition: all 0.2s ease;
-}
-
-.qv-platform-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateY(-1px);
-}
-
-/* FIXED: Platform status colors to match standard */
-
-.qv-platform-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.qv-platform-info {
-    display: flex;
-    align-items: center;
-}
-
-.qv-platform-icon {
-    font-size: 1.5rem;
-    margin-right: 0.5rem;
-}
-
-.qv-platform-name {
-    font-weight: 600;
-    color: #374151;
-    font-size: 1rem;
-}
-
-.qv-platform-status-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-
-.qv-platform-success .qv-platform-status-badge {
-    background: #d1e7dd;
-    color: #0f5132;
-}
-
-.qv-platform-failed .qv-platform-status-badge {
-    background: #f8d7da;
-    color: #842029;
-}
-
-.qv-platform-pending .qv-platform-status-badge {
-    background: #e2e3e5;
-    color: #41464b;
-}
-
-.qv-platform-detail {
-    font-size: 0.85rem;
-    color: #64748b;
-}
-
-.qv-platform-error {
-    margin-top: 0.75rem;
-    padding: 0.75rem;
-    background: #f8d7da;
-    border: 1px solid #f1aeb5;
-    border-radius: 6px;
-}
-
-.qv-error-header {
-    color: #842029;
-    font-size: 0.8rem;
-    margin-bottom: 0.25rem;
-}
-
-.qv-error-detail {
-    color: #721c24;
-    font-size: 0.75rem;
-    line-height: 1.4;
-}
-
-.qv-retry-info {
-    color: #9ca3af;
-    font-size: 0.7rem;
-    margin-top: 0.25rem;
-}
-
-/* Statistics Grid */
-.qv-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1rem;
-}
-
-.qv-stat-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.25rem 1rem;
-    text-align: center;
-    transition: transform 0.2s ease;
-}
-
-.qv-stat-card:hover {
-    transform: translateY(-2px);
-}
-
-
-.qv-stat-success {
-    border-top: 3px solid #198754; /* success green */
-}
-
-.qv-stat-failed {
-    border-top: 3px solid #dc3545; /* danger red */
-}
-
-.qv-stat-pending {
-    border-top: 3px solid #6c757d; /* secondary gray */
-}
-
-.qv-stat-icon {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-
-.qv-stat-success .qv-stat-icon {
-    color: #198754; /* success green */
-}
-
-.qv-stat-failed .qv-stat-icon {
-    color: #dc3545; /* danger red */
-}
-
-.qv-stat-pending .qv-stat-icon {
-    color: #6c757d; /* secondary gray */
-}
-
-.qv-stat-number {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 0.25rem;
-}
-
-.qv-stat-label {
-    font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .qv-post-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-
-    .qv-post-status {
-        margin-left: 0;
-        align-self: flex-start;
-    }
-
-    .qv-platforms-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .qv-stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.75rem;
-    }
-
-    .qv-stat-card {
-        padding: 1rem 0.75rem;
-    }
-
-    .qv-stat-number {
-        font-size: 1.5rem;
-    }
-}
-
-/* more */
+/* ============================================================================
+   MORE / DAY POST ITEMS
+   ============================================================================ */
 .day-post-item {
     transition: all 0.2s ease;
 }
 .day-post-item:hover {
-    background: #f1f3f5; /* subtle hover */
+    background: var(--bg-2);
     transform: translateY(-1px);
 }
 .text-truncate-2 {
@@ -1189,7 +877,9 @@
     overflow: hidden;
 }
 
-/* analytics */
+/* ============================================================================
+   ANALYTICS GRADIENTS (kept as-is â€” these are decorative)
+   ============================================================================ */
 .bg-gradient-success {
     background: linear-gradient(90deg, #28a745, #20c997);
 }
@@ -1200,37 +890,13 @@
     background: linear-gradient(90deg, #dc3545, #f87171);
 }
 
-/* create and edit */
-.card {
-    border: none;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.card-header {
-    background: #fff;
-    border-bottom: 1px solid #dee2e6;
-    padding: 1rem;
-    border-radius: 0.5rem 0.5rem 0 0;
-}
-
-.card-body {
-    padding: 1rem;
-}
-
-.form-control,
-.form-check-input {
-    border-radius: 0.375rem;
-}
-
+/* ============================================================================
+   CREATE / EDIT POST â€” form-specific helpers
+   (DO NOT override global .card / .card-header / .card-body here!)
+   ============================================================================ */
 .form-label {
     font-weight: 500;
-    color: #495057;
-}
-
-.btn-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
+    color: var(--fg-1);
 }
 
 .platform-badge {
@@ -1285,17 +951,22 @@
 }
 
 .platform-card {
-    background: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
     padding: 0.75rem;
     text-align: center;
     cursor: pointer;
+    transition: border-color var(--t-1) var(--ease), background var(--t-1) var(--ease);
+}
+
+.platform-card:hover {
+    border-color: var(--signal);
 }
 
 .platform-card.selected {
-    border-color: #696cff;
-    background: rgba(105, 108, 255, 0.1);
+    border-color: var(--signal);
+    background: oklch(from var(--signal) l c h / 0.10);
 }
 
 .platform-icon {
@@ -1308,19 +979,19 @@
     width: 100%;
     height: 120px;
     object-fit: cover;
-    border-radius: 0.375rem;
+    border-radius: var(--r-2);
 }
 
 .media-item {
     position: relative;
     overflow: hidden;
-    border-radius: 0.375rem;
+    border-radius: var(--r-2);
 }
 
 .post-preview {
-    background: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
     padding: 1rem;
     min-height: 150px;
     margin-top: 0.5rem;
@@ -1340,22 +1011,22 @@
     position: absolute;
     right: 0;
     top: 0.5rem;
-    font-size: 0.75rem;
-    color: #6c757d;
+    font-size: var(--fs-xs);
+    color: var(--fg-3);
 }
 
 .accordion-item {
-    border-radius: 0.375rem;
+    border-radius: var(--r-2);
     margin-bottom: 0.75rem;
 }
 
 .accordion-button {
-    border-radius: 0.375rem !important;
+    border-radius: var(--r-2) !important;
 }
 
 .accordion-button:not(.collapsed) {
-    background: rgba(105, 108, 255, 0.1) !important;
-    color: #696cff;
+    background: oklch(from var(--signal) l c h / 0.10) !important;
+    color: var(--signal);
 }
 
 
@@ -1370,35 +1041,31 @@
 .carousel-inner video {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* keeps full media visible */
-     border-radius: 0.5rem;
-    background: white
+    object-fit: contain;
+    border-radius: var(--r-2);
+    background: var(--bg-1);
 }
 
 /* Custom next/prev button design */
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
     background-size: 60% 60%;
-    background-color: rgba(0, 0, 0, 0.4); /* semi-transparent black circle */
+    background-color: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
     padding: 20px;
 }
 
-/* Hover effect */
 .carousel-control-prev-icon:hover,
 .carousel-control-next-icon:hover {
     background-color: rgba(0, 0, 0, 0.7);
 }
 
-/* Optional: remove layout jump when switching */
 #post-preview {
-    min-height: 300px; /* consistent post preview area */
+    min-height: 300px;
     display: flex;
     flex-direction: column;
-
 }
 
-/* Position buttons properly */
 .carousel-control-prev,
 .carousel-control-next {
     width: auto;
@@ -1407,14 +1074,14 @@
 
 .platform-preview-selector .nav-link {
     padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    border-radius: 0.375rem;
+    font-size: var(--fs-base);
+    border-radius: var(--r-2);
     margin-right: 0.5rem;
 }
 
 .platform-preview-selector .nav-link.active {
-    background: #696cff;
-    color: white;
+    background: var(--signal);
+    color: var(--signal-fg, #fff);
 }
 
 .remove-new-media,
@@ -1422,7 +1089,7 @@
     position: absolute;
     top: 5px;
     right: 5px;
-    background: #dc3545;
+    background: var(--err);
     color: white;
     border: none;
     border-radius: 50%;
@@ -1438,7 +1105,7 @@
 
 .remove-new-media:hover,
 .remove-media:hover {
-    background: #c82333;
+    filter: brightness(0.9);
 }
 
 .ai-custom-prompt {
@@ -1448,33 +1115,6 @@
 .ai-loader {
     width: 20px;
     height: 20px;
-}
-
-.status-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
-    font-weight: 500;
-}
-
-.status-badge.draft {
-    background: #6c757d;
-    color: white;
-}
-
-.status-badge.scheduled {
-    background: #fd7e14;
-    color: white;
-}
-
-.status-badge.published {
-    background: #198754;
-    color: white;
-}
-
-.status-badge.failed {
-    background: #dc3545;
-    color: white;
 }
 
 @media (max-width: 768px) {
@@ -1491,3 +1131,45 @@
         max-height: 150px;
     }
 }
+
+/* Dark Mode Overrides for Create/Edit Post Elements */
+[data-theme="dark"] .platform-card {
+    background: var(--bg-2) !important;
+    border-color: var(--line) !important;
+}
+
+[data-theme="dark"] .platform-card:hover {
+    border-color: var(--signal) !important;
+}
+
+[data-theme="dark"] .platform-card.selected {
+    background: oklch(from var(--signal) l c h / 0.15) !important;
+    border-color: var(--signal) !important;
+}
+
+[data-theme="dark"] .accordion-item {
+    background: var(--bg-1) !important;
+    border-color: var(--line) !important;
+}
+
+[data-theme="dark"] .accordion-button {
+    background: var(--bg-2) !important;
+    color: var(--fg-0) !important;
+}
+
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+    background: oklch(from var(--signal) l c h / 0.15) !important;
+    color: var(--signal) !important;
+}
+
+[data-theme="dark"] .post-preview {
+    background: var(--bg-2) !important;
+    border-color: var(--line) !important;
+}
+
+[data-theme="dark"] .carousel-inner img,
+[data-theme="dark"] .carousel-inner video {
+    background: var(--bg-2) !important;
+}
+
+

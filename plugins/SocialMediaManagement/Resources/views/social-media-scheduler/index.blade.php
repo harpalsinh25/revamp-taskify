@@ -28,35 +28,36 @@
                     $socialsDefaultView = getUserPreferences('socials', 'default_view');
                 @endphp
                 @if ($socialsDefaultView === 'socials')
-                    <span class="badge bg-primary">{{ get_label('default_view', 'Default View') }}</span>
+                    <span class="tk-badge tk-badge-primary">{{ get_label('default_view', 'Default View') }}</span>
                 @else
                     <a href="javascript:void(0);">
-                        <span class="badge bg-secondary" id="set-default-view" data-type="socials" data-view="socials">
+                        <span class="tk-badge" id="set-default-view" data-type="socials" data-view="socials" style="cursor:pointer">
                             {{ get_label('set_as_default_view', 'Set as Default View') }}
                         </span>
                     </a>
                 @endif
             </div>
-            <div>
+            <div class="tk-cluster">
                 <a href="{{ route('social.create') }}">
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="right"
+                    <button type="button" class="tk-btn tk-btn-primary tk-btn-sm" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-original-title="{{ get_label('create_post', 'Create Post') }}">
                         <i class="bx bx-plus"></i>
                     </button>
                 </a>
-                <a href="{{ route('social.calendar') }}"><button type="button" class="btn btn-sm btn-primary"
+                <a href="{{ route('social.calendar') }}">
+                    <button type="button" class="tk-btn tk-btn-primary tk-btn-sm"
                         data-bs-toggle="tooltip" data-bs-placement="left"
-                        data-bs-original-title="<?= get_label('calendar_view', 'Calendar view') ?>"><i
-                            class='bx bx-calendar'></i></button></a>
-
+                        data-bs-original-title="<?= get_label('calendar_view', 'Calendar view') ?>">
+                        <i class='bx bx-calendar'></i>
+                    </button>
+                </a>
                 <a href="{{ route('social.analytics') }}">
-                    <button type="button" id="" class="btn btn-sm btn-primary action_create_template"
+                    <button type="button" class="tk-btn tk-btn-primary tk-btn-sm"
                         data-bs-toggle="tooltip" data-bs-placement="left"
                         data-bs-original-title="{{ get_label('analytics', 'Analytics') }}">
                         <i class='bx bx-chart'></i>
                     </button>
                 </a>
-                </li>
             </div>
         </div>
 
@@ -64,8 +65,8 @@
             @php
                 $visibleColumns = getUserPreferences('socials');
             @endphp
-            <div class="card mb-4">
-                <div class="card-body">
+            <div class="tk-card mb-4">
+                <div class="tk-card-body" style="padding:14px">
                     <div class="row align-items-center">
                         <div class="col-md-3 mb-3 mb-md-0">
                             <select class="form-select tom_static_select" id="select_social_platforms"
@@ -79,11 +80,9 @@
                                 <option value="instagram"
                                     <?= request()->sort && request()->sort == 'instagram' ? 'selected' : '' ?>>
                                     <?= get_label('instagram', 'Instagram') ?></option>
-
                                 <option value="linkedin"
                                     <?= request()->sort && request()->sort == 'linkedin' ? 'selected' : '' ?>>
                                     <?= get_label('linkedin', 'Linkedin') ?></option>
-
                                 <option value="pinterest"
                                     <?= request()->sort && request()->sort == 'pinterest' ? 'selected' : '' ?>>
                                     <?= get_label('pinterest', 'Pinterest') ?></option>
@@ -101,11 +100,9 @@
                                 <option value="scheduled"
                                     <?= request()->sort && request()->sort == 'scheduled' ? 'selected' : '' ?>>
                                     <?= get_label('scheduled', 'Scheduled') ?></option>
-
                                 <option value="published"
                                     <?= request()->sort && request()->sort == 'published' ? 'selected' : '' ?>>
                                     <?= get_label('published', 'Published') ?></option>
-
                                 <option value="failed"
                                     <?= request()->sort && request()->sort == 'failed' ? 'selected' : '' ?>>
                                     <?= get_label('failed', 'Failed') ?></option>
@@ -115,8 +112,9 @@
                             </select>
                         </div>
                         <div class="col-md-6 d-flex justify-content-md-end">
-                            <button type="button" class="btn btn-sm btn-secondary" id="clear_filters"
-                                style="height: 38px;"><i class='bx bx-refresh'></i> <?= get_label('clear_filters', 'Clear filters') ?></button>
+                            <button type="button" class="tk-btn tk-btn-secondary tk-btn-sm" id="clear_filters">
+                                <i class='bx bx-refresh'></i> <?= get_label('clear_filters', 'Clear filters') ?>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -152,48 +150,46 @@
                 </div>
             </div>
         @else
-            <div class="card empty-state text-center">
-                <div class="card-body">
-                    <div class="misc-wrapper">
-                        <h2 class="mx-2 mb-2">
-                            <span>{{ get_label('posts_not_found', 'Posts Not Found') }}</span>
-                        </h2>
-                        <p class="mx-2 mb-4">
+            <div class="tk-card">
+                <div class="tk-card-body">
+                    <div class="tk-empty" style="padding:40px 16px">
+                        <i class="bx bx-calendar-x" style="font-size:40px;opacity:0.5"></i>
+                        <h6 style="margin:0;font-size:15px;font-weight:600;color:var(--fg-0)">
+                            {{ get_label('posts_not_found', 'Posts Not Found') }}
+                        </h6>
+                        <p style="margin:0;font-size:var(--fs-base);color:var(--fg-3)">
                             {{ get_label('no_posts_available', 'Oops! No posts available yet.') }}
                         </p>
-
-                        <a href="{{ route('social.create') }}" class="btn btn-md btn-primary m-1">
+                        <a href="{{ route('social.create') }}" class="tk-btn tk-btn-primary" style="margin-top:8px">
+                            <i class="bx bx-plus"></i>
                             {{ get_label('create_now', 'Create now') }}
                         </a>
-
-                        <div class="mt-3">
-                            <img src="{{ asset('/storage/no-result.png') }}" alt="No result" width="500"
-                                class="img-fluid" />
-                        </div>
                     </div>
                 </div>
             </div>
         @endif
     </div>
 
-    <!-- Quick View Modal HTML -->
+    <!-- Quick View Modal -->
     <div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title" id="quickViewModalLabel">
-                        <i class="bx bx-show-alt me-2"></i>Post Publishing Details
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-3)">
+                <div class="modal-header" style="border-bottom:1px solid var(--line);padding:14px 18px">
+                    <h6 class="modal-title" id="quickViewModalLabel" style="font-size:14px;font-weight:600;color:var(--fg-0);display:flex;align-items:center;gap:8px">
+                        <i class="bx bx-show-alt" style="color:var(--signal);font-size:18px"></i>
+                        Post Publishing Details
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter:var(--btn-close-filter,none)"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding:18px">
                     <div id="quickViewContent">
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <script>
         var label_update = '{{ get_label('update', 'Update') }}';

@@ -1107,7 +1107,7 @@
 
 .fixed-header,
 .fixed-footer {
-    background: white;
+    background: var(--bg-1, white) !important;
     position: sticky;
     z-index: 10;
 }
@@ -3809,20 +3809,77 @@ body.v2-shell .layout-page {
 /* notification badge */
 .badge-notifications {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 3px;
+    right: 3px;
 
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 3px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    font-size: 10px;
+    font-size: 8px;
+    font-weight: 700;
     line-height: 1;
+    border: 1.5px solid var(--bg-0, #ffffff) !important;
 }
+
+/* Premium Notifications Dropdown Styling Override */
+.dropdown-menu {
+    border: 1px solid var(--line) !important;
+    background-color: var(--bg-1) !important;
+    box-shadow: var(--shadow-3) !important;
+    border-radius: var(--r-3) !important;
+}
+
+.fixed-header {
+    border-bottom: 1px solid var(--line) !important;
+}
+
+.fixed-footer {
+    border-top: 1px solid var(--line) !important;
+}
+
+.fixed-header span {
+    color: var(--fg-1) !important;
+    font-weight: 700;
+}
+
+.fixed-footer a {
+    color: var(--signal) !important;
+}
+
+.fixed-footer a:hover {
+    filter: brightness(1.1);
+}
+
+.update-notification-status {
+    color: var(--fg-1) !important;
+    transition: background var(--t-1) var(--ease), color var(--t-1) var(--ease);
+}
+
+.update-notification-status:hover {
+    background-color: var(--bg-2) !important;
+    color: var(--fg-0) !important;
+}
+
+.update-notification-status .text-muted {
+    color: var(--fg-3) !important;
+}
+
+.update-notification-status:hover .text-muted {
+    color: var(--fg-2) !important;
+}
+
+.update-notification-status i.bx-bell {
+    color: var(--signal) !important;
+    background: oklch(from var(--signal) l c h / 0.12) !important;
+    padding: 6px;
+    border-radius: var(--r-2);
+}
+
 
 /* language switcher name */
 .tk-cbar .tk-lang-name {

@@ -30,6 +30,20 @@ $(document).ready(function () {
 $(document).ready(function () {
     // Wait for TinyMCE to initialize
     if (typeof tinymce !== 'undefined') {
+        function applyTinyMCETheme(editor) {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const body = editor.getBody();
+            if (body) {
+                if (isDark) {
+                    body.style.backgroundColor = '#2b2b32';
+                    body.style.color = '#f5f5f9';
+                } else {
+                    body.style.backgroundColor = '#ffffff';
+                    body.style.color = '#435971';
+                }
+            }
+        }
+
         tinymce.init({
             height: 250,
             selector: '.caption',
@@ -41,6 +55,19 @@ $(document).ready(function () {
                     console.log('TinyMCE initialized successfully for #' + editor.id);
                     updateCharacterCounter();
                     updatePostPreview();
+                    
+                    // Apply initial theme
+                    applyTinyMCETheme(editor);
+
+                    // Observe theme change
+                    const observer = new MutationObserver(function (mutations) {
+                        mutations.forEach(function (mutation) {
+                            if (mutation.attributeName === "data-theme") {
+                                applyTinyMCETheme(editor);
+                            }
+                        });
+                    });
+                    observer.observe(document.documentElement, { attributes: true });
                 });
                 editor.on('change keyup input', function () {
                     updateCharacterCounter();
@@ -714,9 +741,9 @@ function showPostQuickView(postId) {
     // Show loading state
     const $modalContent = $('#quickViewContent');
     $modalContent.html(`
-    <div class="qv-loading">
-        <div class="qv-loading-spinner"></div>
-        <p class="qv-loading-text">Loading post details...</p>
+    <div class="tk-empty" style="padding:40px 16px">
+        <div class="tk-skel" style="width:32px;height:32px;border-radius:50%;margin:0 auto 12px"></div>
+        <p class="tk-muted">Loading post details…</p>
     </div>
     `);
 
@@ -747,9 +774,9 @@ function showPostQuickView(postId) {
         .fail(function (jqXHR, textStatus, errorThrown) {
             const errorMessage = jqXHR.responseJSON?.message || errorThrown || 'Failed to load post details';
             $modalContent.html(`
-            <div class="qv-error-state">
-                <i class="bx bx-error-circle qv-error-icon"></i>
-                <p class="qv-error-message">Error loading post details: ${errorMessage}</p>
+            <div class="tk-empty" style="padding:32px 16px">
+                <i class="bx bx-error-circle" style="font-size:2rem;color:var(--err)"></i>
+                <p style="color:var(--err);margin:0;font-size:var(--fs-base)">Error loading post details: ${errorMessage}</p>
             </div>
         `);
         });
@@ -758,7 +785,7 @@ function showPostQuickView(postId) {
 function showQuickView(postData) {
     const $modalContent = $('#quickViewContent');
 
-    // Platform icons mapping with modern colors
+    // Platform icons mapping
     const platformConfig = {
         'facebook': { icon: 'bxl-facebook-circle', color: '#4267B2' },
         'instagram': { icon: 'bxl-instagram', color: '#E4405F' },
@@ -767,164 +794,156 @@ function showQuickView(postData) {
         'pinterest': { icon: 'bxl-pinterest', color: '#E60023' }
     };
 
-    // Status configuration with modern colors
+    // Status → tk-badge variant mapping
     const statusConfig = {
-        'published': { class: 'bg-success', text: 'Published' },
-        'scheduled': { class: 'bg-warning', text: 'Scheduled' },
-        'failed': { class: 'bg-danger', text: 'Failed' },
-        'pending': { class: 'bg-info', text: 'Pending' },
-        'partially_published': { class: 'bg-primary', text: 'Partially Published' }
+        'published':            { badge: 'tk-badge-success', text: 'Published' },
+        'scheduled':            { badge: 'tk-badge-warning', text: 'Scheduled' },
+        'failed':               { badge: 'tk-badge-danger',  text: 'Failed' },
+        'pending':              { badge: 'tk-badge-info',    text: 'Pending' },
+        'partially_published':  { badge: 'tk-badge-primary', text: 'Partially Published' }
     };
 
+    const sts = statusConfig[postData.status] || { badge: '', text: postData.status.replace('_', ' ') };
+
     let content = `
-    <div class="qv-container">
-        <!-- Post Header -->
-        <div class="qv-post-header">
-            <div class="qv-post-info">
-                <div class="qv-post-title">
-                    <i class="bx bx-file-blank qv-post-icon"></i>
-                    <h3>Post #${postData.id}</h3>
+    <div class="tk-stack" style="gap:16px">
+
+        <!-- Post header tile -->
+        <div class="tk-tile">
+            <div class="tk-between" style="margin-bottom:8px">
+                <div class="tk-cluster">
+                    <i class="bx bx-file-blank" style="font-size:18px;color:var(--signal)"></i>
+                    <span style="font-size:14px;font-weight:600;color:var(--fg-0)">Post #${postData.id}</span>
                 </div>
-                <div class="qv-post-meta">
-                    <span class="qv-meta-item">
-                        <i class="bx bx-time-five"></i>
-                        Created: ${formatQuickViewDate(postData.created_at)}
-                    </span>
-                    ${postData.scheduled_at ? `
-                        <span class="qv-meta-item">
-                            <i class="bx bx-calendar"></i>
-                            Scheduled: ${formatQuickViewDate(postData.scheduled_at)}
-                        </span>
-                        ` : ''}
-                </div>
+                <span class="tk-badge ${sts.badge}">${sts.text}</span>
             </div>
-            <div class="qv-post-status">
-                <span class="qv-status-badge text-white ${statusConfig[postData.status]?.class || 'qv-status-pending'}">
-                    ${statusConfig[postData.status]?.text || postData.status.replace('_', ' ')}
-                </span>
+            <div class="tk-meta" style="grid-template-columns:90px 1fr">
+                <dt>Created</dt>
+                <dd>${formatQuickViewDate(postData.created_at)}</dd>
+                ${postData.scheduled_at ? `
+                <dt>Scheduled</dt>
+                <dd>${formatQuickViewDate(postData.scheduled_at)}</dd>
+                ` : ''}
             </div>
         </div>
 
-        <!-- Caption Section -->
-        <div class="qv-content-section">
-            <h4 class="qv-section-title">
-                <i class="bx bx-message-square-detail"></i>
-                Caption
-            </h4>
-            <div class="qv-caption-preview">
-                ${postData.caption ?
-            `<p class="qv-caption-text">${postData.caption}</p>` :
-            `<p class="qv-caption-empty">No caption provided</p>`
-        }
+        <!-- Caption section -->
+        <div class="tk-card">
+            <div class="tk-card-head">
+                <h6 class="tk-card-title" style="display:flex;align-items:center;gap:6px">
+                    <i class="bx bx-message-square-detail" style="color:var(--signal)"></i>
+                    Caption
+                </h6>
+            </div>
+            <div class="tk-card-body">
+                ${postData.caption
+                    ? `<div class="tk-tile" style="max-height:180px;overflow-y:auto"><p style="margin:0;white-space:pre-line;color:var(--fg-1);font-size:var(--fs-base);line-height:1.6">${postData.caption}</p></div>`
+                    : `<p class="tk-muted" style="margin:0;font-style:italic;font-size:var(--fs-base)">No caption provided</p>`
+                }
             </div>
         </div>
 
-        <!-- Platform Status Section -->
-        <div class="qv-content-section">
-            <h4 class="qv-section-title">
-                <i class="bx bx-globe"></i>
-                Platform Status
-            </h4>
-            <div class="qv-platforms-grid">
-                `;
+        <!-- Platform status section -->
+        <div class="tk-card">
+            <div class="tk-card-head">
+                <h6 class="tk-card-title" style="display:flex;align-items:center;gap:6px">
+                    <i class="bx bx-globe" style="color:var(--signal)"></i>
+                    Platform Status
+                </h6>
+            </div>
+            <div class="tk-card-body">
+                <div class="tk-stack" style="gap:8px">`;
 
-    // Generate platform status cards
+    // Generate platform status tiles
     const platforms = postData.platforms || [];
     $.each(platforms, function (index, platform) {
         const log = postData.response_logs ? postData.response_logs[platform] : null;
         const config = platformConfig[platform] || { icon: 'bx-circle', color: '#6c757d' };
 
         const isSuccess = log && log.success === true;
-        const isFailed = log && log.success === false;
-        const isPending = !log;
+        const isFailed  = log && log.success === false;
 
-        let statusClass, statusIcon, statusText, statusDetail;
+        let badgeClass, statusIcon, statusText, statusDetail;
 
         if (isSuccess) {
-            statusClass = 'qv-platform-success';
-            statusIcon = 'bx-check-circle';
-            statusText = 'Published';
+            badgeClass  = 'tk-badge-success';
+            statusIcon  = 'bx-check-circle';
+            statusText  = 'Published';
             statusDetail = `Published: ${formatQuickViewDateTime(log.published_at)}`;
         } else if (isFailed) {
-            statusClass = 'qv-platform-failed';
-            statusIcon = 'bx-x-circle';
-            statusText = 'Failed';
+            badgeClass  = 'tk-badge-danger';
+            statusIcon  = 'bx-x-circle';
+            statusText  = 'Failed';
             statusDetail = `Failed: ${log.failed_at ? formatQuickViewDateTime(log.failed_at) : 'Unknown'}`;
         } else {
-            statusClass = 'qv-platform-pending';
-            statusIcon = 'bx-time-five';
-            statusText = 'Pending';
+            badgeClass  = '';
+            statusIcon  = 'bx-time-five';
+            statusText  = 'Pending';
             statusDetail = 'Not processed yet';
         }
 
         content += `
-                <div class="qv-platform-card ${statusClass}">
-                    <div class="qv-platform-header">
-                        <div class="qv-platform-info">
-                            <i class="bx ${config.icon} qv-platform-icon" style="color: ${config.color}"></i>
-                            <span class="qv-platform-name">${platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+                    <div class="tk-tile">
+                        <div class="tk-between" style="margin-bottom:4px">
+                            <div class="tk-cluster">
+                                <i class="bx ${config.icon}" style="font-size:20px;color:${config.color}"></i>
+                                <span style="font-weight:600;color:var(--fg-0);font-size:var(--fs-md)">${platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+                            </div>
+                            <span class="tk-badge ${badgeClass}">
+                                <i class="bx ${statusIcon}" style="font-size:12px"></i>
+                                ${statusText}
+                            </span>
                         </div>
-                        <div class="qv-platform-status-badge">
-                            <i class="bx ${statusIcon}"></i>
-                            <span>${statusText}</span>
-                        </div>
-                    </div>
-                    <div class="qv-platform-detail">
-                        ${statusDetail}
-                    </div>
-                    `;
+                        <span class="tk-muted" style="font-size:var(--fs-sm)">${statusDetail}</span>`;
 
         // Show error details if failed
         if (isFailed && log.error) {
             const errorMsg = log.error.length > 100 ? log.error.substring(0, 100) + '...' : log.error;
             content += `
-                    <div class="qv-platform-error">
-                        <div class="qv-error-header">
-                            <strong>${log.error_code || 'Error'}</strong>
-                        </div>
-                        <div class="qv-error-message">${errorMsg}</div>
-                    </div>
-                    `;
+                        <div style="margin-top:8px;padding:8px 10px;background:oklch(from var(--err) l c h / 0.08);border:1px solid oklch(from var(--err) l c h / 0.18);border-radius:var(--r-2)">
+                            <strong style="color:var(--err);font-size:var(--fs-sm)">${log.error_code || 'Error'}</strong>
+                            <p style="margin:2px 0 0;color:var(--fg-2);font-size:var(--fs-sm);line-height:1.4">${errorMsg}</p>
+                        </div>`;
         }
 
         content += `</div>`;
     });
 
     content += `
+                </div>
             </div>
         </div>
 
-        <!-- Summary Statistics -->
-        <div class="qv-content-section">
-            <div class="qv-stats-grid">
-                `;
+        <!-- Summary statistics -->
+        <div class="tk-facts" style="grid-template-columns:repeat(3,1fr)">`;
 
     const successCount = postData.successful_platforms ? postData.successful_platforms.length : 0;
-    const failedCount = postData.failed_platforms ? postData.failed_platforms.length : 0;
+    const failedCount  = postData.failed_platforms ? postData.failed_platforms.length : 0;
     const pendingCount = platforms.length - successCount - failedCount;
 
     const stats = [
-        { label: 'Published', count: successCount, icon: 'bx-check-circle', class: 'qv-stat-success' },
-        { label: 'Failed', count: failedCount, icon: 'bx-x-circle', class: 'qv-stat-failed' },
-        { label: 'Pending', count: pendingCount, icon: 'bx-time-five', class: 'qv-stat-pending' }
+        { label: 'Published', count: successCount, icon: 'bx-check-circle', color: 'var(--ok)' },
+        { label: 'Failed',    count: failedCount,  icon: 'bx-x-circle',     color: 'var(--err)' },
+        { label: 'Pending',   count: pendingCount,  icon: 'bx-time-five',    color: 'var(--fg-3)' }
     ];
 
     $.each(stats, function (index, stat) {
         content += `
-            <div class="qv-stat-card ${stat.class}">
-                <i class="bx ${stat.icon} qv-stat-icon"></i>
-                <div class="qv-stat-number">${stat.count}</div>
-                <div class="qv-stat-label">${stat.label}</div>
-            </div>
-        `;
+            <div class="tk-fact" style="flex-direction:column;align-items:center;text-align:center;padding:14px 11px">
+                <i class="bx ${stat.icon}" style="font-size:22px;color:${stat.color};margin-bottom:4px"></i>
+                <span class="tk-fact-v" style="font-size:20px">${stat.count}</span>
+                <span class="tk-fact-k">${stat.label}</span>
+            </div>`;
     });
 
-
+    content += `
+        </div>
+    </div>`;
 
     $modalContent.html(content);
 
     // Update the modal title
-    $('#quickViewModalLabel').text(`Post #${postData.id} - Publishing Details`);
+    $('#quickViewModalLabel').text(`Post #${postData.id} — Publishing Details`);
 
     // Update action buttons with post data
     updateQuickViewActionButtons(postData);

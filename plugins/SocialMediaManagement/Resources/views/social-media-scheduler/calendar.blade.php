@@ -146,16 +146,16 @@
     <!-- Quick View Modal -->
     <div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title" id="quickViewModalLabel">
-                        <i
-                            class="bx bx-show-alt me-2"></i>{{ get_label('post_publishing_details', 'Post Publishing Details') }}
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-3)">
+                <div class="modal-header" style="border-bottom:1px solid var(--line);padding:14px 18px">
+                    <h6 class="modal-title" id="quickViewModalLabel" style="font-size:14px;font-weight:600;color:var(--fg-0);display:flex;align-items:center;gap:8px">
+                        <i class="bx bx-show-alt" style="color:var(--signal);font-size:18px"></i>
+                        {{ get_label('post_publishing_details', 'Post Publishing Details') }}
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter:var(--btn-close-filter,none)"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding:18px">
                     <div id="quickViewContent">
                     </div>
                 </div>

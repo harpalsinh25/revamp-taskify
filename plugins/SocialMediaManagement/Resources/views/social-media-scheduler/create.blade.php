@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-
 @extends('layout')
 
 @section('title')
@@ -8,32 +6,37 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('assets/css/social/social.css') }}">
-    <div class="container-fluid py-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
-                    <li class="breadcrumb-item">
-                        <a href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a
-                            href="{{ route('social.index') }}">{{ get_label('social_media', 'Social Media') }}</a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        {{ get_label('create_post', 'Create Post') }}
-                    </li>
-                </ol>
-            </nav>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between mb-2 mt-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style1">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url('home') }}">{{ get_label('home', 'Home') }}</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('social.index') }}">{{ get_label('social_media', 'Social Media') }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ get_label('create_post', 'Create Post') }}
+                        </li>
+                    </ol>
+                </nav>
+            </div>
         </div>
 
-        <div class="row g-3">
+        <div class="row g-4 mt-2">
+            <!-- Main Form -->
             <div class="col-lg-8">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i
-                                class="bx bx-edit me-1"></i>{{ get_label('create_new_post', 'Create New Post') }}</h4>
+                <div class="tk-card h-100">
+                    <div class="tk-card-head">
+                        <h6 class="tk-card-title" style="display:flex;align-items:center;gap:6px">
+                            <i class="bx bx-edit" style="color:var(--signal);font-size:16px"></i>
+                            {{ get_label('create_new_post', 'Create New Post') }}
+                        </h6>
                     </div>
-                    <div class="card-body mt-2">
+                    <div class="tk-card-body">
                         <form id="create-post-form" class="form-submit-event" action="{{ route('social.post') }}"
                             method="POST" enctype="multipart/form-data">
                             @csrf
@@ -41,29 +44,29 @@
                                 <!-- AI Generation Controls Row -->
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label">{{ get_label('caption', 'Caption') }}</label>
+                                        <label class="form-label" style="color:var(--fg-1);font-weight:500">{{ get_label('caption', 'Caption') }}</label>
                                     </div>
                                     <div class="col-md-6 text-md-end">
                                         <div class="d-flex align-items-center justify-content-md-end">
                                             <div class="form-check form-switch me-3">
                                                 <input class="form-check-input social-caption-enable-custom-prompt"
                                                     type="checkbox" id="socialCaptionEnableCustomPrompt">
-                                                <label class="form-check-label" for="socialCaptionEnableCustomPrompt">
+                                                <label class="form-check-label" for="socialCaptionEnableCustomPrompt" style="color:var(--fg-2)">
                                                     {{ get_label('use_custom_prompt', 'Use Custom Prompt') }}
                                                 </label>
                                             </div>
                                             <button type="button"
-                                                class="btn btn-outline-primary social-caption-generate-ai btn-sm">
-                                                <i class="fas fa-magic me-1"></i>
+                                                class="tk-btn tk-btn-outline tk-btn-sm social-caption-generate-ai">
+                                                <i class="fas fa-magic"></i>
                                                 {{ get_label('generate_with_ai', 'Generate with AI') }}
                                             </button>
-                                            <i class="bx bx-info-circle text-primary ms-2" data-bs-toggle="tooltip"
+                                            <i class="bx bx-info-circle ms-2" style="color:var(--signal);cursor:help" data-bs-toggle="tooltip"
                                                 data-bs-offset="0,4" data-bs-placement="top" data-bs-html="true"
                                                 title=""
                                                 data-bs-original-title="<b>{{ get_label('generate_with_ai', 'Generate with AI') }}:</b> {{ get_label('ai_caption_help', 'Enable custom prompt to write your own AI instructions. If disabled, AI will enhance existing caption or create a new engaging one based on selected platforms.') }}">
                                             </i>
                                             <div class="spinner-border text-primary social-caption-ai-loader d-none ms-2"
-                                                role="status">
+                                                role="status" style="width:20px;height:20px">
                                                 <span class="visually-hidden">Loading...</span>
                                             </div>
                                         </div>
@@ -72,12 +75,10 @@
 
                                 <!-- Custom Prompt Input (initially hidden) -->
                                 <div class="social-caption-custom-prompt-container d-none mb-3">
-                                    <label
-                                        class="form-label text-muted">{{ get_label('custom_prompt', 'Custom Prompt') }}</label>
+                                    <label class="form-label" style="color:var(--fg-3);font-size:var(--fs-sm)">{{ get_label('custom_prompt', 'Custom Prompt') }}</label>
                                     <textarea class="form-control social-caption-ai-custom-prompt" rows="3" maxlength="500"
                                         placeholder="{{ get_label('enter_custom_prompt_caption', 'E.g., Create a fun, engaging caption with emojis for a product launch post targeting young professionals...') }}"></textarea>
-                                    <small
-                                        class="text-muted">{{ get_label('custom_prompt_help', 'Describe what kind of caption you want. Max 500 characters.') }}</small>
+                                    <small style="color:var(--fg-3)">{{ get_label('custom_prompt_help', 'Describe what kind of caption you want. Max 500 characters.') }}</small>
                                 </div>
 
                                 <!-- Caption Textarea -->
@@ -90,8 +91,8 @@
                                         </div>
                                         <small class="char-counter-text" id="caption-count">0/2000</small>
                                     </div>
-                                    <small class="text-muted d-block mt-1">
-                                        <i class="bx bx-bulb me-1"></i>
+                                    <small style="color:var(--fg-3);display:block;margin-top:4px">
+                                        <i class="bx bx-bulb me-1" style="color:var(--signal)"></i>
                                         {{ get_label('caption_tip', 'Tip: Select platforms and upload media first for better AI-generated captions!') }}
                                     </small>
                                 </div>
@@ -99,39 +100,38 @@
 
                             <!-- Media Upload -->
                             <div class="mb-3">
-                                <label class="form-label">{{ get_label('media_files', 'Media Files') }}</label>
+                                <label class="form-label" style="color:var(--fg-1);font-weight:500">{{ get_label('media_files', 'Media Files') }}</label>
                                 <input type="file" class="form-control" name="media[]" multiple accept="image/*,video/*"
                                     id="media-upload">
-                                <small
-                                    class="text-muted">{{ get_label('media_upload_help', 'Supported formats: JPG, PNG, GIF, MP4. Max size: 10MB per file.') }}</small>
+                                <small style="color:var(--fg-3)">{{ get_label('media_upload_help', 'Supported formats: JPG, PNG, GIF, MP4. Max size: 10MB per file.') }}</small>
                             </div>
 
                             <!-- Platform Selection -->
                             <div class="mb-3">
-                                <label class="form-label">{{ get_label('select_platforms', 'Select Platforms') }} <span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label" style="color:var(--fg-1);font-weight:500">{{ get_label('select_platforms', 'Select Platforms') }} <span
+                                        style="color:var(--err)">*</span></label>
                                 <div class="platform-selector">
                                     <div class="platform-card" data-platform="facebook">
                                         <i class="bx bxl-facebook-circle platform-icon" style="color: #1877f2;"></i>
-                                        <div class="fw-semibold">{{ get_label('facebook', 'Facebook') }}</div>
+                                        <div class="fw-semibold" style="color:var(--fg-0)">{{ get_label('facebook', 'Facebook') }}</div>
                                         <input type="checkbox" class="d-none" name="platforms[]" value="facebook"
                                             id="platform-facebook">
                                     </div>
                                     <div class="platform-card" data-platform="instagram">
                                         <i class="bx bxl-instagram platform-icon" style="color: #e4405f;"></i>
-                                        <div class="fw-semibold">{{ get_label('instagram', 'Instagram') }}</div>
+                                        <div class="fw-semibold" style="color:var(--fg-0)">{{ get_label('instagram', 'Instagram') }}</div>
                                         <input type="checkbox" class="d-none" name="platforms[]" value="instagram"
                                             id="platform-instagram">
                                     </div>
                                     <div class="platform-card" data-platform="linkedin">
                                         <i class="bx bxl-linkedin platform-icon" style="color: #0077b5;"></i>
-                                        <div class="fw-semibold">{{ get_label('linkedin', 'LinkedIn') }}</div>
+                                        <div class="fw-semibold" style="color:var(--fg-0)">{{ get_label('linkedin', 'LinkedIn') }}</div>
                                         <input type="checkbox" class="d-none" name="platforms[]" value="linkedin"
                                             id="platform-linkedin">
                                     </div>
                                     <div class="platform-card" data-platform="pinterest">
                                         <i class="bx bxl-pinterest platform-icon" style="color: #e60023;"></i>
-                                        <div class="fw-semibold">{{ get_label('pinterest', 'Pinterest') }}</div>
+                                        <div class="fw-semibold" style="color:var(--fg-0)">{{ get_label('pinterest', 'Pinterest') }}</div>
                                         <input type="checkbox" class="d-none" name="platforms[]" value="pinterest"
                                             id="platform-pinterest">
                                     </div>
@@ -140,14 +140,14 @@
 
                             <!-- Post Type -->
                             <div class="mb-3">
-                                <label class="form-label">{{ get_label('when_to_post', 'When to Post') }}</label>
+                                <label class="form-label" style="color:var(--fg-1);font-weight:500">{{ get_label('when_to_post', 'When to Post') }}</label>
                                 <div class="row g-2">
                                     <div class="col-md-6">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="post_type"
                                                 value="now" id="post-now" checked>
-                                            <label class="form-check-label" for="post-now">
-                                                <i class="bx bx-send me-1"></i>
+                                            <label class="form-check-label" for="post-now" style="color:var(--fg-1)">
+                                                <i class="bx bx-send me-1" style="color:var(--signal)"></i>
                                                 {{ get_label('post_now', 'Post Now') }}
                                             </label>
                                         </div>
@@ -156,8 +156,8 @@
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="post_type"
                                                 value="schedule" id="post-schedule">
-                                            <label class="form-check-label" for="post-schedule">
-                                                <i class="bx bx-calendar me-1"></i>
+                                            <label class="form-check-label" for="post-schedule" style="color:var(--fg-1)">
+                                                <i class="bx bx-calendar me-1" style="color:var(--signal)"></i>
                                                 {{ get_label('schedule_post', 'Schedule Post') }}
                                             </label>
                                         </div>
@@ -167,20 +167,19 @@
 
                             <!-- Schedule DateTime -->
                             <div class="mb-3" id="schedule-section" style="display: none;">
-                                <label
-                                    class="form-label">{{ get_label('schedule_date_time', 'Schedule Date & Time') }}</label>
+                                <label class="form-label" style="color:var(--fg-1);font-weight:500">{{ get_label('schedule_date_time', 'Schedule Date & Time') }}</label>
                                 <input type="datetime-local" class="form-control" name="scheduled_at"
                                     min="{{ date('Y-m-d\TH:i') }}">
                             </div>
 
                             <!-- Submit Buttons -->
-                            <div class="mb-3">
-                                <button type="submit" class="btn btn-primary me-2" id="submit_btn">
-                                    <i class="bx bx-send me-1"></i>
+                            <div class="mb-3 d-flex gap-2">
+                                <button type="submit" class="tk-btn tk-btn-primary" id="submit_btn">
+                                    <i class="bx bx-send"></i>
                                     <span id="submit-text">{{ get_label('post_now', 'Post Now') }}</span>
                                 </button>
-                                <a href="{{ route('social.index') }}" class="btn btn-outline-secondary">
-                                    <i class="bx bx-x me-1"></i>
+                                <a href="{{ route('social.index') }}" class="tk-btn tk-btn-secondary">
+                                    <i class="bx bx-x"></i>
                                     {{ get_label('cancel', 'Cancel') }}
                                 </a>
                             </div>
@@ -189,37 +188,45 @@
                 </div>
             </div>
 
+            <!-- Sidebar -->
             <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bx bx-show me-1"></i>{{ get_label('post_preview', 'Post Preview') }}
-                        </h5>
+                <!-- Post Preview -->
+                <div class="tk-card">
+                    <div class="tk-card-head">
+                        <h6 class="tk-card-title" style="display:flex;align-items:center;gap:6px">
+                            <i class="bx bx-show" style="color:var(--signal);font-size:16px"></i>
+                            {{ get_label('post_preview', 'Post Preview') }}
+                        </h6>
                         <ul class="nav nav-pills platform-preview-selector">
                         </ul>
                     </div>
-                    <div class="card-body">
+                    <div class="tk-card-body">
                         <div id="post-preview" class="post-preview">
-                            <div class="text-muted py-3 text-center">
-                              {{ get_label('preview_will_appear_here', 'Post preview will appear here...') }}
+                            <div class="tk-empty" style="padding:20px 16px">
+                                <i class="bx bx-image" style="font-size:28px;opacity:0.4"></i>
+                                <p style="margin:0;font-size:var(--fs-base);color:var(--fg-3)">
+                                  {{ get_label('preview_will_appear_here', 'Post preview will appear here...') }}
+                                </p>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <small class="text-muted">{{ get_label('selected_platforms', 'Selected Platforms:') }}</small>
+                            <small style="color:var(--fg-3)">{{ get_label('selected_platforms', 'Selected Platforms:') }}</small>
                             <div id="selectedPlatforms" class="mt-1">
-                                <small
-                                    class="text-muted">{{ get_label('no_platforms_selected', 'No Platforms Selected') }}</small>
+                                <small style="color:var(--fg-3)">{{ get_label('no_platforms_selected', 'No Platforms Selected') }}</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i
-                                class="bx bx-info-circle me-1"></i>{{ get_label('platform_requirements', 'Platform Requirements') }}
-                        </h5>
+                <!-- Platform Requirements -->
+                <div class="tk-card mt-3">
+                    <div class="tk-card-head">
+                        <h6 class="tk-card-title" style="display:flex;align-items:center;gap:6px">
+                            <i class="bx bx-info-circle" style="color:var(--signal);font-size:16px"></i>
+                            {{ get_label('platform_requirements', 'Platform Requirements') }}
+                        </h6>
                     </div>
-                    <div class="card-body">
+                    <div class="tk-card-body">
                         <div class="accordion" id="platformAccordion">
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
@@ -232,7 +239,7 @@
                                 <div id="facebook-req" class="accordion-collapse collapse"
                                     data-bs-parent="#platformAccordion">
                                     <div class="accordion-body">
-                                        <small class="text-muted">
+                                        <small style="color:var(--fg-2)">
                                             • {{ get_label('text_limit', 'Text: Up to 63,206 characters') }}<br>
                                             • {{ get_label('image_formats', 'Images: JPG, PNG, GIF') }}<br>
                                             • {{ get_label('video_formats', 'Videos: MP4, MOV, AVI') }}
@@ -252,7 +259,7 @@
                                 <div id="instagram-req" class="accordion-collapse collapse"
                                     data-bs-parent="#platformAccordion">
                                     <div class="accordion-body">
-                                        <small class="text-muted">
+                                        <small style="color:var(--fg-2)">
                                             • {{ get_label('text_limit', 'Text: Up to 2,200 characters') }}<br>
                                             • {{ get_label('image_required', 'Images: Required (JPG, PNG)') }}<br>
                                             • {{ get_label('square_format', 'Square format recommended') }}
@@ -271,7 +278,7 @@
                                 <div id="pinterest-req" class="accordion-collapse collapse"
                                     data-bs-parent="#platformAccordion">
                                     <div class="accordion-body">
-                                        <small class="text-muted">
+                                        <small style="color:var(--fg-2)">
                                             •
                                             {{ get_label('text_limit', 'Text: Up to 500 characters for Pin description') }}<br>
                                             • {{ get_label('image_required', 'Images: Required (JPG, PNG)') }}<br>
@@ -294,7 +301,7 @@
                                 <div id="linkedin-req" class="accordion-collapse collapse"
                                     data-bs-parent="#platformAccordion">
                                     <div class="accordion-body">
-                                        <small class="text-muted">
+                                        <small style="color:var(--fg-2)">
                                             • {{ get_label('text_limit', 'Text: Up to 3,000 characters for posts') }}<br>
                                             • {{ get_label('image_optional', 'Images: Optional (JPG, PNG)') }}<br>
                                             •
