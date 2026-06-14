@@ -71,7 +71,7 @@
                                 </h5>
                             </div>
                             <div class="mb-2">
-                                <span class="badge bg-label-primary text-truncate me-1"
+                                <span class="badge bg-label-success text-truncate me-1"
                                     style="max-width: 100%;">{{ $candidate->position }}</span>
                             </div>
                             <div class="text-truncate mb-2">

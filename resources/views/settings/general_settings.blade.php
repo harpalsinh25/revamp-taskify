@@ -293,7 +293,7 @@
                             <label for="primaryColorPicker" class="form-label"><?= get_label('primary_color', 'Primary Color') ?></label>
                             <div class="d-flex align-items-center gap-3">
                                 <input type="color" class="form-control form-control-color" name="primary_color" id="primaryColorPicker" title="<?= get_label('choose_your_color', 'Choose your color') ?>" value="{{ $general_settings['primary_color'] ?? '#696cff' }}">
-                                <button type="button" class="btn btn-outline-warning btn-sm" id="btnResetPrimaryColor" onclick="document.getElementById('primaryColorPicker').value='#696cff'; document.documentElement.style.setProperty('--signal', '#696cff');"><?= get_label('reset_to_default', 'Reset') ?></button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" id="btnResetPrimaryColor" onclick="document.getElementById('primaryColorPicker').value='#696cff'; document.documentElement.style.setProperty('--signal', '#696cff'); localStorage.removeItem('taskify.primaryColor');"><?= get_label('reset_to_default', 'Reset') ?></button>
                             </div>
                         </div>
                     </div>
@@ -439,9 +439,13 @@ $(document).ready(function() {
         });
     });
 
-    // Appearance Settings: Live preview
+    // Appearance Settings: Live preview and localStorage
     $('#primaryColorPicker').on('input', function() {
         document.documentElement.style.setProperty('--signal', $(this).val());
+    });
+    
+    $('#primaryColorPicker').on('change', function() {
+        localStorage.setItem("taskify.primaryColor", $(this).val());
     });
 });
 </script>

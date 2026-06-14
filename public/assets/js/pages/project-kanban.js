@@ -101,8 +101,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return false;
         }
     });
-    // Event when dragging starts
-    drake.on('drag', function (el) {
+    var oldParent;
+    drake.on('drag', function (el, source) {
+        oldParent = source;
         el.classList.add('dragging'); // Add visual style to the dragged element
     });
 
@@ -156,11 +157,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     updateColumnCounts();
                 } else {
                     toastr.error(response.message);
+                    drake.cancel(true);
+                    if (oldParent) $(oldParent).append(el);
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Error:', error);
                 toastr.error('Failed to update project status.');
+                drake.cancel(true);
+                if (oldParent) $(oldParent).append(el);
             }
         });
     });

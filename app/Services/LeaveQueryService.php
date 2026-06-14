@@ -81,7 +81,7 @@ class LeaveQueryService
             } elseif ($daysLeft === 0 && !$hasPartial) {
                 $label = ' <span class="badge bg-label-success">' . get_label('on_leave', 'On Leave') . '</span>';
             } elseif ($daysLeft === 1) {
-                $label = ' <span class="badge bg-label-primary">' . get_label('on_leave_tomorrow', 'On Leave From Tomorrow') . '</span>';
+                $label = ' <span class="badge bg-label-success">' . get_label('on_leave_tomorrow', 'On Leave From Tomorrow') . '</span>';
             } elseif ($daysLeft === 2) {
                 $label = ' <span class="badge bg-label-warning">' . get_label('on_leave_day_after_tomorow', 'On Leave From Day After Tomorrow') . '</span>';
             }
@@ -97,7 +97,7 @@ class LeaveQueryService
                 'to_date'   => $toDate->format('D, M d, Y'),
                 'type'      => $hasPartial
                     ? '<span class="badge bg-label-info">' . get_label('partial', 'Partial') . '</span>'
-                    : '<span class="badge bg-label-primary">' . get_label('full', 'Full') . '</span>',
+                    : '<span class="badge bg-label-success">' . get_label('full', 'Full') . '</span>',
                 'duration'  => $duration,
                 'days_left' => $daysLeft,
                 'label'     => $label,

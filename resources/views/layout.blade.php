@@ -15,8 +15,14 @@
                     document.documentElement.setAttribute("data-bs-theme", t);
                 }
                 @if(!empty($general_settings['primary_color']))
-                document.documentElement.style.setProperty('--signal', '{{ $general_settings['primary_color'] }}');
+                var dbColor = '{{ $general_settings['primary_color'] }}';
+                @else
+                var dbColor = '';
                 @endif
+                var c = localStorage.getItem("taskify.primaryColor") || dbColor;
+                if (c) {
+                    document.documentElement.style.setProperty('--signal', c);
+                }
             } catch (e) {}
         })();
     </script>

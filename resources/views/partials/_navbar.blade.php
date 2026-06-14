@@ -130,38 +130,38 @@ if ($remainingUnreadNotificationsCount < 0) {
                 </div>
             @endif
 
-            {{-- Language switcher (unchanged logic + IDs/classes) --}}
+            {{-- Language switcher --}}
             <div class="dropdown">
                 <button type="button" class="tk-icon-btn" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                     title="{{ get_label('language', 'Language') }}">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.9 2.6 15.1 0 18M12 3c-2.6 2.9-2.6 15.1 0 18"/></svg>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end language-dropdown" id="languageDropdown">
+                <ul class="dropdown-menu dropdown-menu-end p-2 language-dropdown" id="languageDropdown" style="min-width: 220px; max-height: 80vh; overflow-y: auto;">
                     @foreach ($languages as $language)
-                        <?php $checked = $language->code == app()->getLocale() ? "<i class='menu-icon tf-icons bx bx-check-square text-primary'></i>" : "<i class='menu-icon tf-icons bx bx-square text-solid'></i>" ?>
-                        <li class="dropdown-item">
-                            <a href="{{ url('/settings/languages/switch/' . $language->code) }}">
-                                <?= $checked ?>
-                                {{ $language->name }}
+                        <?php $checked = $language->code == app()->getLocale() ? "bx-check-square text-primary" : "bx-square text-solid"; ?>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center py-2 rounded" href="{{ url('/settings/languages/switch/' . $language->code) }}">
+                                <i class="bx {{ $checked }} me-2"></i>
+                                <span>{{ $language->name }}</span>
                             </a>
                         </li>
                     @endforeach
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                    <li><hr class="dropdown-divider my-1"></li>
                     @if (!$current_language->isEmpty() && $current_language[0]['code'] == $default_language)
-                        <li>
-                            <span class="badge bg-primary mx-5 mb-1 mt-1" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>">
+                        <li class="px-3 py-1">
+                            <span class="badge bg-primary w-100" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>">
                                 <?= get_label('primary', 'Primary') ?>
                             </span>
                         </li>
                     @else
-                        <a href="javascript:void(0);">
-                            <span class="badge bg-secondary mx-5 mb-1 mt-1" id="set-as-default" data-lang="{{ app()->getLocale() }}" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('set_current_language_as_your_primary_language', 'Set current language as your primary language') ?>">
-                                <?= get_label('set_as_primary', 'Set as primary') ?>
-                            </span>
-                        </a>
+                        <li class="px-3 py-1">
+                            <a href="javascript:void(0);" class="text-decoration-none d-block">
+                                <span class="badge bg-secondary w-100" id="set-as-default" data-lang="{{ app()->getLocale() }}" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('set_current_language_as_your_primary_language', 'Set current language as your primary language') ?>">
+                                    <?= get_label('set_as_primary', 'Set as primary') ?>
+                                </span>
+                            </a>
+                        </li>
                     @endif
                 </ul>
             </div>

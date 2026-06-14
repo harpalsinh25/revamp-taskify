@@ -247,7 +247,7 @@
                                         <h5 class="mb-0"><i class="bx bx-pie-chart text-primary"></i> {{ get_label('leave_distribution', 'Leave Distribution') }}</h5>
                                         <p class="text-muted mb-0 small">{{ get_label('paid_vs_unpaid_overview', 'Paid vs Unpaid Leaves Overview') }}</p>
                                     </div>
-                                    <span class="badge bg-label-primary" id="chart-paid-percentage">0%</span>
+                                    <span class="badge bg-label-success" id="chart-paid-percentage">0%</span>
                                 </div>
                             </div>
                             <div class="p-3">

@@ -384,14 +384,14 @@ class BirthdayAnniversaryService
         } elseif ($daysLeft === 1) {
             $label = '<span class="badge bg-label-warning mt-2">' . $yearDifference . '<sup>' . $ordinalSuffix . '</sup> ' . get_label('birthday', 'Birthday') . ' ' . get_label('tomorrow', 'Tomorrow') . '</span>';
         } elseif ($daysLeft === 2) {
-            $label = '<span class="badge bg-label-primary mt-2">' . $yearDifference . '<sup>' . $ordinalSuffix . '</sup> ' . get_label('birthday', 'Birthday') . ' ' . get_label('day_after_tomorrow', 'Day After Tomorrow') . '</span>';
+            $label = '<span class="badge bg-label-success mt-2">' . $yearDifference . '<sup>' . $ordinalSuffix . '</sup> ' . get_label('birthday', 'Birthday') . ' ' . get_label('day_after_tomorrow', 'Day After Tomorrow') . '</span>';
         }
 
         $type = $item['type'] ?? 'user';
         $formattedMember = $type === 'user' ? formatUserHtml((object)$item) : formatClientHtml((object)$item);
         $typeLabel = $type === 'user'
             ? '<span class="badge bg-label-info">' . get_label('user', 'User') . '</span>'
-            : '<span class="badge bg-label-primary">' . get_label('client', 'Client') . '</span>';
+            : '<span class="badge bg-label-success">' . get_label('client', 'Client') . '</span>';
 
         return [
             'id' => $item['id'],
@@ -474,7 +474,7 @@ class BirthdayAnniversaryService
         } elseif ($daysLeft === 1) {
             $label = '<span class="badge bg-label-warning mt-2">' . $yearDifference . '<sup>' . $ordinalSuffix . '</sup> ' . get_label('work_anniversary', 'Work Anniversary') . ' ' . get_label('tomorrow', 'Tomorrow') . '</span>';
         } elseif ($daysLeft === 2) {
-            $label = '<span class="badge bg-label-primary mt-2">' . $yearDifference . '<sup>' . $ordinalSuffix . '</sup> ' . get_label('work_anniversary', 'Work Anniversary') . ' ' . get_label('day_after_tomorrow', 'Day After Tomorrow') . '</span>';
+            $label = '<span class="badge bg-label-success mt-2">' . $yearDifference . '<sup>' . $ordinalSuffix . '</sup> ' . get_label('work_anniversary', 'Work Anniversary') . ' ' . get_label('day_after_tomorrow', 'Day After Tomorrow') . '</span>';
         }
 
         return [
@@ -483,7 +483,7 @@ class BirthdayAnniversaryService
             'days_left' => $daysLeft,
             'wa_date' => $anniversaryDate->format('D, M d, Y') . ' ' . $label,
             'type' => $item['type'] === 'user'
-                ? '<span class="badge bg-label-primary">' . get_label('user', 'User') . '</span>'
+                ? '<span class="badge bg-label-success">' . get_label('user', 'User') . '</span>'
                 : '<span class="badge bg-label-info">' . get_label('client', 'Client') . '</span>',
         ];
     }

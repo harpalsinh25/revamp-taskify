@@ -8,7 +8,7 @@
                       <i class="bx bx-chevron-down fs-4"></i>
                   </button>
                   <h6 class="mb-0">{{ $taskList->name }}</h6>
-                  <span class="badge bg-label-primary rounded-pill">{{ count($taskList->tasks) }}</span>
+                  <span class="badge bg-label-success rounded-pill">{{ count($taskList->tasks) }}</span>
               </div>
           </div>
       </div>

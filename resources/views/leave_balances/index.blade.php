@@ -397,7 +397,7 @@
                                         <div class="card-body py-3 px-4">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 <h6 class="text-muted text-uppercase small mb-0">{{ get_label('leave_balances_chart_trend_title', 'Monthly trend') }}</h6>
-                                                <span class="badge bg-label-primary" data-trend-months>--</span>
+                                                <span class="badge bg-label-success" data-trend-months>--</span>
                                             </div>
                                             <div id="leaveBalancesTrendSparkline" class="w-100"></div>
                                             <ul class="list-unstyled mb-0 mt-3 small">

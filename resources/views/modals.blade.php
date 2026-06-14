@@ -39,7 +39,7 @@
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="color" name="color">
-                                <option class="badge bg-label-primary" value="primary"
+                                <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
@@ -124,7 +124,7 @@
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="status_color" name="color"
                                 required>
-                                <option class="badge bg-label-primary" value="primary">
+                                <option class="badge bg-label-success" value="primary">
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary">
@@ -206,7 +206,7 @@
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="color" name="color">
-                                <option class="badge bg-label-primary" value="primary"
+                                <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
@@ -270,7 +270,7 @@
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="priority_color" name="color"
                                 required>
-                                <option class="badge bg-label-primary" value="primary">
+                                <option class="badge bg-label-success" value="primary">
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary">
@@ -328,7 +328,7 @@
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="color" name="color">
-                                <option class="badge bg-label-primary" value="primary"
+                                <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
@@ -390,7 +390,7 @@
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
                             <select class="form-select select-bg-label-primary" id="tag_color" name="color">
-                                <option class="badge bg-label-primary" value="primary">
+                                <option class="badge bg-label-success" value="primary">
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
                                 <option class="badge bg-label-secondary" value="secondary">
@@ -5061,7 +5061,7 @@
                                 <span class="asterisk">*</span>
                             </label>
                             <select class="form-select select-bg-label-primary" id="color" name="color">
-                                <option class="badge bg-label-primary" value="primary"
+                                <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
@@ -5128,7 +5128,7 @@
                             </label>
                             <select class="form-select select-bg-label-primary" id="edit_lead_stages_color"
                                 name="color">
-                                <option class="badge bg-label-primary" value="primary"
+                                <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
                                 </option>
@@ -5708,7 +5708,7 @@
                         <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                 class="asterisk">*</span></label>
                         <select class="form-select select-bg-label-primary" id="color" name="color">
-                            <option class="badge bg-label-primary" value="primary"
+                            <option class="badge bg-label-success" value="primary"
                                 {{ old('color') == 'primary' ? 'selected' : '' }}>
                                 <?= get_label('primary', 'Primary') ?>
                             </option>
@@ -5768,7 +5768,7 @@
                                 class="asterisk">*</span></label>
                         <select class="form-select select-bg-label-primary" id="status_color" name="color"
                             required>
-                            <option class="badge bg-label-primary" value="primary">
+                            <option class="badge bg-label-success" value="primary">
                                 <?= get_label('primary', 'Primary') ?>
                             </option>
                             <option class="badge bg-label-secondary" value="secondary">

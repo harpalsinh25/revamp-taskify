@@ -2962,8 +2962,8 @@ html:not([dir="rtl"]) .timeline-item {
 }
 
 .bg-label-success {
-    background-color: rgba(113, 221, 55, 0.1);
-    color: #71dd37;
+    background-color: rgba(40, 199, 111, 0.16) !important;
+    color: #28c76f !important;
 }
 
 .bg-label-danger {
@@ -3273,7 +3273,7 @@ html:not([dir="rtl"]) .timeline-item {
 :root {
     --signal: oklch(81.99% 0.11932 142.474);
     --signal-fg: oklch(0.18 0.02 130);
-    --signal-glow: oklch(0.88 0.20 130 / 0.35);
+    --signal-glow: color-mix(in srgb, var(--signal) 35%, transparent);
     --ok: oklch(0.70 0.16 155);
     --warn: oklch(0.78 0.16 80);
     --err: oklch(0.65 0.22 25);
@@ -3315,7 +3315,7 @@ html:not([dir="rtl"]) .timeline-item {
     --ctrl-h-sm: 24px;
     --ctrl-h-md: 32px;
     --ctrl-h-lg: 40px;
-    --signal-soft: oklch(0.95 0.10 130);
+    --signal-soft: color-mix(in srgb, var(--signal) 12%, var(--bg-1));
     --shadow-1: 0 1px 1px oklch(0.16 0.01 280 / 0.04);
     --shadow-2: 0 2px 6px oklch(0.16 0.01 280 / 0.06), 0 1px 2px oklch(0.16 0.01 280 / 0.04);
     --shadow-3: 0 8px 24px oklch(0.16 0.01 280 / 0.10), 0 2px 6px oklch(0.16 0.01 280 / 0.05);
@@ -3325,7 +3325,6 @@ html:not([dir="rtl"]) .timeline-item {
 }
 
 [data-theme="dark"] {
-    --signal-soft: oklch(0.32 0.10 130);
     --shadow-1: 0 1px 1px oklch(0 0 0 / 0.30);
     --shadow-2: 0 2px 6px oklch(0 0 0 / 0.30), 0 1px 2px oklch(0 0 0 / 0.20);
     --shadow-3: 0 8px 24px oklch(0 0 0 / 0.40), 0 2px 6px oklch(0 0 0 / 0.25);
@@ -4027,8 +4026,8 @@ body.v2-shell .layout-page {
     }
 }
 
-/* Tablet / small: tighten the command bar spacing */
-@media (max-width: 991.98px) {
+/* Tablet / small desktop: tighten the command bar spacing and hide sidebar by default */
+@media (max-width: 1199.98px) {
     .tk-cbar {
         gap: 8px;
         padding: 0 12px;
@@ -4036,6 +4035,35 @@ body.v2-shell .layout-page {
 
     .tk-cbar-actions {
         gap: 0;
+    }
+
+    body.v2-shell .tk-rail {
+        transform: translateX(-100%);
+        transition: transform var(--t-2) var(--ease);
+        z-index: 1050;
+    }
+
+    body.v2-shell .tk-panel {
+        transform: translateX(calc(-100% - var(--rail-w)));
+        transition: transform var(--t-2) var(--ease);
+        z-index: 1049;
+    }
+
+    body.v2-shell .layout-page {
+        padding-left: 0 !important;
+    }
+
+    html.layout-menu-expanded body.v2-shell .tk-rail {
+        transform: translateX(0);
+    }
+
+    html.layout-menu-expanded body.v2-shell .tk-panel {
+        transform: translateX(0);
+    }
+
+    html.layout-menu-expanded body.v2-shell .layout-overlay {
+        display: block;
+        z-index: 1040;
     }
 }
 
@@ -5877,23 +5905,15 @@ body.v2-shell .badge.text-bg-primary {
     color: var(--signal-fg) !important;
 }
 
-body.v2-shell .badge.bg-label-primary {
-    background: var(--signal-soft) !important;
-    /* Mix the signal color with black to create a dark, readable text color that matches the theme hue */
-    color: color-mix(in srgb, var(--signal) 40%, black) !important;
-}
 
-[data-theme="dark"] body.v2-shell .badge.bg-label-primary {
-    color: var(--signal) !important;
-}
 
 /* success / ok (soft) */
 body.v2-shell .badge.bg-success,
 body.v2-shell .badge.text-bg-success,
 body.v2-shell .badge.bg-label-success,
 body.v2-shell .badge.badge-ok {
-    background: rgba(40, 199, 111, 0.12) !important;
-    color: #28c76f !important;
+    background: rgba(136, 241, 182, 0.12) !important;
+    color: #447c5f !important;
 }
 
 /* warning / warn (soft) */
@@ -6117,14 +6137,14 @@ body.v2-shell .btn.rounded-pill {
 /* solid variants (primary = signal) */
 body.v2-shell .btn-primary {
     background: var(--signal) !important;
-    color: var(--signal-fg) !important;
+    color: #ffffff !important;
     border-color: var(--signal) !important;
     box-shadow: var(--shadow-1), inset 0 1px 0 oklch(1 0 0 / 0.18);
 }
 
 body.v2-shell .btn-primary:hover {
     filter: brightness(1.05);
-    color: var(--signal-fg) !important;
+    color: #ffffff !important;
 }
 
 body.v2-shell .btn-success {
@@ -8681,7 +8701,7 @@ body.v2-shell .fc-day-today {
 }
 
 html[data-theme="dark"] body.v2-shell .fc-day-today {
-    background-color: oklch(0.32 0.10 130 / 0.35) !important;
+    background-color: var(--signal-glow) !important;
 }
 
 body.v2-shell .fc-day-today .fc-daygrid-day-number {

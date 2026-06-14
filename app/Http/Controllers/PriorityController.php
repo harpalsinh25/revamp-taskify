@@ -155,7 +155,7 @@ class PriorityController extends Controller
                 return [
                     'id' => $priority->id,
                     'title' => $priority->title,
-                    'color' => '<span class="badge bg-' . $priority->color . '">' . $priority->title . '</span>',
+                    'color' => '<span class="badge bg-label-' . $priority->color . '">' . $priority->title . '</span>',
                     'created_at' => format_date($priority->created_at, true),
                     'updated_at' => format_date($priority->updated_at, true),
                     'actions' => $actions,

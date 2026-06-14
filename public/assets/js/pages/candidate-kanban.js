@@ -72,8 +72,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
+    var oldParent;
     // Add class on drag start
-    drake.on('drag', function (el) {
+    drake.on('drag', function (el, source) {
+        oldParent = source;
         el.classList.add('dragging');
     });
 
@@ -121,11 +123,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     updateColumnCounts();
                 } else {
                     toastr.error(response.message);
+                    drake.cancel(true);
+                    if (oldParent) $(oldParent).append(el);
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Error:', error);
                 toastr.error('Failed to update candidate status.');
+                drake.cancel(true);
+                if (oldParent) $(oldParent).append(el);
             }
         });
     });
