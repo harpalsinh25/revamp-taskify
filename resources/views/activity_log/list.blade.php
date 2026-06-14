@@ -88,36 +88,47 @@ $visibleColumns = getUserPreferences('activity_log');
                         </button>
                     </div>
                 </div>
-                <input type="hidden" id="activity_log_between_date_from">
-                <input type="hidden" id="activity_log_between_date_to">
-                <div class="table-responsive text-nowrap tk-table">
-                    <input type="hidden" id="data_type" value="activity-log">
-                    <input type="hidden" id="data_table" value="activity_log_table">
-                    <input type="hidden" id="save_column_visibility">
-                    <input type="hidden" id="multi_select">
-                    <table id="activity_log_table" data-toggle="table" data-loading-template="loadingTemplate" data-url="{{ url('/activity-log/list') }}" data-icons-prefix="bx" data-icons="icons" data-show-refresh="true" data-total-field="total" data-trim-on-search="false" data-data-field="rows" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-side-pagination="server" data-show-columns="true" data-pagination="true" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-query-params="queryParams">
-                        <thead>
-                            <tr>
-                                <th data-checkbox="true"></th>
-                                <th data-field="id" data-visible="{{ (in_array('id', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('id', 'ID') ?></th>
-                                <th data-field="actor_id" data-visible="{{ (in_array('actor_id', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('actioned_by_id', 'Actioned By ID') ?></th>
-                                <th data-field="actor_name" data-visible="{{ (in_array('actor_name', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('actioned_by', 'Actioned By') ?></th>
-                                <th data-field="actor_type" data-visible="{{ (in_array('actor_type', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('actioned_by_type', 'Actioned By Type') ?></th>
-                                <th data-field="type_id" data-visible="{{ (in_array('type_id', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('type_id', 'Type ID') ?></th>
-                                <th data-field="parent_type_id" data-visible="{{ (in_array('parent_type_id', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('parent_type_id', 'Parent type ID') ?></th>
-                                <th data-field="activity" data-visible="{{ (in_array('activity', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('activity', 'Activity') ?></th>
-                                <th data-field="type" data-visible="{{ (in_array('type', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('type', 'Type') ?></th>
-                                <th data-field="parent_type" data-visible="{{ (in_array('parent_type', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('parent_type', 'Parent type') ?></th>
-                                <th data-field="type_title" data-visible="{{ (in_array('type_title', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('type_title', 'Type title') ?></th>
-                                <th data-field="parent_type_title" data-visible="{{ (in_array('parent_type_title', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('parent_type_title', 'Parent type title') ?></th>
-                                <th data-field="message" data-visible="{{ (in_array('message', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('message', 'Message') ?></th>
-                                <th data-field="created_at" data-visible="{{ (in_array('created_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('created_at', 'Created at') ?></th>
-                                <th data-field="updated_at" data-visible="{{ (in_array('updated_at', $visibleColumns)) ? 'true' : 'false' }}" data-sortable="true"><?= get_label('updated_at', 'Updated at') ?></th>
-                                <th data-field="actions" data-visible="{{ (in_array('actions', $visibleColumns) || empty($visibleColumns)) ? 'true' : 'false' }}"><?= get_label('actions', 'Actions') ?></th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
+            </div>
+        </div>
+        @php
+        $columns = [
+            ['checkbox' => true],
+            ['field' => 'id', 'label' => get_label('id', 'ID'), 'sortable' => true, 'visible' => (in_array('id', $visibleColumns) || empty($visibleColumns))],
+            ['field' => 'actor_id', 'label' => get_label('actioned_by_id', 'Actioned By ID'), 'sortable' => true, 'visible' => (in_array('actor_id', $visibleColumns))],
+            ['field' => 'actor_name', 'label' => get_label('actioned_by', 'Actioned By'), 'sortable' => true, 'visible' => (in_array('actor_name', $visibleColumns) || empty($visibleColumns))],
+            ['field' => 'actor_type', 'label' => get_label('actioned_by_type', 'Actioned By Type'), 'sortable' => true, 'visible' => (in_array('actor_type', $visibleColumns))],
+            ['field' => 'type_id', 'label' => get_label('type_id', 'Type ID'), 'sortable' => true, 'visible' => (in_array('type_id', $visibleColumns))],
+            ['field' => 'parent_type_id', 'label' => get_label('parent_type_id', 'Parent type ID'), 'sortable' => true, 'visible' => (in_array('parent_type_id', $visibleColumns))],
+            ['field' => 'activity', 'label' => get_label('activity', 'Activity'), 'sortable' => true, 'visible' => (in_array('activity', $visibleColumns) || empty($visibleColumns))],
+            ['field' => 'type', 'label' => get_label('type', 'Type'), 'sortable' => true, 'visible' => (in_array('type', $visibleColumns) || empty($visibleColumns))],
+            ['field' => 'parent_type', 'label' => get_label('parent_type', 'Parent type'), 'sortable' => true, 'visible' => (in_array('parent_type', $visibleColumns))],
+            ['field' => 'type_title', 'label' => get_label('type_title', 'Type title'), 'sortable' => true, 'visible' => (in_array('type_title', $visibleColumns) || empty($visibleColumns))],
+            ['field' => 'parent_type_title', 'label' => get_label('parent_type_title', 'Parent type title'), 'sortable' => true, 'visible' => (in_array('parent_type_title', $visibleColumns))],
+            ['field' => 'message', 'label' => get_label('message', 'Message'), 'sortable' => true, 'visible' => (in_array('message', $visibleColumns))],
+            ['field' => 'created_at', 'label' => get_label('created_at', 'Created at'), 'sortable' => true, 'visible' => (in_array('created_at', $visibleColumns))],
+            ['field' => 'updated_at', 'label' => get_label('updated_at', 'Updated at'), 'sortable' => true, 'visible' => (in_array('updated_at', $visibleColumns))],
+            ['field' => 'actions', 'label' => get_label('actions', 'Actions'), 'visible' => (in_array('actions', $visibleColumns) || empty($visibleColumns))]
+        ];
+        @endphp
+        <div class="card border shadow-none">
+            <div class="card-body p-0">
+                <x-tk-table
+                    id="activity_log_table"
+                    :url="url('/activity-log/list')"
+                    :columns="$columns"
+                    data-sort-name="id"
+                    data-sort-order="desc"
+                    data-query-params="queryParams"
+                >
+                    <x-slot:before>
+                        <input type="hidden" id="activity_log_between_date_from">
+                        <input type="hidden" id="activity_log_between_date_to">
+                        <input type="hidden" id="data_type" value="activity-log">
+                        <input type="hidden" id="data_table" value="activity_log_table">
+                        <input type="hidden" id="save_column_visibility">
+                        <input type="hidden" id="multi_select">
+                    </x-slot:before>
+                </x-tk-table>
             </div>
         </div>
     </div>

@@ -45,4 +45,10 @@
   - Refactored Activity Log page (`resources/views/activity_log/list.blade.php` and `public/assets/js/pages/activity-log.js`):
     - Migrated filters to Tom Select (`tom_users_select`, `tom_clients_select`, and `tom_static_select`) and updated `TableFilterSync` configuration types.
     - Updated clear filters button logic in `activity-log.js` to correctly invoke the Tom Select API.
-    - Aligned filters layout inside a `.tk-filter-row` inside the main `card border shadow-none` container and wrapped the table in `.tk-table` wrapper to conform to V2 standards.
+    - Aligned filters layout inside a `.tk-filter-row` inside a top `card border shadow-none mb-3` filters card, and wrapped the table in a separate `card border shadow-none` card with a `.tk-table` wrapper to conform to V2 standards.
+    - Migrated the Activity Log table from a raw `<table>` tag to the design system's `<x-tk-table>` blade component to inherit premium styling and standard pagination controls.
+- Redesigned Social Media Scheduler Quick View Modal (`quickViewModal`):
+  - Refactored `.qv-` styles in `public/assets/css/social/social.css` using theme CSS variables (`var(--bg-*)`, `var(--fg-*)`, `var(--line)`) for complete dark and light mode compatibility.
+  - Upgraded status badges, platform cards, and statistics metrics to use correct semantic design tokens and semi-transparent colors.
+  - Added action buttons (Publish Now, Edit, Delete, Close) inside the `modal-footer` of `quickViewModal` in `calendar.blade.php` and `index.blade.php` to restore missing UI functions.
+  - Refactored `.day-post-item` in `social.css` with dynamic CSS variables to render correctly in dark mode.
