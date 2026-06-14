@@ -777,6 +777,22 @@
     </div>
 </div>
 @if (Request::is('leave-requests') || Request::is('leave-requests/*'))
+    <style>
+        @media (min-width: 768px) {
+            #create_leave_request_modal .leave-from-date-div.col-3,
+            #create_leave_request_modal .leave-to-date-div.col-3,
+            #create_leave_request_modal .leave-from-time-div.col-2,
+            #create_leave_request_modal .leave-to-time-div.col-2,
+            #create_leave_request_modal .leave-days-div.col-2,
+            #edit_leave_request_modal .leave-from-date-div.col-3,
+            #edit_leave_request_modal .leave-to-date-div.col-3,
+            #edit_leave_request_modal .leave-from-time-div.col-2,
+            #edit_leave_request_modal .leave-to-time-div.col-2,
+            #edit_leave_request_modal .leave-days-div.col-2 {
+                width: 20% !important;
+            }
+        }
+    </style>
 
     <div class="modal fade" id="paidLeaveWorkflowModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -1011,7 +1027,7 @@
                                 <label class="form-label"
                                     for="user_id"><?= get_label('select_user', 'Select user') ?> <span
                                         class="asterisk">*</span></label>
-                                <select class="form-select users_select"
+                                <select class="form-select tom_users_select"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     name="user_id" data-single-select="true">
                                     <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -1051,7 +1067,7 @@
                                     class="asterisk">*</span></label>
                             <input type="time" name="to_time" class="form-control" value="{{ old('to_time') }}">
                         </div>
-                        <div class="col-2 mb-3">
+                        <div class="col-2 leave-days-div mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('days', 'Days') ?></label>
                             <input type="text" id="total_days" class="form-control" value="1"
                                 placeholder="" disabled>
@@ -1069,12 +1085,11 @@
                             </div>
                         </div>
                         <div class="col-12 leaveVisibleToDiv mb-3">
-                            <select class="form-select users_select"
+                            <select class="form-select tom_users_select"
                                 data-placeholder="<?= get_label('type_to_search_users_leave_visible_to', 'Type To Search Users Leave Visible To') ?>"
                                 name="visible_to_ids[]" data-leave-visible-to-users="true" multiple>
-                            </select>
+                        </select>
                         </div>
-                    </div>
                     <div class="col-12 mb-3">
                         <label for="description" class="form-label"><?= get_label('reason', 'Reason') ?> <span
                                 class="asterisk">*</span></label>
@@ -1098,26 +1113,25 @@
                         </div>
                     @endif
                     @if (is_admin_or_leave_editor())
-                        <div class="row">
-                            <div class="col-12 d-flex justify-content-center">
-                                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                                    <input type="radio" class="btn-check" name="status" id="create_lr_pending"
-                                        value="pending" checked>
-                                    <label class="btn btn-outline-primary"
-                                        for="create_lr_pending"><?= get_label('pending', 'Pending') ?></label>
-                                    <input type="radio" class="btn-check" name="status" id="create_lr_approved"
-                                        value="approved">
-                                    <label class="btn btn-outline-primary"
-                                        for="create_lr_approved"><?= get_label('approved', 'Approved') ?></label>
-                                    <input type="radio" class="btn-check" name="status" id="create_lr_rejected"
-                                        value="rejected">
-                                    <label class="btn btn-outline-primary"
-                                        for="create_lr_rejected"><?= get_label('rejected', 'Rejected') ?></label>
-                                </div>
+                        <div class="col-12 d-flex justify-content-center">
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="status" id="create_lr_pending"
+                                    value="pending" checked>
+                                <label class="btn btn-outline-primary"
+                                    for="create_lr_pending"><?= get_label('pending', 'Pending') ?></label>
+                                <input type="radio" class="btn-check" name="status" id="create_lr_approved"
+                                    value="approved">
+                                <label class="btn btn-outline-primary"
+                                    for="create_lr_approved"><?= get_label('approved', 'Approved') ?></label>
+                                <input type="radio" class="btn-check" name="status" id="create_lr_rejected"
+                                    value="rejected">
+                                <label class="btn btn-outline-primary"
+                                    for="create_lr_rejected"><?= get_label('rejected', 'Rejected') ?></label>
                             </div>
                         </div>
                     @endif
                 </div>
+            </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
@@ -1172,7 +1186,7 @@
         });
 
         // Update when user changes
-        $(document).on('change', '.users_select[name="user_id"]', function() {
+        $(document).on('change', '.tom_users_select[name="user_id"]', function() {
             var newUserId = $(this).val();
             console.log('[INLINE] User changed to:', newUserId);
 
@@ -1250,7 +1264,7 @@
                                     class="asterisk">*</span></label>
                             <input type="time" name="to_time" class="form-control">
                         </div>
-                        <div class="col-2 mb-3">
+                        <div class="col-2 leave-days-div mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('days', 'Days') ?></label>
                             <input type="text" id="update_total_days" class="form-control" value="1"
                                 placeholder="" disabled>
@@ -1268,7 +1282,7 @@
                             </div>
                         </div>
                         <div class="col-12 leaveVisibleToDiv mb-3">
-                            <select class="form-select users_select"
+                            <select class="form-select tom_users_select"
                                 data-placeholder="<?= get_label('type_to_search_users_leave_visible_to', 'Type To Search Users Leave Visible To') ?>"
                                 name="visible_to_ids[]" data-leave-visible-to-users="true" multiple>
                             </select>
@@ -3753,13 +3767,10 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                            <select class="form-control users_select" name="user_ids[]" multiple="multiple"
+                            <select class="form-select tom_users_select" name="user_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
-                                @if ($guard == 'web')
-                                    <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
-                                        {{ $auth_user->last_name }}</option>
-                                @endif
+
                             </select>
                         </div>
                     </div>
@@ -3767,13 +3778,10 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                            <select class="form-control clients_select" name="client_ids[]" multiple="multiple"
+                            <select class="form-select tom_clients_select" name="client_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
-                                @if ($guard == 'client')
-                                    <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
-                                        {{ $auth_user->last_name }}</option>
-                                @endif
+
                             </select>
                         </div>
                     </div>
@@ -3833,7 +3841,7 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                            <select class="form-control users_select" name="user_ids[]" multiple="multiple"
+                            <select class="form-select tom_users_select" name="user_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
                             </select>
@@ -3843,7 +3851,7 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                            <select class="form-control clients_select" name="client_ids[]" multiple="multiple"
+                            <select class="form-select tom_clients_select" name="client_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
                             </select>

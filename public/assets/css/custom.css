@@ -93,6 +93,10 @@
     display: none !important;
 }
 
+.tomselected {
+    display: none !important;
+}
+
 .bx.bx-search {
     display: none;
 }
@@ -3002,28 +3006,28 @@ html:not([dir="rtl"]) .timeline-item {
 }
 
 .paid-leave-timeline .list-group-item {
-    border: 1px solid #e4e6e8;
-    border-radius: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
     padding: 1rem;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
     transition: all 0.3s ease;
-    background-color: #fff;
+    background-color: var(--bg-1);
     cursor: pointer;
     text-align: left;
 }
 
 .paid-leave-timeline .list-group-item:hover:not(.active):not(.disabled) {
-    background-color: #f8f9fa;
-    border-color: #d9dee3;
+    background-color: var(--bg-2);
+    border-color: var(--line);
     transform: translateX(4px);
 }
 
 .paid-leave-timeline .list-group-item.active {
-    background-color: rgba(105, 108, 255, 0.1);
-    border-color: #696cff;
-    box-shadow: 0 2px 8px rgba(105, 108, 255, 0.15);
+    background-color: oklch(from var(--signal) l c h / 0.12);
+    border-color: var(--signal);
+    box-shadow: var(--shadow-1);
 }
 
 .paid-leave-timeline .list-group-item.disabled {
@@ -3035,16 +3039,17 @@ html:not([dir="rtl"]) .timeline-item {
 .paid-leave-timeline .list-group-item h6 {
     margin-bottom: 0.25rem;
     font-weight: 600;
-    color: #566a7f;
+    color: var(--fg-0);
 }
 
 .paid-leave-timeline .list-group-item.active h6 {
-    color: #696cff;
+    color: var(--signal);
 }
 
 .paid-leave-timeline .list-group-item small {
     display: block;
     line-height: 1.4;
+    color: var(--fg-2);
 }
 
 /* Timeline Index (Step Numbers) */
@@ -3056,8 +3061,8 @@ html:not([dir="rtl"]) .timeline-item {
     height: 2.5rem;
     min-width: 2.5rem;
     border-radius: 50%;
-    background-color: #e4e6e8;
-    color: #8592a3;
+    background-color: var(--bg-3);
+    color: var(--fg-3);
     font-weight: 600;
     font-size: 0.875rem;
     flex-shrink: 0;
@@ -3065,16 +3070,16 @@ html:not([dir="rtl"]) .timeline-item {
 }
 
 .paid-leave-timeline .list-group-item.active .timeline-index {
-    background-color: #696cff;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(105, 108, 255, 0.3);
+    background-color: var(--signal);
+    color: var(--signal-fg, #fff);
+    box-shadow: 0 2px 8px oklch(from var(--signal) l c h / 0.3);
 }
 
 /* Pro Tip Callout */
 .paid-leave-callout {
-    background-color: #fff8e1;
-    border: 1px solid #ffe082;
-    border-radius: 0.5rem;
+    background-color: oklch(from var(--warn) l c h / 0.1);
+    border: 1px solid oklch(from var(--warn) l c h / 0.25);
+    border-radius: var(--r-2);
     padding: 1rem;
     margin-top: 1.5rem;
 }
@@ -3083,10 +3088,12 @@ html:not([dir="rtl"]) .timeline-item {
     font-weight: 600;
     letter-spacing: 0.5px;
     margin-bottom: 0.5rem;
+    color: var(--warn);
 }
 
 .paid-leave-callout p {
     margin-bottom: 0.75rem;
+    color: var(--fg-2);
 }
 
 .paid-leave-callout ul {
@@ -3095,6 +3102,7 @@ html:not([dir="rtl"]) .timeline-item {
 
 .paid-leave-callout ul li {
     margin-bottom: 0.25rem;
+    color: var(--fg-2);
 }
 
 /* Step Content Wrapper */
@@ -3126,28 +3134,37 @@ html:not([dir="rtl"]) .timeline-item {
     width: 3rem;
     height: 3rem;
     min-width: 3rem;
-    border-radius: 0.5rem;
+    border-radius: var(--r-2);
     font-size: 1.5rem;
     flex-shrink: 0;
 }
 
+.paid-leave-step-icon.text-primary,
+#paidLeaveWorkflowModal .text-primary {
+    color: var(--signal) !important;
+}
+
+#paidLeaveWorkflowModal .text-info {
+    color: var(--info) !important;
+}
+
 .bg-soft-primary {
-    background-color: rgba(105, 108, 255, 0.1) !important;
+    background-color: oklch(from var(--signal) l c h / 0.12) !important;
 }
 
 /* Role Cards */
 .paid-leave-role-card {
-    background-color: #f8f9fa;
-    border: 1px solid #e4e6e8;
-    border-radius: 0.5rem;
+    background-color: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
     padding: 1rem;
     height: 100%;
     transition: all 0.3s ease;
 }
 
 .paid-leave-role-card:hover {
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background-color: var(--bg-1);
+    box-shadow: var(--shadow-1);
     transform: translateY(-2px);
 }
 
@@ -3158,7 +3175,7 @@ html:not([dir="rtl"]) .timeline-item {
     font-size: 0.875rem;
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e4e6e8;
+    border-bottom: 1px solid var(--line);
 }
 
 .paid-leave-role-card ul {
@@ -3168,6 +3185,7 @@ html:not([dir="rtl"]) .timeline-item {
 .paid-leave-role-card ul li {
     margin-bottom: 0.5rem;
     line-height: 1.5;
+    color: var(--fg-2);
 }
 
 .paid-leave-role-card ul li:last-child {
@@ -3770,18 +3788,17 @@ body.v2-shell .layout-page {
 
 .tk-icon-btn {
     position: relative;
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--r-2);
-    color: var(--fg-2);
-    background: transparent;
     border: 0;
+    border-radius: 8px;
+    background: transparent;
     cursor: pointer;
-    text-decoration: none;
-    transition: background var(--t-1), color var(--t-1);
+    color: var(--fg-2);
+    transition: .2s ease;
 }
 
 .tk-icon-btn:hover {
@@ -3789,27 +3806,22 @@ body.v2-shell .layout-page {
     color: var(--fg-0);
 }
 
-.tk-cbar-divider {
-    width: 1px;
-    height: 18px;
-    background: var(--line);
-    margin: 0 6px;
-    flex: 0 0 auto;
-}
-
-/* notification count badge sits on the bell */
-.tk-icon-btn .badge-notifications {
+/* notification badge */
+.badge-notifications {
     position: absolute;
-    top: 1px;
-    right: 1px;
-    min-width: 15px;
-    height: 15px;
-    padding: 0 3px;
-    font-size: 9px;
-    line-height: 15px;
+    top: 2px;
+    right: 2px;
+
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    font-size: 10px;
+    line-height: 1;
 }
 
 /* language switcher name */

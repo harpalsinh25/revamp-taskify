@@ -4,46 +4,54 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <?= get_label('leads_management', 'Leads Management') ?>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            <?= get_label('leads', 'Leads') ?>
-                        </li>
-                    </ol>
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+            <!-- Left Side: Breadcrumbs and Badge -->
+            <div class="d-flex align-items-center gap-3">
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-item"><?= get_label('leads_management', 'Leads Management') ?></span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current"><?= get_label('leads', 'Leads') ?></span>
                 </nav>
-            </div>
-            <div>
+
                 @php
                     $leadsDefaultView = getUserPreferences('leads', 'default_view');
                 @endphp
                 @if ($leadsDefaultView === 'list')
                     <span class="badge bg-primary"><?= get_label('default_view', 'Default View') ?></span>
                 @else
-                    <a href="javascript:void(0);"><span class="badge bg-secondary" id="set-default-view" data-type="leads"
-                            data-view="list"><?= get_label('set_as_default_view', 'Set as Default View') ?></span></a>
+                    <a href="javascript:void(0);" id="set-default-view" data-type="leads" data-view="list">
+                        <span class="badge bg-secondary"><?= get_label('set_as_default_view', 'Set as Default View') ?></span>
+                    </a>
                 @endif
             </div>
-            <div>
-                <a href="{{ route('leads.create') }}"><button type="button" class="btn btn-sm btn-primary"
-                        data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-original-title=" <?= get_label('create_lead', 'Create Lead') ?>"><i
-                            class="bx bx-plus"></i></button></a>
-                <a href="{{ route('leads.kanban_view') }}"><button type="button" class="btn btn-sm btn-primary"
-                        data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-original-title=" <?= get_label('kanban_view', 'Kanban View') ?>"><i
-                            class="bx bx-layout"></i></button></a>
-                <a href="{{ route('leads.upload') }}"><button type="button" class="btn btn-sm btn-primary"
-                        data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-original-title=" <?= get_label('bulk_upload', 'Bulk Upload') ?>"><i
-                            class="bx bx-upload"></i></button></a>
+
+            <!-- Right Side: View modes and Actions -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- View Toggles -->
+                <div class="seg">
+                    <a href="javascript:void(0);" class="seg-btn on" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('list_view', 'List view') ?>">
+                        <i class='bx bx-list-ul'></i>
+                    </a>
+                    <a href="{{ route('leads.kanban_view') }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
+                        <i class='bx bx-layout'></i>
+                    </a>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2">
+                    <a href="{{ route('leads.upload') }}">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('bulk_upload', 'Bulk Upload') ?>">
+                            <i class='bx bx-upload'></i>
+                        </button>
+                    </a>
+                    <a href="{{ route('leads.create') }}">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_lead', 'Create Lead') ?>">
+                            <i class='bx bx-plus'></i>
+                        </button>
+                    </a>
+                </div>
             </div>
         </div>
         @if ($leads->count() > 0)
@@ -51,38 +59,39 @@
                 $visibleColumns = getUserPreferences('leads');
             @endphp
             <div class="mt-2">
-                <div class="row g-3 align-items-end tk-filter-row mb-3">
-                    <div class="col-md-3 mb-3">
-                        <label class="tk-filter-label">{{ get_label('sort_by', 'Sort By') }}</label>
-                        <select class="form-select" id="sort"
-                            aria-label="Default select example"
-                            data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>"
-                            data-allow-clear="true">
-                            <option></option>
-                            <option value="newest"> {{ get_label('newest', 'Newest') }}</option>
-                            <option value="oldest">{{ get_label('oldest', 'Oldest') }}</option>
-                            <option value="recently-updated">
-                                {{ get_label('most_recently_updated', 'Most recently updated') }}</option>
-                            <option value="earliest-updated">
-                                {{ get_label('least_recently_updated', 'Least recently updated') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="tk-filter-label">{{ get_label('sources', 'Sources') }}</label>
-                        <select class="form-select tom_select" id="selected_sources" name="sources[]"
-                            aria-label="Default select example"
-                            data-placeholder="{{ get_label('filter_by_sources', 'Filter by sources') }}"
-                            data-allow-clear="true" multiple>
-                        </select>
-                    </div>
-                    <x-advanced-date-filters prefix="lead" :filters="['date_range']" colClass="col-md-3 mb-3" />
-                    <div class="col-md-3 mb-3">
-                        <label class="tk-filter-label">{{ get_label('stages', 'Stages') }}</label>
-                        <select class="form-select tom_select" id="selected_stages" name="stages[]"
-                            aria-label="Default select example"
-                            data-placeholder="{{ get_label('filter_by_stages', 'Filter by stages') }}"
-                            data-allow-clear="true" multiple>
-                        </select>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end tk-filter-row mb-0">
+                            <div class="col-md-3 mb-0">
+                                <select class="form-select tom_select" id="sort"
+                                    aria-label="Default select example"
+                                    data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>"
+                                    data-allow-clear="true">
+                                    <option></option>
+                                    <option value="newest"> {{ get_label('newest', 'Newest') }}</option>
+                                    <option value="oldest">{{ get_label('oldest', 'Oldest') }}</option>
+                                    <option value="recently-updated">
+                                        {{ get_label('most_recently_updated', 'Most recently updated') }}</option>
+                                    <option value="earliest-updated">
+                                        {{ get_label('least_recently_updated', 'Least recently updated') }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-0">
+                                <select class="form-select tom_select" id="selected_sources" name="sources[]"
+                                    aria-label="Default select example"
+                                    data-placeholder="{{ get_label('filter_by_sources', 'Filter by sources') }}"
+                                    data-allow-clear="true" multiple>
+                                </select>
+                            </div>
+                            <x-advanced-date-filters prefix="lead" :filters="['date_range']" colClass="col-md-3 mb-0" :showLabel="false" />
+                            <div class="col-md-3 mb-0">
+                                <select class="form-select tom_select" id="selected_stages" name="stages[]"
+                                    aria-label="Default select example"
+                                    data-placeholder="{{ get_label('filter_by_stages', 'Filter by stages') }}"
+                                    data-allow-clear="true" multiple>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card">

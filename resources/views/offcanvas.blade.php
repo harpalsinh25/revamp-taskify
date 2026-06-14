@@ -150,7 +150,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                    <select class="form-select tom_users_select" name="user_id[]" multiple="multiple"
+                    <select class="form-select tom_users_select" name="user_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'web')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -161,7 +161,7 @@
                 <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-select tom_clients_select" name="client_id[]" multiple="multiple"
+                    <select class="form-select tom_clients_select" name="client_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'client')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -177,7 +177,7 @@
                             <a href="{{ url('tags/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_tags', 'Manage tags') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select tom_tags_select" name="tag_ids[]" multiple="multiple"
+                    <select class="form-select tom_tags_select" name="tag_ids[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -384,14 +384,14 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                    <select class="form-control tom_users_select" name="user_id[]" multiple="multiple"
+                    <select class="form-select tom_users_select" name="user_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
                 <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-select tom_clients_select" name="client_id[]" multiple="multiple"
+                    <select class="form-select tom_clients_select" name="client_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -403,7 +403,7 @@
                             <a href="{{ url('tags/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_tags', 'Manage tags') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-control tom_tags_select" name="tag_ids[]" multiple="multiple"
+                    <select class="form-select tom_tags_select" name="tag_ids[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -936,7 +936,7 @@
                 <div class="mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?> <span
                             id="task_update_users_associated_with_project"></span></label>
-                    <select class="form-control" name="user_id[]" multiple="multiple"
+                    <select class="form-select tom_users_select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -971,7 +971,7 @@
                 <label for="edit_task_list" class="form-label">
                     {{ get_label('task_list', 'Task List') }}
                 </label>
-                <select class="form-select select2" name="task_list_id" id="edit_task_list" style="width: 100%">
+                <select class="form-select tom_task_list_select" name="task_list_id" id="edit_task_list">
                     <option value="">Select a task list</option>
                 </select>
             </div>

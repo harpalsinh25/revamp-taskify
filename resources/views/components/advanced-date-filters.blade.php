@@ -3,6 +3,7 @@
     'filters' => ['date_between', 'start_date_between', 'end_date_between'],
     'colClass' => 'col-md-4',
     'showIcons' => true,
+    'showLabel' => true,
 ])
 
 {{-- Advanced Date Filters Component
@@ -14,6 +15,7 @@
         :filters="['date_between', 'start_date_between', 'end_date_between']"
         colClass="col-md-4"
         :showIcons="true"
+        :showLabel="true"
     />
 
     Props:
@@ -21,6 +23,7 @@
     - filters: array (optional) - Which filters to show. Options: 'date_between', 'start_date_between', 'end_date_between'
     - colClass: string (optional) - Bootstrap column class for responsive layout (default: 'col-md-4')
     - showIcons: boolean (optional) - Whether to show calendar icons (default: true)
+    - showLabel: boolean (optional) - Whether to show the filter label above the input (default: true)
 --}}
 
 @php
@@ -28,6 +31,7 @@
         'date_between' => get_label('date_between', 'Date Between'),
         'start_date_between' => get_label('start_date_between', 'Start date between'),
         'end_date_between' => get_label('end_date_between', 'End date between'),
+        'date_range' => get_label('date_range', 'Date Range'),
     ];
 @endphp
 
@@ -35,7 +39,9 @@
 @foreach ($filters as $filter)
     @if (isset($filterLabels[$filter]))
         <div class="{{ $colClass }}">
-            <label class="form-label small text-muted mb-1">{{ $filterLabels[$filter] }}</label>
+            @if ($showLabel)
+                <label class="form-label small text-muted mb-1">{{ $filterLabels[$filter] }}</label>
+            @endif
             <div class="input-group input-group-merge">
                 @if ($showIcons)
                     <span class="input-group-text"><i class="bx bx-calendar"></i></span>

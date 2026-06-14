@@ -41,7 +41,7 @@ $(document).ready(function () {
             hiddenFrom: '#lb_date_range_from',
             hiddenTo: '#lb_date_range_to',
             tableId: 'leave_balances_table',
-            callback: function(start, end, label) {
+            callback: function (start, end, label) {
                 // Refresh table when date range changes
                 $table.bootstrapTable('refresh', { silent: true });
             }
@@ -268,12 +268,12 @@ $(document).ready(function () {
         filters: [
             {
                 selector: '#lb_status_filter',
-                type: 'select',
+                type: 'tom-select',
                 name: 'balance_status'
             },
             {
                 selector: '#lb_member_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
                 ajaxType: 'users'
             }
@@ -597,11 +597,11 @@ $(document).ready(function () {
                         var title = typeof label_leaves_taken !== 'undefined' ? label_leaves_taken : 'Leaves Taken';
                         return (
                             '<div class="px-3 py-2">' +
-                                '<div class="text-muted small mb-1">' + monthLabel + '</div>' +
-                                '<div class="d-flex align-items-center">' +
-                                    '<i class="bx bxs-circle text-primary me-2"></i>' +
-                                    '<span class="fw-semibold">' + title + ': ' + formatDays(value) + '</span>' +
-                                '</div>' +
+                            '<div class="text-muted small mb-1">' + monthLabel + '</div>' +
+                            '<div class="d-flex align-items-center">' +
+                            '<i class="bx bxs-circle text-primary me-2"></i>' +
+                            '<span class="fw-semibold">' + title + ': ' + formatDays(value) + '</span>' +
+                            '</div>' +
                             '</div>'
                         );
                     }
@@ -627,11 +627,11 @@ $(document).ready(function () {
                         var title = typeof label_leaves_taken !== 'undefined' ? label_leaves_taken : 'Leaves Taken';
                         return (
                             '<div class="px-3 py-2">' +
-                                '<div class="text-muted small mb-1">' + monthLabel + '</div>' +
-                                '<div class="d-flex align-items-center">' +
-                                    '<i class="bx bxs-circle text-primary me-2"></i>' +
-                                    '<span class="fw-semibold">' + title + ': ' + formatDays(value) + '</span>' +
-                                '</div>' +
+                            '<div class="text-muted small mb-1">' + monthLabel + '</div>' +
+                            '<div class="d-flex align-items-center">' +
+                            '<i class="bx bxs-circle text-primary me-2"></i>' +
+                            '<span class="fw-semibold">' + title + ': ' + formatDays(value) + '</span>' +
+                            '</div>' +
                             '</div>'
                         );
                     }

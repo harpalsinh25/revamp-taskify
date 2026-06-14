@@ -269,70 +269,110 @@ $pendingLeaveRequestsCount = $query->count();
 <aside class="tk-panel" id="tk-context-panel" aria-label="{{ get_label('secondary_navigation', 'Secondary navigation') }}">
     {{-- Workspace switcher (logic preserved from the legacy menu) --}}
     <div class="tk-panel-head">
-        <div class="btn-group dropend tk-ws w-100">
-            <button type="button"
-                class="btn {{ getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin') ? 'dropdown-toggle' : '' }}"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="text-truncate">{{ strlen($current_workspace_title) > 20 ? substr($current_workspace_title, 0, 20) . '...' : $current_workspace_title }}</span>
-            </button>
-            @if (getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin'))
-                <ul class="dropdown-menu">
-                    @if ($total_workspaces > 0)
-                        @foreach ($workspaces as $workspace)
-                            <?php $checked = $workspace->id == $current_workspace_id ? "<i class='menu-icon tf-icons bx bx-check-square text-primary'></i>" : "<i class='menu-icon tf-icons bx bx-square text-solid'></i>"; ?>
-                            <li>
-                                <a class="dropdown-item" href="{{ url('/workspaces/switch/' . $workspace->id) }}">
-                                    {!! $checked !!}
-                                    {{ $workspace->title }}
+       <div class="btn-group dropend tk-ws w-100">
+    <button type="button"
+        class="btn {{ getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin') ? 'dropdown-toggle' : '' }}"
+        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="text-truncate d-block">
+            {{ strlen($current_workspace_title) > 20 ? substr($current_workspace_title, 0, 20) . '...' : $current_workspace_title }}
+        </span>
+    </button>
+
+    @if (getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin'))
+        <ul class="dropdown-menu p-2 ">
+
+            @if ($total_workspaces > 0)
+                @foreach ($workspaces as $workspace)
+                    <?php $checked = $workspace->id == $current_workspace_id ? "bx-check-square" : "bx-square"; ?>
+                    <li>
+                        <a class="dropdown-item d-block py-2"
+                            href="{{ url('/workspaces/switch/' . $workspace->id) }}">
+
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                                <div class="d-flex align-items-center">
+                                    <i class='bx {{ $checked }} me-2'></i>
+
+                                    <span>
+                                        {{ $workspace->title }}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex gap-1">
                                     @if ($workspace->is_primary)
-                                        <span class="badge bg-success">{{ get_label('primary', 'Primary') }}</span>
+                                        <span class="badge bg-success">
+                                            {{ get_label('primary', 'Primary') }}
+                                        </span>
                                     @endif
+
                                     @if ($user->default_workspace_id == $workspace->id)
-                                        <span class="badge bg-primary">{{ get_label('default', 'Default') }}</span>
+                                        <span class="badge bg-primary">
+                                            {{ get_label('default', 'Default') }}
+                                        </span>
                                     @endif
-                                </a>
-                            </li>
-                        @endforeach
-                        <li><hr class="dropdown-divider" /></li>
-                    @endif
-                    @if ($user->can('manage_workspaces'))
-                        <li>
-                            <a class="dropdown-item" href="{{ url('workspaces') }}">
-                                <i class='menu-icon tf-icons bx bx-bar-chart-alt-2 text-success'></i>
-                                {!! get_label('manage_workspaces', 'Manage workspaces') !!}
-                                {!! $total_workspaces > 5 ? '<span class="badge bg-primary"> + ' . ($total_workspaces - 5) . '</span>' : '' !!}
-                            </a>
-                        </li>
-                        @if ($user->can('create_workspaces'))
-                            <li>
-                                <span data-bs-toggle="modal" data-bs-target="#createWorkspaceModal">
-                                    <a class="dropdown-item" href="javascript:void(0);">
-                                        <i class='menu-icon tf-icons bx bx-plus text-warning'></i>
-                                        {!! get_label('create_workspace', 'Create workspace') !!}
-                                    </a>
-                                </span>
-                            </li>
-                        @endif
-                        @if ($user->can('edit_workspaces'))
-                            <li>
-                                <a class="dropdown-item edit-workspace" href="javascript:void(0);" data-id="{{ getWorkspaceId() }}">
-                                    <i class='menu-icon tf-icons bx bx-edit text-primary'></i>
-                                    {!! get_label('edit_workspace', 'Edit workspace') !!}
-                                </a>
-                            </li>
-                        @endif
-                    @endif
-                    @if ($current_workspace)
-                        <li>
-                            <a class="dropdown-item" href="#" id="remove-participant">
-                                <i class='menu-icon tf-icons bx bx-exit text-danger'></i>
-                                {!! get_label('remove_me_from_workspace', 'Remove me from workspace') !!}
-                            </a>
-                        </li>
-                    @endif
-                </ul>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                @endforeach
+
+                <li><hr class="dropdown-divider"></li>
             @endif
-        </div>
+
+
+            @if ($user->can('manage_workspaces'))
+                <li>
+                    <a class="dropdown-item d-block py-2" href="{{ url('workspaces') }}">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <i class='bx bx-bar-chart-alt-2 me-2'></i>
+                                <span>{!! get_label('manage_workspaces', 'Manage workspaces') !!}</span>
+                            </div>
+
+                            @if ($total_workspaces > 5)
+                                <span class="badge bg-primary">
+                                    +{{ $total_workspaces - 5 }}
+                                </span>
+                            @endif
+                        </div>
+                    </a>
+                </li>
+
+                @if ($user->can('create_workspaces'))
+                    <li>
+                        <span data-bs-toggle="modal" data-bs-target="#createWorkspaceModal" class="d-block">
+                            <a class="dropdown-item d-block py-2" href="javascript:void(0);">
+                                <i class='bx bx-plus me-2'></i>
+                                <span>{!! get_label('create_workspace', 'Create workspace') !!}</span>
+                            </a>
+                        </span>
+                    </li>
+                @endif
+
+                @if ($user->can('edit_workspaces'))
+                    <li>
+                        <a class="dropdown-item d-block py-2 edit-workspace"
+                            href="javascript:void(0);"
+                            data-id="{{ getWorkspaceId() }}">
+                            <i class='bx bx-edit me-2'></i>
+                            <span>{!! get_label('edit_workspace', 'Edit workspace') !!}</span>
+                        </a>
+                    </li>
+                @endif
+            @endif
+
+
+            @if ($current_workspace)
+                <li>
+                    <a class="dropdown-item d-block py-2" href="#" id="remove-participant">
+                        <i class='bx bx-exit me-2'></i>
+                        <span>{!! get_label('remove_me_from_workspace', 'Remove me from workspace') !!}</span>
+                    </a>
+                </li>
+            @endif
+
+        </ul>
+    @endif
+</div>
     </div>
 
     {{-- Menu search (filters the active pane, behaviour wired in custom.js) --}}

@@ -73,47 +73,58 @@ if ($remainingUnreadNotificationsCount < 0) {
                         title="{{ get_label('notifications', 'Notifications') }}">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9ZM10 21a2 2 0 0 0 4 0"/></svg>
-                        <span id="unreadNotificationsCount" class="badge badge-notifications bg-danger rounded-pill {{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}">{{ $unreadNotificationsCount }}</span>
+                        <span id="unreadNotificationsCount"
+      class="badge bg-danger rounded-pill badge-notifications 
+      {{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}">
+    {{ $unreadNotificationsCount }}
+</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end p-0">
-                        <li class="dropdown-header dropdown-header-highlighted fixed-header">
-                            <i class="bx bx-bell bx-md me-2"></i>{{ get_label('notifications', 'Notifications') }}
+                    <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 350px;">
+                        <li class="fixed-header border-bottom px-3 py-2">
+                            <div class="d-flex align-items-center text-muted fw-bold" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                                <i class="bx bx-bell me-2"></i>
+                                <span class="text-uppercase">{{ get_label('notifications', 'Notifications') }}</span>
+                            </div>
                         </li>
                         <div id="unreadNotificationsContainer" class="scrollable-dropdown">
                             @if ($unreadNotificationsCount > 0)
                                 @foreach ($unreadNotifications as $notification)
                                     <li>
-                                        <a class="dropdown-item update-notification-status" data-id="{{ $notification->id }}" href="javascript:void(0);">
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-auto fw-semibold">{{ $notification->title }} <small class="text-muted mx-2">{{ $notification->created_at->diffForHumans() }}</small></div>
-                                                <i class="bx bx-bell me-2"></i>
-                                            </div>
-                                            <div class="mt-2">
-                                                {{ strlen(strip_tags($notification->message)) > 50 ? substr(strip_tags($notification->message), 0, 50) . '...' : strip_tags($notification->message) }}
+                                        <a class="dropdown-item update-notification-status py-3 px-3" data-id="{{ $notification->id }}" href="javascript:void(0);">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bx bx-bell me-3 mt-1"></i>
+                                                <div class="d-flex flex-column w-100">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="fw-semibold text-wrap">{{ $notification->title }}</span>
+                                                        <small class="text-muted text-nowrap ms-2">{{ $notification->created_at->diffForHumans() }}</small>
+                                                    </div>
+                                                    <div class="small text-muted text-wrap">
+                                                        {{ strlen(strip_tags($notification->message)) > 50 ? substr(strip_tags($notification->message), 0, 50) . '...' : strip_tags($notification->message) }}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
-                                        <div class="dropdown-divider"></div>
+                                        <hr class="dropdown-divider m-0">
                                     </li>
                                 @endforeach
                             @else
-                                <li class="p-5 d-flex align-items-center justify-content-center">
+                                <li class="p-5 d-flex align-items-center justify-content-center text-muted">
                                     <span>{{ get_label('no_unread_notifications', 'No unread notifications') }}</span>
-                                </li>
-                                <li>
-                                    <div class="dropdown-divider"></div>
                                 </li>
                             @endif
                         </div>
-                        <li class="d-flex justify-content-between fixed-footer">
-                            <a href="{{ url('notifications') }}" class="p-3">
-                                <b>{{ get_label('view_all', 'View all') }}</b>
+                        <li class="d-flex justify-content-between align-items-center fixed-footer border-top px-3 py-2" style="background: var(--bs-dropdown-bg);">
+                            <a href="{{ url('notifications') }}" class="text-decoration-none">
+                                <span class="fw-bold">{{ get_label('view_all', 'View all') }}</span>
                                 @if ($remainingUnreadNotificationsCount > 0)
-                                    <span class="badge bg-primary">+{{ $remainingUnreadNotificationsCount }}</span>
+                                    <span class="badge bg-primary ms-1">+{{ $remainingUnreadNotificationsCount }}</span>
                                 @endif
                             </a>
-                            <a href="#" class="p-3 text-end" id="mark-all-notifications-as-read"><b>{{ get_label('mark_all_as_read', 'Mark all as read') }}</b></a>
+                            <a href="#" class="text-decoration-none text-end" id="mark-all-notifications-as-read">
+                                <span class="fw-bold">{{ get_label('mark_all_as_read', 'Mark all as read') }}</span>
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -158,62 +169,88 @@ if ($remainingUnreadNotificationsCount < 0) {
             <span class="tk-cbar-divider"></span>
 
             {{-- User menu (unchanged logic) --}}
-            <div class="dropdown">
-                <a class="tk-cbar-user" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"
-                    title="<?= get_label('hi', 'Hi') ?> {{ $authenticatedUser->first_name }}">
-                    <img src="{{ $authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg') }}" alt="" />
-                    <span class="tk-cbar-username nav-mobile-hidden">{{ Str::limit($authenticatedUser->first_name, 10) }}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <div class="dropdown-item">
-                            <div class="d-flex">
-                                <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online avatar-nav-dropdown">
-                                        <img src="{{ $authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg') }}" alt class="rounded-circle" />
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <span class="fw-semibold d-block">{{ Str::limit($authenticatedUser->first_name . ' ' . $authenticatedUser->last_name, 16) }}</span>
-                                    <small class="text-muted text-capitalize">
-                                        {{ ucfirst($authenticatedUser->getRoleNames()->first()) }}
-                                    </small>
-                                </div>
-                            </div>
+       <div class="dropdown">
+    <a class="tk-cbar-user" href="javascript:void(0);" 
+       data-bs-toggle="dropdown" aria-expanded="false"
+       title="<?= get_label('hi', 'Hi') ?> {{ $authenticatedUser->first_name }}">
+
+        <img src="{{ $authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg') }}"
+             alt="" />
+
+        <span class="tk-cbar-username nav-mobile-hidden">
+            {{ Str::limit($authenticatedUser->first_name, 10) }}
+        </span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end p-2" style="min-width: 260px;">
+
+        <!-- Profile header -->
+        <li>
+            <div class="dropdown-item d-block py-2">
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="flex-shrink-0">
+                        <div class="avatar avatar-online avatar-nav-dropdown">
+                            <img src="{{ $authenticatedUser->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($authenticatedUser->photo) ? asset('storage/' . $authenticatedUser->photo) : asset('storage/photos/no-image.jpg') }}"
+                                 class="rounded-circle"
+                                 alt="">
                         </div>
-                    </li>
-                    <li>
-                        <div class="dropdown-divider"></div>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="{{ url('/account/' . $authenticatedUser->id) }}">
-                            <i class="bx bx-user me-2"></i>
-                            <span class="align-middle"><?= get_label('my_profile', 'My Profile') ?></span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="{{ url('preferences') }}">
-                            <i class='bx bx-cog me-2'></i>
-                            <span class="align-middle"><?= get_label('preferences', 'Preferences') ?></span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="{{ url('clear-cache') }}">
-                            <i class="bx bx-refresh"></i>
-                            <span class="align-middle">{{ get_label('clear_system_cache', 'Clear System Cache') }}</span>
-                        </a>
-                    </li>
-                    <li>
-                        <div class="dropdown-divider"></div>
-                    </li>
-                    <li>
-                        <form action="{{ url('logout') }}" method="POST" class="dropdown-item">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-log-out-circle"></i> <?= get_label('logout', 'Logout') ?></button>
-                        </form>
-                    </li>
-                </ul>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <span class="fw-semibold d-block">
+                            {{ Str::limit($authenticatedUser->first_name . ' ' . $authenticatedUser->last_name, 18) }}
+                        </span>
+
+                        <small class="text-muted text-capitalize">
+                            {{ ucfirst($authenticatedUser->getRoleNames()->first()) }}
+                        </small>
+                    </div>
+
+                </div>
             </div>
+        </li>
+
+        <li><hr class="dropdown-divider my-1"></li>
+
+        <!-- Menu items -->
+        <li>
+            <a class="dropdown-item d-block py-2" href="{{ url('/account/' . $authenticatedUser->id) }}">
+                <i class="bx bx-user me-2"></i>
+                <span> <?= get_label('my_profile', 'My Profile') ?> </span>
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item d-block py-2" href="{{ url('preferences') }}">
+                <i class="bx bx-cog me-2"></i>
+                <span> <?= get_label('preferences', 'Preferences') ?> </span>
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item d-block py-2" href="{{ url('clear-cache') }}">
+                <i class="bx bx-refresh me-2"></i>
+                <span>{{ get_label('clear_system_cache', 'Clear System Cache') }}</span>
+            </a>
+        </li>
+
+        <li><hr class="dropdown-divider my-1"></li>
+
+        <!-- Logout -->
+        <li>
+            <form action="{{ url('logout') }}" method="POST">
+                @csrf
+                <button type="submit" 
+                        class="dropdown-item d-block py-2 text-danger border-0 bg-transparent w-100 text-start">
+                    <i class="bx bx-log-out-circle me-2"></i>
+                    <span><?= get_label('logout', 'Logout') ?></span>
+                </button>
+            </form>
+        </li>
+
+    </ul>
+</div>
         </div>
     </header>
 </div>

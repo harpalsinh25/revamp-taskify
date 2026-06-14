@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return true;
             }
             // Do not drag if clicking anything inside the footer or settings dropdown
-            if (el.closest('.kanban-footer') || el.closest('.dropdown-menu') || el.classList.contains('create-project-btn')) {
+            if (el.closest('.kanban-footer') || el.closest('.dropdown-menu') || el.classList.contains('create-lead-btn')) {
                 return true;
             }
             return false;
@@ -162,14 +162,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateColumnCounts() {
         // Function to update the counts of items in each column header
         document.querySelectorAll('.kanban-column').forEach(column => {
-            const statusId = column.dataset.statusId;
+            const stageId = column.dataset.stageId;
             const count = column.querySelectorAll('.kanban-card').length;
-            column.querySelector('.column-count').textContent = `${count}/${totalProjectsCount}`;
+            column.querySelector('.column-count').textContent = `${count}/${totalLeadsCount}`;
         });
     }
 
-    // Optionally, calculate the total number of projects if needed
-    const totalProjectsCount = document.querySelectorAll('.kanban-card').length;
+    // Optionally, calculate the total number of leads if needed
+    const totalLeadsCount = document.querySelectorAll('.kanban-card').length;
 });
 
 function queryParamsUsersClients(p) {

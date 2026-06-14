@@ -1,0 +1,10 @@
+- **Leads Kanban Architecture Redesign**:
+  - Completely refactored `resources/views/components/leads-kanban-card.blade.php` to strictly adhere to the established Taskify design system (mirroring Project Management and Task Management).
+  - Transitioned from generic Bootstrap utility classes to semantic Kanban components (`.tk-kanban`, `.kcol`, `.tcard`, `.tcard-meta`, `.kcol-head`, etc.).
+  - Brought in the visually distinct `.kcol-dot` column indicators and unified `.kanban-column-body` targets.
+- **Kanban Card Enhancements**:
+  - Remapped the quick action dropdowns, company badges, lead source labels, and contact icons (phone, email) into the clean `.tcard-tags` and `.tcard-foot` structures.
+  - Social icons and "Converted" badges now perfectly align within the `.tk-pfoot` footer grid.
+- **Javascript Synchronization**:
+  - Updated `public/assets/js/pages/leads-kanban.js` to hook into `.stageId` instead of `.statusId` for accurate column count recalculation upon drag-and-drop.
+  - Fixed the footer button ignore-drag selector from `.create-project-btn` to `.create-lead-btn` ensuring smooth column interaction.

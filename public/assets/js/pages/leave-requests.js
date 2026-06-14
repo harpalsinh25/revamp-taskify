@@ -104,26 +104,26 @@ $(document).ready(function () {
 
             {
                 selector: '#lr_user_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
                 ajaxType: 'users'
             },
             {
                 selector: '#lr_action_by_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'action_by_ids',
                 ajaxType: 'users'
             },
 
             {
                 selector: '#lr_status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'statuses',
                 ajaxType: null
             },
             {
                 selector: '#lr_type_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'types',
                 ajaxType: null
             }
@@ -174,7 +174,7 @@ $('#create_leave_request_modal').on('show.bs.modal', function (e) {
 });
 
 // Update balance when user selection changes in create modal
-$(document).on('change', '#create_leave_request_modal .users_select[name="user_id"]', function () {
+$(document).on('change', '#create_leave_request_modal .tom_users_select[name="user_id"]', function () {
     var userId = $(this).val();
     if (userId) {
         fetchAndDisplayBalance(userId, '#create_leave_balance_info');

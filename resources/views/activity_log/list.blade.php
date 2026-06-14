@@ -39,26 +39,30 @@ $visibleColumns = getUserPreferences('activity_log');
                             class='bx bx-calendar'></i></button></a>
             </div>
         </div>
-        <div class="card">
+        <div class="card border shadow-none">
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
+                <div class="row g-3 align-items-end tk-filter-row mb-4">
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <label for="activity_log_between_date" class="form-label"><?= get_label('date_between', 'Date between') ?></label>
                         <div class="input-group input-group-merge">
                             <input type="text" id="activity_log_between_date" class="form-control" placeholder="<?= get_label('date_between', 'Date between') ?>" autocomplete="off">
                         </div>
                     </div>
                     @if(isAdminOrHasAllDataAccess())
-                    <div class="col-md-4 mb-3">
-                        <select class="form-select users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?>" multiple>
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <label for="user_filter" class="form-label"><?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?></label>
+                        <select class="form-select tom_users_select" id="user_filter" data-placeholder="<?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?>" multiple>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <select class="form-select clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?>" multiple>
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <label for="client_filter" class="form-label"><?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?></label>
+                        <select class="form-select tom_clients_select" id="client_filter" data-placeholder="<?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?>" multiple>
                         </select>
                     </div>
                     @endif
-                    <div class="col-md-4 mb-3">
-                        <select class="form-select js-example-basic-multiple" id="activity_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_activities', 'Select Activities') ?>" data-allow-clear="true" multiple>
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <label for="activity_filter" class="form-label"><?= get_label('select_activities', 'Select Activities') ?></label>
+                        <select class="form-select tom_static_select" id="activity_filter" data-placeholder="<?= get_label('select_activities', 'Select Activities') ?>" data-allow-clear="true" multiple>
                             <option value="created"><?= get_label('created', 'Created') ?></option>
                             <option value="updated"><?= get_label('updated', 'Updated') ?></option>
                             <option value="duplicated"><?= get_label('duplicated', 'Duplicated') ?></option>
@@ -70,17 +74,23 @@ $visibleColumns = getUserPreferences('activity_log');
                             <option value="unsigned"><?= get_label('unsigned', 'Unsigned') ?></option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <select class="form-select js-example-basic-multiple" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <label for="type_filter" class="form-label"><?= get_label('select_types', 'Select types') ?></label>
+                        <select class="form-select tom_static_select" id="type_filter" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
                             @foreach ($types as $type)
                             <option value="{{$type}}">{{ Str::title(str_replace('_', ' ', $type)) }}</option>
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <button type="button" class="btn btn-outline-secondary clear-activity-log-filters w-100">
+                            <i class="bx bx-reset me-1"></i><?= get_label('clear_filters', 'Clear Filters') ?>
+                        </button>
+                    </div>
                 </div>
                 <input type="hidden" id="activity_log_between_date_from">
                 <input type="hidden" id="activity_log_between_date_to">
-                <div class="table-responsive text-nowrap">
+                <div class="table-responsive text-nowrap tk-table">
                     <input type="hidden" id="data_type" value="activity-log">
                     <input type="hidden" id="data_table" value="activity_log_table">
                     <input type="hidden" id="save_column_visibility">

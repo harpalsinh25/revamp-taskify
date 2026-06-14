@@ -81,7 +81,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="lead_sources"
                                 class="form-label">{{ get_label('lead_sources', 'Lead Sources') }}</label>
-                            <select class="form-select" name="source_id" id="select_lead_source" data-single-select="true"
+                            <select class="form-select tom_select" name="source_id" id="select_lead_source"
                                 data-allow-clear="false" data-consider-workspace="true">
                                 @if($lead->source)
                                 <option value="{{ $lead->source->id }}">{{ ucwords($lead->source->name) }}</option>
@@ -96,7 +96,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="lead_stages" class="form-label">{{ get_label('lead_stages', 'Lead Stages') }} <span
                                     class="text-danger">*</span></label>
-                            <select class="form-select" name="stage_id" id="select_lead_stage" data-single-select="true"
+                            <select class="form-select tom_select" name="stage_id" id="select_lead_stage"
                                 data-allow-clear="false" data-consider-workspace="true" required>
                                 @if($lead->stage )
                                 <option value="{{ $lead->stage->id }}">{{ ucwords($lead->stage->name) }}</option>
@@ -110,8 +110,8 @@
                         <div class="col-md-4 mb-3">
                             <label for="assign_to" class="form-label">{{ get_label('assigned_to', 'Assign To') }} <span
                                     class="text-danger">*</span></label>
-                            <select name="assigned_to" class="form-select" id="select_lead_assignee"
-                                data-single-select="true" data-allow-clear="false" data-consider-workspace="true" required>
+                            <select name="assigned_to" class="form-select tom_select" id="select_lead_assignee"
+                                data-allow-clear="false" data-consider-workspace="true" required>
                                 @if($lead->assigned_user)
                                 <option value="{{ $lead->assigned_user->id }}">{{ ucwords($lead->assigned_user->first_name . ' ' . $lead->assigned_user->last_name) }}</option>
                                 @endif

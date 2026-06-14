@@ -617,16 +617,23 @@ class LeaveRequestController extends Controller
                         })->implode(', ');
                 }
 
-                $actions = '';
+                $actions = '<div class="d-flex justify-content-center">';
+                $actions .= '<button type="button" class="btn btn-sm btn-icon btn-outline-secondary dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>';
+                $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
+                $hasAction = false;
+
                 if ($isAdmin || $leave_request->action_by === null) {
-                    $actions .= '<a href="javascript:void(0);" class="edit-leave-request" data-bs-toggle="modal" data-bs-target="#edit_leave_request_modal" data-id=' . $leave_request->id . ' title=' . get_label('update', 'Update') . '><i class="bx bx-edit mx-1"></i></a>';
+                    $actions .= '<li><a class="dropdown-item edit-leave-request" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#edit_leave_request_modal" data-id="' . $leave_request->id . '"><i class="bx bx-edit text-muted"></i> ' . get_label('update', 'Update') . '</a></li>';
+                    $hasAction = true;
                 }
 
-            if ($isAdminOrLeaveEditor || $leave_request->status == 'pending') {
-                    $actions .= '<button title=' . get_label('delete', 'Delete') . ' type="button" class="btn delete" data-id=' . $leave_request->id . ' data-type="leave-requests" data-table="lr_table">' .
-                        '<i class="bx bx-trash text-danger mx-1"></i>' .
-                        '</button>';
+                if ($isAdminOrLeaveEditor || $leave_request->status == 'pending') {
+                    $actions .= '<li><a class="dropdown-item delete" href="javascript:void(0);" data-id="' . $leave_request->id . '" data-type="leave-requests" data-table="lr_table"><i class="bx bx-trash text-muted"></i> ' . get_label('delete', 'Delete') . '</a></li>';
+                    $hasAction = true;
                 }
+                
+                $actions .= '</ul></div>';
+                $actions = $hasAction ? $actions : '-';
 
                 return [
                     'id' => $leave_request->id,

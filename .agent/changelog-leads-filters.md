@@ -1,0 +1,5 @@
+- **Refined Filter Layout (List & Kanban Views)**:
+  - Removed the `<label>` headers above the filter dropdowns in both `resources/views/leads/index.blade.php` and `resources/views/leads/kanban.blade.php`, matching the sleek reference design where placeholders function as the primary context.
+  - Added a `showLabel` property to the `advanced-date-filters` component, defaulting to true to preserve existing behaviors globally, but explicitly disabled it (`:showLabel="false"`) within the Leads List View to unify the appearance across the row.
+- **Source Selection Validation**:
+  - Confirmed that all Source selection dropdowns (both for filtering and in creation/edit forms) have been successfully detached from `Select2` and initialized via `initTomSelectWithAjax` within `custom.js`.

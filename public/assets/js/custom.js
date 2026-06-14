@@ -3349,77 +3349,89 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
             // Initialize DateRangePicker
             initializeDateRangePicker($overlay.find("#update_start_date, #update_end_date"));
 
-            // Initialize task list select2
+            // Initialize task list Tom Select
             const editTaskList = $overlay.find("#edit_task_list");
-            editTaskList.select2({
-                dropdownParent: $overlay,
-                width: "100%",
-                ajax: {
-                    url: `${baseUrl}/task-lists/search`,
-                    dataType: "json",
-                    delay: 250,
-                    data: function (params) {
-                        return {
-                            search: params.term || "",
-                            project_id: response.project.id,
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data.map(item => ({
-                                id: item.id,
-                                text: item.name,
-                            })),
-                        };
-                    },
-                    cache: true,
-                },
-                placeholder: "Select a task list",
-                minimumInputLength: 0,
-                allowClear: true,
-            });
+            if (editTaskList.length) {
+                if (editTaskList[0].tomselect) {
+                    editTaskList[0].tomselect.destroy();
+                }
 
-            // Prefill task list if it exists
-            if (response.task.task_list_id) {
-                $.ajax({
-                    url: `${baseUrl}/task-lists/search`,
-                    data: { id: response.task.task_list_id },
-                    dataType: "json",
-                    success: function (data) {
-                        const taskList = data.find(item => item.id === response.task.task_list_id);
-                        if (taskList) {
-                            const option = new Option(taskList.name, taskList.id, true, true);
-                            editTaskList.append(option).trigger("change");
-                        }
-                    },
+                new TomSelect(editTaskList[0], {
+                    valueField: 'id',
+                    labelField: 'text',
+                    searchField: 'text',
+                    placeholder: "Select a task list",
+                    plugins: ['clear_button'],
+                    preload: true,
+                    load: function (query, callback) {
+                        fetch(`${baseUrl}/task-lists/search?search=${encodeURIComponent(query)}&project_id=${response.project.id}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                callback(data.map(item => ({ id: item.id, text: item.name })));
+                            }).catch(() => {
+                                callback();
+                            });
+                    }
                 });
-            } else {
-                editTaskList.val(null).trigger("change");
+
+                // Prefill task list if it exists
+                if (response.task.task_list_id) {
+                    $.ajax({
+                        url: `${baseUrl}/task-lists/search`,
+                        data: { id: response.task.task_list_id },
+                        dataType: "json",
+                        success: function (data) {
+                            const taskList = data.find(item => item.id === response.task.task_list_id);
+                            if (taskList && editTaskList[0].tomselect) {
+                                editTaskList[0].tomselect.addOption({ id: taskList.id, text: taskList.name });
+                                editTaskList[0].tomselect.setValue(taskList.id, true);
+                            }
+                        },
+                    });
+                } else {
+                    editTaskList[0].tomselect.clear(true);
+                }
             }
 
             // Populate users multi-select
             const usersSelect = $overlay.find('select[name="user_id[]"]');
 
-            usersSelect.empty();
-            if (response.project?.users?.length > 0) {
-                response.project.users.forEach(user => {
-                    const userOption = new Option(
-                        `${user.first_name} ${user.last_name}`,
-                        user.id,
-                        false,
-                        false
-                    );
-                    usersSelect.append(userOption);
-                });
-                const selectedTaskUsers = response.task?.users?.length > 0
-                    ? response.task.users.map(user => user.id)
-                    : [];
-                usersSelect.val(selectedTaskUsers).trigger("change");
-                console.log("Users associated with the project:", response.project.users);
-
+            if (usersSelect.length && usersSelect[0].tomselect) {
+                usersSelect[0].tomselect.clear(true);
+                usersSelect[0].tomselect.clearOptions();
+                if (response.project?.users?.length > 0) {
+                    response.project.users.forEach(user => {
+                        usersSelect[0].tomselect.addOption({ id: user.id, text: `${user.first_name} ${user.last_name}` });
+                    });
+                    const selectedTaskUsers = response.task?.users?.length > 0
+                        ? response.task.users.map(user => user.id)
+                        : [];
+                    usersSelect[0].tomselect.setValue(selectedTaskUsers, true);
+                    console.log("Users associated with the project:", response.project.users);
+                } else {
+                    console.log("No users associated with the project");
+                }
             } else {
-                console.log("No users associated with the project");
-                usersSelect.val(null).trigger("change");
+                usersSelect.empty();
+                if (response.project?.users?.length > 0) {
+                    response.project.users.forEach(user => {
+                        const userOption = new Option(
+                            `${user.first_name} ${user.last_name}`,
+                            user.id,
+                            false,
+                            false
+                        );
+                        usersSelect.append(userOption);
+                    });
+                    const selectedTaskUsers = response.task?.users?.length > 0
+                        ? response.task.users.map(user => user.id)
+                        : [];
+                    usersSelect.val(selectedTaskUsers).trigger("change");
+                    console.log("Users associated with the project:", response.project.users);
+                } else {
+                    console.log("No users associated with the project");
+                    usersSelect.val(null).trigger("change");
+                }
             }
 
             // Handle recurring task settings
@@ -3571,56 +3583,82 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             $overlay.find("#update_start_date").val(formattedStartDate);
             $overlay.find("#update_end_date").val(formattedEndDate);
             $overlay.find("#task_accessibility").val(response.project.task_accessibility);
-            $overlay.find("#projectNote").val(response.project.note);
+            $overlay.find("#project_note").val(response.project.note);
             $overlay.find("#project_description").val(response.project.description || "");
             // Initialize DateRangePicker
             initializeDateRangePicker($overlay.find("#update_start_date, #update_end_date"));
+
             // Populate users multi-select
-            const usersSelect = $overlay.find(".users_select");
-            usersSelect.empty();
-            if (response.users && response.users.length > 0) {
-                response.users.forEach(user => {
-                    const userOption = new Option(
-                        `${user.first_name} ${user.last_name}`,
-                        user.id,
-                        true,
-                        true
-                    );
-                    usersSelect.append(userOption);
-                });
-                usersSelect.trigger("change");
+            const usersSelect = $overlay.find(".tom_users_select");
+            if (usersSelect.length && usersSelect[0].tomselect) {
+                usersSelect[0].tomselect.clear(true);
+                usersSelect[0].tomselect.clearOptions();
+                if (response.users && response.users.length > 0) {
+                    const selectedIds = [];
+                    response.users.forEach(user => {
+                        usersSelect[0].tomselect.addOption({ id: user.id, text: `${user.first_name} ${user.last_name}` });
+                        selectedIds.push(user.id);
+                    });
+                    usersSelect[0].tomselect.setValue(selectedIds, true);
+                }
             } else {
-                usersSelect.val(null).trigger("change");
+                const legacyUsers = $overlay.find(".users_select");
+                legacyUsers.empty();
+                if (response.users && response.users.length > 0) {
+                    response.users.forEach(user => {
+                        legacyUsers.append(new Option(`${user.first_name} ${user.last_name}`, user.id, true, true));
+                    });
+                }
+                legacyUsers.trigger("change");
             }
+
             // Populate clients multi-select
-            const clientsSelect = $overlay.find(".clients_select");
-            clientsSelect.empty();
-            if (response.clients && response.clients.length > 0) {
-                response.clients.forEach(client => {
-                    const clientOption = new Option(
-                        `${client.first_name} ${client.last_name}`,
-                        client.id,
-                        true,
-                        true
-                    );
-                    clientsSelect.append(clientOption);
-                });
-                clientsSelect.trigger("change");
+            const clientsSelect = $overlay.find(".tom_clients_select");
+            if (clientsSelect.length && clientsSelect[0].tomselect) {
+                clientsSelect[0].tomselect.clear(true);
+                clientsSelect[0].tomselect.clearOptions();
+                if (response.clients && response.clients.length > 0) {
+                    const selectedIds = [];
+                    response.clients.forEach(client => {
+                        clientsSelect[0].tomselect.addOption({ id: client.id, text: `${client.first_name} ${client.last_name}` });
+                        selectedIds.push(client.id);
+                    });
+                    clientsSelect[0].tomselect.setValue(selectedIds, true);
+                }
             } else {
-                clientsSelect.val(null).trigger("change");
+                const legacyClients = $overlay.find(".clients_select");
+                legacyClients.empty();
+                if (response.clients && response.clients.length > 0) {
+                    response.clients.forEach(client => {
+                        legacyClients.append(new Option(`${client.first_name} ${client.last_name}`, client.id, true, true));
+                    });
+                }
+                legacyClients.trigger("change");
             }
+
             // Populate tags multi-select
-            const tagsSelect = $overlay.find('[name="tag_ids[]"]');
-            tagsSelect.empty();
-            if (response.tags && response.tags.length > 0) {
-                response.tags.forEach(tag => {
-                    const tagOption = new Option(tag.title, tag.id, true, true);
-                    tagsSelect.append(tagOption);
-                });
-                tagsSelect.trigger("change");
+            const tagsSelect = $overlay.find(".tom_tags_select, [name='tag_ids[]']");
+            if (tagsSelect.length && tagsSelect[0].tomselect) {
+                tagsSelect[0].tomselect.clear(true);
+                tagsSelect[0].tomselect.clearOptions();
+                if (response.tags && response.tags.length > 0) {
+                    const selectedIds = [];
+                    response.tags.forEach(tag => {
+                        tagsSelect[0].tomselect.addOption({ id: tag.id, text: tag.title });
+                        selectedIds.push(tag.id);
+                    });
+                    tagsSelect[0].tomselect.setValue(selectedIds, true);
+                }
             } else {
-                tagsSelect.val(null).trigger("change");
+                tagsSelect.empty();
+                if (response.tags && response.tags.length > 0) {
+                    response.tags.forEach(tag => {
+                        tagsSelect.append(new Option(tag.title, tag.id, true, true));
+                    });
+                }
+                tagsSelect.trigger("change");
             }
+
             // Handle checkboxes
             $overlay.find("#updateClientCanDiscussProject")
                 .prop("checked", response.project.client_can_discuss === 1);
@@ -3706,46 +3744,59 @@ $(document).on("click", ".edit-workspace", function () {
         success: function (response) {
             $("#workspace_id").val(response.workspace.id);
             $("#workspace_title").val(response.workspace.title);
-            var usersSelect = $modal.find(".users_select");
-            var clientsSelect = $modal.find(".clients_select");
-            // Clear existing options
-            usersSelect.empty();
-            clientsSelect.empty();
+            var usersSelect = $modal.find(".tom_users_select");
+            var clientsSelect = $modal.find(".tom_clients_select");
+
             // Handle multi-select for users
-            if (
-                response.workspace.users &&
-                response.workspace.users.length > 0
-            ) {
-                response.workspace.users.forEach(function (user) {
-                    var userOption = new Option(
-                        user.first_name + " " + user.last_name,
-                        user.id,
-                        true,
-                        true
-                    );
-                    usersSelect.append(userOption);
-                });
-                usersSelect.trigger("change");
+            if (usersSelect.length && usersSelect[0].tomselect) {
+                usersSelect[0].tomselect.clear(true);
+                usersSelect[0].tomselect.clearOptions();
+                if (response.workspace.users && response.workspace.users.length > 0) {
+                    var selectedUsers = [];
+                    response.workspace.users.forEach(function (user) {
+                        var userIdStr = user.id.toString();
+                        usersSelect[0].tomselect.addOption({ id: userIdStr, text: user.first_name + " " + user.last_name });
+                        selectedUsers.push(userIdStr);
+                    });
+                    usersSelect[0].tomselect.setValue(selectedUsers, true);
+                }
             } else {
-                usersSelect.val(null).trigger("change"); // Handle case when no users are present
+                usersSelect.empty();
+                if (response.workspace.users && response.workspace.users.length > 0) {
+                    response.workspace.users.forEach(function (user) {
+                        var userOption = new Option(user.first_name + " " + user.last_name, user.id, true, true);
+                        usersSelect.append(userOption);
+                    });
+                    usersSelect.trigger("change");
+                } else {
+                    usersSelect.val(null).trigger("change");
+                }
             }
+
             // Handle multi-select for clients
-            if (
-                response.workspace.clients &&
-                response.workspace.clients.length > 0
-            ) {
-                response.workspace.clients.forEach(function (client) {
-                    var clientOption = new Option(
-                        client.first_name + " " + client.last_name,
-                        client.id,
-                        true,
-                        true
-                    );
-                    clientsSelect.append(clientOption);
-                });
-                clientsSelect.trigger("change");
+            if (clientsSelect.length && clientsSelect[0].tomselect) {
+                clientsSelect[0].tomselect.clear(true);
+                clientsSelect[0].tomselect.clearOptions();
+                if (response.workspace.clients && response.workspace.clients.length > 0) {
+                    var selectedClients = [];
+                    response.workspace.clients.forEach(function (client) {
+                        var clientIdStr = client.id.toString();
+                        clientsSelect[0].tomselect.addOption({ id: clientIdStr, text: client.first_name + " " + client.last_name });
+                        selectedClients.push(clientIdStr);
+                    });
+                    clientsSelect[0].tomselect.setValue(selectedClients, true);
+                }
             } else {
-                clientsSelect.val(null).trigger("change"); // Handle case when no clients are present
+                clientsSelect.empty();
+                if (response.workspace.clients && response.workspace.clients.length > 0) {
+                    response.workspace.clients.forEach(function (client) {
+                        var clientOption = new Option(client.first_name + " " + client.last_name, client.id, true, true);
+                        clientsSelect.append(clientOption);
+                    });
+                    clientsSelect.trigger("change");
+                } else {
+                    clientsSelect.val(null).trigger("change");
+                }
             }
             if (response.workspace.is_primary == 1) {
                 $("#editWorkspaceModal")
@@ -5332,13 +5383,13 @@ $(document).ready(function () {
     initSelect2WithAjax(".invoices_select", "invoices");
     initSelect2WithAjax(".statuses_filter", "statuses");
     initSelect2WithAjax(".priorities_filter", "priorities");
-    initSelect2WithAjax("#select_lead_source", "lead_sources");
-    initSelect2WithAjax("#select_lead_stage", "lead_stages");
-    initSelect2WithAjax("#select_lead_assignee", "users");
+    initTomSelectWithAjax("#select_lead_source", "lead_sources");
+    initTomSelectWithAjax("#select_lead_stage", "lead_stages");
+    initTomSelectWithAjax("#select_lead_assignee", "users");
     initSelect2WithAjax("#create_follow_up_assigned_to", "users");
     initSelect2WithAjax("#edit_follow_up_assigned_to", "users");
-    initSelect2WithAjax("#selected_sources", "lead_sources");
-    initSelect2WithAjax("#selected_stages", "lead_stages");
+    initTomSelectWithAjax("#selected_sources", "lead_sources");
+    initTomSelectWithAjax("#selected_stages", "lead_stages");
     initSelect2WithAjax("#select_candidate_statuses", "candidate_statuses");
     initTomSelectWithAjax('.select-interview-candidate', "interview_candidates");
     initTomSelectWithAjax('.select-interview-interviewer', "interview_interviewer");

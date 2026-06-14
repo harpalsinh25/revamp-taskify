@@ -93,7 +93,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="lead_sources"
                                 class="form-label">{{ get_label('lead_sources', 'Lead Sources') }}</label>
-                            <select class="form-select" name="source_id" id="select_lead_source" data-single-select="true"
+                            <select class="form-select tom_select" name="source_id" id="select_lead_source"
                                 data-allow-clear="false" data-consider-workspace="true">
                                 {{-- You can keep the default option if needed --}}
                                 <option value="">{{ get_label('select_lead_source', 'Select Lead Source') }}</option>
@@ -107,7 +107,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="lead_stages" class="form-label">{{ get_label('lead_stages', 'Lead Stages') }} <span
                                     class="text-danger">*</span></label>
-                            <select class="form-select" name="stage_id" id="select_lead_stage" data-single-select="true"
+                            <select class="form-select tom_select" name="stage_id" id="select_lead_stage"
                                 data-allow-clear="false" data-consider-workspace="true" required>
                                 <option value="">{{ get_label('select_lead_stage', 'Select Lead Stage') }}</option>
 
@@ -120,8 +120,8 @@
                         <div class="col-md-4 mb-3">
                             <label for="assign_to" class="form-label">{{ get_label('assigned_to', 'Assign To') }} <span
                                     class="text-danger">*</span></label>
-                            <select name="assigned_to" class="form-select" id="select_lead_assignee"
-                                data-single-select="true" data-allow-clear="false" data-consider-workspace="true"
+                            <select name="assigned_to" class="form-select tom_select" id="select_lead_assignee"
+                                data-allow-clear="false" data-consider-workspace="true"
                                 required>
                                 <option value="">{{ get_label('select_assignee', 'Assigned To') }}</option>
 

@@ -234,15 +234,10 @@
             </div>
         </div>
 
-        <div class="card filters-card mb-4 border-0 shadow-sm">
-            <div class="card-header bg-transparent border-0 pb-0">
-                <div class="d-flex align-items-center gap-2">
-                    <i class='bx bx-filter-alt text-primary'></i>
-                    <h6 class="mb-0 text-uppercase text-muted">{{ get_label('leave_balance_filters_header', 'Filters') }}</h6>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row g-3 align-items-end">
+        <!-- Filters Card -->
+        <div class="card mb-4 border shadow-none">
+            <div class="card-body p-3">
+                <div class="row g-3 align-items-end tk-filter-row">
                     <div class="col-lg-3 col-md-4 col-12">
                         <label for="lb_date_range" class="form-label"><?= get_label('date_range', 'Date Range') ?></label>
                         <div class="input-group input-group-merge">
@@ -264,7 +259,7 @@
                     </div>
                     <div class="col-lg-3 col-md-4 col-12">
                         <label for="lb_status_filter" class="form-label"><?= get_label('balance_status', 'Balance Status') ?></label>
-                        <select id="lb_status_filter" class="form-select">
+                        <select id="lb_status_filter" class="form-select tom_static_select" data-allow-clear="true">
                             <option value=""><?= get_label('balance_status_all', 'All balance states') ?></option>
                             <option value="healthy"><?= get_label('balance_status_healthy', 'Healthy') ?></option>
                             <option value="low"><?= get_label('balance_status_low', 'Low') ?></option>
@@ -273,7 +268,7 @@
                     </div>
                     <div class="col-lg-6 col-md-4 col-12">
                         <label for="lb_member_filter" class="form-label"><?= get_label('select_members', 'Select Members') ?></label>
-                        <select id="lb_member_filter" class="form-select users_select" multiple="multiple"
+                        <select id="lb_member_filter" class="form-select tom_users_select" multiple="multiple"
                             data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         </select>
                     </div>
@@ -281,101 +276,93 @@
             </div>
         </div>
 
+        <!-- Metric Strips -->
         @foreach (array_chunk($metricCards, 4) as $cardGroup)
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4 align-items-stretch">
-                @foreach ($cardGroup as $card)
-                    <div class="col">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body p-4">
-                                <div class="d-flex align-items-start gap-3">
-                                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 {{ $card['icon_class'] }} p-3">
-                                        <i class="{{ $card['icon'] }} fs-4"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <h6 class="card-title text-body fw-semibold mb-1">{{ $card['label'] }}</h6>
-                                            @if (!empty($card['tooltip']))
-                                                <button type="button" class="btn btn-link btn-sm p-0 text-body-secondary" data-bs-toggle="tooltip"
-                                                    title="{{ $card['tooltip'] }}">
-                                                    <i class="bx bx-help-circle"></i>
-                                                </button>
-                                            @endif
-                                        </div>
-                                        <div class="d-flex align-items-end flex-wrap gap-2 mt-2">
-                                            <span class="fw-bold fs-2" data-summary-key="{{ $card['value']['primary']['key'] }}">
-                                                {{ $formatSummary($card['value']['primary']['key'], $card['value']['primary']['decimals'] ?? 2) }}
-                                            </span>
-                                            @if (!empty($card['value']['secondary']))
-                                                <span class="text-body-secondary fs-5">/</span>
-                                                <span class="fw-semibold fs-5 text-body-secondary" data-summary-key="{{ $card['value']['secondary']['key'] }}">
-                                                    {{ $formatSummary($card['value']['secondary']['key'], $card['value']['secondary']['decimals'] ?? 2) }}
-                                                </span>
-                                            @endif
-                                            @if (!empty($card['value']['suffix']))
-                                                <span class="text-body-secondary small text-nowrap">{{ $card['value']['suffix'] }}</span>
-                                            @endif
-                                        </div>
-                                        @if (!empty($card['meta']))
-                                            <div class="d-flex flex-column gap-1 mt-3 small text-body-secondary">
-                                                @foreach ($card['meta'] as $meta)
-                                                    <span class="d-flex align-items-baseline gap-1">
-                                                        <span>{{ $meta['label'] }}:</span>
-                                                        <span class="fw-semibold text-body" data-summary-key="{{ $meta['key'] }}">
-                                                            {{ $formatSummary($meta['key'], $meta['decimals'] ?? 2) }}
-                                                        </span>
-                                                        @if (!empty($meta['suffix']))
-                                                            <span>{{ $meta['suffix'] }}</span>
-                                                        @endif
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                        @if (!empty($card['description']))
-                                            <p class="mb-0 mt-3 small text-body-secondary">{{ $card['description'] }}</p>
-                                        @endif
-                                        @if (!empty($card['progress_key']))
-                                            @php
-                                                $progressValue = (float) ($summary[$card['progress_key']] ?? 0);
-                                                $progressWidth = max(0, min(100, $progressValue));
-                                            @endphp
-                                            <div class="mt-4">
-                                                <div class="progress" style="height: 0.5rem;">
-                                                    <div class="progress-bar {{ $card['progress_color'] ?? 'bg-primary' }}" role="progressbar"
-                                                        style="width: {{ $progressWidth }}%;"
-                                                        aria-valuenow="{{ $progressWidth }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </div>
+            <div class="tk-card mb-4">
+                <div class="tk-card-body p-0">
+                    <div class="tk-metric-strip">
+                        @foreach ($cardGroup as $card)
+                            <div class="tk-metric">
+                                <div class="tk-metric-row">
+                                    <span class="tk-metric-label">{{ $card['label'] }}</span>
+                                    @if (!empty($card['tooltip']))
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-muted" data-bs-toggle="tooltip"
+                                            title="{{ $card['tooltip'] }}">
+                                            <i class="bx bx-help-circle"></i>
+                                        </button>
+                                    @endif
                                 </div>
+                                <div class="tk-metric-value count d-flex align-items-baseline gap-1 mt-1">
+                                    <span data-summary-key="{{ $card['value']['primary']['key'] }}">
+                                        {{ $formatSummary($card['value']['primary']['key'], $card['value']['primary']['decimals'] ?? 2) }}
+                                    </span>
+                                    @if (!empty($card['value']['secondary']))
+                                        <small class="text-muted fs-5 fw-normal">/ <span data-summary-key="{{ $card['value']['secondary']['key'] }}">{{ $formatSummary($card['value']['secondary']['key'], $card['value']['secondary']['decimals'] ?? 2) }}</span></small>
+                                    @endif
+                                    @if (!empty($card['value']['suffix']))
+                                        <small class="text-muted fs-5 fw-normal">{{ $card['value']['suffix'] }}</small>
+                                    @endif
+                                </div>
+                                @if (!empty($card['meta']))
+                                    <div class="d-flex flex-column gap-1 mt-2 small text-muted">
+                                        @foreach ($card['meta'] as $meta)
+                                            <span class="d-flex align-items-baseline gap-1">
+                                                <span>{{ $meta['label'] }}:</span>
+                                                <span class="fw-semibold text-body" data-summary-key="{{ $meta['key'] }}">
+                                                    {{ $formatSummary($meta['key'], $meta['decimals'] ?? 2) }}
+                                                </span>
+                                                @if (!empty($meta['suffix']))
+                                                    <span>{{ $meta['suffix'] }}</span>
+                                                @endif
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @if (!empty($card['description']))
+                                    <p class="mb-0 mt-2 small text-muted">{{ $card['description'] }}</p>
+                                @endif
+                                @if (!empty($card['progress_key']))
+                                    @php
+                                        $progressValue = (float) ($summary[$card['progress_key']] ?? 0);
+                                        $progressWidth = max(0, min(100, $progressValue));
+                                    @endphp
+                                    <div class="mt-3">
+                                        <div class="progress" style="height: 0.4rem;">
+                                            <div class="progress-bar {{ $card['progress_color'] ?? 'bg-primary' }}" role="progressbar"
+                                                style="width: {{ $progressWidth }}%;"
+                                                aria-valuenow="{{ $progressWidth }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
-                        </div>
+                        @endforeach
                     </div>
-                @endforeach
+                </div>
             </div>
         @endforeach
 
+        <!-- Chart and Table section -->
         <div class="row">
-            <div class="col-xl-12 col-md-12 col-12 mb-4">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="d-flex flex-column flex-lg-row flex-wrap justify-content-between align-items-start align-items-lg-center gap-2 mb-3">
-                            <div>
-                                <h5 class="mb-1">{{ get_label('leave_balances_chart_title', 'User leave utilization') }}</h5>
-                                <p class="mb-0 text-muted small">{{ get_label('leave_balances_chart_subtitle', 'Compare used versus remaining paid time off for the visible members.') }}</p>
-                            </div>
-                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-primary chart-legend-toggle active" data-series="used_paid_leaves">
-                                    <i class='bx bxs-circle text-primary me-2'></i>{{ get_label('used_paid_leaves', 'Used Paid Leaves') }}
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-success chart-legend-toggle active" data-series="remaining_paid_leaves">
-                                    <i class='bx bxs-circle text-success me-2'></i>{{ get_label('remaining_paid_leaves', 'Remaining Paid Leaves') }}
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-warning chart-legend-toggle active" data-series="unpaid_leaves_taken">
-                                    <i class='bx bxs-circle text-warning me-2'></i>{{ get_label('unpaid_leaves', 'Unpaid Leaves') }}
-                                </button>
-                            </div>
+            <div class="col-12 mb-4">
+                <div class="tk-card mb-4">
+                    <div class="tk-card-head">
+                        <div class="tk-card-head-main">
+                            <h3 class="tk-card-title"><i class='bx bx-pie-chart-alt me-2'></i>{{ get_label('leave_balances_chart_title', 'User leave utilization') }}</h3>
+                            <p class="tk-card-title-sub mt-1">{{ get_label('leave_balances_chart_subtitle', 'Compare used versus remaining paid time off for the visible members.') }}</p>
                         </div>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary chart-legend-toggle active" data-series="used_paid_leaves">
+                                <i class='bx bxs-circle text-primary me-2'></i>{{ get_label('used_paid_leaves', 'Used Paid Leaves') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-success chart-legend-toggle active" data-series="remaining_paid_leaves">
+                                <i class='bx bxs-circle text-success me-2'></i>{{ get_label('remaining_paid_leaves', 'Remaining Paid Leaves') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-warning chart-legend-toggle active" data-series="unpaid_leaves_taken">
+                                <i class='bx bxs-circle text-warning me-2'></i>{{ get_label('unpaid_leaves', 'Unpaid Leaves') }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tk-card-body">
                         <div id="leaveBalancesStackedChart" class="w-100"></div>
                         <div id="leaveBalancesChartEmptyState" class="text-muted small mt-3 d-none">
                             {{ get_label('leave_balances_chart_no_data', 'No leave balance data to display.') }}
@@ -433,28 +420,28 @@
 
                                 <div class="col-xl-3 col-lg-12">
                                     <div class="d-flex flex-column gap-3 h-100">
-                                        <div class="alert alert-warning d-flex align-items-center py-2 px-3">
+                                        <div class="alert alert-warning d-flex align-items-center py-2 px-3 m-0">
                                             <i class="bx bx-bell fs-4 me-2"></i>
                                             <div>
                                                 <div class="fw-semibold small">{{ get_label('leave_balances_chart_low_balance_title', 'Approaching zero balance') }}</div>
                                                 <div class="small text-muted" data-highlight-low>--</div>
                                             </div>
                                         </div>
-                                        <div class="alert alert-info d-flex align-items-center py-2 px-3">
+                                        <div class="alert alert-info d-flex align-items-center py-2 px-3 m-0">
                                             <i class="bx bx-wallet fs-4 me-2"></i>
                                             <div>
                                                 <div class="fw-semibold small">{{ get_label('leave_balances_chart_top_unpaid_title', 'Highest unpaid usage') }}</div>
                                                 <div class="small text-muted" data-highlight-unpaid>--</div>
                                             </div>
                                         </div>
-                                        <div class="alert alert-success d-flex align-items-center py-2 px-3">
+                                        <div class="alert alert-success d-flex align-items-center py-2 px-3 m-0">
                                             <i class="bx bx-check-circle fs-4 me-2"></i>
                                             <div>
                                                 <div class="fw-semibold small">{{ get_label('leave_balances_chart_healthy_balance_title', 'Healthy balances') }}</div>
                                                 <div class="small text-muted" data-highlight-healthy>--</div>
                                             </div>
                                         </div>
-                                        <div class="alert alert-secondary d-flex align-items-center py-2 px-3">
+                                        <div class="alert alert-secondary d-flex align-items-center py-2 px-3 m-0">
                                             <i class="bx bx-calendar-check fs-4 me-2"></i>
                                             <div>
                                                 <div class="fw-semibold small">{{ get_label('leave_balances_chart_latest_leave_title', 'Most recent leave') }}</div>
@@ -468,12 +455,9 @@
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">{{ get_label('leave_balance_overview', 'Leave Balance Overview') }}</h5>
-                        </div>
-                        <div class="table-responsive ">
+                <div class="card border shadow-none">
+                    <div class="card-body p-0">
+                        <div class="table-responsive text-nowrap">
                             <table id="leave_balances_table"
                                    class="table table-hover table-nowrap "
                                    data-toggle="table"
@@ -508,7 +492,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 @endsection

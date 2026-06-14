@@ -1,0 +1,1 @@
+- Standardize workspace dropdown in menu.blade.php by removing colorful icons and aligning text with icons.

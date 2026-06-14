@@ -25,3 +25,24 @@
 - Redesigned Create Project and Update Project offcanvas (`resources/views/offcanvas.blade.php`) to adhere to V2 Design System:
   - Migrated `users_select`, `clients_select`, and `tags_select` from Select2 to Tom Select (`tom_users_select`, `tom_clients_select`, `tom_tags_select`).
   - Added `initTomSelectWithAjax(".tom_tags_select", "tags")` inside `public/assets/js/custom.js`.
+
+[2026-06-14]
+- Refactored `resources/views/leave_requests/list.blade.php`:
+  - Added CSS grid-template-columns overrides for the Leave Balance card to render the 5 metrics evenly in one row on desktop and wrap gracefully on tablet/mobile views.
+  - Wrapped the "Select Leave Editors" admin configuration form in a `.tk-card` component with proper design system headings (`.tk-card-head`, `.tk-card-title`, `.tk-card-title-sub`).
+  - Converted the "Select Leave Editors" selector from `users_select` (Select2) to `tom_users_select` (Tom Select with AJAX) to align with standard design system inputs.
+  - Fixed Tom Select dropdown clipping and z-index overlap by setting `overflow: visible; position: relative; z-index: 10;` on the parent `.tk-card`.
+  - Updated Leave Requests table filter selects to use the correct initialization classes (`tom_users_select` and `tom_static_select`) so they render as Tom Select inputs.
+  - Converted User and Visibility selectors inside Create Leave Request and Edit Leave Request modals (`resources/views/modals.blade.php`) to use Tom Select (`tom_users_select` class).
+  - Aligned partial leave form inputs in Create and Edit modals by applying equal `20%` desktop widths to From Date, To Date, From Time, To Time, and Days fields, preventing layout wrapping.
+  - Standardized Leave Balances page filters to use Tom Select:
+    - Updated `#lb_status_filter` to `tom_static_select` and `#lb_member_filter` to `tom_users_select` in `leave_balances/index.blade.php`.
+    - Configured `TableFilterSync` types to `tom-select` for both selectors in `public/assets/js/pages/leave-balances.js`.
+    - Refactored cards, filters row, metric strips, charts card, and overview table wrappers in `leave_balances/index.blade.php` to completely align with V2 design system guidelines.
+  - Refactored `paidLeaveWorkflowModal` styles (`public/assets/css/custom.css`) to use V2 Design Tokens (borders, backgrounds, shadows, text-colors, and callouts) ensuring consistent dark mode rendering and alignment with Brand styles.
+  - Aligned and corrected the HTML grid row nesting in `create_leave_request_modal` (`resources/views/modals.blade.php`) to fix premature column wrapping and ensure fields flow properly inside a single row container.
+  - Migrated select elements inside leave modals from Select2 to Tom Select by removing the conflicting `.users_select` class and updating event listener targets in `modals.blade.php` and `leave-requests.js`.
+  - Refactored Activity Log page (`resources/views/activity_log/list.blade.php` and `public/assets/js/pages/activity-log.js`):
+    - Migrated filters to Tom Select (`tom_users_select`, `tom_clients_select`, and `tom_static_select`) and updated `TableFilterSync` configuration types.
+    - Updated clear filters button logic in `activity-log.js` to correctly invoke the Tom Select API.
+    - Aligned filters layout inside a `.tk-filter-row` inside the main `card border shadow-none` container and wrapped the table in `.tk-table` wrapper to conform to V2 standards.

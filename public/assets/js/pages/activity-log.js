@@ -49,13 +49,28 @@ $(document).on('click', '.clear-activity-log-filters', function (e) {
     e.preventDefault();
     $('#activity_log_between_date_from').val('');
     $('#activity_log_between_date_to').val('');
-    $('#activity_log_between_date').val('');
-    $('#user_filter').val('').trigger('change', [0]);
-    $('#client_filter').val('').trigger('change', [0]);
-    $('#activity_filter').val('').trigger('change', [0]);
-    $('#type_filter').val('').trigger('change', [0]);
+    
+    // Reset Daterangepicker
+    var drp = $('#activity_log_between_date').data('daterangepicker');
+    if (drp) {
+        $('#activity_log_between_date').val('');
+        drp.setStartDate(moment());
+        drp.setEndDate(moment());
+        drp.updateElement();
+    }
+
+    // Reset Tom Selects
+    ['#user_filter', '#client_filter', '#activity_filter', '#type_filter'].forEach(function(selector) {
+        var el = $(selector)[0];
+        if (el && el.tomselect) {
+            el.tomselect.clear();
+        } else {
+            $(selector).val('').trigger('change');
+        }
+    });
+
     $('#activity_log_table').bootstrapTable('refresh');
-})
+});
 $(document).ready(function () {
     // Initialize TableFilterSync for users
     const activityLogFilterSync = new TableFilterSync({
@@ -71,25 +86,25 @@ $(document).ready(function () {
             },
             {
                 selector: '#user_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
                 ajaxType: 'users'
             },
             {
                 selector: '#client_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'client_ids',
                 ajaxType: 'clients'
             },
             {
                 selector: '#activity_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'activities',
                 ajaxType: null
             },
             {
                 selector: '#type_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'types',
                 ajaxType: null
             }
