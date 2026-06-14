@@ -139,25 +139,27 @@ if ($remainingUnreadNotificationsCount < 0) {
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end p-2 language-dropdown" id="languageDropdown" style="min-width: 220px; max-height: 80vh; overflow-y: auto;">
                     @foreach ($languages as $language)
-                        <?php $checked = $language->code == app()->getLocale() ? "bx-check-square text-primary" : "bx-square text-solid"; ?>
+                        <?php $is_active = $language->code == app()->getLocale(); ?>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center py-2 rounded" href="{{ url('/settings/languages/switch/' . $language->code) }}">
-                                <i class="bx {{ $checked }} me-2"></i>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between py-2 rounded" href="{{ url('/settings/languages/switch/' . $language->code) }}">
                                 <span>{{ $language->name }}</span>
+                                @if ($is_active)
+                                    <i class="bx bx-check" style="color: var(--signal) !important; font-size: 1.25rem;"></i>
+                                @endif
                             </a>
                         </li>
                     @endforeach
                     <li><hr class="dropdown-divider my-1"></li>
                     @if (!$current_language->isEmpty() && $current_language[0]['code'] == $default_language)
-                        <li class="px-3 py-1">
-                            <span class="badge bg-primary w-100" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>">
+                        <li class="px-2 pt-1">
+                            <span class="tk-badge tk-badge-primary justify-content-center d-flex w-100 py-1" style="font-size: 11px; font-weight: 600;" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>">
                                 <?= get_label('primary', 'Primary') ?>
                             </span>
                         </li>
                     @else
-                        <li class="px-3 py-1">
-                            <a href="javascript:void(0);" class="text-decoration-none d-block">
-                                <span class="badge bg-secondary w-100" id="set-as-default" data-lang="{{ app()->getLocale() }}" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('set_current_language_as_your_primary_language', 'Set current language as your primary language') ?>">
+                        <li class="px-2 pt-1">
+                            <a href="javascript:void(0);" class="text-decoration-none d-block" id="set-as-default" data-lang="{{ app()->getLocale() }}" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('set_current_language_as_your_primary_language', 'Set current language as your primary language') ?>">
+                                <span class="tk-badge justify-content-center d-flex w-100 py-1" style="font-size: 11px; font-weight: 600; background: var(--bg-3); color: var(--fg-1);">
                                     <?= get_label('set_as_primary', 'Set as primary') ?>
                                 </span>
                             </a>

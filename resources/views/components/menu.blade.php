@@ -250,19 +250,6 @@ $pendingLeaveRequestsCount = $query->count();
         </a>
     @endforeach
 
-    <div class="tk-rail-foot">
-        <a href="{{ url('preferences') }}" class="tk-rail-btn" title="{{ get_label('preferences', 'Preferences') }}"
-            aria-label="{{ get_label('preferences', 'Preferences') }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                {!! $tkIconPaths['settings'] !!}
-            </svg>
-        </a>
-        <a href="{{ url('/account/' . $user->id) }}" class="tk-rail-avatar"
-            title="{{ Str::limit($user->first_name . ' ' . $user->last_name, 24) }}">
-            <img src="{{ $tkUserPhoto }}" alt="" />
-        </a>
-    </div>
 </aside>
 
 {{-- ====================== CONTEXT PANEL ======================= --}}
@@ -417,6 +404,49 @@ $pendingLeaveRequestsCount = $query->count();
                         </a>
                     @endif
                 @endforeach
+
+                @if ($item['category'] === 'dashboard')
+                    <div class="tk-panel-group mt-3">
+                        <div class="tk-panel-label">{{ get_label('quick_access', 'Quick Access') }}</div>
+                        
+                        @if ($user->can('manage_tasks'))
+                            <a class="tk-panel-item" href="{{ url('tasks') }}" data-active="false">
+                                <i class="bx bx-task text-muted"></i>
+                                <span>{{ get_label('tasks', 'Tasks') }}</span>
+                            </a>
+                        @endif
+
+                        @if ($user->can('manage_projects'))
+                            <a class="tk-panel-item" href="{{ url('projects') }}" data-active="false">
+                                <i class="bx bx-briefcase-alt-2 text-muted"></i>
+                                <span>{{ get_label('projects', 'Projects') }}</span>
+                            </a>
+                        @endif
+
+                        <a class="tk-panel-item" href="{{ url('todos') }}" data-active="false">
+                            <i class="bx bx-list-check text-muted"></i>
+                            <span>{{ get_label('todos', 'Todos') }}</span>
+                            @if ($pending_todos_count > 0)
+                                <span class="badge bg-danger rounded-pill ms-auto" style="padding: 2px 6px; font-size: 10px;">{{ $pending_todos_count }}</span>
+                            @endif
+                        </a>
+
+                        <a class="tk-panel-item" href="{{ url('notes') }}" data-active="false">
+                            <i class="bx bx-notepad text-muted"></i>
+                            <span>{{ get_label('notes', 'Notes') }}</span>
+                        </a>
+
+                        @if (Auth::guard('web')->check())
+                            <a class="tk-panel-item" href="{{ url('chat') }}" data-active="false">
+                                <i class="bx bx-chat text-muted"></i>
+                                <span>{{ get_label('chat', 'Chat') }}</span>
+                                @if ($unread > 0)
+                                    <span class="badge bg-danger rounded-pill ms-auto" style="padding: 2px 6px; font-size: 10px;">{{ $unread }}</span>
+                                @endif
+                            </a>
+                        @endif
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>

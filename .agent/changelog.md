@@ -2,6 +2,20 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-14] - Dashboard Quick Access Sidebar Section
+### Added
+- **`resources/views/components/menu.blade.php`**:
+  - Implemented a "Quick Access" panel group in the Dashboard context panel.
+  - Included direct links to Tasks, Projects, Todos (with unseen counters), Notes, and Chat (with unread counters) for quick accessibility, making the Dashboard menu list visually balanced and functional.
+
+## [2026-06-14] - Language Dropdown Redesign & Polish
+### Modified
+- **`resources/views/partials/_navbar.blade.php`**:
+  - Polished the language switcher dropdown list to conform to the premium design system.
+  - Replaced native checkbox squares (`bx-square` / `bx-check-square`) with a clean `bx bx-check` checkmark icon on the right side of the active language, colored dynamically with the theme primary color (`var(--signal)`).
+  - Aligned language list items using Bootstrap flexbox `justify-content-between` to position checkmarks on the right.
+  - Updated the "Primary" and "Set as primary" indicators at the bottom to use standard `.tk-badge` and `.tk-badge-primary` classes from the design system helper, replacing outdated Bootstrap native background styles.
+
 ## [2026-06-14] - Dashboard Welcome Card Gradient Color & Dynamic Primary Color Fixes
 ### Modified
 - **`public/assets/css/custom.css`**:
@@ -411,10 +425,15 @@ All notable changes to the Taskify project will be documented in this folder.
 - Extracted and ported Design Tokens from Revamp Kit `tokens.css`.
 ### Modified
 - Overwrote `menu.blade.php` to implement the rail and context-panel layout.
-- Determined the active category using URL parsing (`request()->url()`).
 # Changelog
 
 All notable changes to the Taskify project will be documented in this folder.
+
+## [2026-06-14] - Dashboard Quick Access Sidebar Section
+### Added
+- **`resources/views/components/menu.blade.php`**:
+  - Implemented a "Quick Access" panel group in the Dashboard context panel.
+  - Included direct links to Tasks, Projects, Todos (with unseen counters), Notes, and Chat (with unread counters) for quick accessibility, making the Dashboard menu list visually balanced and functional.
 
 ## [2026-06-03] - Sidebar UI Redesign
 ### Added
