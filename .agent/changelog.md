@@ -2,6 +2,14 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-14] - Primary Color PWA Sync & Flash Fix
+### Modified
+- **`resources/views/layout.blade.php`**:
+  - Updated the inline head `<script>` block to parse the primary color hex to its RGB values, and set `--bs-primary` and `--bs-primary-rgb` CSS variables on `document.documentElement` before the document renders. This prevents the default Bootstrap/Sneat theme primary color (`#696cff` / purple) from flashing prior to JavaScript loading.
+  - Added a synchronization step to write the server-side `$general_settings['primary_color']` into `localStorage.getItem("taskify.primaryColor")` on load. This prevents PWA-cached pages from displaying stale color templates.
+- **`resources/views/settings/general_settings.blade.php`**:
+  - Updated the "Reset" button click handler and the color picker `"input"` event live-preview handler to update `--bs-primary` and `--bs-primary-rgb` alongside `--signal` to ensure live styling previews are consistent.
+
 ## [2026-06-14] - Breadcrumbs Layout Standardization
 ### Modified
 - **Projects, Tasks, Notes, and Leads Views**:

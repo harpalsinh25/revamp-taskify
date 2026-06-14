@@ -293,7 +293,7 @@
                             <label for="primaryColorPicker" class="form-label"><?= get_label('primary_color', 'Primary Color') ?></label>
                             <div class="d-flex align-items-center gap-3">
                                 <input type="color" class="form-control form-control-color" name="primary_color" id="primaryColorPicker" title="<?= get_label('choose_your_color', 'Choose your color') ?>" value="{{ $general_settings['primary_color'] ?? '#696cff' }}">
-                                <button type="button" class="btn btn-outline-warning btn-sm" id="btnResetPrimaryColor" onclick="document.getElementById('primaryColorPicker').value='#696cff'; document.documentElement.style.setProperty('--signal', '#696cff'); localStorage.removeItem('taskify.primaryColor');"><?= get_label('reset_to_default', 'Reset') ?></button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" id="btnResetPrimaryColor" onclick="document.getElementById('primaryColorPicker').value='#696cff'; document.documentElement.style.setProperty('--signal', '#696cff'); document.documentElement.style.setProperty('--bs-primary', '#696cff'); document.documentElement.style.setProperty('--bs-primary-rgb', '105, 108, 255'); localStorage.removeItem('taskify.primaryColor');"><?= get_label('reset_to_default', 'Reset') ?></button>
                             </div>
                         </div>
                     </div>
@@ -440,8 +440,23 @@ $(document).ready(function() {
     });
 
     // Appearance Settings: Live preview and localStorage
+    function hexToRgb(hex) {
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? parseInt(result[1], 16) + ", " + parseInt(result[2], 16) + ", " + parseInt(result[3], 16) : null;
+    }
+
     $('#primaryColorPicker').on('input', function() {
-        document.documentElement.style.setProperty('--signal', $(this).val());
+        var val = $(this).val();
+        document.documentElement.style.setProperty('--signal', val);
+        document.documentElement.style.setProperty('--bs-primary', val);
+        var rgb = hexToRgb(val);
+        if (rgb) {
+            document.documentElement.style.setProperty('--bs-primary-rgb', rgb);
+        }
     });
     
     $('#primaryColorPicker').on('change', function() {
