@@ -14,6 +14,9 @@
                     document.documentElement.setAttribute("data-theme", t);
                     document.documentElement.setAttribute("data-bs-theme", t);
                 }
+                @if(!empty($general_settings['primary_color']))
+                document.documentElement.style.setProperty('--signal', '{{ $general_settings['primary_color'] }}');
+                @endif
             } catch (e) {}
         })();
     </script>

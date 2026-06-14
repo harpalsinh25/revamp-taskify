@@ -80,6 +80,7 @@ class SettingsController extends Controller
             'total_paid_leaves_per_year' => ['required', 'numeric', 'min:0'],
             'company_year_start' => ['required', 'regex:/^\d{2}-\d{2}$/'],
             'company_year_end' => ['required', 'regex:/^\d{2}-\d{2}$/'],
+            'primary_color' => ['nullable', 'string'],
         ]);
 
         // Retrieve existing settings

@@ -50,5 +50,7 @@
 - Redesigned Social Media Scheduler Quick View Modal (`quickViewModal`):
   - Refactored `.qv-` styles in `public/assets/css/social/social.css` using theme CSS variables (`var(--bg-*)`, `var(--fg-*)`, `var(--line)`) for complete dark and light mode compatibility.
   - Upgraded status badges, platform cards, and statistics metrics to use correct semantic design tokens and semi-transparent colors.
-  - Added action buttons (Publish Now, Edit, Delete, Close) inside the `modal-footer` of `quickViewModal` in `calendar.blade.php` and `index.blade.php` to restore missing UI functions.
-  - Refactored `.day-post-item` in `social.css` with dynamic CSS variables to render correctly in dark mode.
+  - Added color picker input in General Settings UI.
+  - Removed localStorage JS logic.
+  - Configured SettingsController to properly validate and store `primary_color` in the `general_settings` JSON column (bypassing any migrations).
+  - Edited `layout.blade.php` to read the primary color from `$general_settings['primary_color']` server-side and inject it before page load.
