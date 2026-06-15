@@ -3707,10 +3707,9 @@ body.v2-shell .layout-page {
     color: var(--fg-2);
     min-width: 0;
 }
-
 .tk-cbar-ws {
     background: var(--signal);
-    color: var(--signal-fg);
+    color: #fff;
     font-size: 10px;
     font-weight: 700;
     font-family: var(--font-mono);
@@ -5908,7 +5907,7 @@ body.v2-shell .badge.rounded-pill {
 body.v2-shell .badge.bg-primary,
 body.v2-shell .badge.text-bg-primary {
     background: var(--signal) !important;
-    color: var(--signal-fg) !important;
+    color: #fff !important;
 }
 
 

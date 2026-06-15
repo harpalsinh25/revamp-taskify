@@ -22,7 +22,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_status', 'Create status') ?>
                     </h5>
-                    <button type="button" class="btn-close m-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -106,7 +106,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_status', 'Update status') ?>
                     </h5>
-                    <button type="button" class="btn-close m-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -189,7 +189,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_priority', 'Create Priority') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -252,7 +252,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_priority', 'Update Priority') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -311,7 +311,7 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_tag', 'Create tag') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -373,7 +373,7 @@
                 <input type="hidden" name="id" id="tag_id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_tag', 'Update tag') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -427,7 +427,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_todo', 'Create todo') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -535,7 +535,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_todo', 'Update todo') ?></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -638,7 +638,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('set_primary_lang_alert', 'Are you want to set as your primary language?') ?></p>
@@ -657,7 +657,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('set_default_view_alert', 'Are You Want to Set as Default View?') ?></p>
@@ -676,7 +676,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('save_column_visibility_alert', 'Are You Want to Save Column Visibility?') ?></p>
@@ -695,7 +695,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <?= get_label('confirm_leave_workspace', 'Are you sure you want leave this workspace?') ?>
@@ -715,7 +715,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_language', 'Create language') ?>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             @csrf
             <div class="modal-body">
@@ -753,7 +753,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_language', 'Update language') ?>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             @csrf
             <div class="modal-body">
@@ -806,7 +806,7 @@
                             <?= get_label('paid_leave_modal_intro', 'Follow this quick tour to understand how paid leave requests move from submission to approval and balance updates for everyone involved.') ?>
                         </p>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="<?= get_label('close', 'Close') ?>"></button>
                 </div>
                 <div class="modal-body">
@@ -1017,7 +1017,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_leave_requet', 'Create leave request') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -1222,7 +1222,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_leave_request', 'Update leave request') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body">
@@ -1351,7 +1351,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1">
                     <?= get_label('create_contract_type', 'Create contract type') ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -1382,7 +1382,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1">
                     <?= get_label('update_contract_type', 'Update contract type') ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -1413,7 +1413,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_contract', 'Create contract') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1512,7 +1512,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_contract', 'Update contract') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1616,7 +1616,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_payment_method', 'Create payment method') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1648,7 +1648,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_payment_method', 'Update payment method') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1680,7 +1680,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_allowance', 'Create allowance') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1721,7 +1721,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_allowance', 'Update allowance') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1763,7 +1763,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_deduction', 'Create deduction') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1820,7 +1820,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_deduction', 'Update deduction') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1878,7 +1878,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_tax', 'Create tax') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1934,7 +1934,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_tax', 'Update tax') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1994,7 +1994,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_unit', 'Create unit') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2031,7 +2031,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_unit', 'Update unit') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2069,7 +2069,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_item', 'Create item') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2125,7 +2125,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_item', 'Update item') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2183,7 +2183,7 @@
                 enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('create_note', 'Create note') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body row g-3">
@@ -2231,7 +2231,7 @@
                 <input type="hidden" name="id" id="note_id">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><?= get_label('update_note', 'Update note') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 @csrf
                 <div class="modal-body row g-3">
@@ -2276,7 +2276,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('delete_account_alert', 'Are you sure you want to delete your account?') ?></p>
@@ -2296,7 +2296,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> '</button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"> '</button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('delete_alert', 'Are you sure you want to delete?') ?></p>
@@ -2316,7 +2316,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> '</button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"> '</button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('delete_selected_alert', 'Are you sure you want to delete selected record(s)?') ?></p>
@@ -2336,7 +2336,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('duplicate_warning', 'Are you sure you want to duplicate?') ?></p>
@@ -2393,7 +2393,7 @@
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('time_tracker', 'Time tracker') ?>
                 </h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="stopwatch">
@@ -2455,7 +2455,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel2"><?= get_label('warning', 'Warning!') ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> '</button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"> '</button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('stop_timer_alert', 'Are you sure you want to stop the timer?') ?></p>
@@ -2477,7 +2477,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_billing_details', 'Update billing details') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close">
                         '</button>
                 </div>
                 <div class="modal-body">
@@ -2547,7 +2547,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_expense_type', 'Create expense type') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2585,7 +2585,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_expense_type', 'Update expense type') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2623,7 +2623,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">
                             <?= get_label('create_expense', 'Create expense') ?></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -2695,7 +2695,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">
                             <?= get_label('update_expense', 'Update expense') ?></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -2770,7 +2770,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_payment', 'Create payment') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2848,7 +2848,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_payment', 'Update payment') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -2925,7 +2925,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('mark_all_notifications_as_read_alert', 'Are you sure you want to mark all notifications as read?') ?>
@@ -2946,7 +2946,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('update_notifications_status_alert', 'Are you sure you want to update notification status?') ?>
@@ -2967,7 +2967,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('confirm_restore_default_template', 'Are you sure you want to restore default template?') ?>
@@ -2989,7 +2989,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1">
                     <?= get_label('permission_settings_instructions', 'Permission Settings Instructions') ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <ul>
@@ -3033,7 +3033,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('confirm_update_status', 'Do You Want to Update the Status?') ?></p>
@@ -3055,7 +3055,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title" id="exampleModalLabel2"><?= get_label('confirm', 'Confirm!') ?></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p><?= get_label('confirm_update_priority', 'Do You Want to Update the Priority?') ?></p>
@@ -3087,7 +3087,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('create_project', 'Create Project') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 @csrf
@@ -3364,7 +3364,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">
                         <?= get_label('update_project', 'Update Project') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 @csrf
@@ -3628,7 +3628,7 @@
                 <span id="typePlaceholder" class="mono" style="font-size:11px;color:var(--fg-1);font-weight:600;"></span>
                 <?= get_label('quick_view', 'Quick View') ?>
             </h5>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <button type="button" class="btn-close m-2 m-2 text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
             <h3 id="quickViewTitlePlaceholder" style="font-size:16px;margin:0 0 12px;" class="text-muted"></h3>
@@ -3749,7 +3749,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ get_label('create_workspace', 'Create Workspace') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ url('workspaces/store') }}" class="form-submit-event" method="POST">
                 <input type="hidden" name="dnr">
@@ -3822,7 +3822,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ get_label('update_workspace', 'Update Workspace') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ url('workspaces/update') }}" class="form-submit-event" method="POST">
                 <input type="hidden" name="dnr">
@@ -3890,7 +3890,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ get_label('create_meeting', 'Create Meeting') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <form action="{{ url('meetings/store') }}" class="form-submit-event" method="POST">
@@ -3979,7 +3979,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ get_label('update_meeting', 'Update Meeting') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <form action="{{ url('meetings/update') }}" class="form-submit-event" method="POST">
@@ -4058,7 +4058,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1"><span id="userPlaceholder"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -4121,7 +4121,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         {{ get_label('test_sms_notification_settings', 'Test SMS Notification Settings') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <form id="testSmsSettingsForm">
@@ -4172,7 +4172,7 @@
                     <h5 class="modal-title">
                         {{ get_label('test_whatsapp_notification_settings', 'Test WhatsApp Notification Settings') }}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <form id="testWhatsappSettingsForm">
@@ -4223,7 +4223,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         {{ get_label('test_slack_notification_settings', 'Test Slack Notification Settings') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <form id="testSlackSettingsForm">
@@ -4279,7 +4279,7 @@
                         <div class="modal-header">
                             <h5 class="modal-title" id="replyModalLabel">{{ get_label('post_reply', 'Post Reply') }}
                             </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -4330,7 +4330,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="commentModalLabel"><?= get_label('add_comment', 'Add Comment') ?>
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -4377,7 +4377,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="commentModalLabel"><?= get_label('edit_comment', 'Edit Comment') ?>
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -4410,7 +4410,7 @@
                         <div class="modal-header">
                             <h5 class="modal-title" id="commentModalLabel">
                                 {{ get_label('delete_comment', 'Delete Comment') }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -4446,7 +4446,7 @@
                     <input type="hidden" name="model_id" value="{{ $task->id }}">
                     <div class="modal-header">
                         <h5 class="modal-title" id="replyModalLabel"><?= get_label('post_reply', 'Post Reply') ?></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -4495,7 +4495,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="task_commentModalLabel">
                             <?= get_label('add_comment', 'Add Comment') ?></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -4543,7 +4543,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="commentModalLabel"><?= get_label('edit_comment', 'Edit Comment') ?>
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -4573,7 +4573,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="commentModalLabel">
                             {{ get_label('delete_comment', 'Delete Comment') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -4603,7 +4603,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel1">Cron Job Setup Instructions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>To enable automatic notifications, you need to set up a cron job on your server. This cron job will
@@ -4644,7 +4644,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ get_label('update_task_list', 'Update Task List') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('task_lists.update') }}" class="form-submit-event" method="POST">
                 @csrf
@@ -4689,7 +4689,7 @@
             <input type="hidden" name="dnr">
             <div class="modal-header">
                 <h5 class="modal-title">{{ get_label('create_task_list', 'Create Task List') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             @csrf
             <div class="modal-body">
@@ -4964,7 +4964,7 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ get_label('create_lead_source', 'Create Lead Source') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 @csrf
@@ -5000,7 +5000,7 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ get_label('edit_lead_source', 'Edit Lead Source') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 @csrf
@@ -5040,7 +5040,7 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ get_label('create_lead_stage', 'Create Lead Stage') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 @csrf
@@ -5105,7 +5105,7 @@
                 <input type="hidden" name="dnr">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ get_label('edit_lead_stage', 'Edit Lead Stage') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 @csrf
@@ -5173,7 +5173,7 @@
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="createTemplateLabel">
             {{ get_label('create_email_template', 'Create Email Template') }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="offcanvas"
             aria-label="{{ get_label('close', 'Close') }}"></button>
     </div>
     <form class="offcanvas-body d-flex flex-column form-submit-event" method="POST"
@@ -5222,7 +5222,7 @@
     aria-hidden="true">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="editEmailTemplateOffcanvasLabel">Edit Email Template</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="offcanvas"
             aria-label="Close"></button>
     </div>
     <form method="POST" id="editEmailTemplateForm" class="offcanvas-body d-flex flex-column form-submit-event">
@@ -5264,7 +5264,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="placeholdersModalLabel">Placeholders</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <ul id="placeholdersList" class="list-group"></ul>
@@ -5282,7 +5282,7 @@
                 <h5 class="modal-title">
                     {{ get_label('email_preview', 'Email Preview') }}
                 </h5>
-                <button type="button" class="btn-close m-1" data-bs-dismiss="modal"
+                <button type="button" class="btn-close m-2 m-2 m-1" data-bs-dismiss="modal"
                     aria-label="{{ get_label('close', 'Close') }}"></button>
             </div>
             <!-- Modal Body -->
@@ -5315,7 +5315,7 @@
             <input type="hidden" name="table" value="custom_fields_table">
             <div class="modal-header">
                 <h5 class="modal-title">{{ get_label('add_field', 'Add Field') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -5396,7 +5396,7 @@
                     <h5 class="modal-title" id="edit_custom_field">
                         <?= get_label('add_field', 'Add Field') ?>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -5487,7 +5487,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Confirm Deletion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -5519,7 +5519,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="candidateModalLabel">
                         {{ get_label('add_new_candidate', 'Add New Candidate') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="{{ get_label('close', 'Close') }}"></button>
                 </div>
                 <div class="modal-body row g-3">
@@ -5610,7 +5610,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="candidateUpdateModalLabel">
                         {{ get_label('update_candidate', 'Update Candidate') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="{{ get_label('close', 'Close') }}"></button>
                 </div>
                 <div class="modal-body row g-3">
@@ -5695,7 +5695,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="createStatusLabel">Create Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -5754,7 +5754,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editStatusLabel">Edit Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -5801,7 +5801,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><?= get_label('upload_attachment', 'Upload Attachment') ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <form id="uploadAttachmentForm"
@@ -5847,7 +5847,7 @@
                     <input type="hidden" id="editStatusId" />
                     <div class="modal-header">
                         <h5 class="modal-title" id="createInterviewModalLabel">Schedule Interview</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body row g-3">
@@ -5935,7 +5935,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="editInterviewModalLabel">Edit Interview</h5>
                         <!-- Close button placed correctly within the header -->
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body row g-3">
@@ -6023,7 +6023,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="candidateQuickViewModalLabel">
                     {{ get_label('candidate_profile', 'Candidate Profile') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Candidate Info -->
@@ -6150,7 +6150,7 @@
                     <i class="bx bx-calendar-check me-2"></i>
                     {{ get_label('interview_details', 'Interview Details') }}
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                <button type="button" class="btn-close m-2 m-2" data-bs-dismiss="modal"
                     aria-label="{{ get_label('close', 'Close') }}"></button>
             </div>
             <!-- Modal Body -->

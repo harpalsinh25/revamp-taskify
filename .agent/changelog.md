@@ -2,6 +2,12 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-14] - Badge Text Color to White
+### Modified
+- **`public/assets/css/custom.css`**:
+  - Updated the workspace monogram badge `.tk-cbar-ws` to use `color: #fff;` instead of `color: var(--signal-fg);`.
+  - Updated primary background badges `.badge.bg-primary` and `.badge.text-bg-primary` to use `color: #fff !important;` instead of `color: var(--signal-fg) !important;`. This resolves low contrast/dark text on primary badges.
+
 ## [2026-06-14] - Primary Color PWA Sync & Flash Fix
 ### Modified
 - **`resources/views/layout.blade.php`**:

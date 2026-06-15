@@ -81,8 +81,8 @@
 .tk-btn[disabled], .tk-btn.is-disabled { opacity: 0.55; pointer-events: none; }
 .tk-btn .tk-ic { width: 15px; height: 15px; }
 
-.tk-btn-primary   { background: var(--signal); color: var(--signal-fg, #fff); }
-.tk-btn-primary:hover { filter: brightness(1.05); color: var(--signal-fg, #fff); }
+.tk-btn-primary   { background: var(--signal); color: #fff; }
+.tk-btn-primary:hover { filter: brightness(1.05); color: #fff; }
 .tk-btn-secondary { background: var(--bg-2); border-color: var(--line); color: var(--fg-0); }
 .tk-btn-secondary:hover { background: var(--bg-3); color: var(--fg-0); }
 .tk-btn-ghost     { background: transparent; color: var(--fg-2); }
