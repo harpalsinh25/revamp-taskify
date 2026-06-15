@@ -281,7 +281,7 @@
                     </div>
                 @endforeach
                 <div class="col-12 mt-3 tk-project-pager">
-                    {{ $projects->links() }}
+                    {{ $projects->links('components.pagination') }}
                 </div>
             </div>
             <!-- delete project modal -->

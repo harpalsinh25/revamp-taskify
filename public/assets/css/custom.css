@@ -3621,21 +3621,30 @@ body.v2-shell .layout-page {
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-    background: var(--bg-0);
-    border: 1px solid var(--line);
-    color: var(--fg-0);
-    font-size: var(--fs-base);
-    font-weight: 600;
-    padding: 7px 10px;
-    border-radius: var(--r-2);
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-0) !important;
+    font-size: var(--fs-base) !important;
+    font-weight: 500 !important;
+    padding: 8px 12px !important;
+    border-radius: var(--r-2) !important;
+    transition: all var(--t-1) var(--ease);
 }
 
 .tk-ws>.btn::after {
     margin-left: auto;
+    font-size: 15px !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center;
 }
 
-.tk-ws>.btn:hover {
-    border-color: var(--line-2);
+.tk-ws>.btn:hover,
+.tk-ws>.btn.show {
+    background: var(--bg-2) !important;
+    border-color: var(--line-2) !important;
+    color: var(--fg-0) !important;
 }
 
 /* Responsive: collapse the context panel below xl, rail stays */
@@ -7193,50 +7202,7 @@ body.v2-shell .tk-project-card .card-body-project-grid>.row:last-child i.bx {
     margin-right: 3px;
 }
 
-/* Laravel paginator -> kit pagination */
-body.v2-shell .tk-project-pager .pagination {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    justify-content: flex-end;
-    margin: 0;
-    padding: 0;
-}
-
-body.v2-shell .tk-project-pager .pagination .page-item {
-    margin: 0;
-}
-
-body.v2-shell .tk-project-pager .pagination .page-link {
-    border: 0;
-    background: transparent;
-    color: var(--fg-1);
-    min-width: 30px;
-    height: 30px;
-    padding: 0 8px;
-    border-radius: var(--r-2);
-    font-size: var(--fs-sm);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background var(--t-1);
-}
-
-body.v2-shell .tk-project-pager .pagination .page-link:hover {
-    background: var(--bg-2);
-    color: var(--fg-0);
-}
-
-body.v2-shell .tk-project-pager .pagination .page-item.active .page-link {
-    background: var(--bg-3);
-    color: var(--fg-0);
-    font-weight: 600;
-}
-
-body.v2-shell .tk-project-pager .pagination .page-item.disabled .page-link {
-    color: var(--fg-3);
-    background: transparent;
-}
+/* Laravel paginator -> kit pagination style removed in favor of unified .tk-pagination */
 
 /* =====================================================================
    Taskify v2 — Design-system icons (<x-tk-icon>) used in the project card

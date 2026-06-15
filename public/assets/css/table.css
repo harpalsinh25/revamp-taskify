@@ -445,8 +445,8 @@ body.v2-shell .bootstrap-table .fixed-table-pagination .page-link:hover {
 
 /* Active link styling (.on equivalent) */
 body.v2-shell .bootstrap-table .fixed-table-pagination .page-item.active .page-link {
-    background: var(--bg-3);
-    color: var(--fg-0);
+    background: var(--signal) !important;
+    color: #ffffff !important;
     font-weight: 600;
 }
 

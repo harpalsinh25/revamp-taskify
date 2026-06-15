@@ -436,3 +436,52 @@
     background: var(--signal) !important; border-color: var(--signal) !important; color: var(--signal-fg, #fff) !important;
 }
 .tk-table .pagination .page-item.disabled .page-link { color: var(--fg-3) !important; opacity: 0.5; }
+
+/* ----------------------------------------------------------------------------
+   12. PAGINATION
+   ---------------------------------------------------------------------------- */
+.tk-pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.tk-pagination-btn {
+    border: 1px solid var(--line);
+    background: var(--bg-1);
+    color: var(--fg-1);
+    border-radius: var(--r-1);
+    min-width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--t-1) var(--ease), border-color var(--t-1) var(--ease), color var(--t-1) var(--ease);
+    box-sizing: border-box;
+    padding: 0 6px;
+}
+.tk-pagination-btn:hover:not([disabled]):not(.is-disabled) {
+    background: var(--bg-2);
+    color: var(--fg-0);
+    border-color: var(--line-2);
+}
+.tk-pagination-btn.is-active,
+.tk-pagination-btn.on {
+    background: var(--signal) !important;
+    border-color: var(--signal) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+.tk-pagination-btn[disabled],
+.tk-pagination-btn.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: var(--bg-2);
+    border-color: var(--line);
+}
