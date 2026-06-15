@@ -118,18 +118,28 @@
     width: 100%; height: var(--ctrl-h-md); padding: 0 11px;
     background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2);
     color: var(--fg-0); font-size: var(--fs-base); font-family: inherit;
-    transition: border-color var(--t-1) var(--ease), box-shadow var(--t-1) var(--ease);
+    transition: border-color var(--t-1) var(--ease);
 }
 .tk-textarea { height: auto; min-height: 76px; padding: 9px 11px; resize: vertical; }
 .tk-input::placeholder, .tk-textarea::placeholder { color: var(--fg-3); }
+.tk-input:hover, .tk-select:hover, .tk-textarea:hover {
+    border-color: var(--line-2);
+}
 .tk-input:focus, .tk-select:focus, .tk-textarea:focus {
-    outline: none; border-color: var(--signal); box-shadow: var(--shadow-focus);
+    outline: none; border-color: var(--fg-1); box-shadow: none;
 }
 /* input with a leading icon */
 .tk-inputgroup {
     display: inline-flex; align-items: center; gap: 7px; width: 100%;
     height: var(--ctrl-h-md); padding: 0 11px;
     background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2);
+    transition: border-color var(--t-1) var(--ease);
+}
+.tk-inputgroup:hover {
+    border-color: var(--line-2);
+}
+.tk-inputgroup:focus-within {
+    border-color: var(--fg-1);
 }
 .tk-inputgroup .tk-ic { color: var(--fg-3); flex: none; }
 .tk-inputgroup input { flex: 1; border: 0; background: transparent; outline: none; color: var(--fg-0); font-size: var(--fs-base); }
@@ -148,6 +158,44 @@
 .tk-badge-warning { background: oklch(from var(--warn) l c h / 0.16); color: var(--warn); }
 .tk-badge-danger  { background: oklch(from var(--err) l c h / 0.16);  color: var(--err); }
 .tk-badge-info    { background: oklch(from var(--info) l c h / 0.16); color: var(--info); }
+
+.tk-badge-counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    box-sizing: border-box;
+    z-index: 3;
+    flex: 0 0 auto !important;
+}
+.tk-badge-counter-danger {
+    background-color: var(--err, #ff3e1d) !important;
+    color: #ffffff !important;
+}
+.tk-badge-counter-success {
+    background-color: var(--ok, #71dd37) !important;
+    color: #ffffff !important;
+}
+.tk-badge-counter-nav {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    border: 1.5px solid var(--bg-1, #ffffff) !important;
+}
+.tk-badge-counter-rail {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+}
 
 .tk-tag {
     display: inline-flex; align-items: center; gap: 4px;
@@ -269,9 +317,15 @@
     background: var(--bg-2) !important; border: 1px solid var(--line) !important;
     border-radius: var(--r-2) !important; color: var(--fg-0) !important;
     font-size: var(--fs-base) !important; box-shadow: none !important;
+    transition: border-color var(--t-1) var(--ease) !important;
 }
-.tk-table .fixed-table-toolbar .search .form-control:focus {
-    border-color: var(--signal) !important; box-shadow: var(--shadow-focus) !important;
+.tk-table .fixed-table-toolbar .search .form-control:hover,
+.tk-table .fixed-table-toolbar .search input:hover {
+    border-color: var(--line-2) !important;
+}
+.tk-table .fixed-table-toolbar .search .form-control:focus,
+.tk-table .fixed-table-toolbar .search input:focus {
+    border-color: var(--fg-1) !important; box-shadow: none !important; outline: none !important;
 }
 .tk-table .fixed-table-toolbar .btn,
 .tk-table .fixed-table-toolbar .button > .btn {
@@ -283,6 +337,42 @@
 }
 .tk-table .fixed-table-toolbar .btn:hover { background: var(--bg-3) !important; color: var(--fg-0) !important; }
 .tk-table .fixed-table-toolbar .btn i { font-size: 17px; }
+
+/* Table Toolbar Button Specific Overrides */
+.tk-table .fixed-table-toolbar .btn.delete-selected {
+    background: transparent !important;
+    border-color: oklch(from var(--err) l c h / 0.40) !important;
+    color: var(--err) !important;
+    transition: background-color var(--t-1) var(--ease), border-color var(--t-1) var(--ease) !important;
+}
+.tk-table .fixed-table-toolbar .btn.delete-selected:hover {
+    background: oklch(from var(--err) l c h / 0.10) !important;
+    border-color: var(--err) !important;
+    color: var(--err) !important;
+}
+.tk-table .fixed-table-toolbar .btn.delete-selected:focus {
+    border-color: var(--err) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.tk-table .fixed-table-toolbar .btn.save-column-visibility {
+    background: transparent !important;
+    border-color: var(--line-2) !important;
+    color: var(--fg-0) !important;
+    transition: background-color var(--t-1) var(--ease), border-color var(--t-1) var(--ease) !important;
+}
+.tk-table .fixed-table-toolbar .btn.save-column-visibility:hover {
+    background: var(--signal-soft) !important;
+    border-color: var(--signal) !important;
+    color: var(--fg-0) !important;
+}
+.tk-table .fixed-table-toolbar .btn.save-column-visibility:focus {
+    border-color: var(--signal) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
 
 /* --- container --- */
 .tk-table .fixed-table-container {

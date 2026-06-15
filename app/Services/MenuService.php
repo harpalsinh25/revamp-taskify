@@ -151,7 +151,7 @@ class MenuService
                 'url' => url('chat'),
                 'icon' => 'bx bx-chat',
                 'class' => 'menu-item' . (Request::is('chat') || Request::is('chat/*') ? ' active' : ''),
-                'badge' => ($unread > 0) ? '<span class="flex-shrink-0 badge badge-center bg-danger w-px-20 h-px-20">' . $unread . '</span>' : '',
+                'badge' => ($unread > 0) ? '<span class="flex-shrink-0 tk-badge-counter tk-badge-counter-danger">' . $unread . '</span>' : '',
                 'show' => Auth::guard('web')->check() ? 1 : 0,
                 'category' => 'team',
             ],
@@ -238,7 +238,7 @@ class MenuService
                 'url' => url('todos'),
                 'icon' => 'bx bx-list-check',
                 'class' => 'menu-item' . (Request::is('todos') || Request::is('todos/*') ? ' active' : ''),
-                'badge' => ($pending_todos_count > 0) ? '<span class="flex-shrink-0 badge badge-center bg-danger w-px-20 h-px-20">' . $pending_todos_count . '</span>' : '',
+                'badge' => ($pending_todos_count > 0) ? '<span class="flex-shrink-0 tk-badge-counter tk-badge-counter-danger">' . $pending_todos_count . '</span>' : '',
                 'category' => 'todos',
             ],
             [
@@ -247,7 +247,7 @@ class MenuService
                 'url' => getDefaultRoute('meetings'),
                 'icon' => 'bx bx-shape-polygon',
                 'class' => 'menu-item' . (Request::is('meetings') || Request::is('meetings/*') ? ' active' : ''),
-                'badge' => ($ongoing_meetings_count > 0) ? '<span class="flex-shrink-0 badge badge-center bg-success w-px-20 h-px-20">' . $ongoing_meetings_count . '</span>' : '',
+                'badge' => ($ongoing_meetings_count > 0) ? '<span class="flex-shrink-0 tk-badge-counter tk-badge-counter-success">' . $ongoing_meetings_count . '</span>' : '',
                 'show' => $user->can('manage_meetings') ? 1 : 0,
                 'category' => 'utilities',
             ],
@@ -296,41 +296,7 @@ class MenuService
                     ],
                 ],
             ],
-            [
-                'id' => 'payslips',
-                'label' => get_label('payslips', 'Payslips'),
-                'url' => 'javascript:void(0)',
-                'icon' => 'bx bx-box',
-                'class' => 'menu-item' . (Request::is('payslips') || Request::is('payslips/*') || Request::is('allowances') || Request::is('deductions') ? ' active open' : ''),
-                'show' => ($user->can('manage_payslips') || $user->can('manage_allowances') || $user->can('manage_deductions')) ? 1 : 0,
-                'category' => 'finance',
-                'submenus' => [
-                    [
-                        'id' => 'manage_payslips',
-                        'label' => get_label('manage_payslips', 'Manage payslips'),
-                        'url' => url('payslips'),
-                        'icon' => 'bx bx-receipt',
-                        'class' => 'menu-item' . (Request::is('payslips') || Request::is('payslips/*') ? ' active' : ''),
-                        'show' => $user->can('manage_payslips') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'allowances',
-                        'label' => get_label('allowances', 'Allowances'),
-                        'url' => url('allowances'),
-                        'icon' => 'bx bx-plus-circle',
-                        'class' => 'menu-item' . (Request::is('allowances') ? ' active' : ''),
-                        'show' => $user->can('manage_allowances') ? 1 : 0
-                    ],
-                    [
-                        'id' => 'deductions',
-                        'label' => get_label('deductions', 'Deductions'),
-                        'url' => url('deductions'),
-                        'icon' => 'bx bx-minus-circle',
-                        'class' => 'menu-item' . (Request::is('deductions') ? ' active' : ''),
-                        'show' => $user->can('manage_deductions') ? 1 : 0
-                    ],
-                ],
-            ],
+
             [
                 'id' => 'finance',
                 'label' => get_label('finance', 'Finance'),
@@ -463,8 +429,8 @@ class MenuService
                 'id' => 'hrms',
                 'label' => get_label('HRMS', 'HRMS'),
                 'icon' => 'bx bx-group',
-                'class' => 'menu-item' . (Request::is('candidate*') || Request::is('candidate_status*') || Request::is('interviews*') ? ' active open' : ''),
-                'show' => ($user->can('manage_candidate') || $user->can('manage_candidate_status') || $user->can('manage_interview')) ? 1 : 0,
+                'class' => 'menu-item' . (Request::is('candidate*') || Request::is('candidate_status*') || Request::is('interviews*') || Request::is('leave-requests*') || Request::is('payslips*') || Request::is('allowances*') || Request::is('deductions*') ? ' active open' : ''),
+                'show' => ($user->can('manage_candidate') || $user->can('manage_candidate_status') || $user->can('manage_interview') || Auth::guard('web')->check() || $user->can('manage_payslips') || $user->can('manage_allowances') || $user->can('manage_deductions')) ? 1 : 0,
                 'category' => 'hrms',
                 'submenus' => [
                     [
@@ -491,6 +457,39 @@ class MenuService
                         'class' => 'menu-item' . (Request::is('interviews*') ? ' active' : ''),
                         'show' => $user->can('manage_interview') ? 1 : 0,
                     ],
+                    [
+                        'id' => 'leave_requests',
+                        'label' => get_label('leave_requests', 'Leave requests'),
+                        'url' => getDefaultRoute('leave_requests'),
+                        'icon' => 'bx bx-calendar-event',
+                        'class' => 'menu-item' . (Request::is('leave-requests') || Request::is('leave-requests/*') ? ' active' : ''),
+                        'badge' => ($pendingLeaveRequestsCount > 0) ? '<span class="flex-shrink-0 tk-badge-counter tk-badge-counter-danger">' . $pendingLeaveRequestsCount . '</span>' : '',
+                        'show' => Auth::guard('web')->check() ? 1 : 0,
+                    ],
+                    [
+                        'id' => 'manage_payslips',
+                        'label' => get_label('manage_payslips', 'Manage payslips'),
+                        'url' => url('payslips'),
+                        'icon' => 'bx bx-receipt',
+                        'class' => 'menu-item' . (Request::is('payslips') || Request::is('payslips/*') ? ' active' : ''),
+                        'show' => $user->can('manage_payslips') ? 1 : 0
+                    ],
+                    [
+                        'id' => 'allowances',
+                        'label' => get_label('allowances', 'Allowances'),
+                        'url' => url('allowances'),
+                        'icon' => 'bx bx-plus-circle',
+                        'class' => 'menu-item' . (Request::is('allowances') ? ' active' : ''),
+                        'show' => $user->can('manage_allowances') ? 1 : 0
+                    ],
+                    [
+                        'id' => 'deductions',
+                        'label' => get_label('deductions', 'Deductions'),
+                        'url' => url('deductions'),
+                        'icon' => 'bx bx-minus-circle',
+                        'class' => 'menu-item' . (Request::is('deductions') ? ' active' : ''),
+                        'show' => $user->can('manage_deductions') ? 1 : 0
+                    ],
                 ]
             ],
             [
@@ -501,16 +500,7 @@ class MenuService
                 'class' => 'menu-item' . (Request::is('notes') || Request::is('notes/*') ? ' active' : ''),
                 'category' => 'notes',
             ],
-            [
-                'id' => 'leave_requests',
-                'label' => get_label('leave_requests', 'Leave requests'),
-                'url' => getDefaultRoute('leave_requests'),
-                'icon' => 'bx bx-right-arrow-alt',
-                'class' => 'menu-item' . (Request::is('leave-requests') || Request::is('leave-requests/*') ? ' active' : ''),
-                'badge' => ($pendingLeaveRequestsCount > 0) ? '<span class="flex-shrink-0 badge badge-center bg-danger w-px-20 h-px-20">' . $pendingLeaveRequestsCount . '</span>' : '',
-                'show' => Auth::guard('web')->check() ? 1 : 0,
-                'category' => 'utilities',
-            ],
+
             [
                 'id' => 'activity_log',
                 'label' => get_label('activity_log', 'Activity log'),

@@ -245,7 +245,7 @@ $pendingLeaveRequestsCount = $query->count();
                 {!! $item['icon'] !!}
             </svg>
             @if ($item['badge'] > 0)
-                <span class="tk-rail-badge">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
+                <span class="tk-badge-counter tk-badge-counter-danger tk-badge-counter-rail">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
             @endif
         </a>
     @endforeach
@@ -392,6 +392,7 @@ $pendingLeaveRequestsCount = $query->count();
                                     data-active="{{ $subActive ? 'true' : 'false' }}">
                                     @if (!empty($sub['icon']))<i class="{{ $sub['icon'] }}"></i>@endif
                                     <span>{{ $sub['label'] }}</span>
+                                    @if (!empty($sub['badge'])){!! $sub['badge'] !!}@endif
                                 </a>
                             @endforeach
                         </div>

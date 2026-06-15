@@ -83,8 +83,8 @@ $visibleColumns = getUserPreferences('activity_log');
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-4 col-12">
-                        <button type="button" class="btn btn-outline-secondary clear-activity-log-filters w-100">
-                            <i class="bx bx-reset me-1"></i><?= get_label('clear_filters', 'Clear Filters') ?>
+                        <button type="button" class="btn btn-secondary clear-activity-log-filters w-100">
+                            <i class="bx bx-refresh me-1"></i><?= get_label('clear_filters', 'Clear Filters') ?>
                         </button>
                     </div>
                 </div>

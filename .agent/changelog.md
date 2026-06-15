@@ -2,6 +2,16 @@
 
 All notable changes to the Taskify project will be documented in this folder.
 
+## [2026-06-15] - Input Hover & Focus Standardization
+### Modified
+- **`public/assets/css/tk-design-system.css`**:
+  - Unified hover states (`border-color: var(--line-2)`) and focus states (`border-color: var(--fg-1)`, outline: none, box-shadow: none) for `.tk-input`, `.tk-select`, `.tk-textarea`, and `.tk-inputgroup`.
+  - Standardized `.tk-table` search input hover and focus styles to Option A.
+- **`public/assets/css/custom.css`**:
+  - Added hover border style for Select2 dropdown selection fields in the V2 shell.
+  - Standardized hover and focus states for inputs in `.tk-filter-bar` and `.tk-panel-search`.
+  - Added dynamic custom hover and focus styles for `input[type="file"]` controls and their inner selector buttons.
+
 ## [2026-06-14] - Badge Text Color to White
 ### Modified
 - **`public/assets/css/custom.css`**:

@@ -74,7 +74,7 @@ if ($remainingUnreadNotificationsCount < 0) {
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9ZM10 21a2 2 0 0 0 4 0"/></svg>
                         <span id="unreadNotificationsCount"
-      class="badge bg-danger rounded-pill badge-notifications 
+      class="tk-badge-counter tk-badge-counter-danger tk-badge-counter-nav
       {{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}">
     {{ $unreadNotificationsCount }}
 </span>

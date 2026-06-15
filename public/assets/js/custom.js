@@ -2684,10 +2684,10 @@ $(document).ready(function () {
                     : "clear-" + data_type + "-filters";
                 // Create the "Clear Filters" button
                 var $clearFiltersButton = $(
-                    '<button type="button" class="btn btn-outline-secondary w-100 ' +
+                    '<button type="button" class="btn btn-secondary w-100 ' +
                     clearButtonClass +
                     '">' +
-                    '<i class="bx bx-x-circle me-1"></i>' +
+                    '<i class="bx bx-refresh me-1"></i>' +
                     label_clear_filters +
                     "</button>"
                 );

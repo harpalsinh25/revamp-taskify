@@ -23,7 +23,10 @@
         @endphp
         <div class="tk-welcome">
             <div class="tk-welcome-main">
-                <div class="tk-welcome-eyebrow">{{ now()->format('H:i') }} · {{ now()->translatedFormat('D d M') }} · {{ get_label('wk', 'WK') }} {{ now()->weekOfYear }}</div>
+                    @php
+                    $dashboardNow = now()->tz(config('app.timezone'));
+                @endphp
+                <div class="tk-welcome-eyebrow">{{ $dashboardNow->format('H:i') }} · {{ $dashboardNow->translatedFormat('D d M') }} · {{ get_label('wk', 'WK') }} {{ $dashboardNow->weekOfYear }}</div>
                 <h1 class="tk-welcome-title">{{ get_label('welcome_back', 'Welcome back') }}, {{ $tkUser->first_name }}.</h1>
                 <p class="tk-welcome-sub">
                     <span class="tk-welcome-stat {{ $tkDeadlines > 0 ? 'tk-stat-warn' : '' }}">{{ $tkDeadlines }}</span>

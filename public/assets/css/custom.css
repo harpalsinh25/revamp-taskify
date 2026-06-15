@@ -3462,19 +3462,6 @@ body.v2-shell .layout-page {
     position: absolute;
     top: 1px;
     right: 1px;
-    min-width: 14px;
-    height: 14px;
-    padding: 0 3px;
-    background: var(--err);
-    color: #fff;
-    border-radius: 7px;
-    font-size: 9px;
-    font-weight: 700;
-    font-family: var(--font-mono);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3;
 }
 
 .tk-rail-foot {
@@ -3533,9 +3520,13 @@ body.v2-shell .layout-page {
     color: var(--fg-3);
 }
 
+.tk-panel-search input:hover {
+    border-color: var(--line-2);
+}
+
 .tk-panel-search input:focus {
     outline: none;
-    border-color: var(--line-2);
+    border-color: var(--fg-1);
 }
 
 .tk-panel-body {
@@ -3809,19 +3800,6 @@ body.v2-shell .layout-page {
     position: absolute;
     top: 3px;
     right: 3px;
-
-    min-width: 15px;
-    height: 15px;
-    padding: 0 3px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 8px;
-    font-weight: 700;
-    line-height: 1;
-    border: 1.5px solid var(--bg-0, #ffffff) !important;
 }
 
 /* Premium Notifications Dropdown Styling Override */
@@ -4507,9 +4485,9 @@ body.v2-shell .table-hover>tbody>tr:hover>* {
 
 .tk-welcome-eyebrow {
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: var(--fs-xs);
     font-weight: 500;
-    letter-spacing: 0.06em;
+    letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
     color: var(--fg-3);
 }
@@ -5250,9 +5228,13 @@ body.v2-shell .tk-filter-bar .form-control::placeholder {
     color: var(--fg-3);
 }
 
+body.v2-shell .tk-filter-bar .form-control:hover {
+    border-color: var(--line-2);
+}
+
 body.v2-shell .tk-filter-bar .form-control:focus {
-    border-color: var(--signal);
-    box-shadow: var(--shadow-focus);
+    border-color: var(--fg-1);
+    box-shadow: none;
     outline: none;
 }
 
@@ -5347,6 +5329,11 @@ body.v2-shell .select2-container--default .select2-selection--single .select2-se
 body.v2-shell .select2-container--default .select2-selection__placeholder,
 body.v2-shell .select2-container--default .select2-search__field::placeholder {
     color: var(--fg-3);
+}
+
+body.v2-shell .select2-container--default .select2-selection--single:hover,
+body.v2-shell .select2-container--default .select2-selection--multiple:hover {
+    border-color: var(--line-2) !important;
 }
 
 body.v2-shell .select2-container--default.select2-container--focus .select2-selection--single,
@@ -5762,6 +5749,26 @@ body.v2-shell .form-select:focus {
     border-color: var(--fg-1) !important;
     box-shadow: none !important;
     outline: none !important;
+}
+
+body.v2-shell .form-control[type="file"] {
+    line-height: 30px !important;
+}
+
+body.v2-shell .form-control[type="file"]::file-selector-button {
+    background-color: var(--bg-2) !important;
+    border: 0 !important;
+    border-inline-end: 1px solid var(--line) !important;
+    margin-inline-start: -10px !important;
+    margin-inline-end: 10px !important;
+    height: 100% !important;
+    color: var(--fg-1) !important;
+    transition: background-color var(--t-1) var(--ease), color var(--t-1) var(--ease) !important;
+}
+
+body.v2-shell .form-control[type="file"]:hover::file-selector-button {
+    background-color: var(--bg-3) !important;
+    color: var(--fg-0) !important;
 }
 
 body.v2-shell input[type="number"] {
