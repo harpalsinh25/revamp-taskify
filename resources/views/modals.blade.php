@@ -1520,7 +1520,7 @@
                         <div class="col-6 mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="title" name="title" class="form-control"
+                            <input type="text" id="edit_contract_title" name="title" class="form-control"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                         </div>
                         <div class="col-6 mb-3">

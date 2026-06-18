@@ -532,15 +532,13 @@ class DashboardManager {
             this.updateDashboard();
         }.bind(this));
 
-        $('#userFilter').on('change', () => {
+       $('#userFilter').on('change', () => {
+    this.updateDashboard();
+});
 
-            this.updateDashboard();
-        });
-
-        $('.select-all-users-btn, .clear-user-selection-btn').on('click', () => {
-            $('#userFilter').val([]).trigger('change');
-            this.updateDashboard();
-        });
+$('.select-all-users-btn, .clear-user-selection-btn').on('click', () => {
+    $('#userFilter').val([]).trigger('change');
+});
 
         const urlParams = new URLSearchParams(window.location.search);
         const startDate = urlParams.get('start_date');
@@ -575,7 +573,7 @@ class DashboardManager {
         }
 
 
-        setTimeout(() => this.updateDashboard(), 100);
+       
     }
     initSortable() {
         const $container = $("#dashboard-items");

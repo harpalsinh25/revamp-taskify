@@ -1066,5 +1066,18 @@ Route::middleware(['CheckInstallation'])->group(function () {
         Route::get('/file-manager', function () {
             return view('file-manager.index');
         })->name('file-manager.index')->middleware(['customRole:admin']);
+
+        // Single generic bulk upload page
+Route::get('bulk-upload/{type}', [BulkImportController::class, 'show'])
+    ->name('bulk-import.show');
+
+Route::post('bulk-import/parse', [BulkImportController::class, 'parse'])
+    ->name('bulk-import.parse');
+
+Route::post('bulk-import/preview', [BulkImportController::class, 'preview'])
+    ->name('bulk-import.preview');
+
+Route::post('bulk-import/import', [BulkImportController::class, 'import'])
+    ->name('bulk-import.import');
     });
 });

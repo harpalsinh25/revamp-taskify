@@ -889,7 +889,7 @@ $(document).on("click", ".edit-contract", function () {
                     response.contract.end_date
                 ).format(js_date_format);
                 $("#contract_id").val(response.contract.id);
-                $("#title").val(response.contract.title);
+                $("#edit_contract_title").val(response.contract.title);
                 $("#value").val(response.contract.value);
                 if ($("#client_id")[0].tomselect) {
                     $("#client_id")[0].tomselect.addOption({ id: response.contract.client.id, text: response.contract.client.first_name + " " + response.contract.client.last_name });

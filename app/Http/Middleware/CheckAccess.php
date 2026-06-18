@@ -22,6 +22,14 @@ class CheckAccess
         $itemId = $request->route($parameterName);
         $labelUnauthorized = get_label('un_authorized_action', 'Un authorized action.');
         // Check if the user has the 'admin' role or if they have access with the given ID
+//       dd([
+//     'user' => $user ? $user->id : null,
+//     'itemId' => $itemId,
+//     'typeKey' => $typeKey,
+//     'typeModel' => $typeModel,
+//     'isAdmin' => isAdminOrHasAllDataAccess(),
+//     'hasAccess' => $this->hasAccess($user, $typeKey, $typeModel, $itemId),
+// ]);
         if (isAdminOrHasAllDataAccess() || ($this->hasAccess($user, $typeKey, $typeModel, $itemId))) {
             return $next($request); // User is authorized, proceed with the request
         }
