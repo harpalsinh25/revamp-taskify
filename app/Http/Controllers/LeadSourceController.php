@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Models\LeadForm;
 use App\Models\Workspace;
 use App\Models\LeadSource;
 use Illuminate\Http\Request;
@@ -292,6 +293,20 @@ class LeadSourceController extends Controller
      */
     public function destroy(string $id)
     {
+        $lead_source = LeadSource::find($id);
+
+        if (!$lead_source) {
+            return response()->json(['error' => true, 'message' => 'Lead source not found.']);
+        }
+
+        if ((bool) ($lead_source->is_default ?? false)) {
+            return response()->json(['error' => true, 'message' => 'Default lead source cannot be deleted.']);
+        }
+
+        if (LeadForm::where('source_id', $id)->exists()) {
+            return response()->json(['error' => true, 'message' => 'This lead source is used in lead forms. Please update or delete those forms first.']);
+        }
+
         $response = DeletionService::delete(LeadSource::class, $id, 'lead_source');
         return $response;
     }
@@ -307,6 +322,15 @@ class LeadSourceController extends Controller
         $ids = $validatedData['ids'];
         $deletedIds = [];
         $deletedTitles = [];
+
+        if (LeadSource::whereIn('id', $ids)->where('is_default', true)->exists()) {
+            return response()->json(['error' => true, 'message' => 'Default lead source cannot be deleted.']);
+        }
+
+        if (LeadForm::whereIn('source_id', $ids)->exists()) {
+            return response()->json(['error' => true, 'message' => 'One or more lead sources are used in lead forms. Please update or delete those forms first.']);
+        }
+
         foreach ($ids as $id) {
             $lead_source = LeadSource::findOrFail($id);
             $deletedIds[] = $id;

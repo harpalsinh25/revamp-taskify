@@ -310,7 +310,7 @@ class GoogleCalendarManager {
                 extendedProps: {
                     ...event.extendedProps,
                     status: status,
-                    leaveUrl: event.url
+                    leaveUrl: (event.id ? (this.config.baseUrl + '/leave-requests/' + event.id) : null)
                 }
             };
         });
@@ -371,6 +371,17 @@ class GoogleCalendarManager {
     }
 
     handleEventClick(info) {
+        if (info.jsEvent && typeof info.jsEvent.preventDefault === 'function') {
+            info.jsEvent.preventDefault();
+        }
+
+        const event = info.event;
+        const url = (event.extendedProps && event.extendedProps.leaveUrl) || (event.id ? (this.config.baseUrl + '/leave-requests/' + event.id) : null);
+        if (url && url !== 'null') {
+            window.location.href = url;
+        } else {
+            console.warn('No URL available for calendar event', event);
+        }
 
     }
 

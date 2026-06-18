@@ -202,6 +202,35 @@
   }
 }
 
+/* >>> Stacking fixes: ensure modal overlays sit above offcanvas and backdrops */
+.offcanvas {
+  z-index: 1045 !important;
+}
+.offcanvas-backdrop {
+  z-index: 1040 !important;
+}
+.modal-backdrop {
+  z-index: 1050 !important;
+}
+.modal {
+  z-index: 1060 !important;
+}
+
+/* Ensure TinyMCE and other dropdowns appear above backdrops when modal is open */
+.tox-tinymce, .tox-tinymce-aux, .mce-tinymce, .mce-container, .note-editor {
+  z-index: 1070 !important;
+}
+
+/* Strong stacking classes applied dynamically from JS to guarantee ordering */
+.modal-backdrop.stacked {
+  z-index: 1990 !important;
+}
+.modal.stacked-active {
+  z-index: 2000 !important;
+}
+
+
+
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);

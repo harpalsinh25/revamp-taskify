@@ -38,14 +38,14 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            'root' => public_path('storage'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
          'file-manager' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/file-manager'),
+            'root' => public_path('storage/file-manager'),
             'throw' => false,
             'visibility' => 'public',
             'url' => env('APP_URL').'/storage/file-manager',

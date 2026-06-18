@@ -117,6 +117,10 @@ $(document).on("click", ".delete", function (e) {
     var id = $(this).data("id");
     var type = $(this).data("type");
     var reload = $(this).data("reload"); // Get the value of data-reload attribute
+    if (!id || !type) {
+        toastr.error(label_something_went_wrong);
+        return;
+    }
     if (typeof reload !== "undefined" && reload === true) {
         reload = true;
     } else {
@@ -336,6 +340,120 @@ $(document).ready(function () {
         }
     });
 });
+
+/* ===== Modal / Offcanvas backdrop stacking fixes =====
+   Ensure proper Bootstrap class usage and avoid stray backdrop overlay.
+*/
+// When a modal is about to be shown, compute z-index based on any visible offcanvas
+$(document).on('show.bs.modal', '.modal', function () {
+    try {
+        var $modal = $(this);
+        // Find highest z-index among visible offcanvas elements
+        var highestOffcanvasZ = 0;
+        $('.offcanvas.show').each(function () {
+            var z = parseInt($(this).css('z-index')) || 0;
+            if (z > highestOffcanvasZ) highestOffcanvasZ = z;
+        });
+        // Base modal/backdrop z-index values
+        var modalZ = highestOffcanvasZ ? highestOffcanvasZ + 20 : 1060;
+        var backdropZ = modalZ - 10;
+        $modal.data('stacking-modal-z', modalZ);
+        $modal.data('stacking-backdrop-z', backdropZ);
+        // Ensure modal is a direct child of <body> to avoid ancestor stacking contexts
+        try {
+            if (!$modal.parent().is('body')) $modal.appendTo(document.body);
+        } catch (e) {}
+        // Apply inline z-index/position to the modal itself immediately so any appended backdrop sits behind
+        $modal.css({ 'z-index': modalZ, 'position': 'fixed' });
+    } catch (e) {
+        // ignore
+    }
+});
+
+// After modal is shown, adjust the newly added backdrop z-index
+$(document).on('shown.bs.modal', '.modal', function () {
+    try {
+        var $modal = $(this);
+        // Compute the highest z-index among visible overlays (offcanvas, backdrops, other modals)
+        var highest = 0;
+        $('.offcanvas.show, .modal-backdrop, .modal.show').each(function () {
+            // skip the current modal when checking .modal.show
+            if ($(this).is($modal)) return;
+            var z = parseInt($(this).css('z-index')) || 0;
+            if (z > highest) highest = z;
+        });
+        var backdropZ = (highest && highest >= 0) ? highest + 10 : ($modal.data('stacking-backdrop-z') || 1050);
+        var modalZ = (backdropZ) ? (backdropZ + 10) : ($modal.data('stacking-modal-z') || 1060);
+        // The backdrop inserted by Bootstrap is usually the last .modal-backdrop element
+        var $backdrops = $('.modal-backdrop');
+        if ($backdrops.length) {
+            // Mark all backdrops as stacked so CSS can enforce proper z-index
+            $backdrops.addClass('stacked');
+        }
+        // Add a strong class to modal so CSS !important rules ensure it stays on top
+        $modal.addClass('stacked-active');
+        // Ensure backdrop inline z-index is set after insertion (small delay to account for timing)
+        setTimeout(function () {
+            try {
+                var modalZ_inline = parseInt($modal.css('z-index')) || ($modal.data('stacking-modal-z') || 2000);
+                var backdropZ_inline = (modalZ_inline - 10) || ($modal.data('stacking-backdrop-z') || 1990);
+                var $lastBackdrop = $('.modal-backdrop').last();
+                if ($lastBackdrop.length) {
+                    $lastBackdrop.css('z-index', backdropZ_inline);
+                    $lastBackdrop.addClass('stacked');
+                }
+                // Reinforce modal inline z-index and position
+                $modal.css({ 'z-index': modalZ_inline, 'position': 'fixed' });
+            } catch (e) {}
+        }, 10);
+        // Ensure body has modal-open
+        if (!$('body').hasClass('modal-open')) $('body').addClass('modal-open');
+    } catch (e) {
+        // ignore
+    }
+});
+
+// When modal hidden, remove its backdrop only if there are no other visible modals
+$(document).on('hidden.bs.modal', '.modal', function () {
+    try {
+        // Allow Bootstrap to remove backdrop; if stray backdrops remain, clean them safely
+        setTimeout(function () {
+            // Remove backdrop elements that are not associated with any visible modal
+            if ($('.modal.show').length === 0) {
+                // No modals open — remove any leftover backdrops and modal-open body class
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+            } else {
+                // There are other modals open — ensure only one backdrop exists and body class stays
+                $('.modal-backdrop').not('.stacked').remove();
+                if (!$('body').hasClass('modal-open')) $('body').addClass('modal-open');
+            }
+            // cleanup stacking classes on the modal that was hidden
+            $(this).removeClass('stacked-active');
+            // if no modals remain, remove stacked class from backdrops too (they were removed above)
+            if ($('.modal.show').length === 0) $('.modal-backdrop').removeClass('stacked');
+        }, 200);
+    } catch (e) {
+        // ignore
+    }
+});
+
+// When an offcanvas is shown, ensure its backdrop z-index is under modals
+$(document).on('show.bs.offcanvas', '.offcanvas', function () {
+    try {
+        var $off = $(this);
+        // default offcanvas z-index
+        var offZ = parseInt($off.css('z-index')) || 1045;
+        // if any modal is visible, push offcanvas under modal
+        if ($('.modal.show').length) {
+            var topModalZ = parseInt($('.modal.show').last().css('z-index')) || 1060;
+            if (topModalZ && offZ >= topModalZ) {
+                $off.css('z-index', topModalZ - 20);
+            }
+        }
+    } catch (e) {}
+});
+
 $("#select-all").on("click", function () {
     $(".selected-items").prop("checked", this.checked);
 });

@@ -24,7 +24,12 @@ class RolesController extends Controller
      */
     public function index()
     {
-        $roles = Role::all();
+        $roles = Role::all()->map(function ($role) {
+            $role->actions = $this->getActions($role);
+
+            return $role;
+        });
+
         return view('settings.permission_settings', ['roles' => $roles]);
     }
 
@@ -188,6 +193,32 @@ class RolesController extends Controller
     {
         // $createProjectsPermission = Permission::findOrCreate('create_tasks', 'client');
         Permission::create(['name' => 'edit_projects', 'guard_name' => 'client']);
+    }
+
+    private function getActions($role)
+    {
+        if (strtolower($role->name) === 'admin') {
+            return '-';
+        }
+
+        $actions = '<div class="dropdown">';
+        $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+        $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
+        $actions .= '</button>';
+        $actions .= '<ul class="dropdown-menu dropdown-menu-end">';
+
+        $actions .= '<li><a href="' . url('/roles/edit/' . $role->id) . '" class="dropdown-item d-block">';
+        $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('edit', 'Edit') . '</a></li>';
+
+        if (!in_array(strtolower($role->name), ['client', 'member'])) {
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $role->id . '" data-type="roles" data-reload="true">';
+            $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
+        }
+
+        $actions .= '</ul>';
+        $actions .= '</div>';
+
+        return $actions;
     }
 
     /**

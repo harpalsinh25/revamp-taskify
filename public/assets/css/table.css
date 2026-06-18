@@ -352,7 +352,7 @@ body.v2-shell .bootstrap-table .fixed-table-toolbar .columns-right .dropdown-tog
 }
 
 /* Action Buttons */
-body.v2-shell .bootstrap-table table.table td[data-field="actions"] a,
+body.v2-shell .bootstrap-table table.table td[data-field="actions"] a:not(.dropdown-item),
 body.v2-shell .bootstrap-table table.table td[data-field="actions"] button {
     width: 28px;
     height: 28px;
@@ -369,7 +369,7 @@ body.v2-shell .bootstrap-table table.table td[data-field="actions"] button {
     margin: 0 2px;
 }
 
-body.v2-shell .bootstrap-table table.table td[data-field="actions"] a:hover,
+body.v2-shell .bootstrap-table table.table td[data-field="actions"] a:not(.dropdown-item):hover,
 body.v2-shell .bootstrap-table table.table td[data-field="actions"] button:hover {
     background: var(--bg-3);
     color: var(--fg-0);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Models\LeadForm;
 use App\Models\LeadStage;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
@@ -325,6 +326,20 @@ class LeadStageController extends Controller
      */
     public function destroy(string $id)
     {
+        $lead_stage = LeadStage::find($id);
+
+        if (!$lead_stage) {
+            return response()->json(['error' => true, 'message' => 'Lead stage not found.']);
+        }
+
+        if ((bool) ($lead_stage->is_default ?? false)) {
+            return response()->json(['error' => true, 'message' => 'Default lead stage cannot be deleted.']);
+        }
+
+        if (LeadForm::where('stage_id', $id)->exists()) {
+            return response()->json(['error' => true, 'message' => 'This lead stage is used in lead forms. Please update or delete those forms first.']);
+        }
+
         $response = DeletionService::delete(LeadStage::class, $id, 'LeadStage');
 
         LeadStage::where(function ($query) {
@@ -356,6 +371,14 @@ class LeadStageController extends Controller
         $ids = $validatedData['ids'];
         $deletedIds = [];
         $deletedTitles = [];
+
+        if (LeadStage::whereIn('id', $ids)->where('is_default', true)->exists()) {
+            return response()->json(['error' => true, 'message' => 'Default lead stage cannot be deleted.']);
+        }
+
+        if (LeadForm::whereIn('stage_id', $ids)->exists()) {
+            return response()->json(['error' => true, 'message' => 'One or more lead stages are used in lead forms. Please update or delete those forms first.']);
+        }
 
         foreach ($ids as $id) {
             $lead_stage = LeadStage::findOrFail($id);

@@ -80,21 +80,7 @@
                                 </td>
                             @endif
                             <td data-field="actions">
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded fs-5 text-secondary"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-end shadow-sm">
-                                        <a class="dropdown-item py-1 px-3" href="{{ url('/roles/edit/' . $role->id) }}">
-                                            <i class='bx bx-edit me-2 fs-6 text-secondary'></i><?= get_label('edit', 'Edit') ?>
-                                        </a>
-                                        @if (!in_array($role->name, ['Client', 'member']))
-                                            <a class="dropdown-item delete py-1 px-3" href="javascript:void(0);" data-id="{{ $role->id }}" data-type="roles" data-reload="true">
-                                                <i class='bx bx-trash text-danger me-2 fs-6'></i><?= get_label('delete', 'Delete') ?>
-                                            </a>
-                                        @endif
-                                    </div>
-                                </div>
+                                {!! $role->actions !!}
                             </td>
                         @endif
                     </tr>

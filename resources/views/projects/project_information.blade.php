@@ -514,11 +514,9 @@
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="mb-0 fw-semibold"><?= get_label('milestones', 'Milestones') ?></h6>
-                            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_milestone_modal">
-                                <button type="button" class="btn btn-sm btn-primary action_create_milestones" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_milestone', 'Create milestone') ?>">
-                                    <i class="bx bx-plus me-1"></i><?= get_label('create_milestone', 'Create milestone') ?>
-                                </button>
-                            </a>
+                            <button type="button" class="btn btn-sm btn-primary action_create_milestones" data-bs-toggle="modal" data-bs-target="#create_milestone_modal" aria-controls="create_milestone_modal">
+                                <i class="bx bx-plus me-1"></i><?= get_label('create_milestone', 'Create milestone') ?>
+                            </button>
                         </div>
                         
                         <div class="card mb-3 border shadow-none">

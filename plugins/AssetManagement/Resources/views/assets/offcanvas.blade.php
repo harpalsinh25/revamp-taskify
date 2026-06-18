@@ -286,6 +286,7 @@
 @endif
 
 
+@if (isset($users) && isset($assets))
 <!-- Bulk Assign Assets Offcanvas -->
 <div class="offcanvas offcanvas-end offcanvas-responsive" tabindex="-1" id="bulkAssignOffcanvas"
     aria-labelledby="bulkAssignOffcanvasLabel">
@@ -374,6 +375,7 @@
         </form>
     </div>
 </div>
+@endif
 
 <!-- Create Category Modal -->
 <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel"
