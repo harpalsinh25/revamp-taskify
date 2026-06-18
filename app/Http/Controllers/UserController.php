@@ -199,11 +199,24 @@ class UserController extends Controller
                     'nullable',
                     function ($attribute, $value, $fail) use ($isApi) {
                         $doj = request()->input('doj');
+                        $dob = request()->input('dob');
                         $errors = validate_date_format_and_order($doj, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'DOJ', endDateKey: 'doj');
 
                         if (!empty($errors['doj'])) {
                             foreach ($errors['doj'] as $error) {
                                 $fail($error);
+                            }
+                        }
+
+                        if ($dob && $doj) {
+                            $matchFormat = $isApi ? 'Y-m-d' : get_php_date_time_format();
+                            $parsedDob = \DateTime::createFromFormat($matchFormat, $dob);
+                            $parsedDoj = \DateTime::createFromFormat($matchFormat, $doj);
+                            
+                            if ($parsedDob && $parsedDoj) {
+                                if ($parsedDob >= $parsedDoj) {
+                                    $fail(get_label('doj_must_be_after_dob', 'The date of joining must be a date after date of birth.'));
+                                }
                             }
                         }
                     },
@@ -591,11 +604,24 @@ class UserController extends Controller
                     'nullable',
                     function ($attribute, $value, $fail) use ($isApi) {
                         $doj = request()->input('doj');
+                        $dob = request()->input('dob');
                         $errors = validate_date_format_and_order($doj, $value, $isApi ? 'Y-m-d' : null, endDateLabel: 'DOJ', endDateKey: 'doj');
 
                         if (!empty($errors['doj'])) {
                             foreach ($errors['doj'] as $error) {
                                 $fail($error);
+                            }
+                        }
+
+                        if ($dob && $doj) {
+                            $matchFormat = $isApi ? 'Y-m-d' : get_php_date_time_format();
+                            $parsedDob = \DateTime::createFromFormat($matchFormat, $dob);
+                            $parsedDoj = \DateTime::createFromFormat($matchFormat, $doj);
+                            
+                            if ($parsedDob && $parsedDoj) {
+                                if ($parsedDob >= $parsedDoj) {
+                                    $fail(get_label('doj_must_be_after_dob', 'The date of joining must be a date after date of birth.'));
+                                }
                             }
                         }
                     },

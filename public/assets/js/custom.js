@@ -4777,7 +4777,7 @@ $(document).ready(function () {
                     }
                     var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
                     if (!color) color = 'primary';
-                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 },
                 item: function (data, escape) {
                     if (!data.value) {
@@ -4785,7 +4785,7 @@ $(document).ready(function () {
                     }
                     var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
                     if (!color) color = 'primary';
-                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 }
             }
         });
@@ -4808,7 +4808,7 @@ $(document).ready(function () {
                     }
                     var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
                     if (!color) color = 'primary';
-                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 },
                 item: function (data, escape) {
                     if (!data.value) {
@@ -4816,7 +4816,7 @@ $(document).ready(function () {
                     }
                     var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
                     if (!color) color = 'primary';
-                    return '<div><span class="badge bg-label-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
                 }
             }
         });
@@ -6933,10 +6933,19 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                                 data: {
                                     id: result.data.id,
                                     text: result.data.name,
-                                    color: result.priority.color || 'primary' // Ensure color is passed
+                                    color: result.priority?.color || result.status?.color || 'primary' // Ensure color is passed
                                 }
                             }
                         });
+                    }
+                    // Handle TomSelect specifically
+                    if (selector[0].tomselect) {
+                        selector[0].tomselect.addOption({
+                            value: result.data.id,
+                            text: result.data.name,
+                            color: result.priority?.color || result.status?.color || 'primary'
+                        });
+                        selector[0].tomselect.addItem(result.data.id);
                     }
                 } else {
                 }

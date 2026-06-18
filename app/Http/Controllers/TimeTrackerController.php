@@ -191,7 +191,7 @@ class TimeTrackerController extends Controller
         $search = request('search');
         $sort = request('sort', 'id');
         $order = request('order', 'DESC');
-        $user_id = request('user_id', '');
+        $user_ids = request('user_ids');
         $date_between_from = request('date_between_from') ?: "";
         $date_between_to = request('date_between_to') ?: "";
         $start_date_from = request('start_date_from', '');
@@ -232,8 +232,10 @@ class TimeTrackerController extends Controller
             $timesheet = $timesheet->whereBetween('end_date_time', [$end_date_from, $end_date_to]);
         }
 
-        if ($user_id) {
-            $timesheet = $timesheet->where('user_id', $user_id);
+        if ($user_ids && is_array($user_ids)) {
+            $timesheet = $timesheet->whereIn('user_id', $user_ids);
+        } elseif ($user_ids) {
+            $timesheet = $timesheet->where('user_id', $user_ids);
         }
 
         if ($search) {
@@ -410,7 +412,7 @@ class TimeTrackerController extends Controller
             $search = request('search');
             $sort = request('sort', 'id');
             $order = request('order', 'DESC');
-            $user_id = request('user_id', '');
+            $user_ids = request('user_ids');
             $date_between_from = request('date_between_from') ?: "";
             $date_between_to = request('date_between_to') ?: "";
             $start_date_from = request('start_date_from', '');
@@ -451,8 +453,10 @@ class TimeTrackerController extends Controller
                 $timesheet = $timesheet->whereBetween('end_date_time', [$end_date_from, $end_date_to]);
             }
 
-            if ($user_id) {
-                $timesheet = $timesheet->where('user_id', $user_id);
+            if ($user_ids && is_array($user_ids)) {
+                $timesheet = $timesheet->whereIn('user_id', $user_ids);
+            } elseif ($user_ids) {
+                $timesheet = $timesheet->where('user_id', $user_ids);
             }
 
             if ($search) {

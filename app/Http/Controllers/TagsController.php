@@ -64,7 +64,7 @@ class TagsController extends Controller
         $isApi = $request->get('isApi', false);
         try {
             $formFields = $request->validate([
-                'title' => ['required'],
+                'title' => ['required', 'unique:tags,title'],
                 'color' => ['required']
             ]);
             $slug = generateUniqueSlug($request->title, Tag::class);

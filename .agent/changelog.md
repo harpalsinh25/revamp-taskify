@@ -330,6 +330,10 @@ All notable changes to the Taskify project will be documented in this folder.
   - Added a "Clear Filters" button inside the filter row and adjusted column classes to `col-md-3`.
   - Updated the user table card container to use the standard flat styling (`card border shadow-none` with `card-body p-0`).
 
+## [2026-06-18] - User DOB and DOJ Validation Update
+### Modified
+- **`app/Http/Controllers/UserController.php`**: Updated `store` and `update_user` validation rules for the `doj` (Date of Joining) field. Added logic to verify that the Date of Joining is chronologically strictly after the Date of Birth (`dob`), preventing users from entering the same or earlier dates for DOJ.
+
 ## [2026-06-12] - Users Table & Filters Redesign
 ### Modified
 - **`resources/views/users/users.blade.php`**:

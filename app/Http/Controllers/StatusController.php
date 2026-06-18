@@ -77,7 +77,7 @@ class StatusController extends Controller
     {
         try {
             $formFields = $request->validate([
-                'title' => ['required', 'string', 'max:255'],
+                'title' => ['required', 'string', 'max:255', 'unique:statuses,title'],
                 'color' => ['required', 'string'],
                 'role_ids' => ['nullable', 'array'],
                 'role_ids.*' => ['integer', 'exists:roles,id']
@@ -462,7 +462,7 @@ class StatusController extends Controller
         try {
             $formFields = $request->validate([
                 'id' => ['required', 'integer', 'exists:statuses,id'],
-                'title' => ['required', 'string', 'max:255'],
+                'title' => ['required', 'string', 'max:255', 'unique:statuses,title,' . $request->id],
                 'color' => ['required', 'string'],
                 'role_ids' => ['nullable', 'array'],
                 'role_ids.*' => ['integer', 'exists:roles,id']

@@ -8874,3 +8874,25 @@ body.v2-shell .ts-control:hover {
     background-color: var(--bg-2) !important;
     transition: background-color 0.15s ease;
 }
+
+/* ============================================================================
+   STICKY FOOTER FIX
+   ============================================================================ */
+body.v2-shell .layout-wrapper,
+body.v2-shell .layout-container,
+body.v2-shell .layout-page {
+    min-height: 100vh;
+}
+body.v2-shell .layout-page {
+    display: flex;
+    flex-direction: column;
+}
+body.v2-shell .content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+body.v2-shell #section-not-to-print {
+    margin-top: auto !important;
+    width: 100%;
+}

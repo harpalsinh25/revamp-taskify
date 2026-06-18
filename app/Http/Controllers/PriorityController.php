@@ -66,7 +66,7 @@ class PriorityController extends Controller
     {
         try {
             $formFields = $request->validate([
-                'title' => ['required', 'string', 'max:255'],
+                'title' => ['required', 'string', 'max:255', 'unique:priorities,title'],
                 'color' => ['required', 'string']
             ]);
 
@@ -405,7 +405,7 @@ class PriorityController extends Controller
         try {
             $formFields = $request->validate([
                 'id' => ['required', 'integer', 'exists:priorities,id'],
-                'title' => ['required', 'string', 'max:255'],
+                'title' => ['required', 'string', 'max:255', 'unique:priorities,title,' . $request->id],
                 'color' => ['required', 'string']
             ]);
 
