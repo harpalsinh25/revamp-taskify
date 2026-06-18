@@ -119,6 +119,42 @@ class DashboardManager {
         this.initTooltips();
         this.updateDashboard();
     }
+    renderTkDonut(elementId, data, labels, colors) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const legendEl = document.getElementById(elementId.replace('-donut', '-legend'));
+        const centerLabel = el.dataset.centerLabel || '';
+        const series = (Array.isArray(data) ? data : []).map(v => Math.max(0, Number(v) || 0));
+        const total = series.reduce((a, b) => a + b, 0);
+        if (this.charts['#' + elementId]) { this.charts['#' + elementId].destroy(); }
+        if (total === 0) {
+            el.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:140px;color:#64748b;font-size:13px;">${el.dataset.emptyLabel || 'No data'}</div>`;
+            if (legendEl) legendEl.innerHTML = '';
+            return;
+        }
+        el.innerHTML = '';
+        const palette = colors && colors.length ? colors : this.chartPalette;
+        const chart = new ApexCharts(el, {
+            series, labels,
+            colors: palette,
+            chart: { type: 'donut', height: 160, toolbar: { show: false } },
+            plotOptions: { pie: { donut: { size: '72%', labels: { show: true, total: { show: true, label: centerLabel, fontSize: '11px', fontWeight: 600, formatter: () => total } } } } },
+            dataLabels: { enabled: false },
+            legend: { show: false },
+            stroke: { width: 2 },
+            tooltip: { y: { formatter: (val) => val } }
+        });
+        chart.render();
+        this.charts['#' + elementId] = chart;
+        if (legendEl) {
+            legendEl.innerHTML = labels.map((lbl, i) => {
+                const count = series[i] || 0;
+                const pct = total > 0 ? ((count / total) * 100).toFixed(0) : 0;
+                const color = palette[i % palette.length];
+                return `<div class="tk-legend-row"><span class="tk-legend-dot" style="background:${color}"></span><span class="tk-legend-label">${lbl}</span><span class="tk-legend-val">${count}</span><span class="tk-legend-pct">${pct}%</span></div>`;
+            }).join('');
+        }
+    }
     renderPolarAreaChart(selector, data, colors, labels, label = "") {
         if (!document.querySelector(selector)) return;
         const { series, labels: formattedLabels } = this.formatDataForChart('polarArea', data, labels);
@@ -198,10 +234,21 @@ class DashboardManager {
                 $('#clients-tile .count').text(response.clients_count || 0).show();
                 $('#meetings-tile .count').text(response.meetings_count || 0).show();
                 $('#todos-tile .count').text(response.todos_count || 0).show();
+                // Update tk-donut card totals
+                $('#tk-project-total').text(response.projects_count || 0);
+                $('#tk-task-total').text(response.tasks_count || 0);
+                $('#tk-todo-total').text(response.todos_count || 0);
                 // Update charts
                 this.renderPolarAreaChart("#projectStatisticsChart", response.project_data || [], response.bg_colors || [], response.labels || [], label_total_projects);
                 this.renderPieChart("#taskStatisticsChart", response.task_data || [], response.labels || [], response.bg_colors || []);
                 this.renderDonutChart("#todoStatisticsChart", response.todo_data || [], [this.colors.pastelSuccess, this.colors.pastelDanger], ['Done', 'Pending'], label_total_todos);
+                // Update new tk-donut charts
+                this.renderTkDonut('tk-project-donut', response.project_data || [], response.labels || [], response.bg_colors || []);
+                this.renderTkDonut('tk-task-donut', response.task_data || [], response.labels || [], response.bg_colors || []);
+                this.renderTkDonut('tk-todo-donut', response.todo_data || [], [
+                    ($('#tk-todo-donut').data('label-done') || 'Completed'),
+                    ($('#tk-todo-donut').data('label-pending') || 'Pending')
+                ], [this.colors.pastelSuccess, this.colors.pastelDanger]);
                 // Update status lists
                 this.updateStatusList('#project-statistics .status-list', response.project_status_counts || {}, response.statuses || [], response.total_projects || 0, 'projects');
                 this.updateStatusList('#task-statistics .status-list', response.task_status_counts || {}, response.statuses || [], response.total_tasks || 0, 'tasks');
@@ -210,18 +257,9 @@ class DashboardManager {
                 // Update timeline
                 this.updateTimeline('#recent-activities .timeline', response.activities || []);
                 // Update selected users count
-                const userIds = $('#userFilter').val() || [];
-                $('#selectedUsersCount').text(userIds.length > 0
-                    ? `${userIds.length} ${userIds.length === 1 ? 'user' : 'users'} ${label_selected}`
-                    : label_all_team_members_selected).show();
-                // Update URL with filter parameters
-                this.updateIncomeExpenseChart(filters);
-                const urlParams = new URLSearchParams();
-                if (filters.start_date) urlParams.set('start_date', filters.start_date);
-                if (filters.end_date) urlParams.set('end_date', filters.end_date);
-                if (userIds.length > 0) urlParams.set('user_ids', userIds.join(','));
-                window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
-                // Fetch and update income vs. expense chart
+                $('#selectedUsersCount').text(label_all_team_members_selected || 'All team members').show();
+                // Fetch income vs expense chart (no filters)
+                this.updateIncomeExpenseChart({});
             },
             error: (xhr, status, error) => console.error("Dashboard Update Error:", error)
         });
@@ -399,6 +437,8 @@ class DashboardManager {
         }
     }
     updateIncomeExpenseChart(filters) {
+        const heroEl = document.getElementById('tk-hero-chart');
+        if (!heroEl) return; // chart not on page (non-admin)
 
         $.ajax({
             type: "GET",
@@ -408,6 +448,7 @@ class DashboardManager {
             dataType: "JSON",
             success: (response) => {
                 const { invoices = [], expenses = [] } = response;
+
                 const groupByDate = (data, dateField, amountField) => {
                     return data.reduce((acc, item) => {
                         const date = (item[dateField] || '').split(' ')[0] || '';
@@ -417,163 +458,99 @@ class DashboardManager {
                         return acc;
                     }, {});
                 };
+
                 const invoicesByDate = groupByDate(invoices, 'from_date', 'amount');
                 const expensesByDate = groupByDate(expenses, 'expense_date', 'amount');
-                // robust parse for dd-mm-yyyy strings
+
                 const parseDMY = (d) => {
                     if (!d) return new Date(0);
                     const parts = d.split('-');
-                    if (parts.length !== 3) return new Date(d); // fallback
+                    if (parts.length !== 3) return new Date(d);
                     const [dd, mm, yyyy] = parts.map(p => Number(p));
                     return new Date(yyyy, mm - 1, dd);
                 };
+
                 const allDates = [...new Set([...Object.keys(invoicesByDate), ...Object.keys(expensesByDate)])];
                 allDates.sort((a, b) => parseDMY(a) - parseDMY(b));
-                const chartData = {
-                    categories: allDates,
-                    incomeData: allDates.map(d => invoicesByDate[d] || 0),
-                    expenseData: allDates.map(d => expensesByDate[d] || 0)
-                };
-                // NOTE: pass categories as 4th argument (third is labels in your current signature)
-                const { series, categories } = this.formatDataForChart('area', [
-                    { name: label_income, data: chartData.incomeData },
-                    { name: label_expenses, data: chartData.expenseData }
-                ], [], chartData.categories); // <-- important: [] is labels, chartData.categories is 4th param
+
+                const incomeData  = allDates.map(d => invoicesByDate[d] || 0);
+                const expenseData = allDates.map(d => expensesByDate[d] || 0);
+
+                const labelIncome   = heroEl.dataset.labelIncome   || 'Income';
+                const labelExpense  = heroEl.dataset.labelExpense   || 'Expenses';
+                const emptyLabel    = heroEl.dataset.emptyLabel     || 'No data available';
+
+                // Destroy previous instance
+                if (this.charts['#tk-hero-chart']) {
+                    this.charts['#tk-hero-chart'].destroy();
+                }
+
+                if (allDates.length === 0) {
+                    heroEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#64748b;font-size:14px;">${emptyLabel}</div>`;
+                    return;
+                }
+
+                heroEl.innerHTML = '';
+
                 const options = {
-                    series,
-                    chart: { height: 380, type: "area", stacked: false, toolbar: { show: false } },
-                    stroke: { curve: "smooth", width: 2 },
-                    fill: { type: "gradient", gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
-                    colors: [this.colors.success, this.colors.danger],
-                    xaxis: { categories, labels: { rotate: -45, style: { colors: this.colors.text, fontSize: "12px" } }, axisBorder: { show: false }, axisTicks: { show: false } },
-                    yaxis: { labels: { formatter: (val) => "₹" + Math.abs(val).toLocaleString(), style: { colors: this.colors.text, fontSize: "12px" } } },
-                    grid: { borderColor: this.colors.grid, strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } } },
-                    tooltip: { shared: true, y: { formatter: (v) => "₹" + Math.abs(v).toLocaleString() } },
-                    legend: { position: "top", horizontalAlign: "right", fontSize: "14px", markers: { radius: 12 } }
+                    series: [
+                        { name: labelIncome,  data: incomeData  },
+                        { name: labelExpense, data: expenseData }
+                    ],
+                    chart: {
+                        type: 'area',
+                        height: 220,
+                        toolbar: { show: false },
+                        zoom: { enabled: false }
+                    },
+                    colors: ['var(--signal, #22C55E)', this.colors.secondary],
+                    fill: {
+                        type: 'gradient',
+                        gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] }
+                    },
+                    stroke: { curve: 'smooth', width: 2 },
+                    xaxis: {
+                        categories: allDates,
+                        labels: { style: { colors: this.colors.text, fontSize: '11px' }, rotate: -30 },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: { labels: { style: { colors: this.colors.text, fontSize: '11px' } } },
+                    grid: { borderColor: this.colors.grid, strokeDashArray: 4 },
+                    dataLabels: { enabled: false },
+                    legend: { position: 'top', horizontalAlign: 'right', fontSize: '13px' },
+                    tooltip: { y: { formatter: (val) => val.toLocaleString() } }
                 };
-                this.renderChartInstance("#income-expense-chart", options);
+
+                const chart = new ApexCharts(heroEl, options);
+                chart.render();
+                this.charts['#tk-hero-chart'] = chart;
+
+                // Wire up the segment toggle (Both / Income / Expense)
+                document.querySelectorAll('.tk-seg-btn[data-chart="hero"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.tk-seg-btn[data-chart="hero"]').forEach(b => {
+                            b.classList.remove('on');
+                            b.setAttribute('aria-checked', 'false');
+                        });
+                        btn.classList.add('on');
+                        btn.setAttribute('aria-checked', 'true');
+                        const val = btn.dataset.value;
+                        if (val === 'income')        chart.updateSeries([{ name: labelIncome,  data: incomeData  }]);
+                        else if (val === 'expense')  chart.updateSeries([{ name: labelExpense, data: expenseData }]);
+                        else                          chart.updateSeries([{ name: labelIncome, data: incomeData }, { name: labelExpense, data: expenseData }]);
+                    });
+                });
             },
             error: (xhr, status, error) => console.error("Income vs Expense Chart Update Error:", error)
         });
     }
     getFilters() {
-        const filters = {
-            start_date: $("#filter_date_range_from").val() || moment().subtract(6, "days").format("YYYY-MM-DD"),
-            end_date: $("#filter_date_range_to").val() || moment().format("YYYY-MM-DD"),
-            user_ids: $('#userFilter').val() || []
-        };
-
-        return filters;
+        // No filters — always fetch all data
+        return { start_date: "", end_date: "", user_ids: [] };
     }
     initFilters() {
-        if (typeof moment === "undefined" || !$.fn.daterangepicker) {
-            console.error("Moment.js or DateRangePicker is not loaded!");
-            return;
-        }
-
-
-        $('#daterange').daterangepicker({
-            startDate: moment().subtract(6, 'days'),
-            endDate: moment(),
-            locale: { format: "YYYY-MM-DD", cancelLabel: label_clear },
-            ranges: {
-                [label_today]: [moment(), moment()],
-                [label_yesterday]: [moment().subtract(1, "days"), moment().subtract(1, "days")],
-                [label_last_7_days]: [moment().subtract(6, "days"), moment()],
-                [label_last_30_days]: [moment().subtract(29, "days"), moment()],
-                [label_current_month]: [moment().startOf("month"), moment().endOf("month")]
-            }
-        });
-
-        $("#daterange").on("apply.daterangepicker", (ev, picker) => {
-            $("#filter_date_range_from").val(picker.startDate.format("YYYY-MM-DD"));
-            $("#filter_date_range_to").val(picker.endDate.format("YYYY-MM-DD"));
-
-            this.updateDashboard();
-        });
-
-        $("#daterange").on("cancel.daterangepicker", (ev, picker) => {
-            $("#filter_date_range_from").val(moment().subtract(6, "days").format("YYYY-MM-DD"));
-            $("#filter_date_range_to").val(moment().format("YYYY-MM-DD"));
-            picker.setStartDate(moment().subtract(6, "days"));
-            picker.setEndDate(moment());
-            picker.updateElement();
-
-            this.updateDashboard();
-        });
-
-        $('.quick-date-btn').on('click', function (e) {
-            const range = $(e.currentTarget).data('range');
-            let startDate, endDate;
-            switch (range) {
-                case 'today':
-                    startDate = endDate = moment();
-                    break;
-                case 'yesterday':
-                    startDate = endDate = moment().subtract(1, 'days');
-                    break;
-                case 'last7days':
-                    startDate = moment().subtract(6, 'days');
-                    endDate = moment();
-                    break;
-                case 'last30days':
-                    startDate = moment().subtract(29, 'days');
-                    endDate = moment();
-                    break;
-                case 'thismonth':
-                    startDate = moment().startOf('month');
-                    endDate = moment().endOf('month');
-                    break;
-            }
-            $('#daterange').data('daterangepicker').setStartDate(startDate);
-            $('#daterange').data('daterangepicker').setEndDate(endDate);
-            $("#filter_date_range_from").val(startDate.format("YYYY-MM-DD"));
-            $("#filter_date_range_to").val(endDate.format("YYYY-MM-DD"));
-            this.updateDashboard();
-        }.bind(this));
-
-        $('#userFilter').on('change', () => {
-            this.updateDashboard();
-        });
-
-        $('.select-all-users-btn, .clear-user-selection-btn').on('click', () => {
-            $('#userFilter').val([]).trigger('change');
-        });
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const startDate = urlParams.get('start_date');
-        const endDate = urlParams.get('end_date');
-        const userIds = urlParams.get('user_ids') ? urlParams.get('user_ids').split(',') : [];
-
-
-        if (startDate && endDate) {
-            $('#daterange').data('daterangepicker').setStartDate(moment(startDate));
-            $('#daterange').data('daterangepicker').setEndDate(moment(endDate));
-            $("#filter_date_range_from").val(startDate);
-            $("#filter_date_range_to").val(endDate);
-        }
-
-        if (userIds.length > 0) {
-            $.ajax({
-                url: '/users/list',
-                dataType: 'json',
-                data: { ids: userIds },
-                success: (data) => {
-                    data.forEach(user => {
-                        const option = new Option(user.name, user.id, true, true);
-                        $('#userFilter').append(option);
-                    });
-                    $('#userFilter').trigger('change');
-
-                },
-                error: (xhr, status, error) => {
-                    console.error("Failed to load user data:", error);
-                }
-            });
-        }
-
-
-
+        // Filters removed — dashboard always shows all data
     }
     initSortable() {
         const $container = $("#dashboard-items");

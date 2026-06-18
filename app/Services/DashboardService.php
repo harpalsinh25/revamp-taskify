@@ -27,21 +27,24 @@ class DashboardService
         $endDateInput = $filters['end_date'] ?? null;
         $userIds = $filters['user_ids'] ?? [];
 
-        // Use Carbon to set defaults if inputs are null or invalid
-        $startDate = $startDateInput && Carbon::hasFormat($startDateInput, 'Y-m-d')
+        // Use Carbon to set defaults if inputs are null or invalid.
+        // If both are empty/null, we intentionally leave them null so date filters are skipped.
+        $startDate = ($startDateInput && Carbon::hasFormat($startDateInput, 'Y-m-d'))
             ? $startDateInput
-            : Carbon::now()->subDays(6)->format('Y-m-d');
+            : null;
 
-        $endDate = $endDateInput && Carbon::hasFormat($endDateInput, 'Y-m-d')
+        $endDate = ($endDateInput && Carbon::hasFormat($endDateInput, 'Y-m-d'))
             ? $endDateInput
-            : Carbon::now()->format('Y-m-d');
+            : null;
 
-        // Validate date range (preserve original behaviour of throwing on invalid range)
-        if (Carbon::parse($startDate)->gt(Carbon::parse($endDate))) {
+        // Validate date range only when both are supplied
+        if ($startDate && $endDate && Carbon::parse($startDate)->gt(Carbon::parse($endDate))) {
             throw new \InvalidArgumentException('start_date cannot be after end_date.');
         }
 
-        $dateRangeWithTime = [$startDate . ' 00:00:00', $endDate . ' 23:59:59'];
+        $dateRangeWithTime = ($startDate && $endDate)
+            ? [$startDate . ' 00:00:00', $endDate . ' 23:59:59']
+            : null;
 
         [
             $projectsCount,
@@ -115,8 +118,8 @@ class DashboardService
         ?Workspace $workspace,
         ?User $user,
         array $userIds,
-        string $startDate,
-        string $endDate
+        ?string $startDate,
+        ?string $endDate
     ): array {
         $empty = [
             'projects' => [], 'tasks' => [], 'users' => [],
@@ -295,10 +298,10 @@ class DashboardService
     protected function buildTileCounts(
         ?Workspace $workspace,
         ?User $user,
-        array $dateRangeWithTime,
+        ?array $dateRangeWithTime,
         array $userIds,
-        string $startDate,
-        string $endDate
+        ?string $startDate,
+        ?string $endDate
     ): array {
         $projectsCount = 0;
         $tasksCount = 0;
@@ -328,22 +331,29 @@ class DashboardService
                 });
             };
 
-            $projectsQuery = $workspace->projects()->where($projectOverlapQuery);
-            $tasksQuery = $workspace->tasks()->where($taskOverlapQuery);
-            $meetingsQuery = $workspace->meetings()->whereBetween('created_at', $dateRangeWithTime);
+            // Projects and tasks are NOT filtered by date range — the tile shows ALL records.
+            // Only meetings, clients, todos, and activities respect the date picker.
+            $projectsQuery = $workspace->projects();
+
+            $tasksQuery = $workspace->tasks();
+
+            $meetingsQuery = $workspace->meetings();
+            if ($dateRangeWithTime) {
+                $meetingsQuery->whereBetween('created_at', $dateRangeWithTime);
+            }
 
             if (!isAdminOrHasAllDataAccess()) {
                 // For non-admins, filter by user-specific relationships
                 $projectsQuery = $user && method_exists($user, 'projects')
-                    ? $user->projects()->where($projectOverlapQuery)
+                    ? $user->projects()
                     : $workspace->projects()->whereRaw('1=0');
 
                 $tasksQuery = $user && method_exists($user, 'tasks')
-                    ? $user->tasks()->where($taskOverlapQuery)
+                    ? $user->tasks()
                     : $workspace->tasks()->whereRaw('1=0');
 
                 $meetingsQuery = $user && method_exists($user, 'meetings')
-                    ? $user->meetings()->whereBetween('created_at', $dateRangeWithTime)
+                    ? ($dateRangeWithTime ? $user->meetings()->whereBetween('created_at', $dateRangeWithTime) : $user->meetings())
                     : $workspace->meetings()->whereRaw('1=0');
             }
 
@@ -358,9 +368,9 @@ class DashboardService
             $usersCount = $workspace->users()
                 ->when($userIds, static fn ($query) => $query->whereIn('users.id', $userIds))
                 ->count();
-            $clientsCount = $workspace->clients()
-                ->whereBetween('created_at', $dateRangeWithTime)
-                ->count();
+
+            // Clients — no date filter, show all
+            $clientsCount = $workspace->clients()->count();
             $meetingsCount = $meetingsQuery->count();
         }
 
@@ -381,15 +391,13 @@ class DashboardService
      * @param  array<int,int>  $userIds
      * @return int
      */
-    protected function countTodos(?Workspace $workspace, array $dateRangeWithTime, array $userIds): int
+    protected function countTodos(?Workspace $workspace, ?array $dateRangeWithTime, array $userIds): int
     {
         if (!$workspace || !method_exists($workspace, 'todos')) {
             return 0;
         }
 
         return $workspace->todos()
-            ->whereBetween('created_at', $dateRangeWithTime)
-            ->when($userIds, static fn ($query) => $query->whereIn('creator_id', $userIds))
             ->count();
     }
 
@@ -397,19 +405,23 @@ class DashboardService
      * Build todos list collection for the authenticated user.
      *
      * @param  User|null  $user
-     * @param  array{0:string,1:string}  $dateRangeWithTime
+     * @param  array{0:string,1:string}|null  $dateRangeWithTime
      * @param  array<int,int>  $userIds
      * @return \Illuminate\Support\Collection<int,array<string,mixed>>
      */
-    protected function buildTodos(?User $user, array $dateRangeWithTime, array $userIds): Collection
+    protected function buildTodos(?User $user, ?array $dateRangeWithTime, array $userIds): Collection
     {
-        if (!$user || !method_exists($user, 'todos')) {
+        if (!$user) {
             return collect();
         }
 
-        return $user->todos()
-            ->whereBetween('created_at', $dateRangeWithTime)
-            ->when($userIds, static fn ($query) => $query->whereIn('creator_id', $userIds))
+        // Use workspace todos so ALL todos appear, not just the logged-in user's own
+        $workspace = \App\Models\Workspace::find(getWorkspaceId());
+        if (!$workspace || !method_exists($workspace, 'todos')) {
+            return collect();
+        }
+
+        return $workspace->todos()
             ->orderBy('is_completed', 'asc')
             ->orderBy('created_at', 'desc')
             ->get()
@@ -427,19 +439,17 @@ class DashboardService
      * Build recent activities collection for the workspace.
      *
      * @param  Workspace|null  $workspace
-     * @param  array{0:string,1:string}  $dateRangeWithTime
+     * @param  array{0:string,1:string}|null  $dateRangeWithTime
      * @param  array<int,int>  $userIds
      * @return \Illuminate\Support\Collection<int,array<string,mixed>>
      */
-    protected function buildActivities(?Workspace $workspace, array $dateRangeWithTime, array $userIds): Collection
+    protected function buildActivities(?Workspace $workspace, ?array $dateRangeWithTime, array $userIds): Collection
     {
         if (!$workspace || !method_exists($workspace, 'activity_logs')) {
             return collect();
         }
 
         return $workspace->activity_logs()
-            ->whereBetween('created_at', $dateRangeWithTime)
-            ->when($userIds, static fn ($query) => $query->whereIn('actor_id', $userIds))
             ->orderBy('id', 'desc')
             ->limit(10)
             ->get()
@@ -469,8 +479,8 @@ class DashboardService
         ?Workspace $workspace,
         ?User $user,
         array $userIds,
-        string $startDate,
-        string $endDate
+        ?string $startDate,
+        ?string $endDate
     ): array {
         $projectData = [];
         $taskData = [];
@@ -524,21 +534,20 @@ class DashboardService
         };
 
         foreach ($statuses as $status) {
+            // Status charts count ALL projects/tasks (no date filter) so the donut total matches the tile.
             $projectStatusQuery = $workspace->projects()
-                ->where('status_id', $status->id)
-                ->where($projectOverlapQuery);
+                ->where('status_id', $status->id);
 
             $taskStatusQuery = $workspace->tasks()
-                ->where('status_id', $status->id)
-                ->where($taskOverlapQuery);
+                ->where('status_id', $status->id);
 
             if (!isAdminOrHasAllDataAccess()) {
                 $projectStatusQuery = $user && method_exists($user, 'projects')
-                    ? $user->projects()->where('status_id', $status->id)->where($projectOverlapQuery)
+                    ? $user->projects()->where('status_id', $status->id)
                     : $workspace->projects()->whereRaw('1=0');
 
                 $taskStatusQuery = $user && method_exists($user, 'tasks')
-                    ? $user->tasks()->where('status_id', $status->id)->where($taskOverlapQuery)
+                    ? $user->tasks()->where('status_id', $status->id)
                     : $workspace->tasks()->whereRaw('1=0');
             }
 
@@ -577,26 +586,20 @@ class DashboardService
      * @param  array<int,int>  $userIds
      * @return array<int,int>
      */
-    protected function buildTodoStatusData(?Workspace $workspace, array $dateRangeWithTime, array $userIds): array
+    protected function buildTodoStatusData(?Workspace $workspace, ?array $dateRangeWithTime, array $userIds): array
     {
         if (!$workspace || !method_exists($workspace, 'todos')) {
             return [0, 0];
         }
 
         $completed = $workspace->todos()
-            ->whereBetween('created_at', $dateRangeWithTime)
-            ->when($userIds, static fn ($query) => $query->whereIn('creator_id', $userIds))
             ->where('is_completed', true)
             ->count();
 
         $pending = $workspace->todos()
-            ->whereBetween('created_at', $dateRangeWithTime)
-            ->when($userIds, static fn ($query) => $query->whereIn('creator_id', $userIds))
             ->where('is_completed', false)
             ->count();
 
         return [$completed, $pending];
     }
 }
-
-
