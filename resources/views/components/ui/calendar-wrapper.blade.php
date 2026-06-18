@@ -13,7 +13,7 @@
 
 <!-- Mobile Sidebar Toggle -->
 <div class="d-md-none mb-3">
-    <button class="btn btn-secondary w-100 d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#calendarSidebarOffcanvas" aria-controls="calendarSidebarOffcanvas">
+    <button class="btn btn-secondary d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#calendarSidebarOffcanvas" aria-controls="calendarSidebarOffcanvas">
         <i class="bx bx-menu me-2"></i> Toggle Filters & Options
     </button>
 </div>

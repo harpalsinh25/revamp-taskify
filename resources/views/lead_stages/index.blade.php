@@ -43,7 +43,7 @@
 
                     </div>
                 </div>
-                <div class="card-datatable table-responsive text-nowrap">
+                <div class="card-datatable table-responsive text-nowrap ">
                         <input type="hidden" id="data_type" value="lead-stages">
                         <input type="hidden" id="save_column_visibility">
                         <table id="table" data-toggle="table" data-loading-template="loadingTemplate"

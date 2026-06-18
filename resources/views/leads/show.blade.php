@@ -26,7 +26,7 @@
             </div>
             
             <!-- Right Side: Actions -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center ">
                 <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="{{ get_label('update', 'Update') }}">
                     <i class="bx bx-edit-alt"></i> {{ get_label('update', 'Update') }}
                 </a>
