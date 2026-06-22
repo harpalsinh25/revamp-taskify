@@ -4,888 +4,389 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="align-items-center d-flex justify-content-between mb-2 mt-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url('home') }}">
-                                <?= get_label('home', 'Home') ?>
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{{ url(getUserPreferences('tasks', 'default_view')) }}">
-                                <?= get_label('tasks', 'Tasks') ?>
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            {{ $task->title }}
-                        </li>
-                    </ol>
-                </nav>
+    <header class="tk-proj-head mt-4 mb-4">
+        <div class="tk-proj-headmain">
+            <div class="tk-proj-eyebrow mono">
+                <span class="kcol-dot kcol-dot-{{ $task->status->color }}"></span>
+                {{ strtoupper(str_replace(' ', '-', $task->project ? $task->project->title : get_label('task', 'Task'))) }}@if(count($task->project?->clients ?? []) > 0) · {{ strtoupper($task->project->clients->first()->first_name.' '.$task->project->clients->first()->last_name) }}@endif
             </div>
-            <div>
+            <h1 class="tk-proj-title">
+                {{ $task->title }}
+                <a href="javascript:void(0);" class="tk-proj-ic mx-1">
+                    <i class='bx {{ getFavoriteStatus($task->id) ? "bxs" : "bx" }}-star favorite-icon text-warning' data-id="{{ $task->id }}" data-type="tasks" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getFavoriteStatus($task->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}" data-favorite="{{ getFavoriteStatus($task->id) ? 1 : 0 }}"></i>
+                </a>
+                <a href="javascript:void(0);" class="tk-proj-ic">
+                    <i class='bx {{ getPinnedStatus($task->id, \App\Models\Task::class) ? "bxs" : "bx" }}-pin pinned-icon text-success' data-id="{{ $task->id }}" data-type="tasks" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ getPinnedStatus($task->id, \App\Models\Task::class) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}" data-pinned="{{ getPinnedStatus($task->id, \App\Models\Task::class) }}" data-require_reload="0"></i>
+                </a>
+            </h1>
+            <div class="tk-proj-meta">
+                @if($task->due_date)
+                <span><x-tk-icon name="calendar" size="13" /> {{ get_label('due', 'Due') }} {{ format_date($task->due_date) }}</span>
+                @endif
+                @if($task->priority)
+                <span class="text-{{ $task->priority->color }}">● {{ $task->priority->title }}</span>
+                @endif
+                @if ($task->completion_percentage != null)
+                <span><x-tk-icon name="check" size="13" /> {{ $task->completion_percentage }}%</span>
+                @endif
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h2 class="fw-bold">{{ $task->title }}
-                                    <a href="javascript:void(0);" class="mx-2">
-                                        <i class='bx {{ getFavoriteStatus($task->id) ? ' bxs' : 'bx' }}-star favorite-icon text-warning'
-                                            data-id="{{ $task->id }}" data-type="tasks" data-bs-toggle="tooltip"
-                                            data-bs-placement="right"
-                                            data-bs-original-title="{{ getFavoriteStatus($task->id) ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}"
-                                            data-favorite="{{ getFavoriteStatus($task->id) ? 1 : 0 }}"></i>
-                                    </a>
-                                    <a href="javascript:void(0);">
-                                        <i class='bx {{ getPinnedStatus($task->id, \App\Models\Task::class) ? ' bxs' : 'bx' }}-pin pinned-icon text-success'
-                                            data-id="{{ $task->id }}" data-type="tasks" data-bs-toggle="tooltip"
-                                            data-bs-placement="right"
-                                            data-bs-original-title="{{ getPinnedStatus($task->id, \App\Models\Task::class) ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}"
-                                            data-pinned="{{ getPinnedStatus($task->id, \App\Models\Task::class) }}"
-                                            data-require_reload="0"></i>
-                                    </a>
-                                </h2>
+        <div class="tk-proj-headside">
+            <span class="av-stack tk-av-stack">
+                @php $hu = $task->users; $huCount = $hu->count(); $huShown = 0; @endphp
+                @foreach($hu as $u)
+                    @if($huShown < 4)
+                    <a href="{{ url('/users/profile/' . $u->id) }}" class="av" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ $u->first_name }} {{ $u->last_name }}">
+                        <img src="{{ $u->photo ? asset('storage/' . $u->photo) : asset('storage/photos/no-image.jpg') }}" loading="lazy" onerror="this.onerror=null;this.src='{{ asset('storage/photos/no-image.jpg') }}'" alt="{{ $u->first_name }}">
+                    </a>
+                    @php $huShown++; @endphp
+                    @endif
+                @endforeach
+                @if($huCount > 4) <span class="av av-more">+{{ $huCount - 4 }}</span> @endif
+            </span>
+            <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary edit-task update-users-clients" data-id="{{ $task->id }}">
+                <x-tk-icon name="users" /> {{ get_label('users', 'Users') }}
+            </a>
+        </div>
+    </header>    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body">
+                    
+                    @php
+                        use Carbon\Carbon;
+                        $fromDate = $task->start_date ? Carbon::parse($task->start_date) : null;
+                        $toDate = $task->due_date ? Carbon::parse($task->due_date) : null;
+                        if ($fromDate && $toDate) {
+                            $duration = $fromDate->diffInDays($toDate) + 1;
+                            $durationText = $duration . ' ' . ($duration > 1 ? get_label('days', 'days') : get_label('day', 'day'));
+                        } else {
+                            $durationText = '-';
+                        }
+                    @endphp
 
-                                @if ($task->completion_percentage != null)
-                                    <div class="progress h-2vh">
-                                        @php
-                                            $progressBarClass = '';
-                                            if ($task->completion_percentage > 75) {
-                                                $progressBarClass = 'bg-success';
-                                            } elseif ($task->completion_percentage > 50) {
-                                                $progressBarClass = 'bg-warning';
-                                            } elseif ($task->completion_percentage > 25) {
-                                                $progressBarClass = 'bg-info';
-                                            } else {
-                                                $progressBarClass = 'bg-danger';
-                                            }
-                                        @endphp
-                                        <div role="progressbar"
-                                            class="progress-bar progress-bar-striped progress-bar-animated {{ $progressBarClass }}"
-                                            role="progressbar" style="width: {{ $task->completion_percentage }}%;"
-                                            aria-valuenow="{{ $task->completion_percentage }}" aria-valuemin="0"
-                                            aria-valuemax="100">
-                                            {{ get_label('completion_percentage', 'Completion Percentage') }} :
-                                            {{ $task->completion_percentage }}%
+                    <!-- Top Info Grid: Status, Priority, Due Date -->
+                    <div class="row mb-4 g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded d-flex align-items-center justify-content-between h-100">
+                                <div>
+                                    <h6 class="mb-2 text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;"><?= get_label('status', 'Status') ?></h6>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <x-badges.status-pill :status="$task->status->color">{{$task->status->title}}</x-badges.status-pill>
+                                        @if($task->note)
+                                        <div class="ms-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{$task->note}}">
+                                            <x-tk-icon name="note" size="15" />
                                         </div>
-                                    </div>
-                                @endif
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mt-3">
-                                        <label class="form-label" for="start_date">
-                                            <?= get_label('users', 'Users') ?>
-                                        </label>
-                                        <?php
-                                                                                                                    $users = $task->users;
-                                                                                                                    $clients = $task->project->clients;
-                                                                                                                    if (count($users) > 0) { ?>
-                                        <ul
-                                            class="list-unstyled users-list avatar-group d-flex align-items-center m-0 flex-wrap">
-                                            @foreach ($users as $user)
-                                                <li class="avatar avatar-sm pull-up"
-                                                    title="{{ $user->first_name }} {{ $user->last_name }}"><a
-                                                        href="{{ url('/users/profile/' . $user->id) }}">
-                                                        <img src="{{ $user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg') }}"
-                                                            class="rounded-circle"
-                                                            alt="{{ $user->first_name }} {{ $user->last_name }}">
-                                                    </a></li>
-                                            @endforeach
-                                            <a href="javascript:void(0)"
-                                                class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-task update-users-clients"
-                                                data-id="{{ $task->id }}"><span class="bx bx-edit"></span></a>
-                                        </ul>
-                                        <?php } else { ?>
-                                        <p><span class="badge bg-primary">
-                                                <?= get_label('not_assigned', 'Not assigned') ?>
-                                            </span><a href="javascript:void(0)"
-                                                class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-task update-users-clients"
-                                                data-id="{{ $task->id }}"><span class="bx bx-edit"></span></a></p>
-                                        <?php } ?>
-                                    </div>
-                                    <div class="col-md-6 mb-3 mt-3">
-                                        <label class="form-label" for="end_date">
-                                            <?= get_label('clients', 'Clients') ?>
-                                        </label>
-                                        <?php
-                                                                                                                    if (count($clients) > 0) { ?>
-                                        <ul
-                                            class="list-unstyled users-list avatar-group d-flex align-items-center m-0 flex-wrap">
-                                            @foreach ($clients as $client)
-                                                <li class="avatar avatar-sm pull-up"
-                                                    title="{{ $client->first_name }} {{ $client->last_name }}"><a
-                                                        href="{{ url('/clients/profile/' . $client->id) }}">
-                                                        <img src="{{ $client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg') }}"
-                                                            class="rounded-circle"
-                                                            alt="{{ $client->first_name }} {{ $client->last_name }}">
-                                                    </a></li>
-                                            @endforeach
-                                        </ul>
-                                        <?php } else { ?>
-                                        <p><span class="badge bg-primary">
-                                                <?= get_label('not_assigned', 'Not assigned') ?>
-                                            </span>
-                                        </p>
-                                        <?php } ?>
-                                    </div>
-                                    <div class="col-md-{{ $task->note ? '7' : '6' }} mb-3">
-                                        <label class="form-label">
-                                            <?= get_label('status', 'Status') ?>
-                                        </label>
-                                        <div class="d-flex align-items-center">
-                                            <select
-                                                class="form-select form-select-sm select-bg-label-{{ $task->status->color }}"
-                                                id="statusSelect" data-id="{{ $task->id }}"
-                                                data-original-status-id="{{ $task->status->id }}"
-                                                data-original-color-class="select-bg-label-{{ $task->status->color }}"
-                                                data-type="task">
-                                                @foreach ($statuses as $status)
-                                                    @php
-                                                        $disabled = canSetStatus($status) ? '' : 'disabled';
-                                                    @endphp
-                                                    <option value="{{ $status->id }}"
-                                                        class="badge bg-label-{{ $status->color }}"
-                                                        {{ $task->status->id == $status->id ? 'selected' : '' }}
-                                                        {{ $disabled }}>
-                                                        {{ $status->title }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            @if ($task->note)
-                                                <i class="bx bx-notepad text-primary ms-1" data-bs-toggle="tooltip"
-                                                    data-bs-offset="0,4" data-bs-placement="top" title=""
-                                                    data-bs-original-title="{{ $task->note }}"></i>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <div class="col-md-{{ $task->note ? '5' : '6' }} mb-3">
-                                        <label for="prioritySelect" class="form-label">
-                                            <?= get_label('priority', 'Priority') ?>
-                                        </label>
-                                        <select
-                                            class="form-select form-select-sm select-bg-label-{{ $task->priority ? $task->priority->color : 'secondary' }}"
-                                            id="prioritySelect" data-id="{{ $task->id }}"
-                                            data-original-priority-id="{{ $task->priority ? $task->priority->id : '' }}"
-                                            data-original-color-class="select-bg-label-{{ $task->priority ? $task->priority->color : 'secondary' }}"
-                                            data-type="task">
-                                            <option value="" class="badge bg-label-secondary">-</option>
-                                            @foreach ($priorities as $priority)
-                                                <option value="{{ $priority->id }}"
-                                                    class="badge bg-label-{{ $priority->color }}"
-                                                    {{ $task->priority && $task->priority->id == $priority->id ? 'selected' : '' }}>
-                                                    {{ $priority->title }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="my-0" />
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="row">
-                                <!-- Project Card -->
-                                <div class="col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="card-title d-flex align-items-start justify-content-between">
-                                                <div class="avatar flex-shrink-0">
-                                                    <i class="menu-icon tf-icons bx bx-briefcase bx-md text-info"></i>
-                                                </div>
-                                            </div>
-                                            <span class="fw-semibold d-block mb-1">
-                                                <?= get_label('project', 'Project') ?>
-                                            </span>
-                                            <h3 class="card-title mb-2">
-                                                @if (isset($task->project) && checkPermission('manage_projects'))
-                                                    <a href="{{ url('projects/information/' . $task->project->id) }}"
-                                                        class="text-decoration-none">
-                                                        {{ $task->project->title }}
-                                                    </a>
-                                                @else
-                                                    {{ $task->project->title ?? '-' }}
-                                                @endif
-                                            </h3>
-
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Starts at Card -->
-                                <div class="col-lg-4 col-md-12 col-6 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="card-title d-flex align-items-start justify-content-between">
-                                                <div class="avatar flex-shrink-0">
-                                                    <i
-                                                        class="menu-icon tf-icons bx bx-calendar-check bx-md text-success"></i>
-                                                </div>
-                                            </div>
-                                            <span class="fw-semibold d-block mb-1">
-                                                <?= get_label('starts_at', 'Starts at') ?>
-                                            </span>
-                                            <h3 class="card-title mb-2">{{ format_date($task->start_date) }}</h3>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Ends at Card -->
-                                <div class="col-lg-4 col-md-12 col-6 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="card-title d-flex align-items-start justify-content-between">
-                                                <div class="avatar flex-shrink-0">
-                                                    <i class="menu-icon tf-icons bx bx-calendar-x bx-md text-danger"></i>
-                                                </div>
-                                            </div>
-                                            <span class="fw-semibold d-block mb-1">
-                                                <?= get_label('ends_at', 'Ends at') ?>
-                                            </span>
-                                            <h3 class="card-title mb-2">{{ format_date($task->due_date) }}</h3>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Duration Card -->
-                                <div class="col-lg-4 col-md-12 col-6 mb-4">
-                                    @php
-                                        use Carbon\Carbon;
-                                        $fromDate = $task->start_date ? Carbon::parse($task->start_date) : null;
-                                        $toDate = $task->due_date ? Carbon::parse($task->due_date) : null;
-                                        $durationText =
-                                            $fromDate && $toDate
-                                                ? $fromDate->diffInDays($toDate) +
-                                                    1 .
-                                                    ' day' .
-                                                    ($fromDate->diffInDays($toDate) > 1 ? 's' : '')
-                                                : '-';
-                                    @endphp
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="card-title d-flex align-items-start justify-content-between">
-                                                <div class="avatar flex-shrink-0">
-                                                    <i class="menu-icon tf-icons bx bx-time bx-md text-primary"></i>
-                                                </div>
-                                            </div>
-                                            <span class="fw-semibold d-block mb-1">
-                                                <?= get_label('duration', 'Duration') ?>
-                                            </span>
-                                            <h3 class="card-title mb-2">{{ $durationText }}</h3>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Description Card-->
-                            <div class="col-md-12 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="card-title">
-                                            <h5>
-                                                <?= get_label('description', 'Description') ?>
-                                            </h5>
-                                        </div>
-                                        <p>
-                                            <!-- Add your project description here -->
-                                            <?= filled($task->description) ? $task->description : '-' ?>
-                                        </p>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- Task Remider Card-->
-                            <div class="col-md-12 mb-4">
-                                <div class="shadow-sm">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <div class="card-title">
-                                            <h5>{{ get_label('reminder_details', 'Reminders Details') }}</h5>
-                                        </div>
-                                        <span
-                                            class="badge {{ $task->reminders->first()?->is_active ? 'bg-success' : 'bg-danger' }}">
-                                            {{ $task->reminders->first()?->is_active ? get_label('active', 'Active') : get_label('inactive', 'Inactive') }}
-                                        </span>
-                                    </div>
-                                    @if ($task->reminders->isNotEmpty())
-                                        <div class="card-body">
-                                            @php
-                                                $reminder = $task->reminders->first();
-                                                $frequencyType = ucfirst($reminder->frequency_type);
-                                                $timeOfDay = \Carbon\Carbon::parse($reminder->time_of_day)->format(
-                                                    'h:i A',
-                                                );
-                                            @endphp
-
-                                            <div class="row">
-
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label('frequency', 'Frequency') }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            @switch($reminder->frequency_type)
-                                                                @case('daily')
-                                                                    <i class="bx bx-time text-dark me-1"></i>
-                                                                    {{ get_label('daily_at', 'Daily at') }} {{ $timeOfDay }}
-                                                                @break
-
-                                                                @case('weekly')
-                                                                    <i class="bx bx-calendar text-dark me-1"></i>
-                                                                    @php
-                                                                        $dayNames = [
-                                                                            1 => 'Monday',
-                                                                            2 => 'Tuesday',
-                                                                            3 => 'Wednesday',
-                                                                            4 => 'Thursday',
-                                                                            5 => 'Friday',
-                                                                            6 => 'Saturday',
-                                                                            7 => 'Sunday',
-                                                                        ];
-                                                                        $dayName = $reminder->day_of_week
-                                                                            ? get_label(
-                                                                                strtolower(
-                                                                                    $dayNames[$reminder->day_of_week],
-                                                                                ),
-                                                                                $dayNames[$reminder->day_of_week],
-                                                                            )
-                                                                            : get_label('any_day', 'Any Day');
-                                                                    @endphp
-                                                                    {{ get_label('weekly_on', 'Weekly on') }} {{ $dayName }}
-                                                                    {{ get_label('at', 'at') }} {{ $timeOfDay }}
-                                                                @break
-
-                                                                @case('monthly')
-                                                                    <i class="bx bx-calendar-alt text-dark me-1"></i>
-                                                                    @php
-                                                                        $dayOfMonth =
-                                                                            $reminder->day_of_month ?:
-                                                                            get_label('any_day', 'Any Day');
-                                                                        if (is_numeric($dayOfMonth)) {
-                                                                            $dayOfMonth .= date(
-                                                                                'S',
-                                                                                mktime(0, 0, 0, 1, $dayOfMonth, 2000),
-                                                                            ); // Adds st, nd, rd, th
-                                                                        }
-                                                                    @endphp
-                                                                    {{ get_label('monthly_on_the', 'Monthly on the') }}
-                                                                    {{ $dayOfMonth }}
-                                                                    {{ get_label('at', 'at') }} {{ $timeOfDay }}
-                                                                @break
-                                                            @endswitch
-                                                        </p>
-                                                    </div>
-
-                                                    @if ($reminder->last_sent_at)
-                                                        <div class="mb-3">
-                                                            <label
-                                                                class="form-label">{{ get_label(
-                                                                    'last_reminder_sent',
-                                                                    'Last
-                                                                                                                    Reminder Sent',
-                                                                ) }}</label>
-                                                            <p class="form-control mb-0" readonly>
-                                                                <i class='bx bxs-alarm-add text-primary me-1'></i>
-                                                                {{ \Carbon\Carbon::parse($reminder->last_sent_at)->diffForHumans() }}
-                                                            </p>
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label('created_on', 'Created On') }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            <i class='bx bxs-calendar-event text-danger me-1'></i>
-                                                            {{ format_date($reminder->created_at) }}
-                                                        </p>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label('last_updated', 'Last Updated') }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            <i class='bx bx-calendar text-warning me-1'></i>
-                                                            {{ format_date($reminder->updated_at, true) }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="card-body">
-                                            <p class="text-muted mb-0">
-                                                <i class="fas fa-bell-slash me-2"></i>
-                                                {{ get_label('no_reminders_set', 'No reminders set for this task') }}
-                                            </p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-
-
-                            <!-- Recurring Task-->
-                            <div class="col-md-12 mb-4">
-                                <div class="shadow-sm">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <div class="card-title">
-                                            <h5>{{ get_label('recurrence_details', 'Recurrence Details') }}</h5>
-                                        </div>
-                                        <span
-                                            class="badge {{ $task->recurringTask?->is_active ? 'bg-success' : 'bg-danger' }}">
-                                            {{ $task->recurringTask?->is_active ? get_label('active', 'Active') : get_label('inactive', 'Inactive') }}
-                                        </span>
-                                    </div>
-                                    @if ($task->recurringTask)
-                                        <div class="card-body">
-                                            @php
-                                                $recurringTask = $task->recurringTask;
-                                                $frequencyType = ucfirst($recurringTask->frequency);
-
-                                            @endphp
-
-                                            <div class="row">
-
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label('frequency', 'Frequency') }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            @switch($recurringTask->frequency)
-                                                                @case('daily')
-                                                                    <i class="bx bx-time text-dark me-1"></i>
-                                                                    {{ get_label('daily_at', 'Daily at') }} {{ '00:00' }}
-                                                                @break
-
-                                                                @case('weekly')
-                                                                    <i class="bx bx-calendar text-dark me-1"></i>
-                                                                    @php
-                                                                        $dayNames = [
-                                                                            1 => 'Monday',
-                                                                            2 => 'Tuesday',
-                                                                            3 => 'Wednesday',
-                                                                            4 => 'Thursday',
-                                                                            5 => 'Friday',
-                                                                            6 => 'Saturday',
-                                                                            7 => 'Sunday',
-                                                                        ];
-                                                                        $dayName = $recurringTask->day_of_week
-                                                                            ? get_label(
-                                                                                strtolower(
-                                                                                    $dayNames[
-                                                                                        $recurringTask->day_of_week
-                                                                                    ],
-                                                                                ),
-                                                                                $dayNames[$recurringTask->day_of_week],
-                                                                            )
-                                                                            : get_label('any_day', 'Any Day');
-                                                                    @endphp
-                                                                    {{ get_label('weekly_on', 'Weekly on') }} {{ $dayName }}
-                                                                    {{ get_label('at', 'at') }} {{ '00:00' }}
-                                                                @break
-
-                                                                @case('monthly')
-                                                                    <i class="bx bx-calendar-alt text-dark me-1"></i>
-                                                                    @php
-                                                                        $dayOfMonth =
-                                                                            $recurringTask->day_of_month ?:
-                                                                            get_label('any_day', 'Any Day');
-                                                                        if (is_numeric($dayOfMonth)) {
-                                                                            $dayOfMonth .= date(
-                                                                                'S',
-                                                                                mktime(0, 0, 0, 1, $dayOfMonth, 2000),
-                                                                            ); // Adds st, nd, rd, th
-                                                                        }
-                                                                    @endphp
-                                                                    {{ get_label('monthly_on_the', 'Monthly on the') }}
-                                                                    {{ $dayOfMonth }}
-                                                                    {{ get_label('at', 'at') }} {{ '00:00' }}
-                                                                @break
-
-                                                                @case('yearly')
-                                                                    <i class="bx bx-calendar-alt text-dark me-1"></i>
-                                                                    @php
-                                                                        $dayOfMonth =
-                                                                            $recurringTask->day_of_month ?:
-                                                                            get_label('any_day', 'Any Day');
-                                                                        if (is_numeric($dayOfMonth)) {
-                                                                            $dayOfMonth .= date(
-                                                                                'S',
-                                                                                mktime(0, 0, 0, 1, $dayOfMonth, 2000),
-                                                                            ); // Adds st, nd, rd, th
-                                                                        }
-                                                                    @endphp
-                                                                    {{ get_label('yearly_on_the', 'Yearly on the') }}
-                                                                    {{ $dayOfMonth }}
-                                                                    {{ get_label('of', 'of') }}
-                                                                    {{ \Carbon\Carbon::create()->month($recurringTask->month_of_year)->format('F') }}
-                                                                    {{ get_label('at', 'at') }} {{ '00:00' }}
-                                                                @break
-                                                            @endswitch
-                                                        </p>
-                                                    </div>
-
-                                                    @if ($recurringTask->starts_from)
-                                                        <div class="mb-3">
-                                                            <label
-                                                                class="form-label">{{ get_label('starts_from', 'Starts From') }}</label>
-                                                            <p class="form-control mb-0" readonly>
-                                                                <i class='bx bxs-alarm-add text-primary me-1'></i>
-                                                                {{ format_date($recurringTask->starts_from) }}
-                                                            </p>
-                                                        </div>
-                                                    @endif
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label('completed_occurrences', 'Completed Occurrences') }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            <i class='bx bxs-analyse text-success me-1'></i>
-                                                            {{ $recurringTask->completed_occurrences ?? 0 }}
-                                                            {{ get_label('completed_occurances', 'Completed Occurrences') }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-
-
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label('created_on', 'Created On') }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            <i class='bx bxs-calendar-event text-danger me-1'></i>
-                                                            {{ format_date($recurringTask->created_at, true) }}
-                                                        </p>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label('last_updated', 'Last Updated') }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            <i class='bx bx-calendar text-warning me-1'></i>
-                                                            {{ format_date($recurringTask->updated_at, true) }}
-                                                        </p>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label
-                                                            class="form-label">{{ get_label(
-                                                                'number_of_occurrences',
-                                                                'Number
-                                                                                                                of Occurrences',
-                                                            ) }}</label>
-                                                        <p class="form-control mb-0" readonly>
-                                                            <i class='bx bxs-analyse text-primary me-1'></i>
-                                                            {{ $recurringTask->number_of_occurrences }}
-                                                            {{ get_label('number_of_occurances', 'Number of Occurrences') }}
-                                                        </p>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="card-body">
-                                            <p class="text-muted mb-0">
-                                                <i class="fas fa-bell-slash me-2"></i>
-                                                {{ get_label('no_recurrence_set', 'No recurrence set for this task') }}
-                                            </p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-
-
-
-                            <!-- Custom Fields Card -->
-                            <div class="col-md-12 mb-4">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="card-title mb-0">{{ get_label('additional_fields', 'Additional Fields') }}
-                                        </h5>
-                                    </div>
-                                    <div class="card-body">
-                                        @php
-                                            $hasValues = false;
-                                            foreach ($customFields as $field) {
-                                                if ($task->getCustomFieldValue($field->id)) {
-                                                    $hasValues = true;
-                                                    break;
-                                                }
-                                            }
-                                        @endphp
-
-                                        @if ($customFields->isNotEmpty())
-                                            @if ($hasValues)
-                                                <div class="row">
-                                                    @foreach ($customFields as $field)
-                                                        @php
-                                                            $fieldValue = $task->getCustomFieldValue($field->id);
-                                                        @endphp
-                                                        @if ($fieldValue)
-                                                            <div class="col-md-6 mb-3">
-                                                                <label
-                                                                    class="form-label">{{ $field->field_label }}</label>
-
-                                                                @switch($field->field_type)
-                                                                    @case('text')
-                                                                    @case('number')
-
-                                                                    @case('password')
-                                                                    @case('email')
-                                                                        <input class="form-control" value="{{ $fieldValue }}"
-                                                                            readonly>
-                                                                    @break
-
-                                                                    @case('textarea')
-                                                                        <textarea class="form-control" readonly>{{ $fieldValue }}</textarea>
-                                                                    @break
-
-                                                                    @case('select')
-                                                                    @case('radio')
-                                                                        @php
-                                                                            $options = json_decode(
-                                                                                $field->options,
-                                                                                true,
-                                                                            );
-                                                                            $currentValue = $fieldValue;
-                                                                        @endphp
-                                                                        @if ($field->field_type == 'select')
-                                                                            <select class="form-control" disabled>
-                                                                                <option value="">Select an option</option>
-                                                                                @foreach ($options as $option)
-                                                                                    <option value="{{ $option }}"
-                                                                                        {{ $currentValue == $fieldValue ? 'selected' : '' }}>
-                                                                                        {{ $option }}
-                                                                                    </option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                        @else
-                                                                            <div>
-                                                                                @foreach ($options as $option)
-                                                                                    <div class="form-check">
-                                                                                        <input class="form-check-input"
-                                                                                            type="radio"
-                                                                                            value="{{ $option }}"
-                                                                                            {{ $currentValue == $option ? 'checked' : '' }}
-                                                                                            disabled>
-                                                                                        <label class="form-check-label">
-                                                                                            {{ $option }}
-                                                                                        </label>
-                                                                                    </div>
-                                                                                @endforeach
-                                                                            </div>
-                                                                        @endif
-                                                                    @break
-
-                                                                    @case('date')
-                                                                        <input type="form-control"
-                                                                            value="{{ $fieldValue ? $fieldValue : '' }}"
-                                                                            readonly>
-                                                                    @break
-
-                                                                    @case('checkbox')
-                                                                        @php
-                                                                            $options =
-                                                                                json_decode($field->options, true) ??
-                                                                                [];
-                                                                            $currentValues = $fieldValue
-                                                                                ? json_decode($fieldValue, true)
-                                                                                : [];
-                                                                            if (!is_array($currentValues)) {
-                                                                                $currentValues = [$currentValues];
-                                                                            }
-                                                                        @endphp
-                                                                        <div class="form-group">
-                                                                            @foreach ($options as $option)
-                                                                                <div class="form-check">
-                                                                                    <input class="form-check-input"
-                                                                                        type="checkbox"
-                                                                                        value="{{ $option }}"
-                                                                                        {{ in_array($option, $currentValues) ? 'checked' : '' }}
-                                                                                        disabled>
-                                                                                    <label class="form-check-label">
-                                                                                        {{ $option }}
-                                                                                    </label>
-                                                                                </div>
-                                                                            @endforeach
-                                                                        </div>
-                                                                    @break
-
-                                                                    @case('file')
-                                                                        @if ($fieldValue)
-                                                                            <div>
-                                                                                <a href="{{ asset('storage/' . $fieldValue) }}"
-                                                                                    target="_blank"
-                                                                                    class="btn btn-sm btn-outline-primary">
-                                                                                    <i class="bi bx-file"></i> View File
-                                                                                </a>
-                                                                            </div>
-                                                                        @else
-                                                                            <p class="text-muted mb-0">No file uploaded</p>
-                                                                        @endif
-                                                                    @break
-
-                                                                    @case('color')
-                                                                        <div class="d-flex align-items-center">
-                                                                            <div class="me-2"
-                                                                                style="width: 25px; height: 25px; background-color: {{ $fieldValue ?? '#FFFFFF' }}; border: 1px solid #ddd; border-radius: 4px;">
-                                                                            </div>
-                                                                            <input type="text" class="form-control"
-                                                                                value="{{ $fieldValue }}" readonly>
-                                                                        </div>
-                                                                    @break
-                                                                @endswitch
-
-                                                                @if ($field->guide_text)
-                                                                    <small
-                                                                        class="form-text text-muted">{{ $field->guide_text }}</small>
-                                                                @endif
-                                                            </div>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <p class="text-muted mb-0">
-                                                    <i class="bi bx-info-circle me-1"></i>
-                                                    {{ get_label('no_custom_fields', 'No custom fields for this task') }}
-                                                </p>
-                                            @endif
-                                        @else
-                                            <p class="text-muted mb-0">
-                                                <i class="bx bx-info-circle me-1"></i>
-                                                {{ get_label('no_custom_fields', 'No custom fields defined') }}
-                                            </p>
                                         @endif
                                     </div>
                                 </div>
+                                <i class="bx bx-loader-circle fs-2 text-secondary opacity-50"></i>
                             </div>
-
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded d-flex align-items-center justify-content-between h-100">
+                                <div>
+                                    <h6 class="mb-2 text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;"><?= get_label('priority', 'Priority') ?></h6>
+                                    @if($task->priority)
+                                    <x-badges.badge tone="{{$task->priority->color}}">{{$task->priority->title}}</x-badges.badge>
+                                    @else
+                                    <x-badges.badge>-</x-badges.badge>
+                                    @endif
+                                </div>
+                                <i class="bx bx-error-circle fs-2 text-secondary opacity-50"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded d-flex align-items-center justify-content-between h-100">
+                                <div>
+                                    <h6 class="mb-2 text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;"><?= get_label('due_date', 'Due Date') ?></h6>
+                                    <span class="fw-bold fs-6">{{ $task->due_date ? format_date($task->due_date) : '-' }}</span>
+                                </div>
+                                <i class="bx bx-calendar-exclamation fs-2 text-secondary opacity-50"></i>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Timeline Grid: Starts At, Ends At, Duration -->
+                    <div class="row mb-4 g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded d-flex align-items-center h-100">
+                                <div class="bg-label-primary rounded p-2 me-3 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                    <i class="bx bx-calendar text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;"><?= get_label('starts_at', 'Starts At') ?></h6>
+                                    <span class="fw-bold">{{ $task->start_date ? format_date($task->start_date) : '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded d-flex align-items-center h-100">
+                                <div class="bg-label-primary rounded p-2 me-3 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                    <i class="bx bx-calendar-check text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;"><?= get_label('ends_at', 'Ends At') ?></h6>
+                                    <span class="fw-bold">{{ $task->due_date ? format_date($task->due_date) : '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded d-flex align-items-center h-100">
+                                <div class="bg-label-primary rounded p-2 me-3 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                    <i class="bx bx-time-five text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;"><?= get_label('duration', 'Duration') ?></h6>
+                                    <span class="fw-bold">{{ $durationText }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-semibold mb-2 d-flex align-items-center">
+                            <i class="bx bx-align-left fs-5 me-2"></i> <?= get_label('description', 'Description') ?>
+                        </h6>
+                        <div class="border rounded p-3 {{ filled($task->description) ? '' : 'text-muted' }}" style="min-height: 120px;">
+                            <?= (filled($task->description)) ? $task->description : '<i>' . get_label('no_description_provided', 'No description provided') . '</i>' ?>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Task Reminder -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted fw-semibold mb-3 d-flex align-items-center">
+                                <i class="bx bx-bell fs-5 me-2"></i> {{ get_label('task_reminder', 'Task Reminder') }}
+                            </h6>
+                            <div class="border rounded p-3 h-100">
+                                @if ($task->reminders->isNotEmpty())
+                                    @php
+                                        $reminder = $task->reminders->first();
+                                        $timeOfDay = \Carbon\Carbon::parse($reminder->time_of_day)->format('h:i A');
+                                    @endphp
+                                    <div class="mb-3">
+                                        <span class="d-block text-muted text-xs mb-1">{{ get_label('frequency', 'Frequency') }}</span>
+                                        <span class="fw-medium d-flex align-items-center">
+                                            @switch($reminder->frequency_type)
+                                                @case('daily')
+                                                    <i class="bx bx-time me-1 text-muted"></i> {{ get_label('daily_at', 'Daily at') }} {{ $timeOfDay }}
+                                                @break
+                                                @case('weekly')
+                                                    <i class="bx bx-calendar me-1 text-muted"></i> {{ get_label('weekly_on', 'Weekly on') }} {{ $reminder->day_of_week ? get_label(strtolower(date('l', strtotime("Sunday +{$reminder->day_of_week} days"))), date('l', strtotime("Sunday +{$reminder->day_of_week} days"))) : get_label('any_day', 'Any Day') }} {{ get_label('at', 'at') }} {{ $timeOfDay }}
+                                                @break
+                                                @case('monthly')
+                                                    <i class="bx bx-calendar me-1 text-muted"></i> {{ get_label('monthly_on_the', 'Monthly on the') }} {{ $reminder->day_of_month ?: get_label('any_day', 'Any Day') }} {{ get_label('at', 'at') }} {{ $timeOfDay }}
+                                                @break
+                                            @endswitch
+                                        </span>
+                                    </div>
+                                    @if ($reminder->last_sent_at)
+                                    <div>
+                                        <span class="d-block text-muted text-xs mb-1">{{ get_label('last_reminder_sent', 'Last Reminder Sent') }}</span>
+                                        <span class="fw-medium d-flex align-items-center"><i class="bx bx-send me-1 text-muted"></i> {{ \Carbon\Carbon::parse($reminder->last_sent_at)->diffForHumans() }}</span>
+                                    </div>
+                                    @endif
+                                @else
+                                    <div class="text-center text-muted my-3">
+                                        <i class="bx bx-bell-off fs-2 mb-2 opacity-50"></i>
+                                        <p class="mb-0">{{ get_label('no_reminders_set', 'No reminders set') }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Recurrence Details -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted fw-semibold mb-3 d-flex align-items-center">
+                                <i class="bx bx-refresh fs-5 me-2"></i> {{ get_label('recurrence_details', 'Recurrence Details') }}
+                            </h6>
+                            <div class="border rounded p-3 h-100">
+                                @if ($task->recurringTask)
+                                    @php $recurringTask = $task->recurringTask; @endphp
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <span class="d-block text-muted text-xs mb-1">{{ get_label('frequency', 'Frequency') }}</span>
+                                            <span class="fw-medium d-flex align-items-center">
+                                                @switch($recurringTask->frequency)
+                                                    @case('daily')
+                                                        <i class="bx bx-time me-1 text-muted"></i> {{ get_label('daily_at', 'Daily at') }} 00:00
+                                                    @break
+                                                    @case('weekly')
+                                                        <i class="bx bx-calendar me-1 text-muted"></i> {{ get_label('weekly_on', 'Weekly on') }} {{ $recurringTask->day_of_week ? get_label(strtolower(date('l', strtotime("Sunday +{$recurringTask->day_of_week} days"))), date('l', strtotime("Sunday +{$recurringTask->day_of_week} days"))) : get_label('any_day', 'Any Day') }}
+                                                    @break
+                                                    @case('monthly')
+                                                        <i class="bx bx-calendar me-1 text-muted"></i> {{ get_label('monthly_on_the', 'Monthly on the') }} {{ $recurringTask->day_of_month ?: get_label('any_day', 'Any Day') }}
+                                                    @break
+                                                    @case('yearly')
+                                                        <i class="bx bx-calendar me-1 text-muted"></i> {{ get_label('yearly_on_the', 'Yearly on the') }} {{ $recurringTask->day_of_month ?: get_label('any_day', 'Any Day') }} {{ get_label('of', 'of') }} {{ \Carbon\Carbon::create()->month($recurringTask->month_of_year)->format('F') }}
+                                                    @break
+                                                @endswitch
+                                            </span>
+                                        </div>
+                                        <x-badges.status-pill :status="$recurringTask->is_active ? 'success' : 'danger'">{{ $recurringTask->is_active ? get_label('active', 'Active') : get_label('inactive', 'Inactive') }}</x-badges.status-pill>
+                                    </div>
+                                    <div class="row">
+                                        @if ($recurringTask->starts_from)
+                                        <div class="col-6">
+                                            <span class="d-block text-muted text-xs mb-1">{{ get_label('starts_from', 'Starts From') }}</span>
+                                            <span class="fw-medium">{{ format_date($recurringTask->starts_from) }}</span>
+                                        </div>
+                                        @endif
+                                        <div class="col-6">
+                                            <span class="d-block text-muted text-xs mb-1">{{ get_label('completed', 'Completed') }}</span>
+                                            <span class="fw-medium">{{ $recurringTask->completed_occurrences ?? 0 }} / {{ $recurringTask->number_of_occurrences }}</span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="text-center text-muted my-3">
+                                        <i class="bx bx-block fs-2 mb-2 opacity-50"></i>
+                                        <p class="mb-0">{{ get_label('no_recurrence_set', 'No recurrence set') }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Fields -->
+                    <div class="mt-4">
+                        <h6 class="text-muted fw-semibold mb-3 d-flex align-items-center">
+                            <i class="bx bx-list-plus fs-5 me-2"></i> {{ get_label('additional_fields', 'Additional Fields') }}
+                        </h6>
+                        <div class="border rounded p-3">
+                            @php
+                                $hasValues = false;
+                                foreach ($customFields as $field) {
+                                    if ($task->getCustomFieldValue($field->id)) {
+                                        $hasValues = true;
+                                        break;
+                                    }
+                                }
+                            @endphp
+
+                            @if ($customFields->isNotEmpty() && $hasValues)
+                                <div class="row g-3">
+                                    @foreach ($customFields as $field)
+                                        @php $fieldValue = $task->getCustomFieldValue($field->id); @endphp
+                                        @if ($fieldValue)
+                                            <div class="col-md-6">
+                                                <div class="p-2 border rounded h-100">
+                                                    <span class="d-block text-muted text-xs fw-semibold mb-1">{{ $field->field_label }}</span>
+                                                    @switch($field->field_type)
+                                                        @case('text')
+                                                        @case('number')
+                                                        @case('password')
+                                                        @case('email')
+                                                        @case('date')
+                                                        @case('textarea')
+                                                        @case('select')
+                                                        @case('radio')
+                                                            <span class="fw-medium">{{ $fieldValue }}</span>
+                                                        @break
+                                                        @case('checkbox')
+                                                            @php
+                                                                $currentValues = $fieldValue ? json_decode($fieldValue, true) : [];
+                                                                if (!is_array($currentValues)) $currentValues = [$currentValues];
+                                                            @endphp
+                                                            <span class="fw-medium">{{ implode(', ', $currentValues) }}</span>
+                                                        @break
+                                                        @case('file')
+                                                            <a href="{{ asset('storage/' . $fieldValue) }}" target="_blank" class="d-inline-flex align-items-center fw-medium">
+                                                                <i class="bx bx-file me-1"></i> {{ get_label('view_file', 'View File') }}
+                                                            </a>
+                                                        @break
+                                                        @case('color')
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="me-2 rounded border shadow-sm" style="width: 20px; height: 20px; background-color: {{ $fieldValue ?? '#FFFFFF' }};"></div>
+                                                                <span class="fw-medium">{{ $fieldValue }}</span>
+                                                            </div>
+                                                        @break
+                                                    @endswitch
+                                                    @if ($field->guide_text)
+                                                        <small class="d-block text-muted mt-1" style="font-size: 0.7rem;">{{ $field->guide_text }}</small>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center text-muted my-3">
+                                    <i class="bx bx-info-circle fs-2 mb-2 opacity-50"></i>
+                                    <p class="mb-0">{{ get_label('no_custom_fields', 'No custom fields for this task') }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
                 </div>
-                <input type="hidden" id="media_type_id" value="{{ $task->id }}">
             </div>
+
+            <input type="hidden" id="media_type_id" value="{{ $task->id }}">
+        </div>
+    </div>
             @if (Auth::guard('web')->check() ||
-                    $task->client_can_discuss ||
-                    $auth_user->can('manage_media') ||
-                    $auth_user->can('manage_activity_log'))
-                <div class="nav-align-top mt-2">
-                    <ul class="nav nav-tabs" role="tablist">
-                        @php
-                            $activeTab = '';
-                        @endphp
+                $task->client_can_discuss ||
+                $auth_user->can('manage_media') ||
+                $auth_user->can('manage_activity_log'))
+            <div class="card mt-4 border-0 shadow-sm">
+                <div class="card-body">
+                <ul class="nav nav-tabs tk-tabs" role="tablist">
+                    @php $activeTab = ''; @endphp
 
-                        @if (Auth::guard('web')->check() || $task->client_can_discuss)
-                            <li class="nav-item">
-                                <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}"
-                                    role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-discussions"
-                                    aria-controls="navs-top-discussions">
-                                    <i class="menu-icon tf-icons bx bxs-chat text-danger"></i>
-                                    <?= get_label('discussions', 'Discussions') ?>
-                                </button>
-                            </li>
-                            @php
-                                if (empty($activeTab)) {
-                                    $activeTab = 'discussions';
-                                }
-                            @endphp
-                        @endif
-
-                        @if (!$task->parent_id)
-                            <li class="nav-item">
-                                <button type="button" class="nav-link {{ $activeTab == 'sub_task' ? 'active' : '' }}"
-                                    role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-sub-task"
-                                    aria-controls="navs-top-sub-task">
-                                    <i class="menu-icon tf-icons bx bx-task text-waring"></i>
-                                    <?= get_label('sub_task', 'Sub Task') ?>
-                                </button>
-                            </li>
-                        @endif
-                        @php
-                            if (empty($activeTab)) {
-                                $activeTab = 'sub_task';
-                            }
-                        @endphp
-
-
-
-                        @if ($task->project->enable_tasks_time_entries == 1)
-                            <li class="nav-item">
-                                <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}"
-                                    role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-time-entries"
-                                    aria-controls="navs-top-time-entries">
-                                    <i
-                                        class="menu-icon tf-icons bx bx-time text-info"></i>{{ get_label(
-                                            'time_entries',
-                                            'Time
-                                                                Entries',
-                                        ) }}
-                                </button>
-                            </li>
-                            @php
-                                if (empty($activeTab)) {
-                                    $activeTab = 'time_entries';
-                                }
-                            @endphp
-                        @endif
-
-
-                        @if ($auth_user->can('manage_media'))
-                            <li class="nav-item">
-                                <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}"
-                                    role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-media"
-                                    aria-controls="navs-top-media">
-                                    <i class="menu-icon tf-icons bx bx-image-alt text-success"></i>
-                                    <?= get_label('media', 'Media') ?>
-                                </button>
-                            </li>
-                            @php
-                                if (empty($activeTab)) {
-                                    $activeTab = 'media';
-                                }
-                            @endphp
-                        @endif
+                    @if (Auth::guard('web')->check() || $task->client_can_discuss)
                         <li class="nav-item">
-                            <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}"
-                                role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-status_timeline"
-                                aria-controls="navs-top-status_timeline">
-                                <i
-                                    class="menu-icon tf-icons bx bx-align-justify text-dark"></i>{{ get_label('status_timeline', 'Status Timeline') }}
+                            <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-discussions" aria-controls="navs-top-discussions">
+                                <x-tk-icon name="msg" size="14" class="me-1 text-muted" /> <?= get_label('discussions', 'Discussions') ?>
                             </button>
                         </li>
-                        @php
-                            if (empty($activeTab)) {
-                                $activeTab = 'status_timeline';
-                            }
-                        @endphp
+                        @php if (empty($activeTab)) $activeTab = 'discussions'; @endphp
+                    @endif
 
-                        @if ($auth_user->can('manage_activity_log'))
-                            <li class="nav-item">
-                                <button type="button"
-                                    class="nav-link {{ $activeTab == 'activity_log' ? 'active' : '' }}" role="tab"
-                                    data-bs-toggle="tab" data-bs-target="#navs-top-activity-log"
-                                    aria-controls="navs-top-activity-log">
-                                    <i class="menu-icon tf-icons bx bx-line-chart text-info"></i>
-                                    <?= get_label('activity_log', 'Activity log') ?>
-                                </button>
-                            </li>
-                            @php
-                                if (empty($activeTab)) {
-                                    $activeTab = 'activity_log';
-                                }
-                            @endphp
-                        @endif
+                    @if (!$task->parent_id)
+                        <li class="nav-item">
+                            <button type="button" class="nav-link {{ $activeTab == 'sub_task' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-sub-task" aria-controls="navs-top-sub-task">
+                                <x-tk-icon name="check" size="14" class="me-1 text-muted" /> <?= get_label('sub_task', 'Sub Task') ?>
+                            </button>
+                        </li>
+                        @php if (empty($activeTab)) $activeTab = 'sub_task'; @endphp
+                    @endif
 
+                    @if ($task->project->enable_tasks_time_entries == 1)
+                        <li class="nav-item">
+                            <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-time-entries" aria-controls="navs-top-time-entries">
+                                <x-tk-icon name="clock" size="14" class="me-1 text-muted" /> {{ get_label('time_entries', 'Time Entries') }}
+                            </button>
+                        </li>
+                        @php if (empty($activeTab)) $activeTab = 'time_entries'; @endphp
+                    @endif
 
+                    @if ($auth_user->can('manage_media'))
+                        <li class="nav-item">
+                            <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-media" aria-controls="navs-top-media">
+                                <x-tk-icon name="image" size="14" class="me-1 text-muted" /> <?= get_label('media', 'Media') ?>
+                            </button>
+                        </li>
+                        @php if (empty($activeTab)) $activeTab = 'media'; @endphp
+                    @endif
 
-                    </ul>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ empty($activeTab) ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-status_timeline" aria-controls="navs-top-status_timeline">
+                            <x-tk-icon name="list" size="14" class="me-1 text-muted" /> {{ get_label('status_timeline', 'Status Timeline') }}
+                        </button>
+                    </li>
+                    @php if (empty($activeTab)) $activeTab = 'status_timeline'; @endphp
+
+                    @if ($auth_user->can('manage_activity_log'))
+                        <li class="nav-item">
+                            <button type="button" class="nav-link {{ $activeTab == 'activity_log' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-activity-log" aria-controls="navs-top-activity-log">
+                                <x-tk-icon name="activity" size="14" class="me-1 text-muted" /> <?= get_label('activity_log', 'Activity log') ?>
+                            </button>
+                        </li>
+                        @php if (empty($activeTab)) $activeTab = 'activity_log'; @endphp
+                    @endif
+                </ul>
 
                     <div class="tab-content">
 

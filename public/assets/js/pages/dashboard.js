@@ -242,9 +242,81 @@ class DashboardManager {
                 this.renderPolarAreaChart("#projectStatisticsChart", response.project_data || [], response.bg_colors || [], response.labels || [], label_total_projects);
                 this.renderPieChart("#taskStatisticsChart", response.task_data || [], response.labels || [], response.bg_colors || []);
                 this.renderDonutChart("#todoStatisticsChart", response.todo_data || [], [this.colors.pastelSuccess, this.colors.pastelDanger], ['Done', 'Pending'], label_total_todos);
-                // Update new tk-donut charts
-                this.renderTkDonut('tk-project-donut', response.project_data || [], response.labels || [], response.bg_colors || []);
-                this.renderTkDonut('tk-task-donut', response.task_data || [], response.labels || [], response.bg_colors || []);
+                // Update combined tk bar chart
+                const projectData = response.project_data || [];
+                const taskData = response.task_data || [];
+                const combinedLabels = response.labels || [];
+                
+                if (document.getElementById('tk-combined-bar-chart')) {
+                    if (this.charts['#tk-combined-bar-chart']) {
+                        this.charts['#tk-combined-bar-chart'].destroy();
+                    }
+                    
+                    const options = {
+                        series: [
+                            { name: 'Projects', data: projectData },
+                            { name: 'Tasks', data: taskData }
+                        ],
+                        chart: { 
+                            type: 'bar', 
+                            height: 320, 
+                            toolbar: { show: false },
+                            parentHeightOffset: 0,
+                            fontFamily: 'inherit'
+                        },
+                        colors: ['#8B5CF6', '#3B82F6'], // Modern purple and blue
+                        plotOptions: {
+                            bar: {
+                                horizontal: false,
+                                columnWidth: '45%',
+                                borderRadius: 6,
+                                borderRadiusApplication: 'end',
+                                dataLabels: { position: 'top' }
+                            },
+                        },
+                        dataLabels: { 
+                            enabled: true, 
+                            offsetY: -20,
+                            style: { fontSize: '13px', colors: ['#64748b'], fontWeight: 600 },
+                            formatter: function (val) { return val > 0 ? val : ''; }
+                        },
+                        stroke: { show: true, width: 4, colors: ['transparent'] },
+                        xaxis: { 
+                            categories: combinedLabels,
+                            axisBorder: { show: false },
+                            axisTicks: { show: false },
+                            labels: { style: { colors: '#64748b', fontSize: '13px', fontWeight: 500 } }
+                        },
+                        yaxis: { show: false },
+                        grid: {
+                            show: true,
+                            borderColor: '#f1f5f9',
+                            strokeDashArray: 4,
+                            xaxis: { lines: { show: false } },
+                            yaxis: { lines: { show: true } },
+                            padding: { top: 0, right: 0, bottom: 0, left: 10 }
+                        },
+                        fill: { 
+                            type: 'gradient',
+                            gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.25, inverseColors: true, opacityFrom: 1, opacityTo: 0.85, stops: [50, 0, 100] }
+                        },
+                        legend: { 
+                            position: 'top', 
+                            horizontalAlign: 'right',
+                            markers: { radius: 12 },
+                            fontWeight: 500,
+                            itemMargin: { horizontal: 10, vertical: 0 }
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            y: { formatter: function (val) { return val } },
+                            marker: { show: true }
+                        }
+                    };
+                    const chart = new ApexCharts(document.querySelector("#tk-combined-bar-chart"), options);
+                    chart.render();
+                    this.charts['#tk-combined-bar-chart'] = chart;
+                }
                 this.renderTkDonut('tk-todo-donut', response.todo_data || [], [
                     ($('#tk-todo-donut').data('label-done') || 'Completed'),
                     ($('#tk-todo-donut').data('label-pending') || 'Pending')

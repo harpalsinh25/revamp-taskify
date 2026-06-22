@@ -21,7 +21,7 @@
                 : $tkUser->tasks()->whereNotNull('tasks.due_date')
                     ->whereBetween('tasks.due_date', [now()->startOfDay(), now()->endOfWeek()])->count();
         @endphp
-        <div class="tk-welcome">
+        <div class="tk-welcome d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div class="tk-welcome-main">
                     @php
                     $dashboardNow = now()->tz(config('app.timezone'));
@@ -35,6 +35,18 @@
                     <span class="tk-welcome-stat">{{ $tkTotalTasks }}</span>
                     {{ $tkTotalTasks == 1 ? get_label('task', 'task') : get_label('tasks', 'tasks') }}
                 </p>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                @if ($auth_user->can('manage_tasks'))
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create_task_modal">
+                    <i class='bx bx-plus'></i> {{ get_label('create_task', 'Create Task') }}
+                </button>
+                @endif
+                @if ($auth_user->can('manage_projects'))
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#create_project_modal">
+                    <i class='bx bx-plus'></i> {{ get_label('create_project', 'Create Project') }}
+                </button>
+                @endif
             </div>
         </div>
 
@@ -117,7 +129,6 @@
             $filteredTiles = array_filter($tiles, function ($tile) use ($auth_user) {
                 return !$tile['permission'] || $auth_user->can($tile['permission']);
             });
-            $filteredTiles = array_slice($filteredTiles, 0, 4);
         @endphp
         <div class="tk-metric-strip">
             @foreach ($filteredTiles as $tile)
@@ -137,6 +148,19 @@
         <div class="row g-4 tk-dash-grid mb-4">
             {{-- LEFT COLUMN --}}
             <div class="col-lg-8 d-flex flex-column gap-4">
+                @if ($auth_user->can('manage_projects') || $auth_user->can('manage_tasks'))
+                    <div class="tk-card flex-grow-0" data-id="tk-combined-chart">
+                        <div class="tk-card-head">
+                            <div class="tk-card-head-main">
+                                <div class="tk-card-eyebrow">{{ get_label('overview', 'Overview') }}</div>
+                                <h3 class="tk-card-title">{{ get_label('projects_and_tasks', 'Projects & Tasks') }}</h3>
+                            </div>
+                        </div>
+                        <div class="tk-card-body p-2">
+                            <div id="tk-combined-bar-chart"></div>
+                        </div>
+                    </div>
+                @endif
                 <div class="tk-card {{ $tkHasHero ? '' : 'flex-grow-1' }}" data-id="tk-activity-card">
                     <div class="tk-card-head">
                         <div class="tk-card-head-main">
@@ -175,65 +199,69 @@
                     </div>
                 @endif
             </div>
-            {{-- RIGHT COLUMN: project → task → todo --}}
+            {{-- RIGHT COLUMN: project → task → meetings --}}
             <div class="col-lg-4 d-flex flex-column gap-4">
-                @if ($auth_user->can('manage_projects'))
-                    <div class="tk-card flex-grow-1" data-id="tk-project-chart">
-                        <div class="tk-card-head">
-                            <div class="tk-card-head-main">
-                                <div class="tk-card-eyebrow">{{ get_label('projects', 'Projects') }}</div>
-                                <h3 class="tk-card-title"><span id="tk-project-total">0</span>
-                                    <span class="tk-card-title-sub">{{ get_label('total', 'total') }}</span>
-                                </h3>
-                            </div>
-                        </div>
-                        <div class="tk-card-body">
-                            <div class="tk-donut-wrap">
-                                <div id="tk-project-donut" class="tk-donut" data-kind="project"
-                                    data-center-label="{{ get_label('projects', 'PROJECTS') }}"></div>
-                                <div id="tk-project-legend" class="tk-donut-legend"></div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                @if ($auth_user->can('manage_tasks'))
-                    <div class="tk-card flex-grow-1" data-id="tk-task-chart">
-                        <div class="tk-card-head">
-                            <div class="tk-card-head-main">
-                                <div class="tk-card-eyebrow">{{ get_label('tasks', 'Tasks') }}</div>
-                                <h3 class="tk-card-title"><span id="tk-task-total">0</span>
-                                    <span class="tk-card-title-sub">{{ get_label('total', 'total') }}</span>
-                                </h3>
-                            </div>
-                        </div>
-                        <div class="tk-card-body">
-                            <div class="tk-donut-wrap">
-                                <div id="tk-task-donut" class="tk-donut" data-kind="task"
-                                    data-center-label="{{ get_label('tasks', 'TASKS') }}"></div>
-                                <div id="tk-task-legend" class="tk-donut-legend"></div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                <div class="tk-card flex-grow-1" data-id="tk-todo-chart">
+                @php
+                    $tkUpcomingMeetings = $tkAllData 
+                        ? ($tkWs ? \App\Models\Meeting::where('workspace_id', $tkWs->id)->where('start_date_time', '>=', now(config('app.timezone')))->orderBy('start_date_time', 'asc')->limit(5)->get() : collect())
+                        : $tkUser->meetings()->where('start_date_time', '>=', now(config('app.timezone')))->orderBy('start_date_time', 'asc')->limit(5)->get();
+                @endphp
+                
+                <div class="tk-card flex-grow-0" data-id="tk-upcoming-meetings">
                     <div class="tk-card-head">
                         <div class="tk-card-head-main">
-                            <div class="tk-card-eyebrow">{{ get_label('todos', 'Todos') }}</div>
-                            <h3 class="tk-card-title"><span id="tk-todo-total">0</span>
-                                <span class="tk-card-title-sub">{{ get_label('total', 'total') }}</span>
-                            </h3>
+                            <div class="tk-card-eyebrow text-info">{{ get_label('upcoming', 'Upcoming') }}</div>
+                            <h3 class="tk-card-title">{{ get_label('meetings', 'Meetings') }}</h3>
                         </div>
+                        <a href="{{ url('meetings') }}" class="tk-card-link">{{ get_label('view_all', 'View all') }}</a>
                     </div>
                     <div class="tk-card-body">
-                        <div class="tk-donut-wrap">
-                            <div id="tk-todo-donut" class="tk-donut" data-kind="todo"
-                                data-center-label="{{ get_label('todos', 'TODOS') }}"
-                                data-label-done="{{ get_label('completed', 'Completed') }}"
-                                data-label-pending="{{ get_label('pending', 'Pending') }}"></div>
-                            <div id="tk-todo-legend" class="tk-donut-legend"></div>
-                        </div>
+                        @if($tkUpcomingMeetings->count() > 0)
+                            <ul class="list-group list-group-flush mb-0">
+                                @foreach($tkUpcomingMeetings as $meeting)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <div class="d-flex flex-column">
+                                            <a href="{{ url('meetings') }}" class="text-body fw-bold text-decoration-none">{{ $meeting->title }}</a>
+                                            <small class="text-muted">{{ \Carbon\Carbon::parse($meeting->start_date_time)->format('M d, H:i') }}</small>
+                                        </div>
+                                        <span class="badge bg-label-info rounded-pill"><i class="bx bx-calendar"></i></span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <div class="text-center py-3">
+                                <p class="text-muted mb-0">{{ get_label('no_upcoming_meetings', 'No upcoming meetings') }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
+
+                @php
+                    $tkOverdueTasks = $tkAllData 
+                        ? ($tkWs ? $tkWs->tasks()->whereNotNull('tasks.due_date')->where('tasks.due_date', '<', now()->startOfDay())->limit(5)->get() : collect())
+                        : $tkUser->tasks()->whereNotNull('tasks.due_date')->where('tasks.due_date', '<', now()->startOfDay())->limit(5)->get();
+                @endphp
+                @if($tkOverdueTasks->count() > 0)
+                <div class="tk-card flex-grow-0" data-id="tk-overdue-tasks">
+                    <div class="tk-card-head">
+                        <div class="tk-card-head-main">
+                            <div class="tk-card-eyebrow text-danger">{{ get_label('attention', 'Attention') }}</div>
+                            <h3 class="tk-card-title text-danger">{{ get_label('overdue_tasks', 'Overdue Tasks') }}</h3>
+                        </div>
+                        <a href="{{ url(getUserPreferences('tasks', 'default_view')) }}" class="tk-card-link">{{ get_label('view_all', 'View all') }}</a>
+                    </div>
+                    <div class="tk-card-body">
+                        <ul class="list-group list-group-flush mb-0">
+                            @foreach($tkOverdueTasks as $task)
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <a href="{{ url('tasks/information/'.$task->id) }}" class="text-body fw-bold text-decoration-none">{{ $task->title }}</a>
+                                    <span class="badge bg-label-danger rounded-pill">{{ \Carbon\Carbon::parse($task->due_date)->format('M d') }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
