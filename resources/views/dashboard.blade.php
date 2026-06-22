@@ -262,6 +262,28 @@
                     </div>
                 </div>
                 @endif
+
+                <div class="tk-card flex-grow-1" id="todos-overview" data-id="todos-overview">
+                    <div class="tk-card-head">
+                        <div class="tk-card-head-main">
+                            <div class="tk-card-eyebrow text-info">{{ get_label('todos', 'Todos') }}</div>
+                            <h3 class="tk-card-title">{{ get_label('todos_overview', 'Todos overview') }}</h3>
+                        </div>
+                        <div class="d-flex gap-3 align-items-center">
+                            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_todo_modal" class="tk-card-link text-primary" title="{{ get_label('create_todo', 'Create Todo') }}">
+                                <i class='bx bx-plus me-1'></i>{{ get_label('add', 'Add') }}
+                            </a>
+                            <a href="{{ url('todos') }}" class="tk-card-link">{{ get_label('view_more', 'View more') }}</a>
+                        </div>
+                    </div>
+                    <div class="tk-card-body d-flex flex-column" style="min-height: 250px;">
+                        <div style="flex: 1 1 auto; overflow-y: auto; min-height: 0;">
+                            <ul class="p-0 m-0 todo-list list-group list-group-flush">
+                                <!-- Populated via JS/AJAX -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

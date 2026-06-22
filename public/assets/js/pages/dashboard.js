@@ -409,38 +409,38 @@ class DashboardManager {
             if (Array.isArray(todos) && todos.length > 0) {
                 todos.forEach(todo => {
                     html += `
-                    <li class="list-group-item d-flex align-items-center py-2">
+                    <li class="list-group-item d-flex align-items-center px-0 py-2 border-0">
                         <div class="me-3">
                             <input type="checkbox"
                                    id="${todo.id}"
                                    onclick="update_status(this)"
                                    name="${todo.id}"
-                                   class="form-check-input"
+                                   class="form-check-input mt-0"
                                    ${todo.is_completed ? 'checked' : ''}>
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-0 ${todo.is_completed ? 'text-decoration-line-through text-muted' : ''}" id="${todo.id}_title">
+                                <div style="min-width: 0;">
+                                    <div class="text-body fw-bold ${todo.is_completed ? 'text-decoration-line-through text-muted' : ''}" id="${todo.id}_title" style="font-size: 13px; line-height: 1.2;">
                                         ${todo.title}
-                                    </h6>
-                                    <small class="text-muted">${todo.created_at}</small>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 11px;">${todo.created_at}</small>
                                 </div>
                                 <div class="user-progress d-flex align-items-center gap-2">
                                     <a href="javascript:void(0);"
-                                       class="edit-todo text-primary"
+                                       class="edit-todo text-muted"
                                        data-bs-toggle="modal"
                                        data-bs-target="#edit_todo_modal"
                                        data-id="${todo.id}"
                                        title="${label_update}">
-                                        <i class="bx bx-edit"></i>
+                                        <i class="bx bx-edit fs-5"></i>
                                     </a>
                                     <a href="javascript:void(0);"
                                        class="delete text-danger"
                                        data-id="${todo.id}"
                                        data-type="todos"
                                        title="${label_delete}">
-                                        <i class="bx bx-trash"></i>
+                                        <i class="bx bx-trash fs-5"></i>
                                     </a>
                                 </div>
                             </div>
