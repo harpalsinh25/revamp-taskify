@@ -33,12 +33,12 @@
         <div class="offcanvas-body flex-column p-3">
             @if ($createButtonText)
                 <!-- Add Button -->
-                <button class="btn btn-primary w-100 mb-4"
+                <!-- <button class="btn btn-primary w-100 mb-4"
                     @if ($createOffcanvasTarget) data-bs-toggle="offcanvas" data-bs-target="{{ $createOffcanvasTarget }}"
             @else
             data-bs-toggle="modal" data-bs-target="{{ $createModalTarget }}" @endif>
                     <i class="bx bx-plus me-1"></i> {{ $createButtonText }}
-                </button>
+                </button> -->
             @endif
 
             <!-- Mini Calendar (if enabled) -->

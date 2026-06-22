@@ -28,7 +28,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-start align-items-sm-center gap-4">
                         <img src="{{$user->photo ? asset('storage/' . $user->photo) : asset('/photos/1.png')}}" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
-                        <h4 class="card-header fw-bold">{{ $user->first_name }} {{$user->last_name}}</h4> <?= $user->status == 1 ? '<span class="badge bg-success">' . get_label('active', 'Active') . '</span>' : '<span class="badge bg-danger">' . get_label('deactive', 'Deactive') . '</span>' ?>
+                        <div class="mb-0">
+                            <h4 class="fw-bold mb-1">{{ $user->first_name }} {{$user->last_name}}</h4>
+                            <?= $user->status == 1 ? '<span class="badge bg-success">' . get_label('active', 'Active') . '</span>' : '<span class="badge bg-danger">' . get_label('deactive', 'Deactive') . '</span>' ?>
+                        </div>
                     </div>
                 </div>
                 <hr class="my-0" />
@@ -63,19 +66,19 @@
                                 <input class="form-control" type="text" id="city" value="{{$user->city??'-'}}" readonly="">
                             </div>
                         </div>
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-4">
                             <label class="form-label" for="state"><?= get_label('state', 'State') ?></label>
                             <div class="input-group input-group-merge">
                                 <input class="form-control" type="text" id="state" value="{{$user->state??'-'}}" readonly="">
                             </div>
                         </div>
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-4">
                             <label class="form-label" for="country"><?= get_label('country', 'Country') ?></label>
                             <div class="input-group input-group-merge">
                                 <input class="form-control" type="text" id="country" value="{{$user->country??'-'}}" readonly="">
                             </div>
                         </div>
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-4">
                             <label class="form-label" for="zip"><?= get_label('zip_code', 'Zip code') ?></label>
                             <div class="input-group input-group-merge">
                                 <input class="form-control" type="text" id="zip" value="{{$user->zip??'-'}}" readonly="">
@@ -191,7 +194,7 @@
             @if ($auth_user->can('manage_projects'))
             <div class="tab-pane fade active show" id="navs-top-projects" role="tabpanel">
                 <div class="d-flex justify-content-between">
-                    <h4 class="fw-bold">{{$user->first_name}}'s <?= get_label('projects', 'Projects') ?></h4>
+                    <h4 class="fw-bold mx-4 mt-4">{{$user->first_name}}'s <?= get_label('projects', 'Projects') ?></h4>
                 </div>
                 @if (is_countable($projects) && count($projects) > 0)
                 <?php
@@ -208,7 +211,7 @@
             @if ($auth_user->can('manage_tasks'))
             <div class="tab-pane fade {{!$auth_user->can('manage_projects')?'active show':''}}" id="navs-top-tasks" role="tabpanel">
                 <div class="d-flex justify-content-between">
-                    <h4 class="fw-bold">{{$user->first_name}}'s <?= get_label('tasks', 'Tasks') ?></h4>
+                    <h4 class="fw-bold mx-4 mt-4">{{$user->first_name}}'s <?= get_label('tasks', 'Tasks') ?></h4>
                 </div>
                 @if ($tasks > 0)
                 <?php

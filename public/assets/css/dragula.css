@@ -4,6 +4,7 @@
   margin: 0 !important;
   z-index: 9999 !important;
   opacity: 0.8;
+  pointer-events: none !important;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
   filter: alpha(opacity=80);
 }

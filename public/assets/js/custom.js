@@ -4,8 +4,14 @@ if ($.fn.bootstrapTable) {
     $.extend($.fn.bootstrapTable.defaults, {
         formatNoMatches: function () {
             // Using the global label if available, otherwise fallback
-            var msg = typeof label_data_does_not_exists !== 'undefined' ? label_data_does_not_exists : 'No matching records found';
-            var title = typeof label_not_found !== 'undefined' ? label_not_found : 'Nothing found';
+            var msg =
+                typeof label_data_does_not_exists !== "undefined"
+                    ? label_data_does_not_exists
+                    : "No matching records found";
+            var title =
+                typeof label_not_found !== "undefined"
+                    ? label_not_found
+                    : "Nothing found";
             return `
             <div class="empty">
                 <div class="empty-icon">
@@ -14,7 +20,7 @@ if ($.fn.bootstrapTable) {
                 <div class="empty-title">${title}</div>
                 <div class="empty-sub">${msg}</div>
             </div>`;
-        }
+        },
     });
 }
 
@@ -30,7 +36,7 @@ toastr.options = {
 
 function renderRemainingLeavesSummary(balance, options) {
     if (!balance) {
-        return '';
+        return "";
     }
 
     var settings = $.extend(
@@ -40,73 +46,121 @@ function renderRemainingLeavesSummary(balance, options) {
             includeAccrualMeta: true,
             includeWarnings: true,
         },
-        options || {}
+        options || {},
     );
 
     var remaining = parseFloat(balance.remaining_paid_leaves || 0);
-    var effectiveTotal = balance.accrued_leaves && balance.accrued_leaves > 0
-        ? parseFloat(balance.accrued_leaves)
-        : parseFloat(balance.total_annual_leaves || 0);
+    var effectiveTotal =
+        balance.accrued_leaves && balance.accrued_leaves > 0
+            ? parseFloat(balance.accrued_leaves)
+            : parseFloat(balance.total_annual_leaves || 0);
 
     function formatNumber(value) {
-        return (value % 1 === 0) ? value.toString() : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+        return value % 1 === 0
+            ? value.toString()
+            : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
     }
 
-    var status = 'healthy';
+    var status = "healthy";
     if (remaining <= 0) {
-        status = 'exhausted';
+        status = "exhausted";
     } else if (remaining < settings.lowThreshold) {
-        status = 'low';
+        status = "low";
     }
 
     var badgeClasses = {
-        healthy: 'bg-label-success text-success',
-        low: 'bg-label-warning text-warning',
-        exhausted: 'bg-label-danger text-danger'
+        healthy: "bg-label-success text-success",
+        low: "bg-label-warning text-warning",
+        exhausted: "bg-label-danger text-danger",
     };
 
     var iconClasses = {
-        healthy: 'bx bx-check-circle',
-        low: 'bx bx-bell',
-        exhausted: 'bx bx-error-circle'
+        healthy: "bx bx-check-circle",
+        low: "bx bx-bell",
+        exhausted: "bx bx-error-circle",
     };
 
     var hintTexts = {
         healthy: label_remaining_leaves_good_hint,
         low: label_remaining_leaves_low_hint,
-        exhausted: label_remaining_leaves_exhausted_hint
+        exhausted: label_remaining_leaves_exhausted_hint,
     };
 
     var html = '<div class="d-flex flex-column gap-1 leave-remaining-pill">';
 
     if (settings.heading) {
-        html += '<small class="text-muted">' + settings.heading + '</small>';
+        html += '<small class="text-muted">' + settings.heading + "</small>";
     }
 
-    html += '<span class="badge d-inline-flex align-items-center gap-2 ' + badgeClasses[status] + '">';
+    html +=
+        '<span class="badge d-inline-flex align-items-center gap-2 ' +
+        badgeClasses[status] +
+        '">';
     html += '<i class="' + iconClasses[status] + '"></i>';
-    html += '<span class="text-body">' + label_remaining_leaves + ':</span>';
-    html += '<strong>' + formatNumber(remaining) + '</strong>';
-    html += '</span>';
+    html += '<span class="text-body">' + label_remaining_leaves + ":</span>";
+    html += "<strong>" + formatNumber(remaining) + "</strong>";
+    html += "</span>";
 
-    html += '<small class="text-muted">' + label_of_text + ' ' + formatNumber(effectiveTotal) + ' ' + label_days + '</small>';
+    html +=
+        '<small class="text-muted">' +
+        label_of_text +
+        " " +
+        formatNumber(effectiveTotal) +
+        " " +
+        label_days +
+        "</small>";
 
     if (settings.includeWarnings) {
-        var hintClass = status === 'healthy' ? 'text-muted' : (status === 'low' ? 'text-warning' : 'text-danger');
-        html += '<small class="' + hintClass + '">' + hintTexts[status] + '</small>';
+        var hintClass =
+            status === "healthy"
+                ? "text-muted"
+                : status === "low"
+                  ? "text-warning"
+                  : "text-danger";
+        html +=
+            '<small class="' +
+            hintClass +
+            '">' +
+            hintTexts[status] +
+            "</small>";
     }
 
-    if (settings.includeAccrualMeta && balance.accrued_leaves && balance.monthly_accrual_rate) {
-        html += '<small class="text-muted">' + label_earning + ' ' + balance.monthly_accrual_rate + ' ' + label_days_per_month + ' · ' + balance.months_worked + ' ' + label_months_worked + ' · ' + label_annual + ': ' + balance.total_annual_leaves + '</small>';
+    if (
+        settings.includeAccrualMeta &&
+        balance.accrued_leaves &&
+        balance.monthly_accrual_rate
+    ) {
+        html +=
+            '<small class="text-muted">' +
+            label_earning +
+            " " +
+            balance.monthly_accrual_rate +
+            " " +
+            label_days_per_month +
+            " · " +
+            balance.months_worked +
+            " " +
+            label_months_worked +
+            " · " +
+            label_annual +
+            ": " +
+            balance.total_annual_leaves +
+            "</small>";
     }
 
-    if (status === 'exhausted') {
-        html += '<small class="text-danger">⚠️ ' + label_marked_unpaid_if_approved + '</small>';
-    } else if (status === 'low') {
-        html += '<small class="text-warning">⚠️ ' + label_marked_unpaid + '</small>';
+    if (status === "exhausted") {
+        html +=
+            '<small class="text-danger">⚠️ ' +
+            label_marked_unpaid_if_approved +
+            "</small>";
+    } else if (status === "low") {
+        html +=
+            '<small class="text-warning">⚠️ ' +
+            label_marked_unpaid +
+            "</small>";
     }
 
-    html += '</div>';
+    html += "</div>";
 
     return html;
 }
@@ -131,26 +185,26 @@ $(document).on("click", ".delete", function (e) {
         type == "users"
             ? "delete_user"
             : type == "contract-type"
-                ? "delete-contract-type"
-                : type == "project-media" || type == "task-media"
-                    ? "delete-media"
-                    : type == "expense-type"
-                        ? "delete-expense-type"
-                        : type == "milestone"
-                            ? "delete-milestone"
-                            : "destroy";
+              ? "delete-contract-type"
+              : type == "project-media" || type == "task-media"
+                ? "delete-media"
+                : type == "expense-type"
+                  ? "delete-expense-type"
+                  : type == "milestone"
+                    ? "delete-milestone"
+                    : "destroy";
     type =
         type == "contract-type"
             ? "contracts"
             : type == "project-media"
-                ? "projects"
-                : type == "task-media"
-                    ? "tasks"
-                    : type == "expense-type"
-                        ? "expenses"
-                        : type == "milestone"
-                            ? "projects"
-                            : type;
+              ? "projects"
+              : type == "task-media"
+                ? "tasks"
+                : type == "expense-type"
+                  ? "expenses"
+                  : type == "milestone"
+                    ? "projects"
+                    : type;
     $("#deleteModal").modal("show"); // show the confirmation modal
     $("#deleteModal").off("click", "#confirmDelete");
     $("#deleteModal").on("click", "#confirmDelete", function (e) {
@@ -194,26 +248,26 @@ $(document).on("click", ".delete-selected", function (e) {
         type == "users"
             ? "delete_multiple_user"
             : type == "contract-types"
-                ? "delete-multiple-contract-type"
-                : type == "project-media" || type == "task-media"
-                    ? "delete-multiple-media"
-                    : type == "expense-types"
-                        ? "delete-multiple-expense-type"
-                        : type == "milestones"
-                            ? "delete-multiple-milestone"
-                            : "destroy_multiple";
+              ? "delete-multiple-contract-type"
+              : type == "project-media" || type == "task-media"
+                ? "delete-multiple-media"
+                : type == "expense-types"
+                  ? "delete-multiple-expense-type"
+                  : type == "milestones"
+                    ? "delete-multiple-milestone"
+                    : "destroy_multiple";
     type =
         type == "contract-types"
             ? "contracts"
             : type == "project-media"
-                ? "projects"
-                : type == "task-media"
-                    ? "tasks"
-                    : type == "expense-types"
-                        ? "expenses"
-                        : type == "milestones"
-                            ? "projects"
-                            : type;
+              ? "projects"
+              : type == "task-media"
+                ? "tasks"
+                : type == "expense-types"
+                  ? "expenses"
+                  : type == "milestones"
+                    ? "projects"
+                    : type;
     var selections = $("#" + table).bootstrapTable("getSelections");
     var selectedIds = selections.map(function (row) {
         return row.id; // Replace 'id' with the field containing the unique ID
@@ -222,7 +276,7 @@ $(document).on("click", ".delete-selected", function (e) {
         $("#confirmDeleteSelectedModal").modal("show"); // show the confirmation modal
         $("#confirmDeleteSelectedModal").off(
             "click",
-            "#confirmDeleteSelections"
+            "#confirmDeleteSelections",
         );
         $("#confirmDeleteSelectedModal").on(
             "click",
@@ -253,9 +307,12 @@ $(document).on("click", ".delete-selected", function (e) {
                                 if (response.hasOwnProperty("message")) {
                                     if (response.error == false) {
                                         toastr.success(response["message"]);
-                                        setTimeout(function () {
-                                            location.reload();
-                                        }, parseFloat(toastTimeOut) * 1000);
+                                        setTimeout(
+                                            function () {
+                                                location.reload();
+                                            },
+                                            parseFloat(toastTimeOut) * 1000,
+                                        );
                                     } else {
                                         toastr.error(response["message"]);
                                     }
@@ -279,7 +336,7 @@ $(document).on("click", ".delete-selected", function (e) {
                         toastr.error(label_something_went_wrong);
                     },
                 });
-            }
+            },
         );
     } else {
         toastr.error(label_please_select_records_to_delete);
@@ -298,7 +355,7 @@ $(document).ready(function () {
             $("#confirmDeleteSelectedModal").modal("show"); // show the confirmation modal
             $("#confirmDeleteSelectedModal").off(
                 "click",
-                "#confirmDeleteSelections"
+                "#confirmDeleteSelections",
             );
             $("#confirmDeleteSelectedModal").on(
                 "click",
@@ -315,7 +372,7 @@ $(document).ready(function () {
                         type: "POST",
                         headers: {
                             "X-CSRF-TOKEN": $('input[name="_token"]').attr(
-                                "value"
+                                "value",
                             ),
                         },
                         success: function (response) {
@@ -333,7 +390,7 @@ $(document).ready(function () {
                             toastr.error(label_something_went_wrong);
                         },
                     });
-                }
+                },
             );
         } else {
             toastr.error(label_please_select_records_to_delete);
@@ -345,93 +402,106 @@ $(document).ready(function () {
    Ensure proper Bootstrap class usage and avoid stray backdrop overlay.
 */
 // When a modal is about to be shown, compute z-index based on any visible offcanvas
-$(document).on('show.bs.modal', '.modal', function () {
+$(document).on("show.bs.modal", ".modal", function () {
     try {
         var $modal = $(this);
         // Find highest z-index among visible offcanvas elements
         var highestOffcanvasZ = 0;
-        $('.offcanvas.show').each(function () {
-            var z = parseInt($(this).css('z-index')) || 0;
+        $(".offcanvas.show").each(function () {
+            var z = parseInt($(this).css("z-index")) || 0;
             if (z > highestOffcanvasZ) highestOffcanvasZ = z;
         });
         // Base modal/backdrop z-index values
         var modalZ = highestOffcanvasZ ? highestOffcanvasZ + 20 : 1060;
         var backdropZ = modalZ - 10;
-        $modal.data('stacking-modal-z', modalZ);
-        $modal.data('stacking-backdrop-z', backdropZ);
+        $modal.data("stacking-modal-z", modalZ);
+        $modal.data("stacking-backdrop-z", backdropZ);
         // Ensure modal is a direct child of <body> to avoid ancestor stacking contexts
         try {
-            if (!$modal.parent().is('body')) $modal.appendTo(document.body);
+            if (!$modal.parent().is("body")) $modal.appendTo(document.body);
         } catch (e) {}
         // Apply inline z-index/position to the modal itself immediately so any appended backdrop sits behind
-        $modal.css({ 'z-index': modalZ, 'position': 'fixed' });
+        $modal.css({ "z-index": modalZ, position: "fixed" });
     } catch (e) {
         // ignore
     }
 });
 
 // After modal is shown, adjust the newly added backdrop z-index
-$(document).on('shown.bs.modal', '.modal', function () {
+$(document).on("shown.bs.modal", ".modal", function () {
     try {
         var $modal = $(this);
         // Compute the highest z-index among visible overlays (offcanvas, backdrops, other modals)
         var highest = 0;
-        $('.offcanvas.show, .modal-backdrop, .modal.show').each(function () {
+        $(".offcanvas.show, .modal-backdrop, .modal.show").each(function () {
             // skip the current modal when checking .modal.show
             if ($(this).is($modal)) return;
-            var z = parseInt($(this).css('z-index')) || 0;
+            var z = parseInt($(this).css("z-index")) || 0;
             if (z > highest) highest = z;
         });
-        var backdropZ = (highest && highest >= 0) ? highest + 10 : ($modal.data('stacking-backdrop-z') || 1050);
-        var modalZ = (backdropZ) ? (backdropZ + 10) : ($modal.data('stacking-modal-z') || 1060);
+        var backdropZ =
+            highest && highest >= 0
+                ? highest + 10
+                : $modal.data("stacking-backdrop-z") || 1050;
+        var modalZ = backdropZ
+            ? backdropZ + 10
+            : $modal.data("stacking-modal-z") || 1060;
         // The backdrop inserted by Bootstrap is usually the last .modal-backdrop element
-        var $backdrops = $('.modal-backdrop');
+        var $backdrops = $(".modal-backdrop");
         if ($backdrops.length) {
             // Mark all backdrops as stacked so CSS can enforce proper z-index
-            $backdrops.addClass('stacked');
+            $backdrops.addClass("stacked");
         }
         // Add a strong class to modal so CSS !important rules ensure it stays on top
-        $modal.addClass('stacked-active');
+        $modal.addClass("stacked-active");
         // Ensure backdrop inline z-index is set after insertion (small delay to account for timing)
         setTimeout(function () {
             try {
-                var modalZ_inline = parseInt($modal.css('z-index')) || ($modal.data('stacking-modal-z') || 2000);
-                var backdropZ_inline = (modalZ_inline - 10) || ($modal.data('stacking-backdrop-z') || 1990);
-                var $lastBackdrop = $('.modal-backdrop').last();
+                var modalZ_inline =
+                    parseInt($modal.css("z-index")) ||
+                    $modal.data("stacking-modal-z") ||
+                    2000;
+                var backdropZ_inline =
+                    modalZ_inline - 10 ||
+                    $modal.data("stacking-backdrop-z") ||
+                    1990;
+                var $lastBackdrop = $(".modal-backdrop").last();
                 if ($lastBackdrop.length) {
-                    $lastBackdrop.css('z-index', backdropZ_inline);
-                    $lastBackdrop.addClass('stacked');
+                    $lastBackdrop.css("z-index", backdropZ_inline);
+                    $lastBackdrop.addClass("stacked");
                 }
                 // Reinforce modal inline z-index and position
-                $modal.css({ 'z-index': modalZ_inline, 'position': 'fixed' });
+                $modal.css({ "z-index": modalZ_inline, position: "fixed" });
             } catch (e) {}
         }, 10);
         // Ensure body has modal-open
-        if (!$('body').hasClass('modal-open')) $('body').addClass('modal-open');
+        if (!$("body").hasClass("modal-open")) $("body").addClass("modal-open");
     } catch (e) {
         // ignore
     }
 });
 
 // When modal hidden, remove its backdrop only if there are no other visible modals
-$(document).on('hidden.bs.modal', '.modal', function () {
+$(document).on("hidden.bs.modal", ".modal", function () {
     try {
         // Allow Bootstrap to remove backdrop; if stray backdrops remain, clean them safely
         setTimeout(function () {
             // Remove backdrop elements that are not associated with any visible modal
-            if ($('.modal.show').length === 0) {
+            if ($(".modal.show").length === 0) {
                 // No modals open — remove any leftover backdrops and modal-open body class
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open');
+                $(".modal-backdrop").remove();
+                $("body").removeClass("modal-open");
             } else {
                 // There are other modals open — ensure only one backdrop exists and body class stays
-                $('.modal-backdrop').not('.stacked').remove();
-                if (!$('body').hasClass('modal-open')) $('body').addClass('modal-open');
+                $(".modal-backdrop").not(".stacked").remove();
+                if (!$("body").hasClass("modal-open"))
+                    $("body").addClass("modal-open");
             }
             // cleanup stacking classes on the modal that was hidden
-            $(this).removeClass('stacked-active');
+            $(this).removeClass("stacked-active");
             // if no modals remain, remove stacked class from backdrops too (they were removed above)
-            if ($('.modal.show').length === 0) $('.modal-backdrop').removeClass('stacked');
+            if ($(".modal.show").length === 0)
+                $(".modal-backdrop").removeClass("stacked");
         }, 200);
     } catch (e) {
         // ignore
@@ -439,16 +509,17 @@ $(document).on('hidden.bs.modal', '.modal', function () {
 });
 
 // When an offcanvas is shown, ensure its backdrop z-index is under modals
-$(document).on('show.bs.offcanvas', '.offcanvas', function () {
+$(document).on("show.bs.offcanvas", ".offcanvas", function () {
     try {
         var $off = $(this);
         // default offcanvas z-index
-        var offZ = parseInt($off.css('z-index')) || 1045;
+        var offZ = parseInt($off.css("z-index")) || 1045;
         // if any modal is visible, push offcanvas under modal
-        if ($('.modal.show').length) {
-            var topModalZ = parseInt($('.modal.show').last().css('z-index')) || 1060;
+        if ($(".modal.show").length) {
+            var topModalZ =
+                parseInt($(".modal.show").last().css("z-index")) || 1060;
             if (topModalZ && offZ >= topModalZ) {
-                $off.css('z-index', topModalZ - 20);
+                $off.css("z-index", topModalZ - 20);
             }
         }
     } catch (e) {}
@@ -478,9 +549,12 @@ $(document).on("click", "#deleteAccount", function (e) {
                 $("#deleteAccountModal").modal("hide");
                 if (!response.error) {
                     toastr.success(response["message"]);
-                    setTimeout(function () {
-                        location.reload();
-                    }, parseFloat(toastTimeOut) * 1000);
+                    setTimeout(
+                        function () {
+                            location.reload();
+                        },
+                        parseFloat(toastTimeOut) * 1000,
+                    );
                 } else {
                     toastr.error(response.message);
                 }
@@ -542,19 +616,22 @@ $(document).on("click", ".edit-todo", function () {
             $("#todo_description").val(response.todo.description);
             if (response.todo?.reminders?.length > 0) {
                 const reminder = response.todo.reminders[0];
-                $("#edit-todo-reminder-switch").prop(
-                    "checked",
-                    reminder.is_active === 1
-                ).trigger("change"); // trigger change event
+                $("#edit-todo-reminder-switch")
+                    .prop("checked", reminder.is_active === 1)
+                    .trigger("change"); // trigger change event
                 $("#edit-todo-frequency-type")
                     .val(reminder.frequency_type)
                     .trigger("change");
                 switch (reminder.frequency_type) {
                     case "weekly":
-                        $("#edit-todo-day-of-week").val(reminder.day_of_week || "");
+                        $("#edit-todo-day-of-week").val(
+                            reminder.day_of_week || "",
+                        );
                         break;
                     case "monthly":
-                        $("#edit-todo-day-of-month").val(reminder.day_of_month || "");
+                        $("#edit-todo-day-of-month").val(
+                            reminder.day_of_month || "",
+                        );
                         break;
                 }
                 if (reminder.time_of_day) {
@@ -575,7 +652,7 @@ $(document).on("click", ".edit-note", function () {
     })[0];
     const noteTypeLabels = {
         text: "Text Note",
-        drawing: "Drawing Note"
+        drawing: "Drawing Note",
     };
     $.ajax({
         url: baseUrl + "/notes/get/" + id,
@@ -596,25 +673,29 @@ $(document).on("click", ".edit-note", function () {
             $("#editNoteType").val(noteType);
             $("#editNoteTypeDisplay").val(noteTypeLabels[noteType]);
             if (noteType === "text") {
-                $("#edit-text-note-section").removeClass('d-none');
-                $("#edit-drawing-note-section").addClass('d-none');
+                $("#edit-text-note-section").removeClass("d-none");
+                $("#edit-drawing-note-section").addClass("d-none");
                 $("#note_description").val(response.note.description || "");
             } else if (noteType === "drawing") {
-                $("#edit-text-note-section").addClass('d-none');
-                $("#edit-drawing-note-section").removeClass('d-none');
+                $("#edit-text-note-section").addClass("d-none");
+                $("#edit-drawing-note-section").removeClass("d-none");
                 // Set the drawing data
                 $("#edit_drawing_data").val(response.note.drawing_data || "");
                 // Initialize the drawing editor
                 setTimeout(function () {
-                    let drawingContainer = document.getElementById("edit_drawing-container");
+                    let drawingContainer = document.getElementById(
+                        "edit_drawing-container",
+                    );
                     if (drawingContainer) {
                         try {
                             // Clear any existing content
-                            drawingContainer.innerHTML = '';
-                            let editor = new jsdraw.Editor(drawingContainer);
-                            editor.getRootElement().style.height = "260px";
-                            const toolbar = editor.addToolbar();
-                            $('.toolbar-internalWidgetId--selection-tool-widget, .toolbar-internalWidgetId--text-tool-widget, .toolbar-internalWidgetId--document-properties-widget, .pipetteButton,.toolbar-internalWidgetId--insert-image-widget').hide();
+                            drawingContainer.innerHTML = "";
+                            window.editNoteEditor = new jsdraw.Editor(drawingContainer);
+                            window.editNoteEditor.getRootElement().style.height = "260px";
+                            const toolbar = window.editNoteEditor.addToolbar();
+                            $(
+                                ".toolbar-internalWidgetId--selection-tool-widget, .toolbar-internalWidgetId--text-tool-widget, .toolbar-internalWidgetId--document-properties-widget, .pipetteButton,.toolbar-internalWidgetId--insert-image-widget",
+                            ).hide();
                             setTimeout(() => {
                                 $(".toolbar--pen-tool-toggle-buttons").hide();
                             }, 500);
@@ -622,23 +703,19 @@ $(document).on("click", ".edit-note", function () {
                             if (response.note.drawing_data) {
                                 var svgSavedData = response.note.drawing_data;
                                 try {
-                                    editor.loadFromSVG(svgSavedData);
+                                    window.editNoteEditor.loadFromSVG(svgSavedData);
                                 } catch (error) {
-                                    console.error("Error loading drawing data:", error);
+                                    console.error(
+                                        "Error loading drawing data:",
+                                        error,
+                                    );
                                 }
                             }
-                            // Update the drawing data when submitting
-                            $(document).on('click', '#submit_btn', function (e) {
-                                if (noteType === "drawing") {
-                                    e.preventDefault();
-                                    let drawingData = editor.toSVG().outerHTML;
-                                    let encodedDrawingData = btoa(unescape(encodeURIComponent(drawingData)));
-                                    $("#edit_drawing_data").val(encodedDrawingData);
-                                    $(this).off("submit").submit();
-                                }
-                            });
                         } catch (e) {
-                            console.error("Error initializing jsDraw for edit:", e);
+                            console.error(
+                                "Error initializing jsDraw for edit:",
+                                e,
+                            );
                         }
                     }
                 }, 300);
@@ -646,8 +723,20 @@ $(document).on("click", ".edit-note", function () {
         },
         error: function (xhr, status, error) {
             console.error("Error fetching note data:", error);
-        }
+        },
     });
+});
+$(document).on("submit", "#edit_note_modal form", function (e) {
+    if ($("#editNoteType").val() === "drawing" && window.editNoteEditor) {
+        console.log("Saving edit drawing data...");
+        let drawingData = window.editNoteEditor.toSVG().outerHTML;
+        let encodedDrawingData = btoa(
+            unescape(
+                encodeURIComponent(drawingData),
+            ),
+        );
+        $("#edit_drawing_data").val(encodedDrawingData);
+    }
 });
 $(document).on("click", ".edit-status", function () {
     var id = $(this).data("id");
@@ -672,7 +761,7 @@ $(document).on("click", ".edit-status", function () {
                 .addClass("select-bg-label-" + response.status.color);
             var modalForm = $("#edit_status_modal").find("form");
             var usersSelect = modalForm.find(
-                '.tom_static_select[name="role_ids[]"]'
+                '.tom_static_select[name="role_ids[]"]',
             );
             if (usersSelect.length && usersSelect[0].tomselect) {
                 usersSelect[0].tomselect.setValue(response.roles);
@@ -719,29 +808,29 @@ $(document).on("click", ".edit-leave-request", function () {
         dataType: "json",
         success: function (response) {
             var formattedFromDate = moment(response.lr.from_date).format(
-                js_date_format
+                js_date_format,
             );
             var formattedToDate = moment(response.lr.to_date).format(
-                js_date_format
+                js_date_format,
             );
             var fromDateSelect = $("#edit_leave_request_modal").find(
-                "#update_start_date"
+                "#update_start_date",
             );
             var toDateSelect = $("#edit_leave_request_modal").find(
-                "#update_end_date"
+                "#update_end_date",
             );
             var reasonSelect = $("#edit_leave_request_modal").find(
-                '[name="reason"]'
+                '[name="reason"]',
             );
             var commentSelect = $("#edit_leave_request_modal").find(
-                '[name="comment"]'
+                '[name="comment"]',
             );
             var totalDaysSelect = $("#edit_leave_request_modal").find(
-                "#update_total_days"
+                "#update_total_days",
             );
             $("#lr_id").val(response.lr.id);
             $("#leaveUser").val(
-                response.lr.user.first_name + " " + response.lr.user.last_name
+                response.lr.user.first_name + " " + response.lr.user.last_name,
             );
             fromDateSelect.val(formattedFromDate);
             toDateSelect.val(formattedToDate);
@@ -755,10 +844,10 @@ $(document).on("click", ".edit-leave-request", function () {
                     .prop("checked", true)
                     .trigger("change");
                 var fromTimeSelect = $("#edit_leave_request_modal").find(
-                    '[name="from_time"]'
+                    '[name="from_time"]',
                 );
                 var toTimeSelect = $("#edit_leave_request_modal").find(
-                    '[name="to_time"]'
+                    '[name="to_time"]',
                 );
                 fromTimeSelect.val(response.lr.from_time);
                 toTimeSelect.val(response.lr.to_time);
@@ -778,7 +867,7 @@ $(document).on("click", ".edit-leave-request", function () {
                     .prop("checked", false)
                     .trigger("change");
                 var visibleToSelect = $("#edit_leave_request_modal").find(
-                    '.users_select[name="visible_to_ids[]"]'
+                    '.users_select[name="visible_to_ids[]"]',
                 );
                 if (
                     response.lr.visible_to_users &&
@@ -790,7 +879,7 @@ $(document).on("click", ".edit-leave-request", function () {
                             user.first_name + " " + user.last_name,
                             user.id,
                             true,
-                            true
+                            true,
                         );
                         visibleToSelect.append(userOption);
                     });
@@ -802,53 +891,70 @@ $(document).on("click", ".edit-leave-request", function () {
             commentSelect.val(response.lr.comment);
             $("input[name=status][value=" + response.lr.status + "]").prop(
                 "checked",
-                true
+                true,
             );
 
             // Set the "Mark as Paid Leave" toggle based on database value
-            var isPaidToggle = $("#edit_leave_request_modal").find("#is_paid_toggle");
-            console.log('is_paid value from DB:', response.lr.is_paid);
+            var isPaidToggle = $("#edit_leave_request_modal").find(
+                "#is_paid_toggle",
+            );
+            console.log("is_paid value from DB:", response.lr.is_paid);
 
             // Remove any disabled attribute to ensure it's clickable
-            isPaidToggle.prop('disabled', false);
+            isPaidToggle.prop("disabled", false);
 
             if (response.lr.is_paid === true || response.lr.is_paid === 1) {
                 isPaidToggle.prop("checked", true);
-                console.log('Toggle set to ON (paid)');
-            } else if (response.lr.is_paid === false || response.lr.is_paid === 0) {
+                console.log("Toggle set to ON (paid)");
+            } else if (
+                response.lr.is_paid === false ||
+                response.lr.is_paid === 0
+            ) {
                 isPaidToggle.prop("checked", false);
-                console.log('Toggle set to OFF (unpaid)');
+                console.log("Toggle set to OFF (unpaid)");
             } else {
                 // If null/undefined, default to ON
                 isPaidToggle.prop("checked", true);
-                console.log('Toggle set to ON (default - is_paid is null)');
+                console.log("Toggle set to ON (default - is_paid is null)");
             }
 
             // Fetch and display leave balance
             if (response.lr.user && response.lr.user.id) {
-                console.log('Fetching balance for user:', response.lr.user.id, 'excluding leave:', response.lr.id);
+                console.log(
+                    "Fetching balance for user:",
+                    response.lr.user.id,
+                    "excluding leave:",
+                    response.lr.id,
+                );
                 $.ajax({
-                    url: baseUrl + '/leave-requests/get-user-balance',
-                    method: 'GET',
+                    url: baseUrl + "/leave-requests/get-user-balance",
+                    method: "GET",
                     data: {
                         user_id: response.lr.user.id,
-                        exclude_leave_id: response.lr.id
+                        exclude_leave_id: response.lr.id,
                     },
                     success: function (balanceResponse) {
-                        console.log('Balance response:', balanceResponse);
+                        console.log("Balance response:", balanceResponse);
                         if (!balanceResponse.error && balanceResponse.balance) {
                             var balance = balanceResponse.balance;
 
-                            var balanceHtml = renderRemainingLeavesSummary(balance, {
-                                heading: label_balance_snapshot,
-                                includeAccrualMeta: true
-                            });
-                            $('#leave_balance_info').html(balanceHtml);
+                            var balanceHtml = renderRemainingLeavesSummary(
+                                balance,
+                                {
+                                    heading: label_balance_snapshot,
+                                    includeAccrualMeta: true,
+                                },
+                            );
+                            $("#leave_balance_info").html(balanceHtml);
                         }
                     },
                     error: function () {
-                        $('#leave_balance_info').html('<span class="text-danger">' + label_err_try_again + '</span>');
-                    }
+                        $("#leave_balance_info").html(
+                            '<span class="text-danger">' +
+                                label_err_try_again +
+                                "</span>",
+                        );
+                    },
                 });
             }
         },
@@ -883,51 +989,69 @@ $(document).on("click", ".edit-contract", function () {
         success: function (response) {
             if (response.error == false) {
                 var formattedStartDate = moment(
-                    response.contract.start_date
+                    response.contract.start_date,
                 ).format(js_date_format);
                 var formattedEndDate = moment(
-                    response.contract.end_date
+                    response.contract.end_date,
                 ).format(js_date_format);
                 $("#contract_id").val(response.contract.id);
                 $("#edit_contract_title").val(response.contract.title);
                 $("#value").val(response.contract.value);
                 if ($("#client_id")[0].tomselect) {
-                    $("#client_id")[0].tomselect.addOption({ id: response.contract.client.id, text: response.contract.client.first_name + " " + response.contract.client.last_name });
-                    $("#client_id")[0].tomselect.setValue(response.contract.client.id);
+                    $("#client_id")[0].tomselect.addOption({
+                        id: response.contract.client.id,
+                        text:
+                            response.contract.client.first_name +
+                            " " +
+                            response.contract.client.last_name,
+                    });
+                    $("#client_id")[0].tomselect.setValue(
+                        response.contract.client.id,
+                    );
                 } else {
                     var clientOption = new Option(
                         response.contract.client.first_name +
-                        " " +
-                        response.contract.client.last_name,
+                            " " +
+                            response.contract.client.last_name,
                         response.contract.client.id,
                         true,
-                        true
+                        true,
                     );
                     $("#client_id").append(clientOption).trigger("change");
                 }
 
                 if ($("#project_id")[0].tomselect) {
-                    $("#project_id")[0].tomselect.addOption({ id: response.contract.project.id, text: response.contract.project.title });
-                    $("#project_id")[0].tomselect.setValue(response.contract.project.id);
+                    $("#project_id")[0].tomselect.addOption({
+                        id: response.contract.project.id,
+                        text: response.contract.project.title,
+                    });
+                    $("#project_id")[0].tomselect.setValue(
+                        response.contract.project.id,
+                    );
                 } else {
                     var projectOption = new Option(
                         response.contract.project.title,
                         response.contract.project.id,
                         true,
-                        true
+                        true,
                     );
                     $("#project_id").append(projectOption).trigger("change");
                 }
 
                 if ($("#contract_type_id")[0].tomselect) {
-                    $("#contract_type_id")[0].tomselect.addOption({ id: response.contract.contract_type.id, text: response.contract.contract_type.type });
-                    $("#contract_type_id")[0].tomselect.setValue(response.contract.contract_type.id);
+                    $("#contract_type_id")[0].tomselect.addOption({
+                        id: response.contract.contract_type.id,
+                        text: response.contract.contract_type.type,
+                    });
+                    $("#contract_type_id")[0].tomselect.setValue(
+                        response.contract.contract_type.id,
+                    );
                 } else {
                     var contractTypeOption = new Option(
                         response.contract.contract_type.type,
                         response.contract.contract_type.id,
                         true,
-                        true
+                        true,
                     );
                     $("#contract_type_id")
                         .append(contractTypeOption)
@@ -941,7 +1065,7 @@ $(document).on("click", ".edit-contract", function () {
                 $("#update_start_date").val(formattedStartDate);
                 $("#update_end_date").val(formattedEndDate);
                 initializeDateRangePicker(
-                    "#update_start_date, #update_end_date"
+                    "#update_start_date, #update_end_date",
                 );
             } else {
                 location.reload();
@@ -978,20 +1102,33 @@ $(document).on("click", ".edit-expense", function () {
         dataType: "json",
         success: function (response) {
             var formattedExpDate = moment(response.exp.expense_date).format(
-                js_date_format
+                js_date_format,
             );
             $("#update_expense_id").val(response.exp.id);
             $("#expense_title").val(response.exp.title);
             if (response.exp.expense_type && response.exp.expense_type.title) {
                 if ($("#expense_type_id")[0].tomselect) {
-                    $("#expense_type_id")[0].tomselect.addOption({ id: response.exp.expense_type.id, text: response.exp.expense_type.title });
-                    $("#expense_type_id")[0].tomselect.setValue(response.exp.expense_type.id);
+                    $("#expense_type_id")[0].tomselect.addOption({
+                        id: response.exp.expense_type.id,
+                        text: response.exp.expense_type.title,
+                    });
+                    $("#expense_type_id")[0].tomselect.setValue(
+                        response.exp.expense_type.id,
+                    );
                 }
             }
             if (response.exp.user && response.exp.user.id) {
                 if ($("#expense_user_id")[0].tomselect) {
-                    $("#expense_user_id")[0].tomselect.addOption({ id: response.exp.user.id, text: response.exp.user.first_name + " " + response.exp.user.last_name });
-                    $("#expense_user_id")[0].tomselect.setValue(response.exp.user.id);
+                    $("#expense_user_id")[0].tomselect.addOption({
+                        id: response.exp.user.id,
+                        text:
+                            response.exp.user.first_name +
+                            " " +
+                            response.exp.user.last_name,
+                    });
+                    $("#expense_user_id")[0].tomselect.setValue(
+                        response.exp.user.id,
+                    );
                 }
             }
             $("#expense_amount").val(response.exp.amount);
@@ -1028,33 +1165,45 @@ $(document).on("click", ".edit-payment", function () {
         dataType: "json",
         success: function (response) {
             var formattedExpDate = moment(response.payment.payment_date).format(
-                js_date_format
+                js_date_format,
             );
             $("#update_payment_id").val(response.payment.id);
             // Update payment_user_id with user details
             if (response.payment.user && response.payment.user.id) {
-                var ts = document.querySelector('#payment_user_id').tomselect;
+                var ts = document.querySelector("#payment_user_id").tomselect;
                 ts.addOption({
                     value: response.payment.user.id,
-                    text: response.payment.user.first_name + " " + response.payment.user.last_name
+                    text:
+                        response.payment.user.first_name +
+                        " " +
+                        response.payment.user.last_name,
                 });
                 ts.setValue(response.payment.user.id);
             } else {
-                if (document.querySelector('#payment_user_id').tomselect) {
-                    document.querySelector('#payment_user_id').tomselect.clear();
+                if (document.querySelector("#payment_user_id").tomselect) {
+                    document
+                        .querySelector("#payment_user_id")
+                        .tomselect.clear();
                 }
             }
             // Update payment_invoice_id with invoice details
             if (response.payment.invoice && response.payment.invoice.id) {
-                var ts = document.querySelector('#payment_invoice_id').tomselect;
+                var ts = document.querySelector(
+                    "#payment_invoice_id",
+                ).tomselect;
                 ts.addOption({
                     value: response.payment.invoice.id,
-                    text: label_invoice_id_prefix + "" + response.payment.invoice.id
+                    text:
+                        label_invoice_id_prefix +
+                        "" +
+                        response.payment.invoice.id,
                 });
                 ts.setValue(response.payment.invoice.id);
             } else {
-                if (document.querySelector('#payment_invoice_id').tomselect) {
-                    document.querySelector('#payment_invoice_id').tomselect.clear();
+                if (document.querySelector("#payment_invoice_id").tomselect) {
+                    document
+                        .querySelector("#payment_invoice_id")
+                        .tomselect.clear();
                 }
             }
             // Update payment_pm_id with payment method details
@@ -1062,11 +1211,11 @@ $(document).on("click", ".edit-payment", function () {
                 response.payment.payment_method &&
                 response.payment.payment_method.title
             ) {
-                var ts = document.querySelector('#payment_pm_id').tomselect;
+                var ts = document.querySelector("#payment_pm_id").tomselect;
                 ts.setValue(response.payment.payment_method_id);
             } else {
-                if (document.querySelector('#payment_pm_id').tomselect) {
-                    document.querySelector('#payment_pm_id').tomselect.clear();
+                if (document.querySelector("#payment_pm_id").tomselect) {
+                    document.querySelector("#payment_pm_id").tomselect.clear();
                 }
             }
             $("#payment_amount").val(response.payment.amount);
@@ -1104,7 +1253,9 @@ function initializeDateRangePicker(inputSelector) {
         var isEmpty = $input.val() === ""; // Check if the input is empty
         // Check for closest modal or offcanvas
         var parentOverlay = $input.closest(".modal, .offcanvas");
-        var parentOverlayId = parentOverlay.length ? parentOverlay.attr("id") : "";
+        var parentOverlayId = parentOverlay.length
+            ? parentOverlay.attr("id")
+            : "";
         // Check if input is inside any of the specified modals or offcanvas
         var isInsideOverlay = modalsToCheck.some(function (overlayId) {
             var isInOverlay = $input.closest(overlayId).length > 0;
@@ -1135,7 +1286,10 @@ function initializeDateRangePicker(inputSelector) {
         }
         // Conditionally add startDate if input is not empty
         if (!isEmpty) {
-            daterangepickerOptions.startDate = moment($input.val(), js_date_format);
+            daterangepickerOptions.startDate = moment(
+                $input.val(),
+                js_date_format,
+            );
         }
         // Initialize DateRangePicker
         $input.daterangepicker(daterangepickerOptions);
@@ -1298,12 +1452,12 @@ $(document).ready(function () {
         "#task_start_date",
         "#task_end_date",
         "#dob",
-        "#doj"
+        "#doj",
     ];
 
     idsToProcess.forEach(function (id) {
         var config = { selector: id };
-        if (id === '#dob' || id === '#doj') {
+        if (id === "#dob" || id === "#doj") {
             config.minDate = moment("01/01/1950", "DD/MM/YYYY");
             config.maxDate = moment();
         }
@@ -1312,29 +1466,53 @@ $(document).ready(function () {
 });
 $(document).ready(function () {
     var filterIds = [
-        "#report_start_date_between", "#report_end_date_between", "#filter_date_range", "#ie_date_between",
-        "#ms_date_between", "#start_date_between", "#end_date_between", "#project_date_between",
-        "#project_start_date_between", "#project_end_date_between", "#task_date_between",
-        "#task_start_date_between", "#task_end_date_between", "#lr_date_between",
-        "#lr_start_date_between", "#lr_end_date_between", "#contract_date_between",
-        "#contract_start_date_between", "#contract_end_date_between", "#timesheet_date_between",
-        "#timesheet_start_date_between", "#timesheet_end_date_between", "#meeting_date_between",
-        "#meeting_start_date_between", "#meeting_end_date_between", "#activity_log_between_date",
-        "#notification_between_date", "#expense_from_date_between", "#payment_date_between",
-        "#lead_kanban_date_range", "#lead_date_range", "#candidate_date_between", "#interview_date_between", "#report_date_between"
+        "#report_start_date_between",
+        "#report_end_date_between",
+        "#filter_date_range",
+        "#ie_date_between",
+        "#ms_date_between",
+        "#start_date_between",
+        "#end_date_between",
+        "#project_date_between",
+        "#project_start_date_between",
+        "#project_end_date_between",
+        "#task_date_between",
+        "#task_start_date_between",
+        "#task_end_date_between",
+        "#lr_date_between",
+        "#lr_start_date_between",
+        "#lr_end_date_between",
+        "#contract_date_between",
+        "#contract_start_date_between",
+        "#contract_end_date_between",
+        "#timesheet_date_between",
+        "#timesheet_start_date_between",
+        "#timesheet_end_date_between",
+        "#meeting_date_between",
+        "#meeting_start_date_between",
+        "#meeting_end_date_between",
+        "#activity_log_between_date",
+        "#notification_between_date",
+        "#expense_from_date_between",
+        "#payment_date_between",
+        "#lead_kanban_date_range",
+        "#lead_date_range",
+        "#candidate_date_between",
+        "#interview_date_between",
+        "#report_date_between",
     ];
 
     filterIds.forEach(function (id) {
-        var baseId = id.replace('#', '');
+        var baseId = id.replace("#", "");
         var tableIdMap = {
-            'project': 'projects_table',
-            'task': 'task_table',
-            'lr': 'lr_table',
-            'contract': 'contract_table',
-            'timesheet': 'timesheet_table',
-            'meeting': 'meetings_table',
-            'expense_from': 'expense_table',
-            'payment': 'payment_table'
+            project: "projects_table",
+            task: "task_table",
+            lr: "lr_table",
+            contract: "contract_table",
+            timesheet: "timesheet_table",
+            meeting: "meetings_table",
+            expense_from: "expense_table",
+            payment: "payment_table",
         };
 
         var tableId = null;
@@ -1345,14 +1523,14 @@ $(document).ready(function () {
             }
         }
 
-        var hiddenFrom = id + '_from';
-        var hiddenTo = id + '_to';
+        var hiddenFrom = id + "_from";
+        var hiddenTo = id + "_to";
 
         // Robust fallback logic for hidden field IDs
         if (!$(hiddenFrom).length) {
-            var fallbacks = ['_between', '_range', '_date'];
+            var fallbacks = ["_between", "_range", "_date"];
             for (var i = 0; i < fallbacks.length; i++) {
-                var fallbackFrom = id.replace(fallbacks[i], '_from');
+                var fallbackFrom = id.replace(fallbacks[i], "_from");
                 if ($(fallbackFrom).length) {
                     hiddenFrom = fallbackFrom;
                     break;
@@ -1360,9 +1538,9 @@ $(document).ready(function () {
             }
         }
         if (!$(hiddenTo).length) {
-            var fallbacks = ['_between', '_range', '_date'];
+            var fallbacks = ["_between", "_range", "_date"];
             for (var i = 0; i < fallbacks.length; i++) {
-                var fallbackTo = id.replace(fallbacks[i], '_to');
+                var fallbackTo = id.replace(fallbacks[i], "_to");
                 if ($(fallbackTo).length) {
                     hiddenTo = fallbackTo;
                     break;
@@ -1374,13 +1552,13 @@ $(document).ready(function () {
             selector: id,
             hiddenFrom: hiddenFrom,
             hiddenTo: hiddenTo,
-            tableId: tableId
+            tableId: tableId,
         });
     });
 });
 // Redundant manual handlers removed as they are now handled by initAdvancedDateRangePicker
 $(
-    "textarea#footer_text,textarea#contract_description,textarea#update_contract_description,textarea.description"
+    "textarea#footer_text,textarea#contract_description,textarea#update_contract_description,textarea.description",
 ).tinymce({
     height: 250,
     menubar: false,
@@ -1416,7 +1594,7 @@ $(
         "link | undo redo | a11ycheck casechange blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist checklist outdent indent | removeformat | code blockquote emoticons table help",
 });
 $(
-    "textarea#privacy_policy,textarea#terms_conditions,textarea#about_us"
+    "textarea#privacy_policy,textarea#terms_conditions,textarea#about_us",
 ).tinymce({
     height: 400,
     menubar: false,
@@ -1454,7 +1632,7 @@ $(
 document.addEventListener("focusin", function (e) {
     if (
         e.target.closest(
-            ".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root"
+            ".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root",
         ) !== null
     ) {
         e.stopImmediatePropagation();
@@ -1468,13 +1646,17 @@ $(document).on("submit", ".form-submit-event", function (e) {
     }
     var formData = new FormData(this);
     // NEW CODE: Check if this is an HTML template and encode it if needed
-    if ($(this).attr("action").includes("store_template") ||
+    if (
+        $(this).attr("action").includes("store_template") ||
         $(this).attr("action").includes("/email-templates/store") ||
         $(this).attr("action").includes("email-templates/update") ||
         $(this).attr("action").includes("/emails/store") ||
-        $(this).attr("action").includes("/emails/preview")) {
+        $(this).attr("action").includes("/emails/preview")
+    ) {
         // Find the HTML content field - adjust the selector as needed
-        var contentField = $(this).find('textarea[name="content"] , input[name="content"]');
+        var contentField = $(this).find(
+            'textarea[name="content"] , input[name="content"]',
+        );
         if (contentField.length > 0) {
             // Remove the original content from FormData
             formData.delete("content");
@@ -1528,49 +1710,94 @@ $(document).on("submit", ".form-submit-event", function (e) {
 
             // Check if override confirmation is required (for payslip forms)
             if (result["override_required"] === true) {
-                console.log('[Override Check] Override required detected', result.override_data);
+                console.log(
+                    "[Override Check] Override required detected",
+                    result.override_data,
+                );
 
                 // Check for function in global scope or window object
-                var showModalFunc = typeof showOverrideConfirmationModal !== 'undefined'
-                    ? showOverrideConfirmationModal
-                    : (typeof window.showOverrideConfirmationModal !== 'undefined'
-                        ? window.showOverrideConfirmationModal
-                        : null);
+                var showModalFunc =
+                    typeof showOverrideConfirmationModal !== "undefined"
+                        ? showOverrideConfirmationModal
+                        : typeof window.showOverrideConfirmationModal !==
+                            "undefined"
+                          ? window.showOverrideConfirmationModal
+                          : null;
 
-                console.log('[Override Check] Function check:', {
-                    'showOverrideConfirmationModal exists': typeof showOverrideConfirmationModal,
-                    'window.showOverrideConfirmationModal exists': typeof window.showOverrideConfirmationModal,
-                    'showModalFunc found': showModalFunc !== null,
-                    'showModalFunc is function': showModalFunc && typeof showModalFunc === 'function'
+                console.log("[Override Check] Function check:", {
+                    "showOverrideConfirmationModal exists":
+                        typeof showOverrideConfirmationModal,
+                    "window.showOverrideConfirmationModal exists":
+                        typeof window.showOverrideConfirmationModal,
+                    "showModalFunc found": showModalFunc !== null,
+                    "showModalFunc is function":
+                        showModalFunc && typeof showModalFunc === "function",
                 });
 
-                if (showModalFunc && typeof showModalFunc === 'function') {
+                if (showModalFunc && typeof showModalFunc === "function") {
                     try {
                         // Show override confirmation modal
                         var formData = new FormData(currentForm[0]);
-                        console.log('[Override Check] Calling showOverrideConfirmationModal');
-                        showModalFunc(result.override_data, currentForm, formData);
-                        console.log('[Override Check] Modal should be shown now');
+                        console.log(
+                            "[Override Check] Calling showOverrideConfirmationModal",
+                        );
+                        showModalFunc(
+                            result.override_data,
+                            currentForm,
+                            formData,
+                        );
+                        console.log(
+                            "[Override Check] Modal should be shown now",
+                        );
                         return; // Don't proceed with normal success handling
                     } catch (error) {
-                        console.error('[Override Check] Error showing modal:', error);
+                        console.error(
+                            "[Override Check] Error showing modal:",
+                            error,
+                        );
                         // Fallback: show alert
-                        alert((APP_LABELS && APP_LABELS['override_required'] ? APP_LABELS['override_required'] : 'Override Required!') + '\n\n' +
-                            'Available Balance: ' + (result.override_data?.available_balance || 0) + '\n' +
-                            'Excess Paid Leave: ' + (result.override_data?.excess_paid_leave || 0) + '\n' +
-                            'Delta Paid Leave: ' + (result.override_data?.delta_paid_leave || 0));
+                        alert(
+                            (APP_LABELS && APP_LABELS["override_required"]
+                                ? APP_LABELS["override_required"]
+                                : "Override Required!") +
+                                "\n\n" +
+                                "Available Balance: " +
+                                (result.override_data?.available_balance || 0) +
+                                "\n" +
+                                "Excess Paid Leave: " +
+                                (result.override_data?.excess_paid_leave || 0) +
+                                "\n" +
+                                "Delta Paid Leave: " +
+                                (result.override_data?.delta_paid_leave || 0),
+                        );
                         return; // Don't proceed with normal success handling
                     }
                 } else {
                     // Function not found - this shouldn't happen, but log for debugging
-                    console.error('[Override Check] showOverrideConfirmationModal function not found. Override required but modal cannot be shown.');
-                    console.log('[Override Check] Override data:', result.override_data);
+                    console.error(
+                        "[Override Check] showOverrideConfirmationModal function not found. Override required but modal cannot be shown.",
+                    );
+                    console.log(
+                        "[Override Check] Override data:",
+                        result.override_data,
+                    );
                     // Fallback: show alert
-                    alert((APP_LABELS && APP_LABELS['override_required'] ? APP_LABELS['override_required'] : 'Override Required!') + '\n\n' +
-                        'Available Balance: ' + (result.override_data?.available_balance || 0) + '\n' +
-                        'Excess Paid Leave: ' + (result.override_data?.excess_paid_leave || 0) + '\n' +
-                        'Delta Paid Leave: ' + (result.override_data?.delta_paid_leave || 0) + '\n\n' +
-                        'Please refresh the page and try again.');
+                    alert(
+                        (APP_LABELS && APP_LABELS["override_required"]
+                            ? APP_LABELS["override_required"]
+                            : "Override Required!") +
+                            "\n\n" +
+                            "Available Balance: " +
+                            (result.override_data?.available_balance || 0) +
+                            "\n" +
+                            "Excess Paid Leave: " +
+                            (result.override_data?.excess_paid_leave || 0) +
+                            "\n" +
+                            "Delta Paid Leave: " +
+                            (result.override_data?.delta_paid_leave || 0) +
+                            "\n\n" +
+                            "Please refresh the page and try again.",
+                    );
                     return; // Don't proceed with normal success handling
                 }
             }
@@ -1586,7 +1813,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                         toastr.success(result["message"]);
                         setTimeout(
                             handleRedirection,
-                            parseFloat(toastTimeOut) * 1000
+                            parseFloat(toastTimeOut) * 1000,
                         );
                     } else {
                         handleRedirection();
@@ -1603,7 +1830,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             resetDateFields(currentForm);
                             if (idOfModal == "create_status_modal") {
                                 var dropdownSelector = modalWithClass.find(
-                                    'select[name="status_id"]'
+                                    'select[name="status_id"]',
                                 );
                                 if (dropdownSelector.length) {
                                     var newItem = result.status;
@@ -1613,9 +1840,9 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                         .attr("selected", true)
                                         .text(
                                             newItem.title +
-                                            " (" +
-                                            newItem.color +
-                                            ")"
+                                                " (" +
+                                                newItem.color +
+                                                ")",
                                         );
                                     $(dropdownSelector).append(newOption);
                                     var openModalId = dropdownSelector
@@ -1634,26 +1861,26 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                         if (modalId !== "#" + openModalId) {
                                             // Find the select element within the modal
                                             var otherModalSelector = $(
-                                                modalId
+                                                modalId,
                                             ).find('select[name="status_id"]');
                                             // Create a new option without 'selected' attribute
                                             var otherOption = $(
-                                                "<option></option>"
+                                                "<option></option>",
                                             )
                                                 .attr("value", newItem.id)
                                                 .attr(
                                                     "data-color",
-                                                    newItem.color
+                                                    newItem.color,
                                                 )
                                                 .text(
                                                     newItem.title +
-                                                    " (" +
-                                                    newItem.color +
-                                                    ")"
+                                                        " (" +
+                                                        newItem.color +
+                                                        ")",
                                                 );
                                             // Append the option to the select element in the modal
                                             otherModalSelector.append(
-                                                otherOption
+                                                otherOption,
                                             );
                                         }
                                     });
@@ -1661,7 +1888,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             }
                             if (idOfModal == "create_priority_modal") {
                                 var dropdownSelector = modalWithClass.find(
-                                    'select[name="priority_id"]'
+                                    'select[name="priority_id"]',
                                 );
                                 if (dropdownSelector.length) {
                                     var newItem = result.priority;
@@ -1669,14 +1896,14 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                         .attr("value", newItem.id)
                                         .attr(
                                             "class",
-                                            "badge bg-label-" + newItem.color
+                                            "badge bg-label-" + newItem.color,
                                         )
                                         .attr("selected", true)
                                         .text(
                                             newItem.title +
-                                            " (" +
-                                            newItem.color +
-                                            ")"
+                                                " (" +
+                                                newItem.color +
+                                                ")",
                                         );
                                     $(dropdownSelector).append(newOption);
                                     var openModalId = dropdownSelector
@@ -1695,29 +1922,29 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                         if (modalId !== "#" + openModalId) {
                                             // Find the select element within the modal
                                             var otherModalSelector = $(
-                                                modalId
+                                                modalId,
                                             ).find(
-                                                'select[name="priority_id"]'
+                                                'select[name="priority_id"]',
                                             );
                                             // Create a new option without 'selected' attribute
                                             var otherOption = $(
-                                                "<option></option>"
+                                                "<option></option>",
                                             )
                                                 .attr("value", newItem.id)
                                                 .attr(
                                                     "class",
                                                     "badge bg-label-" +
-                                                    newItem.color
+                                                        newItem.color,
                                                 )
                                                 .text(
                                                     newItem.title +
-                                                    " (" +
-                                                    newItem.color +
-                                                    ")"
+                                                        " (" +
+                                                        newItem.color +
+                                                        ")",
                                                 );
                                             // Append the option to the select element in the modal
                                             otherModalSelector.append(
-                                                otherOption
+                                                otherOption,
                                             );
                                         }
                                     });
@@ -1725,7 +1952,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             }
                             if (idOfModal == "create_tag_modal") {
                                 var dropdownSelector = modalWithClass.find(
-                                    'select[name="tag_ids[]"]'
+                                    'select[name="tag_ids[]"]',
                                 );
                                 if (dropdownSelector.length) {
                                     var newItem = result.tag;
@@ -1750,21 +1977,21 @@ $(document).on("submit", ".form-submit-event", function (e) {
                                         if (modalId !== "#" + openModalId) {
                                             // Find the select element within the modal
                                             var otherModalSelector = $(
-                                                modalId
+                                                modalId,
                                             ).find('select[name="tag_ids[]"]');
                                             // Create a new option without 'selected' attribute
                                             var otherOption = $(
-                                                "<option></option>"
+                                                "<option></option>",
                                             )
                                                 .attr("value", newItem.id)
                                                 .attr(
                                                     "data-color",
-                                                    newItem.color
+                                                    newItem.color,
                                                 )
                                                 .text(newItem.title);
                                             // Append the option to the select element in the modal
                                             otherModalSelector.append(
-                                                otherOption
+                                                otherOption,
                                             );
                                         }
                                     });
@@ -1785,20 +2012,29 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             if (idOfModal === "create_contract_type_modal") {
                                 var newItem = result.ct;
                                 // Find the currently open contract modal
-                                var contractModal = $("#create_contract_modal.show, #edit_contract_modal.show");
+                                var contractModal = $(
+                                    "#create_contract_modal.show, #edit_contract_modal.show",
+                                );
                                 if (contractModal.length) {
-                                    var dropdownSelector = contractModal.find('select[name="contract_type_id"]');
+                                    var dropdownSelector = contractModal.find(
+                                        'select[name="contract_type_id"]',
+                                    );
                                     if (dropdownSelector.length) {
                                         // Append and select the new option
                                         var newOption = $("<option></option>")
                                             .attr("value", newItem.id)
                                             .text(newItem.type)
                                             .attr("selected", true);
-                                        dropdownSelector.append(newOption).val(newItem.id).trigger("change");
+                                        dropdownSelector
+                                            .append(newOption)
+                                            .val(newItem.id)
+                                            .trigger("change");
                                     }
                                 }
                                 // Append to the *other* contract modal (to keep both in sync)
-                                var otherContractModal = $("#create_contract_modal, #edit_contract_modal")
+                                var otherContractModal = $(
+                                    "#create_contract_modal, #edit_contract_modal",
+                                )
                                     .not(contractModal)
                                     .find('select[name="contract_type_id"]');
                                 if (otherContractModal.length) {
@@ -1817,7 +2053,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             }
                             if (idOfModal == "create_pm_modal") {
                                 var dropdownSelector = $(
-                                    'select[name="payment_method_id"]'
+                                    'select[name="payment_method_id"]',
                                 );
                                 if (dropdownSelector.length) {
                                     var newItem = result.pm;
@@ -1830,7 +2066,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             }
                             if (idOfModal == "create_allowance_modal") {
                                 var dropdownSelector = $(
-                                    'select[name="allowance_id"]'
+                                    'select[name="allowance_id"]',
                                 );
                                 if (dropdownSelector.length) {
                                     var newItem = result.allowance;
@@ -1845,7 +2081,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             }
                             if (idOfModal == "create_deduction_modal") {
                                 var dropdownSelector = $(
-                                    'select[name="deduction_id"]'
+                                    'select[name="deduction_id"]',
                                 );
                                 if (dropdownSelector.length) {
                                     var newItem = result.deduction;
@@ -1866,7 +2102,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             toastr.success(result["message"]);
                             setTimeout(
                                 handleRedirection,
-                                parseFloat(toastTimeOut) * 1000
+                                parseFloat(toastTimeOut) * 1000,
                             );
                         } else {
                             handleRedirection();
@@ -1892,7 +2128,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                 var showInModal = response.showInModal; // Flag to decide if errors should be shown in the modal
                 if (showInModal) {
                     // Get validation errors from the response
-                    var errorHtmlBody = '';
+                    var errorHtmlBody = "";
                     // Loop through the validation errors
                     $.each(errors, function (row, fields) {
                         errorHtmlBody += `<div><strong>${row}</strong><ul>`;
@@ -1904,12 +2140,12 @@ $(document).on("submit", ".form-submit-event", function (e) {
                         errorHtmlBody += `</ul></div>`;
                     });
                     // Inject error HTML into the modal
-                    $('#errorModalContent').html(errorHtmlBody);
-                    $('#errorModalBody').removeClass('d-none');
+                    $("#errorModalContent").html(errorHtmlBody);
+                    $("#errorModalBody").removeClass("d-none");
                 }
                 // Assuming you have a list of all input fields with error messages
                 var inputFields = currentForm.find(
-                    "input[name], select[name], textarea[name]"
+                    "input[name], select[name], textarea[name]",
                 );
                 inputFields = $(inputFields.toArray().reverse());
                 // Iterate through all input fields
@@ -1917,7 +2153,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                     var inputField = $(this);
                     var fieldName = inputField.attr("name");
                     var errorMessageElement = $(
-                        '<span class="text-danger error-message"></span>'
+                        '<span class="text-danger error-message"></span>',
                     );
                     if (errors && errors[fieldName]) {
                         if (
@@ -1975,7 +2211,12 @@ $(document).on("submit", ".form-submit-event", function (e) {
                         }
                         // If there is a validation error message for this field, display it
                         if (errors[fieldName][0].includes("required")) {
-                            errorMessageElement.text(APP_LABELS && APP_LABELS['this_field_is_required'] ? APP_LABELS['this_field_is_required'] : "This field is required.");
+                            errorMessageElement.text(
+                                APP_LABELS &&
+                                    APP_LABELS["this_field_is_required"]
+                                    ? APP_LABELS["this_field_is_required"]
+                                    : "This field is required.",
+                            );
                         } else {
                             errorMessageElement.text(errors[fieldName]);
                         }
@@ -1987,7 +2228,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                     } else {
                         // If there is no validation error message, clear the existing message
                         var existingErrorMessage = inputField.next(
-                            ".text-danger.error-message"
+                            ".text-danger.error-message",
                         );
                         if (inputField.hasClass("select2-hidden-accessible")) {
                             existingErrorMessage = inputField
@@ -1999,14 +2240,14 @@ $(document).on("submit", ".form-submit-event", function (e) {
                             var inputGroup =
                                 inputField.closest(".input-group-merge");
                             existingErrorMessage = inputGroup.next(
-                                ".text-danger.error-message"
+                                ".text-danger.error-message",
                             );
                         } else if (
                             inputField.closest(".input-group").length > 0
                         ) {
                             var inputGroup = inputField.closest(".input-group");
                             existingErrorMessage = inputGroup.next(
-                                ".text-danger.error-message"
+                                ".text-danger.error-message",
                             );
                         }
                         if (existingErrorMessage.length > 0) {
@@ -2019,7 +2260,7 @@ $(document).on("submit", ".form-submit-event", function (e) {
                 if (response && response.message && response.exception) {
                     var errorMessage = response.message;
                     var match = errorMessage.match(
-                        /Access denied for user '([^']+)'@/
+                        /Access denied for user '([^']+)'@/,
                     );
                     if (match) {
                         var dbUser = match[1];
@@ -2084,12 +2325,16 @@ $(document).on("click", ".favorite-icon", function () {
                     icon.removeClass("bxs-star");
                     icon.addClass("bx-star");
                     icon.attr(temp, add_favorite); // Update the tooltip text
-                    icon.find("i").removeClass("bxs-star text-warning").addClass("bx-star text-muted");
+                    icon.find("i")
+                        .removeClass("bxs-star text-warning")
+                        .addClass("bx-star text-muted");
                 } else {
                     icon.removeClass("bx-star");
                     icon.addClass("bxs-star");
                     icon.attr(temp, remove_favorite); // Update the tooltip text
-                    icon.find("i").removeClass("bx-star text-muted").addClass("bxs-star text-warning");
+                    icon.find("i")
+                        .removeClass("bx-star text-muted")
+                        .addClass("bxs-star text-warning");
                 }
                 icon.attr("data-favorite", isFavorite);
                 var textNode = icon.contents().filter(function () {
@@ -2097,7 +2342,10 @@ $(document).on("click", ".favorite-icon", function () {
                 });
                 if (textNode.length) {
                     if (!icon.hasClass("dropdown-item")) {
-                        textNode[0].nodeValue = isFavorite == 0 ? " " + add_favorite : " " + remove_favorite;
+                        textNode[0].nodeValue =
+                            isFavorite == 0
+                                ? " " + add_favorite
+                                : " " + remove_favorite;
                     }
                 }
                 if (isFavorite == 0) {
@@ -2144,12 +2392,16 @@ $(document).on("click", ".pinned-icon", function () {
                     icon.removeClass("bxs-pin");
                     icon.addClass("bx-pin");
                     icon.attr(temp, label_click_pin); // Update the tooltip text
-                    icon.find("i").removeClass("bxs-pin text-success").addClass("bx-pin text-muted");
+                    icon.find("i")
+                        .removeClass("bxs-pin text-success")
+                        .addClass("bx-pin text-muted");
                 } else {
                     icon.removeClass("bx-pin");
                     icon.addClass("bxs-pin");
                     icon.attr(temp, label_click_unpin); // Update the tooltip text
-                    icon.find("i").removeClass("bx-pin text-muted").addClass("bxs-pin text-success");
+                    icon.find("i")
+                        .removeClass("bx-pin text-muted")
+                        .addClass("bxs-pin text-success");
                 }
                 icon.attr("data-pinned", isPinned);
                 var textNode = icon.contents().filter(function () {
@@ -2157,15 +2409,21 @@ $(document).on("click", ".pinned-icon", function () {
                 });
                 if (textNode.length) {
                     if (!icon.hasClass("dropdown-item")) {
-                        textNode[0].nodeValue = isPinned == 0 ? " " + label_click_pin : " " + label_click_unpin;
+                        textNode[0].nodeValue =
+                            isPinned == 0
+                                ? " " + label_click_pin
+                                : " " + label_click_unpin;
                     }
                 }
                 if (requireReload) {
                     // Show success message
                     toastr.success(response.message);
-                    setTimeout(function () {
-                        location.reload();
-                    }, parseFloat(toastTimeOut) * 1000);
+                    setTimeout(
+                        function () {
+                            location.reload();
+                        },
+                        parseFloat(toastTimeOut) * 1000,
+                    );
                 } else {
                     icon.attr("data-pinned", isPinned);
                     if (isPinned == 0) {
@@ -2250,9 +2508,12 @@ $(document).on("click", ".duplicate", function (e) {
                         if (response.message) {
                             // Show success message
                             toastr.success(response.message);
-                            setTimeout(function () {
-                                location.reload();
-                            }, parseFloat(toastTimeOut) * 1000);
+                            setTimeout(
+                                function () {
+                                    location.reload();
+                                },
+                                parseFloat(toastTimeOut) * 1000,
+                            );
                         } else {
                             location.reload();
                         }
@@ -2367,7 +2628,7 @@ if (document.getElementById("system-update-dropzone")) {
                         this.files[_i].name === file.name &&
                         this.files[_i].size === file.size &&
                         this.files[_i].lastModifiedDate.toString() ===
-                        file.lastModifiedDate.toString()
+                            file.lastModifiedDate.toString()
                     ) {
                         this.removeFile(file);
                         i++;
@@ -2403,9 +2664,12 @@ if (document.getElementById("system-update-dropzone")) {
             } else {
                 // Show success message
                 toastr.success(response.message);
-                setTimeout(function () {
-                    location.reload();
-                }, parseFloat(toastTimeOut) * 1000);
+                setTimeout(
+                    function () {
+                        location.reload();
+                    },
+                    parseFloat(toastTimeOut) * 1000,
+                );
             }
         });
         $("#system_update_btn").on("click", function (e) {
@@ -2465,7 +2729,10 @@ if (document.getElementById("media-upload-dropzone")) {
         if (this.files.length > maxFilesAllowed) {
             this.removeFile(file); // Remove the extra file
             toastr.error(
-                label_max_files_count_allowed.replace(":count", maxFilesAllowed)
+                label_max_files_count_allowed.replace(
+                    ":count",
+                    maxFilesAllowed,
+                ),
             );
             return; // Exit to prevent further processing
         }
@@ -2598,7 +2865,7 @@ if (document.getElementById("bulk-upload-dropzone")) {
                     this.files[_i].name === file.name &&
                     this.files[_i].size === file.size &&
                     this.files[_i].lastModifiedDate.toString() ===
-                    file.lastModifiedDate.toString()
+                        file.lastModifiedDate.toString()
                 ) {
                     this.removeFile(file);
                     i++;
@@ -2678,7 +2945,7 @@ $(".row-permission-checkbox").change(function () {
     var isChecked = $(this).prop("checked");
     $(`.permission-checkbox[data-module="${module}"]`).prop(
         "checked",
-        isChecked
+        isChecked,
     );
 });
 $("#selectAllColumnPermissions").change(function () {
@@ -2765,13 +3032,15 @@ $(document).ready(function () {
                     : data_type.replace("-", "_"));
             var showDelete =
                 data_type !== "report" &&
-                    data_table !== "birthdays_table" &&
-                    data_table !== "wa_table"
+                data_table !== "birthdays_table" &&
+                data_table !== "wa_table"
                     ? 1
                     : 0;
-            var $actionBar = $toolbar.find('.custom-action-bar');
+            var $actionBar = $toolbar.find(".custom-action-bar");
             if ($actionBar.length === 0) {
-                $actionBar = $('<div class="custom-action-bar bs-bars float-left d-flex flex-wrap gap-2 align-items-center mb-3"></div>');
+                $actionBar = $(
+                    '<div class="custom-action-bar bs-bars float-left d-flex flex-wrap gap-2 align-items-center mb-3"></div>',
+                );
                 $toolbar.prepend($actionBar);
             } else {
                 $actionBar.empty();
@@ -2781,17 +3050,17 @@ $(document).ready(function () {
             if (showDelete) {
                 var $deleteButton = $(
                     '<button type="button" class="btn btn-outline-danger delete-selected ' +
-                    action_class +
-                    '" data-type="' +
-                    data_type +
-                    '" data-table="' +
-                    data_table +
-                    '" data-reload="' +
-                    data_reload +
-                    '">' +
-                    '<i class="bx bx-trash me-1"></i>' +
-                    label_delete_selected +
-                    "</button>"
+                        action_class +
+                        '" data-type="' +
+                        data_type +
+                        '" data-table="' +
+                        data_table +
+                        '" data-reload="' +
+                        data_reload +
+                        '">' +
+                        '<i class="bx bx-trash me-1"></i>' +
+                        label_delete_selected +
+                        "</button>",
                 );
                 $actionBar.append($deleteButton);
             }
@@ -2803,35 +3072,46 @@ $(document).ready(function () {
                 // Create the "Clear Filters" button
                 var $clearFiltersButton = $(
                     '<button type="button" class="btn btn-secondary w-100 ' +
-                    clearButtonClass +
-                    '">' +
-                    '<i class="bx bx-refresh me-1"></i>' +
-                    label_clear_filters +
-                    "</button>"
+                        clearButtonClass +
+                        '">' +
+                        '<i class="bx bx-refresh me-1"></i>' +
+                        label_clear_filters +
+                        "</button>",
                 );
 
                 // Try to find the filter row by checking parents from closest to furthest
                 var $filterRow = $();
-                $toolbar.parents('.card-body, .card, .mt-2, .container-fluid').each(function () {
-                    var $row = $(this).find('.row').filter(function () {
-                        return $(this).find('select[multiple="multiple"]').length > 0 || $(this).hasClass('tk-filter-row');
-                    }).last();
-                    if ($row.length > 0) {
-                        $filterRow = $row;
-                        return false; // Break the loop once we find the filter row
-                    }
-                });
+                $toolbar
+                    .parents(".card-body, .card, .mt-2, .container-fluid")
+                    .each(function () {
+                        var $row = $(this)
+                            .find(".row")
+                            .filter(function () {
+                                return (
+                                    $(this).find('select[multiple="multiple"]')
+                                        .length > 0 ||
+                                    $(this).hasClass("tk-filter-row")
+                                );
+                            })
+                            .last();
+                        if ($row.length > 0) {
+                            $filterRow = $row;
+                            return false; // Break the loop once we find the filter row
+                        }
+                    });
 
                 if ($filterRow.length > 0) {
-                    var $existingContainer = $filterRow.find('.clear-filters-container');
-                    if ($existingContainer.length > 0) {
-                        $existingContainer.empty().append($clearFiltersButton);
-                    } else {
-                        var $filterCol = $('<div class="col-md-auto  d-flex align-items-end clear-filters-container"></div>');
-                        $filterCol.append($clearFiltersButton);
-                        $filterRow.append($filterCol);
-                    }
+                    // Remove old clear filter button if already exists
+                    $filterRow.find(".clear-filters-container").remove();
+
+                    var $filterCol = $(
+                        '<div class="col-md-auto d-flex align-items-end clear-filters-container"></div>',
+                    );
+                    $filterCol.append($clearFiltersButton);
+                    $filterRow.append($filterCol);
                 } else {
+                    // Prevent duplicate append in action bar
+                    $actionBar.find("." + clearButtonClass).remove();
                     $actionBar.append($clearFiltersButton);
                 }
             }
@@ -2843,13 +3123,13 @@ $(document).ready(function () {
                     $save_column_visibility.data("table") || data_table;
                 var $savePreferencesButton = $(
                     '<button type="button" class="btn btn-outline-primary save-column-visibility" data-type="' +
-                    saveType +
-                    '" data-table="' +
-                    saveTable +
-                    '">' +
-                    '<i class="bx bx-save me-1"></i>' +
-                    label_save_column_visibility +
-                    "</button>"
+                        saveType +
+                        '" data-table="' +
+                        saveTable +
+                        '">' +
+                        '<i class="bx bx-save me-1"></i>' +
+                        label_save_column_visibility +
+                        "</button>",
                 );
                 $actionBar.append($savePreferencesButton);
             }
@@ -2920,41 +3200,47 @@ $(document).on("click", "#mark-all-notifications-as-read", function (e) {
                     // $('#confirmMarkAllAsRead').html(label_yes).attr('disabled', false);
                 },
             });
-        }
+        },
     );
 });
 
 // Global Table Style Normalizer
 // Applies the design system badge styles (bg-label-*) and uncolored action icons to ALL tables automatically
-$(document).on('post-body.bs.table', 'table[data-toggle="table"]', function () {
+$(document).on("post-body.bs.table", 'table[data-toggle="table"]', function () {
     var $table = $(this);
 
     // 1. Convert all standard bg-* badges to bg-label-*
-    $table.find('.badge').each(function () {
+    $table.find(".badge").each(function () {
         var $badge = $(this);
-        var classes = $badge.attr('class').split(' ');
-        var originalBgClass = '';
+        var classes = $badge.attr("class").split(" ");
+        var originalBgClass = "";
         var hasLabelClass = false;
 
         for (var i = 0; i < classes.length; i++) {
-            if (classes[i].startsWith('bg-label-')) {
+            if (classes[i].startsWith("bg-label-")) {
                 hasLabelClass = true;
                 break;
             }
-            if (classes[i].startsWith('bg-') && classes[i] !== 'bg-transparent' && classes[i] !== 'bg-white') {
+            if (
+                classes[i].startsWith("bg-") &&
+                classes[i] !== "bg-transparent" &&
+                classes[i] !== "bg-white"
+            ) {
                 originalBgClass = classes[i];
             }
         }
 
         if (!hasLabelClass && originalBgClass) {
             var color = originalBgClass.substring(3); // extracts 'primary', 'danger', etc.
-            $badge.removeClass(originalBgClass).addClass('bg-label-' + color);
+            $badge.removeClass(originalBgClass).addClass("bg-label-" + color);
         }
     });
 
     // 2. Normalize Action Icons (remove hardcoded colors like text-danger, text-primary from action columns)
-    $table.find('a i.bx, button i.bx').each(function () {
-        $(this).removeClass('text-danger text-primary text-success text-warning text-info text-dark text-secondary text-muted');
+    $table.find("a i.bx, button i.bx").each(function () {
+        $(this).removeClass(
+            "text-danger text-primary text-success text-warning text-info text-dark text-secondary text-muted",
+        );
     });
 });
 $(document).on("click", ".update-notification-status", function (e) {
@@ -2966,7 +3252,7 @@ $(document).on("click", ".update-notification-status", function (e) {
         // Attach click event handler to the confirmation button
         $("#update_notification_status_modal").off(
             "click",
-            "#confirmNotificationStatus"
+            "#confirmNotificationStatus",
         );
         $("#update_notification_status_modal").on(
             "click",
@@ -2976,7 +3262,7 @@ $(document).on("click", ".update-notification-status", function (e) {
                     .html(label_please_wait)
                     .attr("disabled", true);
                 performUpdate(notificationId, needConfirm);
-            }
+            },
         );
     } else {
         // If confirmation is not needed, directly perform the update and handle response
@@ -3008,7 +3294,7 @@ function performUpdate(notificationId, needConfirm = "") {
                 var redirectUrl = determineRedirectUrl(
                     response.notification.type,
                     response.notification.type_id,
-                    response.notification.action
+                    response.notification.action,
                 );
                 window.location.href = redirectUrl;
             }
@@ -3075,11 +3361,11 @@ if (
                 $("#unreadNotificationsCount").text(unreadNotificationsCount);
                 $("#unreadNotificationsCount").toggleClass(
                     "d-none",
-                    unreadNotificationsCount === 0
+                    unreadNotificationsCount === 0,
                 );
                 // Update the notifications list with the new HTML
                 $("#unreadNotificationsContainer").html(
-                    unreadNotificationsHtml
+                    unreadNotificationsHtml,
                 );
             },
             error: function (xhr, status, error) {
@@ -3093,7 +3379,7 @@ if (
     // setInterval(updateUnreadNotifications, 30000);
 }
 $(
-    "textarea#email_verify_email,textarea#email_account_creation,textarea#email_forgot_password,textarea#email_project_assignment,textarea#email_task_assignment,textarea#email_workspace_assignment,textarea#email_meeting_assignment,textarea#email_leave_request_creation,textarea#email_leave_request_status_updation,textarea#email_project_status_updation,textarea#email_task_status_updation,textarea#email_team_member_on_leave_alert,textarea#email_birthday_wish,#email_work_anniversary_wish,textarea#email_task_reminder,textarea#email_recurring_task,textarea#template-body,textarea#editBody,textarea#email_interview_assignment,textarea#email_interview_status_update"
+    "textarea#email_verify_email,textarea#email_account_creation,textarea#email_forgot_password,textarea#email_project_assignment,textarea#email_task_assignment,textarea#email_workspace_assignment,textarea#email_meeting_assignment,textarea#email_leave_request_creation,textarea#email_leave_request_status_updation,textarea#email_project_status_updation,textarea#email_task_status_updation,textarea#email_team_member_on_leave_alert,textarea#email_birthday_wish,#email_work_anniversary_wish,textarea#email_task_reminder,textarea#email_recurring_task,textarea#template-body,textarea#editBody,textarea#email_interview_assignment,textarea#email_interview_status_update",
 ).tinymce({
     height: 821,
     menubar: true,
@@ -3179,7 +3465,7 @@ $(document).on("click", ".restore-default", function (e) {
                     }
                 },
             });
-        }
+        },
     );
 });
 $(document).on("click", ".sms-restore-default", function (e) {
@@ -3218,12 +3504,16 @@ $(document).on("click", ".sms-restore-default", function (e) {
                     }
                 },
             });
-        }
+        },
     );
 });
 $(document).ready(function () {
     // Shared function to calculate total days
-    function calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector) {
+    function calculateTotalDays(
+        startDateSelector,
+        endDateSelector,
+        totalDaysSelector,
+    ) {
         var start_date = moment($(startDateSelector).val(), js_date_format);
         var end_date = moment($(endDateSelector).val(), js_date_format);
         if (start_date.isValid() && end_date.isValid()) {
@@ -3232,17 +3522,33 @@ $(document).ready(function () {
         }
     }
     // Function to bind event listeners for date inputs
-    function bindDateChangeListeners(startDateSelector, endDateSelector, totalDaysSelector) {
+    function bindDateChangeListeners(
+        startDateSelector,
+        endDateSelector,
+        totalDaysSelector,
+    ) {
         $(startDateSelector + ", " + endDateSelector)
             .off("change")
             .on("change", function () {
-                calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
+                calculateTotalDays(
+                    startDateSelector,
+                    endDateSelector,
+                    totalDaysSelector,
+                );
             });
         $(startDateSelector).on("apply.daterangepicker", function () {
-            calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
+            calculateTotalDays(
+                startDateSelector,
+                endDateSelector,
+                totalDaysSelector,
+            );
         });
         $(endDateSelector).on("apply.daterangepicker", function () {
-            calculateTotalDays(startDateSelector, endDateSelector, totalDaysSelector);
+            calculateTotalDays(
+                startDateSelector,
+                endDateSelector,
+                totalDaysSelector,
+            );
         });
     }
     // Initial binding for create modal
@@ -3251,7 +3557,11 @@ $(document).ready(function () {
     }
     // Initial binding for update modal
     if ($("#update_total_days").length) {
-        bindDateChangeListeners("#update_start_date", "#update_end_date", "#update_total_days");
+        bindDateChangeListeners(
+            "#update_start_date",
+            "#update_end_date",
+            "#update_total_days",
+        );
     }
     // Reset form logic for both modal and offcanvas
     function resetModalForm(container) {
@@ -3259,10 +3569,18 @@ $(document).ready(function () {
         var $form = $(container).find("form");
         $form.trigger("reset");
         if ($form.find("#total_days").length) {
-            bindDateChangeListeners("#start_date", "#lr_end_date", "#total_days");
+            bindDateChangeListeners(
+                "#start_date",
+                "#lr_end_date",
+                "#total_days",
+            );
         }
         if ($form.find("#update_total_days").length) {
-            bindDateChangeListeners("#update_start_date", "#update_end_date", "#update_total_days");
+            bindDateChangeListeners(
+                "#update_start_date",
+                "#update_end_date",
+                "#update_total_days",
+            );
         }
         $form.find(".error-message").html("");
         var partialLeaveCheckbox = $("#partialLeave");
@@ -3273,21 +3591,33 @@ $(document).ready(function () {
         if (leaveVisibleToAllCheckbox.length) {
             leaveVisibleToAllCheckbox.trigger("change");
         }
-        var defaultColor = (containerId == "create_note_modal" || containerId == "edit_note_modal") ? "success" : "primary";
+        var defaultColor =
+            containerId == "create_note_modal" ||
+            containerId == "edit_note_modal"
+                ? "success"
+                : "primary";
         var colorSelect = $form.find('select[name="color"]');
         if (colorSelect.length) {
             var classes = colorSelect.attr("class").split(" ");
-            var currentColorClass = classes.find(c => c.startsWith("select-"));
-            colorSelect.removeClass(currentColorClass).addClass("select-bg-label-" + defaultColor);
+            var currentColorClass = classes.find((c) =>
+                c.startsWith("select-"),
+            );
+            colorSelect
+                .removeClass(currentColorClass)
+                .addClass("select-bg-label-" + defaultColor);
         }
         var selectPriority = $form.find('select[name="priority_id"]');
         if (selectPriority.length) {
             var classes = selectPriority.attr("class").split(" ");
-            var currentClass = classes.find(c => c.startsWith("bg-label"));
-            selectPriority.removeClass(currentClass).addClass("bg-label-secondary");
+            var currentClass = classes.find((c) => c.startsWith("bg-label"));
+            selectPriority
+                .removeClass(currentClass)
+                .addClass("bg-label-secondary");
         }
         $form
-            .find(".js-example-basic-multiple, .users_select, .clients_select, .projects_select, .contract_types_select, .invoices_select")
+            .find(
+                ".js-example-basic-multiple, .users_select, .clients_select, .projects_select, .contract_types_select, .invoices_select",
+            )
             .val(null)
             .trigger("change");
         $("#create_task_offcanvas, #edit_task_offcanvas")
@@ -3295,7 +3625,9 @@ $(document).ready(function () {
             .val(null)
             .trigger("change");
         if ($('.selectTaskProject[name="project"]').length) {
-            $form.find($('.selectTaskProject[name="project"]')).trigger("change");
+            $form
+                .find($('.selectTaskProject[name="project"]'))
+                .trigger("change");
         }
         if ($('.statusDropdown[name="status_id"]').length) {
             var $s = $form.find($('.statusDropdown[name="status_id"]'));
@@ -3313,7 +3645,9 @@ $(document).ready(function () {
                 $p.trigger("change");
             }
         }
-        $("#users_associated_with_project, #task_update_users_associated_with_project").text("");
+        $(
+            "#users_associated_with_project, #task_update_users_associated_with_project",
+        ).text("");
         $(container)
             .find('input[type="checkbox"]')
             .each(function () {
@@ -3351,10 +3685,10 @@ $(document).ready(function () {
                         .find("#users_associated_with_project")
                         .html(
                             "(" +
-                            label_users_associated_with_project +
-                            " <strong>" +
-                            response.project.title +
-                            "</strong>)"
+                                label_users_associated_with_project +
+                                " <strong>" +
+                                response.project.title +
+                                "</strong>)",
                         );
                     usersSelect.empty(); // Clear existing options
                     // Check if task_accessibility is 'project_users'
@@ -3365,7 +3699,7 @@ $(document).ready(function () {
                                 user.first_name + " " + user.last_name,
                                 user.id,
                                 false,
-                                false
+                                false,
                             ); // Unselected initially
                             usersSelect.append(userOption);
                         });
@@ -3375,7 +3709,7 @@ $(document).ready(function () {
                             "project_users"
                         ) {
                             var taskUsers = response.users.map(
-                                (user) => user.id
+                                (user) => user.id,
                             );
                             usersSelect.val(taskUsers);
                         } else {
@@ -3448,24 +3782,44 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
                 : "";
 
             // Populate form fields
-            $overlay.find("#task_update_users_associated_with_project").html(
-                `(${label_users_associated_with_project} <strong>${response.project.title}</strong>)`
-            );
+            $overlay
+                .find("#task_update_users_associated_with_project")
+                .html(
+                    `(${label_users_associated_with_project} <strong>${response.project.title}</strong>)`,
+                );
             $overlay.find("#id").val(response.task.id);
             $overlay.find("#title").val(response.task.title);
-            $overlay.find("#task_status_id").val(response.task.status_id).trigger("change");
-            $overlay.find("#priority_id").val(response.task.priority_id).trigger("change");
+            $overlay
+                .find("#task_status_id")
+                .val(response.task.status_id)
+                .trigger("change");
+            $overlay
+                .find("#priority_id")
+                .val(response.task.priority_id)
+                .trigger("change");
             $overlay.find("#update_start_date").val(formattedStartDate);
             $overlay.find("#update_end_date").val(formattedEndDate);
             $overlay.find("#update_project_title").val(response.project.title);
-            $overlay.find("#task_description").val(response.task.description || "");
+            $overlay
+                .find("#task_description")
+                .val(response.task.description || "");
             $overlay.find("#taskNote").val(response.task.note);
-            $overlay.find("#edit_billing_type").val(response.task.billing_type).trigger("change");
-            $overlay.find("#edit_completion_percentage").val(response.task.completion_percentage).trigger("change");
-            $overlay.find("#updateClientCanDiscussTask").prop("checked", response.task.client_can_discuss === 1);
+            $overlay
+                .find("#edit_billing_type")
+                .val(response.task.billing_type)
+                .trigger("change");
+            $overlay
+                .find("#edit_completion_percentage")
+                .val(response.task.completion_percentage)
+                .trigger("change");
+            $overlay
+                .find("#updateClientCanDiscussTask")
+                .prop("checked", response.task.client_can_discuss === 1);
 
             // Initialize DateRangePicker
-            initializeDateRangePicker($overlay.find("#update_start_date, #update_end_date"));
+            initializeDateRangePicker(
+                $overlay.find("#update_start_date, #update_end_date"),
+            );
 
             // Initialize task list Tom Select
             const editTaskList = $overlay.find("#edit_task_list");
@@ -3475,21 +3829,29 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
                 }
 
                 new TomSelect(editTaskList[0], {
-                    valueField: 'id',
-                    labelField: 'text',
-                    searchField: 'text',
+                    valueField: "id",
+                    labelField: "text",
+                    searchField: "text",
                     placeholder: "Select a task list",
-                    plugins: ['clear_button'],
+                    plugins: ["clear_button"],
                     preload: true,
                     load: function (query, callback) {
-                        fetch(`${baseUrl}/task-lists/search?search=${encodeURIComponent(query)}&project_id=${response.project.id}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                callback(data.map(item => ({ id: item.id, text: item.name })));
-                            }).catch(() => {
+                        fetch(
+                            `${baseUrl}/task-lists/search?search=${encodeURIComponent(query)}&project_id=${response.project.id}`,
+                        )
+                            .then((res) => res.json())
+                            .then((data) => {
+                                callback(
+                                    data.map((item) => ({
+                                        id: item.id,
+                                        text: item.name,
+                                    })),
+                                );
+                            })
+                            .catch(() => {
                                 callback();
                             });
-                    }
+                    },
                 });
 
                 // Prefill task list if it exists
@@ -3499,10 +3861,19 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
                         data: { id: response.task.task_list_id },
                         dataType: "json",
                         success: function (data) {
-                            const taskList = data.find(item => item.id === response.task.task_list_id);
+                            const taskList = data.find(
+                                (item) =>
+                                    item.id === response.task.task_list_id,
+                            );
                             if (taskList && editTaskList[0].tomselect) {
-                                editTaskList[0].tomselect.addOption({ id: taskList.id, text: taskList.name });
-                                editTaskList[0].tomselect.setValue(taskList.id, true);
+                                editTaskList[0].tomselect.addOption({
+                                    id: taskList.id,
+                                    text: taskList.name,
+                                });
+                                editTaskList[0].tomselect.setValue(
+                                    taskList.id,
+                                    true,
+                                );
                             }
                         },
                     });
@@ -3518,34 +3889,45 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
                 usersSelect[0].tomselect.clear(true);
                 usersSelect[0].tomselect.clearOptions();
                 if (response.project?.users?.length > 0) {
-                    response.project.users.forEach(user => {
-                        usersSelect[0].tomselect.addOption({ id: user.id, text: `${user.first_name} ${user.last_name}` });
+                    response.project.users.forEach((user) => {
+                        usersSelect[0].tomselect.addOption({
+                            id: user.id,
+                            text: `${user.first_name} ${user.last_name}`,
+                        });
                     });
-                    const selectedTaskUsers = response.task?.users?.length > 0
-                        ? response.task.users.map(user => user.id)
-                        : [];
+                    const selectedTaskUsers =
+                        response.task?.users?.length > 0
+                            ? response.task.users.map((user) => user.id)
+                            : [];
                     usersSelect[0].tomselect.setValue(selectedTaskUsers, true);
-                    console.log("Users associated with the project:", response.project.users);
+                    console.log(
+                        "Users associated with the project:",
+                        response.project.users,
+                    );
                 } else {
                     console.log("No users associated with the project");
                 }
             } else {
                 usersSelect.empty();
                 if (response.project?.users?.length > 0) {
-                    response.project.users.forEach(user => {
+                    response.project.users.forEach((user) => {
                         const userOption = new Option(
                             `${user.first_name} ${user.last_name}`,
                             user.id,
                             false,
-                            false
+                            false,
                         );
                         usersSelect.append(userOption);
                     });
-                    const selectedTaskUsers = response.task?.users?.length > 0
-                        ? response.task.users.map(user => user.id)
-                        : [];
+                    const selectedTaskUsers =
+                        response.task?.users?.length > 0
+                            ? response.task.users.map((user) => user.id)
+                            : [];
                     usersSelect.val(selectedTaskUsers).trigger("change");
-                    console.log("Users associated with the project:", response.project.users);
+                    console.log(
+                        "Users associated with the project:",
+                        response.project.users,
+                    );
                 } else {
                     console.log("No users associated with the project");
                     usersSelect.val(null).trigger("change");
@@ -3554,43 +3936,99 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
 
             // Handle recurring task settings
             if (response.task.recurring_task) {
-                $overlay.find("#edit-recurring-task-switch").prop("checked", true);
-                $overlay.find("#edit-recurring-task-settings").removeClass("d-none");
-                $overlay.find("#edit-recurrence-frequency").val(response.task.recurring_task.frequency).trigger("change");
+                $overlay
+                    .find("#edit-recurring-task-switch")
+                    .prop("checked", true);
+                $overlay
+                    .find("#edit-recurring-task-settings")
+                    .removeClass("d-none");
+                $overlay
+                    .find("#edit-recurrence-frequency")
+                    .val(response.task.recurring_task.frequency)
+                    .trigger("change");
                 switch (response.task.recurring_task.frequency) {
                     case "weekly":
-                        $overlay.find("#edit-recurrence-day-of-week").val(response.task.recurring_task.day_of_week || "");
+                        $overlay
+                            .find("#edit-recurrence-day-of-week")
+                            .val(
+                                response.task.recurring_task.day_of_week || "",
+                            );
                         break;
                     case "monthly":
                     case "yearly":
-                        $overlay.find("#edit-recurrence-day-of-month").val(response.task.recurring_task.day_of_month || "");
+                        $overlay
+                            .find("#edit-recurrence-day-of-month")
+                            .val(
+                                response.task.recurring_task.day_of_month || "",
+                            );
                         break;
                     case "yearly":
-                        $overlay.find("#edit-recurrence-month-of-year").val(response.task.recurring_task.month_of_year || "");
+                        $overlay
+                            .find("#edit-recurrence-month-of-year")
+                            .val(
+                                response.task.recurring_task.month_of_year ||
+                                    "",
+                            );
                         break;
                 }
-                $overlay.find("#edit-recurrence-starts-from").val(
-                    response.task.recurring_task.starts_from
-                        ? moment(response.task.recurring_task.starts_from).format("YYYY-MM-DD")
-                        : ""
-                );
-                $overlay.find("#edit-recurrence-occurrences").val(response.task.recurring_task.number_of_occurrences || "");
+                $overlay
+                    .find("#edit-recurrence-starts-from")
+                    .val(
+                        response.task.recurring_task.starts_from
+                            ? moment(
+                                  response.task.recurring_task.starts_from,
+                              ).format("YYYY-MM-DD")
+                            : "",
+                    );
+                $overlay
+                    .find("#edit-recurrence-occurrences")
+                    .val(
+                        response.task.recurring_task.number_of_occurrences ||
+                            "",
+                    );
             } else {
-                $overlay.find("#edit-recurring-task-switch").prop("checked", false);
-                $overlay.find("#edit-recurring-task-settings").addClass("d-none");
+                $overlay
+                    .find("#edit-recurring-task-switch")
+                    .prop("checked", false);
+                $overlay
+                    .find("#edit-recurring-task-settings")
+                    .addClass("d-none");
             }
 
             // Handle reminder settings
             if (response.task?.reminders?.length > 0) {
                 const reminder = response.task.reminders[0];
-                $overlay.find("#edit-reminder-switch").prop("checked", reminder.is_active === 1);
-                $overlay.find("#edit-reminder-settings").toggleClass("d-none", reminder.is_active !== 1);
-                $overlay.find("#edit-frequency-type").val(reminder.frequency_type).trigger("change");
-                $overlay.find("#edit-day-of-week-group").toggleClass("d-none", reminder.frequency_type !== "weekly");
-                $overlay.find("#edit-day-of-month-group").toggleClass("d-none", reminder.frequency_type !== "monthly");
-                $overlay.find("#edit-day-of-week").val(reminder.day_of_week || "");
-                $overlay.find("#edit-day-of-month").val(reminder.day_of_month || "");
-                $overlay.find("#edit-time-of-day").val(reminder.time_of_day?.slice(0, 5) || "");
+                $overlay
+                    .find("#edit-reminder-switch")
+                    .prop("checked", reminder.is_active === 1);
+                $overlay
+                    .find("#edit-reminder-settings")
+                    .toggleClass("d-none", reminder.is_active !== 1);
+                $overlay
+                    .find("#edit-frequency-type")
+                    .val(reminder.frequency_type)
+                    .trigger("change");
+                $overlay
+                    .find("#edit-day-of-week-group")
+                    .toggleClass(
+                        "d-none",
+                        reminder.frequency_type !== "weekly",
+                    );
+                $overlay
+                    .find("#edit-day-of-month-group")
+                    .toggleClass(
+                        "d-none",
+                        reminder.frequency_type !== "monthly",
+                    );
+                $overlay
+                    .find("#edit-day-of-week")
+                    .val(reminder.day_of_week || "");
+                $overlay
+                    .find("#edit-day-of-month")
+                    .val(reminder.day_of_month || "");
+                $overlay
+                    .find("#edit-time-of-day")
+                    .val(reminder.time_of_day?.slice(0, 5) || "");
             } else {
                 $overlay.find("#edit-reminder-switch").prop("checked", false);
                 $overlay.find("#edit-reminder-settings").addClass("d-none");
@@ -3599,49 +4037,83 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
             // Handle custom fields
             if (response.task.formatted_custom_fields) {
                 setTimeout(() => {
-                    $.each(response.task.formatted_custom_fields, (fieldId, field) => {
-                        const fieldName = `custom_fields[${field.field_id}]`;
-                        const fieldSelector = `#edit_cf_${field.field_id}`;
-                        const fieldType = field.field_type.toLowerCase();
-                        switch (fieldType) {
-                            case "checkbox":
-                                const values = field.value ? JSON.parse(field.value) : [];
-                                $(`input[name="${fieldName}[]"]`).each(function () {
-                                    $(this).prop("checked", values.includes($(this).val()));
-                                });
-                                break;
-                            case "radio":
-                                $(`input[name="${fieldName}"]`).each(function () {
-                                    $(this).prop("checked", $(this).val() === field.value);
-                                });
-                                break;
-                            case "select":
-                                $(fieldSelector).val(field.value).trigger("change");
-                                break;
-                            case "textarea":
-                            case "text":
-                            case "password":
-                            case "number":
-                                $(fieldSelector).val(field.value);
-                                break;
-                            case "date":
-                                const formattedDate = field.value ? moment(field.value).format(js_date_format) : "";
-                                $(fieldSelector).val(formattedDate);
-                                if ($(fieldSelector).data("daterangepicker")) {
-                                    $(fieldSelector).data("daterangepicker").remove();
-                                }
-                                $(fieldSelector).daterangepicker({
-                                    singleDatePicker: true,
-                                    showDropdowns: true,
-                                    autoUpdateInput: true,
-                                    locale: { cancelLabel: "Clear", format: js_date_format },
-                                    startDate: formattedDate || moment(),
-                                }).on("cancel.daterangepicker", function () {
-                                    $(this).val("");
-                                });
-                                break;
-                        }
-                    });
+                    $.each(
+                        response.task.formatted_custom_fields,
+                        (fieldId, field) => {
+                            const fieldName = `custom_fields[${field.field_id}]`;
+                            const fieldSelector = `#edit_cf_${field.field_id}`;
+                            const fieldType = field.field_type.toLowerCase();
+                            switch (fieldType) {
+                                case "checkbox":
+                                    const values = field.value
+                                        ? JSON.parse(field.value)
+                                        : [];
+                                    $(`input[name="${fieldName}[]"]`).each(
+                                        function () {
+                                            $(this).prop(
+                                                "checked",
+                                                values.includes($(this).val()),
+                                            );
+                                        },
+                                    );
+                                    break;
+                                case "radio":
+                                    $(`input[name="${fieldName}"]`).each(
+                                        function () {
+                                            $(this).prop(
+                                                "checked",
+                                                $(this).val() === field.value,
+                                            );
+                                        },
+                                    );
+                                    break;
+                                case "select":
+                                    $(fieldSelector)
+                                        .val(field.value)
+                                        .trigger("change");
+                                    break;
+                                case "textarea":
+                                case "text":
+                                case "password":
+                                case "number":
+                                    $(fieldSelector).val(field.value);
+                                    break;
+                                case "date":
+                                    const formattedDate = field.value
+                                        ? moment(field.value).format(
+                                              js_date_format,
+                                          )
+                                        : "";
+                                    $(fieldSelector).val(formattedDate);
+                                    if (
+                                        $(fieldSelector).data("daterangepicker")
+                                    ) {
+                                        $(fieldSelector)
+                                            .data("daterangepicker")
+                                            .remove();
+                                    }
+                                    $(fieldSelector)
+                                        .daterangepicker({
+                                            singleDatePicker: true,
+                                            showDropdowns: true,
+                                            autoUpdateInput: true,
+                                            locale: {
+                                                cancelLabel: "Clear",
+                                                format: js_date_format,
+                                            },
+                                            startDate:
+                                                formattedDate || moment(),
+                                        })
+                                        .on(
+                                            "cancel.daterangepicker",
+                                            function () {
+                                                $(this).val("");
+                                            },
+                                        );
+                                    break;
+                            }
+                        },
+                    );
                 }, 500);
             }
         },
@@ -3664,7 +4136,9 @@ $(document).on("click", ".edit-task", function () {
  * @returns {void}
  */
 function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
-    const overlayId = isOffcanvas ? "#edit_project_offcanvas" : "#edit_project_modal";
+    const overlayId = isOffcanvas
+        ? "#edit_project_offcanvas"
+        : "#edit_project_modal";
     const overlayType = isOffcanvas ? "offcanvas" : "modal";
     // Open the overlay
     const $overlay = $(overlayId);
@@ -3695,16 +4169,28 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             // Populate form fields
             $overlay.find("#project_id").val(response.project.id);
             $overlay.find("#project_title").val(response.project.title);
-            $overlay.find("#project_status_id").val(response.project.status_id).trigger("change");
-            $overlay.find("#project_priority_id").val(response.project.priority_id).trigger("change");
+            $overlay
+                .find("#project_status_id")
+                .val(response.project.status_id)
+                .trigger("change");
+            $overlay
+                .find("#project_priority_id")
+                .val(response.project.priority_id)
+                .trigger("change");
             $overlay.find("#project_budget").val(response.project.budget);
             $overlay.find("#update_start_date").val(formattedStartDate);
             $overlay.find("#update_end_date").val(formattedEndDate);
-            $overlay.find("#task_accessibility").val(response.project.task_accessibility);
+            $overlay
+                .find("#task_accessibility")
+                .val(response.project.task_accessibility);
             $overlay.find("#project_note").val(response.project.note);
-            $overlay.find("#project_description").val(response.project.description || "");
+            $overlay
+                .find("#project_description")
+                .val(response.project.description || "");
             // Initialize DateRangePicker
-            initializeDateRangePicker($overlay.find("#update_start_date, #update_end_date"));
+            initializeDateRangePicker(
+                $overlay.find("#update_start_date, #update_end_date"),
+            );
 
             // Populate users multi-select
             const usersSelect = $overlay.find(".tom_users_select");
@@ -3713,8 +4199,11 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
                 usersSelect[0].tomselect.clearOptions();
                 if (response.users && response.users.length > 0) {
                     const selectedIds = [];
-                    response.users.forEach(user => {
-                        usersSelect[0].tomselect.addOption({ id: user.id, text: `${user.first_name} ${user.last_name}` });
+                    response.users.forEach((user) => {
+                        usersSelect[0].tomselect.addOption({
+                            id: user.id,
+                            text: `${user.first_name} ${user.last_name}`,
+                        });
                         selectedIds.push(user.id);
                     });
                     usersSelect[0].tomselect.setValue(selectedIds, true);
@@ -3723,8 +4212,15 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
                 const legacyUsers = $overlay.find(".users_select");
                 legacyUsers.empty();
                 if (response.users && response.users.length > 0) {
-                    response.users.forEach(user => {
-                        legacyUsers.append(new Option(`${user.first_name} ${user.last_name}`, user.id, true, true));
+                    response.users.forEach((user) => {
+                        legacyUsers.append(
+                            new Option(
+                                `${user.first_name} ${user.last_name}`,
+                                user.id,
+                                true,
+                                true,
+                            ),
+                        );
                     });
                 }
                 legacyUsers.trigger("change");
@@ -3737,8 +4233,11 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
                 clientsSelect[0].tomselect.clearOptions();
                 if (response.clients && response.clients.length > 0) {
                     const selectedIds = [];
-                    response.clients.forEach(client => {
-                        clientsSelect[0].tomselect.addOption({ id: client.id, text: `${client.first_name} ${client.last_name}` });
+                    response.clients.forEach((client) => {
+                        clientsSelect[0].tomselect.addOption({
+                            id: client.id,
+                            text: `${client.first_name} ${client.last_name}`,
+                        });
                         selectedIds.push(client.id);
                     });
                     clientsSelect[0].tomselect.setValue(selectedIds, true);
@@ -3747,22 +4246,34 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
                 const legacyClients = $overlay.find(".clients_select");
                 legacyClients.empty();
                 if (response.clients && response.clients.length > 0) {
-                    response.clients.forEach(client => {
-                        legacyClients.append(new Option(`${client.first_name} ${client.last_name}`, client.id, true, true));
+                    response.clients.forEach((client) => {
+                        legacyClients.append(
+                            new Option(
+                                `${client.first_name} ${client.last_name}`,
+                                client.id,
+                                true,
+                                true,
+                            ),
+                        );
                     });
                 }
                 legacyClients.trigger("change");
             }
 
             // Populate tags multi-select
-            const tagsSelect = $overlay.find(".tom_tags_select, [name='tag_ids[]']");
+            const tagsSelect = $overlay.find(
+                ".tom_tags_select, [name='tag_ids[]']",
+            );
             if (tagsSelect.length && tagsSelect[0].tomselect) {
                 tagsSelect[0].tomselect.clear(true);
                 tagsSelect[0].tomselect.clearOptions();
                 if (response.tags && response.tags.length > 0) {
                     const selectedIds = [];
-                    response.tags.forEach(tag => {
-                        tagsSelect[0].tomselect.addOption({ id: tag.id, text: tag.title });
+                    response.tags.forEach((tag) => {
+                        tagsSelect[0].tomselect.addOption({
+                            id: tag.id,
+                            text: tag.title,
+                        });
                         selectedIds.push(tag.id);
                     });
                     tagsSelect[0].tomselect.setValue(selectedIds, true);
@@ -3770,18 +4281,25 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
             } else {
                 tagsSelect.empty();
                 if (response.tags && response.tags.length > 0) {
-                    response.tags.forEach(tag => {
-                        tagsSelect.append(new Option(tag.title, tag.id, true, true));
+                    response.tags.forEach((tag) => {
+                        tagsSelect.append(
+                            new Option(tag.title, tag.id, true, true),
+                        );
                     });
                 }
                 tagsSelect.trigger("change");
             }
 
             // Handle checkboxes
-            $overlay.find("#updateClientCanDiscussProject")
+            $overlay
+                .find("#updateClientCanDiscussProject")
                 .prop("checked", response.project.client_can_discuss === 1);
-            $overlay.find("#tasks_time_entries")
-                .prop("checked", response.project.enable_tasks_time_entries === 1);
+            $overlay
+                .find("#tasks_time_entries")
+                .prop(
+                    "checked",
+                    response.project.enable_tasks_time_entries === 1,
+                );
             // Handle custom fields
             if (response.customFieldValues) {
                 $.each(response.customFieldValues, function (fieldId, value) {
@@ -3790,26 +4308,51 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
                         if (inputField.is("select")) {
                             inputField.val(value).trigger("change");
                         } else if (inputField.hasClass("custom-datepicker")) {
-                            inputField.val(value ? moment(value).format(js_date_format) : "");
+                            inputField.val(
+                                value
+                                    ? moment(value).format(js_date_format)
+                                    : "",
+                            );
                         } else {
                             inputField.val(value);
                         }
-                    } else if ($overlay.find(`input[type="radio"][name="custom_fields[${fieldId}]"]`).length) {
-                        $overlay.find(`input[type="radio"][name="custom_fields[${fieldId}]"][value="${value}"]`)
+                    } else if (
+                        $overlay.find(
+                            `input[type="radio"][name="custom_fields[${fieldId}]"]`,
+                        ).length
+                    ) {
+                        $overlay
+                            .find(
+                                `input[type="radio"][name="custom_fields[${fieldId}]"][value="${value}"]`,
+                            )
                             .prop("checked", true);
-                    } else if ($overlay.find(`input[type="checkbox"][name="custom_fields[${fieldId}][]"]`).length) {
+                    } else if (
+                        $overlay.find(
+                            `input[type="checkbox"][name="custom_fields[${fieldId}][]"]`,
+                        ).length
+                    ) {
                         try {
-                            const checkboxValues = typeof value === "string" && value.includes("[")
-                                ? JSON.parse(value)
-                                : [value];
-                            $overlay.find(`input[type="checkbox"][name="custom_fields[${fieldId}][]"]`)
+                            const checkboxValues =
+                                typeof value === "string" && value.includes("[")
+                                    ? JSON.parse(value)
+                                    : [value];
+                            $overlay
+                                .find(
+                                    `input[type="checkbox"][name="custom_fields[${fieldId}][]"]`,
+                                )
                                 .prop("checked", false);
-                            checkboxValues.forEach(val => {
-                                $overlay.find(`input[type="checkbox"][name="custom_fields[${fieldId}][]"][value="${val}"]`)
+                            checkboxValues.forEach((val) => {
+                                $overlay
+                                    .find(
+                                        `input[type="checkbox"][name="custom_fields[${fieldId}][]"][value="${val}"]`,
+                                    )
                                     .prop("checked", true);
                             });
                         } catch (e) {
-                            console.error(`Error parsing checkbox values for field ${fieldId}:`, e);
+                            console.error(
+                                `Error parsing checkbox values for field ${fieldId}:`,
+                                e,
+                            );
                         }
                     }
                 });
@@ -3822,7 +4365,12 @@ function editProject(projectId, isOffcanvas = true, baseUrl, js_date_format) {
     });
 }
 $(document).on("click", ".edit-project", function () {
-    editProject($(this).data("id"), $(this).data("offcanvas") === true, baseUrl, js_date_format);
+    editProject(
+        $(this).data("id"),
+        $(this).data("offcanvas") === true,
+        baseUrl,
+        js_date_format,
+    );
 });
 $(document).on("click", ".edit-priority", function () {
     var id = $(this).data("id");
@@ -3869,20 +4417,34 @@ $(document).on("click", ".edit-workspace", function () {
             if (usersSelect.length && usersSelect[0].tomselect) {
                 usersSelect[0].tomselect.clear(true);
                 usersSelect[0].tomselect.clearOptions();
-                if (response.workspace.users && response.workspace.users.length > 0) {
+                if (
+                    response.workspace.users &&
+                    response.workspace.users.length > 0
+                ) {
                     var selectedUsers = [];
                     response.workspace.users.forEach(function (user) {
                         var userIdStr = user.id.toString();
-                        usersSelect[0].tomselect.addOption({ id: userIdStr, text: user.first_name + " " + user.last_name });
+                        usersSelect[0].tomselect.addOption({
+                            id: userIdStr,
+                            text: user.first_name + " " + user.last_name,
+                        });
                         selectedUsers.push(userIdStr);
                     });
                     usersSelect[0].tomselect.setValue(selectedUsers, true);
                 }
             } else {
                 usersSelect.empty();
-                if (response.workspace.users && response.workspace.users.length > 0) {
+                if (
+                    response.workspace.users &&
+                    response.workspace.users.length > 0
+                ) {
                     response.workspace.users.forEach(function (user) {
-                        var userOption = new Option(user.first_name + " " + user.last_name, user.id, true, true);
+                        var userOption = new Option(
+                            user.first_name + " " + user.last_name,
+                            user.id,
+                            true,
+                            true,
+                        );
                         usersSelect.append(userOption);
                     });
                     usersSelect.trigger("change");
@@ -3895,20 +4457,34 @@ $(document).on("click", ".edit-workspace", function () {
             if (clientsSelect.length && clientsSelect[0].tomselect) {
                 clientsSelect[0].tomselect.clear(true);
                 clientsSelect[0].tomselect.clearOptions();
-                if (response.workspace.clients && response.workspace.clients.length > 0) {
+                if (
+                    response.workspace.clients &&
+                    response.workspace.clients.length > 0
+                ) {
                     var selectedClients = [];
                     response.workspace.clients.forEach(function (client) {
                         var clientIdStr = client.id.toString();
-                        clientsSelect[0].tomselect.addOption({ id: clientIdStr, text: client.first_name + " " + client.last_name });
+                        clientsSelect[0].tomselect.addOption({
+                            id: clientIdStr,
+                            text: client.first_name + " " + client.last_name,
+                        });
                         selectedClients.push(clientIdStr);
                     });
                     clientsSelect[0].tomselect.setValue(selectedClients, true);
                 }
             } else {
                 clientsSelect.empty();
-                if (response.workspace.clients && response.workspace.clients.length > 0) {
+                if (
+                    response.workspace.clients &&
+                    response.workspace.clients.length > 0
+                ) {
                     response.workspace.clients.forEach(function (client) {
-                        var clientOption = new Option(client.first_name + " " + client.last_name, client.id, true, true);
+                        var clientOption = new Option(
+                            client.first_name + " " + client.last_name,
+                            client.id,
+                            true,
+                            true,
+                        );
                         clientsSelect.append(clientOption);
                     });
                     clientsSelect.trigger("change");
@@ -3954,7 +4530,7 @@ function setDefaultWorkspace(workspaceId, isDefault) {
         },
         error: function (xhr, status, error) {
             toastr.error(
-                "An error occurred while updating the default workspace."
+                "An error occurred while updating the default workspace.",
             );
         },
     });
@@ -3971,13 +4547,13 @@ $(document).on("click", ".edit-meeting", function () {
         dataType: "json",
         success: function (response) {
             var formattedStartDate = moment(response.meeting.start_date).format(
-                js_date_format
+                js_date_format,
             );
             var formattedEndDate = moment(response.meeting.end_date).format(
-                js_date_format
+                js_date_format,
             );
             var startDateInput = $("#editMeetingModal").find(
-                '[name="start_date"]'
+                '[name="start_date"]',
             );
             var endDateInput = $("#editMeetingModal").find('[name="end_date"]');
             $("#meeting_id").val(response.meeting.id);
@@ -3998,7 +4574,7 @@ $(document).on("click", ".edit-meeting", function () {
                         user.first_name + " " + user.last_name,
                         user.id,
                         true,
-                        true
+                        true,
                     );
                     usersSelect.append(userOption);
                 });
@@ -4016,7 +4592,7 @@ $(document).on("click", ".edit-meeting", function () {
                         client.first_name + " " + client.last_name,
                         client.id,
                         true,
-                        true
+                        true,
                     );
                     clientsSelect.append(clientOption);
                 });
@@ -4055,7 +4631,7 @@ $(document).on("change", "#statusSelect", function (e) {
                 $("#confirmUpdateStatusModal").modal("show");
                 $("#confirmUpdateStatusModal").off(
                     "click",
-                    "#confirmUpdateStatus"
+                    "#confirmUpdateStatus",
                 );
                 if (type == "task" && response.task) {
                     $("#statusNote").val(response.task.note);
@@ -4087,13 +4663,16 @@ $(document).on("change", "#statusSelect", function (e) {
                                     .html(label_yes)
                                     .attr("disabled", false);
                                 if (response.error == false) {
-                                    setTimeout(function () {
-                                        if (reload) {
-                                            window.location.reload();
-                                        }
-                                    }, parseFloat(toastTimeOut) * 1000);
+                                    setTimeout(
+                                        function () {
+                                            if (reload) {
+                                                window.location.reload();
+                                            }
+                                        },
+                                        parseFloat(toastTimeOut) * 1000,
+                                    );
                                     $("#confirmUpdateStatusModal").modal(
-                                        "hide"
+                                        "hide",
                                     );
                                     var tableSelector =
                                         type == "project"
@@ -4105,12 +4684,12 @@ $(document).on("change", "#statusSelect", function (e) {
                                     }
                                     if ($("#activity_log_table").length) {
                                         $("#activity_log_table").bootstrapTable(
-                                            "refresh"
+                                            "refresh",
                                         );
                                     }
                                     select.attr(
                                         "data-original-status-id",
-                                        statusId
+                                        statusId,
                                     );
                                     toastr.success(response.message);
                                 } else {
@@ -4132,7 +4711,7 @@ $(document).on("change", "#statusSelect", function (e) {
                                 toastr.error("Something Went Wrong");
                             },
                         });
-                    }
+                    },
                 );
             } else {
                 $("#confirmUpdateStatus")
@@ -4148,7 +4727,7 @@ $(document).on("change", "#statusSelect", function (e) {
     });
     $("#confirmUpdateStatusModal").off(
         "click",
-        ".btn-close, #declineUpdateStatus"
+        ".btn-close, #declineUpdateStatus",
     );
     $("#confirmUpdateStatusModal").on(
         "click",
@@ -4156,7 +4735,7 @@ $(document).on("change", "#statusSelect", function (e) {
         function (e) {
             select.val(originalStatusId);
             select.removeClass(newColorClass).addClass(currentColorClass);
-        }
+        },
     );
 });
 $(document).on("change", "#prioritySelect", function (e) {
@@ -4200,11 +4779,14 @@ $(document).on("change", "#prioritySelect", function (e) {
                         .html(label_yes)
                         .attr("disabled", false);
                     if (response.error == false) {
-                        setTimeout(function () {
-                            if (reload) {
-                                window.location.reload(); // Reload the current page
-                            }
-                        }, parseFloat(toastTimeOut) * 1000);
+                        setTimeout(
+                            function () {
+                                if (reload) {
+                                    window.location.reload(); // Reload the current page
+                                }
+                            },
+                            parseFloat(toastTimeOut) * 1000,
+                        );
                         $("#confirmUpdatePriorityModal").modal("hide");
                         var tableSelector =
                             type == "project" ? "projects_table" : "task_table";
@@ -4237,12 +4819,12 @@ $(document).on("change", "#prioritySelect", function (e) {
                     toastr.error("Something Went Wrong");
                 },
             });
-        }
+        },
     );
     // Handle modal close event
     $("#confirmUpdatePriorityModal").off(
         "click",
-        ".btn-close, #declineUpdatePriority"
+        ".btn-close, #declineUpdatePriority",
     );
     $("#confirmUpdatePriorityModal").on(
         "click",
@@ -4251,7 +4833,7 @@ $(document).on("change", "#prioritySelect", function (e) {
             // Set original priority when modal is closed without confirmation
             select.val(originalPriorityId);
             select.removeClass(newColorClass).addClass(currentColorClass);
-        }
+        },
     );
 });
 $("#partialLeave, #updatePartialLeave").on("change", function () {
@@ -4288,7 +4870,7 @@ $(".leaveVisibleToAll").on("change", function () {
         // If the checkbox is checked
         $form.find(".leaveVisibleToDiv").addClass("d-none");
         var visibleToSelect = $form.find(
-            '.js-example-basic-multiple[name="visible_to_ids[]"]'
+            '.js-example-basic-multiple[name="visible_to_ids[]"]',
         );
         visibleToSelect.val(null).trigger("change");
     } else {
@@ -4303,15 +4885,22 @@ $(document).ready(function () {
     // Listen for the inner calendar tab click
     $(document).on("shown.bs.tab", ".calendar-button", function (event) {
         var tabId = $(event.target).attr("data-bs-target");
-        if (tabId === "#upcomingBirthdaysCalendar-calendar" && !upcomingBDCalendarInitialized) {
+        if (
+            tabId === "#upcomingBirthdaysCalendar-calendar" &&
+            !upcomingBDCalendarInitialized
+        ) {
             initializeUpcomingBDCalendar();
             upcomingBDCalendarInitialized = true;
-        }
-        else if (tabId === "#upcomingWorkAnniversariesCalendar-calendar" && !upcomingWACalendarInitialized) {
+        } else if (
+            tabId === "#upcomingWorkAnniversariesCalendar-calendar" &&
+            !upcomingWACalendarInitialized
+        ) {
             initializeUpcomingWACalendar();
             upcomingWACalendarInitialized = true;
-        }
-        else if (tabId === "#membersOnLeaveCalendar-calendar" && !membersOnLeaveCalendarInitialized) {
+        } else if (
+            tabId === "#membersOnLeaveCalendar-calendar" &&
+            !membersOnLeaveCalendarInitialized
+        ) {
             initializeMembersOnLeaveCalendar();
             membersOnLeaveCalendarInitialized = true;
         }
@@ -4319,7 +4908,7 @@ $(document).ready(function () {
 });
 function initializeUpcomingBDCalendar() {
     var upcomingBDCalendar = document.getElementById(
-        "upcomingBirthdaysCalendar"
+        "upcomingBirthdaysCalendar",
     );
     // Check if the calendar element exists
     if (upcomingBDCalendar) {
@@ -4403,7 +4992,7 @@ function initializeUpcomingBDCalendar() {
                     function () {
                         document.body.removeChild(tooltip);
                     },
-                    { once: true }
+                    { once: true },
                 );
             },
         });
@@ -4412,7 +5001,7 @@ function initializeUpcomingBDCalendar() {
 }
 function initializeUpcomingWACalendar() {
     var upcomingWACalendar = document.getElementById(
-        "upcomingWorkAnniversariesCalendar"
+        "upcomingWorkAnniversariesCalendar",
     );
     // Check if the calendar element exists
     if (upcomingWACalendar) {
@@ -4497,7 +5086,7 @@ function initializeUpcomingWACalendar() {
                     function () {
                         document.body.removeChild(tooltip);
                     },
-                    { once: true }
+                    { once: true },
                 );
             },
         });
@@ -4506,7 +5095,7 @@ function initializeUpcomingWACalendar() {
 }
 function initializeMembersOnLeaveCalendar() {
     var membersOnLeaveCalendar = document.getElementById(
-        "membersOnLeaveCalendar"
+        "membersOnLeaveCalendar",
     );
     // Check if the calendar element exists
     if (membersOnLeaveCalendar) {
@@ -4596,7 +5185,7 @@ function initializeMembersOnLeaveCalendar() {
                     function () {
                         document.body.removeChild(tooltip);
                     },
-                    { once: true }
+                    { once: true },
                 );
             },
         });
@@ -4611,7 +5200,7 @@ $(document).ready(function () {
         // Extract the part of class name after "action-"
         var className = $(this).attr("class");
         var permission = className.substring(
-            className.indexOf("action_") + "action_".length
+            className.indexOf("action_") + "action_".length,
         );
         // Check if the user is not an admin and if the permission does not exist
         if (
@@ -4690,19 +5279,19 @@ $(document).on("click", ".viewAssigned", function (e) {
     var tasksTable = $("#viewAssignedModal").find("#task_table");
     if (type === "tasks") {
         $('.nav-link[data-bs-target="#navs-top-view-assigned-tasks"]').tab(
-            "show"
+            "show",
         );
         $(
-            '.nav-link[data-bs-target="#navs-top-view-assigned-projects"]'
+            '.nav-link[data-bs-target="#navs-top-view-assigned-projects"]',
         ).removeClass("active");
         $("#navs-top-view-assigned-projects").removeClass("show active");
         $("#navs-top-view-assigned-tasks").addClass("show active");
     } else {
         $('.nav-link[data-bs-target="#navs-top-view-assigned-projects"]').tab(
-            "show"
+            "show",
         );
         $(
-            '.nav-link[data-bs-target="#navs-top-view-assigned-tasks"]'
+            '.nav-link[data-bs-target="#navs-top-view-assigned-tasks"]',
         ).removeClass("active");
         $("#navs-top-view-assigned-tasks").removeClass("show active");
         $("#navs-top-view-assigned-projects").addClass("show active");
@@ -4749,7 +5338,7 @@ function formatTag(tag) {
     }
     var color = tag.color;
     return $(
-        '<span class="badge bg-label-' + color + '">' + tag.text + "</span>"
+        '<span class="badge bg-label-' + color + '">' + tag.text + "</span>",
     );
 }
 /**
@@ -4773,21 +5362,45 @@ $(document).ready(function () {
             render: {
                 option: function (data, escape) {
                     if (!data.value) {
-                        return '<div>' + escape(data.text || 'Please select') + '</div>';
+                        return (
+                            "<div>" +
+                            escape(data.text || "Please select") +
+                            "</div>"
+                        );
                     }
-                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
-                    if (!color) color = 'primary';
-                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    var color = data.$option
+                        ? data.$option.getAttribute("data-color")
+                        : data.color || "primary";
+                    if (!color) color = "primary";
+                    return (
+                        '<div><span class="badge bg-' +
+                        escape(color) +
+                        '">' +
+                        escape(data.text) +
+                        "</span></div>"
+                    );
                 },
                 item: function (data, escape) {
                     if (!data.value) {
-                        return '<div>' + escape(data.text || 'Please select') + '</div>';
+                        return (
+                            "<div>" +
+                            escape(data.text || "Please select") +
+                            "</div>"
+                        );
                     }
-                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
-                    if (!color) color = 'primary';
-                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
-                }
-            }
+                    var color = data.$option
+                        ? data.$option.getAttribute("data-color")
+                        : data.color || "primary";
+                    if (!color) color = "primary";
+                    return (
+                        '<div><span class="badge bg-' +
+                        escape(color) +
+                        '">' +
+                        escape(data.text) +
+                        "</span></div>"
+                    );
+                },
+            },
         });
     });
 
@@ -4804,21 +5417,45 @@ $(document).ready(function () {
             render: {
                 option: function (data, escape) {
                     if (!data.value) {
-                        return '<div>' + escape(data.text || 'Please select') + '</div>';
+                        return (
+                            "<div>" +
+                            escape(data.text || "Please select") +
+                            "</div>"
+                        );
                     }
-                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
-                    if (!color) color = 'primary';
-                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
+                    var color = data.$option
+                        ? data.$option.getAttribute("data-color")
+                        : data.color || "primary";
+                    if (!color) color = "primary";
+                    return (
+                        '<div><span class="badge bg-' +
+                        escape(color) +
+                        '">' +
+                        escape(data.text) +
+                        "</span></div>"
+                    );
                 },
                 item: function (data, escape) {
                     if (!data.value) {
-                        return '<div>' + escape(data.text || 'Please select') + '</div>';
+                        return (
+                            "<div>" +
+                            escape(data.text || "Please select") +
+                            "</div>"
+                        );
                     }
-                    var color = data.$option ? data.$option.getAttribute('data-color') : (data.color || 'primary');
-                    if (!color) color = 'primary';
-                    return '<div><span class="badge bg-' + escape(color) + '">' + escape(data.text) + '</span></div>';
-                }
-            }
+                    var color = data.$option
+                        ? data.$option.getAttribute("data-color")
+                        : data.color || "primary";
+                    if (!color) color = "primary";
+                    return (
+                        '<div><span class="badge bg-' +
+                        escape(color) +
+                        '">' +
+                        escape(data.text) +
+                        "</span></div>"
+                    );
+                },
+            },
         });
     });
 });
@@ -4854,7 +5491,7 @@ $(document).ready(function () {
             var isChecked = $(this).prop("checked");
             $('input[name="enabled_notifications[]"]:not(:disabled)').prop(
                 "checked",
-                isChecked
+                isChecked,
             );
         });
         // Update the selectAllPreferences checkbox state based on the checkboxes' status
@@ -4867,7 +5504,7 @@ $(document).ready(function () {
                 $('input[name="enabled_notifications[]"]:not(:disabled)')
                     .length ===
                 $(
-                    'input[name="enabled_notifications[]"]:not(:disabled):checked'
+                    'input[name="enabled_notifications[]"]:not(:disabled):checked',
                 ).length;
             $("#selectAllPreferences").prop("checked", allChecked);
         }
@@ -4878,7 +5515,7 @@ $("#internal_client").change(function () {
     $("#password, #password_confirmation").val("");
     $("#passDiv, #confirmPassDiv, #statusDiv, #requireEvDiv").toggleClass(
         "d-none",
-        isChecked
+        isChecked,
     );
     $("#client_deactive").prop("checked", true);
     $("#require_ev_" + (isChecked ? "no" : "yes")).prop("checked", true);
@@ -4890,7 +5527,7 @@ $("#update_internal_client").change(function () {
     $("#password, #password_confirmation").val("");
     $("#passDiv, #confirmPassDiv, #statusDiv, #requireEvDiv").toggleClass(
         "d-none",
-        isChecked
+        isChecked,
     );
     // Remove .error-message elements next to #password and #password_confirmation
     $("#password").next(".error-message").remove();
@@ -4929,7 +5566,7 @@ $(document).ready(function () {
         };
         toastr.success(
             "This is a preview of your toast message!",
-            "Toast Preview"
+            "Toast Preview",
         );
     });
 });
@@ -4996,7 +5633,11 @@ $("#testSmsSettingsForm").on("submit", function (event) {
                 .prop("disabled", false)
                 .html(label_submit);
             $("#smsTestResponse").removeClass("d-none");
-            $("#smsResponseText").text((APP_LABELS && APP_LABELS['error_prefix'] ? APP_LABELS['error_prefix'] : "Error: ") + xhr.responseText);
+            $("#smsResponseText").text(
+                (APP_LABELS && APP_LABELS["error_prefix"]
+                    ? APP_LABELS["error_prefix"]
+                    : "Error: ") + xhr.responseText,
+            );
         },
     });
 });
@@ -5046,7 +5687,11 @@ $("#testWhatsappSettingsForm").on("submit", function (event) {
                 .prop("disabled", false)
                 .html(label_submit);
             $("#whatsappTestResponse").removeClass("d-none");
-            $("#whatsappResponseText").text((APP_LABELS && APP_LABELS['error_prefix'] ? APP_LABELS['error_prefix'] : "Error: ") + xhr.responseText);
+            $("#whatsappResponseText").text(
+                (APP_LABELS && APP_LABELS["error_prefix"]
+                    ? APP_LABELS["error_prefix"]
+                    : "Error: ") + xhr.responseText,
+            );
         },
     });
 });
@@ -5094,7 +5739,11 @@ $("#testSlackSettingsForm").on("submit", function (event) {
                 .prop("disabled", false)
                 .html(label_submit);
             $("#slackTestResponse").removeClass("d-none");
-            $("#slackResponseText").text((APP_LABELS && APP_LABELS['error_prefix'] ? APP_LABELS['error_prefix'] : "Error: ") + xhr.responseText);
+            $("#slackResponseText").text(
+                (APP_LABELS && APP_LABELS["error_prefix"]
+                    ? APP_LABELS["error_prefix"]
+                    : "Error: ") + xhr.responseText,
+            );
         },
     });
 });
@@ -5211,15 +5860,15 @@ function initSelect2WithAjax(selector, type) {
                 leaveVisibleToUsers == undefined
                     ? false
                     : leaveVisibleToUsers === false
-                        ? false
-                        : true;
+                      ? false
+                      : true;
             var ignoreAdmins = $this.data("ignore-admins");
             ignoreAdmins =
                 ignoreAdmins == undefined
                     ? false
                     : ignoreAdmins === false
-                        ? false
-                        : true;
+                      ? false
+                      : true;
             // Check if the 'data-consider-workspace' attribute is defined
             var considerWorkspace = $this.data("consider-workspace");
             // If 'considerWorkspace' is undefined, default to true
@@ -5227,11 +5876,11 @@ function initSelect2WithAjax(selector, type) {
                 considerWorkspace == undefined
                     ? true
                     : considerWorkspace === false
-                        ? false
-                        : true;
+                      ? false
+                      : true;
             var singleSelect =
                 $this.data("single-select") === undefined ||
-                    $this.data("single-select") === false
+                $this.data("single-select") === false
                     ? false
                     : true;
             // New: Check if initial values should be loaded
@@ -5329,32 +5978,50 @@ function initTomSelectWithAjax(selector, type) {
         var considerWorkspace = el.dataset.considerWorkspace !== "false";
         var leaveVisibleToUsers = el.dataset.leaveVisibleToUsers !== "false";
         var ignoreAdmins = el.dataset.ignoreAdmins !== "false";
+        var isMultiple = el.hasAttribute("multiple");
+
+        var plugins = [];
+        if (allowClear) {
+            plugins.push("clear_button");
+        }
+        if (isMultiple) {
+            plugins.push("remove_button");
+        }
 
         new TomSelect(el, {
-            valueField: 'id',
-            labelField: 'text',
-            searchField: 'text',
-            plugins: allowClear ? ['remove_button', 'clear_button'] : ['remove_button'],
+            valueField: "id",
+            labelField: "text",
+            searchField: "text",
+            plugins: plugins,
             preload: true,
             load: function (query, callback) {
-                var url = '/search?q=' + encodeURIComponent(query) +
-                    '&type=' + encodeURIComponent(type) +
-                    '&considerWorkspace=' + considerWorkspace +
-                    '&leaveVisibleToUsers=' + leaveVisibleToUsers +
-                    '&ignoreAdmins=' + ignoreAdmins;
+                var url =
+                    "/search?q=" +
+                    encodeURIComponent(query) +
+                    "&type=" +
+                    encodeURIComponent(type) +
+                    "&considerWorkspace=" +
+                    considerWorkspace +
+                    "&leaveVisibleToUsers=" +
+                    leaveVisibleToUsers +
+                    "&ignoreAdmins=" +
+                    ignoreAdmins;
 
                 if (!query) {
-                    url += '&initial=true&limit=' + (el.dataset.initialLimit || 10);
+                    url +=
+                        "&initial=true&limit=" +
+                        (el.dataset.initialLimit || 10);
                 }
 
                 fetch(url)
-                    .then(response => response.json())
-                    .then(json => {
+                    .then((response) => response.json())
+                    .then((json) => {
                         callback(json.results);
-                    }).catch(() => {
+                    })
+                    .catch(() => {
                         callback();
                     });
-            }
+            },
         });
     });
 }
@@ -5365,10 +6032,19 @@ function initTomSelectStatic(selector) {
             el.tomselect.destroy();
         }
         var allowClear = el.dataset.allowClear !== "false";
+        var isMultiple = el.hasAttribute("multiple");
+        var plugins = [];
+        if (allowClear) {
+            plugins.push("clear_button");
+        }
+        if (isMultiple) {
+            plugins.push("remove_button");
+        }
+
         new TomSelect(el, {
-            plugins: allowClear ? ['remove_button', 'clear_button'] : ['remove_button'],
+            plugins: plugins,
             persist: false,
-            placeholder: el.dataset.placeholder || ''
+            placeholder: el.dataset.placeholder || "",
         });
     });
 }
@@ -5376,9 +6052,10 @@ function initTomSelectStatic(selector) {
 // When a "Clear filters" button is clicked, also clear any Tom Select instances
 // in the same card (the page JS only resets the underlying <select>, which would
 // leave the Tom Select chips visible). Additive — no page JS changed.
-$(document).on('click', '[class*="clear-"][class*="-filters"]', function () {
-    var scope = this.closest('.tk-filter-panel, .card, .container-fluid') || document;
-    scope.querySelectorAll('select').forEach(function (s) {
+$(document).on("click", '[class*="clear-"][class*="-filters"]', function () {
+    var scope =
+        this.closest(".tk-filter-panel, .card, .container-fluid") || document;
+    scope.querySelectorAll("select").forEach(function (s) {
         if (s.tomselect) {
             s.tomselect.clear(true); // silent: page handler already triggers the refresh
         }
@@ -5409,8 +6086,8 @@ function initTagifyFromSelect(selector, type) {
                 closeOnSelect: true,
                 searchKeys: ["text"],
                 // ✅ Ensure dropdown renders inside modal if present
-                appendTarget: dropdownContainer
-            }
+                appendTarget: dropdownContainer,
+            },
         });
 
         // Fix z-index if in modal
@@ -5420,19 +6097,21 @@ function initTagifyFromSelect(selector, type) {
 
         // Preload already selected <option> as Tagify values
         var selected = Array.from(selectEl.options)
-            .filter(o => o.selected)
-            .map(o => ({ value: o.value, text: o.text }));
+            .filter((o) => o.selected)
+            .map((o) => ({ value: o.value, text: o.text }));
         tagify.addTags(selected);
 
         // Sync Tagify back to <select>
         tagify.on("change", function () {
             // Clear all selected options
-            Array.from(selectEl.options).forEach(o => (o.selected = false));
+            Array.from(selectEl.options).forEach((o) => (o.selected = false));
 
             // Set selected ones from tagify
-            var values = tagify.value.map(v => v.value);
-            values.forEach(val => {
-                var option = Array.from(selectEl.options).find(o => o.value == val);
+            var values = tagify.value.map((v) => v.value);
+            values.forEach((val) => {
+                var option = Array.from(selectEl.options).find(
+                    (o) => o.value == val,
+                );
                 if (option) option.selected = true;
                 else {
                     // If not exists, create dynamically
@@ -5456,16 +6135,16 @@ function initTagifyFromSelect(selector, type) {
                     q: value,
                     type: type,
                     initial: !value,
-                    limit: $(selectEl).data("initial-limit") ?? 10
+                    limit: $(selectEl).data("initial-limit") ?? 10,
                 },
                 dataType: "json",
                 success: function (data) {
-                    tagify.settings.whitelist = data.results.map(item => ({
+                    tagify.settings.whitelist = data.results.map((item) => ({
                         value: item.id,
-                        text: item.text
+                        text: item.text,
                     }));
                     tagify.loading(false).dropdown.show.call(tagify, value);
-                }
+                },
             });
         });
     });
@@ -5488,7 +6167,10 @@ $(document).ready(function () {
     initTomSelectWithAjax(".tom_deductions_select", "deductions");
     initTomSelectWithAjax(".tom_expense_types_select", "expense_types");
     initTomSelectWithAjax(".tom_invoices_select", "invoices");
-    initTomSelectWithAjax(".tom_candidate_statuses_select", "candidate_statuses");
+    initTomSelectWithAjax(
+        ".tom_candidate_statuses_select",
+        "candidate_statuses",
+    );
     initTomSelectStatic(".tom_static_select");
 
     initSelect2WithAjax(".clients_select", "clients");
@@ -5508,9 +6190,14 @@ $(document).ready(function () {
     initSelect2WithAjax("#edit_follow_up_assigned_to", "users");
     initTomSelectWithAjax("#selected_sources", "lead_sources");
     initTomSelectWithAjax("#selected_stages", "lead_stages");
-    initSelect2WithAjax("#select_candidate_statuses", "candidate_statuses");
-    initTomSelectWithAjax('.select-interview-candidate', "interview_candidates");
-    initTomSelectWithAjax('.select-interview-interviewer', "interview_interviewer");
+    initTomSelectWithAjax(
+        ".select-interview-candidate",
+        "interview_candidates",
+    );
+    initTomSelectWithAjax(
+        ".select-interview-interviewer",
+        "interview_interviewer",
+    );
     $("#create_task_offcanvas, #edit_task_offcanvas")
         .find('select[name="user_id[]"]')
         .each(function () {
@@ -5536,13 +6223,11 @@ $(document).ready(function () {
 $(document).ready(function () {
     // Function to load users for a specific project
     function loadProjectUsers(projectId) {
-
         var usersSelect = $("#create_task_offcanvas").find(
-            'select[name="user_id[]"]'
+            'select[name="user_id[]"]',
         );
         usersSelect.empty(); // Clear any previous options
         if (projectId) {
-
             $.ajax({
                 url: baseUrl + "/projects/get/" + projectId, // Endpoint to get users based on project
                 type: "GET",
@@ -5555,7 +6240,7 @@ $(document).ready(function () {
                                 user.first_name + " " + user.last_name,
                                 user.id,
                                 false,
-                                false
+                                false,
                             );
                             usersSelect.append(userOption);
                         });
@@ -5564,11 +6249,11 @@ $(document).ready(function () {
                             response.project.task_accessibility ===
                             "project_users"
                         ) {
-                            var projectUserIds = response.users.map(function (
-                                user
-                            ) {
-                                return user.id;
-                            });
+                            var projectUserIds = response.users.map(
+                                function (user) {
+                                    return user.id;
+                                },
+                            );
                             // Set selected users
                             usersSelect.val(projectUserIds);
                         }
@@ -5679,7 +6364,10 @@ $("#create_project_offcanvas").on("shown.bs.offcanvas", function (event) {
     }
 });
 $("#create_task_offcanvas").on("shown.bs.offcanvas", function (event) {
-    if (window.location.search.includes("favorite=1") || window.location.search.includes("is_favorite=1")) {
+    if (
+        window.location.search.includes("favorite=1") ||
+        window.location.search.includes("is_favorite=1")
+    ) {
         $("#create_task_offcanvas #is_favorite").val(1); // Set is_favorite to 1 if the query parameter favorite=1 is present
     } else {
         $("#create_task_offcanvas #is_favorite").val(0); // Set is_favorite to 0 if the query parameter favorite is not present
@@ -5771,7 +6459,7 @@ function stripHtml(content) {
         function (match, innerText) {
             // Check if the innerText already starts with @
             return innerText.startsWith("@") ? innerText : "@" + innerText;
-        }
+        },
     );
 }
 // Recuring Task Settings
@@ -5782,7 +6470,7 @@ $(document).ready(function () {
         $("#recurring-task-settings").toggleClass("d-none", !isChecked);
         // Toggle required attributes based on switch state
         $(
-            "#recurrence-frequency, #recurrence-starts-from, #recurrence-occurrences"
+            "#recurrence-frequency, #recurrence-starts-from, #recurrence-occurrences",
         ).prop("required", isChecked);
         // Trigger change event to update dependent fields
         if (isChecked) {
@@ -5794,7 +6482,7 @@ $(document).ready(function () {
         const value = $(this).val();
         // Hide all frequency-specific groups
         $(
-            "#recurrence-day-of-week-group, #recurrence-day-of-month-group, #recurrence-month-of-year-group"
+            "#recurrence-day-of-week-group, #recurrence-day-of-month-group, #recurrence-month-of-year-group",
         ).addClass("d-none");
         // Show appropriate groups based on selected frequency
         switch (value) {
@@ -5806,7 +6494,7 @@ $(document).ready(function () {
                 break;
             case "yearly":
                 $(
-                    "#recurrence-day-of-month-group, #recurrence-month-of-year-group"
+                    "#recurrence-day-of-month-group, #recurrence-month-of-year-group",
                 ).removeClass("d-none");
                 break;
         }
@@ -5832,7 +6520,7 @@ $(document).ready(function () {
         $("#edit-recurring-task-settings").toggleClass("d-none", !isChecked);
         // Toggle required attributes based on switch state
         $(
-            "#edit-recurrence-frequency, #edit-recurrence-starts-from, #edit-recurrence-occurrences"
+            "#edit-recurrence-frequency, #edit-recurrence-starts-from, #edit-recurrence-occurrences",
         ).prop("required", isChecked);
         // Trigger change event to update dependent fields
         if (isChecked) {
@@ -5844,7 +6532,7 @@ $(document).ready(function () {
         const value = $(this).val();
         // Hide all frequency-specific groups
         $(
-            "#edit-recurrence-day-of-week-group, #edit-recurrence-day-of-month-group, #edit-recurrence-month-of-year-group"
+            "#edit-recurrence-day-of-week-group, #edit-recurrence-day-of-month-group, #edit-recurrence-month-of-year-group",
         ).addClass("d-none");
         // Show appropriate groups based on selected frequency
         switch (value) {
@@ -5856,7 +6544,7 @@ $(document).ready(function () {
                 break;
             case "yearly":
                 $(
-                    "#edit-recurrence-day-of-month-group, #edit-recurrence-month-of-year-group"
+                    "#edit-recurrence-day-of-month-group, #edit-recurrence-month-of-year-group",
                 ).removeClass("d-none");
                 break;
         }
@@ -5978,7 +6666,7 @@ $(document).ready(function () {
                                 id: item.id,
                                 text: item.name,
                             };
-                        })
+                        }),
                     );
                 });
             }
@@ -6009,12 +6697,12 @@ $(document).ready(function () {
                     taskListSelect.empty();
                     // Add placeholder option
                     taskListSelect.append(
-                        new Option("Select a task list", "", true, true)
+                        new Option("Select a task list", "", true, true),
                     );
                     // Add received options
                     data.forEach(function (item) {
                         taskListSelect.append(
-                            new Option(item.name, item.id, false, false)
+                            new Option(item.name, item.id, false, false),
                         );
                     });
                     taskListSelect.trigger("change");
@@ -6053,7 +6741,7 @@ document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (button) {
                     subTab.classList.remove("bg-primary", "text-white");
                 });
             const activeSubTab = parentPane.querySelector(
-                ".list-button.active, .calendar-button.active"
+                ".list-button.active, .calendar-button.active",
             );
             if (activeSubTab) {
                 activeSubTab.classList.add("bg-primary", "text-white");
@@ -6061,7 +6749,6 @@ document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (button) {
         }
     });
 });
-
 
 $(document).on("click", ".edit-task-list", function () {
     var id = $(this).data("id");
@@ -6083,7 +6770,12 @@ $(document).on("click", ".edit-task-list", function () {
                 text: response.task_list.project.title, // Ensure this matches your project's title field
             };
             var $projectSelect = $("#task_list_project_id");
-            $projectSelect.empty().append(new Option(projectData.text, projectData.id, true, true)).trigger("change");
+            $projectSelect
+                .empty()
+                .append(
+                    new Option(projectData.text, projectData.id, true, true),
+                )
+                .trigger("change");
         },
     });
 });
@@ -6111,7 +6803,7 @@ $(document).on("click", ".edit-lead-follow-up", function () {
         url: "/leads/follow-up/get/" + id,
         type: "GET",
         headers: {
-            "X-CSRF-TOKEN": $('input[name="_token"]').val()
+            "X-CSRF-TOKEN": $('input[name="_token"]').val(),
         },
         dataType: "json",
         success: function (response) {
@@ -6131,20 +6823,22 @@ $(document).on("click", ".edit-lead-follow-up", function () {
                 dropdownSelector.append(newOption).trigger("change");
             }
             // Prefill Follow Up Date
-            var formatted = moment(followUp.follow_up_at).format('YYYY-MM-DDTHH:mm');
+            var formatted = moment(followUp.follow_up_at).format(
+                "YYYY-MM-DDTHH:mm",
+            );
             $('input[name="follow_up_at"]').val(formatted);
             // Prefill Follow Up Type
             $('select[name="type"]').val(followUp.type);
             // Prefill Status field
             $('select[name="status"]').val(followUp.status);
             // Prefill Note field (make sure to decode HTML entities if needed)
-            $('#edit_follow_up_note').val(followUp.note);
+            $("#edit_follow_up_note").val(followUp.note);
             // Optionally, you can populate any additional lead-related information if needed
             // Example: Pre-fill any lead-specific info in the form, if required
         },
         error: function (xhr, status, error) {
-            console.error('Error:', error);
-        }
+            console.error("Error:", error);
+        },
     });
 });
 $(document).ready(function () {
@@ -6157,71 +6851,79 @@ $(document).ready(function () {
 });
 $(document).ready(function () {
     // Use event delegation to handle clicks on dynamically loaded buttons
-    $(document).on('click', '.convert-to-client', function (e) {
+    $(document).on("click", ".convert-to-client", function (e) {
         e.preventDefault();
-        var leadId = $(this).data('id');
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        var leadId = $(this).data("id");
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
         if (!leadId) {
-            toastr.error('Invalid lead ID.');
+            toastr.error("Invalid lead ID.");
             return;
         }
         $.ajax({
-            url: '/leads/' + leadId + '/convert-to-client',
-            type: 'POST',
+            url: "/leads/" + leadId + "/convert-to-client",
+            type: "POST",
             data: {
                 _token: csrfToken,
-                lead_id: leadId
+                lead_id: leadId,
             },
             success: handleConvertSuccess,
-            error: handleConvertError
+            error: handleConvertError,
         });
     });
     function handleConvertSuccess(response) {
         if (response.error || response.status === false) {
-            toastr.error(response.message || 'Conversion failed.');
+            toastr.error(response.message || "Conversion failed.");
         } else {
-            toastr.success(response.message || 'Lead successfully converted.');
-            setTimeout(() => {
-                location.reload();
-            }, parseFloat(toastTimeOut) * 1000);
+            toastr.success(response.message || "Lead successfully converted.");
+            setTimeout(
+                () => {
+                    location.reload();
+                },
+                parseFloat(toastTimeOut) * 1000,
+            );
         }
     }
     function handleConvertError(xhr) {
-        let message = 'Something went wrong.';
+        let message = "Something went wrong.";
         if (xhr.responseJSON && xhr.responseJSON.message) {
             message = xhr.responseJSON.message;
         }
         toastr.error(message);
-        setTimeout(() => {
-            location.reload();
-        }, parseFloat(toastTimeOut) * 1000);
+        setTimeout(
+            () => {
+                location.reload();
+            },
+            parseFloat(toastTimeOut) * 1000,
+        );
     }
 });
 function setupScopedAIGenerator(generateBtnSelector, options = {}) {
     const defaultOptions = {
-        promptSelector: '.ai-title',
-        customPromptSelector: '.ai-custom-prompt',
-        outputSelector: '.ai-output',
-        loaderSelector: '.ai-loader',
-        customPromptSwitchSelector: '.enableCustomPrompt',
-        customPromptContainerSelector: '.customPromptContainer',
-        endpoint: '/ai/generate-description'
+        promptSelector: ".ai-title",
+        customPromptSelector: ".ai-custom-prompt",
+        outputSelector: ".ai-output",
+        loaderSelector: ".ai-loader",
+        customPromptSwitchSelector: ".enableCustomPrompt",
+        customPromptContainerSelector: ".customPromptContainer",
+        endpoint: "/ai/generate-description",
     };
     const settings = { ...defaultOptions, ...options };
     // Toggle custom prompt textarea visibility using Bootstrap's d-none
-    $(document).on('change', settings.customPromptSwitchSelector, function () {
-        const isChecked = $(this).is(':checked');
+    $(document).on("change", settings.customPromptSwitchSelector, function () {
+        const isChecked = $(this).is(":checked");
         const $container = $(settings.customPromptContainerSelector);
         if (isChecked) {
-            $container.removeClass('d-none');
+            $container.removeClass("d-none");
         } else {
-            $container.addClass('d-none');
+            $container.addClass("d-none");
         }
     });
-    $(document).on('click', generateBtnSelector, function () {
+    $(document).on("click", generateBtnSelector, function () {
         const $btn = $(this);
-        const $scope = $btn.closest('.ai-wrapper');
-        const useCustomPrompt = $scope.find(settings.customPromptSwitchSelector).is(':checked');
+        const $scope = $btn.closest(".ai-wrapper");
+        const useCustomPrompt = $scope
+            .find(settings.customPromptSwitchSelector)
+            .is(":checked");
         let prompt;
         if (useCustomPrompt) {
             prompt = $scope.find(settings.customPromptSelector).val();
@@ -6239,16 +6941,16 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
         const $output = $scope.find(settings.outputSelector);
         const existingDescription = $output.val(); // Get the existing description
         const $loader = $scope.find(settings.loaderSelector);
-        $btn.prop('disabled', true);
-        if ($loader.length) $loader.removeClass('d-none');
+        $btn.prop("disabled", true);
+        if ($loader.length) $loader.removeClass("d-none");
         $.ajax({
             url: settings.endpoint,
-            method: 'POST',
+            method: "POST",
             data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
+                _token: $('meta[name="csrf-token"]').attr("content"),
                 prompt: prompt,
                 isCustomPrompt: useCustomPrompt,
-                existingDescription: existingDescription // Send existing description to backend
+                existingDescription: existingDescription, // Send existing description to backend
             },
             success: function (response) {
                 if (response.error) {
@@ -6269,30 +6971,30 @@ function setupScopedAIGenerator(generateBtnSelector, options = {}) {
                 }
             },
             complete: function () {
-                $btn.prop('disabled', false);
-                if ($loader.length) $loader.addClass('d-none');
-            }
+                $btn.prop("disabled", false);
+                if ($loader.length) $loader.addClass("d-none");
+            },
         });
     });
 }
 // Initialize
 $(document).ready(function () {
-    setupScopedAIGenerator('.generate-ai');
+    setupScopedAIGenerator(".generate-ai");
 });
 $(document).ready(function () {
     // Listen for change events on the radio buttons with the class 'is_active_ai_model'
-    $('.is_active_ai_model').on('change', function () {
+    $(".is_active_ai_model").on("change", function () {
         // When a radio button is selected, uncheck all others
-        $('.is_active_ai_model').not(this).prop('checked', false);
+        $(".is_active_ai_model").not(this).prop("checked", false);
     });
 });
 $(document).ready(function () {
     // Update temperature value displays when sliders change
-    $('#openrouter_temperature').on('input', function () {
-        $('#openrouter_temperature_value').text($(this).val());
+    $("#openrouter_temperature").on("input", function () {
+        $("#openrouter_temperature_value").text($(this).val());
     });
-    $('#gemini_temperature').on('input', function () {
-        $('#gemini_temperature_value').text($(this).val());
+    $("#gemini_temperature").on("input", function () {
+        $("#gemini_temperature_value").text($(this).val());
     });
     // Initialize Bootstrap tooltips
     $('[data-bs-toggle="tooltip"]').tooltip();
@@ -6335,7 +7037,7 @@ if (document.getElementById("install-plugin-dropzone")) {
                         this.files[_i].name === file.name &&
                         this.files[_i].size === file.size &&
                         this.files[_i].lastModifiedDate.toString() ===
-                        file.lastModifiedDate.toString()
+                            file.lastModifiedDate.toString()
                     ) {
                         this.removeFile(file);
                         i++;
@@ -6371,9 +7073,12 @@ if (document.getElementById("install-plugin-dropzone")) {
             } else {
                 // Show success message
                 toastr.success(response.message);
-                setTimeout(function () {
-                    location.reload();
-                }, parseFloat(toastTimeOut) * 1000);
+                setTimeout(
+                    function () {
+                        location.reload();
+                    },
+                    parseFloat(toastTimeOut) * 1000,
+                );
             }
         });
         $("#install_plugin_btn").on("click", function (e) {
@@ -6547,7 +7252,9 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         $(this).attr("action").includes("/emails/store") ||
         $(this).attr("action").includes("/emails/preview")
     ) {
-        var contentField = $(this).find('textarea[name="content"], input[name="content"]');
+        var contentField = $(this).find(
+            'textarea[name="content"], input[name="content"]',
+        );
         if (contentField.length > 0) {
             formData.delete("content");
             formData.append("content", btoa(contentField.val()));
@@ -6557,21 +7264,31 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
     var currentForm = $(this);
     var submit_btn = currentForm.find("#submit_btn");
     var button_text = submit_btn.html() || submit_btn.val();
-    var redirect_url = currentForm.find('input[name="redirect_url"]').val() || "";
+    var redirect_url =
+        currentForm.find('input[name="redirect_url"]').val() || "";
     var tableID = currentForm.find('input[name="table"]').val() || "table";
     // Enhanced overlay type detection
-    var isInModal = currentForm.closest('.modal').length > 0;
-    var isInOffcanvas = currentForm.closest('.offcanvas').length > 0;
-    var parentModal = isInModal ? currentForm.closest('.modal') : null;
-    var parentOffcanvas = isInOffcanvas ? currentForm.closest('.offcanvas') : null;
+    var isInModal = currentForm.closest(".modal").length > 0;
+    var isInOffcanvas = currentForm.closest(".offcanvas").length > 0;
+    var parentModal = isInModal ? currentForm.closest(".modal") : null;
+    var parentOffcanvas = isInOffcanvas
+        ? currentForm.closest(".offcanvas")
+        : null;
     // Enhanced dependent property detection
-    var isDependentProperty = currentForm.hasClass('dependent-property-form') ||
+    var isDependentProperty =
+        currentForm.hasClass("dependent-property-form") ||
         currentForm.find('input[name="is_dependent_property"]').length > 0 ||
-        currentForm.closest('.modal').hasClass('dependent-property-modal') ||
-        currentForm.closest('.offcanvas').hasClass('dependent-property-offcanvas');
+        currentForm.closest(".modal").hasClass("dependent-property-modal") ||
+        currentForm
+            .closest(".offcanvas")
+            .hasClass("dependent-property-offcanvas");
     // Enhanced contract dropzone handling for both modal and offcanvas
-    if (currentForm.closest("#edit_contract_offcanvas, #edit_contract_modal").length > 0 &&
-        typeof Dropzone !== 'undefined' && Dropzone.instances.length > 0) {
+    if (
+        currentForm.closest("#edit_contract_offcanvas, #edit_contract_modal")
+            .length > 0 &&
+        typeof Dropzone !== "undefined" &&
+        Dropzone.instances.length > 0
+    ) {
         try {
             var dropzoneInstance = Dropzone.forElement("#contract-dropzone");
             if (dropzoneInstance) {
@@ -6588,7 +7305,9 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         url: currentForm.attr("action"),
         data: formData,
         headers: {
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content') || $('input[name="_token"]').val(),
+            "X-CSRF-TOKEN":
+                $('meta[name="csrf-token"]').attr("content") ||
+                $('input[name="_token"]').val(),
         },
         beforeSend: function () {
             submit_btn.html(label_please_wait).prop("disabled", true);
@@ -6604,7 +7323,11 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 return;
             }
             // Smart overlay closing
-            handleOverlayClosing(isDependentProperty, parentModal, parentOffcanvas);
+            handleOverlayClosing(
+                isDependentProperty,
+                parentModal,
+                parentOffcanvas,
+            );
             // Handle success scenarios - REORDERED to check DNR first
             if (currentForm.find('input[name="dnr"]').length > 0) {
                 // DNR scenario - refresh table and reset form
@@ -6614,7 +7337,11 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 resetForm(currentForm);
                 toastr.success(result.message || "Success");
                 // Always try to refresh parent dropdowns for DNR forms in modal/offcanvas
-                if ((isInModal || isInOffcanvas) && result.type && result.data) {
+                if (
+                    (isInModal || isInOffcanvas) &&
+                    result.type &&
+                    result.data
+                ) {
                     refreshParentFormDropdowns(result);
                 }
                 // Also refresh for dependent properties
@@ -6627,7 +7354,11 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             } else {
                 toastr.success(result.message || "Success");
                 // Always try to refresh parent dropdowns if we're in a modal/offcanvas
-                if ((isInModal || isInOffcanvas) && result.type && result.data) {
+                if (
+                    (isInModal || isInOffcanvas) &&
+                    result.type &&
+                    result.data
+                ) {
                     refreshParentFormDropdowns(result);
                 }
                 setTimeout(handleRedirection, parseFloat(toastTimeOut) * 1000);
@@ -6642,10 +7373,14 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             } else {
                 handleServerErrors(xhr);
             }
-        }
+        },
     });
     // ✅ ENHANCED OVERLAY CLOSING LOGIC
-    function handleOverlayClosing(isDependentProperty, parentModal, parentOffcanvas) {
+    function handleOverlayClosing(
+        isDependentProperty,
+        parentModal,
+        parentOffcanvas,
+    ) {
         try {
             if (isDependentProperty) {
                 // For dependent properties: only close the immediate modal
@@ -6680,25 +7415,29 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             }
         } catch (error) {
             // console.warn('Error closing specific modal:', error);
-            modalElement.removeClass('show').css('display', 'none');
-            modalElement.attr('aria-hidden', 'true').removeAttr('aria-modal');
+            modalElement.removeClass("show").css("display", "none");
+            modalElement.attr("aria-hidden", "true").removeAttr("aria-modal");
         }
     }
     // ✅ ENHANCED OFFCANVAS CLOSING
     function closeSpecificOffcanvas(offcanvasElement) {
         try {
-            let offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement[0]);
+            let offcanvasInstance = bootstrap.Offcanvas.getInstance(
+                offcanvasElement[0],
+            );
             if (offcanvasInstance) {
                 offcanvasInstance.hide();
             } else {
-                offcanvasElement.removeClass('show').css('visibility', 'hidden');
-                $('body').removeClass('offcanvas-open');
+                offcanvasElement
+                    .removeClass("show")
+                    .css("visibility", "hidden");
+                $("body").removeClass("offcanvas-open");
             }
         } catch (error) {
             // console.warn('Error closing specific offcanvas:', error);
-            offcanvasElement.removeClass('show').css('visibility', 'hidden');
-            offcanvasElement.attr('aria-hidden', 'true');
-            $('body').removeClass('offcanvas-open');
+            offcanvasElement.removeClass("show").css("visibility", "hidden");
+            offcanvasElement.attr("aria-hidden", "true");
+            $("body").removeClass("offcanvas-open");
         }
     }
     // ✅ CLOSE ALL MODALS
@@ -6714,7 +7453,7 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             });
         } catch (error) {
             // console.warn('Error closing all modals:', error);
-            $(".modal").removeClass('show').css('display', 'none');
+            $(".modal").removeClass("show").css("display", "none");
         }
     }
     // ✅ ENHANCED CLOSE ALL OVERLAYS
@@ -6735,20 +7474,20 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                 if (offcanvasInstance) {
                     offcanvasInstance.hide();
                 } else {
-                    $(this).removeClass('show').css('visibility', 'hidden');
+                    $(this).removeClass("show").css("visibility", "hidden");
                 }
             });
             // Cleanup backdrops and body classes after animation
             setTimeout(function () {
-                $('.modal-backdrop, .offcanvas-backdrop').remove();
-                $('body').removeClass('modal-open offcanvas-open');
+                $(".modal-backdrop, .offcanvas-backdrop").remove();
+                $("body").removeClass("modal-open offcanvas-open");
             }, 300);
         } catch (error) {
             // console.warn('Error in closeAllOverlays:', error);
             // Force cleanup
-            $('.modal, .offcanvas').removeClass('show');
-            $('.modal-backdrop, .offcanvas-backdrop').remove();
-            $('body').removeClass('modal-open offcanvas-open');
+            $(".modal, .offcanvas").removeClass("show");
+            $(".modal-backdrop, .offcanvas-backdrop").remove();
+            $("body").removeClass("modal-open offcanvas-open");
         }
     }
     // ✅ ENHANCED FORM RESET
@@ -6758,19 +7497,19 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             form.find("select").val(null).trigger("change");
             // Handle Select2 dropdowns
             form.find(".select2").each(function () {
-                $(this).val(null).trigger('change');
+                $(this).val(null).trigger("change");
             });
             // Handle specific elements
             if ($("#partialLeave").length) {
                 $("#partialLeave").trigger("change");
             }
-            if (typeof resetDateFields === 'function') {
+            if (typeof resetDateFields === "function") {
                 resetDateFields(form);
             }
             // Clear any summernote editors
-            form.find('.summernote').each(function () {
+            form.find(".summernote").each(function () {
                 if ($(this).summernote) {
-                    $(this).summernote('code', '');
+                    $(this).summernote("code", "");
                 }
             });
         } catch (error) {
@@ -6783,40 +7522,55 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         var errors = xhr.responseJSON.errors || {};
         // Show errors in overlay-specific container
         if (xhr.responseJSON.showInModal) {
-            var errorContainerId = isInOffcanvas ? '#errorOffcanvasContent' : '#errorModalContent';
-            var errorBodyId = isInOffcanvas ? '#errorOffcanvasBody' : '#errorModalBody';
+            var errorContainerId = isInOffcanvas
+                ? "#errorOffcanvasContent"
+                : "#errorModalContent";
+            var errorBodyId = isInOffcanvas
+                ? "#errorOffcanvasBody"
+                : "#errorModalBody";
             let errorHtmlBody = "";
             $.each(errors, function (field, messages) {
-                errorHtmlBody += `<div class="mb-2"><strong class="text-capitalize">${field.replace(/_/g, ' ')}</strong><ul class="mb-0 mt-1">`;
+                errorHtmlBody += `<div class="mb-2"><strong class="text-capitalize">${field.replace(/_/g, " ")}</strong><ul class="mb-0 mt-1">`;
                 $.each(messages, function (_, msg) {
                     errorHtmlBody += `<li>${msg}</li>`;
                 });
                 errorHtmlBody += `</ul></div>`;
             });
             $(errorContainerId).html(errorHtmlBody);
-            $(errorBodyId).removeClass('d-none');
+            $(errorBodyId).removeClass("d-none");
         }
         // Render field-specific errors with enhanced targeting
-        var inputFields = $(currentForm.find("input[name], select[name], textarea[name]").get().reverse());
+        var inputFields = $(
+            currentForm
+                .find("input[name], select[name], textarea[name]")
+                .get()
+                .reverse(),
+        );
         var firstErrorField = null;
         inputFields.each(function () {
             var input = $(this);
             var fieldName = input.attr("name");
             var errorMessage = errors[fieldName];
-            var parent = input.closest(".form-group, .input-group, .form-control, .form-select, .mb-3, .mb-2");
+            var parent = input.closest(
+                ".form-group, .input-group, .form-control, .form-select, .mb-3, .mb-2",
+            );
             // Remove existing error messages
             parent.find(".text-danger.error-message").remove();
             if (errorMessage) {
                 if (!firstErrorField) firstErrorField = input;
-                var msg = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
-                var errorEl = $('<span class="text-danger error-message d-block mt-1 small"></span>').text(msg);
+                var msg = Array.isArray(errorMessage)
+                    ? errorMessage[0]
+                    : errorMessage;
+                var errorEl = $(
+                    '<span class="text-danger error-message d-block mt-1 small"></span>',
+                ).text(msg);
                 // Enhanced error placement logic
                 if (input.hasClass("select2-hidden-accessible")) {
                     input.siblings(".select2").after(errorEl);
                 } else if (input.is("textarea#privacy_policy")) {
                     input.parent().find(".mt-2").first().before(errorEl);
-                } else if (input.closest('.input-group').length) {
-                    input.closest('.input-group').after(errorEl);
+                } else if (input.closest(".input-group").length) {
+                    input.closest(".input-group").after(errorEl);
                 } else {
                     input.after(errorEl);
                 }
@@ -6825,7 +7579,10 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         // Scroll to first error field
         if (firstErrorField) {
             setTimeout(function () {
-                firstErrorField[0].scrollIntoView({ behavior: "smooth", block: "center" });
+                firstErrorField[0].scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
                 firstErrorField.focus();
             }, 100);
         }
@@ -6842,43 +7599,61 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
             }
             // SQL State errors
             else if (/SQLSTATE\[(\w+)\]/.test(msg)) {
-                let sqlMatch = msg.match(/SQLSTATE\[(\w+)\]: (.+?)(?:\s\(SQL:|$)/);
+                let sqlMatch = msg.match(
+                    /SQLSTATE\[(\w+)\]: (.+?)(?:\s\(SQL:|$)/,
+                );
                 if (sqlMatch) {
                     msg = `Database Error [${sqlMatch[1]}]: ${sqlMatch[2]}`;
                 }
             }
             // Connection timeout errors
-            else if (msg.includes('Connection timed out')) {
+            else if (msg.includes("Connection timed out")) {
                 msg = "Database connection timed out. Please try again.";
             }
             // General SQL errors
-            else if (msg.includes('Query Exception')) {
-                msg = "Database query error. Please contact support if this persists.";
+            else if (msg.includes("Query Exception")) {
+                msg =
+                    "Database query error. Please contact support if this persists.";
             }
         }
         toastr.error(msg);
     }
     // ✅ ENHANCED DROPDOWN REFRESH WITH MORE ENTITY TYPES AND COMPREHENSIVE DEBUG
     function refreshParentFormDropdowns(result) {
-        if (!result.data || !result.data.id || !result.data.name || !result.type) {
+        if (
+            !result.data ||
+            !result.data.id ||
+            !result.data.name ||
+            !result.type
+        ) {
             return;
         }
         // Enhanced mapping for more entity types
         let selectMap = {
-            status: ['status_id', 'project_status_id', 'task_status_id', 'status'],
-            priority: ['priority_id', 'project_priority_id', 'task_priority_id', 'priority'],
-            tag: ['tag_ids[]', 'tags[]', 'tag_id'],
-            contract_type: ['contract_type_id', 'contract_type'],
-            payment_method: ['payment_method_id'],
-            allowance: ['allowance_id', 'allowance_ids[]'],
-            deduction: ['deduction_id', 'deduction_ids[]'],
-            item: ['item_id', 'product_id'],
-            category: ['category_id'],
-            department: ['department_id'],
-            designation: ['designation_id'],
-            client: ['client_id', 'customer_id'],
-            project: ['project_id'],
-            workspace: ['workspace_id']
+            status: [
+                "status_id",
+                "project_status_id",
+                "task_status_id",
+                "status",
+            ],
+            priority: [
+                "priority_id",
+                "project_priority_id",
+                "task_priority_id",
+                "priority",
+            ],
+            tag: ["tag_ids[]", "tags[]", "tag_id"],
+            contract_type: ["contract_type_id", "contract_type"],
+            payment_method: ["payment_method_id"],
+            allowance: ["allowance_id", "allowance_ids[]"],
+            deduction: ["deduction_id", "deduction_ids[]"],
+            item: ["item_id", "product_id"],
+            category: ["category_id"],
+            department: ["department_id"],
+            designation: ["designation_id"],
+            client: ["client_id", "customer_id"],
+            project: ["project_id"],
+            workspace: ["workspace_id"],
         };
         let targetSelects = selectMap[result.type] || [];
         if (!targetSelects.length) {
@@ -6887,55 +7662,86 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
         // Look for selects in the active offcanvas first, then modal
         let activeContainer = $(".offcanvas.show");
         if (!activeContainer.length) {
-            activeContainer = $(".modal.show").not('#create_status_modal'); // Exclude the status creation modal itself
+            activeContainer = $(".modal.show").not("#create_status_modal"); // Exclude the status creation modal itself
         }
         if (activeContainer.length) {
-            console.log('All selects in container:', activeContainer.find('select').map(function () {
-                return {
-                    name: this.name || 'NO_NAME',
-                    id: this.id || 'NO_ID',
-                    classes: this.className
-                };
-            }).get());
+            console.log(
+                "All selects in container:",
+                activeContainer
+                    .find("select")
+                    .map(function () {
+                        return {
+                            name: this.name || "NO_NAME",
+                            id: this.id || "NO_ID",
+                            classes: this.className,
+                        };
+                    })
+                    .get(),
+            );
             let foundAndUpdated = false;
             targetSelects.forEach(function (selectName) {
-                let selector = activeContainer.find(`select[name="${selectName}"]`);
+                let selector = activeContainer.find(
+                    `select[name="${selectName}"]`,
+                );
                 if (selector.length) {
                     foundAndUpdated = true;
                     // Check if option already exists
-                    if (selector.find(`option[value="${result.data.id}"]`).length === 0) {
-                        let newOption = new Option(result.data.name, result.data.id, true, true);
+                    if (
+                        selector.find(`option[value="${result.data.id}"]`)
+                            .length === 0
+                    ) {
+                        let newOption = new Option(
+                            result.data.name,
+                            result.data.id,
+                            true,
+                            true,
+                        );
 
                         // Attach color data to the option
                         if (result.priority?.color || result.status?.color) {
-                            $(newOption).data('color', result.priority?.color || result.status?.color);
-                            $(newOption).attr('data-color', result.priority?.color || result.status?.color); // Ensure data attribute is set
+                            $(newOption).data(
+                                "color",
+                                result.priority?.color || result.status?.color,
+                            );
+                            $(newOption).attr(
+                                "data-color",
+                                result.priority?.color || result.status?.color,
+                            ); // Ensure data attribute is set
                         }
                         selector.append(newOption);
                     } else {
                         selector.val(result.data.id);
                     }
                     // Trigger change event for Select2 and other plugins
-                    selector.trigger('change');
+                    selector.trigger("change");
                     // Handle Select2 specifically
-                    if (selector.hasClass('select2-hidden-accessible')) {
-                        selector.trigger('change.select2');
+                    if (selector.hasClass("select2-hidden-accessible")) {
+                        selector.trigger("change.select2");
                         // Force Select2 to recognize the new option
                         setTimeout(function () {
-                            selector.val(result.data.id).trigger('change.select2');
+                            selector
+                                .val(result.data.id)
+                                .trigger("change.select2");
                         }, 100);
                     }
                     // Handle Ajax Select2 dropdowns
-                    if (selector.data('select2') && selector.data('select2').options && selector.data('select2').options.ajax) {
+                    if (
+                        selector.data("select2") &&
+                        selector.data("select2").options &&
+                        selector.data("select2").options.ajax
+                    ) {
                         selector.trigger({
-                            type: 'select2:select',
+                            type: "select2:select",
                             params: {
                                 data: {
                                     id: result.data.id,
                                     text: result.data.name,
-                                    color: result.priority?.color || result.status?.color || 'primary' // Ensure color is passed
-                                }
-                            }
+                                    color:
+                                        result.priority?.color ||
+                                        result.status?.color ||
+                                        "primary", // Ensure color is passed
+                                },
+                            },
                         });
                     }
                     // Handle TomSelect specifically
@@ -6943,7 +7749,10 @@ $(document).on("submit", ".new-form-submit-event", function (e) {
                         selector[0].tomselect.addOption({
                             value: result.data.id,
                             text: result.data.name,
-                            color: result.priority?.color || result.status?.color || 'primary'
+                            color:
+                                result.priority?.color ||
+                                result.status?.color ||
+                                "primary",
                         });
                         selector[0].tomselect.addItem(result.data.id);
                     }
@@ -6984,23 +7793,39 @@ $(document).ready(function () {
                 if (response.error === false) {
                     $("#quickViewOffcanvas").offcanvas("show");
                     if (type === "task" && response.task) {
-                        $("#quickViewTitlePlaceholder").text(response.task.title);
-                        $("#quickViewDescPlaceholder").html(response.task.description);
+                        $("#quickViewTitlePlaceholder").text(
+                            response.task.title,
+                        );
+                        $("#quickViewDescPlaceholder").html(
+                            response.task.description,
+                        );
                     } else if (type === "project" && response.project) {
-                        $("#quickViewTitlePlaceholder").text(response.project.title);
-                        $("#quickViewDescPlaceholder").html(response.project.description);
+                        $("#quickViewTitlePlaceholder").text(
+                            response.project.title,
+                        );
+                        $("#quickViewDescPlaceholder").html(
+                            response.project.description,
+                        );
                     }
-                    $("#typePlaceholder").text(type === "task" ? "Task" : "Project");
+                    $("#typePlaceholder").text(
+                        type === "task" ? "Task" : "Project",
+                    );
                     $("#usersTable").bootstrapTable("refresh");
                     $("#clientsTable").bootstrapTable("refresh");
                     // Update URL with modal parameters
                     if (updateUrl) {
-                        const urlParams = new URLSearchParams(window.location.search);
+                        const urlParams = new URLSearchParams(
+                            window.location.search,
+                        );
                         urlParams.set("modal", "quickview");
                         urlParams.set("type", type);
                         urlParams.set("id", id);
                         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-                        window.history.pushState({ modal: "quickview", type, id }, "", newUrl);
+                        window.history.pushState(
+                            { modal: "quickview", type, id },
+                            "",
+                            newUrl,
+                        );
                     }
                 } else {
                     toastr.error(response.message);
@@ -7076,7 +7901,9 @@ $(document).ready(function () {
 
         var panes = panel.querySelectorAll(".tk-panel-pane");
         var activePane = panel.querySelector(".tk-panel-pane:not([hidden])");
-        var activeKey = activePane ? activePane.getAttribute("data-panel") : null;
+        var activeKey = activePane
+            ? activePane.getAttribute("data-panel")
+            : null;
 
         function showPane(key) {
             panes.forEach(function (p) {
@@ -7089,7 +7916,9 @@ $(document).ready(function () {
         }
 
         var railButtons = rail.querySelectorAll(".tk-rail-btn[data-panel]");
-        var isCompact = function () { return window.matchMedia("(max-width: 1199.98px)").matches; };
+        var isCompact = function () {
+            return window.matchMedia("(max-width: 1199.98px)").matches;
+        };
 
         railButtons.forEach(function (btn) {
             var key = btn.getAttribute("data-panel");
@@ -7134,39 +7963,54 @@ $(document).ready(function () {
         if (search) {
             search.addEventListener("input", function () {
                 var q = this.value.trim().toLowerCase();
-                if (searchClear) searchClear.style.display = q.length > 0 ? "block" : "none";
+                if (searchClear)
+                    searchClear.style.display = q.length > 0 ? "block" : "none";
                 var pane = panel.querySelector(".tk-panel-pane:not([hidden])");
                 if (!pane) return;
-                pane.querySelectorAll(".tk-panel-item").forEach(function (item) {
-                    var span = item.querySelector("span");
-                    if (!span) return;
+                pane.querySelectorAll(".tk-panel-item").forEach(
+                    function (item) {
+                        var span = item.querySelector("span");
+                        if (!span) return;
 
-                    if (!span.hasAttribute("data-original-text")) {
-                        span.setAttribute("data-original-text", span.textContent);
-                    }
-                    var text = span.getAttribute("data-original-text");
-                    var lowerText = text.toLowerCase();
+                        if (!span.hasAttribute("data-original-text")) {
+                            span.setAttribute(
+                                "data-original-text",
+                                span.textContent,
+                            );
+                        }
+                        var text = span.getAttribute("data-original-text");
+                        var lowerText = text.toLowerCase();
 
-                    if (!q) {
-                        span.innerHTML = text;
-                        item.style.display = "";
-                    } else if (lowerText.indexOf(q) !== -1) {
-                        item.style.display = "";
-                        var startIndex = lowerText.indexOf(q);
-                        var endIndex = startIndex + q.length;
-                        span.innerHTML = text.substring(0, startIndex) + "<span style=\"color: var(--signal); font-weight: 600;\">" + text.substring(startIndex, endIndex) + "</span>" + text.substring(endIndex);
-                    } else {
-                        item.style.display = "none";
-                        span.innerHTML = text;
-                    }
-                });
-                pane.querySelectorAll(".tk-panel-group").forEach(function (group) {
-                    var anyVisible = Array.prototype.some.call(
-                        group.querySelectorAll(".tk-panel-item"),
-                        function (it) { return it.style.display !== "none"; }
-                    );
-                    group.style.display = anyVisible ? "" : "none";
-                });
+                        if (!q) {
+                            span.innerHTML = text;
+                            item.style.display = "";
+                        } else if (lowerText.indexOf(q) !== -1) {
+                            item.style.display = "";
+                            var startIndex = lowerText.indexOf(q);
+                            var endIndex = startIndex + q.length;
+                            span.innerHTML =
+                                text.substring(0, startIndex) +
+                                '<span style="color: var(--signal); font-weight: 600;">' +
+                                text.substring(startIndex, endIndex) +
+                                "</span>" +
+                                text.substring(endIndex);
+                        } else {
+                            item.style.display = "none";
+                            span.innerHTML = text;
+                        }
+                    },
+                );
+                pane.querySelectorAll(".tk-panel-group").forEach(
+                    function (group) {
+                        var anyVisible = Array.prototype.some.call(
+                            group.querySelectorAll(".tk-panel-item"),
+                            function (it) {
+                                return it.style.display !== "none";
+                            },
+                        );
+                        group.style.display = anyVisible ? "" : "none";
+                    },
+                );
             });
 
             if (searchClear) {
@@ -7180,7 +8024,11 @@ $(document).ready(function () {
 
         // Keyboard shortcut '/' to focus menu search
         document.addEventListener("keydown", function (e) {
-            if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+            if (
+                e.key === "/" &&
+                document.activeElement.tagName !== "INPUT" &&
+                document.activeElement.tagName !== "TEXTAREA"
+            ) {
                 var searchInput = document.getElementById("menu-search");
                 if (searchInput) {
                     e.preventDefault();
@@ -7215,7 +8063,9 @@ $(document).ready(function () {
     }
 
     function currentTheme() {
-        return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        return document.documentElement.getAttribute("data-theme") === "dark"
+            ? "dark"
+            : "light";
     }
 
     function initCbar() {
@@ -7224,7 +8074,9 @@ $(document).ready(function () {
             toggle.addEventListener("click", function () {
                 var next = currentTheme() === "dark" ? "light" : "dark";
                 applyTheme(next);
-                try { localStorage.setItem(STORAGE_KEY, next); } catch (e) { }
+                try {
+                    localStorage.setItem(STORAGE_KEY, next);
+                } catch (e) {}
             });
         }
 
@@ -7261,19 +8113,36 @@ $(document).ready(function () {
         if (!input || !pal) return;
         var empty = modal.querySelector("#tk-pal-empty");
 
-        function items() { return Array.prototype.slice.call(pal.querySelectorAll(".tk-pal-item")); }
-        function visibleItems() { return items().filter(function (it) { return it.style.display !== "none"; }); }
-        function clearActive() { items().forEach(function (it) { it.removeAttribute("data-active"); }); }
+        function items() {
+            return Array.prototype.slice.call(
+                pal.querySelectorAll(".tk-pal-item"),
+            );
+        }
+        function visibleItems() {
+            return items().filter(function (it) {
+                return it.style.display !== "none";
+            });
+        }
+        function clearActive() {
+            items().forEach(function (it) {
+                it.removeAttribute("data-active");
+            });
+        }
         function setActive(it) {
             clearActive();
-            if (it) { it.setAttribute("data-active", "true"); it.scrollIntoView({ block: "nearest" }); }
+            if (it) {
+                it.setAttribute("data-active", "true");
+                it.scrollIntoView({ block: "nearest" });
+            }
         }
 
         function filter() {
             var q = (input.value || "").trim().toLowerCase();
             var anyVisible = false;
             items().forEach(function (it) {
-                var text = it.getAttribute("data-text") || it.textContent.toLowerCase();
+                var text =
+                    it.getAttribute("data-text") ||
+                    it.textContent.toLowerCase();
                 var match = !q || text.indexOf(q) !== -1;
                 it.style.display = match ? "" : "none";
                 if (match) anyVisible = true;
@@ -7281,7 +8150,9 @@ $(document).ready(function () {
             pal.querySelectorAll(".tk-pal-group").forEach(function (group) {
                 var groupVisible = Array.prototype.some.call(
                     group.querySelectorAll(".tk-pal-item"),
-                    function (it) { return it.style.display !== "none"; }
+                    function (it) {
+                        return it.style.display !== "none";
+                    },
                 );
                 group.style.display = groupVisible ? "" : "none";
             });
@@ -7297,7 +8168,9 @@ $(document).ready(function () {
         input.addEventListener("keydown", function (e) {
             var vis = visibleItems();
             if (!vis.length) return;
-            var idx = vis.findIndex(function (it) { return it.getAttribute("data-active") === "true"; });
+            var idx = vis.findIndex(function (it) {
+                return it.getAttribute("data-active") === "true";
+            });
             if (e.key === "ArrowDown") {
                 e.preventDefault();
                 setActive(vis[Math.min(idx + 1, vis.length - 1)] || vis[0]);
@@ -7315,7 +8188,10 @@ $(document).ready(function () {
 
         // Reset filter + highlight each time the modal opens.
         if (window.jQuery) {
-            window.jQuery(modal).on("shown.bs.modal", function () { filter(); input.focus(); });
+            window.jQuery(modal).on("shown.bs.modal", function () {
+                filter();
+                input.focus();
+            });
         }
         filter();
     }
@@ -7345,7 +8221,8 @@ $(document).ready(function () {
 (function () {
     "use strict";
 
-    var VB_W = 100, VB_H = 28;   // svg viewBox
+    var VB_W = 100,
+        VB_H = 28; // svg viewBox
     var PAD_Y = 3;
 
     // tile id -> trends key returned by the backend.
@@ -7355,28 +8232,34 @@ $(document).ready(function () {
         "users-tile": "users",
         "clients-tile": "clients",
         "meetings-tile": "meetings",
-        "todos-tile": "todos"
+        "todos-tile": "todos",
     };
 
     function buildLinePath(series) {
         var data = series.slice();
-        if (data.length === 1) { data = [data[0], data[0]]; }
+        if (data.length === 1) {
+            data = [data[0], data[0]];
+        }
         var n = data.length;
         var min = Math.min.apply(null, data);
         var max = Math.max.apply(null, data);
-        var range = (max - min) || 1;
+        var range = max - min || 1;
         var usableH = VB_H - PAD_Y * 2;
         var d = "";
         for (var i = 0; i < n; i++) {
             var x = (i / (n - 1)) * VB_W;
             var y = PAD_Y + (1 - (data[i] - min) / range) * usableH;
-            d += (i === 0 ? "M" : " L") + (Math.round(x * 100) / 100) + " " + (Math.round(y * 100) / 100);
+            d +=
+                (i === 0 ? "M" : " L") +
+                Math.round(x * 100) / 100 +
+                " " +
+                Math.round(y * 100) / 100;
         }
         return d;
     }
 
     function formatDelta(delta) {
-        var sign = delta > 0 ? "+" : (delta < 0 ? "−" : "");
+        var sign = delta > 0 ? "+" : delta < 0 ? "−" : "";
         return sign + Math.abs(Math.round(delta));
     }
 
@@ -7386,33 +8269,50 @@ $(document).ready(function () {
 
         // No real data for this metric -> show nothing (cells stay clean).
         if (!Array.isArray(series) || series.length === 0) {
-            if (sparkEl) { sparkEl.innerHTML = ""; }
-            if (trendEl) { trendEl.innerHTML = ""; }
+            if (sparkEl) {
+                sparkEl.innerHTML = "";
+            }
+            if (trendEl) {
+                trendEl.innerHTML = "";
+            }
             return;
         }
 
         var delta = series[series.length - 1] - series[0];
-        var dir = delta > 0 ? "up" : (delta < 0 ? "down" : "flat");
+        var dir = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
 
         if (trendEl) {
             trendEl.classList.remove("is-up", "is-down", "is-flat");
             trendEl.classList.add("is-" + dir);
-            var arrow = dir === "down" ? "↓" : (dir === "up" ? "↑" : "→");
-            trendEl.innerHTML = '<span class="tk-trend-arrow">' + arrow + "</span>" +
-                "<span>" + formatDelta(delta) + "</span>";
+            var arrow = dir === "down" ? "↓" : dir === "up" ? "↑" : "→";
+            trendEl.innerHTML =
+                '<span class="tk-trend-arrow">' +
+                arrow +
+                "</span>" +
+                "<span>" +
+                formatDelta(delta) +
+                "</span>";
         }
 
         if (sparkEl) {
             var d = buildLinePath(series);
             sparkEl.innerHTML =
-                '<svg viewBox="0 0 ' + VB_W + " " + VB_H + '" preserveAspectRatio="none" focusable="false">' +
-                '<path class="tk-spark-line" d="' + d + '"></path>' +
+                '<svg viewBox="0 0 ' +
+                VB_W +
+                " " +
+                VB_H +
+                '" preserveAspectRatio="none" focusable="false">' +
+                '<path class="tk-spark-line" d="' +
+                d +
+                '"></path>' +
                 "</svg>";
         }
     }
 
     function applyTrends(trends) {
-        if (!trends) { return; }
+        if (!trends) {
+            return;
+        }
         var metrics = document.querySelectorAll(".tk-metric");
         for (var i = 0; i < metrics.length; i++) {
             var metric = metrics[i];
@@ -7424,18 +8324,34 @@ $(document).ready(function () {
     }
 
     function initMetricSparklines() {
-        if (!document.querySelector(".tk-metric")) { return; }
-        if (!window.jQuery) { return; }
+        if (!document.querySelector(".tk-metric")) {
+            return;
+        }
+        if (!window.jQuery) {
+            return;
+        }
 
         // Read the real trend series from the dashboard AJAX response without
         // touching dashboard.js — jQuery fires ajaxSuccess globally.
         window.jQuery(document).ajaxSuccess(function (evt, xhr, settings) {
-            if (!settings || !settings.url || settings.url.indexOf("/dashboard/data") < 0) { return; }
+            if (
+                !settings ||
+                !settings.url ||
+                settings.url.indexOf("/dashboard/data") < 0
+            ) {
+                return;
+            }
             var resp = xhr.responseJSON;
             if (!resp && xhr.responseText) {
-                try { resp = JSON.parse(xhr.responseText); } catch (e) { resp = null; }
+                try {
+                    resp = JSON.parse(xhr.responseText);
+                } catch (e) {
+                    resp = null;
+                }
             }
-            if (resp && resp.trends) { applyTrends(resp.trends); }
+            if (resp && resp.trends) {
+                applyTrends(resp.trends);
+            }
         });
     }
 
@@ -7460,14 +8376,23 @@ $(document).ready(function () {
     "use strict";
 
     var ENDPOINT_HINT = "income-vs-expense-report-data";
-    var H = 240, PT = 16, PB = 26, PL = 48, PR = 14;
-    var CUR = (typeof window.label_currency_symbol === "string" && window.label_currency_symbol) || "₹";
+    var H = 240,
+        PT = 16,
+        PB = 26,
+        PL = 48,
+        PR = 14;
+    var CUR =
+        (typeof window.label_currency_symbol === "string" &&
+            window.label_currency_symbol) ||
+        "₹";
 
     var lastData = null; // {categories, income, expense, labels}
     var tooltip = null;
     var mode = "both"; // income | expense | both (driven by the segmented selector)
 
-    function el() { return document.getElementById("tk-hero-chart"); }
+    function el() {
+        return document.getElementById("tk-hero-chart");
+    }
 
     function fmtMoney(v) {
         var n = Math.abs(Math.round(Number(v) || 0));
@@ -7476,18 +8401,31 @@ $(document).ready(function () {
 
     // dd-mm-yyyy -> Date (mirrors dashboard.js parseDMY).
     function parseDMY(d) {
-        if (!d) { return new Date(0); }
+        if (!d) {
+            return new Date(0);
+        }
         var parts = String(d).split("-");
-        if (parts.length !== 3) { return new Date(d); }
-        return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+        if (parts.length !== 3) {
+            return new Date(d);
+        }
+        return new Date(
+            Number(parts[2]),
+            Number(parts[1]) - 1,
+            Number(parts[0]),
+        );
     }
 
     function groupByDate(rows, dateField, amountField) {
         var acc = {};
         (rows || []).forEach(function (item) {
-            var date = (String(item[dateField] || "").split(" ")[0]) || "";
-            if (!date) { return; }
-            var amount = parseFloat(String(item[amountField] || "").replace(/[^0-9.\-]+/g, "")) || 0;
+            var date = String(item[dateField] || "").split(" ")[0] || "";
+            if (!date) {
+                return;
+            }
+            var amount =
+                parseFloat(
+                    String(item[amountField] || "").replace(/[^0-9.\-]+/g, ""),
+                ) || 0;
             acc[date] = (acc[date] || 0) + amount;
         });
         return acc;
@@ -7500,22 +8438,40 @@ $(document).ready(function () {
         var inc = groupByDate(invoices, "from_date", "amount");
         var exp = groupByDate(expenses, "expense_date", "amount");
         var dates = Object.keys(inc).concat(Object.keys(exp));
-        var seen = {}; var all = [];
-        dates.forEach(function (d) { if (!seen[d]) { seen[d] = 1; all.push(d); } });
-        all.sort(function (a, b) { return parseDMY(a) - parseDMY(b); });
+        var seen = {};
+        var all = [];
+        dates.forEach(function (d) {
+            if (!seen[d]) {
+                seen[d] = 1;
+                all.push(d);
+            }
+        });
+        all.sort(function (a, b) {
+            return parseDMY(a) - parseDMY(b);
+        });
         return {
             categories: all,
-            income: all.map(function (d) { return inc[d] || 0; }),
-            expense: all.map(function (d) { return exp[d] || 0; }),
+            income: all.map(function (d) {
+                return inc[d] || 0;
+            }),
+            expense: all.map(function (d) {
+                return exp[d] || 0;
+            }),
             labels: all.map(function (d) {
                 var dt = parseDMY(d);
-                return isNaN(dt) ? d : (dt.getDate() + " " + dt.toLocaleString(undefined, { month: "short" }));
-            })
+                return isNaN(dt)
+                    ? d
+                    : dt.getDate() +
+                          " " +
+                          dt.toLocaleString(undefined, { month: "short" });
+            }),
         };
     }
 
     function ensureTooltip() {
-        if (tooltip) { return tooltip; }
+        if (tooltip) {
+            return tooltip;
+        }
         tooltip = document.createElement("div");
         tooltip.className = "tk-chart-tt";
         document.body.appendChild(tooltip);
@@ -7524,19 +8480,31 @@ $(document).ready(function () {
 
     function svgNS(tag, attrs) {
         var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
-        for (var k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) { node.setAttribute(k, attrs[k]); } }
+        for (var k in attrs) {
+            if (Object.prototype.hasOwnProperty.call(attrs, k)) {
+                node.setAttribute(k, attrs[k]);
+            }
+        }
         return node;
     }
 
-    function round(n) { return Math.round(n * 100) / 100; }
+    function round(n) {
+        return Math.round(n * 100) / 100;
+    }
 
     function linePath(pts) {
-        return pts.map(function (p, i) { return (i === 0 ? "M" : "L") + round(p[0]) + " " + round(p[1]); }).join(" ");
+        return pts
+            .map(function (p, i) {
+                return (i === 0 ? "M" : "L") + round(p[0]) + " " + round(p[1]);
+            })
+            .join(" ");
     }
 
     function render() {
         var host = el();
-        if (!host || !lastData) { return; }
+        if (!host || !lastData) {
+            return;
+        }
 
         var data = lastData;
         var n = data.categories.length;
@@ -7545,7 +8513,8 @@ $(document).ready(function () {
         if (n === 0) {
             var empty = document.createElement("div");
             empty.className = "tk-area-empty";
-            empty.textContent = host.getAttribute("data-empty-label") || "No data available";
+            empty.textContent =
+                host.getAttribute("data-empty-label") || "No data available";
             host.appendChild(empty);
             return;
         }
@@ -7557,23 +8526,49 @@ $(document).ready(function () {
         var plotW = W - PL - PR;
         var plotH = H - PT - PB;
         var visible = [];
-        if (showInc) { visible = visible.concat(data.income); }
-        if (showExp) { visible = visible.concat(data.expense); }
+        if (showInc) {
+            visible = visible.concat(data.income);
+        }
+        if (showExp) {
+            visible = visible.concat(data.expense);
+        }
         var maxV = visible.length ? Math.max.apply(null, visible) : 0;
         maxV = maxV > 0 ? maxV * 1.15 : 1;
 
-        var x = function (i) { return n === 1 ? PL + plotW / 2 : PL + (i / (n - 1)) * plotW; };
-        var y = function (v) { return PT + (1 - v / maxV) * plotH; };
+        var x = function (i) {
+            return n === 1 ? PL + plotW / 2 : PL + (i / (n - 1)) * plotW;
+        };
+        var y = function (v) {
+            return PT + (1 - v / maxV) * plotH;
+        };
 
-        var incPts = data.income.map(function (v, i) { return [x(i), y(v)]; });
-        var expPts = data.expense.map(function (v, i) { return [x(i), y(v)]; });
+        var incPts = data.income.map(function (v, i) {
+            return [x(i), y(v)];
+        });
+        var expPts = data.expense.map(function (v, i) {
+            return [x(i), y(v)];
+        });
 
-        var svg = svgNS("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none", focusable: "false" });
+        var svg = svgNS("svg", {
+            viewBox: "0 0 " + W + " " + H,
+            preserveAspectRatio: "none",
+            focusable: "false",
+        });
 
         // gradients
         var defs = svgNS("defs", {});
-        [["tkHeroIncomeGrad", "tk-grad--income"], ["tkHeroExpenseGrad", "tk-grad--expense"]].forEach(function (g) {
-            var grad = svgNS("linearGradient", { id: g[0], class: "tk-grad " + g[1], x1: 0, y1: 0, x2: 0, y2: 1 });
+        [
+            ["tkHeroIncomeGrad", "tk-grad--income"],
+            ["tkHeroExpenseGrad", "tk-grad--expense"],
+        ].forEach(function (g) {
+            var grad = svgNS("linearGradient", {
+                id: g[0],
+                class: "tk-grad " + g[1],
+                x1: 0,
+                y1: 0,
+                x2: 0,
+                y2: 1,
+            });
             grad.appendChild(svgNS("stop", { class: "tk-g0", offset: "0%" }));
             grad.appendChild(svgNS("stop", { class: "tk-g1", offset: "100%" }));
             defs.appendChild(grad);
@@ -7585,8 +8580,14 @@ $(document).ready(function () {
         var axis = svgNS("g", { class: "tk-area-axis" });
         [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
             var gy = PT + t * plotH;
-            grid.appendChild(svgNS("line", { x1: PL, x2: W - PR, y1: gy, y2: gy }));
-            var label = svgNS("text", { x: PL - 8, y: gy + 3, "text-anchor": "end" });
+            grid.appendChild(
+                svgNS("line", { x1: PL, x2: W - PR, y1: gy, y2: gy }),
+            );
+            var label = svgNS("text", {
+                x: PL - 8,
+                y: gy + 3,
+                "text-anchor": "end",
+            });
             label.textContent = Math.round(maxV * (1 - t)).toLocaleString();
             axis.appendChild(label);
         });
@@ -7594,7 +8595,11 @@ $(document).ready(function () {
         var stepLabel = Math.max(1, Math.floor(n / 8));
         for (var i = 0; i < n; i++) {
             if (i % stepLabel === 0 || i === n - 1) {
-                var tx = svgNS("text", { x: x(i), y: H - 8, "text-anchor": "middle" });
+                var tx = svgNS("text", {
+                    x: x(i),
+                    y: H - 8,
+                    "text-anchor": "middle",
+                });
                 tx.textContent = data.labels[i];
                 axis.appendChild(tx);
             }
@@ -7605,33 +8610,91 @@ $(document).ready(function () {
         // areas (closed to baseline)
         var baseY = PT + plotH;
         function areaPath(pts) {
-            return linePath(pts) + " L" + round(pts[pts.length - 1][0]) + " " + baseY + " L" + round(pts[0][0]) + " " + baseY + " Z";
+            return (
+                linePath(pts) +
+                " L" +
+                round(pts[pts.length - 1][0]) +
+                " " +
+                baseY +
+                " L" +
+                round(pts[0][0]) +
+                " " +
+                baseY +
+                " Z"
+            );
         }
-        if (showInc) { svg.appendChild(svgNS("path", { d: areaPath(incPts), fill: "url(#tkHeroIncomeGrad)" })); }
-        if (showExp) { svg.appendChild(svgNS("path", { d: areaPath(expPts), fill: "url(#tkHeroExpenseGrad)" })); }
+        if (showInc) {
+            svg.appendChild(
+                svgNS("path", {
+                    d: areaPath(incPts),
+                    fill: "url(#tkHeroIncomeGrad)",
+                }),
+            );
+        }
+        if (showExp) {
+            svg.appendChild(
+                svgNS("path", {
+                    d: areaPath(expPts),
+                    fill: "url(#tkHeroExpenseGrad)",
+                }),
+            );
+        }
 
         // hover cursor line
-        var cursor = svgNS("line", { class: "tk-area-cursor", x1: 0, x2: 0, y1: PT, y2: baseY });
+        var cursor = svgNS("line", {
+            class: "tk-area-cursor",
+            x1: 0,
+            x2: 0,
+            y1: PT,
+            y2: baseY,
+        });
         svg.appendChild(cursor);
 
         // lines
-        if (showInc) { svg.appendChild(svgNS("path", { class: "tk-area-line tk-area-line--income", d: linePath(incPts) })); }
-        if (showExp) { svg.appendChild(svgNS("path", { class: "tk-area-line tk-area-line--expense", d: linePath(expPts) })); }
+        if (showInc) {
+            svg.appendChild(
+                svgNS("path", {
+                    class: "tk-area-line tk-area-line--income",
+                    d: linePath(incPts),
+                }),
+            );
+        }
+        if (showExp) {
+            svg.appendChild(
+                svgNS("path", {
+                    class: "tk-area-line tk-area-line--expense",
+                    d: linePath(expPts),
+                }),
+            );
+        }
 
         // dots (skip when too dense)
         var showDots = n <= 24;
-        var incDots = [], expDots = [];
+        var incDots = [],
+            expDots = [];
         if (showDots) {
             if (showInc) {
                 incPts.forEach(function (p) {
-                    var c = svgNS("circle", { class: "tk-area-dot tk-area-dot--income", cx: round(p[0]), cy: round(p[1]), r: 2.5 });
-                    svg.appendChild(c); incDots.push(c);
+                    var c = svgNS("circle", {
+                        class: "tk-area-dot tk-area-dot--income",
+                        cx: round(p[0]),
+                        cy: round(p[1]),
+                        r: 2.5,
+                    });
+                    svg.appendChild(c);
+                    incDots.push(c);
                 });
             }
             if (showExp) {
                 expPts.forEach(function (p) {
-                    var c = svgNS("circle", { class: "tk-area-dot tk-area-dot--expense", cx: round(p[0]), cy: round(p[1]), r: 2.5 });
-                    svg.appendChild(c); expDots.push(c);
+                    var c = svgNS("circle", {
+                        class: "tk-area-dot tk-area-dot--expense",
+                        cx: round(p[0]),
+                        cy: round(p[1]),
+                        r: 2.5,
+                    });
+                    svg.appendChild(c);
+                    expDots.push(c);
                 });
             }
         }
@@ -7644,42 +8707,62 @@ $(document).ready(function () {
 
         function indexFromEvent(evt) {
             var rect = svg.getBoundingClientRect();
-            var px = (evt.clientX - rect.left) / rect.width * W; // map back to viewBox units
-            var idx = n === 1 ? 0 : Math.round((px - PL) / plotW * (n - 1));
+            var px = ((evt.clientX - rect.left) / rect.width) * W; // map back to viewBox units
+            var idx = n === 1 ? 0 : Math.round(((px - PL) / plotW) * (n - 1));
             return Math.max(0, Math.min(n - 1, idx));
         }
 
         function showAt(evt) {
             var idx = indexFromEvent(evt);
             var cx = x(idx);
-            cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx);
+            cursor.setAttribute("x1", cx);
+            cursor.setAttribute("x2", cx);
             host.classList.add("is-hover");
             if (showDots) {
-                incDots.forEach(function (c, i) { c.setAttribute("r", i === idx ? 3.6 : 2.5); });
-                expDots.forEach(function (c, i) { c.setAttribute("r", i === idx ? 3.6 : 2.5); });
+                incDots.forEach(function (c, i) {
+                    c.setAttribute("r", i === idx ? 3.6 : 2.5);
+                });
+                expDots.forEach(function (c, i) {
+                    c.setAttribute("r", i === idx ? 3.6 : 2.5);
+                });
             }
             var tt = ensureTooltip();
-            var rows = '<div class="tk-chart-tt-date">' + data.labels[idx] + "</div>";
+            var rows =
+                '<div class="tk-chart-tt-date">' + data.labels[idx] + "</div>";
             if (showInc) {
-                rows += '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:var(--signal)"></span>' + incLabel +
-                    '<span class="tk-chart-tt-val">' + fmtMoney(data.income[idx]) + "</span></div>";
+                rows +=
+                    '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:var(--signal)"></span>' +
+                    incLabel +
+                    '<span class="tk-chart-tt-val">' +
+                    fmtMoney(data.income[idx]) +
+                    "</span></div>";
             }
             if (showExp) {
-                rows += '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:var(--fg-2)"></span>' + expLabel +
-                    '<span class="tk-chart-tt-val">' + fmtMoney(data.expense[idx]) + "</span></div>";
+                rows +=
+                    '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:var(--fg-2)"></span>' +
+                    expLabel +
+                    '<span class="tk-chart-tt-val">' +
+                    fmtMoney(data.expense[idx]) +
+                    "</span></div>";
             }
             tt.innerHTML = rows;
             tt.classList.add("is-on");
             tt.style.left = evt.clientX + "px";
-            tt.style.top = (evt.clientY) + "px";
+            tt.style.top = evt.clientY + "px";
         }
 
         function hide() {
             host.classList.remove("is-hover");
-            if (tooltip) { tooltip.classList.remove("is-on"); }
+            if (tooltip) {
+                tooltip.classList.remove("is-on");
+            }
             if (showDots) {
-                incDots.forEach(function (c) { c.setAttribute("r", 2.5); });
-                expDots.forEach(function (c) { c.setAttribute("r", 2.5); });
+                incDots.forEach(function (c) {
+                    c.setAttribute("r", 2.5);
+                });
+                expDots.forEach(function (c) {
+                    c.setAttribute("r", 2.5);
+                });
             }
         }
 
@@ -7689,20 +8772,36 @@ $(document).ready(function () {
 
     var resizeTimer = null;
     function onResize() {
-        if (resizeTimer) { clearTimeout(resizeTimer); }
+        if (resizeTimer) {
+            clearTimeout(resizeTimer);
+        }
         resizeTimer = setTimeout(render, 120);
     }
 
     function initHeroAreaChart() {
-        if (!el() || !window.jQuery) { return; }
+        if (!el() || !window.jQuery) {
+            return;
+        }
 
         window.jQuery(document).ajaxSuccess(function (evt, xhr, settings) {
-            if (!settings || !settings.url || settings.url.indexOf(ENDPOINT_HINT) < 0) { return; }
+            if (
+                !settings ||
+                !settings.url ||
+                settings.url.indexOf(ENDPOINT_HINT) < 0
+            ) {
+                return;
+            }
             var resp = xhr.responseJSON;
             if (!resp && xhr.responseText) {
-                try { resp = JSON.parse(xhr.responseText); } catch (e) { resp = null; }
+                try {
+                    resp = JSON.parse(xhr.responseText);
+                } catch (e) {
+                    resp = null;
+                }
             }
-            if (!resp) { return; }
+            if (!resp) {
+                return;
+            }
             lastData = buildModel(resp);
             render();
         });
@@ -7713,16 +8812,23 @@ $(document).ready(function () {
         var seg = document.querySelector('.tk-seg[data-chart="hero"]');
         if (seg) {
             var onBtn = seg.querySelector(".tk-seg-btn.on");
-            if (onBtn) { mode = onBtn.getAttribute("data-value") || "both"; }
+            if (onBtn) {
+                mode = onBtn.getAttribute("data-value") || "both";
+            }
             seg.addEventListener("click", function (e) {
                 var btn = e.target.closest(".tk-seg-btn");
-                if (!btn) { return; }
+                if (!btn) {
+                    return;
+                }
                 mode = btn.getAttribute("data-value") || "both";
                 var btns = seg.querySelectorAll(".tk-seg-btn");
                 for (var i = 0; i < btns.length; i++) {
                     var isOn = btns[i] === btn;
                     btns[i].classList.toggle("on", isOn);
-                    btns[i].setAttribute("aria-checked", isOn ? "true" : "false");
+                    btns[i].setAttribute(
+                        "aria-checked",
+                        isOn ? "true" : "false",
+                    );
                 }
                 render();
             });
@@ -7749,39 +8855,84 @@ $(document).ready(function () {
 (function () {
     "use strict";
 
-    var SIZE = 132, TH = 14;
+    var SIZE = 132,
+        TH = 14;
     // App status colour name -> design-system token.
     var STATUS_TOKENS = {
-        primary: "var(--signal)", secondary: "var(--fg-3)",
-        success: "var(--ok)", danger: "var(--err)",
-        warning: "var(--warn)", info: "var(--info)"
+        primary: "var(--signal)",
+        secondary: "var(--fg-3)",
+        success: "var(--ok)",
+        danger: "var(--err)",
+        warning: "var(--warn)",
+        info: "var(--info)",
     };
-    var FALLBACK = ["var(--signal)", "var(--info)", "var(--warn)", "var(--ok)", "var(--err)", "var(--fg-3)"];
+    var FALLBACK = [
+        "var(--signal)",
+        "var(--info)",
+        "var(--warn)",
+        "var(--ok)",
+        "var(--err)",
+        "var(--fg-3)",
+    ];
     var tt = null;
 
     function tooltip() {
-        if (tt) { return tt; }
+        if (tt) {
+            return tt;
+        }
         tt = document.querySelector(".tk-chart-tt");
-        if (!tt) { tt = document.createElement("div"); tt.className = "tk-chart-tt"; document.body.appendChild(tt); }
+        if (!tt) {
+            tt = document.createElement("div");
+            tt.className = "tk-chart-tt";
+            document.body.appendChild(tt);
+        }
         return tt;
     }
 
     function svgNS(tag, attrs) {
         var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
-        for (var k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) { node.setAttribute(k, attrs[k]); } }
+        for (var k in attrs) {
+            if (Object.prototype.hasOwnProperty.call(attrs, k)) {
+                node.setAttribute(k, attrs[k]);
+            }
+        }
         return node;
     }
 
-    function colorFor(name, i) { return STATUS_TOKENS[name] || FALLBACK[i % FALLBACK.length]; }
+    function colorFor(name, i) {
+        return STATUS_TOKENS[name] || FALLBACK[i % FALLBACK.length];
+    }
 
     function drawDonut(host, legendHost, totalEl, items, centerLabel) {
-        if (!host) { return; }
-        var total = items.reduce(function (a, b) { return a + b.value; }, 0);
-        if (totalEl) { totalEl.textContent = total.toLocaleString(); }
+        if (!host) {
+            return;
+        }
+        var total = items.reduce(function (a, b) {
+            return a + b.value;
+        }, 0);
+        if (totalEl) {
+            totalEl.textContent = total.toLocaleString();
+        }
 
-        var r = SIZE / 2 - TH / 2, cx = SIZE / 2, cy = SIZE / 2, circ = 2 * Math.PI * r;
-        var svg = svgNS("svg", { width: SIZE, height: SIZE, viewBox: "0 0 " + SIZE + " " + SIZE });
-        svg.appendChild(svgNS("circle", { cx: cx, cy: cy, r: r, fill: "none", stroke: "var(--bg-3)", "stroke-width": TH }));
+        var r = SIZE / 2 - TH / 2,
+            cx = SIZE / 2,
+            cy = SIZE / 2,
+            circ = 2 * Math.PI * r;
+        var svg = svgNS("svg", {
+            width: SIZE,
+            height: SIZE,
+            viewBox: "0 0 " + SIZE + " " + SIZE,
+        });
+        svg.appendChild(
+            svgNS("circle", {
+                cx: cx,
+                cy: cy,
+                r: r,
+                fill: "none",
+                stroke: "var(--bg-3)",
+                "stroke-width": TH,
+            }),
+        );
 
         var acc = 0;
         var segNodes = [];
@@ -7790,11 +8941,16 @@ $(document).ready(function () {
             if (it.value > 0) {
                 var len = frac * circ;
                 var seg = svgNS("circle", {
-                    cx: cx, cy: cy, r: r, fill: "none", stroke: it.color, "stroke-width": TH,
+                    cx: cx,
+                    cy: cy,
+                    r: r,
+                    fill: "none",
+                    stroke: it.color,
+                    "stroke-width": TH,
                     "stroke-dasharray": Math.max(len - 2, 0) + " " + circ,
-                    "stroke-dashoffset": (-acc * circ),
+                    "stroke-dashoffset": -acc * circ,
                     transform: "rotate(-90 " + cx + " " + cy + ")",
-                    "class": "donut-segment"
+                    class: "donut-segment",
                 });
                 svg.appendChild(seg);
                 segNodes.push(seg);
@@ -7805,13 +8961,24 @@ $(document).ready(function () {
         });
 
         var t1 = svgNS("text", {
-            x: cx, y: cy - 1, "text-anchor": "middle", "font-size": 22, "font-weight": 700,
-            fill: "var(--fg-0)", "letter-spacing": "-0.03em", "font-family": "var(--font-sans)"
+            x: cx,
+            y: cy - 1,
+            "text-anchor": "middle",
+            "font-size": 22,
+            "font-weight": 700,
+            fill: "var(--fg-0)",
+            "letter-spacing": "-0.03em",
+            "font-family": "var(--font-sans)",
         });
         t1.textContent = total.toLocaleString();
         var t2 = svgNS("text", {
-            x: cx, y: cy + 14, "text-anchor": "middle", "font-size": 9,
-            fill: "var(--fg-3)", "font-family": "var(--font-mono)", "letter-spacing": "0.06em"
+            x: cx,
+            y: cy + 14,
+            "text-anchor": "middle",
+            "font-size": 9,
+            fill: "var(--fg-3)",
+            "font-family": "var(--font-mono)",
+            "letter-spacing": "0.06em",
         });
         t2.textContent = centerLabel || "TOTAL";
         svg.appendChild(t1);
@@ -7820,38 +8987,70 @@ $(document).ready(function () {
         host.innerHTML = "";
         host.appendChild(svg);
 
-        function fadeExcept(idx) { segNodes.forEach(function (s, j) { if (s) { s.classList.toggle("is-faded", j !== idx); } }); }
-        function clearFade() { segNodes.forEach(function (s) { if (s) { s.classList.remove("is-faded"); } }); }
+        function fadeExcept(idx) {
+            segNodes.forEach(function (s, j) {
+                if (s) {
+                    s.classList.toggle("is-faded", j !== idx);
+                }
+            });
+        }
+        function clearFade() {
+            segNodes.forEach(function (s) {
+                if (s) {
+                    s.classList.remove("is-faded");
+                }
+            });
+        }
 
         if (legendHost) {
             legendHost.innerHTML = "";
             if (!items.length) {
-                legendHost.innerHTML = '<div class="tk-donut-empty">' + (legendHost.getAttribute("data-empty-label") || "No data") + "</div>";
+                legendHost.innerHTML =
+                    '<div class="tk-donut-empty">' +
+                    (legendHost.getAttribute("data-empty-label") || "No data") +
+                    "</div>";
             }
             items.forEach(function (it, i) {
-                var pct = total ? Math.round(it.value / total * 100) : 0;
+                var pct = total ? Math.round((it.value / total) * 100) : 0;
                 var row = document.createElement("div");
                 row.className = "tk-donut-legend-row";
                 row.innerHTML =
-                    '<span class="tk-ld" style="background:' + it.color + '"></span>' +
-                    '<span class="tk-ll">' + it.label + "</span>" +
-                    '<span class="tk-lv">' + it.value.toLocaleString() + "</span>";
+                    '<span class="tk-ld" style="background:' +
+                    it.color +
+                    '"></span>' +
+                    '<span class="tk-ll">' +
+                    it.label +
+                    "</span>" +
+                    '<span class="tk-lv">' +
+                    it.value.toLocaleString() +
+                    "</span>";
                 legendHost.appendChild(row);
-                row.addEventListener("mouseenter", function () { fadeExcept(i); });
+                row.addEventListener("mouseenter", function () {
+                    fadeExcept(i);
+                });
                 row.addEventListener("mouseleave", clearFade);
             });
         }
 
         segNodes.forEach(function (seg, i) {
-            if (!seg) { return; }
+            if (!seg) {
+                return;
+            }
             var it = items[i];
-            var pct = total ? Math.round(it.value / total * 100) : 0;
+            var pct = total ? Math.round((it.value / total) * 100) : 0;
             seg.addEventListener("mousemove", function (e) {
                 fadeExcept(i);
                 var el = tooltip();
                 el.innerHTML =
-                    '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:' + it.color + '"></span>' +
-                    it.label + '<span class="tk-chart-tt-val">' + it.value.toLocaleString() + " (" + pct + "%)</span></div>";
+                    '<div class="tk-chart-tt-row"><span class="tk-chart-tt-sw" style="background:' +
+                    it.color +
+                    '"></span>' +
+                    it.label +
+                    '<span class="tk-chart-tt-val">' +
+                    it.value.toLocaleString() +
+                    " (" +
+                    pct +
+                    "%)</span></div>";
                 el.classList.add("is-on");
                 el.style.left = e.clientX + "px";
                 el.style.top = e.clientY + "px";
@@ -7866,36 +9065,75 @@ $(document).ready(function () {
 
     // Build segments from the workspace statuses + a status_id -> count map.
     function statusItems(statuses, counts) {
-        return (statuses || []).map(function (s, i) {
-            return { label: s.title, value: Math.max(0, Number((counts || {})[s.id]) || 0), color: colorFor(s.color, i) };
-        }).filter(function (x) { return x.value > 0; });
+        return (statuses || [])
+            .map(function (s, i) {
+                return {
+                    label: s.title,
+                    value: Math.max(0, Number((counts || {})[s.id]) || 0),
+                    color: colorFor(s.color, i),
+                };
+            })
+            .filter(function (x) {
+                return x.value > 0;
+            });
     }
 
     function renderCharts(resp) {
         var pHost = document.getElementById("tk-project-donut");
         if (pHost) {
-            drawDonut(pHost, document.getElementById("tk-project-legend"), document.getElementById("tk-project-total"),
-                statusItems(resp.statuses, resp.project_status_counts), pHost.getAttribute("data-center-label") || "PROJECTS");
+            drawDonut(
+                pHost,
+                document.getElementById("tk-project-legend"),
+                document.getElementById("tk-project-total"),
+                statusItems(resp.statuses, resp.project_status_counts),
+                pHost.getAttribute("data-center-label") || "PROJECTS",
+            );
         }
         var kHost = document.getElementById("tk-task-donut");
         if (kHost) {
-            drawDonut(kHost, document.getElementById("tk-task-legend"), document.getElementById("tk-task-total"),
-                statusItems(resp.statuses, resp.task_status_counts), kHost.getAttribute("data-center-label") || "TASKS");
+            drawDonut(
+                kHost,
+                document.getElementById("tk-task-legend"),
+                document.getElementById("tk-task-total"),
+                statusItems(resp.statuses, resp.task_status_counts),
+                kHost.getAttribute("data-center-label") || "TASKS",
+            );
         }
         var dHost = document.getElementById("tk-todo-donut");
         if (dHost) {
             var td = resp.todo_data || [0, 0];
             var todoItems = [
-                { label: dHost.getAttribute("data-label-done") || "Completed", value: Math.max(0, Number(td[0]) || 0), color: "var(--ok)" },
-                { label: dHost.getAttribute("data-label-pending") || "Pending", value: Math.max(0, Number(td[1]) || 0), color: "var(--warn)" }
-            ].filter(function (x) { return x.value > 0; });
-            drawDonut(dHost, document.getElementById("tk-todo-legend"), document.getElementById("tk-todo-total"),
-                todoItems, dHost.getAttribute("data-center-label") || "TODOS");
+                {
+                    label: dHost.getAttribute("data-label-done") || "Completed",
+                    value: Math.max(0, Number(td[0]) || 0),
+                    color: "var(--ok)",
+                },
+                {
+                    label:
+                        dHost.getAttribute("data-label-pending") || "Pending",
+                    value: Math.max(0, Number(td[1]) || 0),
+                    color: "var(--warn)",
+                },
+            ].filter(function (x) {
+                return x.value > 0;
+            });
+            drawDonut(
+                dHost,
+                document.getElementById("tk-todo-legend"),
+                document.getElementById("tk-todo-total"),
+                todoItems,
+                dHost.getAttribute("data-center-label") || "TODOS",
+            );
         }
     }
 
     // ---- Recent Activity feed ----
-    var ACT_CLASS = { created: "is-created", updated: "is-updated", deleted: "is-deleted", "updated status": "is-status" };
+    var ACT_CLASS = {
+        created: "is-created",
+        updated: "is-updated",
+        deleted: "is-deleted",
+        "updated status": "is-status",
+    };
     function escTime(s) {
         return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
             return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
@@ -7903,35 +9141,75 @@ $(document).ready(function () {
     }
     function renderActivity(resp) {
         var host = document.getElementById("tk-activity-list");
-        if (!host) { return; }
+        if (!host) {
+            return;
+        }
         var acts = resp.activities || [];
         if (!acts.length) {
-            host.innerHTML = '<div class="tk-act-empty">' + escTime(host.getAttribute("data-empty-label") || "No recent activities") + "</div>";
+            host.innerHTML =
+                '<div class="tk-act-empty">' +
+                escTime(
+                    host.getAttribute("data-empty-label") ||
+                        "No recent activities",
+                ) +
+                "</div>";
             return;
         }
         // message is server-rendered (same as dashboard.js timeline) -> inserted as-is.
-        host.innerHTML = acts.map(function (a) {
-            var cls = ACT_CLASS[a.activity] || "is-default";
-            return '<div class="tk-act-row"><span class="tk-act-dot ' + cls + '"></span>' +
-                '<div class="tk-act-main"><div class="tk-act-msg">' + (a.message || "") + "</div>" +
-                '<div class="tk-act-time">' + escTime(a.created_at_diff || a.created_at_formatted || "") + "</div></div></div>";
-        }).join("");
+        host.innerHTML = acts
+            .map(function (a) {
+                var cls = ACT_CLASS[a.activity] || "is-default";
+                return (
+                    '<div class="tk-act-row"><span class="tk-act-dot ' +
+                    cls +
+                    '"></span>' +
+                    '<div class="tk-act-main"><div class="tk-act-msg">' +
+                    (a.message || "") +
+                    "</div>" +
+                    '<div class="tk-act-time">' +
+                    escTime(a.created_at_diff || a.created_at_formatted || "") +
+                    "</div></div></div>"
+                );
+            })
+            .join("");
     }
 
-    function apply(resp) { renderCharts(resp); renderActivity(resp); }
+    function apply(resp) {
+        renderCharts(resp);
+        renderActivity(resp);
+    }
 
     function initDashboardCharts() {
-        if (!window.jQuery) { return; }
-        var anchor = document.getElementById("tk-project-donut") || document.getElementById("tk-task-donut") ||
-            document.getElementById("tk-todo-donut") || document.getElementById("tk-activity-list");
-        if (!anchor) { return; }
+        if (!window.jQuery) {
+            return;
+        }
+        var anchor =
+            document.getElementById("tk-project-donut") ||
+            document.getElementById("tk-task-donut") ||
+            document.getElementById("tk-todo-donut") ||
+            document.getElementById("tk-activity-list");
+        if (!anchor) {
+            return;
+        }
         window.jQuery(document).ajaxSuccess(function (evt, xhr, settings) {
-            if (!settings || !settings.url || settings.url.indexOf("/dashboard/data") < 0) { return; }
+            if (
+                !settings ||
+                !settings.url ||
+                settings.url.indexOf("/dashboard/data") < 0
+            ) {
+                return;
+            }
             var resp = xhr.responseJSON;
             if (!resp && xhr.responseText) {
-                try { resp = JSON.parse(xhr.responseText); } catch (e) { resp = null; }
+                try {
+                    resp = JSON.parse(xhr.responseText);
+                } catch (e) {
+                    resp = null;
+                }
             }
-            if (resp) { apply(resp); }
+            if (resp) {
+                apply(resp);
+            }
         });
     }
 
@@ -7955,18 +9233,31 @@ $(document).ready(function () {
 (function () {
     "use strict";
 
-    function $j() { return window.jQuery; }
-    function val(sel) { var $ = $j(); return ($ && $(sel).length) ? ($(sel).val() || "") : ""; }
+    function $j() {
+        return window.jQuery;
+    }
+    function val(sel) {
+        var $ = $j();
+        return $ && $(sel).length ? $(sel).val() || "" : "";
+    }
     function arr(sel) {
-        var $ = $j(); if (!$ || !$(sel).length) { return []; }
+        var $ = $j();
+        if (!$ || !$(sel).length) {
+            return [];
+        }
         var v = $(sel).val() || [];
-        return Array.isArray(v) ? v : (v ? [v] : []);
+        return Array.isArray(v) ? v : v ? [v] : [];
     }
     // Drop empty values so the server defaults (e.g. upcoming_days = 30) apply.
     function clean(extra) {
         Object.keys(extra).forEach(function (k) {
             var v = extra[k];
-            if (v === "" || v === null || typeof v === "undefined" || (Array.isArray(v) && v.length === 0)) {
+            if (
+                v === "" ||
+                v === null ||
+                typeof v === "undefined" ||
+                (Array.isArray(v) && v.length === 0)
+            ) {
                 delete extra[k];
             }
         });
@@ -7974,9 +9265,12 @@ $(document).ready(function () {
     }
     function base(p, extra) {
         var out = {
-            search: p.search, sort: p.sort, order: p.order,
-            offset: p.offset, limit: p.limit,
-            page: p.limit ? (p.offset / p.limit) + 1 : 1
+            search: p.search,
+            sort: p.sort,
+            order: p.order,
+            offset: p.offset,
+            limit: p.limit,
+            page: p.limit ? p.offset / p.limit + 1 : 1,
         };
         return Object.assign(out, clean(extra));
     }
@@ -7986,31 +9280,53 @@ $(document).ready(function () {
         return base(p, {
             upcoming_days: val("#upcoming_days_bd"),
             user_ids: arr("#birthday_user_filter"),
-            client_ids: arr("#birthday_client_filter")
+            client_ids: arr("#birthday_client_filter"),
         });
     };
     window.queryParamsUpcomingWa = function (p) {
         return base(p, {
             upcoming_days: val("#upcoming_days_wa"),
             user_ids: arr("#wa_user_filter"),
-            client_ids: arr("#wa_client_filter")
+            client_ids: arr("#wa_client_filter"),
         });
     };
     window.queryParamsMol = function (p) {
         return base(p, {
             upcoming_days: val("#upcoming_days_mol"),
-            user_ids: arr("#mol_user_filter")
+            user_ids: arr("#mol_user_filter"),
         });
     };
 
     function initDashboardTableFilters() {
         var $ = $j();
-        if (!$) { return; }
+        if (!$) {
+            return;
+        }
 
         var groups = [
-            { table: "#birthdays_table", filters: ["#birthday_user_filter", "#birthday_client_filter", "#upcoming_days_bd"], btn: "#upcoming_days_birthday_filter" },
-            { table: "#wa_table", filters: ["#wa_user_filter", "#wa_client_filter", "#upcoming_days_wa"], btn: "#upcoming_days_wa_filter" },
-            { table: "#mol_table", filters: ["#mol_user_filter", "#upcoming_days_mol"], btn: "#upcoming_days_mol_filter" }
+            {
+                table: "#birthdays_table",
+                filters: [
+                    "#birthday_user_filter",
+                    "#birthday_client_filter",
+                    "#upcoming_days_bd",
+                ],
+                btn: "#upcoming_days_birthday_filter",
+            },
+            {
+                table: "#wa_table",
+                filters: [
+                    "#wa_user_filter",
+                    "#wa_client_filter",
+                    "#upcoming_days_wa",
+                ],
+                btn: "#upcoming_days_wa_filter",
+            },
+            {
+                table: "#mol_table",
+                filters: ["#mol_user_filter", "#upcoming_days_mol"],
+                btn: "#upcoming_days_mol_filter",
+            },
         ];
 
         groups.forEach(function (g) {
@@ -8020,7 +9336,11 @@ $(document).ready(function () {
                 timer = setTimeout(function () {
                     var $t = $(g.table);
                     if ($t.length && $t.data("bootstrap.table")) {
-                        try { $t.bootstrapTable("refresh"); } catch (e) { /* table not ready */ }
+                        try {
+                            $t.bootstrapTable("refresh");
+                        } catch (e) {
+                            /* table not ready */
+                        }
                     }
                 }, 350);
             }
@@ -8037,11 +9357,11 @@ $(document).ready(function () {
                     if (el) {
                         if (el.tomselect) {
                             el.tomselect.clear(true);
-                            $(el).trigger('change');
+                            $(el).trigger("change");
                         } else {
                             // Fallback for native inputs
-                            $(el).val('');
-                            $(el).trigger('change');
+                            $(el).val("");
+                            $(el).trigger("change");
                         }
                     }
                 });
@@ -8051,12 +9371,22 @@ $(document).ready(function () {
     }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initDashboardTableFilters);
+        document.addEventListener(
+            "DOMContentLoaded",
+            initDashboardTableFilters,
+        );
     } else {
         initDashboardTableFilters();
         $(function () {
-            if (typeof window.initAdvancedDateRangePicker === 'function' && $('#task_date_between').length) {
-                window.initAdvancedDateRangePicker('#task_date_between', '#task_date_between_from', '#task_date_between_to');
+            if (
+                typeof window.initAdvancedDateRangePicker === "function" &&
+                $("#task_date_between").length
+            ) {
+                window.initAdvancedDateRangePicker(
+                    "#task_date_between",
+                    "#task_date_between_from",
+                    "#task_date_between_to",
+                );
             }
         });
     }
@@ -8069,32 +9399,45 @@ $(document).ready(function () {
    while their tab is hidden) by recomputing on tab-show.
    ============================================================ */
 (function () {
-    var SEL = '#project_detail_panel';
+    var SEL = "#project_detail_panel";
 
     // Re-fit the table of whichever module tab the user switches to.
     if (window.jQuery) {
-        jQuery(document).on('shown.bs.tab', SEL + ' [data-bs-toggle="tab"]', function (e) {
-            var target = jQuery(e.target).attr('data-bs-target');
-            if (target) {
-                jQuery(target).find('table[data-toggle="table"]').each(function () {
-                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) { }
-                });
-            }
-        });
+        jQuery(document).on(
+            "shown.bs.tab",
+            SEL + ' [data-bs-toggle="tab"]',
+            function (e) {
+                var target = jQuery(e.target).attr("data-bs-target");
+                if (target) {
+                    jQuery(target)
+                        .find('table[data-toggle="table"]')
+                        .each(function () {
+                            try {
+                                jQuery(this).bootstrapTable("resetView");
+                            } catch (err) {}
+                        });
+                }
+            },
+        );
 
         // The panel is visible from the start; nudge the active tab's table +
         // the statistics chart once the layout has settled.
         jQuery(function () {
             setTimeout(function () {
-                try { window.dispatchEvent(new Event('resize')); } catch (e) { }
-                jQuery(SEL + ' .tab-pane.active table[data-toggle="table"]').each(function () {
-                    try { jQuery(this).bootstrapTable('resetView'); } catch (err) { }
+                try {
+                    window.dispatchEvent(new Event("resize"));
+                } catch (e) {}
+                jQuery(
+                    SEL + ' .tab-pane.active table[data-toggle="table"]',
+                ).each(function () {
+                    try {
+                        jQuery(this).bootstrapTable("resetView");
+                    } catch (err) {}
                 });
             }, 300);
         });
     }
 })();
-
 
 /* ============================================================
    DOCKED TASK INSPECTOR (project board / list) — always-visible
@@ -8107,53 +9450,115 @@ $(document).ready(function () {
 (function () {
     if (!window.jQuery) return;
     var $ = jQuery;
-    var $dock = $('#task_inspector');
+    var $dock = $("#task_inspector");
     if (!$dock.length) return;
 
-    var listUrl = $dock.data('tasks-list-url');
-    var infoUrl = $dock.data('task-info-url');
-    var mediaUrl = $dock.data('task-media-url');
-    var getUrl = $dock.data('task-get-url');
-    var commentBase = $dock.data('comment-url');
-    var storageUrl = $dock.data('storage-url');
-    var noImage = $dock.data('no-image');
-    var tasksBase = String(listUrl || '').replace(/\/list$/, '');
+    var listUrl = $dock.data("tasks-list-url");
+    var infoUrl = $dock.data("task-info-url");
+    var mediaUrl = $dock.data("task-media-url");
+    var getUrl = $dock.data("task-get-url");
+    var commentBase = $dock.data("comment-url");
+    var storageUrl = $dock.data("storage-url");
+    var noImage = $dock.data("no-image");
+    var tasksBase = String(listUrl || "").replace(/\/list$/, "");
 
     var currentTaskId = null;
     var loaded = {};
     var taskPageDoc = null;
 
     function csrf() {
-        return $('meta[name="csrf-token"]').attr('content') ||
-            $dock.find('input[name="_token"]').val() || '';
+        return (
+            $('meta[name="csrf-token"]').attr("content") ||
+            $dock.find('input[name="_token"]').val() ||
+            ""
+        );
     }
-    function statuses() { return window.statusArray || []; }
-    function priorities() { return window.priorityArray || []; }
-    function byId(arr, id) { for (var i = 0; i < arr.length; i++) { if (String(arr[i].id) === String(id)) return arr[i]; } return null; }
-    function statusTitleById(id) { var s = byId(statuses(), id); return s ? s.title : ''; }
-    function doneStatusId() { var s = statuses(); return s.length ? s[s.length - 1].id : null; }
-    function todoStatusId() { var s = statuses(); return s.length ? s[0].id : null; }
-    function esc(t) { return $('<div>').text(t == null ? '' : t).html(); }
-    var COLORVAR = { success: 'var(--ok)', danger: 'var(--err)', warning: 'var(--warn)', info: 'var(--info)', primary: 'var(--signal)', secondary: 'var(--fg-3)' };
-    function colorVar(c) { return COLORVAR[c] || 'var(--fg-3)'; }
-    function parseStatusId(html) { var m = /data-original-status-id=['"]?(\d+)/.exec(html || ''); return m ? m[1] : null; }
-    function parseTitle(html) { var $h = $('<div>').html(html || ''); var t = $h.find('strong').first().text(); return t || $.trim($h.text()); }
-    function row(lbl, val) { return '<div class="tk-insp-lbl">' + esc(lbl) + '</div><div class="tk-insp-val">' + val + '</div>'; }
+    function statuses() {
+        return window.statusArray || [];
+    }
+    function priorities() {
+        return window.priorityArray || [];
+    }
+    function byId(arr, id) {
+        for (var i = 0; i < arr.length; i++) {
+            if (String(arr[i].id) === String(id)) return arr[i];
+        }
+        return null;
+    }
+    function statusTitleById(id) {
+        var s = byId(statuses(), id);
+        return s ? s.title : "";
+    }
+    function doneStatusId() {
+        var s = statuses();
+        return s.length ? s[s.length - 1].id : null;
+    }
+    function todoStatusId() {
+        var s = statuses();
+        return s.length ? s[0].id : null;
+    }
+    function esc(t) {
+        return $("<div>")
+            .text(t == null ? "" : t)
+            .html();
+    }
+    var COLORVAR = {
+        success: "var(--ok)",
+        danger: "var(--err)",
+        warning: "var(--warn)",
+        info: "var(--info)",
+        primary: "var(--signal)",
+        secondary: "var(--fg-3)",
+    };
+    function colorVar(c) {
+        return COLORVAR[c] || "var(--fg-3)";
+    }
+    function parseStatusId(html) {
+        var m = /data-original-status-id=['"]?(\d+)/.exec(html || "");
+        return m ? m[1] : null;
+    }
+    function parseTitle(html) {
+        var $h = $("<div>").html(html || "");
+        var t = $h.find("strong").first().text();
+        return t || $.trim($h.text());
+    }
+    function row(lbl, val) {
+        return (
+            '<div class="tk-insp-lbl">' +
+            esc(lbl) +
+            '</div><div class="tk-insp-val">' +
+            val +
+            "</div>"
+        );
+    }
 
-    function photoSrc(p) { return p ? (storageUrl + '/' + p) : noImage; }
+    function photoSrc(p) {
+        return p ? storageUrl + "/" + p : noImage;
+    }
     function avatarsFromUsers(users) {
         users = users || [];
-        if (!users.length) return '<span style="font-size:12px;color:var(--fg-3)">—</span>';
-        var h = '<span class="av-stack tk-av-stack">', n = 0;
+        if (!users.length)
+            return '<span style="font-size:12px;color:var(--fg-3)">—</span>';
+        var h = '<span class="av-stack tk-av-stack">',
+            n = 0;
         users.forEach(function (u) {
             if (n < 5) {
-                h += '<span class="av" title="' + esc((u.first_name || '') + ' ' + (u.last_name || '')) + '"><img src="' + esc(photoSrc(u.photo)) + '" onerror="this.onerror=null;this.src=DEFAULT_IMG" alt=""></span>';
+                h +=
+                    '<span class="av" title="' +
+                    esc((u.first_name || "") + " " + (u.last_name || "")) +
+                    '"><img src="' +
+                    esc(photoSrc(u.photo)) +
+                    '" onerror="this.onerror=null;this.src=DEFAULT_IMG" alt=""></span>';
                 n++;
             }
         });
-        if (users.length > 5) h += '<span class="av av-more">+' + (users.length - 5) + '</span>';
-        h = h.replace(/DEFAULT_IMG/g, "'" + String(noImage).replace(/'/g, "%27") + "'");
-        return h + '</span>';
+        if (users.length > 5)
+            h += '<span class="av av-more">+' + (users.length - 5) + "</span>";
+        h = h.replace(
+            /DEFAULT_IMG/g,
+            "'" + String(noImage).replace(/'/g, "%27") + "'",
+        );
+        return h + "</span>";
     }
 
     function openTask(taskId, $card) {
@@ -8161,69 +9566,111 @@ $(document).ready(function () {
         currentTaskId = taskId;
         loaded = {};
         taskPageDoc = null;
-        $('#tk_insp_empty').hide();
-        $('#tk_insp_content').show();
-        $('#tk_insp_foot').show();
-        $('#tk_insp_task_id').val(taskId);
-        $('#tk_insp_open').attr('href', infoUrl + '/' + taskId);
-        $('#tk_insp_scroll').scrollTop(0);
-        activateTab('subtask');
-        if ($card && $card.length) { metaFromCard($card, taskId); }
-        else { metaFromJson(taskId); }
-        loadTab('subtask');
+        $("#tk_insp_empty").hide();
+        $("#tk_insp_content").show();
+        $("#tk_insp_foot").show();
+        $("#tk_insp_task_id").val(taskId);
+        $("#tk_insp_open").attr("href", infoUrl + "/" + taskId);
+        $("#tk_insp_scroll").scrollTop(0);
+        activateTab("subtask");
+        if ($card && $card.length) {
+            metaFromCard($card, taskId);
+        } else {
+            metaFromJson(taskId);
+        }
+        loadTab("subtask");
     }
 
     function metaFromCard($card, taskId) {
-        var code = $.trim($card.find('.tcard-code').first().text());
-        var title = $.trim($card.find('.tcard-title').first().text());
-        var statusId = $card.closest('.kanban-tasks').data('status');
+        var code = $.trim($card.find(".tcard-code").first().text());
+        var title = $.trim($card.find(".tcard-title").first().text());
+        var statusId = $card.closest(".kanban-tasks").data("status");
         var stTitle = statusTitleById(statusId);
-        var $prio = $card.find('.tag-priority').first();
+        var $prio = $card.find(".tag-priority").first();
         var prioTxt = $.trim($prio.text());
-        var prioColor = $prio.length ? $prio.css('color') : '';
-        var dueTxt = $.trim($card.find('.tag-due').first().text());
-        var $assignees = $card.find('.tcard-foot .av-stack').first().clone();
-        $assignees.find('.av-add').remove();
-        $('#tk_insp_code').text(code || ('#' + taskId));
-        $('#tk_insp_status').html('<span class="dot"></span>' + esc(stTitle));
-        $('#tk_insp_title').text(title);
-        var html = '';
-        if (prioTxt) html += row('Priority', '<span class="mono" style="color:' + prioColor + '">' + esc(prioTxt) + '</span>');
-        html += row('Assignees', '<span id="tk_insp_assignees"></span>');
-        if (dueTxt) html += row('Due', '<span class="mono">' + esc(dueTxt) + '</span>');
-        if (stTitle) html += row('Status', esc(stTitle));
-        $('#tk_insp_meta').html(html);
-        if ($assignees.length) $('#tk_insp_assignees').replaceWith($assignees); else $('#tk_insp_assignees').text('—');
+        var prioColor = $prio.length ? $prio.css("color") : "";
+        var dueTxt = $.trim($card.find(".tag-due").first().text());
+        var $assignees = $card.find(".tcard-foot .av-stack").first().clone();
+        $assignees.find(".av-add").remove();
+        $("#tk_insp_code").text(code || "#" + taskId);
+        $("#tk_insp_status").html('<span class="dot"></span>' + esc(stTitle));
+        $("#tk_insp_title").text(title);
+        var html = "";
+        if (prioTxt)
+            html += row(
+                "Priority",
+                '<span class="mono" style="color:' +
+                    prioColor +
+                    '">' +
+                    esc(prioTxt) +
+                    "</span>",
+            );
+        html += row("Assignees", '<span id="tk_insp_assignees"></span>');
+        if (dueTxt)
+            html += row("Due", '<span class="mono">' + esc(dueTxt) + "</span>");
+        if (stTitle) html += row("Status", esc(stTitle));
+        $("#tk_insp_meta").html(html);
+        if ($assignees.length) $("#tk_insp_assignees").replaceWith($assignees);
+        else $("#tk_insp_assignees").text("—");
     }
 
     function metaFromJson(taskId) {
-        $('#tk_insp_code').text('#' + taskId);
-        $('#tk_insp_title').text('');
-        $('#tk_insp_meta').html('<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:60%"></div>');
+        $("#tk_insp_code").text("#" + taskId);
+        $("#tk_insp_title").text("");
+        $("#tk_insp_meta").html(
+            '<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:60%"></div>',
+        );
         if (!getUrl) return;
-        $.getJSON(getUrl + '/' + taskId).done(function (res) {
-            if (!res || res.error || !res.task) { $('#tk_insp_meta').html(''); return; }
-            var t = res.task;
-            var stTitle = statusTitleById(t.status_id);
-            $('#tk_insp_code').text('#' + t.id);
-            $('#tk_insp_status').html('<span class="dot"></span>' + esc(stTitle));
-            $('#tk_insp_title').text(t.title || '');
-            var html = '';
-            var pr = byId(priorities(), t.priority_id);
-            if (pr) html += row('Priority', '<span class="mono" style="color:' + colorVar(pr.color) + '">● ' + esc(pr.title) + '</span>');
-            html += row('Assignees', avatarsFromUsers(t.users));
-            if (t.due_date) html += row('Due', '<span class="mono">' + esc(t.due_date) + '</span>');
-            if (stTitle) html += row('Status', esc(stTitle));
-            $('#tk_insp_meta').html(html);
-        }).fail(function () { $('#tk_insp_meta').html(''); });
+        $.getJSON(getUrl + "/" + taskId)
+            .done(function (res) {
+                if (!res || res.error || !res.task) {
+                    $("#tk_insp_meta").html("");
+                    return;
+                }
+                var t = res.task;
+                var stTitle = statusTitleById(t.status_id);
+                $("#tk_insp_code").text("#" + t.id);
+                $("#tk_insp_status").html(
+                    '<span class="dot"></span>' + esc(stTitle),
+                );
+                $("#tk_insp_title").text(t.title || "");
+                var html = "";
+                var pr = byId(priorities(), t.priority_id);
+                if (pr)
+                    html += row(
+                        "Priority",
+                        '<span class="mono" style="color:' +
+                            colorVar(pr.color) +
+                            '">● ' +
+                            esc(pr.title) +
+                            "</span>",
+                    );
+                html += row("Assignees", avatarsFromUsers(t.users));
+                if (t.due_date)
+                    html += row(
+                        "Due",
+                        '<span class="mono">' + esc(t.due_date) + "</span>",
+                    );
+                if (stTitle) html += row("Status", esc(stTitle));
+                $("#tk_insp_meta").html(html);
+            })
+            .fail(function () {
+                $("#tk_insp_meta").html("");
+            });
     }
 
     function activateTab(name) {
-        $('#tk_insp_tabs .tk-insp-tab').removeClass('active').filter('[data-insp-tab="' + name + '"]').addClass('active');
-        $('#tk_insp_panes .tk-insp-pane').removeClass('active').filter('[data-insp-pane="' + name + '"]').addClass('active');
+        $("#tk_insp_tabs .tk-insp-tab")
+            .removeClass("active")
+            .filter('[data-insp-tab="' + name + '"]')
+            .addClass("active");
+        $("#tk_insp_panes .tk-insp-pane")
+            .removeClass("active")
+            .filter('[data-insp-pane="' + name + '"]')
+            .addClass("active");
     }
-    $dock.on('click', '.tk-insp-tab', function () {
-        var name = $(this).data('insp-tab');
+    $dock.on("click", ".tk-insp-tab", function () {
+        var name = $(this).data("insp-tab");
         activateTab(name);
         loadTab(name);
     });
@@ -8232,72 +9679,136 @@ $(document).ready(function () {
         if (!currentTaskId) return;
         if (loaded[name]) return;
         loaded[name] = true;
-        if (name === 'subtask') return loadSubtasks(currentTaskId);
-        if (name === 'media') return loadMedia(currentTaskId);
-        if (name === 'activity') return fillActivity(currentTaskId);
-        if (name === 'comments' || name === 'timeline') return loadTaskPage(currentTaskId);
+        if (name === "subtask") return loadSubtasks(currentTaskId);
+        if (name === "media") return loadMedia(currentTaskId);
+        if (name === "activity") return fillActivity(currentTaskId);
+        if (name === "comments" || name === "timeline")
+            return loadTaskPage(currentTaskId);
     }
 
     function loadSubtasks(taskId) {
-        var $p = $('#tk_insp_pane_subtask');
-        $p.html('<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:80%"></div>');
-        if (!listUrl) { $p.html('<div class="tk-insp-emptyline">—</div>'); return; }
-        $.ajax({ url: listUrl, data: { task_parent_id: taskId, limit: 100 }, dataType: 'json' })
-            .done(function (res) { renderSubtasks((res && res.rows) || []); })
-            .fail(function () { $p.html('<div class="tk-insp-emptyline">Could not load subtasks.</div>'); });
+        var $p = $("#tk_insp_pane_subtask");
+        $p.html(
+            '<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:80%"></div>',
+        );
+        if (!listUrl) {
+            $p.html('<div class="tk-insp-emptyline">—</div>');
+            return;
+        }
+        $.ajax({
+            url: listUrl,
+            data: { task_parent_id: taskId, limit: 100 },
+            dataType: "json",
+        })
+            .done(function (res) {
+                renderSubtasks((res && res.rows) || []);
+            })
+            .fail(function () {
+                $p.html(
+                    '<div class="tk-insp-emptyline">Could not load subtasks.</div>',
+                );
+            });
     }
     function renderSubtasks(rows) {
-        var $p = $('#tk_insp_pane_subtask');
-        var total = rows.length, done = 0, dId = doneStatusId();
-        if (!total) { $p.html('<div class="tk-insp-emptyline">No subtasks.</div>'); return; }
-        var items = '';
+        var $p = $("#tk_insp_pane_subtask");
+        var total = rows.length,
+            done = 0,
+            dId = doneStatusId();
+        if (!total) {
+            $p.html('<div class="tk-insp-emptyline">No subtasks.</div>');
+            return;
+        }
+        var items = "";
         rows.forEach(function (r) {
             var sid = parseStatusId(r.status_id);
             var isDone = dId && String(sid) === String(dId);
             if (isDone) done++;
-            items += '<label class="tk-subtask' + (isDone ? ' is-done' : '') + '" data-sub-id="' + r.id + '">';
-            items += '<input type="checkbox" ' + (isDone ? 'checked' : '') + '>';
-            items += '<span class="tk-subtask-title">' + esc(parseTitle(r.title)) + '</span></label>';
+            items +=
+                '<label class="tk-subtask' +
+                (isDone ? " is-done" : "") +
+                '" data-sub-id="' +
+                r.id +
+                '">';
+            items +=
+                '<input type="checkbox" ' + (isDone ? "checked" : "") + ">";
+            items +=
+                '<span class="tk-subtask-title">' +
+                esc(parseTitle(r.title)) +
+                "</span></label>";
         });
-        var pct = total ? Math.round(done / total * 100) : 0;
-        $p.html('<div class="tk-insp-sechead"><strong>Subtasks</strong><span class="tk-insp-count" id="tk_insp_subcount">' + done + '/' + total + '</span></div>'
-            + '<div class="tk-insp-progress"><span id="tk_insp_progress" style="width:' + pct + '%"></span></div>'
-            + '<div class="tk-subtask-list">' + items + '</div>');
+        var pct = total ? Math.round((done / total) * 100) : 0;
+        $p.html(
+            '<div class="tk-insp-sechead"><strong>Subtasks</strong><span class="tk-insp-count" id="tk_insp_subcount">' +
+                done +
+                "/" +
+                total +
+                "</span></div>" +
+                '<div class="tk-insp-progress"><span id="tk_insp_progress" style="width:' +
+                pct +
+                '%"></span></div>' +
+                '<div class="tk-subtask-list">' +
+                items +
+                "</div>",
+        );
     }
     function updateSubCount() {
-        var $list = $('#tk_insp_pane_subtask');
-        var total = $list.find('.tk-subtask').length;
-        var done = $list.find('.tk-subtask input:checked').length;
-        $('#tk_insp_subcount').text(done + '/' + total);
-        $('#tk_insp_progress').css('width', (total ? Math.round(done / total * 100) : 0) + '%');
+        var $list = $("#tk_insp_pane_subtask");
+        var total = $list.find(".tk-subtask").length;
+        var done = $list.find(".tk-subtask input:checked").length;
+        $("#tk_insp_subcount").text(done + "/" + total);
+        $("#tk_insp_progress").css(
+            "width",
+            (total ? Math.round((done / total) * 100) : 0) + "%",
+        );
     }
-    $dock.on('change', '.tk-subtask input[type=checkbox]', function () {
-        var $r = $(this).closest('.tk-subtask');
-        var sid = $r.data('sub-id');
-        var checked = this.checked, self = this;
+    $dock.on("change", ".tk-subtask input[type=checkbox]", function () {
+        var $r = $(this).closest(".tk-subtask");
+        var sid = $r.data("sub-id");
+        var checked = this.checked,
+            self = this;
         var target = checked ? doneStatusId() : todoStatusId();
         if (!target || !tasksBase) return;
-        $r.toggleClass('is-done', checked);
+        $r.toggleClass("is-done", checked);
         updateSubCount();
-        $.ajax({ url: tasksBase + '/' + sid + '/update-status/' + target, method: 'PUT', headers: { 'X-CSRF-TOKEN': csrf() } })
-            .fail(function () { self.checked = !checked; $r.toggleClass('is-done', self.checked); updateSubCount(); });
+        $.ajax({
+            url: tasksBase + "/" + sid + "/update-status/" + target,
+            method: "PUT",
+            headers: { "X-CSRF-TOKEN": csrf() },
+        }).fail(function () {
+            self.checked = !checked;
+            $r.toggleClass("is-done", self.checked);
+            updateSubCount();
+        });
     });
 
     function loadTaskPage(taskId) {
-        $('#tk_insp_pane_comments').html('<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:70%"></div>');
-        $('#tk_insp_pane_timeline').html('<div class="tk-insp-skel"></div>');
+        $("#tk_insp_pane_comments").html(
+            '<div class="tk-insp-skel"></div><div class="tk-insp-skel" style="width:70%"></div>',
+        );
+        $("#tk_insp_pane_timeline").html('<div class="tk-insp-skel"></div>');
         if (!infoUrl) return;
-        $.ajax({ url: infoUrl + '/' + taskId, dataType: 'html' })
+        $.ajax({ url: infoUrl + "/" + taskId, dataType: "html" })
             .done(function (htmlStr) {
                 // Full HTML document — parse with DOMParser (jQuery .html() drops
                 // <html>/<head>/<body> and mangles the panes).
-                try { taskPageDoc = new DOMParser().parseFromString(htmlStr, 'text/html'); }
-                catch (e) { taskPageDoc = null; }
-                fillComments(); fillTimeline();
+                try {
+                    taskPageDoc = new DOMParser().parseFromString(
+                        htmlStr,
+                        "text/html",
+                    );
+                } catch (e) {
+                    taskPageDoc = null;
+                }
+                fillComments();
+                fillTimeline();
             })
             .fail(function () {
-                $('#tk_insp_pane_comments').html('<div class="tk-insp-emptyline">Could not load comments.</div>');
-                $('#tk_insp_pane_timeline').html('<div class="tk-insp-emptyline">Could not load timeline.</div>');
+                $("#tk_insp_pane_comments").html(
+                    '<div class="tk-insp-emptyline">Could not load comments.</div>',
+                );
+                $("#tk_insp_pane_timeline").html(
+                    '<div class="tk-insp-emptyline">Could not load timeline.</div>',
+                );
             });
     }
     function paneHtml(sel) {
@@ -8305,99 +9816,161 @@ $(document).ready(function () {
         var el = taskPageDoc.querySelector(sel);
         return el ? el.innerHTML : null;
     }
-    function hasText(html) { return html && $.trim($('<div>').html(html).text()) !== ''; }
+    function hasText(html) {
+        return html && $.trim($("<div>").html(html).text()) !== "";
+    }
     function fillComments() {
-        var $p = $('#tk_insp_pane_comments');
-        var html = paneHtml('#navs-top-discussions');
-        if (hasText(html)) { $p.html('<div class="tk-insp-activity">' + html + '</div>'); }
-        else { $p.html('<div class="tk-insp-emptyline">No comments yet.</div>'); }
+        var $p = $("#tk_insp_pane_comments");
+        var html = paneHtml("#navs-top-discussions");
+        if (hasText(html)) {
+            $p.html('<div class="tk-insp-activity">' + html + "</div>");
+        } else {
+            $p.html('<div class="tk-insp-emptyline">No comments yet.</div>');
+        }
     }
     function fillTimeline() {
-        var $p = $('#tk_insp_pane_timeline');
-        var html = paneHtml('#navs-top-status_timeline');
-        if (hasText(html)) { $p.html('<div class="tk-insp-timeline">' + html + '</div>'); }
-        else { $p.html('<div class="tk-insp-emptyline">No timeline entries.</div>'); }
+        var $p = $("#tk_insp_pane_timeline");
+        var html = paneHtml("#navs-top-status_timeline");
+        if (hasText(html)) {
+            $p.html('<div class="tk-insp-timeline">' + html + "</div>");
+        } else {
+            $p.html(
+                '<div class="tk-insp-emptyline">No timeline entries.</div>',
+            );
+        }
     }
 
     function loadMedia(taskId) {
-        var $p = $('#tk_insp_pane_media');
+        var $p = $("#tk_insp_pane_media");
         $p.html('<div class="tk-insp-skel"></div>');
-        if (!mediaUrl) { $p.html('<div class="tk-insp-emptyline">—</div>'); return; }
-        $.getJSON(mediaUrl + '/' + taskId).done(function (res) {
-            var rows = (res && res.rows) || [];
-            if (!rows.length) { $p.html('<div class="tk-insp-emptyline">No media.</div>'); return; }
-            // `file` is server-rendered HTML (image thumbnail link or download link).
-            var h = '<div class="tk-insp-media-grid">';
-            rows.forEach(function (m) {
-                h += '<div class="tk-insp-media">' + (m.file || '') + '<span class="tk-insp-media-name">' + esc(m.file_name || '') + '</span></div>';
+        if (!mediaUrl) {
+            $p.html('<div class="tk-insp-emptyline">—</div>');
+            return;
+        }
+        $.getJSON(mediaUrl + "/" + taskId)
+            .done(function (res) {
+                var rows = (res && res.rows) || [];
+                if (!rows.length) {
+                    $p.html('<div class="tk-insp-emptyline">No media.</div>');
+                    return;
+                }
+                // `file` is server-rendered HTML (image thumbnail link or download link).
+                var h = '<div class="tk-insp-media-grid">';
+                rows.forEach(function (m) {
+                    h +=
+                        '<div class="tk-insp-media">' +
+                        (m.file || "") +
+                        '<span class="tk-insp-media-name">' +
+                        esc(m.file_name || "") +
+                        "</span></div>";
+                });
+                $p.html(h + "</div>");
+            })
+            .fail(function () {
+                $p.html(
+                    '<div class="tk-insp-emptyline">Could not load media.</div>',
+                );
             });
-            $p.html(h + '</div>');
-        }).fail(function () { $p.html('<div class="tk-insp-emptyline">Could not load media.</div>'); });
     }
 
     function fillActivity(taskId) {
-        $('#tk_insp_pane_activity').html(
-            '<div class="tk-insp-emptyline" style="text-align:center;padding:18px 8px;">'
-            + 'Activity log opens in the full task view.<br>'
-            + '<a class="btn btn-sm btn-outline-secondary mt-2" target="_blank" href="' + esc(infoUrl + '/' + taskId) + '#navs-top-activity-log">Open activity</a>'
-            + '</div>');
+        $("#tk_insp_pane_activity").html(
+            '<div class="tk-insp-emptyline" style="text-align:center;padding:18px 8px;">' +
+                "Activity log opens in the full task view.<br>" +
+                '<a class="btn btn-sm btn-outline-secondary mt-2" target="_blank" href="' +
+                esc(infoUrl + "/" + taskId) +
+                '#navs-top-activity-log">Open activity</a>' +
+                "</div>",
+        );
     }
 
-    $('#tk_insp_comment_form').on('submit', function (e) {
+    $("#tk_insp_comment_form").on("submit", function (e) {
         e.preventDefault();
-        var taskId = $('#tk_insp_task_id').val();
-        var content = $.trim($('#tk_insp_comment_input').val());
+        var taskId = $("#tk_insp_task_id").val();
+        var content = $.trim($("#tk_insp_comment_input").val());
         if (!taskId || !content || !commentBase) return;
         var fd = new FormData();
-        fd.append('model_type', 'App\\Models\\Task');
-        fd.append('model_id', taskId);
-        fd.append('parent_id', '');
-        fd.append('content', content);
-        fd.append('_token', csrf());
-        var $btn = $('#tk_insp_comment_submit');
-        $btn.prop('disabled', true);
-        $.ajax({ url: commentBase + '/' + taskId + '/comments', method: 'POST', data: fd, processData: false, contentType: false })
+        fd.append("model_type", "App\\Models\\Task");
+        fd.append("model_id", taskId);
+        fd.append("parent_id", "");
+        fd.append("content", content);
+        fd.append("_token", csrf());
+        var $btn = $("#tk_insp_comment_submit");
+        $btn.prop("disabled", true);
+        $.ajax({
+            url: commentBase + "/" + taskId + "/comments",
+            method: "POST",
+            data: fd,
+            processData: false,
+            contentType: false,
+        })
             .done(function () {
-                $('#tk_insp_comment_input').val('');
-                activateTab('comments');
-                taskPageDoc = null; loaded['comments'] = false; loaded['timeline'] = false;
-                loadTab('comments');
+                $("#tk_insp_comment_input").val("");
+                activateTab("comments");
+                taskPageDoc = null;
+                loaded["comments"] = false;
+                loaded["timeline"] = false;
+                loadTab("comments");
             })
-            .always(function () { $btn.prop('disabled', false); });
+            .always(function () {
+                $btn.prop("disabled", false);
+            });
     });
 
-    $(document).on('click', '#project_task_board .tcard', function (e) {
-        if ($(e.target).closest('.tcard-actions, .tcard-stats, .av-stack, .dropdown, [data-bs-toggle]').length) return;
-        if ($(this).hasClass('gu-transit') || $(this).hasClass('gu-mirror')) return;
+    $(document).on("click", "#project_task_board .tcard", function (e) {
+        if (
+            $(e.target).closest(
+                ".tcard-actions, .tcard-stats, .av-stack, .dropdown, [data-bs-toggle]",
+            ).length
+        )
+            return;
+        if ($(this).hasClass("gu-transit") || $(this).hasClass("gu-mirror"))
+            return;
         e.preventDefault();
-        $('#project_task_board .tcard').removeClass('tk-card-active');
-        $(this).addClass('tk-card-active');
-        openTask($(this).data('task-id'), $(this));
+        $("#project_task_board .tcard").removeClass("tk-card-active");
+        $(this).addClass("tk-card-active");
+        openTask($(this).data("task-id"), $(this));
     });
 
-    $(document).on('click', 'table[data-toggle="table"] tbody tr', function (e) {
-        if (!$('#task_inspector').length) return;
-        if ($(e.target).closest('a, button, input, select, .dropdown, label, .form-check, [data-bs-toggle]').length) return;
-        var id = $(this).find('[data-task-row-id]').data('task-row-id');
-        if (!id) {
-            var href = $(this).find('a[href*="/tasks/information/"]').attr('href') || '';
-            var m = /\/tasks\/information\/(\d+)/.exec(href);
-            id = m ? m[1] : null;
-        }
-        if (!id) return;
-        $('table[data-toggle="table"] tbody tr').removeClass('tk-row-active');
-        $(this).addClass('tk-row-active');
-        openTask(id, null);
-    });
+    $(document).on(
+        "click",
+        'table[data-toggle="table"] tbody tr',
+        function (e) {
+            if (!$("#task_inspector").length) return;
+            if (
+                $(e.target).closest(
+                    "a, button, input, select, .dropdown, label, .form-check, [data-bs-toggle]",
+                ).length
+            )
+                return;
+            var id = $(this).find("[data-task-row-id]").data("task-row-id");
+            if (!id) {
+                var href =
+                    $(this)
+                        .find('a[href*="/tasks/information/"]')
+                        .attr("href") || "";
+                var m = /\/tasks\/information\/(\d+)/.exec(href);
+                id = m ? m[1] : null;
+            }
+            if (!id) return;
+            $('table[data-toggle="table"] tbody tr').removeClass(
+                "tk-row-active",
+            );
+            $(this).addClass("tk-row-active");
+            openTask(id, null);
+        },
+    );
 
-    $(document).on('input', '#tk_board_search', function () {
+    $(document).on("input", "#tk_board_search", function () {
         var q = $.trim(this.value).toLowerCase();
-        $('#project_task_board .tcard').each(function () {
-            var t = $(this).find('.tcard-title').text().toLowerCase();
-            $(this).toggleClass('tk-hide', !!q && t.indexOf(q) === -1);
+        $("#project_task_board .tcard").each(function () {
+            var t = $(this).find(".tcard-title").text().toLowerCase();
+            $(this).toggleClass("tk-hide", !!q && t.indexOf(q) === -1);
         });
-        $('#project_task_board .kcol').each(function () {
-            $(this).find('.kcol-count').text($(this).find('.tcard:not(.tk-hide)').length);
+        $("#project_task_board .kcol").each(function () {
+            $(this)
+                .find(".kcol-count")
+                .text($(this).find(".tcard:not(.tk-hide)").length);
         });
     });
 })();
@@ -8406,14 +9979,16 @@ $(document).ready(function () {
    column counts. Kept independent of the (now optional) task inspector. */
 (function () {
     if (!window.jQuery) return;
-    jQuery(document).on('input', '#tk_board_search', function () {
+    jQuery(document).on("input", "#tk_board_search", function () {
         var q = jQuery.trim(this.value).toLowerCase();
-        jQuery('#project_task_board .tcard').each(function () {
-            var t = jQuery(this).find('.tcard-title').text().toLowerCase();
-            jQuery(this).toggleClass('tk-hide', !!q && t.indexOf(q) === -1);
+        jQuery("#project_task_board .tcard").each(function () {
+            var t = jQuery(this).find(".tcard-title").text().toLowerCase();
+            jQuery(this).toggleClass("tk-hide", !!q && t.indexOf(q) === -1);
         });
-        jQuery('#project_task_board .kcol').each(function () {
-            jQuery(this).find('.kcol-count').text(jQuery(this).find('.tcard:not(.tk-hide)').length);
+        jQuery("#project_task_board .kcol").each(function () {
+            jQuery(this)
+                .find(".kcol-count")
+                .text(jQuery(this).find(".tcard:not(.tk-hide)").length);
         });
     });
 })();
@@ -8424,18 +9999,27 @@ $(document).ready(function () {
     if (!window.jQuery) return;
     var $ = jQuery;
     function setCollapsed(collapsed) {
-        $('#tk_workspace').toggleClass('tk-detail-collapsed', collapsed);
-        $('#tk_detail_toggle').toggleClass('active', !collapsed);
-        try { localStorage.setItem('tkProjectDetailCollapsed', collapsed ? '1' : '0'); } catch (e) { }
+        $("#tk_workspace").toggleClass("tk-detail-collapsed", collapsed);
+        $("#tk_detail_toggle").toggleClass("active", !collapsed);
+        try {
+            localStorage.setItem(
+                "tkProjectDetailCollapsed",
+                collapsed ? "1" : "0",
+            );
+        } catch (e) {}
     }
-    $(document).on('click', '#tk_detail_toggle', function () {
-        setCollapsed(!$('#tk_workspace').hasClass('tk-detail-collapsed'));
+    $(document).on("click", "#tk_detail_toggle", function () {
+        setCollapsed(!$("#tk_workspace").hasClass("tk-detail-collapsed"));
     });
-    $(document).on('click', '#tk_detail_close', function () { setCollapsed(true); });
+    $(document).on("click", "#tk_detail_close", function () {
+        setCollapsed(true);
+    });
     $(function () {
-        if (!$('#tk_workspace').length) return;
+        if (!$("#tk_workspace").length) return;
         var saved = null;
-        try { saved = localStorage.getItem('tkProjectDetailCollapsed'); } catch (e) { }
-        if (saved === '1') setCollapsed(true);
+        try {
+            saved = localStorage.getItem("tkProjectDetailCollapsed");
+        } catch (e) {}
+        if (saved === "1") setCollapsed(true);
     });
 })();

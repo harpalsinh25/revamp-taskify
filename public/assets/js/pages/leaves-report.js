@@ -15,7 +15,7 @@ $(function () {
     });
 });
 $(document).ready(function () {
-    $('#export_button').click(function () {
+    $('#export_button, #exportChartsButton').click(function () {
         var $exportButton = $(this);
         $exportButton.attr('disabled', true);
         // Prepare query parameters

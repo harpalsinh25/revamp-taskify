@@ -44,7 +44,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="first_name" class="form-label">{{ get_label('first_name', 'First Name') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="first_name" class="form-control" required
+                            <input type="text" name="first_name" class="form-control"
                                 placeholder="{{ get_label('enter_first_name', 'Enter first name') }}"
                                 value="{{ old('first_name') }}">
                             @error('first_name')
@@ -55,7 +55,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="last_name" class="form-label">{{ get_label('last_name', 'Last Name') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="last_name" class="form-control" required
+                            <input type="text" name="last_name" class="form-control"
                                 placeholder="{{ get_label('enter_last_name', 'Enter last name') }}"
                                 value="{{ old('last_name') }}">
                             @error('last_name')
@@ -66,7 +66,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" required
+                            <input type="email" name="email" class="form-control"
                                 placeholder="{{ get_label('enter_email', 'Enter email address') }}"
                                 value="{{ old('email') }}">
                             @error('email')
@@ -92,7 +92,8 @@
 
                         <div class="col-md-4 mb-3">
                             <label for="lead_sources"
-                                class="form-label">{{ get_label('lead_sources', 'Lead Sources') }}</label>
+                                class="form-label">{{ get_label('lead_sources', 'Lead Sources') }} <span
+                                    class="text-danger">*</span></label>
                             <select class="form-select tom_select" name="source_id" id="select_lead_source"
                                 data-allow-clear="false" data-consider-workspace="true">
                                 {{-- You can keep the default option if needed --}}
@@ -108,7 +109,7 @@
                             <label for="lead_stages" class="form-label">{{ get_label('lead_stages', 'Lead Stages') }} <span
                                     class="text-danger">*</span></label>
                             <select class="form-select tom_select" name="stage_id" id="select_lead_stage"
-                                data-allow-clear="false" data-consider-workspace="true" required>
+                                data-allow-clear="false" data-consider-workspace="true">
                                 <option value="">{{ get_label('select_lead_stage', 'Select Lead Stage') }}</option>
 
                             </select>
@@ -121,8 +122,7 @@
                             <label for="assign_to" class="form-label">{{ get_label('assigned_to', 'Assign To') }} <span
                                     class="text-danger">*</span></label>
                             <select name="assigned_to" class="form-select tom_select" id="select_lead_assignee"
-                                data-allow-clear="false" data-consider-workspace="true"
-                                required>
+                                data-allow-clear="false" data-consider-workspace="true">
                                 <option value="">{{ get_label('select_assignee', 'Assigned To') }}</option>
 
                             </select>
@@ -140,7 +140,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="job_title" class="form-label">{{ get_label('job_title', 'Job Title') }}</label>
+                            <label for="job_title" class="form-label">{{ get_label('job_title', 'Job Title') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="text" name="job_title" class="form-control"
                                 placeholder="{{ get_label('enter_job_title', 'Enter job title') }}">
                             @error('job_title')
@@ -149,7 +150,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="industry" class="form-label">{{ get_label('industry', 'Industry') }}</label>
+                            <label for="industry" class="form-label">{{ get_label('industry', 'Industry') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="text" name="industry" class="form-control"
                                 placeholder="{{ get_label('enter_industry', 'Enter industry') }}">
                             @error('industry')
@@ -160,7 +162,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="company" class="form-label">{{ get_label('company', 'Company') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="company" class="form-control" required
+                            <input type="text" name="company" class="form-control"
                                 placeholder="{{ get_label('enter_company', 'Enter company name') }}">
                             @error('company')
                                 <span class="text-danger">{{ $message }}</span>
@@ -168,7 +170,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="website" class="form-label">{{ get_label('website', 'Website') }}</label>
+                            <label for="website" class="form-label">{{ get_label('website', 'Website') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="text" name="website" class="form-control"
                                 placeholder="{{ get_label('enter_website', 'Enter company website') }}">
                             @error('website')
@@ -183,7 +186,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="linkedin" class="form-label">{{ get_label('linkedin', 'LinkedIn') }}</label>
+                            <label for="linkedin" class="form-label">{{ get_label('linkedin', 'LinkedIn') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="url" name="linkedin" class="form-control"
                                 placeholder="{{ get_label('enter_linkedin_url', 'Enter LinkedIn URL') }}"
                                 value="{{ old('linkedin') }}">
@@ -193,7 +197,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="instagram" class="form-label">{{ get_label('instagram', 'Instagram') }}</label>
+                            <label for="instagram" class="form-label">{{ get_label('instagram', 'Instagram') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="url" name="instagram" class="form-control"
                                 placeholder="{{ get_label('enter_instagram_url', 'Enter Instagram URL') }}"
                                 value="{{ old('instagram') }}">
@@ -203,7 +208,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="facebook" class="form-label">{{ get_label('facebook', 'Facebook') }}</label>
+                            <label for="facebook" class="form-label">{{ get_label('facebook', 'Facebook') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="url" name="facebook" class="form-control"
                                 placeholder="{{ get_label('enter_facebook_url', 'Enter Facebook URL') }}"
                                 value="{{ old('facebook') }}">
@@ -213,7 +219,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="pinterest" class="form-label">{{ get_label('pinterest','Pinterest') }}</label>
+                            <label for="pinterest" class="form-label">{{ get_label('pinterest','Pinterest') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="url" name="pinterest" class="form-control"
                                 placeholder="{{ get_label('enter_pinterest_url', 'Enter Pinterest URL') }}"
                                 value="{{ old('pinterest') }}">
@@ -228,7 +235,8 @@
                             <hr>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="city" class="form-label">{{ get_label('city', 'City') }}</label>
+                            <label for="city" class="form-label">{{ get_label('city', 'City') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="text" name="city" class="form-control"
                                 placeholder="{{ get_label('please_enter_city', 'Please enter city') }}"
                                 value="{{ old('city') }}">
@@ -238,7 +246,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="state" class="form-label">{{ get_label('state', 'State') }}</label>
+                            <label for="state" class="form-label">{{ get_label('state', 'State') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="text" name="state" class="form-control"
                                 placeholder="{{ get_label('please_enter_state', 'Please enter state') }}"
                                 value="{{ old('state') }}">
@@ -248,7 +257,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="zip" class="form-label">{{ get_label('zip_code', 'Zip Code') }}</label>
+                            <label for="zip" class="form-label">{{ get_label('zip_code', 'Zip Code') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="number" name="zip" class="form-control"
                                 placeholder="{{ get_label('please_enter_zip_code', 'Please enter ZIP code') }}"
                                 value="{{ old('zip') }}">
@@ -258,7 +268,8 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="country" class="form-label">{{ get_label('country', 'Country') }}</label>
+                            <label for="country" class="form-label">{{ get_label('country', 'Country') }} <span
+                                    class="text-danger">*</span></label>
                             <input type="text" name="country" class="form-control"
                                 placeholder="{{ get_label('please_enter_country', 'Please enter country') }}">
                             @error('country')

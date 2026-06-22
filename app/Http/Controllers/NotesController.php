@@ -87,8 +87,8 @@ class NotesController extends Controller
             'note_type' => 'required|in:text,drawing',
             'title' => 'required|string',
             'color' => 'required|in:info,warning,danger',
-            'description' => 'nullable|string|required_if:type,text',
-            'drawing_data' => 'nullable|string|required_if:type,drawing',
+            'description' => 'nullable|string|required_if:note_type,text',
+            'drawing_data' => 'nullable|string|required_if:note_type,drawing',
         ];
         $drawingData = $request->input('drawing_data');
 

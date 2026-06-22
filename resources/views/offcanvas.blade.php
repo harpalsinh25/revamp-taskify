@@ -46,7 +46,8 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select statusDropdown" name="status_id">
+                    <select class="form-select statusDropdown" name="status_id" data-placeholder="<?= get_label('please_select', 'Please select') ?>">
+                        <option></option>
                         @isset($statuses)
                             @foreach ($statuses as $status)
                                 @if (canSetStatus($status))
@@ -508,7 +509,8 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select statusDropdown" name="status_id">
+                    <select class="form-select statusDropdown" name="status_id" data-placeholder="<?= get_label('please_select', 'Please select') ?>">
+                        <option></option>
                         @isset($statuses)
                             @foreach ($statuses as $status)
                                 @if (canSetStatus($status))

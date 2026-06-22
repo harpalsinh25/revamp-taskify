@@ -272,6 +272,17 @@ class ProjectsController extends Controller
         $isApi = request()->get('isApi', false);
 
         try {
+            $customFieldsReq = CustomField::where('module', 'project')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $formFields = $request->validated();
             $status = Status::findOrFail($request->input('status_id'));
 
@@ -545,6 +556,17 @@ class ProjectsController extends Controller
         $isApi = request()->get('isApi', false);
 
         try {
+            $customFieldsReq = CustomField::where('module', 'project')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $id = $request->input('id');
             $project = Project::findOrFail($id);
 
@@ -754,10 +776,10 @@ class ProjectsController extends Controller
                     $isPinned = !is_null($project->pinned_id) ? 1 : 0; // Use pinned_id from the query
 
                     $actions = '<div class="dropdown">';
-                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow " type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $actions .= '<button class="btn p-0 dropdown-toggle hide-arrow " type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-bs-boundary="window">';
                     $actions .= '<i class="bx bx-dots-vertical-rounded fs-5"></i>';
                     $actions .= '</button>';
-                    $actions .= '<ul class="dropdown-menu  project-actions-dropdown">';
+                    $actions .= '<ul class="dropdown-menu  project-actions-dropdown z-3">';
 
                     if ($canEdit) {
                         $actions .= '<li><a href="javascript:void(0);" class="dropdown-item edit-project d-block" data-offcanvas="true" data-id="' . $project->id . '">';

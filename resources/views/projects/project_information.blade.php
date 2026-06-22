@@ -730,9 +730,11 @@
                     </div>
                 </div>
                 @endif
+                </div>
             </div>
-        </div>
         @endif
+        </div>{{-- /.tab-content --}}
+        </div>{{-- /.mt-2 --}}
         </div>{{-- /.row inside offcanvas-body --}}
         </div>{{-- /.offcanvas-body --}}
     </div>{{-- /.offcanvas --}}

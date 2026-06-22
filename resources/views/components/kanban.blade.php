@@ -23,12 +23,12 @@
         <a href="{{ url('tasks/information/' . $task->id) }}" class="tcard-code mono">#{{ $task->id }}</a>
         <div class="tcard-actions">
             <a href="javascript:void(0);" class="favorite-icon tcard-ic" data-bs-toggle="tooltip" data-bs-placement="top"
-                data-bs-original-title="{{ $isFav ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}">
-                <i class='bx {{ $isFav ? "bxs" : "bx" }}-star {{ $isFav ? "tcard-star-on" : "" }}' data-id="{{ $task->id }}" data-type="tasks" data-favorite="{{ $isFav ? 1 : 0 }}"></i>
+                data-bs-original-title="{{ $isFav ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite') }}" data-id="{{ $task->id }}" data-type="tasks" data-favorite="{{ $isFav ? 1 : 0 }}">
+                <i class='bx {{ $isFav ? "bxs" : "bx" }}-star {{ $isFav ? "tcard-star-on" : "" }}'></i>
             </a>
             <a href="javascript:void(0);" class="pinned-icon tcard-ic" data-bs-toggle="tooltip" data-bs-placement="top"
-                data-bs-original-title="{{ $isPin ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}">
-                <i class='bx {{ $isPin ? "bxs" : "bx" }}-pin {{ $isPin ? "tcard-pin-on" : "" }}' data-id="{{ $task->id }}" data-pinned="{{ $isPin }}" data-type="tasks"></i>
+                data-bs-original-title="{{ $isPin ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin') }}" data-id="{{ $task->id }}" data-pinned="{{ $isPin ? 1 : 0 }}" data-type="tasks">
+                <i class='bx {{ $isPin ? "bxs" : "bx" }}-pin {{ $isPin ? "tcard-pin-on" : "" }}'></i>
             </a>
             @if ($showSettings)
             <div class="dropdown tcard-ic">

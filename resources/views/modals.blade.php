@@ -2204,7 +2204,7 @@
                     </div>
                     <div class="col-12">
                         <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span class="asterisk">*</span></label>
-                        <input type="text" id="nameBasic" class="form-control" name="title" placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
+                        <input type="text" id="nameBasic" class="form-control" name="title" placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                     </div>
                     <!-- Text Note Section -->
                     <div id="text-note-section" class="col-12">
@@ -2250,7 +2250,7 @@
                     </div>
                     <div class="col-12">
                         <label for="note_title" class="form-label"><?= get_label('title', 'Title') ?> <span class="asterisk">*</span></label>
-                        <input type="text" class="form-control" id="note_title" name="title" placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
+                        <input type="text" class="form-control" id="note_title" name="title" placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                     </div>
                     <div id="edit-text-note-section" class="col-12">
                         <label for="note_description" class="form-label"><?= get_label('description', 'Description') ?></label>

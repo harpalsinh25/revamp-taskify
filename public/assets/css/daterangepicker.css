@@ -213,8 +213,10 @@
     display: block;
     vertical-align: middle;
     margin: 0 0 5px 0;
-    padding: 0 6px 0 28px !important;
     width: 100%;
+}
+body.v2-shell .daterangepicker .input-mini:not(#phone) {
+    padding: 0 6px 0 36px !important;
 }
 .daterangepicker .input-mini.active {
     border: 1px solid var(--drp-primary);
@@ -223,7 +225,9 @@
 .daterangepicker .daterangepicker_input { position: relative; }
 .daterangepicker .daterangepicker_input i { position: absolute; left: 8px; top: 8px; }
 
-.daterangepicker.rtl .input-mini        { padding-right: 28px; padding-left: 6px; }
+body.v2-shell .daterangepicker.rtl .input-mini:not(#phone) {
+    padding: 0 36px 0 6px !important;
+}
 .daterangepicker.rtl .daterangepicker_input i { left: auto; right: 8px; }
 
 /* ─── Time Picker ───────────────────────────────────────── */

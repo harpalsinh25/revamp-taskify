@@ -10,7 +10,7 @@
         </div>
         <div class="offcanvas-body p-4">
             <form id="assetForm" class="asset-form-submit-event" action="{{ route('assets.store') }}" method="POST"
-                enctype="multipart/form-data">
+                enctype="multipart/form-data" novalidate>
                 <input type="hidden" name="dnr" />
                 <input type="hidden" name="table" value="table" />
                 <input type="hidden" id="editStatusId" />
@@ -147,7 +147,7 @@
         </div>
         <div class="offcanvas-body p-4">
             <form id="updateAssetForm" class="asset-form-submit-event" action="" method="POST"
-                enctype="multipart/form-data">
+                enctype="multipart/form-data" novalidate>
                 @csrf
                 <input type="hidden" name="dnr" />
                 <input type="hidden" name="table" value="table" />
@@ -299,7 +299,7 @@
     </div>
     <div class="offcanvas-body p-4">
         <form id="bulkAssignForm" class="asset-form-submit-event" method="POST"
-            action="{{ route('assets.bulk-assign') }}">
+            action="{{ route('assets.bulk-assign') }}" novalidate>
             @csrf
             <input type="hidden" name="dnr" />
             <input type="hidden" name="table" value="table" />

@@ -148,6 +148,17 @@ class ClientController extends Controller
         }
 
         try {
+            $customFieldsReq = CustomField::where('module', 'client')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $request->merge([
                 'phone' => str_replace(' ', '', $request->input('phone')),
                 'country_code' => str_replace(' ', '', $request->input('country_code')),
@@ -502,6 +513,17 @@ class ClientController extends Controller
             'country_code' => str_replace(' ', '', $request->input('country_code')),
         ]);
         try {
+            $customFieldsReq = CustomField::where('module', 'client')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $rules = [
                 'id' => 'required|exists:clients,id',
                 'first_name' => 'required',

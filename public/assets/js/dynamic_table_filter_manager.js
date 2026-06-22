@@ -42,6 +42,7 @@ class TableFilterSync {
             let allReady = true;
             for (const filter of this.filters) {
                 const $selector = this.getCachedSelector(filter.selector);
+                if ($selector.length === 0) continue;
                 if (filter.type === 'select2' && !$selector.hasClass('select2-hidden-accessible')) {
                     allReady = false;
                 } else if (filter.type === 'tom-select' && !$selector[0].tomselect) {
@@ -76,6 +77,7 @@ class TableFilterSync {
 
         for (const filter of this.filters) {
             const $selector = this.getCachedSelector(filter.selector);
+            if ($selector.length === 0) continue;
             if (filter.type === 'select2' || filter.type === 'tom-select') {
                 let values = $selector.val() || [];
                 // If it's tom-select it might be an array or string
@@ -122,6 +124,10 @@ class TableFilterSync {
 
             const promises = this.filters.map(filter => new Promise(resolve => {
                 const $selector = this.getCachedSelector(filter.selector);
+                if ($selector.length === 0) {
+                    resolve();
+                    return;
+                }
                 if (filter.type === 'select2' || filter.type === 'tom-select') {
                     const values = urlParams.getAll(`${filter.name}[]`);
                     if (values.length) {
@@ -231,6 +237,7 @@ class TableFilterSync {
     attachEventListeners() {
         for (const filter of this.filters) {
             const $selector = this.getCachedSelector(filter.selector);
+            if ($selector.length === 0) continue;
             if (filter.type === 'select2' || filter.type === 'tom-select') {
                 $selector.on('change', () => this.debounceUpdate(true));
             } else if (filter.type === 'daterangepicker') {
@@ -269,6 +276,7 @@ class TableFilterSync {
         };
         for (const filter of this.filters) {
             const $selector = this.getCachedSelector(filter.selector);
+            if ($selector.length === 0) continue;
             if (filter.type === 'select2' || filter.type === 'tom-select') {
                 let values = $selector.val() || [];
                 const valuesArray = Array.isArray(values) ? values : (typeof values === 'string' && values ? values.split(',') : []);

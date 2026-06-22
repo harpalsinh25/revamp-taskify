@@ -31,19 +31,14 @@ $(document).ready(function () {
     });
 
     // Submit drawing data for new notes
-    $(document).on('click', '#submit_btn', function (e) {
+    $('#create_note_modal form').on('submit', function (e) {
         if ($("#noteType").val() === "drawing" && editor) {
-            e.preventDefault();
             console.log("Saving drawing data...");
             let drawingData = editor.toSVG().outerHTML;
             let encodedDrawingData = btoa(unescape(encodeURIComponent(drawingData)));
 
             $("#drawing_data").val(encodedDrawingData);
-            console.log("Drawing data:", $("#drawing_data").val());
-            console.log("Drawing data saved, length:", drawingData);
-            // return false;
-
-            $(this).closest("form").submit();
+            console.log("Drawing data saved, length:", drawingData.length);
         }
     });
 

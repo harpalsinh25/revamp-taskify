@@ -189,6 +189,17 @@ class TasksController extends Controller
     {
         $isApi = request()->get('isApi', false);
         try {
+            $customFieldsReq = CustomField::where('module', 'task')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $status = Status::findOrFail($request->input('status_id'));
             if (!canSetStatus($status)) {
                 return response()->json(['error' => true, 'message' => 'You are not authorized to set this status.']);
@@ -393,6 +404,17 @@ class TasksController extends Controller
     {
         $isApi = request()->get('isApi', false);
         try {
+            $customFieldsReq = CustomField::where('module', 'task')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $status = Status::findOrFail($request->input('status_id'));
             $task = Task::findOrFail($request->input('id'));
 

@@ -185,6 +185,9 @@
                     if (inputField.hasClass("select2-hidden-accessible")) {
                         inputField.parent().find(".text-danger.error-message").remove();
                         inputField.siblings(".select2").after(errorMessageElement);
+                    } else if (inputField.hasClass("tomselected") || inputField.next().hasClass("ts-wrapper")) {
+                        inputField.parent().find(".text-danger.error-message").remove();
+                        inputField.siblings(".ts-wrapper").after(errorMessageElement);
                     } else if (inputField.closest(".input-group-merge").length > 0) {
                         var inputGroup = inputField.closest(".input-group-merge");
                         inputGroup.next(".text-danger.error-message").remove();
@@ -208,6 +211,8 @@
                 // Clear existing error messages for fields without errors
                 var existingErrorMessage = inputField.next(".text-danger.error-message");
                 if (inputField.hasClass("select2-hidden-accessible")) {
+                    existingErrorMessage = inputField.parent().find(".text-danger.error-message");
+                } else if (inputField.hasClass("tomselected") || inputField.next().hasClass("ts-wrapper")) {
                     existingErrorMessage = inputField.parent().find(".text-danger.error-message");
                 } else if (inputField.closest(".input-group-merge").length > 0) {
                     var inputGroup = inputField.closest(".input-group-merge");

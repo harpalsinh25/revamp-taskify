@@ -156,7 +156,7 @@ class SettingsController extends Controller
         session()->put('date_format', $request->input('date_format'));
         Session::flash('message', 'Settings saved successfully.');
 
-        return response()->json(['error' => false]);
+        return response()->json(['error' => false, 'message' => 'Settings saved successfully.']);
     }
 
     /**

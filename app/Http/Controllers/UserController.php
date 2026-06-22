@@ -164,6 +164,17 @@ class UserController extends Controller
         // Validate the request
 
         try {
+            $customFieldsReq = CustomField::where('module', 'user')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $request->merge([
                 'phone' => str_replace(' ', '', $request->input('phone')),
                 'country_code' => str_replace(' ', '', $request->input('country_code')),
@@ -564,6 +575,17 @@ class UserController extends Controller
 
         // Validate the request
         try {
+            $customFieldsReq = CustomField::where('module', 'user')->where('required', 1)->get();
+            $customRules = [];
+            $customMessages = [];
+            foreach ($customFieldsReq as $field) {
+                $customRules["custom_fields.{$field->id}"] = 'required';
+                $customMessages["custom_fields.{$field->id}.required"] = "The {$field->field_label} field is required.";
+            }
+            if (!empty($customRules)) {
+                $request->validate($customRules, $customMessages);
+            }
+
             $request->merge([
                 'phone' => str_replace(' ', '', $request->input('phone')),
                 'country_code' => str_replace(' ', '', $request->input('country_code')),

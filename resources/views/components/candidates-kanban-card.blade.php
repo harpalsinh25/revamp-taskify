@@ -1,43 +1,47 @@
-<div class="row">
-    <div class="col-md-4 mb-3">
-        <div class="input-group input-group-merge">
-            <input type="text" class="form-control" id="candidate_date_between"
-                placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-
-        </div>
-        <input type="hidden" id="candidate_date_between_from" name="startDate" />
-        <input type="hidden" id="candidate_date_between_to" name="EndDate" />
-    </div>
-    <div class="col-md-3 mb-3">
-        <select class="form-select js-example-basic-multiple" id="sort" name="sort"
-            aria-label="Default select example" data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>"
-            data-allow-clear="true">
-            <option></option>
-            <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
-                <?= get_label('newest', 'Newest') ?></option>
-            <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? 'selected' : '' ?>>
-                <?= get_label('oldest', 'Oldest') ?></option>
-            <option value="recently-updated"
-                <?= request()->sort && request()->sort == 'recently-updated' ? 'selected' : '' ?>>
-                <?= get_label('most_recently_updated', 'Most recently updated') ?></option>
-            <option value="earliest-updated"
-                <?= request()->sort && request()->sort == 'earliest-updated' ? 'selected' : '' ?>>
-                <?= get_label('least_recently_updated', 'Least recently updated') ?></option>
-        </select>
-    </div>
-
-    <div class="col-md-4 mb-3">
-        <select class="form-select" id="select_candidate_statuses" name="statuses[]" aria-label="Default select example"
-            data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true"
-            multiple>
-        </select>
-    </div>
-
-    <div class="col-md-1">
-        <div>
-            <button type="button" id="filter" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
-                data-bs-placement="left" data-bs-original-title="<?= get_label('filter', 'Filter') ?>"><i
-                    class='bx bx-filter-alt'></i></button>
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label"><?= get_label('date_between', 'Date Between') ?></label>
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                    <input type="text" class="form-control" id="candidate_date_between"
+                        placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
+                </div>
+                <input type="hidden" id="candidate_date_between_from" name="startDate" />
+                <input type="hidden" id="candidate_date_between_to" name="EndDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><?= get_label('sort_by', 'Sort By') ?></label>
+                <select class="form-select tom_static_select" id="sort" name="sort"
+                    aria-label="Default select example" data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>"
+                    data-allow-clear="true">
+                    <option></option>
+                    <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
+                        <?= get_label('newest', 'Newest') ?></option>
+                    <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? 'selected' : '' ?>>
+                        <?= get_label('oldest', 'Oldest') ?></option>
+                    <option value="recently-updated"
+                        <?= request()->sort && request()->sort == 'recently-updated' ? 'selected' : '' ?>>
+                        <?= get_label('most_recently_updated', 'Most recently updated') ?></option>
+                    <option value="earliest-updated"
+                        <?= request()->sort && request()->sort == 'earliest-updated' ? 'selected' : '' ?>>
+                        <?= get_label('least_recently_updated', 'Least recently updated') ?></option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><?= get_label('status', 'Status') ?></label>
+                <select class="form-select tom_candidate_statuses_select" id="select_candidate_statuses" name="statuses[]" aria-label="Default select example"
+                    data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true"
+                    multiple>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="button" id="filter" class="btn btn-primary" data-bs-toggle="tooltip"
+                    data-bs-placement="top" data-bs-original-title="<?= get_label('filter', 'Filter') ?>">
+                    <i class='bx bx-filter-alt'></i> <?= get_label('filter', 'Filter') ?>
+                </button>
+            </div>
         </div>
     </div>
 </div>
