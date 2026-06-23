@@ -1081,3 +1081,7 @@ Route::post('bulk-import/import', [BulkImportController::class, 'import'])
     ->name('bulk-import.import');
     });
 });
+
+Route::get('/test/design-system', function () {
+    return view('design-system');
+});

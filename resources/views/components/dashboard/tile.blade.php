@@ -18,6 +18,8 @@
         <span class="tk-metric-label">{{ $label }}</span>
         <span class="tk-metric-trend" aria-hidden="true"></span>
     </div>
-    <div class="tk-metric-value count">{{ $count }}</div>
+    <div class="tk-metric-value count">
+        <span class="skel" style="width: 32px; height: 24px; display: inline-block; margin-bottom: 0; border-radius: 4px;"></span>
+    </div>
     <div class="tk-metric-spark" aria-hidden="true"></div>
 </a>

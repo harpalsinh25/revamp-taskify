@@ -36,18 +36,7 @@
                     {{ $tkTotalTasks == 1 ? get_label('task', 'task') : get_label('tasks', 'tasks') }}
                 </p>
             </div>
-            <div class="d-flex gap-2 align-items-center">
-                @if ($auth_user->can('manage_tasks'))
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create_task_modal">
-                    <i class='bx bx-plus'></i> {{ get_label('create_task', 'Create Task') }}
-                </button>
-                @endif
-                @if ($auth_user->can('manage_projects'))
-                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#create_project_modal">
-                    <i class='bx bx-plus'></i> {{ get_label('create_project', 'Create Project') }}
-                </button>
-                @endif
-            </div>
+           
         </div>
 
 
@@ -157,7 +146,18 @@
                             </div>
                         </div>
                         <div class="tk-card-body p-2">
-                            <div id="tk-combined-bar-chart"></div>
+                            <div id="tk-combined-bar-chart">
+                                <div class="skel-chart-container tk-loading-skeleton">
+                                    <div class="skel skel-bar-1"></div>
+                                    <div class="skel skel-bar-2"></div>
+                                    <div class="skel skel-bar-3"></div>
+                                    <div class="skel skel-bar-4"></div>
+                                    <div class="skel skel-bar-5"></div>
+                                    <div class="skel skel-bar-6"></div>
+                                    <div class="skel skel-bar-7"></div>
+                                    <div class="skel skel-bar-8"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -171,7 +171,31 @@
                     </div>
                     <div class="tk-card-body">
                         <div id="tk-activity-list" class="tk-act-list"
-                            data-empty-label="{{ get_label('no_activities', 'No recent activities') }}"></div>
+                            data-empty-label="{{ get_label('no_activities', 'No recent activities') }}">
+                            <div class="tk-loading-skeleton">
+                                <div class="skel-row">
+                                    <span class="skel skel-circle skel-avatar"></span>
+                                    <div class="skel-text-wrap">
+                                        <span class="skel skel-title skel-w-50"></span>
+                                        <span class="skel skel-line skel-w-30"></span>
+                                    </div>
+                                </div>
+                                <div class="skel-row">
+                                    <span class="skel skel-circle skel-avatar"></span>
+                                    <div class="skel-text-wrap">
+                                        <span class="skel skel-title skel-w-65"></span>
+                                        <span class="skel skel-line skel-w-40"></span>
+                                    </div>
+                                </div>
+                                <div class="skel-row">
+                                    <span class="skel skel-circle skel-avatar"></span>
+                                    <div class="skel-text-wrap">
+                                        <span class="skel skel-title skel-w-45"></span>
+                                        <span class="skel skel-line skel-w-25"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 @if ($tkHasHero)
@@ -194,7 +218,18 @@
                             <div id="tk-hero-chart" class="tk-area-chart"
                                 data-label-income="{{ get_label('income', 'Income') }}"
                                 data-label-expense="{{ get_label('expenses', 'Expenses') }}"
-                                data-empty-label="{{ get_label('no_data_available', 'No data available') }}"></div>
+                                data-empty-label="{{ get_label('no_data_available', 'No data available') }}">
+                                <div class="skel-chart-container tk-loading-skeleton">
+                                    <div class="skel skel-bar-1"></div>
+                                    <div class="skel skel-bar-2"></div>
+                                    <div class="skel skel-bar-3"></div>
+                                    <div class="skel skel-bar-4"></div>
+                                    <div class="skel skel-bar-5"></div>
+                                    <div class="skel skel-bar-6"></div>
+                                    <div class="skel skel-bar-7"></div>
+                                    <div class="skel skel-bar-8"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -215,22 +250,42 @@
                         </div>
                         <a href="{{ url('meetings') }}" class="tk-card-link">{{ get_label('view_all', 'View all') }}</a>
                     </div>
-                    <div class="tk-card-body">
+                    <div class="tk-card-body p-0">
                         @if($tkUpcomingMeetings->count() > 0)
-                            <ul class="list-group list-group-flush mb-0">
-                                @foreach($tkUpcomingMeetings as $meeting)
-                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                        <div class="d-flex flex-column">
-                                            <a href="{{ url('meetings') }}" class="text-body fw-bold text-decoration-none">{{ $meeting->title }}</a>
-                                            <small class="text-muted">{{ \Carbon\Carbon::parse($meeting->start_date_time)->format('M d, H:i') }}</small>
+                            @foreach($tkUpcomingMeetings as $meeting)
+                                @php
+                                    $startTime = \Carbon\Carbon::parse($meeting->start_date_time)->tz(config('app.timezone'));
+                                    $endTime = \Carbon\Carbon::parse($meeting->end_date_time)->tz(config('app.timezone'));
+                                    $durationMins = $endTime->diffInMinutes($startTime);
+                                    $durationStr = $durationMins >= 60 ? floor($durationMins / 60) . 'h' . ($durationMins % 60 ? ' ' . ($durationMins % 60) . 'm' : '') : $durationMins . 'm';
+                                    
+                                    $now = now(config('app.timezone'));
+                                    $diffInMins = $startTime->diffInMinutes($now);
+                                    $isSoon = $now->isBefore($startTime) && $diffInMins <= 60;
+                                @endphp
+                                <div class="sched-row" data-soon="{{ $isSoon ? 'true' : 'false' }}">
+                                    <div class="sched-time">
+                                        <span class="mono sched-t">{{ $startTime->format('H:i') }}</span>
+                                        <span class="mono sched-d">{{ $durationStr }}</span>
+                                    </div>
+                                    <div class="sched-content">
+                                        <div class="sched-name">
+                                            <a href="{{ url('meetings') }}">{{ $meeting->title }}</a>
                                         </div>
-                                        <span class="badge bg-label-info rounded-pill"><i class="bx bx-calendar"></i></span>
-                                    </li>
-                                @endforeach
-                            </ul>
+                                        <span class="tag">{{ $startTime->format('M d') }}</span>
+                                    </div>
+                                    @if($isSoon)
+                                        <span class="sched-soon mono">in {{ $diffInMins }}m</span>
+                                    @endif
+                                </div>
+                            @endforeach
                         @else
-                            <div class="text-center py-3">
-                                <p class="text-muted mb-0">{{ get_label('no_upcoming_meetings', 'No upcoming meetings') }}</p>
+                            <div class="empty">
+                                <div class="empty-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                                </div>
+                                <div class="empty-title">{{ get_label('no_upcoming_meetings', 'No upcoming meetings') }}</div>
+                                <div class="empty-sub">{{ get_label('no_meetings_scheduled_yet', 'No meetings scheduled yet') }}.</div>
                             </div>
                         @endif
                     </div>
@@ -250,15 +305,30 @@
                         </div>
                         <a href="{{ url(getUserPreferences('tasks', 'default_view')) }}" class="tk-card-link">{{ get_label('view_all', 'View all') }}</a>
                     </div>
-                    <div class="tk-card-body">
-                        <ul class="list-group list-group-flush mb-0">
-                            @foreach($tkOverdueTasks as $task)
-                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                    <a href="{{ url('tasks/information/'.$task->id) }}" class="text-body fw-bold text-decoration-none">{{ $task->title }}</a>
-                                    <span class="badge bg-label-danger rounded-pill">{{ \Carbon\Carbon::parse($task->due_date)->format('M d') }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
+                    <div class="tk-card-body p-0">
+                        @foreach($tkOverdueTasks as $task)
+                            @php
+                                $dueDate = \Carbon\Carbon::parse($task->due_date)->tz(config('app.timezone'));
+                                $daysOverdue = now(config('app.timezone'))->startOfDay()->diffInDays($dueDate->startOfDay(), false);
+                                $daysOverdueAbs = abs($daysOverdue);
+                                $overdueStr = $daysOverdueAbs == 1 ? '1d ago' : $daysOverdueAbs . 'd ago';
+                            @endphp
+                            <div class="sched-row tk-overdue-row" data-soon="true">
+                                <div class="sched-time">
+                                    <span class="mono sched-t text-danger">{{ $dueDate->format('M d') }}</span>
+                                    <span class="mono sched-d text-muted">{{ $dueDate->format('Y') }}</span>
+                                </div>
+                                <div class="sched-content">
+                                    <div class="sched-name">
+                                        <a href="{{ url('tasks/information/'.$task->id) }}">{{ $task->title }}</a>
+                                    </div>
+                                    @if($task->project)
+                                        <span class="tag">{{ $task->project->title }}</span>
+                                    @endif
+                                </div>
+                                <span class="sched-soon mono" style="background: oklch(from var(--err) l c h / 0.12); color: var(--err);">{{ $overdueStr }}</span>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
                 @endif
@@ -276,10 +346,32 @@
                             <a href="{{ url('todos') }}" class="tk-card-link">{{ get_label('view_more', 'View more') }}</a>
                         </div>
                     </div>
-                    <div class="tk-card-body d-flex flex-column" style="min-height: 250px;">
+                    <div class="tk-card-body p-0 d-flex flex-column" style="min-height: 250px;">
                         <div style="flex: 1 1 auto; overflow-y: auto; min-height: 0;">
                             <ul class="p-0 m-0 todo-list list-group list-group-flush">
-                                <!-- Populated via JS/AJAX -->
+                                <div class="tk-loading-skeleton">
+                                    <div class="skel-row">
+                                        <span class="skel skel-check-icon"></span>
+                                        <div class="skel-text-wrap">
+                                            <span class="skel skel-line skel-w-70"></span>
+                                            <span class="skel skel-line skel-w-40"></span>
+                                        </div>
+                                    </div>
+                                    <div class="skel-row">
+                                        <span class="skel skel-check-icon"></span>
+                                        <div class="skel-text-wrap">
+                                            <span class="skel skel-line skel-w-60"></span>
+                                            <span class="skel skel-line skel-w-30"></span>
+                                        </div>
+                                    </div>
+                                    <div class="skel-row">
+                                        <span class="skel skel-check-icon"></span>
+                                        <div class="skel-text-wrap">
+                                            <span class="skel skel-line skel-w-80"></span>
+                                            <span class="skel skel-line skel-w-50"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </ul>
                         </div>
                     </div>

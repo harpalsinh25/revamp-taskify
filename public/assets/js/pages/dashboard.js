@@ -155,6 +155,74 @@ class DashboardManager {
             }).join('');
         }
     }
+    renderSparklines(trends) {
+        if (!trends) return;
+        const VB_W = 100;
+        const VB_H = 28;
+        const PAD_Y = 3;
+        const TREND_KEY = {
+            "projects-tile": "projects",
+            "tasks-tile": "tasks",
+            "users-tile": "users",
+            "clients-tile": "clients",
+            "meetings-tile": "meetings",
+            "todos-tile": "todos",
+        };
+
+        const buildLinePath = (series) => {
+            let data = [...series];
+            if (data.length === 1) {
+                data = [data[0], data[0]];
+            }
+            const n = data.length;
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const range = max - min || 1;
+            const usableH = VB_H - PAD_Y * 2;
+            let d = "";
+            for (let i = 0; i < n; i++) {
+                const x = (i / (n - 1)) * VB_W;
+                const y = PAD_Y + (1 - (data[i] - min) / range) * usableH;
+                d += (i === 0 ? "M" : " L") + Math.round(x * 100) / 100 + " " + Math.round(y * 100) / 100;
+            }
+            return d;
+        };
+
+        const formatDelta = (delta) => {
+            const sign = delta > 0 ? "+" : delta < 0 ? "−" : "";
+            return sign + Math.abs(Math.round(delta));
+        };
+
+        document.querySelectorAll(".tk-metric").forEach(metric => {
+            const key = TREND_KEY[metric.id];
+            if (key && Object.prototype.hasOwnProperty.call(trends, key)) {
+                const series = trends[key];
+                const sparkEl = metric.querySelector(".tk-metric-spark");
+                const trendEl = metric.querySelector(".tk-metric-trend");
+
+                if (!Array.isArray(series) || series.length === 0) {
+                    if (sparkEl) sparkEl.innerHTML = "";
+                    if (trendEl) trendEl.innerHTML = "";
+                    return;
+                }
+
+                const delta = series[series.length - 1] - series[0];
+                const dir = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+
+                if (trendEl) {
+                    trendEl.classList.remove("is-up", "is-down", "is-flat");
+                    trendEl.classList.add("is-" + dir);
+                    const arrow = dir === "down" ? "↓" : dir === "up" ? "↑" : "→";
+                    trendEl.innerHTML = `<span class="tk-trend-arrow">${arrow}</span><span>${formatDelta(delta)}</span>`;
+                }
+
+                if (sparkEl) {
+                    const d = buildLinePath(series);
+                    sparkEl.innerHTML = `<svg viewBox="0 0 ${VB_W} ${VB_H}" preserveAspectRatio="none" focusable="false"><path class="tk-spark-line" d="${d}"></path></svg>`;
+                }
+            }
+        });
+    }
     renderPolarAreaChart(selector, data, colors, labels, label = "") {
         if (!document.querySelector(selector)) return;
         const { series, labels: formattedLabels } = this.formatDataForChart('polarArea', data, labels);
@@ -251,6 +319,7 @@ class DashboardManager {
                     if (this.charts['#tk-combined-bar-chart']) {
                         this.charts['#tk-combined-bar-chart'].destroy();
                     }
+                    document.getElementById('tk-combined-bar-chart').innerHTML = '';
                     
                     const options = {
                         series: [
@@ -262,14 +331,21 @@ class DashboardManager {
                             height: 320, 
                             toolbar: { show: false },
                             parentHeightOffset: 0,
-                            fontFamily: 'inherit'
+                            fontFamily: 'inherit',
+                            dropShadow: {
+                                enabled: true,
+                                top: 4,
+                                left: 0,
+                                blur: 10,
+                                opacity: 0.05
+                            }
                         },
-                        colors: ['#8B5CF6', '#3B82F6'], // Modern purple and blue
+                        colors: ['#6366F1', '#10B981'], // Indigo and Emerald
                         plotOptions: {
                             bar: {
                                 horizontal: false,
-                                columnWidth: '45%',
-                                borderRadius: 6,
+                                columnWidth: '40%',
+                                borderRadius: 5,
                                 borderRadiusApplication: 'end',
                                 dataLabels: { position: 'top' }
                             },
@@ -277,34 +353,52 @@ class DashboardManager {
                         dataLabels: { 
                             enabled: true, 
                             offsetY: -20,
-                            style: { fontSize: '13px', colors: ['#64748b'], fontWeight: 600 },
+                            style: { fontSize: '11px', colors: ['#475569'], fontWeight: 600, fontFamily: 'inherit' },
                             formatter: function (val) { return val > 0 ? val : ''; }
                         },
-                        stroke: { show: true, width: 4, colors: ['transparent'] },
+                        stroke: { show: true, width: 3, colors: ['transparent'] },
                         xaxis: { 
                             categories: combinedLabels,
                             axisBorder: { show: false },
                             axisTicks: { show: false },
-                            labels: { style: { colors: '#64748b', fontSize: '13px', fontWeight: 500 } }
+                            labels: { style: { colors: '#64748b', fontSize: '12px', fontWeight: 500, fontFamily: 'inherit' } }
                         },
-                        yaxis: { show: false },
+                        yaxis: { 
+                            show: true,
+                            tickAmount: 4,
+                            labels: { 
+                                style: { colors: '#64748b', fontSize: '11px', fontFamily: 'inherit' },
+                                formatter: function (val) { return Math.round(val); }
+                            }
+                        },
                         grid: {
                             show: true,
                             borderColor: '#f1f5f9',
                             strokeDashArray: 4,
                             xaxis: { lines: { show: false } },
                             yaxis: { lines: { show: true } },
-                            padding: { top: 0, right: 0, bottom: 0, left: 10 }
+                            padding: { top: 10, right: 0, bottom: 0, left: 10 }
                         },
                         fill: { 
                             type: 'gradient',
-                            gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.25, inverseColors: true, opacityFrom: 1, opacityTo: 0.85, stops: [50, 0, 100] }
+                            gradient: { 
+                                shade: 'light', 
+                                type: 'vertical', 
+                                shadeIntensity: 0.3, 
+                                gradientToColors: ['#8B5CF6', '#34D399'], // Violet and Mint
+                                inverseColors: false, 
+                                opacityFrom: 0.9, 
+                                opacityTo: 0.45, 
+                                stops: [0, 95, 100] 
+                            }
                         },
                         legend: { 
                             position: 'top', 
                             horizontalAlign: 'right',
                             markers: { radius: 12 },
                             fontWeight: 500,
+                            fontFamily: 'inherit',
+                            fontSize: '12px',
                             itemMargin: { horizontal: 10, vertical: 0 }
                         },
                         tooltip: {
@@ -328,14 +422,16 @@ class DashboardManager {
                 this.updateTodoList('#todos-overview .todo-list', response.todos || []);
                 // Update timeline
                 this.updateTimeline('#recent-activities .timeline', response.activities || []);
-                // Update selected users count
-                $('#selectedUsersCount').text(label_all_team_members_selected || 'All team members').show();
-                // Fetch income vs expense chart (no filters)
-                this.updateIncomeExpenseChart({});
-            },
-            error: (xhr, status, error) => console.error("Dashboard Update Error:", error)
-        });
-    }
+                 // Update selected users count
+                 $('#selectedUsersCount').text(label_all_team_members_selected || 'All team members').show();
+                 // Fetch income vs expense chart (no filters)
+                 this.updateIncomeExpenseChart({});
+                 // Render sparklines from trends data
+                 this.renderSparklines(response.trends);
+             },
+             error: (xhr, status, error) => console.error("Dashboard Update Error:", error)
+         });
+     }
     updateStatusList(selector, statusCounts, statuses, totalCount, type) {
         const container = $(selector);
         container.html(''); // Clear existing content
@@ -409,14 +505,16 @@ class DashboardManager {
             if (Array.isArray(todos) && todos.length > 0) {
                 todos.forEach(todo => {
                     html += `
-                    <li class="list-group-item d-flex align-items-center px-0 py-2 border-0">
+                    <li class="list-group-item d-flex align-items-center px-3 py-2 border-0">
                         <div class="me-3">
-                            <input type="checkbox"
-                                   id="${todo.id}"
-                                   onclick="update_status(this)"
-                                   name="${todo.id}"
-                                   class="form-check-input mt-0"
-                                   ${todo.is_completed ? 'checked' : ''}>
+                            <div class="form-check mb-0">
+                                <input type="checkbox"
+                                       id="${todo.id}"
+                                       onclick="update_status(this)"
+                                       name="${todo.id}"
+                                       class="form-check-input mt-0"
+                                       ${todo.is_completed ? 'checked' : ''}>
+                            </div>
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center">

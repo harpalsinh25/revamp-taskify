@@ -47,13 +47,13 @@ $auth_user = getAuthenticatedUser();
                     @if(!isset($id) || (explode('_',$id)[0] !='client' && explode('_',$id)[0] !='user'))
                     <div class="col-md-3">
                         <label class="form-label" for="project_user_filter"><?= get_label('users', 'Users') ?></label>
-                        <select class="form-select form-select-sm tom_users_select" id="project_user_filter" name="user_ids[]" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                        <select class="form-select form-select-sm tom_users_select w-full px-3 py-2 bg-transparent border border-gray-200 rounded-md shadow-sm text-sm hover:bg-[#f5f5f9] hover:cursor-pointer focus:bg-[#f5f5f9] focus:border-gray-200 focus:ring-0 focus:outline-none transition-all" id="project_user_filter" name="user_ids[]" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                         </select>
                     </div>
                     {{-- Clients --}}
                     <div class="col-md-3">
                         <label class="form-label" for="project_client_filter"><?= get_label('clients', 'Clients') ?></label>
-                        <select class="form-select form-select-sm tom_clients_select" id="project_client_filter" name="client_ids[]" multiple data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
+                        <select class="form-select form-select-sm tom_clients_select w-full px-3 py-2 bg-transparent border border-gray-200 rounded-md shadow-sm text-sm hover:bg-[#f5f5f9] hover:cursor-pointer focus:bg-[#f5f5f9] focus:border-gray-200 focus:ring-0 focus:outline-none transition-all" id="project_client_filter" name="client_ids[]" multiple data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
                         </select>
                     </div>
                     @endif
@@ -61,7 +61,7 @@ $auth_user = getAuthenticatedUser();
                     {{-- Statuses --}}
                     <div class="col-md-3">
                         <label class="form-label" for="project_status_filter"><?= get_label('statuses', 'Statuses') ?></label>
-                        <select class="form-select form-select-sm tom_statuses_filter" id="project_status_filter" name="status_ids[]" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                        <select class="form-select form-select-sm tom_statuses_filter w-full px-3 py-2 bg-transparent border border-gray-200 rounded-md shadow-sm text-sm hover:bg-[#f5f5f9] hover:cursor-pointer focus:bg-[#f5f5f9] focus:border-gray-200 focus:ring-0 focus:outline-none transition-all" id="project_status_filter" name="status_ids[]" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                             @foreach($statuses as $status)
                             <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
                             @endforeach
@@ -70,13 +70,13 @@ $auth_user = getAuthenticatedUser();
                     {{-- Priorities --}}
                     <div class="col-md-3">
                         <label class="form-label" for="project_priority_filter"><?= get_label('priorities', 'Priorities') ?></label>
-                        <select class="form-select form-select-sm tom_priorities_filter" id="project_priority_filter" name="priority_ids[]" multiple data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                        <select class="form-select form-select-sm tom_priorities_filter w-full px-3 py-2 bg-transparent border border-gray-200 rounded-md shadow-sm text-sm hover:bg-[#f5f5f9] hover:cursor-pointer focus:bg-[#f5f5f9] focus:border-gray-200 focus:ring-0 focus:outline-none transition-all" id="project_priority_filter" name="priority_ids[]" multiple data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
                         </select>
                     </div>
                     {{-- Tags --}}
                     <div class="col-md-3">
                         <label class="form-label" for="project_tag_filter"><?= get_label('tags', 'Tags') ?></label>
-                        <select class="form-select form-select-sm tom_tags_select" id="project_tag_filter" name="tag_ids[]" multiple data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
+                        <select class="form-select form-select-sm tom_tags_select w-full px-3 py-2 bg-transparent border border-gray-200 rounded-md shadow-sm text-sm hover:bg-[#f5f5f9] hover:cursor-pointer focus:bg-[#f5f5f9] focus:border-gray-200 focus:ring-0 focus:outline-none transition-all" id="project_tag_filter" name="tag_ids[]" multiple data-placeholder="<?= get_label('select_tags', 'Select Tags') ?>">
                             @foreach($tags as $tag)
                             <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
                             @endforeach
