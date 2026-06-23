@@ -41,13 +41,23 @@
             <!-- Input text -->
             <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-700">Text Input</label>
-                <input type="text" placeholder="Enter text..." class="w-full px-3 py-2 bg-transparent border border-gray-200 rounded-md shadow-sm text-sm hover:bg-[#f5f5f9] hover:cursor-pointer focus:bg-[#f5f5f9] focus:border-gray-200 focus:ring-0 focus:outline-none transition-all">
+             <input 
+  type="text" 
+  placeholder="Enter text..." 
+  class="w-full px-3 py-2 bg-transparent border border-gray-200 rounded-md shadow-sm text-sm 
+         hover:bg-[#f5f5f9] hover:cursor-pointer 
+         focus:bg-[#f5f5f9] 
+         focus:border-gray-200 
+         focus:outline-none 
+         focus:ring-0 
+         focus:shadow-none 
+         transition-all">
             </div>
 
             <!-- Input Error -->
             <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-700">Input with Error</label>
-                <input type="text" value="Invalid input" class="w-full px-3 py-2 bg-transparent border border-red-500 rounded-md shadow-sm text-sm text-red-900 placeholder-red-300 hover:bg-red-50 hover:cursor-pointer focus:bg-red-50 focus:border-red-500 focus:ring-0 focus:outline-none transition-all">
+                <input type="text" value="Invalid input" class="w-full px-3 py-2 bg-transparent border border-red-500 rounded-md shadow-sm text-sm text-red-900 placeholder-red-300 hover:bg-red-50 hover:cursor-pointer focus:!bg-red-50 focus:!border-red-500 focus:!ring-0 focus:!outline-none focus:!shadow-none transition-all">
                 <p class="text-xs text-red-600 mt-1">This field is required.</p>
             </div>
 
@@ -159,6 +169,13 @@
             </div>
         </div>
     </section>
+     <div class="col-md-12 mb-3">
+                    <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                            class="asterisk">*</span></label>
+                    <input class="form-control w-full px-3 py-2 bg-white border border-[#d9dee3] rounded-md text-sm text-[#566a7f]  transition-all duration-150 hover:bg-[#f5f5f9] focus:!bg-[#f5f5f9] focus:!border-[#c9d0d6] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" type="text" name="title"
+                        placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
+                        value="{{ old('title') }}">
+                </div>
 
     <!-- Modal (Static Preview) -->
     <section class="space-y-4">

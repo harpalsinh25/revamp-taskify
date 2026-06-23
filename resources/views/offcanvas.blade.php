@@ -30,7 +30,7 @@
                 <div class="col-md-12 mb-3">
                     <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                             class="asterisk">*</span></label>
-                    <input class="form-control ai-title" type="text" name="title"
+                    <input class="form-control w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" type="text" name="title"
                         placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                         value="{{ old('title') }}">
                 </div>
@@ -46,7 +46,7 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select statusDropdown" name="status_id" data-placeholder="<?= get_label('please_select', 'Please select') ?>">
+                    <select class="form-select statusDropdown w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="status_id" data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
                         @isset($statuses)
                             @foreach ($statuses as $status)
@@ -67,7 +67,7 @@
                             <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select priorityDropdown" name="priority_id"
+                    <select class="form-select priorityDropdown w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
                         @isset($priorities)
@@ -84,12 +84,12 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
-                    <input type="text" id="start_date" name="start_date" class="form-control"
+                    <input type="text" id="start_date" name="start_date" class="form-control w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
-                    <input type="text" id="end_date" name="end_date" class="form-control"
+                    <input type="text" id="end_date" name="end_date" class="form-control w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
             </div>
@@ -99,7 +99,7 @@
                     <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
                     <div class="input-group input-group-merge">
                         <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                        <input class="form-control currency" type="text" id="budget" name="budget"
+                        <input class="form-control currency w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" type="text" id="budget" name="budget"
                             placeholder="<?= get_label('please_enter_budget', 'Please enter budget') ?>"
                             value="{{ old('budget') }}">
                     </div>
@@ -111,7 +111,7 @@
                             data-bs-placement="top" data-bs-html="true" title=""
                             data-bs-original-title="{{ get_label('assigned_users', 'Assigned Users') }}: {{ get_label('assigned_users_info', 'You Will Need to Manually Select Task Users When Creating Tasks Under This Project.') }}<br/>{{ get_label('project_users', 'Project Users') }}: {{ get_label('project_users_info', 'When Creating Tasks Under This Project, the Task Users Selection Will Be Automatically Filled With Project Users.') }}"></i>
                     </label>
-                    <select class="form-select" name="task_accessibility">
+                    <select class="form-select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="task_accessibility">
                         <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?></option>
                         <option value="project_users"><?= get_label('project_users', 'Project Users') ?></option>
                     </select>
@@ -151,7 +151,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                    <select class="form-select tom_users_select" name="user_id[]" multiple data-allow-clear="true"
+                    <select class="form-select tom_users_select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="user_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'web')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -162,7 +162,7 @@
                 <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-select tom_clients_select" name="client_id[]" multiple data-allow-clear="true"
+                    <select class="form-select tom_clients_select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="client_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                         @if ($guard == 'client')
                             <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -178,7 +178,7 @@
                             <a href="{{ url('tags/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_tags', 'Manage tags') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select tom_tags_select" name="tag_ids[]" multiple data-allow-clear="true"
+                    <select class="form-select tom_tags_select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="tag_ids[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -209,11 +209,11 @@
                     </div>
                     <!-- Custom Prompt Input (initially hidden) -->
                     <div class="customPromptContainer d-none mb-2">
-                        <textarea class="form-control ai-custom-prompt" rows="2"
+                        <textarea class="form-control ai-custom-prompt w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
                     <!-- Description Textarea -->
-                    <textarea class="form-control description ai-output" rows="5" name="description"
+                    <textarea class="form-control description ai-output w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" rows="5" name="description"
                         placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                 </div>
             </div>
@@ -221,7 +221,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label"><?= get_label('note', 'Note') ?></label>
-                    <textarea class="form-control" name="note" rows="3"
+                    <textarea class="form-control w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="note" rows="3"
                         placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                 </div>
             </div>
@@ -268,7 +268,7 @@
                 <div class="col-md-12 mb-3">
                     <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                             class="asterisk">*</span></label>
-                    <input class="form-control ai-title" type="text" name="title" id="project_title"
+                    <input class="form-control ai-title w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" type="text" name="title" id="project_title"
                         placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                         value="{{ old('title') }}">
                 </div>
@@ -284,7 +284,7 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select statusDropdown" name="status_id" id="project_status_id">
+                    <select class="form-select statusDropdown w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="status_id" id="project_status_id">
                         @isset($statuses)
                             @foreach ($statuses as $status)
                                 <option value="{{ $status->id }}" data-color="{{ $status->color }}"
@@ -302,7 +302,7 @@
                             <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select priorityDropdown" name="priority_id" id="project_priority_id"
+                    <select class="form-select priorityDropdown w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="priority_id" id="project_priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
                         @isset($priorities)
@@ -318,12 +318,12 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
-                    <input type="text" id="update_start_date" name="start_date" class="form-control"
+                    <input type="text" id="update_start_date" name="start_date" class="form-control w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
-                    <input type="text" id="update_end_date" name="end_date" class="form-control"
+                    <input type="text" id="update_end_date" name="end_date" class="form-control w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
             </div>
@@ -333,7 +333,7 @@
                     <label for="budget" class="form-label"><?= get_label('budget', 'Budget') ?></label>
                     <div class="input-group input-group-merge">
                         <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                        <input class="form-control currency" type="text" id="project_budget" name="budget"
+                        <input class="form-control currency w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" type="text" id="project_budget" name="budget"
                             placeholder="<?= get_label('please_enter_budget', 'Please enter budget') ?>"
                             value="{{ old('budget') }}">
                     </div>
@@ -345,7 +345,7 @@
                             data-bs-placement="top" data-bs-html="true" title=""
                             data-bs-original-title="{{ get_label('assigned_users', 'Assigned Users') }}: {{ get_label('assigned_users_info', 'You Will Need to Manually Select Task Users When Creating Tasks Under This Project.') }}<br/>{{ get_label('project_users', 'Project Users') }}: {{ get_label('project_users_info', 'When Creating Tasks Under This Project, the Task Users Selection Will Be Automatically Filled With Project Users.') }}"></i>
                     </label>
-                    <select class="form-select" name="task_accessibility" id="task_accessibility">
+                    <select class="form-select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="task_accessibility" id="task_accessibility">
                         <option value="assigned_users"><?= get_label('assigned_users', 'Assigned Users') ?></option>
                         <option value="project_users"><?= get_label('project_users', 'Project Users') ?></option>
                     </select>
@@ -385,14 +385,14 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                    <select class="form-select tom_users_select" name="user_id[]" multiple data-allow-clear="true"
+                    <select class="form-select tom_users_select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="user_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
                 <div class="col-md-12 mb-3">
                     <label class="form-label"
                         for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                    <select class="form-select tom_clients_select" name="client_id[]" multiple data-allow-clear="true"
+                    <select class="form-select tom_clients_select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="client_id[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -404,7 +404,7 @@
                             <a href="{{ url('tags/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_tags', 'Manage tags') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select tom_tags_select" name="tag_ids[]" multiple data-allow-clear="true"
+                    <select class="form-select tom_tags_select w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="tag_ids[]" multiple data-allow-clear="true"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -435,11 +435,11 @@
                     </div>
                     <!-- Custom Prompt Input (initially hidden) -->
                     <div class="customPromptContainer d-none mb-2">
-                        <textarea class="form-control ai-custom-prompt" rows="2"
+                        <textarea class="form-control ai-custom-prompt w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" rows="2"
                             placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
                     </div>
                     <!-- Description Textarea -->
-                    <textarea class="form-control description ai-output" rows="5" name="description" id="project_description"
+                    <textarea class="form-control description ai-output w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" rows="5" name="description" id="project_description"
                         placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
                 </div>
             </div>
@@ -447,7 +447,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label"><?= get_label('note', 'Note') ?></label>
-                    <textarea class="form-control" name="note" id="project_note" rows="3"
+                    <textarea class="form-control w-full px-3 py-2 bg-[#f5f5f9] border border-[#d9dee3] rounded-md text-sm text-[#566a7f] placeholder-[#a1b0cb] transition-all duration-150 hover:bg-[#eceef1] focus:!bg-[#f5f5f9] focus:!border-[#566a7f] focus:!ring-0 focus:!outline-none focus:placeholder-transparent" name="note" id="project_note" rows="3"
                         placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                 </div>
             </div>
