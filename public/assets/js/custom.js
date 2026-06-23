@@ -3690,44 +3690,68 @@ $(document).ready(function () {
                                 response.project.title +
                                 "</strong>)",
                         );
-                    usersSelect.empty(); // Clear existing options
-                    // Check if task_accessibility is 'project_users'
-                    if (response.users && response.users.length > 0) {
-                        // Iterate through users and append options
-                        response.users.forEach(function (user) {
-                            var userOption = new Option(
-                                user.first_name + " " + user.last_name,
-                                user.id,
-                                false,
-                                false,
-                            ); // Unselected initially
-                            usersSelect.append(userOption);
-                        });
-                        // Set task users or default to authUserId based on task accessibility
-                        if (
-                            response.project.task_accessibility ==
-                            "project_users"
-                        ) {
-                            var taskUsers = response.users.map(
-                                (user) => user.id,
-                            );
-                            usersSelect.val(taskUsers);
+                    if (usersSelect.length && usersSelect[0].tomselect) {
+                        var ts = usersSelect[0].tomselect;
+                        ts.clear(true);
+                        ts.clearOptions();
+                        if (response.users && response.users.length > 0) {
+                            response.users.forEach(function (user) {
+                                ts.addOption({
+                                    id: user.id,
+                                    text: user.first_name + " " + user.last_name
+                                });
+                            });
+                            if (response.project.task_accessibility == "project_users") {
+                                var selectedIds = response.users.map(function (user) { return user.id; });
+                                ts.setValue(selectedIds, true);
+                            } else {
+                                if (guard != "client" && modalId == "create_task_offcanvas") {
+                                    ts.setValue([authUserId], true);
+                                }
+                            }
                         } else {
+                            if (guard != "client" && modalId == "create_task_offcanvas") {
+                                ts.setValue([authUserId], true);
+                            }
+                        }
+                    } else {
+                        usersSelect.empty(); // Clear existing options
+                        if (response.users && response.users.length > 0) {
+                            // Iterate through users and append options
+                            response.users.forEach(function (user) {
+                                var userOption = new Option(
+                                    user.first_name + " " + user.last_name,
+                                    user.id,
+                                    false,
+                                    false,
+                                ); // Unselected initially
+                                usersSelect.append(userOption);
+                            });
+                            // Set task users or default to authUserId based on task accessibility
+                            if (
+                                response.project.task_accessibility ==
+                                "project_users"
+                            ) {
+                                var taskUsers = response.users.map(
+                                    (user) => user.id,
+                                );
+                                usersSelect.val(taskUsers);
+                            } else {
+                                if (
+                                    guard != "client" &&
+                                    modalId == "create_task_offcanvas"
+                                ) {
+                                    usersSelect.val(authUserId);
+                                }
+                            }
+                        } else {
+                            // Handle case when no users are returned
                             if (
                                 guard != "client" &&
                                 modalId == "create_task_offcanvas"
                             ) {
                                 usersSelect.val(authUserId);
                             }
-                        }
-                        usersSelect.trigger("change");
-                    } else {
-                        // Handle case when no users are returned
-                        if (
-                            guard != "client" &&
-                            modalId == "create_task_offcanvas"
-                        ) {
-                            usersSelect.val(authUserId);
                         }
                         usersSelect.trigger("change");
                     }
@@ -6198,7 +6222,7 @@ $(document).ready(function () {
         ".select-interview-interviewer",
         "interview_interviewer",
     );
-    $("#create_task_offcanvas, #edit_task_offcanvas")
+    $("#edit_task_offcanvas")
         .find('select[name="user_id[]"]')
         .each(function () {
             if ($(this).length) {
@@ -6622,98 +6646,54 @@ $(document).ready(function () {
 });
 // Taks List Selection
 $(document).ready(function () {
-    // Initialize task list select2
-    $("#task_list").select2({
-        dropdownParent: $("#create_task_offcanvas"), // Add this line to fix dropdown in modal
-        width: "100%", // Ensure full width
-        ajax: {
-            url: baseUrl + "/task-lists/search",
-            dataType: "json",
-            delay: 250,
-            data: function (params) {
-                return {
-                    search: params.term || "", // Search term, use empty string if undefined
-                    project_id: $('.selectTaskProject[name="project"]').val(), // Get current project ID
-                };
-            },
-            processResults: function (data) {
-                return {
-                    results: data.map(function (item) {
-                        return {
-                            id: item.id,
-                            text: item.name,
-                        };
-                    }),
-                };
-            },
-            cache: true,
-        },
-        placeholder: "Type to search task list",
-        minimumInputLength: 0,
-        allowClear: true,
-        // Add initial loading of all task lists
-        initSelection: function (element, callback) {
-            var projectId = $('.selectTaskProject[name="project"]').val();
-            if (projectId) {
-                $.ajax({
-                    url: baseUrl + "/task-lists/search",
-                    data: { project_id: projectId },
-                    dataType: "json",
-                }).then(function (data) {
-                    callback(
-                        data.map(function (item) {
-                            return {
+    var taskListSelect = document.getElementById("task_list");
+    var taskListTomSelect = null;
+    if (taskListSelect) {
+        taskListTomSelect = new TomSelect(taskListSelect, {
+            valueField: "id",
+            labelField: "text",
+            searchField: "text",
+            placeholder: "Select a task list",
+            plugins: ["clear_button"],
+            preload: true,
+            load: function (query, callback) {
+                var projectId = $('.selectTaskProject[name="project"]').val() || $('.selectTaskProject[name="project_id"]').val();
+                if (!projectId) {
+                    callback([]);
+                    return;
+                }
+                fetch(`${baseUrl}/task-lists/search?search=${encodeURIComponent(query)}&project_id=${projectId}`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        callback(
+                            data.map((item) => ({
                                 id: item.id,
                                 text: item.name,
-                            };
-                        }),
-                    );
-                });
-            }
-        },
-    });
-    // Add necessary CSS to fix cursor and input issues
-    $(".select2-search__field").css("cursor", "text");
-    // Disable task list select initially if no project is selected
-    if (!$('.selectTaskProject[name="project"]').val()) {
-        $("#task_list").prop("disabled", true);
-    }
-    // Listen for project selection change
-    $('.selectTaskProject[name="project"]').on("change", function () {
-        var projectId = $(this).val();
-        var taskListSelect = $("#task_list");
-        if (projectId) {
-            // Enable task list select
-            taskListSelect.prop("disabled", false);
-            // Clear previous selection
-            taskListSelect.val(null).trigger("change");
-            // Load task lists for selected project
-            $.ajax({
-                url: baseUrl + "/task-lists/search",
-                data: { project_id: projectId },
-                dataType: "json",
-                success: function (data) {
-                    // Clear existing options
-                    taskListSelect.empty();
-                    // Add placeholder option
-                    taskListSelect.append(
-                        new Option("Select a task list", "", true, true),
-                    );
-                    // Add received options
-                    data.forEach(function (item) {
-                        taskListSelect.append(
-                            new Option(item.name, item.id, false, false),
+                            })),
                         );
-                    });
-                    taskListSelect.trigger("change");
-                },
-            });
-        } else {
-            // Disable and clear task list select if no project selected
-            taskListSelect.prop("disabled", true);
-            taskListSelect.val(null).trigger("change");
+                    })
+                    .catch(() => callback([]));
+            }
+        });
+        
+        if (!$('.selectTaskProject[name="project"]').val() && !$('.selectTaskProject[name="project_id"]').val()) {
+            taskListTomSelect.disable();
         }
-    });
+        
+        $('.selectTaskProject[name="project"], .selectTaskProject[name="project_id"]').on("change", function () {
+            var projectId = $(this).val();
+            if (projectId) {
+                taskListTomSelect.enable();
+                taskListTomSelect.clear();
+                taskListTomSelect.clearOptions();
+                taskListTomSelect.load("");
+            } else {
+                taskListTomSelect.disable();
+                taskListTomSelect.clear();
+                taskListTomSelect.clearOptions();
+            }
+        });
+    }
 });
 // Show the Active Tab
 document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (button) {

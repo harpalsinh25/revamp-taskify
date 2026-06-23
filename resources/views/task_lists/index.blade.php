@@ -4,7 +4,7 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb breadcrumb-style1">
@@ -29,7 +29,7 @@
     </div>
     <div class="card">
        
-            <div class="card-datatable table-responsive text-nowrap">
+            <div class="card-datatable table-responsive text-nowrap tk-table">
 @php
     $visibleColumns = getUserPreferences('task-lists');
 @endphp

@@ -4,7 +4,7 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mb-2 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb breadcrumb-style1">

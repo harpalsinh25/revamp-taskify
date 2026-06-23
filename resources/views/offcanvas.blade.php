@@ -499,7 +499,7 @@
                 <div class="col-md-12 mb-3">
                     <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                             class="asterisk">*</span></label>
-                    <input class="form-control ai-title" type="text" name="title"
+                    <input class="tk-input ai-title" type="text" name="title"
                         placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                         value="{{ old('title') }}">
                 </div>
@@ -512,7 +512,7 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select statusDropdown" name="status_id" data-placeholder="<?= get_label('please_select', 'Please select') ?>">
+                    <select class="tk-select statusDropdown" name="status_id" data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
                         @isset($statuses)
                             @foreach ($statuses as $status)
@@ -533,7 +533,7 @@
                             <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select priorityDropdown" name="priority_id"
+                    <select class="tk-select priorityDropdown" name="priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
                         @isset($priorities)
@@ -552,7 +552,7 @@
                 <div class="mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_project', 'Select project') ?>
                         <span class="asterisk">*</span></label>
-                    <select class="form-select selectTaskProject projects_select" name="project"
+                    <select class="tk-select selectTaskProject tom_projects_select" name="project"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                         data-single-select="true" data-allow-clear="false">
                     </select>
@@ -562,7 +562,7 @@
                 <div class="mb-3">
                     <label for="project_title" class="form-label"><?= get_label('project', 'Project') ?>
                         <span class="asterisk">*</span></label>
-                    <input class="form-control" type="text" value="{{ $project->title }}" readonly>
+                    <input class="tk-input" type="text" value="{{ $project->title }}" readonly>
                 </div>
                 <?php } ?>
             </div>
@@ -573,7 +573,7 @@
                         (<?= get_label('users_associated_with_project', 'Users associated with project') ?>
                         <b>{{ $project->title }}</b>)
                         <?php } ?></label>
-                    <select class="form-select" name="user_id[]" multiple="multiple"
+                    <select class="tk-select tom_users_select" name="user_id[]" multiple="multiple"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                     </select>
                 </div>
@@ -581,12 +581,12 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
-                    <input type="text" id="task_start_date" name="start_date" class="form-control"
+                    <input type="text" id="task_start_date" name="start_date" class="tk-input"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
-                    <input type="text" id="task_end_date" name="due_date" class="form-control"
+                    <input type="text" id="task_end_date" name="due_date" class="tk-input"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
             </div>
@@ -595,7 +595,7 @@
                     <label for="task_list" class="form-label">
                         {{ get_label('task_list', 'Task List') }}
                     </label>
-                    <select class="form-select select2" name="task_list_id" id="task_list"
+                    <select class="tk-select tom_task_list_select" name="task_list_id" id="task_list"
                         data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                         data-single-select="true" data-allow-clear="false">
                     </select>
@@ -647,19 +647,19 @@
             </div>
             <!-- Custom Prompt Input (initially hidden) -->
             <div class="customPromptContainer d-none mb-2 mt-2">
-                <textarea class="form-control ai-custom-prompt" rows="2"
+                <textarea class="tk-textarea ai-custom-prompt" rows="2"
                     placeholder="<?= get_label('enter_custom_prompt', 'Enter custom prompt for AI generation') ?>"></textarea>
             </div>
             <!-- Description Textarea -->
             <div class="mb-3">
-                <textarea class="form-control description ai-output" rows="5" name="description"
+                <textarea class="tk-textarea description ai-output" rows="5" name="description"
                     placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label"
                         for="billing_type">{{ get_label('billing_type', 'Billing Type') }}</label>
-                    <select class="form-select" name="billing_type" id="billing_type">
+                    <select class="tk-select" name="billing_type" id="billing_type">
                         <option value="none">{{ get_label('none', 'None') }}</option>
                         <option value="billable">{{ get_label('billable', 'Billable') }}</option>
                         <option value="non-billable">{{ get_label('non_billable', 'Non Billable') }}
@@ -672,7 +672,7 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label"
                         for="completion_percentage">{{ get_label('completion_percentage', 'Completion Percentage (%)') }}</label>
-                    <select class="form-select" name="completion_percentage" id="completion_percentage">
+                    <select class="tk-select" name="completion_percentage" id="completion_percentage">
                         @foreach (range(0, 100, 10) as $percentage)
                             <option value="{{ $percentage }}">{{ $percentage }}%</option>
                         @endforeach
@@ -685,7 +685,7 @@
             <div class="row">
                 <div class="mb-3">
                     <label class="form-label"><?= get_label('note', 'Note') ?></label>
-                    <textarea class="form-control" name="note" rows="3"
+                    <textarea class="tk-textarea" name="note" rows="3"
                         placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                 </div>
             </div>
@@ -713,7 +713,7 @@
                     <div class="mb-3">
                         <label for="frequency-type"
                             class="form-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
-                        <select class="form-select" id="frequency-type" name="frequency_type" required>
+                        <select class="tk-select" id="frequency-type" name="frequency_type" required>
                             <option value="daily">{{ get_label('daily', 'Daily') }}</option>
                             <option value="weekly">{{ get_label('weekly', 'Weekly') }}</option>
                             <option value="monthly">{{ get_label('monthly', 'Monthly') }}</option>
@@ -723,7 +723,7 @@
                     <div class="d-none mb-3" id="day-of-week-group">
                         <label
                             for="day-of-week"class="form-label">{{ get_label('day_of_the_week', 'Day of the Week') }}</label>
-                        <select class="form-select" id="day-of-week" name="day_of_week">
+                        <select class="tk-select" id="day-of-week" name="day_of_week">
                             <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                             <option value="1">{{ get_label('monday', 'Monday') }}</option>
                             <option value="2">{{ get_label('tuesday', 'Tuesday') }}</option>
@@ -738,7 +738,7 @@
                     <div class="d-none mb-3" id="day-of-month-group">
                         <label for="day-of-month"
                             class="form-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
-                        <select class="form-select" id="day-of-month" name="day_of_month">
+                        <select class="tk-select" id="day-of-month" name="day_of_month">
                             <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                             @foreach (range(1, 31) as $day)
                                 <option value="{{ $day }}">{{ $day }}</option>
@@ -749,7 +749,7 @@
                     <div class="mb-3">
                         <label for="time-of-day"
                             class="form-label">{{ get_label('time_of_day', 'Time of Day') }}</label>
-                        <input type="time" class="form-control" id="time-of-day" name="time_of_day">
+                        <input type="time" class="tk-input" id="time-of-day" name="time_of_day">
                     </div>
                 </div>
             </div>
@@ -777,7 +777,7 @@
                         <label for="recurrence-frequency" class="form-label">
                             {{ get_label('recurrence_frequency', 'Recurrence Frequency') }}
                         </label>
-                        <select class="form-select" id="recurrence-frequency" name="recurrence_frequency" required>
+                        <select class="tk-select" id="recurrence-frequency" name="recurrence_frequency" required>
                             <option value="daily">{{ get_label('daily', 'Daily') }}</option>
                             <option value="weekly">{{ get_label('weekly', 'Weekly') }}</option>
                             <option value="monthly">{{ get_label('monthly', 'Monthly') }}</option>
@@ -789,7 +789,7 @@
                         <label for="recurrence-day-of-week" class="form-label">
                             {{ get_label('day_of_the_week', 'Day of the Week') }}
                         </label>
-                        <select class="form-select" id="recurrence-day-of-week" name="recurrence_day_of_week">
+                        <select class="tk-select" id="recurrence-day-of-week" name="recurrence_day_of_week">
                             <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                             <option value="1">{{ get_label('monday', 'Monday') }}</option>
                             <option value="2">{{ get_label('tuesday', 'Tuesday') }}</option>
@@ -805,7 +805,7 @@
                         <label for="recurrence-day-of-month" class="form-label">
                             {{ get_label('day_of_the_month', 'Day of the Month') }}
                         </label>
-                        <select class="form-select" id="recurrence-day-of-month" name="recurrence_day_of_month">
+                        <select class="tk-select" id="recurrence-day-of-month" name="recurrence_day_of_month">
                             <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                             @foreach (range(1, 31) as $day)
                                 <option value="{{ $day }}">{{ $day }}</option>
@@ -817,7 +817,7 @@
                         <label for="recurrence-month-of-year" class="form-label">
                             {{ get_label('month_of_the_year', 'Month of the Year') }}
                         </label>
-                        <select class="form-select" id="recurrence-month-of-year" name="recurrence_month_of_year">
+                        <select class="tk-select" id="recurrence-month-of-year" name="recurrence_month_of_year">
                             <option value="">{{ get_label('any_month', 'Any Month') }}</option>
                             @foreach (range(1, 12) as $month)
                                 <option value="{{ $month }}">
@@ -830,7 +830,7 @@
                         <label for="recurrence-starts-from" class="form-label">
                             {{ get_label('starts_from', 'Starts From') }}
                         </label>
-                        <input type="date" class="form-control" id="recurrence-starts-from"
+                        <input type="date" class="tk-input" id="recurrence-starts-from"
                             name="recurrence_starts_from">
                     </div>
                     <!-- Number of Occurrences -->
@@ -838,7 +838,7 @@
                         <label for="recurrence-occurrences" class="form-label">
                             {{ get_label('number_of_occurrences', 'Number of Occurrences') }}
                         </label>
-                        <input type="number" class="form-control" id="recurrence-occurrences"
+                        <input type="number" class="tk-input" id="recurrence-occurrences"
                             name="recurrence_occurrences" min="1">
                     </div>
                 </div>

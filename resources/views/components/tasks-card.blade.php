@@ -22,32 +22,23 @@
                     {{-- Date Between --}}
                     <div class="col-md-3">
                         <label class="form-label" for="task_date_between"><?= get_label('date_between', 'Date Between') ?></label>
-                        <div class="input-group input-group-merge">
-                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
-                            <input type="text" class="form-control form-control-sm" id="task_date_between" name="task_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-                        </div>
+                        <input type="text" class="tk-input" id="task_date_between" name="task_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
                     </div>
                     {{-- Start Date Between --}}
                     <div class="col-md-3">
                         <label class="form-label" for="task_start_date_between"><?= get_label('start_date_between', 'Start Date Between') ?></label>
-                        <div class="input-group input-group-merge">
-                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
-                            <input type="text" class="form-control form-control-sm" id="task_start_date_between" name="task_start_date_between" placeholder="<?= get_label('start_date_between', 'Start Date Between') ?>" autocomplete="off">
-                        </div>
+                        <input type="text" class="tk-input" id="task_start_date_between" name="task_start_date_between" placeholder="<?= get_label('start_date_between', 'Start Date Between') ?>" autocomplete="off">
                     </div>
                     {{-- End Date Between --}}
                     <div class="col-md-3">
                         <label class="form-label" for="task_end_date_between"><?= get_label('end_date_between', 'End Date Between') ?></label>
-                        <div class="input-group input-group-merge">
-                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
-                            <input type="text" class="form-control form-control-sm" id="task_end_date_between" name="task_end_date_between" placeholder="<?= get_label('end_date_between', 'End Date Between') ?>" autocomplete="off">
-                        </div>
+                        <input type="text" class="tk-input" id="task_end_date_between" name="task_end_date_between" placeholder="<?= get_label('end_date_between', 'End Date Between') ?>" autocomplete="off">
                     </div>
                     {{-- Projects --}}
                     @if (getAuthenticatedUser()->can('manage_projects'))
                     <div class="col-md-3">
                         <label class="form-label" for="task_project_filter">{{ get_label('projects', 'Projects') }}</label>
-                        <select class="form-select form-select-sm tom_projects_select" id="task_project_filter" multiple
+                        <select class="tk-select tom_projects_select" id="task_project_filter" multiple
                             data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
                         </select>
                     </div>
@@ -57,14 +48,14 @@
                         @if (explode('_', $id)[0] != 'client' && explode('_', $id)[0] != 'user')
                         <div class="col-md-3">
                             <label class="form-label" for="task_user_filter">{{ get_label('users', 'Users') }}</label>
-                            <select class="form-select form-select-sm tom_users_select" id="task_user_filter" name="user_ids[]" multiple
+                            <select class="tk-select tom_users_select" id="task_user_filter" name="user_ids[]" multiple
                                 data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                             </select>
                         </div>
                         {{-- Clients --}}
                         <div class="col-md-3">
                             <label class="form-label" for="task_client_filter">{{ get_label('clients', 'Clients') }}</label>
-                            <select class="form-select form-select-sm tom_clients_select" id="task_client_filter" name="client_ids[]" multiple
+                            <select class="tk-select tom_clients_select" id="task_client_filter" name="client_ids[]" multiple
                                 data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
                             </select>
                         </div>
@@ -73,14 +64,14 @@
                     {{-- Statuses --}}
                     <div class="col-md-3">
                         <label class="form-label" for="task_status_filter">{{ get_label('statuses', 'Statuses') }}</label>
-                        <select class="form-select form-select-sm tom_statuses_filter" id="task_status_filter" name="status_ids[]" multiple
+                        <select class="tk-select tom_statuses_filter" id="task_status_filter" name="status_ids[]" multiple
                             data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                         </select>
                     </div>
                     {{-- Priorities --}}
                     <div class="col-md-3">
                         <label class="form-label" for="task_priority_filter">{{ get_label('priorities', 'Priorities') }}</label>
-                        <select class="form-select form-select-sm tom_priorities_filter" id="task_priority_filter" name="priority_ids[]" multiple
+                        <select class="tk-select tom_priorities_filter" id="task_priority_filter" name="priority_ids[]" multiple
                             data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
                         </select>
                     </div>

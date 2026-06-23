@@ -30,7 +30,7 @@
                         <div class="col mb-4">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="nameBasic" class="form-control" name="title"
+                            <input type="text" id="nameBasic" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
@@ -38,7 +38,7 @@
                         <div class="col mb-4">
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
-                            <select class="form-select select-bg-label-primary" id="color" name="color">
+                            <select class="tk-select select-bg-label-primary" id="color" name="color">
                                 <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
@@ -72,7 +72,7 @@
                                     <i class='bx bx-info-circle text-primary' data-bs-toggle="tooltip"
                                         data-bs-offset="0,4" data-bs-placement="top" title=""
                                         data-bs-original-title="{{ get_label('roles_can_set_status_info', 'Including Admin and Roles with All Data Access Permission, Users/Clients Under Selected Role(s) Will Have Permission to Set This Status.') }}"></i></label>
-                                <select class="form-control tom_static_select" name="role_ids[]"
+                                <select class="tk-select tom_static_select" name="role_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-allow-clear="true">
@@ -197,7 +197,7 @@
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="nameBasic" class="form-control" name="title"
+                            <input type="text" id="nameBasic" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
@@ -205,7 +205,7 @@
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
-                            <select class="form-select select-bg-label-primary" id="color" name="color">
+                            <select class="tk-select select-bg-label-primary" id="color" name="color">
                                 <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
@@ -260,7 +260,7 @@
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="priority_title" class="form-control" name="title"
+                            <input type="text" id="priority_title" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" required />
                         </div>
                     </div>
@@ -268,7 +268,7 @@
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
-                            <select class="form-select select-bg-label-primary" id="priority_color" name="color"
+                            <select class="tk-select select-bg-label-primary" id="priority_color" name="color"
                                 required>
                                 <option class="badge bg-label-success" value="primary">
                                     <?= get_label('primary', 'Primary') ?>
@@ -319,7 +319,7 @@
                         <div class="col-12 mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="nameBasic" class="form-control" name="title"
+                            <input type="text" id="nameBasic" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
@@ -327,7 +327,7 @@
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
                                     class="asterisk">*</span></label>
-                            <select class="form-select select-bg-label-primary" id="color" name="color">
+                            <select class="tk-select select-bg-label-primary" id="color" name="color">
                                 <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
@@ -4655,14 +4655,14 @@
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label for="project" class="form-label">{{ get_label('project', 'Project') }}</label>
-                            <input class="form-control" type="text" id="task_list_project" name="project"
+                            <input class="tk-input" type="text" id="task_list_project" name="project"
                                 disabled>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label for="name" class="form-label">{{ get_label('name', 'Name') }}
                                 <span class="asterisk">*</span>
                             </label>
-                            <input class="form-control" type="text" id="task_list_name" name="name"
+                            <input class="tk-input" type="text" id="task_list_name" name="name"
                                 placeholder="{{ get_label('please_enter_name', 'Please Enter Name') }}">
                             @error('title')
                                 <span class="text-danger">{{ $message }}</span>
@@ -4698,7 +4698,7 @@
                         <label for="name" class="form-label">{{ get_label('name', 'Name') }}
                             <span class="asterisk">*</span>
                         </label>
-                        <input class="form-control" type="text" name="name"
+                        <input class="tk-input" type="text" name="name"
                             placeholder="{{ get_label('please_enter_name', 'Please Enter Name') }}">
                         @error('title')
                             <span class="text-danger">{{ $message }}</span>
@@ -4708,7 +4708,7 @@
                         <label for="project"
                             class="form-label">{{ get_label('select_project', 'Select Project') }}</label> <span
                             class="asterisk">*</span>
-                        <select class="form-control selectTaskProject projects_select" name="project_id"
+                        <select class="tk-select selectTaskProject tom_projects_select" name="project_id"
                             data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                             data-single-select="true" data-allow-clear="false">
                         </select>
