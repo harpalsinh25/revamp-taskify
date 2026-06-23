@@ -1,7 +1,7 @@
 @props([
     'id',
     'title' => 'Offcanvas Title',
-    'size' => 'offcanvas-responsive', // Example: 'offcanvas-w-600', 'offcanvas-lg'
+    'size' => 'offcanvas-md', // Default size for project/task creation/edit offcanvas
     'icon' => 'bx bx-menu', // Default icon
     'submitLabel' => 'Save',
     'submitIcon' => 'bx bx-check',

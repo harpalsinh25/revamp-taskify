@@ -32,7 +32,7 @@
                                 type="{{ $field->field_type }}"
                                 id="{{ $isEdit ? 'edit_cf_' . $field->id : 'cf_' . $field->id }}"
                                 name="custom_fields[{{ $field->id }}]"
-                                class="form-control form-control-md"
+                                class="tk-input"
                                 placeholder="Enter"
                                 value="{{ $fieldValue }}"
                                 @if($isRequired) required @endif
@@ -43,7 +43,7 @@
                             <textarea
                                 id="{{ $isEdit ? 'edit_cf_' . $field->id : 'cf_' . $field->id }}"
                                 name="custom_fields[{{ $field->id }}]"
-                                class="form-control form-control-md"
+                                class="tk-textarea"
                                 rows="2"
                                 placeholder="Enter"
                                 @if($isRequired) required @endif
@@ -55,7 +55,7 @@
                                 type="text"
                                 id="cf_{{ $field->id }}"
                                 name="custom_fields[{{ $field->id }}]"
-                                class="form-control form-control-md custom-datepicker"
+                                class="tk-input custom-datepicker"
                                 placeholder="Select date"
                                 value="{{ $fieldValue }}"
                                 autocomplete="off"
@@ -67,7 +67,7 @@
                             <select
                                id="{{ $isEdit ? 'edit_cf_' . $field->id : 'cf_' . $field->id }}"
                                name="custom_fields[{{ $field->id }}]"
-                               class="form-select form-select-md"
+                               class="tk-select"
                                @if($isRequired) required @endif
                             >
                                 <option value="{{ $field->field_label }}">{{ $field->field_label }}</option>
