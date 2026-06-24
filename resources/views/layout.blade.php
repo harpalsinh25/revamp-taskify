@@ -14,28 +14,6 @@
                     document.documentElement.setAttribute("data-theme", t);
                     document.documentElement.setAttribute("data-bs-theme", t);
                 }
-                @if(!empty($general_settings['primary_color']))
-                var dbColor = '{{ $general_settings['primary_color'] }}';
-                try { localStorage.setItem("taskify.primaryColor", dbColor); } catch(e) {}
-                @else
-                var dbColor = '';
-                @endif
-                var c = localStorage.getItem("taskify.primaryColor") || dbColor;
-                if (c) {
-                    document.documentElement.style.setProperty('--signal', c);
-                    document.documentElement.style.setProperty('--bs-primary', c);
-                    
-                    // Convert hex to rgb components to prevent opacity flash bugs on bg-label-primary elements
-                    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-                    var hex = c.replace(shorthandRegex, function(m, r, g, b) {
-                        return r + r + g + g + b + b;
-                    });
-                    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                    if (result) {
-                        var rgb = parseInt(result[1], 16) + ", " + parseInt(result[2], 16) + ", " + parseInt(result[3], 16);
-                        document.documentElement.style.setProperty('--bs-primary-rgb', rgb);
-                    }
-                }
             } catch (e) {}
         })();
     </script>
@@ -118,6 +96,24 @@
     @laravelPWA
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    @if(!empty($general_settings['primary_color']))
+    <style>
+        :root {
+            --signal: {{ $general_settings['primary_color'] }};
+            --bs-primary: {{ $general_settings['primary_color'] }};
+            @php
+                $hex = ltrim($general_settings['primary_color'], '#');
+                if (strlen($hex) === 3) {
+                    $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+                }
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+            @endphp
+            --bs-primary-rgb: {{ $r }}, {{ $g }}, {{ $b }};
+        }
+    </style>
+    @endif
 </head>
 
 <body class="v2-shell">
