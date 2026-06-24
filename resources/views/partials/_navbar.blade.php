@@ -38,14 +38,14 @@ if ($remainingUnreadNotificationsCount < 0) {
         </button>
 
         {{-- Breadcrumb: workspace monogram / current page --}}
-        <div class="tk-cbar-crumb">
+        <div class="tk-cbar-crumb d-none d-md-block">
             <span class="tk-cbar-ws">{{ strtoupper(substr($general_settings['company_title'] ?? 'TK', 0, 2)) }}</span>
             <span class="tk-cbar-sep">/</span>
             <span class="tk-cbar-crumb-title">@yield('title')</span>
         </div>
 
         {{-- Global search (CTRL+K → #globalSearchModal). Keep #global-search for the existing handler --}}
-        <button type="button" class="tk-cbar-search" id="global-search">
+        <button type="button" class="tk-cbar-search d-none d-md-flex" id="global-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <span class="tk-cbar-search-text">{{ get_label('search', 'Search') }}</span>

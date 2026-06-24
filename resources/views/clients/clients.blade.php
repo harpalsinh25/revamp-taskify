@@ -37,9 +37,9 @@
         @if (is_countable($clients) && count($clients) > 0)
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row g-3 align-items-end tk-filter-row">
-                        <div class="col-md-3 mb-3">
-                            <select class="form-select tom_static_select" id="client_status_filter"
+                    <div class="row g-3 align-items-center tk-filter-row">
+                        <div class="col-md-3">
+                            <select class="tk-select tom_static_select" id="client_status_filter"
                                 aria-label="Default select example"
                                 data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>"
                                 data-allow-clear="true" multiple>
@@ -47,8 +47,8 @@
                                 <option value="0">{{ get_label('deactive', 'Deactive') }}</option>
                             </select>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <select class="form-select tom_static_select" id="client_internal_purpose_filter"
+                        <div class="col-md-3">
+                            <select class="tk-select tom_static_select" id="client_internal_purpose_filter"
                                 aria-label="Default select example"
                                 data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true"
                                 multiple>
@@ -56,8 +56,8 @@
                                 <option value="1">{{ get_label('internal_purpose', 'Internal Purpose') }}</option>
                             </select>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <select class="form-select tom_static_select" id="client_ev_status_filter"
+                        <div class="col-md-3">
+                            <select class="tk-select tom_static_select" id="client_ev_status_filter"
                                 aria-label="Default select example"
                                 data-placeholder="<?= get_label('select_ev_statuses', 'Select Email Verification Statuses') ?>"
                                 data-allow-clear="true" multiple>

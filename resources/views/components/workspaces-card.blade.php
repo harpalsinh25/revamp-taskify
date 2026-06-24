@@ -11,12 +11,12 @@ $auth_user = getAuthenticatedUser();
             @if(isAdminOrHasAllDataAccess())
             <div class="col-md-3">
                 <label class="tk-filter-label">{{ get_label('users', 'Users') }}</label>
-                <select class="form-select tom_users_select" id="workspace_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" data-consider-workspace="false" multiple="multiple">
+                <select class="tk-select tom_users_select" id="workspace_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" data-consider-workspace="false" multiple="multiple">
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="tk-filter-label">{{ get_label('clients', 'Clients') }}</label>
-                <select class="form-select tom_clients_select" id="workspace_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" data-consider-workspace="false" multiple="multiple">
+                <select class="tk-select tom_clients_select" id="workspace_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" data-consider-workspace="false" multiple="multiple">
                 </select>
             </div>
             @endif

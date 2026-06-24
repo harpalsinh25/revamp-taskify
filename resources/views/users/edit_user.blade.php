@@ -33,15 +33,15 @@
                 <div class="row">
                     <div class="mb-3 col-md-6">
                         <label for="firstName" class="form-label"><?= get_label('first_name', 'First name') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="text" id="first_name" name="first_name" placeholder="<?= get_label('please_enter_first_name', 'Please enter first name') ?>" value="{{ $user->first_name }}">
+                        <input class="tk-input" type="text" id="first_name" name="first_name" placeholder="<?= get_label('please_enter_first_name', 'Please enter first name') ?>" value="{{ $user->first_name }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="lastName" class="form-label"><?= get_label('last_name', 'Last name') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="text" name="last_name" placeholder="<?= get_label('please_enter_last_name', 'Please enter last name') ?>" id="last_name" value="{{ $user->last_name }}">
+                        <input class="tk-input" type="text" name="last_name" placeholder="<?= get_label('please_enter_last_name', 'Please enter last name') ?>" id="last_name" value="{{ $user->last_name }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label class="form-label" for="role"><?= get_label('role', 'Role') ?> <span class="asterisk">*</span></label>
-                        <select class="form-select text-capitalize js-example-basic-multiple" id="role" name="role" data-placeholder="<?= get_label('Please select', 'Please select') ?>" data-allow-clear="false">
+                        <select class="tk-select text-capitalize tom_static_select" id="role" name="role" data-placeholder="<?= get_label('Please select', 'Please select') ?>" data-allow-clear="false">
                             <option></option>
                             @foreach ($roles as $role)
                             <option value="{{$role->id}}" <?php if ($user->getRoleNames()->first() == $role->name) {
@@ -52,59 +52,59 @@
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="email" class="form-label"><?= get_label('email', 'E-mail') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="text" id="email" name="email" placeholder="<?= get_label('please_enter_email', 'Please enter email') ?>" value="{{ $user->email }}">
+                        <input class="tk-input" type="text" id="email" name="email" placeholder="<?= get_label('please_enter_email', 'Please enter email') ?>" value="{{ $user->email }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label class="form-label">{{ get_label('country_code_and_phone_number', 'Country code and phone number') }}</label>
-                        <div class="input-group">
-                            <input type="tel" name="phone" id="phone" class="form-control" value="{{ $user->phone }}">
-                            <span class="clear-input">×</span>
+                        <div style="position:relative;">
+                            <input type="tel" name="phone" id="phone" class="tk-input" value="{{ $user->phone }}">
+                            <span class="clear-input">&times;</span>
                         </div>
                         <input type="hidden" name="country_code" id="country_code" value="{{ $user->country_code }}">
                         <input type="hidden" name="country_iso_code" id="country_iso_code" value="{{ $user->country_iso_code }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="address" class="form-label"><?= get_label('address', 'Address') ?></label>
-                        <input class="form-control" type="text" id="address" name="address" placeholder="<?= get_label('please_enter_address', 'Please enter address') ?>" value="{{ $user->address }}">
+                        <input class="tk-input" type="text" id="address" name="address" placeholder="<?= get_label('please_enter_address', 'Please enter address') ?>" value="{{ $user->address }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="city" class="form-label"><?= get_label('city', 'City') ?></label>
-                        <input class="form-control" type="text" id="city" name="city" placeholder="<?= get_label('please_enter_city', 'Please enter city') ?>" value="{{ $user->city }}">
+                        <input class="tk-input" type="text" id="city" name="city" placeholder="<?= get_label('please_enter_city', 'Please enter city') ?>" value="{{ $user->city }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="state" class="form-label"><?= get_label('state', 'State') ?></label>
-                        <input class="form-control" type="text" id="state" name="state" placeholder="<?= get_label('please_enter_state', 'Please enter state') ?>" value="{{ $user->state }}">
+                        <input class="tk-input" type="text" id="state" name="state" placeholder="<?= get_label('please_enter_state', 'Please enter state') ?>" value="{{ $user->state }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="country" class="form-label"><?= get_label('country', 'Country') ?></label>
-                        <input class="form-control" type="text" id="country" name="country" placeholder="<?= get_label('please_enter_country', 'Please enter country') ?>" value="{{ $user->country }}">
+                        <input class="tk-input" type="text" id="country" name="country" placeholder="<?= get_label('please_enter_country', 'Please enter country') ?>" value="{{ $user->country }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="zip" class="form-label"><?= get_label('zip_code', 'ZIP code') ?></label>
-                        <input class="form-control" type="text" id="zip" name="zip" placeholder="<?= get_label('please_enter_zip_code', 'Please enter ZIP code') ?>" value="{{ $user->zip }}">
+                        <input class="tk-input" type="text" id="zip" name="zip" placeholder="<?= get_label('please_enter_zip_code', 'Please enter ZIP code') ?>" value="{{ $user->zip }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="dob" class="form-label"><?= get_label('date_of_birth', 'Date of birth') ?></label>
-                        <input class="form-control" type="text" id="dob" name="dob" value="{{ $user->dob?format_date($user->dob) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
+                        <input class="tk-input" type="text" id="dob" name="dob" value="{{ $user->dob?format_date($user->dob) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="doj" class="form-label"><?= get_label('date_of_joining', 'Date of joining') ?></label>
-                        <input class="form-control" type="text" id="doj" name="doj" value="{{ $user->doj?format_date($user->doj) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
+                        <input class="tk-input" type="text" id="doj" name="doj" value="{{ $user->doj?format_date($user->doj) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
                     </div>
                     @if(isAdminOrHasAllDataAccess())
                     <div class="mb-3 col-md-6 form-password-toggle">
                         <label for="password" class="form-label"><?= get_label('password', 'Password') ?> <small class="text-muted"> ({{get_label('leave_blank_if_no_change', 'Leave it blank if no change')}})</small></label>
-                        <div class="input-group input-group-merge">
-                            <input class="form-control" type="password" id="password" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" autocomplete="new-password">
-                            <span class="input-group-text cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
-                            <span class="input-group-text cursor-pointer" id="generate-password"><i class="bx bxs-magic-wand"></i></span>
+                        <div class="tk-inputgroup">
+                            <input type="password" id="password" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" autocomplete="new-password">
+                            <span class="cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
+                            <span class="cursor-pointer" id="generate-password"><i class="bx bxs-magic-wand"></i></span>
                         </div>
                     </div>
                     <div class="mb-3 col-md-6 form-password-toggle">
                         <label for="password_confirmation" class="form-label"><?= get_label('confirm_password', 'Confirm password') ?></label>
-                        <div class="input-group input-group-merge">
-                            <input class="form-control" type="password" id="password_confirmation" name="password_confirmation" placeholder="<?= get_label('please_re_enter_password', 'Please re enter password') ?>" autocomplete="new-password">
-                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                        <div class="tk-inputgroup">
+                            <input type="password" id="password_confirmation" name="password_confirmation" placeholder="<?= get_label('please_re_enter_password', 'Please re enter password') ?>" autocomplete="new-password">
+                            <span class="cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
                         </div>
                     </div>
                     @endif

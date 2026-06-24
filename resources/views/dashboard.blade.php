@@ -136,7 +136,7 @@
         @php $tkHasHero = $auth_user->hasRole('admin'); @endphp
         <div class="row g-4 tk-dash-grid mb-4">
             {{-- LEFT COLUMN --}}
-            <div class="col-lg-8 d-flex flex-column gap-4">
+            <div class="col-12 col-lg-8 d-flex flex-column gap-4">
                 @if ($auth_user->can('manage_projects') || $auth_user->can('manage_tasks'))
                     <div class="tk-card flex-grow-0" data-id="tk-combined-chart">
                         <div class="tk-card-head">
@@ -235,7 +235,7 @@
                 @endif
             </div>
             {{-- RIGHT COLUMN: project → task → meetings --}}
-            <div class="col-lg-4 d-flex flex-column gap-4">
+            <div class="col-12 col-lg-4 d-flex flex-column gap-4">
                 @php
                     $tkUpcomingMeetings = $tkAllData 
                         ? ($tkWs ? \App\Models\Meeting::where('workspace_id', $tkWs->id)->where('start_date_time', '>=', now(config('app.timezone')))->orderBy('start_date_time', 'asc')->limit(5)->get() : collect())

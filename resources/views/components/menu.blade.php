@@ -228,7 +228,7 @@ $pendingLeaveRequestsCount = $query->count();
 @endphp
 
 {{-- ============================ RAIL ============================ --}}
-<aside class="tk-rail" aria-label="{{ get_label('primary_navigation', 'Primary navigation') }}">
+<aside class="tk-rail d-none d-md-flex flex-column" aria-label="{{ get_label('primary_navigation', 'Primary navigation') }}">
     <a href="{{ url('home') }}" class="tk-rail-brand" title="{{ $general_settings['company_title'] ?? 'Taskify' }}">
         <img src="{{ asset($general_settings['favicon'] ?? 'storage/logos/default_favicon.png') }}" alt="" />
     </a>
@@ -253,7 +253,7 @@ $pendingLeaveRequestsCount = $query->count();
 </aside>
 
 {{-- ====================== CONTEXT PANEL ======================= --}}
-<aside class="tk-panel" id="tk-context-panel" aria-label="{{ get_label('secondary_navigation', 'Secondary navigation') }}">
+<aside class="tk-panel d-none d-md-flex flex-column" id="tk-context-panel" aria-label="{{ get_label('secondary_navigation', 'Secondary navigation') }}">
     {{-- Workspace switcher (logic preserved from the legacy menu) --}}
     <div class="tk-panel-head">
        <div class="btn-group dropend tk-ws w-100">

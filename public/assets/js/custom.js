@@ -3103,7 +3103,6 @@ $(document).ready(function () {
                 if ($filterRow.length > 0) {
                     // Remove old clear filter button if already exists
                     $filterRow.find(".clear-filters-container").remove();
-
                     var $filterCol = $(
                         '<div class="col-md-auto d-flex align-items-end clear-filters-container"></div>',
                     );

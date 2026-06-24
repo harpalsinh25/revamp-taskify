@@ -3758,7 +3758,7 @@
                         <div class="mb-3">
                             <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input class="form-control" type="text" id="title" name="title"
+                            <input class="tk-input" type="text" id="title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
@@ -3767,7 +3767,7 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                            <select class="form-select tom_users_select" name="user_ids[]" multiple="multiple"
+                            <select class="tk-select tom_users_select" name="user_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
 
@@ -3778,7 +3778,7 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                            <select class="form-select tom_clients_select" name="client_ids[]" multiple="multiple"
+                            <select class="tk-select tom_clients_select" name="client_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
 
@@ -3832,7 +3832,7 @@
                         <div class="mb-3">
                             <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input class="form-control" type="text" name="title" id="workspace_title"
+                            <input class="tk-input" type="text" name="title" id="workspace_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                                 value="{{ old('title') }}">
                         </div>
@@ -3841,7 +3841,7 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                            <select class="form-select tom_users_select" name="user_ids[]" multiple="multiple"
+                            <select class="tk-select tom_users_select" name="user_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
                             </select>
@@ -3851,7 +3851,7 @@
                         <div class="mb-3">
                             <label class="form-label"
                                 for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                            <select class="form-select tom_clients_select" name="client_ids[]" multiple="multiple"
+                            <select class="tk-select tom_clients_select" name="client_ids[]" multiple="multiple"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-consider-workspace="false">
                             </select>
@@ -5050,7 +5050,7 @@
                             <label for="name" class="form-label">{{ get_label('name', 'Name') }}
                                 <span class="asterisk">*</span>
                             </label>
-                            <input class="form-control" type="text" name="name"
+                            <input class="tk-input" type="text" name="name"
                                 placeholder="{{ get_label('please_enter_name', 'Please Enter Name') }}">
                             @error('title')
                                 <span class="text-danger">{{ $message }}</span>
@@ -5060,7 +5060,7 @@
                             <label for="color" class="form-label">{{ get_label('color', 'Color') }}
                                 <span class="asterisk">*</span>
                             </label>
-                            <select class="form-select select-bg-label-primary" id="color" name="color">
+                            <select class="tk-select select-bg-label-primary" id="color" name="color">
                                 <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>
                                     <?= get_label('primary', 'Primary') ?>
@@ -5116,7 +5116,7 @@
                             <label for="name" class="form-label">{{ get_label('name', 'Name') }}
                                 <span class="asterisk">*</span>
                             </label>
-                            <input class="form-control" type="text" name="name" id="edit_lead_stage_name"
+                            <input class="tk-input" type="text" name="name" id="edit_lead_stage_name"
                                 placeholder="{{ get_label('please_enter_name', 'Please Enter Name') }}">
                             @error('title')
                                 <span class="text-danger">{{ $message }}</span>
@@ -5126,7 +5126,7 @@
                             <label for="color" class="form-label">{{ get_label('color', 'Color') }}
                                 <span class="asterisk">*</span>
                             </label>
-                            <select class="form-select select-bg-label-primary" id="edit_lead_stages_color"
+                            <select class="tk-select select-bg-label-primary" id="edit_lead_stages_color"
                                 name="color">
                                 <option class="badge bg-label-success" value="primary"
                                     {{ old('color') == 'primary' ? 'selected' : '' }}>

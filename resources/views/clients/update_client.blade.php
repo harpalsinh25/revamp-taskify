@@ -39,56 +39,56 @@
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="first_name" class="form-label"><?= get_label('first_name', 'First name') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="text" id="first_name" name="first_name" placeholder="<?= get_label('please_enter_first_name', 'Please enter first name') ?>" value="{{ $client->first_name }}">
+                        <input class="tk-input" type="text" id="first_name" name="first_name" placeholder="<?= get_label('please_enter_first_name', 'Please enter first name') ?>" value="{{ $client->first_name }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="last_name" class="form-label"><?= get_label('last_name', 'Last name') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="text" name="last_name" placeholder="<?= get_label('please_enter_last_name', 'Please enter last name') ?>" id="last_name" value="{{ $client->last_name }}">
+                        <input class="tk-input" type="text" name="last_name" placeholder="<?= get_label('please_enter_last_name', 'Please enter last name') ?>" id="last_name" value="{{ $client->last_name }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="email" class="form-label"><?= get_label('email', 'E-mail') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="text" id="email" name="email" placeholder="<?= get_label('please_enter_email', 'Please enter email') ?>" value="{{ $client->email }}" autocomplete="off">
+                        <input class="tk-input" type="text" id="email" name="email" placeholder="<?= get_label('please_enter_email', 'Please enter email') ?>" value="{{ $client->email }}" autocomplete="off">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label class="form-label">{{ get_label('country_code_and_phone_number', 'Country code and phone number') }}</label>
-                        <div class="input-group">
+                        <div style="position:relative;">
                             <input type="tel" name="phone" id="phone" class="form-control" value="{{ $client->phone }}">
-                            <span class="clear-input">×</span>
+                            <span class="clear-input">&times;</span>
                         </div>
                         <input type="hidden" name="country_code" id="country_code" value="{{ $client->country_code }}">
                         <input type="hidden" name="country_iso_code" id="country_iso_code" value="{{ $client->country_iso_code }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="company" class="form-label"><?= get_label('company', 'Company') ?></label>
-                        <input class="form-control" type="text" id="company" name="company" placeholder="<?= get_label('please_enter_company_name', 'Please enter company name') ?>" value="{{ $client->company }}">
+                        <input class="tk-input" type="text" id="company" name="company" placeholder="<?= get_label('please_enter_company_name', 'Please enter company name') ?>" value="{{ $client->company }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="address" class="form-label"><?= get_label('address', 'Address') ?></label>
-                        <input class="form-control" type="text" id="address" name="address" placeholder="<?= get_label('please_enter_address', 'Please enter address') ?>" value="{{ $client->address }}">
+                        <input class="tk-input" type="text" id="address" name="address" placeholder="<?= get_label('please_enter_address', 'Please enter address') ?>" value="{{ $client->address }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="city" class="form-label"><?= get_label('city', 'City') ?></label>
-                        <input class="form-control" type="text" id="city" name="city" placeholder="<?= get_label('please_enter_city', 'Please enter city') ?>" value="{{ $client->city }}">
+                        <input class="tk-input" type="text" id="city" name="city" placeholder="<?= get_label('please_enter_city', 'Please enter city') ?>" value="{{ $client->city }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="state" class="form-label"><?= get_label('state', 'State') ?></label>
-                        <input class="form-control" type="text" id="state" name="state" placeholder="<?= get_label('please_enter_state', 'Please enter state') ?>" value="{{ $client->state }}">
+                        <input class="tk-input" type="text" id="state" name="state" placeholder="<?= get_label('please_enter_state', 'Please enter state') ?>" value="{{ $client->state }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="country" class="form-label"><?= get_label('country', 'Country') ?></label>
-                        <input class="form-control" type="text" id="country" name="country" placeholder="<?= get_label('please_enter_country', 'Please enter country') ?>" value="{{ $client->country }}">
+                        <input class="tk-input" type="text" id="country" name="country" placeholder="<?= get_label('please_enter_country', 'Please enter country') ?>" value="{{ $client->country }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="zip" class="form-label"><?= get_label('zip_code', 'Zip code') ?></label>
-                        <input class="form-control" type="text" id="zip" name="zip" placeholder="<?= get_label('please_enter_zip_code', 'Please enter ZIP code') ?>" value="{{ $client->zip }}">
+                        <input class="tk-input" type="text" id="zip" name="zip" placeholder="<?= get_label('please_enter_zip_code', 'Please enter ZIP code') ?>" value="{{ $client->zip }}">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="dob" class="form-label"><?= get_label('date_of_birth', 'Date of birth') ?></label>
-                        <input class="form-control" type="text" id="dob" name="dob" value="{{ $client->dob?format_date($client->dob) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
+                        <input class="tk-input" type="text" id="dob" name="dob" value="{{ $client->dob?format_date($client->dob) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
                     </div>
                     <div class="mb-3 col-md-6">
                         <label for="doj" class="form-label"><?= get_label('date_of_joining', 'Date of joining') ?></label>
-                        <input class="form-control" type="text" id="doj" name="doj" value="{{ $client->doj?format_date($client->doj) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
+                        <input class="tk-input" type="text" id="doj" name="doj" value="{{ $client->doj?format_date($client->doj) : ''}}" placeholder="<?= get_label('please_select', 'Please select') ?>" autocomplete="off">
                     </div>
                     @if(isAdminOrHasAllDataAccess())
                     <div class="mb-3 col-md-6 {{$client->internal_purpose==1?'d-none':''}} form-password-toggle" id="passDiv">
@@ -100,10 +100,10 @@
                             <span class="asterisk">*</span>
                             @endif
                         </label>
-                        <div class="input-group input-group-merge">
-                            <input class="form-control" type="password" id="password" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" autocomplete="new-password">
-                            <span class="input-group-text cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
-                            <span class="input-group-text cursor-pointer" id="generate-password"><i class="bx bxs-magic-wand"></i></span>
+                        <div class="tk-inputgroup">
+                            <input type="password" id="password" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" autocomplete="new-password">
+                            <span class="cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
+                            <span class="cursor-pointer" id="generate-password"><i class="bx bxs-magic-wand"></i></span>
                         </div>
                     </div>
                     <div class="mb-3 col-md-6 {{$client->internal_purpose==1?'d-none':''}} form-password-toggle" id="confirmPassDiv">
@@ -112,9 +112,9 @@
                             <span class="asterisk">*</span>
                             @endif
                         </label>
-                        <div class="input-group input-group-merge">
-                            <input class="form-control" type="password" id="password_confirmation" name="password_confirmation" placeholder="<?= get_label('please_re_enter_password', 'Please re enter password') ?>" autocomplete="new-password">
-                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                        <div class="tk-inputgroup">
+                            <input type="password" id="password_confirmation" name="password_confirmation" placeholder="<?= get_label('please_re_enter_password', 'Please re enter password') ?>" autocomplete="new-password">
+                            <span class="cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
                         </div>
                     </div>
                     @endif

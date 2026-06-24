@@ -438,7 +438,7 @@ class DashboardManager {
         if (container.length) {
             // Add table-responsive and table structure
             container.append(`
-            <div class="table-responsive">
+            <div class="table-responsive tk-table">
                 <table class="table table-sm mb-0">
                     <tbody>
         `);
