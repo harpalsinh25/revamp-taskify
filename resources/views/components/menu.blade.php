@@ -228,7 +228,17 @@ $pendingLeaveRequestsCount = $query->count();
 @endphp
 
 {{-- ============================ MOBILE OFFCANVAS WRAPPER ============================ --}}
-<div class="offcanvas-lg offcanvas-start border-0 d-flex flex-row" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="position: fixed; top: 0; bottom: 0; left: 0; width: max-content; background: transparent; z-index: 9999 !important; box-shadow: none; pointer-events: auto;">
+<style>
+    .tk-sidebar-z {
+        z-index: 1030 !important;
+    }
+    @media (max-width: 991.98px) {
+        .tk-sidebar-z {
+            z-index: 9999 !important;
+        }
+    }
+</style>
+<div class="offcanvas-lg offcanvas-start border-0 d-flex flex-row tk-sidebar-z" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="position: fixed; top: 0; bottom: 0; left: 0; width: max-content; background: transparent; box-shadow: none; pointer-events: auto;">
 
 {{-- ============================ RAIL ============================ --}}
 <aside class="tk-rail" style="transform: none !important; position: relative !important; left: 0 !important; z-index: 2 !important; height: 100%; transition: none !important;" aria-label="{{ get_label('primary_navigation', 'Primary navigation') }}">

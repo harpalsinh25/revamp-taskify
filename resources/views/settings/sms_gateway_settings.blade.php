@@ -4,15 +4,23 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-        <h4 class="fw-bold mb-0" style="font-size: 1.35rem;"><?= get_label('messaging_integrations_settings', 'Messaging & Integrations Settings') ?></h4>
-        <div class="d-flex align-items-center gap-3">
-            <nav class="breadcrumb mb-0" aria-label="breadcrumb">
-                <a class="breadcrumb-item" href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
-                <span class="breadcrumb-sep">/</span>
-                <span class="breadcrumb-item"><?= get_label('settings', 'Settings') ?></span>
-                <span class="breadcrumb-sep">/</span>
-                <span class="breadcrumb-current"><?= get_label('messaging_and_integrations', 'Messaging & Integrations') ?></span>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <h4 class="fw-bold mb-0 me-2" style="font-size: 1.35rem;"><?= get_label('messaging_integrations_settings', 'Messaging & Integrations Settings') ?></h4>
+        </div>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1 mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <?= get_label('settings', 'Settings') ?>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        <?= get_label('messaging_and_integrations', 'Messaging & Integrations') ?>
+                    </li>
+                </ol>
             </nav>
         </div>
     </div>
@@ -261,7 +269,7 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                        <div class="d-flex justify-content-end flex-wrap gap-2 border-top pt-3">
                             <button type="reset" class="btn btn-xs btn-outline-secondary py-1 px-3" style="font-size: 0.8rem;"><?= get_label('cancel', 'Cancel') ?></button>
                             @if (config('constants.ALLOW_MODIFICATION') === 1)
                             <button type="button" class="btn btn-xs btn-success py-1 px-3" style="font-size: 0.8rem;" id="testSmsSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
@@ -308,7 +316,7 @@
                             <input type="text" class="form-control form-control-sm" name="whatsapp_phone_number_id" value="{{$whatsapp_settings['whatsapp_phone_number_id'] ?? ''}}" placeholder="Enter Phone Number ID">
                         </div>
                         
-                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                        <div class="d-flex justify-content-end flex-wrap gap-2 border-top pt-3">
                             <button type="reset" class="btn btn-xs btn-outline-secondary py-1 px-3" style="font-size: 0.8rem;"><?= get_label('cancel', 'Cancel') ?></button>
                             @if (config('constants.ALLOW_MODIFICATION') === 1)
                             <button type="button" class="btn btn-xs btn-success py-1 px-3" style="font-size: 0.8rem;" id="testWhatsappSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>
@@ -347,7 +355,7 @@
                             <input type="text" class="form-control form-control-sm" name="slack_bot_token" value="{{ $slack_settings['slack_bot_token'] ?? '' }}" placeholder="Enter Slack Bot Token">
                         </div>
                         
-                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                        <div class="d-flex justify-content-end flex-wrap gap-2 border-top pt-3">
                             <button type="reset" class="btn btn-xs btn-outline-secondary py-1 px-3" style="font-size: 0.8rem;"><?= get_label('cancel', 'Cancel') ?></button>
                             @if (config('constants.ALLOW_MODIFICATION') === 1)
                             <button type="button" class="btn btn-xs btn-success py-1 px-3" style="font-size: 0.8rem;" id="testSlackSettingsButton"><?= get_label('send_test_message', 'Send Test Message') ?></button>

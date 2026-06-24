@@ -8,16 +8,26 @@
 @endphp
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-            <h4 class="fw-bold mb-0"><?= get_label('custom_fields', 'Custom Fields') ?></h4>
-            <div class="d-flex align-items-center gap-3">
-                <nav class="breadcrumb mb-0" aria-label="breadcrumb">
-                    <a class="breadcrumb-item" href="{{ route('home.index') }}"><?= get_label('home', 'Home') ?></a>
-                    <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-item"><?= get_label('settings', 'Settings') ?></span>
-                    <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-current"><?= get_label('custom_fields', 'Custom Fields') ?></span>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <h4 class="fw-bold mb-0 me-2"><?= get_label('custom_fields', 'Custom Fields') ?></h4>
+            </div>
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('home.index') }}"><?= get_label('home', 'Home') ?></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <?= get_label('settings', 'Settings') ?>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            <?= get_label('custom_fields', 'Custom Fields') ?>
+                        </li>
+                    </ol>
                 </nav>
+            </div>
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#add_field_modal">
                     <button type="button" class="btn btn-sm btn-primary action_create_items" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_custom_field', 'Create Custom Field') ?>">
                         <i class="bx bx-plus"></i>

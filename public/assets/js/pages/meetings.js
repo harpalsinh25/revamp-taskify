@@ -107,19 +107,19 @@ $(document).ready(function () {
             },
             {
                 selector: '#meeting_user_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'user_ids',
                 ajaxType: 'users'
             },
             {
                 selector: '#meeting_client_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'client_ids',
                 ajaxType: 'clients'
             },
             {
                 selector: '#status_filter',
-                type: 'select2',
+                type: 'tom-select',
                 name: 'statuses',
                 ajaxType: null
             }

@@ -4,10 +4,10 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mb-2 mt-4">
-        <div>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
+                <ol class="breadcrumb breadcrumb-style1 mb-0">
                     <li class="breadcrumb-item">
                         <a href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
                     </li>
@@ -17,7 +17,7 @@
                 </ol>
             </nav>
         </div>
-        <div>
+        <div class="d-flex align-items-center flex-wrap gap-2">
             <a href="{{url('estimates-invoices/create')}}"><button type="button" class="btn btn-sm btn-primary action_create_estimates_invoices" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title=" <?= get_label('create_estimate_invoice', 'Create estimate/invoice') ?>"><i class="bx bx-plus"></i></button></a>
         </div>
     </div>
@@ -31,7 +31,7 @@
                 <!-- Button with Badges for Estimates -->
                 <div class="col-12">
                     <small class="text-light fw-semibold"><?= get_label('estimates', 'Estimates') ?></small>
-                    <div class="demo-inline-spacing">
+                    <div class="d-flex flex-wrap gap-2 mt-2">
                         @php
                         $possibleStatuses = ['sent', 'accepted', 'draft', 'declined', 'expired', 'not_specified'];
                         $totalEstimates = array_sum(array_map(fn($status) => getStatusCount($status, 'estimate'), $possibleStatuses)); // Total estimates
@@ -59,7 +59,7 @@
                 <!-- Button with Badges for Invoices -->
                 <div class="col-12">
                     <small class="text-light fw-semibold"><?= get_label('invoices', 'Invoices') ?></small>
-                    <div class="demo-inline-spacing">
+                    <div class="d-flex flex-wrap gap-2 mt-2">
                         @php
                         $possibleStatuses = ['partially_paid', 'fully_paid', 'draft', 'cancelled', 'due', 'not_specified'];
                         $totalInvoices = array_sum(array_map(fn($status) => getStatusCount($status, 'invoice'), $possibleStatuses)); // Total invoices
@@ -84,31 +84,31 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row g-3 align-items-end tk-filter-row mb-0">
                 <x-advanced-date-filters prefix="ie" />
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4 mb-0">
                     <select class="form-select js-example-basic-multiple" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
                         <option value="estimate"><?= get_label('estimates', 'Estimates') ?></option>
                         <option value="invoice"><?= get_label('invoices', 'Invoices') ?></option>
                     </select>
                 </div>
                 @if (!isClient() || isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4 mb-0">
                     <select class="form-select clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
                     </select>
                 </div>
                 @endif
                 @if(isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4 mb-0">
                     <select class="form-select users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4 mb-0">
                     <select class="form-select clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>
                     </select>
                 </div>
                 @endif
-                <div class="col-md-4 mb-3 d-flex align-items-center">
+                <div class="col-md-4 mb-0 d-flex align-items-center">
                     <button class="btn btn-secondary clear-estimates-invoices-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
                         <i class="bx bx-refresh"></i>
                     </button>

@@ -5,24 +5,28 @@ $visibleColumns = getUserPreferences('meetings');
 $user = getAuthenticatedUser();
 @endphp
 {{$slot}}
-<div class="row g-3 align-items-end tk-filter-row mb-3">
-    <x-advanced-date-filters prefix="meeting" />
-    @if(isAdminOrHasAllDataAccess())
-    <div class="col-md-4 mb-3">
-        <select class="form-select users_select tom_select" id="meeting_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
-        </select>
-    </div>
-    <div class="col-md-4 mb-3">
-        <select class="form-select clients_select tom_select" id="meeting_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
-        </select>
-    </div>
-    @endif
-    <div class="col-md-3 mb-3">
-        <select class="form-select tom_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>" data-allow-clear="true" multiple>
-            <option value="ongoing"><?= get_label('ongoing', 'Ongoing') ?></option>
-            <option value="yet_to_start"><?= get_label('yet_to_start', 'Yet to start') ?></option>
-            <option value="ended"><?= get_label('ended', 'Ended') ?></option>
-        </select>
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end tk-filter-row mb-0">
+            <x-advanced-date-filters prefix="meeting" />
+            @if(isAdminOrHasAllDataAccess())
+            <div class="col-md-4 mb-0">
+                <select class="tk-select tom_users_select tom_select" id="meeting_user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
+                </select>
+            </div>
+            <div class="col-md-4 mb-0">
+                <select class="tk-select tom_clients_select tom_select" id="meeting_client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+                </select>
+            </div>
+            @endif
+            <div class="col-md-3 mb-0">
+                <select class="tk-select tom_static_select tom_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>" data-allow-clear="true" multiple>
+                    <option value="ongoing"><?= get_label('ongoing', 'Ongoing') ?></option>
+                    <option value="yet_to_start"><?= get_label('yet_to_start', 'Yet to start') ?></option>
+                    <option value="ended"><?= get_label('ended', 'Ended') ?></option>
+                </select>
+            </div>
+        </div>
     </div>
 </div>
 <div class="card">

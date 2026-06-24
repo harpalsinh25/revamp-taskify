@@ -4,10 +4,10 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mt-4">
-        <div>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
+                <ol class="breadcrumb breadcrumb-style1 mb-0">
                     <li class="breadcrumb-item">
                         <a href="{{ route('home.index') }}">{{ get_label('home', 'Home') }}</a>
                     </li>
@@ -22,45 +22,55 @@
         </div>
     </div>
     <!-- Summary Tiles -->
-    <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:12px;" class="mb-4 tk-stats-grid">
+    <div class="row g-3 mb-4 tk-stats-grid">
         <!-- Total -->
-        <div class="tk-fact">
-            <i class="bx bx-receipt" style="font-size:22px; color:var(--signal);"></i>
-            <div class="tk-fact-txt">
-                <span class="tk-fact-k">{{ get_label('total', 'Total') }}</span>
-                <span class="tk-fact-v" id="total-invoices">—</span>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="tk-fact h-100">
+                <i class="bx bx-receipt" style="font-size:22px; color:var(--signal);"></i>
+                <div class="tk-fact-txt">
+                    <span class="tk-fact-k">{{ get_label('total', 'Total') }}</span>
+                    <span class="tk-fact-v" id="total-invoices">—</span>
+                </div>
             </div>
         </div>
         <!-- Total Amount -->
-        <div class="tk-fact">
-            <i class="bx bx-money" style="font-size:22px; color:var(--ok);"></i>
-            <div class="tk-fact-txt">
-                <span class="tk-fact-k">{{ get_label('total_amount', 'Total Amount') }}</span>
-                <span class="tk-fact-v" id="total-amount">—</span>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="tk-fact h-100">
+                <i class="bx bx-money" style="font-size:22px; color:var(--ok);"></i>
+                <div class="tk-fact-txt">
+                    <span class="tk-fact-k">{{ get_label('total_amount', 'Total Amount') }}</span>
+                    <span class="tk-fact-v" id="total-amount">—</span>
+                </div>
             </div>
         </div>
         <!-- Total Tax -->
-        <div class="tk-fact">
-            <i class="bx bx-purchase-tag" style="font-size:22px; color:var(--warn);"></i>
-            <div class="tk-fact-txt">
-                <span class="tk-fact-k">{{ get_label('total_tax', 'Total Tax') }}</span>
-                <span class="tk-fact-v" id="total-tax">—</span>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="tk-fact h-100">
+                <i class="bx bx-purchase-tag" style="font-size:22px; color:var(--warn);"></i>
+                <div class="tk-fact-txt">
+                    <span class="tk-fact-k">{{ get_label('total_tax', 'Total Tax') }}</span>
+                    <span class="tk-fact-v" id="total-tax">—</span>
+                </div>
             </div>
         </div>
         <!-- Final Total -->
-        <div class="tk-fact">
-            <i class="bx bx-money" style="font-size:22px; color:var(--info);"></i>
-            <div class="tk-fact-txt">
-                <span class="tk-fact-k">{{ get_label('final_total', 'Final Total') }}</span>
-                <span class="tk-fact-v" id="total-final">—</span>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="tk-fact h-100">
+                <i class="bx bx-money" style="font-size:22px; color:var(--info);"></i>
+                <div class="tk-fact-txt">
+                    <span class="tk-fact-k">{{ get_label('final_total', 'Final Total') }}</span>
+                    <span class="tk-fact-v" id="total-final">—</span>
+                </div>
             </div>
         </div>
         <!-- Average Value -->
-        <div class="tk-fact">
-            <i class="bx bx-trending-up" style="font-size:22px; color:var(--fg-1);"></i>
-            <div class="tk-fact-txt">
-                <span class="tk-fact-k">{{ get_label('average_value', 'Average Value') }}</span>
-                <span class="tk-fact-v" id="average-invoice-value">—</span>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="tk-fact h-100">
+                <i class="bx bx-trending-up" style="font-size:22px; color:var(--fg-1);"></i>
+                <div class="tk-fact-txt">
+                    <span class="tk-fact-k">{{ get_label('average_value', 'Average Value') }}</span>
+                    <span class="tk-fact-v" id="average-invoice-value">—</span>
+                </div>
             </div>
         </div>
     </div>
@@ -73,7 +83,7 @@
                     <p class="text-muted mb-0 small">{{ get_label('filter_estimates_invoices_report', 'Filter estimates and invoices by date, type, client and creator') }}</p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <button class="btn btn-primary" id="export_button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('export_report', 'Export Report') }}">
                     <i class="bx bx-export"></i> {{ get_label('export', 'Export') }}
                 </button>

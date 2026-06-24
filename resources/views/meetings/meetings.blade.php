@@ -4,10 +4,10 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between mb-2 mt-4">
-            <div>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0">
                         <li class="breadcrumb-item">
                             <a href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
                         </li>
@@ -16,8 +16,6 @@
                         </li>
                     </ol>
                 </nav>
-            </div>
-            <div>
                 @php
                     $meetingsDefaultView = getUserPreferences('meetings', 'default_view');
                 @endphp
@@ -28,11 +26,10 @@
                             data-view="list"><?= get_label('set_as_default_view', 'Set as Default View') ?></span></a>
                 @endif
             </div>
-            <div>
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#createMeetingModal"><button type="button" class="btn btn-sm btn-primary action_create_meetings" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('create_meeting', 'Create meeting') ?>"><i class='bx bx-plus'></i></button></a>
                 <a href="{{ route('meetings.calendar-view') }}" ><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="<?= get_label('calendar_view', 'Calendar view') ?>"><i class='bx bx-calendar'></i></button></a>
             </div>
-
         </div>
 
         <x-meetings-card :meetings="$meetings" />

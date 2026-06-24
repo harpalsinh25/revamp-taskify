@@ -4,10 +4,10 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-            <div>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0">
                         <li class="breadcrumb-item">
                             <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
                         </li>
@@ -20,7 +20,7 @@
                     </ol>
                 </nav>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 @if (app()->getLocale() == $default_language)
                     <span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="left"
                         data-bs-original-title="<?= get_label('current_language_is_your_primary_language', 'Current language is your primary language') ?>"><?= get_label('primary', 'Primary') ?></span>

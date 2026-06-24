@@ -4,15 +4,23 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-        <h4 class="fw-bold mb-0 fs-4"><?= get_label('notification_templates', 'Notification Templates') ?></h4>
-        <div class="d-flex align-items-center gap-3">
-            <nav class="breadcrumb mb-0" aria-label="breadcrumb">
-                <a class="breadcrumb-item" href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
-                <span class="breadcrumb-sep">/</span>
-                <span class="breadcrumb-item"><?= get_label('settings', 'Settings') ?></span>
-                <span class="breadcrumb-sep">/</span>
-                <span class="breadcrumb-current"><?= get_label('notification_templates', 'Notification Templates') ?></span>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <h4 class="fw-bold mb-0 me-2 fs-4"><?= get_label('notification_templates', 'Notification Templates') ?></h4>
+        </div>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1 mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{url('home')}}"><?= get_label('home', 'Home') ?></a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <?= get_label('settings', 'Settings') ?>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        <?= get_label('notification_templates', 'Notification Templates') ?>
+                    </li>
+                </ol>
             </nav>
         </div>
     </div>
