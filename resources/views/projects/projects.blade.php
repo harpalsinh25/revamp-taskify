@@ -4,11 +4,11 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
             <!-- Left Side: Breadcrumbs and Badge -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0">
                         <li class="breadcrumb-item">
                             <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
                         </li>
@@ -39,7 +39,7 @@
             </div>
 
             <!-- Right Side: View modes and Actions -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 @php
                     // Base URLs for different views
                     $gridUrl = $is_favorites == 1 ? url('projects/favorite') : url('projects');
@@ -69,7 +69,7 @@
                     <a href="{{ $finalGridUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('grid_view', 'Grid view') ?>">
                         <i class='bx bxs-grid-alt'></i>
                     </a>
-                    <a href="{{ $finalKanbanUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
+                    <a href="{{ $finalKanbanUrl }}" class="seg-btn d-none d-md-flex" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
                         <i class='bx bx-layout'></i>
                     </a>
                     <a href="{{ $ganttChartUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('gantt_chart_view', 'Gantt Chart View') ?>">

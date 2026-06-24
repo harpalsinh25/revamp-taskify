@@ -4,9 +4,9 @@
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
         <!-- Left Side: Breadcrumbs and Badge -->
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb breadcrumb-style1 mb-0">
                     <li class="breadcrumb-item">
@@ -35,7 +35,7 @@
         </div>
 
         <!-- Right Side: View modes and Actions -->
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
             @php
                 // Base URLs for different views
                 $listUrl = $is_favorite == 1 ? url('projects/list/favorite') : url('projects/list');
@@ -66,7 +66,7 @@
                 <a href="{{ $finalGridUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('grid_view', 'Grid view') ?>">
                     <i class='bx bxs-grid-alt'></i>
                 </a>
-                <a href="{{ $finalKanbanUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
+                <a href="{{ $finalKanbanUrl }}" class="seg-btn d-none d-md-flex" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
                     <i class='bx bx-layout'></i>
                 </a>
                 <a href="javascript:void(0);" class="seg-btn on" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('gantt_chart_view', 'Gantt Chart View') ?>">
@@ -95,14 +95,14 @@
     @endphp
     <div class="row d-none">
         <div class="col-md-4 mb-3">
-            <select class="form-select statuses_filter" id="selected_statuses" name="statuses[]" aria-label="Default select example" data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true" multiple>
+            <select class="tk-select statuses_filter" id="selected_statuses" name="statuses[]" aria-label="Default select example" data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true" multiple>
                 @foreach($filterStatuses as $status)
                 <option value="{{ $status->id }}" selected>{{ $status->title }}</option>
                 @endforeach
             </select>
         </div>
         <!-- <div class="col-md-4 mb-3">
-            <select id="selected_tags" class="form-control tags_select" name="tag[]" multiple="multiple" data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true" multiple>
+            <select id="selected_tags" class="tk-select tags_select" name="tag[]" multiple="multiple" data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true" multiple>
                 @foreach($filterTags as $tag)
                 <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>
                 @endforeach

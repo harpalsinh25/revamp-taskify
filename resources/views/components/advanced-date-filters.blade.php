@@ -42,11 +42,11 @@
             @if ($showLabel)
                 <label class="form-label small text-muted mb-1">{{ $filterLabels[$filter] }}</label>
             @endif
-            <div class="input-group input-group-merge">
+            <div class="tk-inputgroup">
                 @if ($showIcons)
-                    <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                    <span><i class="bx bx-calendar"></i></span>
                 @endif
-                <input type="text" class="form-control" id="{{ $prefix }}_{{ $filter }}"
+                <input type="text" id="{{ $prefix }}_{{ $filter }}"
                     name="{{ $prefix }}_{{ $filter }}" placeholder="{{ $filterLabels[$filter] }}"
                     autocomplete="off">
             </div>

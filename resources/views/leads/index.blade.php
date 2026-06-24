@@ -4,11 +4,11 @@
 @endsection
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
             <!-- Left Side: Breadcrumbs and Badge -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0">
                         <li class="breadcrumb-item">
                             <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
                         </li>
@@ -34,13 +34,13 @@
             </div>
 
             <!-- Right Side: View modes and Actions -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <!-- View Toggles -->
                 <div class="seg">
                     <a href="javascript:void(0);" class="seg-btn on" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('list_view', 'List view') ?>">
                         <i class='bx bx-list-ul'></i>
                     </a>
-                    <a href="{{ route('leads.kanban_view') }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
+                    <a href="{{ route('leads.kanban_view') }}" class="seg-btn d-none d-md-flex" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
                         <i class='bx bx-layout'></i>
                     </a>
                 </div>
@@ -69,7 +69,7 @@
                     <div class="card-body">
                         <div class="row g-3 align-items-end tk-filter-row mb-0">
                             <div class="col-md-3 mb-0">
-                                <select class="form-select tom_select" id="sort"
+                                <select class="tk-select tom_select" id="sort"
                                     aria-label="Default select example"
                                     data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>"
                                     data-allow-clear="true">
@@ -83,7 +83,7 @@
                                 </select>
                             </div>
                             <div class="col-md-3 mb-0">
-                                <select class="form-select tom_select" id="selected_sources" name="sources[]"
+                                <select class="tk-select tom_select" id="selected_sources" name="sources[]"
                                     aria-label="Default select example"
                                     data-placeholder="{{ get_label('filter_by_sources', 'Filter by sources') }}"
                                     data-allow-clear="true" multiple>
@@ -91,7 +91,7 @@
                             </div>
                             <x-advanced-date-filters prefix="lead" :filters="['date_range']" colClass="col-md-3 mb-0" :showLabel="false" />
                             <div class="col-md-3 mb-0">
-                                <select class="form-select tom_select" id="selected_stages" name="stages[]"
+                                <select class="tk-select tom_select" id="selected_stages" name="stages[]"
                                     aria-label="Default select example"
                                     data-placeholder="{{ get_label('filter_by_stages', 'Filter by stages') }}"
                                     data-allow-clear="true" multiple>

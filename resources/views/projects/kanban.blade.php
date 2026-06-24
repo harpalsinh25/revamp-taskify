@@ -8,11 +8,11 @@
 @endphp
 @section('content')
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
             <!-- Left Side: Breadcrumbs and Badge -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0">
                         <li class="breadcrumb-item">
                             <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
                         </li>
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Right Side: View modes and Actions -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
                 @php
                     // Base URLs for different views
                     $listUrl = $is_favorite == 1 ? url('projects/list/favorite') : url('projects/list');
@@ -73,7 +73,7 @@
                     <a href="{{ $finalGridUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('grid_view', 'Grid view') ?>">
                         <i class='bx bxs-grid-alt'></i>
                     </a>
-                    <a href="javascript:void(0);" class="seg-btn on" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
+                    <a href="javascript:void(0);" class="seg-btn on d-none d-md-flex" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('kanban_view', 'Kanban View') ?>">
                         <i class='bx bx-layout'></i>
                     </a>
                     <a href="{{ $ganttChartUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('gantt_chart_view', 'Gantt Chart View') ?>">
@@ -107,7 +107,7 @@
             <div class="card-body py-3">
                 <div class="row g-3 align-items-end justify-content-center">
                     <div class="col-md-4">
-                        <select class="form-select tom-select-sort" id="sort" aria-label="Default select example"
+                        <select class="tk-select tom-select-sort" id="sort" aria-label="Default select example"
                             data-placeholder="<?= get_label('sort_by', 'Sort By') ?>" data-allow-clear="true">
                             <option value=""></option>
                             <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>>
@@ -123,7 +123,7 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <select class="form-select tom_statuses_filter" id="selected_statuses" name="statuses[]"
+                        <select class="tk-select tom_statuses_filter" id="selected_statuses" name="statuses[]"
                             aria-label="Default select example"
                             data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true"
                             multiple>
@@ -133,7 +133,7 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <select id="selected_tags" class="form-select tom_tags_filter" name="tag[]" multiple="multiple"
+                        <select id="selected_tags" class="tk-select tom_tags_filter" name="tag[]" multiple="multiple"
                             data-placeholder="<?= get_label('filter_by_tags', 'Filter by tags') ?>" data-allow-clear="true">
                             @foreach ($filterTags as $tag)
                                 <option value="{{ $tag->id }}" selected>{{ $tag->title }}</option>

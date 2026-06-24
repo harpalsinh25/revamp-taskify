@@ -32,7 +32,7 @@ if ($remainingUnreadNotificationsCount < 0) {
 <div id="section-not-to-print">
     <header class="tk-cbar" id="layout-navbar">
         {{-- Mobile: toggle the context panel --}}
-        <button type="button" class="tk-cbar-burger layout-menu-toggle" aria-label="{{ get_label('menu', 'Menu') }}">
+        <button type="button" class="tk-cbar-burger d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" aria-label="{{ get_label('menu', 'Menu') }}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>

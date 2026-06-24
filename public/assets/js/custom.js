@@ -3039,7 +3039,7 @@ $(document).ready(function () {
             var $actionBar = $toolbar.find(".custom-action-bar");
             if ($actionBar.length === 0) {
                 $actionBar = $(
-                    '<div class="custom-action-bar bs-bars float-left d-flex flex-wrap gap-2 align-items-center mb-3"></div>',
+                    '<div class="custom-action-bar bs-bars float-none float-md-start d-flex flex-column flex-md-row gap-2 mb-3"></div>',
                 );
                 $toolbar.prepend($actionBar);
             } else {

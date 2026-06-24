@@ -44,7 +44,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="first_name" class="form-label">{{ get_label('first_name', 'First Name') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="first_name" class="form-control"
+                            <input type="text" name="first_name" class="tk-input"
                                 placeholder="{{ get_label('enter_first_name', 'Enter first name') }}"
                                 value="{{ old('first_name') }}">
                             @error('first_name')
@@ -55,7 +55,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="last_name" class="form-label">{{ get_label('last_name', 'Last Name') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="last_name" class="form-control"
+                            <input type="text" name="last_name" class="tk-input"
                                 placeholder="{{ get_label('enter_last_name', 'Enter last name') }}"
                                 value="{{ old('last_name') }}">
                             @error('last_name')
@@ -66,7 +66,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control"
+                            <input type="email" name="email" class="tk-input"
                                 placeholder="{{ get_label('enter_email', 'Enter email address') }}"
                                 value="{{ old('email') }}">
                             @error('email')
@@ -78,8 +78,8 @@
                             <label
                                 class="form-label">{{ get_label('country_code_and_phone_number', 'Country code and phone number') }}
                                 <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="tel" name="phone" id="phone" class="form-control"
+                            <div class="tk-inputgroup">
+                                <input type="tel" name="phone" id="phone" class="tk-input"
                                     value="{{ old('phone') }}" data-type="create">
                                 <span class="clear-input">×</span>
                             </div>
@@ -94,7 +94,7 @@
                             <label for="lead_sources"
                                 class="form-label">{{ get_label('lead_sources', 'Lead Sources') }} <span
                                     class="text-danger">*</span></label>
-                            <select class="form-select tom_select" name="source_id" id="select_lead_source"
+                            <select class="tk-select tom_select" name="source_id" id="select_lead_source"
                                 data-allow-clear="false" data-consider-workspace="true">
                                 {{-- You can keep the default option if needed --}}
                                 <option value="">{{ get_label('select_lead_source', 'Select Lead Source') }}</option>
@@ -108,7 +108,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="lead_stages" class="form-label">{{ get_label('lead_stages', 'Lead Stages') }} <span
                                     class="text-danger">*</span></label>
-                            <select class="form-select tom_select" name="stage_id" id="select_lead_stage"
+                            <select class="tk-select tom_select" name="stage_id" id="select_lead_stage"
                                 data-allow-clear="false" data-consider-workspace="true">
                                 <option value="">{{ get_label('select_lead_stage', 'Select Lead Stage') }}</option>
 
@@ -121,7 +121,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="assign_to" class="form-label">{{ get_label('assigned_to', 'Assign To') }} <span
                                     class="text-danger">*</span></label>
-                            <select name="assigned_to" class="form-select tom_select" id="select_lead_assignee"
+                            <select name="assigned_to" class="tk-select tom_select" id="select_lead_assignee"
                                 data-allow-clear="false" data-consider-workspace="true">
                                 <option value="">{{ get_label('select_assignee', 'Assigned To') }}</option>
 
@@ -142,7 +142,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="job_title" class="form-label">{{ get_label('job_title', 'Job Title') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="job_title" class="form-control"
+                            <input type="text" name="job_title" class="tk-input"
                                 placeholder="{{ get_label('enter_job_title', 'Enter job title') }}">
                             @error('job_title')
                                 <span class="text-danger">{{ $message }}</span>
@@ -152,7 +152,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="industry" class="form-label">{{ get_label('industry', 'Industry') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="industry" class="form-control"
+                            <input type="text" name="industry" class="tk-input"
                                 placeholder="{{ get_label('enter_industry', 'Enter industry') }}">
                             @error('industry')
                                 <span class="text-danger">{{ $message }}</span>
@@ -162,7 +162,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="company" class="form-label">{{ get_label('company', 'Company') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="company" class="form-control"
+                            <input type="text" name="company" class="tk-input"
                                 placeholder="{{ get_label('enter_company', 'Enter company name') }}">
                             @error('company')
                                 <span class="text-danger">{{ $message }}</span>
@@ -172,7 +172,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="website" class="form-label">{{ get_label('website', 'Website') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="website" class="form-control"
+                            <input type="text" name="website" class="tk-input"
                                 placeholder="{{ get_label('enter_website', 'Enter company website') }}">
                             @error('website')
                                 <span class="text-danger">{{ $message }}</span>
@@ -188,7 +188,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="linkedin" class="form-label">{{ get_label('linkedin', 'LinkedIn') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="url" name="linkedin" class="form-control"
+                            <input type="url" name="linkedin" class="tk-input"
                                 placeholder="{{ get_label('enter_linkedin_url', 'Enter LinkedIn URL') }}"
                                 value="{{ old('linkedin') }}">
                             @error('linkedin')
@@ -199,7 +199,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="instagram" class="form-label">{{ get_label('instagram', 'Instagram') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="url" name="instagram" class="form-control"
+                            <input type="url" name="instagram" class="tk-input"
                                 placeholder="{{ get_label('enter_instagram_url', 'Enter Instagram URL') }}"
                                 value="{{ old('instagram') }}">
                             @error('instagram')
@@ -210,7 +210,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="facebook" class="form-label">{{ get_label('facebook', 'Facebook') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="url" name="facebook" class="form-control"
+                            <input type="url" name="facebook" class="tk-input"
                                 placeholder="{{ get_label('enter_facebook_url', 'Enter Facebook URL') }}"
                                 value="{{ old('facebook') }}">
                             @error('facebook')
@@ -221,7 +221,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="pinterest" class="form-label">{{ get_label('pinterest','Pinterest') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="url" name="pinterest" class="form-control"
+                            <input type="url" name="pinterest" class="tk-input"
                                 placeholder="{{ get_label('enter_pinterest_url', 'Enter Pinterest URL') }}"
                                 value="{{ old('pinterest') }}">
                             @error('pinterest')
@@ -237,7 +237,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="city" class="form-label">{{ get_label('city', 'City') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="city" class="form-control"
+                            <input type="text" name="city" class="tk-input"
                                 placeholder="{{ get_label('please_enter_city', 'Please enter city') }}"
                                 value="{{ old('city') }}">
                             @error('city')
@@ -248,7 +248,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="state" class="form-label">{{ get_label('state', 'State') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="state" class="form-control"
+                            <input type="text" name="state" class="tk-input"
                                 placeholder="{{ get_label('please_enter_state', 'Please enter state') }}"
                                 value="{{ old('state') }}">
                             @error('state')
@@ -259,7 +259,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="zip" class="form-label">{{ get_label('zip_code', 'Zip Code') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="number" name="zip" class="form-control"
+                            <input type="number" name="zip" class="tk-input"
                                 placeholder="{{ get_label('please_enter_zip_code', 'Please enter ZIP code') }}"
                                 value="{{ old('zip') }}">
                             @error('zip')
@@ -270,7 +270,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="country" class="form-label">{{ get_label('country', 'Country') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="country" class="form-control"
+                            <input type="text" name="country" class="tk-input"
                                 placeholder="{{ get_label('please_enter_country', 'Please enter country') }}">
                             @error('country')
                                 <span class="text-danger">{{ $message }}</span>

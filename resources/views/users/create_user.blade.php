@@ -58,8 +58,8 @@
                     </div>
                     <div class="mb-3 col-md-6">
                         <label class="form-label">{{ get_label('country_code_and_phone_number', 'Country code and phone number') }}</label>
-                        <div style="position:relative;">
-                            <input type="tel" name="phone" id="phone" class="form-control" value="{{ old('phone') }}" data-type="create">
+                        <div class="tk-inputgroup">
+                            <input type="tel" name="phone" id="phone" class="tk-input" value="{{ old('phone') }}" data-type="create">
                             <span class="clear-input">×</span>
                         </div>
                         <input type="hidden" name="country_code" id="country_code">
@@ -68,7 +68,7 @@
                     <div class="mb-3 col-md-6 form-password-toggle">
                         <label for="password" class="form-label"><?= get_label('password', 'Password') ?> <span class="asterisk">*</span></label>
                         <div class="tk-inputgroup">
-                            <input type="password" id="password" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" autocomplete="new-password">
+                            <input type="password" id="password" class="tk-input" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" autocomplete="new-password">
                             <span class="cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
                             <span class="cursor-pointer" id="generate-password"><i class="bx bxs-magic-wand"></i></span>
                         </div>
@@ -76,7 +76,7 @@
                     <div class="mb-3 col-md-6 form-password-toggle">
                         <label for="password_confirmation" class="form-label"><?= get_label('confirm_password', 'Confirm password') ?> <span class="asterisk">*</span></label>
                         <div class="tk-inputgroup">
-                            <input type="password" id="password_confirmation" name="password_confirmation" placeholder="<?= get_label('please_re_enter_password', 'Please re enter password') ?>" autocomplete="new-password">
+                            <input type="password" id="password_confirmation" class="tk-input" name="password_confirmation" placeholder="<?= get_label('please_re_enter_password', 'Please re enter password') ?>" autocomplete="new-password">
                             <span class="cursor-pointer toggle-password"><i class="bx bx-hide"></i></span>
                         </div>
                     </div>
@@ -122,7 +122,7 @@
                         <div class="d-flex align-items-center gap-3 p-3 border border-dashed rounded" style="border-style: dashed !important; border-width: 2px !important; border-color: var(--line) !important; min-height: 110px;">
                             <img src="{{ asset('storage/photos/no-image.jpg') }}" alt="user-avatar" class="d-block rounded-circle object-fit-cover" height="75" width="75" id="uploadedAvatar" />
                             <div class="flex-grow-1">
-                                <input type="file" class="form-control account-file-input" id="photo" name="profile" accept="image/*">
+                                <input type="file" class="tk-input account-file-input" id="photo" name="profile" accept="image/*">
                                 <small class="text-muted mt-1 d-block">Allowed JPG, JPEG, PNG, GIF, BMP or WEBP.</small>
                             </div>
                         </div>

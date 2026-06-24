@@ -9,11 +9,11 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 mt-4 gap-3">
         <!-- Left Side: Breadcrumbs and Badge -->
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
+                <ol class="breadcrumb breadcrumb-style1 mb-0">
                     <li class="breadcrumb-item">
                         <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
                     </li>
@@ -52,7 +52,7 @@
         </div>
 
         <!-- Right Side: View modes and Actions -->
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
             @php
                 $projectId = isset($project->id) ? $project->id : (request()->has('project') ? request('project') : '');
                 
@@ -83,7 +83,7 @@
                 <a href="{{ $listUrl }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('list_view', 'List view') ?>">
                     <i class='bx bx-list-ul'></i>
                 </a>
-                <a href="javascript:void(0);" class="seg-btn on" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('draggable_view', 'Draggable View') ?>">
+                <a href="javascript:void(0);" class="seg-btn on d-none d-md-flex" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('draggable_view', 'Draggable View') ?>">
                     <i class='bx bxs-dashboard'></i>
                 </a>
                 <a href="{{ route('tasks.groupByTaskList') }}" class="seg-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="<?= get_label('group_by_task_list', 'Group By Task List') ?>">

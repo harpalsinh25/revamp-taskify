@@ -227,8 +227,11 @@ $pendingLeaveRequestsCount = $query->count();
         : asset('storage/photos/no-image.jpg');
 @endphp
 
+{{-- ============================ MOBILE OFFCANVAS WRAPPER ============================ --}}
+<div class="offcanvas-lg offcanvas-start border-0 d-flex flex-row" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="position: fixed; top: 0; bottom: 0; left: 0; width: max-content; background: transparent; z-index: 9999 !important; box-shadow: none; pointer-events: auto;">
+
 {{-- ============================ RAIL ============================ --}}
-<aside class="tk-rail d-none d-md-flex flex-column" aria-label="{{ get_label('primary_navigation', 'Primary navigation') }}">
+<aside class="tk-rail" style="transform: none !important; position: relative !important; left: 0 !important; z-index: 2 !important; height: 100%; transition: none !important;" aria-label="{{ get_label('primary_navigation', 'Primary navigation') }}">
     <a href="{{ url('home') }}" class="tk-rail-brand" title="{{ $general_settings['company_title'] ?? 'Taskify' }}">
         <img src="{{ asset($general_settings['favicon'] ?? 'storage/logos/default_favicon.png') }}" alt="" />
     </a>
@@ -253,7 +256,7 @@ $pendingLeaveRequestsCount = $query->count();
 </aside>
 
 {{-- ====================== CONTEXT PANEL ======================= --}}
-<aside class="tk-panel d-none d-md-flex flex-column" id="tk-context-panel" aria-label="{{ get_label('secondary_navigation', 'Secondary navigation') }}">
+<aside class="tk-panel" id="tk-context-panel" style="transform: none !important; position: relative !important; left: 0 !important; z-index: 1 !important; height: 100%; transition: none !important;" aria-label="{{ get_label('secondary_navigation', 'Secondary navigation') }}">
     {{-- Workspace switcher (logic preserved from the legacy menu) --}}
     <div class="tk-panel-head">
        <div class="btn-group dropend tk-ws w-100">
@@ -452,3 +455,4 @@ $pendingLeaveRequestsCount = $query->count();
         @endforeach
     </div>
 </aside>
+</div>
