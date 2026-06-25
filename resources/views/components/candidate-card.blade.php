@@ -3,18 +3,15 @@
         <div class="card-body">
             {{$slot}}
             <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label"><?= get_label('date_between', 'Date Between') ?></label>
-                    <div class="input-group input-group-merge">
-                        <span class="input-group-text"><i class="bx bx-calendar"></i></span>
-                        <input type="text" class="form-control" id="candidate_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
-                    </div>
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label"><?= get_label('date_between', 'Date Between') ?></label>
+                    <input type="text" class="tk-input" id="candidate_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
                     <input type="hidden" id="candidate_date_between_from" name="startDate" />
                     <input type="hidden" id="candidate_date_between_to" name="EndDate" />
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label"><?= get_label('sort_by', 'Sort By') ?></label>
-                    <select class="form-select tom_static_select" id="sort" name="sort" aria-label="Default select example" data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label"><?= get_label('sort_by', 'Sort By') ?></label>
+                    <select class="tk-select tom_static_select" id="sort" name="sort" aria-label="Default select example" data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">
                         <option></option>
                         <option value="newest" <?= request()->sort && request()->sort == 'newest' ? "selected" : "" ?>><?= get_label('newest', 'Newest') ?></option>
                         <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? "selected" : "" ?>><?= get_label('oldest', 'Oldest') ?></option>
@@ -23,13 +20,13 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label"><?= get_label('status', 'Status') ?></label>
-                    <select class="form-select tom_candidate_statuses_select" id="select_candidate_statuses" name="statuses[]" aria-label="Default select example" data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true" multiple></select>
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label"><?= get_label('status', 'Status') ?></label>
+                    <select class="tk-select tom_candidate_statuses_select" id="select_candidate_statuses" name="statuses[]" aria-label="Default select example" data-placeholder="<?= get_label('filter_by_statuses', 'Filter by statuses') ?>" data-allow-clear="true" multiple></select>
                 </div>
                 
                 <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-secondary clear-candidate-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                    <button class="tk-btn tk-btn-secondary clear-candidate-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
                         <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
                     </button>
                 </div>

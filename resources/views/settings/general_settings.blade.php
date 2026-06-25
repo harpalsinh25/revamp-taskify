@@ -49,15 +49,15 @@
 
                             <div class="mb-3 col-md-4">
                                 <label for="full_logo" class="form-label"><?= get_label('full_logo', 'Full Logo') ?> <a data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('view_current_full_logo', 'View current full logo') ?>" href="{{asset($general_settings['full_logo'])}}" data-lightbox="full_logo" data-title="<?= get_label('current_full_logo', 'Current full logo') ?>"> <i class='bx bx-show-alt text-primary'></i></a></label>
-                                <input type="file" class="form-control" id="full_logo" name="full_logo">
+                                <input type="file" class="tk-file-input" id="full_logo" name="full_logo">
                             </div>
                             <div class="mb-3 col-md-4">
                                 <label for="favicon" class="form-label"><?= get_label('favicon', 'Favicon') ?> <a data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('view_current_favicon', 'View current favicon') ?>" href="{{asset($general_settings['favicon'])}}" data-lightbox="favicon" data-title="<?= get_label('current_favicon', 'Current favicon') ?>"> <i class='bx bx-show-alt text-primary'></i></a></label>
-                                <input type="file" class="form-control" id="favicon" name="favicon">
+                                <input type="file" class="tk-file-input" id="favicon" name="favicon">
                             </div>
                             <div class="mb-3 col-md-4">
                                 <label for="half_logo" class="form-label"><?= get_label('half_logo', 'Half Logo') ?> <a data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('view_current_half_logo', 'View current half logo') ?>" href="{{asset($general_settings['half_logo'])}}" data-lightbox="half_logo" data-title="<?= get_label('current_half_logo', 'Current half logo') ?>"> <i class='bx bx-show-alt text-primary'></i></a></label>
-                                <input type="file" class="form-control" id="half_logo" name="half_logo">
+                                <input type="file" class="tk-file-input" id="half_logo" name="half_logo">
                             </div>
                         </div>
                     </div>

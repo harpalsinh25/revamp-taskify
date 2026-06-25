@@ -22,7 +22,7 @@
         </div>
 
         <div class="mb-6">
-            <ul class="nav nav-tabs nav-fill" role="tablist">
+            <ul class="nav nav-tabs tk-tabs nav-fill" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
                         data-bs-target="#navs-template-email" aria-controls="navs-template-email" aria-selected="true">
@@ -49,8 +49,8 @@
                     </div>
                     <div class="mt-2">
                         <div class="row">
-                            <div class="col-md-12">
-                                <select name="template_id" id="templateSelector" class="form-select">
+                            <div class="col-md-12 tk-field">
+                                <select name="template_id" id="templateSelector" class="tk-select tom_static_select" data-placeholder="{{ get_label('select_template', 'Select Template') }}">
                                     <option value="">-- {{ get_label('select_template', 'Select Template') }} --
                                     </option>
                                     @foreach ($templates as $template)
@@ -76,12 +76,12 @@
                             <div class=" d-flex align-items-center justify-content-between mt-3 ">
                                 <h5 class="mb-0">{{ get_label('compose_email', 'Compose Email') }}</h5>
                                 <div class="d-flex gap-2">
-                                    <button type="button" id="previewBtn" class="btn btn-label-secondary hover-shadow"
+                                    <button type="button" id="previewBtn" class="tk-btn tk-btn-outline hover-shadow"
                                         data-company-title="{{ $general_settings['company_title'] ?? 'Company Title' }}"
                                         data-label-preview="{{ get_label('preview', 'Preview') }}">
                                         <i class="bx bx-show me-1"></i> {{ get_label('preview', 'Preview') }}
                                     </button>
-                                    <button type="submit" id="submit_btn" class="btn btn-primary hover-shadow"
+                                    <button type="submit" id="submit_btn" class="tk-btn tk-btn-primary hover-shadow"
                                         data-label-send="{{ get_label('send_now', 'Send Now') }}"
                                         data-label-schedule="{{ get_label('schedule_email', 'Schedule Email') }}">
                                         <i class="bx bx-send me-1"></i> {{ get_label('send_now', 'Send Now') }}
@@ -92,17 +92,13 @@
                             <div class="">
                                 <!-- Subject & Recipient -->
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">{{ get_label('subject', 'Subject') }}</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="bx bx-text"></i></span>
-                                            <input type="text" name="subject" id="emailSubject" class="form-control"
-                                                readonly>
-                                        </div>
+                                    <div class="col-md-6 mb-3 tk-field">
+                                        <label class="tk-label">{{ get_label('subject', 'Subject') }}</label>
+                                        <input type="text" name="subject" id="emailSubject" class="tk-input" readonly>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">{{ get_label('to_email', 'Recipient Email') }}</label>
-                                        <select name="emails[]"  class="form-control to_emails" multiple="multiple"
+                                    <div class="col-md-6 mb-3 tk-field">
+                                        <label class="tk-label">{{ get_label('to_email', 'Recipient Email') }}</label>
+                                        <select name="emails[]"  class="tk-select to_emails" multiple="multiple"
                                             required>
                                         </select>
                                         <small
@@ -115,53 +111,34 @@
                                     <!-- Populated by JavaScript -->
                                 </div>
 
-                                <!-- Attachments and Scheduling -->
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card h-100 border shadow-none">
-                                            <div class="card-header border-bottom py-2">
-                                                <h6 class="mb-0">{{ get_label('attachments', 'Attachments') }}</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <label for="attachments"
-                                                    class="form-label">{{ get_label('choose_files', 'Choose files to upload') }}</label>
-                                                <input type="file" name="attachments[]" id="attachments"
-                                                    class="form-control" multiple>
-                                                <div id="file-list" class="d-none mt-3">
-                                                    <h6 class="small">
-                                                        {{ get_label('selected_files', 'Selected Files:') }}</h6>
-                                                    <ul class="list-unstyled mb-0" id="file-names"></ul>
-                                                </div>
-                                            </div>
+                                    <div class="col-md-6 mb-3 tk-field">
+                                        <label for="attachments" class="tk-label">{{ get_label('attachments', 'Attachments') }} - {{ get_label('choose_files', 'Choose files to upload') }}</label>
+                                        <input type="file" name="attachments[]" id="attachments" class="tk-file-input" multiple>
+                                        <div id="file-list" class="d-none mt-3">
+                                            <h6 class="small">{{ get_label('selected_files', 'Selected Files:') }}</h6>
+                                            <ul class="list-unstyled mb-0" id="file-names"></ul>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <div class="card h-100 border shadow-none">
-                                            <div class="card-header border-bottom py-2">
-                                                <h6 class="mb-0">{{ get_label('delivery_options', 'Delivery Options') }}
-                                                </h6>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="mt-4">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="scheduleToggle"
+                                                    name="schedule_toggle"
+                                                    data-select-time-error="{{ get_label('select_time_error', 'Please select a time to schedule the email') }}">
+                                                <label class="form-check-label" for="scheduleToggle">
+                                                    {{ get_label('schedule_email', 'Schedule Email') }}
+                                                </label>
                                             </div>
-                                            <div class="card-body mt-3">
-                                                <div class="form-check form-switch mb-3">
-                                                    <input class="form-check-input" type="checkbox" id="scheduleToggle"
-                                                        name="schedule_toggle"
-                                                        data-select-time-error="{{ get_label('select_time_error', 'Please select a time to schedule the email') }}">
-                                                    <label class="form-check-label" for="scheduleToggle">
-                                                        {{ get_label('schedule_email', 'Schedule Email') }}
-                                                    </label>
-                                                </div>
 
-                                                <div id="scheduleField" class="d-none">
-                                                    <label
-                                                        class="form-label">{{ get_label('schedule_at', 'Schedule Date & Time') }}</label>
-                                                    <input type="datetime-local" name="scheduled_at" class="form-control"
-                                                        min="{{ now()->format('Y-m-d\TH:i') }}">
-                                                    <small class="text-muted">
-                                                        {{ get_label('timezone_note', 'Timezone:') }}
-                                                        {{ config('app.timezone') }}
-                                                    </small>
-                                                </div>
+                                            <div id="scheduleField" class="d-none tk-field mt-3">
+                                                <label class="tk-label">{{ get_label('schedule_at', 'Schedule Date & Time') }}</label>
+                                                <input type="datetime-local" name="scheduled_at" class="tk-input" min="{{ now()->format('Y-m-d\TH:i') }}">
+                                                <small class="text-muted">
+                                                    {{ get_label('timezone_note', 'Timezone:') }}
+                                                    {{ config('app.timezone') }}
+                                                </small>
                                             </div>
                                         </div>
                                     </div>
@@ -184,16 +161,13 @@
                             <input type="hidden" name="redirect_url" value="{{ route('emails.sent_list') }}" />
 
                             <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label class="form-label">{{ get_label('subject', 'Subject') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bx bx-text"></i></span>
-                                        <input type="text" name="subject" class="form-control" required>
-                                    </div>
+                                <div class="col-md-12 mb-3 tk-field">
+                                    <label class="tk-label">{{ get_label('subject', 'Subject') }}</label>
+                                    <input type="text" name="subject" class="tk-input" required>
                                 </div>
-                                <div class="col-md-12 mb-3">
-                                    <label class="form-label">{{ get_label('recipients', 'Recipients') }}</label>
-                                    <select name="emails[]"  class="form-control to_emails" multiple="multiple"
+                                <div class="col-md-12 mb-3 tk-field">
+                                    <label class="tk-label">{{ get_label('recipients', 'Recipients') }}</label>
+                                    <select name="emails[]"  class="tk-select to_emails" multiple="multiple"
                                         required>
                                     </select>
                                     <small
@@ -201,64 +175,46 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">{{ get_label('message', 'Message') }}</label>
+                            <div class="mb-3 tk-field">
+                                <label class="tk-label">{{ get_label('message', 'Message') }}</label>
                                 <textarea name="body" id="custom-email-body" rows="8"></textarea>
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 border shadow-none">
-                                        <div class="card-header border-bottom py-2">
-                                            <h6 class="mb-0">{{ get_label('attachments', 'Attachments') }}</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <label for="custom_attachments"
-                                                class="form-label">{{ get_label('choose_files', 'Choose files to upload') }}</label>
-                                            <input type="file" name="attachments[]" id="custom_attachments"
-                                                class="form-control" multiple>
-                                            <div id="custom-file-list" class="d-none mt-3">
-                                                <h6 class="small">{{ get_label('selected_files', 'Selected Files:') }}
-                                                </h6>
-                                                <ul class="list-unstyled mb-0" id="custom-file-names"></ul>
-                                            </div>
-                                        </div>
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="custom_attachments" class="tk-label">{{ get_label('attachments', 'Attachments') }} - {{ get_label('choose_files', 'Choose files to upload') }}</label>
+                                    <input type="file" name="attachments[]" id="custom_attachments" class="tk-file-input" multiple>
+                                    <div id="custom-file-list" class="d-none mt-3">
+                                        <h6 class="small">{{ get_label('selected_files', 'Selected Files:') }}</h6>
+                                        <ul class="list-unstyled mb-0" id="custom-file-names"></ul>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <div class="card h-100 border shadow-none">
-                                        <div class="card-header border-bottom py-2">
-                                            <h6 class="mb-0">{{ get_label('delivery_options', 'Delivery Options') }}
-                                            </h6>
+                                    <div class="mt-4">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="customScheduleToggle"
+                                                name="schedule_toggle"
+                                                data-select-time-error="{{ get_label('select_time_error', 'Please select a time to schedule the email') }}">
+                                            <label class="form-check-label" for="customScheduleToggle">
+                                                {{ get_label('schedule_email', 'Schedule Email') }}
+                                            </label>
                                         </div>
-                                        <div class="card-body mt-3">
-                                            <div class="form-check form-switch mb-3">
-                                                <input class="form-check-input" type="checkbox" id="customScheduleToggle"
-                                                    name="schedule_toggle"
-                                                    data-select-time-error="{{ get_label('select_time_error', 'Please select a time to schedule the email') }}">
-                                                <label class="form-check-label" for="customScheduleToggle">
-                                                    {{ get_label('schedule_email', 'Schedule Email') }}
-                                                </label>
-                                            </div>
 
-                                            <div id="customScheduleField" class="d-none">
-                                                <label
-                                                    class="form-label">{{ get_label('schedule_at', 'Schedule Date & Time') }}</label>
-                                                <input type="datetime-local" name="scheduled_at" class="form-control"
-                                                    min="{{ now()->format('Y-m-d\TH:i') }}">
-                                                <small class="text-muted">
-                                                    {{ get_label('timezone_note', 'Timezone:') }}
-                                                    {{ config('app.timezone') }}
-                                                </small>
-                                            </div>
+                                        <div id="customScheduleField" class="d-none tk-field mt-3">
+                                            <label class="tk-label">{{ get_label('schedule_at', 'Schedule Date & Time') }}</label>
+                                            <input type="datetime-local" name="scheduled_at" class="tk-input" min="{{ now()->format('Y-m-d\TH:i') }}">
+                                            <small class="text-muted">
+                                                {{ get_label('timezone_note', 'Timezone:') }}
+                                                {{ config('app.timezone') }}
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="d-flex justify-content-start mt-3">
-                                <button type="submit" id="submit_btn" class="custom_submit_btn btn btn-primary hover-shadow"
+                                <button type="submit" id="submit_btn" class="custom_submit_btn tk-btn tk-btn-primary hover-shadow"
                                     data-label-send="{{ get_label('send_now', 'Send Now') }}"
                                     data-label-schedule="{{ get_label('schedule_email', 'Schedule Email') }}">
                                     <i class="bx bx-send me-1"></i> {{ get_label('send_now', 'Send Now') }}

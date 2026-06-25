@@ -432,18 +432,18 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('priority', 'Priority') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('priority', 'Priority') ?> <span
                                     class="asterisk">*</span></label>
-                            <select class="form-select" name="priority">
+                            <select class="tk-select" name="priority">
                                 <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>
                                     <?= get_label('low', 'Low') ?></option>
                                 <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>
@@ -453,14 +453,16 @@
                             </select>
                         </div>
                     </div>
-                    <label for="description" class="form-label"><?= get_label('description', 'Description') ?></label>
-                    <textarea class="form-control" name="description"
-                        placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    <div class="mb-3 tk-field">
+                        <label for="description" class="tk-label"><?= get_label('description', 'Description') ?></label>
+                        <textarea class="tk-input" name="description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label for="reminder-switch"
-                                    class="form-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
+                                    class="tk-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
                                 <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"data-bs-offset="0,4"
                                     data-bs-placement="top" data-bs-html="true"title=""
                                     data-bs-original-title="<b>{{ get_label('todo_reminder', 'Todo Reminder') }}:</b> {{ get_label('todo_reminder_info', 'Enable this option to set reminders for tasks. You can configure reminder frequencies (daily, weekly, or monthly), specific times, and customize alerts to ensure you stay on track with todo deadlines.') }}"></i>
@@ -473,20 +475,20 @@
                             </div>
                             <div id="reminder-settings" class="d-none">
                                 <!-- Frequency Type -->
-                                <div class="mb-3">
+                                <div class="mb-3 tk-field">
                                     <label for="frequency-type"
-                                        class="form-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
-                                    <select class="form-select" id="frequency-type" name="frequency_type" required>
+                                        class="tk-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
+                                    <select class="tk-select" id="frequency-type" name="frequency_type" required>
                                         <option value="daily">{{ get_label('daily', 'Daily') }}</option>
                                         <option value="weekly">{{ get_label('weekly', 'Weekly') }}</option>
                                         <option value="monthly">{{ get_label('monthly', 'Monthly') }}</option>
                                     </select>
                                 </div>
                                 <!-- Day of Week (Weekly Only) -->
-                                <div class="d-none mb-3" id="day-of-week-group">
+                                <div class="d-none mb-3 tk-field" id="day-of-week-group">
                                     <label
-                                        for="day-of-week"class="form-label">{{ get_label('day_of_the_week', 'Day of the Week') }}</label>
-                                    <select class="form-select" id="day-of-week" name="day_of_week">
+                                        for="day-of-week" class="tk-label">{{ get_label('day_of_the_week', 'Day of the Week') }}</label>
+                                    <select class="tk-select" id="day-of-week" name="day_of_week">
                                         <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                         <option value="1">{{ get_label('monday', 'Monday') }}</option>
                                         <option value="2">{{ get_label('tuesday', 'Tuesday') }}</option>
@@ -498,10 +500,10 @@
                                     </select>
                                 </div>
                                 <!-- Day of Month (Monthly Only) -->
-                                <div class="d-none mb-3" id="day-of-month-group">
+                                <div class="d-none mb-3 tk-field" id="day-of-month-group">
                                     <label for="day-of-month"
-                                        class="form-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
-                                    <select class="form-select" id="day-of-month" name="day_of_month">
+                                        class="tk-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
+                                    <select class="tk-select" id="day-of-month" name="day_of_month">
                                         <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                         @foreach (range(1, 31) as $day)
                                             <option value="{{ $day }}">{{ $day }}</option>
@@ -509,10 +511,10 @@
                                     </select>
                                 </div>
                                 <!-- Time of Day -->
-                                <div class="mb-3">
+                                <div class="mb-3 tk-field">
                                     <label for="time-of-day"
-                                        class="form-label">{{ get_label('time_of_day', 'Time of Day') }}</label>
-                                    <input type="time" class="form-control" id="time-of-day" name="time_of_day">
+                                        class="tk-label">{{ get_label('time_of_day', 'Time of Day') }}</label>
+                                    <input type="time" class="tk-input" id="time-of-day" name="time_of_day">
                                 </div>
                             </div>
                         </div>
@@ -540,31 +542,33 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="todo_title" class="form-control" name="title"
+                            <input type="text" id="todo_title" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('priority', 'Priority') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('priority', 'Priority') ?> <span
                                     class="asterisk">*</span></label>
-                            <select class="form-select" id="todo_priority" name="priority">
+                            <select class="tk-select" id="todo_priority" name="priority">
                                 <option value="low"><?= get_label('low', 'Low') ?></option>
                                 <option value="medium"><?= get_label('medium', 'Medium') ?></option>
                                 <option value="high"><?= get_label('high', 'High') ?></option>
                             </select>
                         </div>
                     </div>
-                    <label for="description" class="form-label"><?= get_label('description', 'Description') ?></label>
-                    <textarea class="form-control" id="todo_description" name="description"
-                        placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    <div class="mb-3 tk-field">
+                        <label for="description" class="tk-label"><?= get_label('description', 'Description') ?></label>
+                        <textarea class="tk-input" id="todo_description" name="description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    </div>
                     <div class="col-md-12">
                         <div class="mb-3">
                             <label for="reminder-switch"
-                                class="form-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
+                                class="tk-label">{{ get_label('enable_reminder', 'Enable Reminder') }}</label>
                             <i class="bx bx-info-circle text-primary" data-bs-toggle="tooltip"data-bs-offset="0,4"
                                 data-bs-placement="top" data-bs-html="true"title=""
                                 data-bs-original-title="<b>{{ get_label('task_reminder', 'Task Reminder') }}:</b> {{ get_label('task_reminder_info', 'Enable this option to set reminders for tasks. You can configure reminder frequencies (daily, weekly, or monthly), specific times, and customize alerts to ensure you stay on track with task deadlines.') }}"></i>
@@ -578,20 +582,20 @@
                     </div>
                     <div id="edit-todo-reminder-settings" class="d-none">
                         <!-- Frequency Type -->
-                        <div class="mb-3">
+                        <div class="mb-3 tk-field">
                             <label for="frequency-type"
-                                class="form-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
-                            <select class="form-select" id="edit-todo-frequency-type" name="frequency_type" required>
+                                class="tk-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
+                            <select class="tk-select" id="edit-todo-frequency-type" name="frequency_type" required>
                                 <option value="daily">{{ get_label('daily', 'Daily') }}</option>
                                 <option value="weekly">{{ get_label('weekly', 'Weekly') }}</option>
                                 <option value="monthly">{{ get_label('monthly', 'Monthly') }}</option>
                             </select>
                         </div>
                         <!-- Day of Week (Weekly Only) -->
-                        <div class="d-none mb-3" id="edit-todo-day-of-week-group">
+                        <div class="d-none mb-3 tk-field" id="edit-todo-day-of-week-group">
                             <label for="day-of-week"
-                                class="form-label">{{ get_label('day_of_the_week', 'Day of the Week') }}</label>
-                            <select class="form-select" id="edit-todo-day-of-week" name="day_of_week">
+                                class="tk-label">{{ get_label('day_of_the_week', 'Day of the Week') }}</label>
+                            <select class="tk-select" id="edit-todo-day-of-week" name="day_of_week">
                                 <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                 <option value="1">{{ get_label('monday', 'Monday') }}</option>
                                 <option value="2">{{ get_label('tuesday', 'Tuesday') }}</option>
@@ -603,10 +607,10 @@
                             </select>
                         </div>
                         <!-- Day of Month (Monthly Only) -->
-                        <div class="d-none mb-3" id="edit-todo-day-of-month-group">
+                        <div class="d-none mb-3 tk-field" id="edit-todo-day-of-month-group">
                             <label for="day-of-month"
-                                class="form-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
-                            <select class="form-select" id="edit-todo-day-of-month" name="day_of_month">
+                                class="tk-label">{{ get_label('day_of_the_month', 'Day of the Month') }}</label>
+                            <select class="tk-select" id="edit-todo-day-of-month" name="day_of_month">
                                 <option value="">{{ get_label('any_day', 'Any Day') }}</option>
                                 @foreach (range(1, 31) as $day)
                                     <option value="{{ $day }}">{{ $day }}</option>
@@ -614,10 +618,10 @@
                             </select>
                         </div>
                         <!-- Time of Day -->
-                        <div class="mb-3">
+                        <div class="mb-3 tk-field">
                             <label for="time-of-day"
-                                class="form-label">{{ get_label('time_of_day', 'Time of Day') }}</label>
-                            <input type="time" class="form-control" id="edit-todo-time-of-day"
+                                class="tk-label">{{ get_label('time_of_day', 'Time of Day') }}</label>
+                            <input type="time" class="tk-input" id="edit-todo-time-of-day"
                                 name="time_of_day">
                         </div>
                     </div>
@@ -1023,19 +1027,19 @@
                 <div class="modal-body">
                     <div class="row">
                         @if (is_admin_or_leave_editor())
-                            <div class="col-12 mb-3">
-                                <label class="form-label"
+                            <div class="col-12 mb-3 tk-field">
+                                <label class="tk-label"
                                     for="user_id"><?= get_label('select_user', 'Select user') ?> <span
                                         class="asterisk">*</span></label>
-                                <select class="form-select tom_users_select"
+                                <select class="tk-select tom_users_select" id="user_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
-                                    name="user_id" data-single-select="true">
+                                    name="user_id" data-single-select="true" data-initial-limit="100">
                                     <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
                                         {{ $auth_user->last_name }}</option>
                                 </select>
                             </div>
                         @endif
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 tk-field">
                             <div class="form-check form-switch">
                                 <label class="form-check-label" for="partialLeave">
                                     <input class="form-check-input" type="checkbox" name="partialLeave"
@@ -1044,35 +1048,35 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-5 leave-from-date-div mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('from_date', 'From date') ?> <span
+                        <div class="col-5 leave-from-date-div mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('from_date', 'From date') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="start_date" name="from_date" class="form-control"
+                            <input type="text" id="start_date" name="from_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
-                        <div class="col-5 leave-to-date-div mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('to_date', 'To date') ?> <span
+                        <div class="col-5 leave-to-date-div mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('to_date', 'To date') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="lr_end_date" name="to_date" class="form-control"
+                            <input type="text" id="lr_end_date" name="to_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
-                        <div class="col-2 leave-from-time-div d-none mb-3">
-                            <label class="form-label" for=""><?= get_label('from_time', 'From Time') ?> <span
+                        <div class="col-2 leave-from-time-div d-none mb-3 tk-field">
+                            <label class="tk-label" for=""><?= get_label('from_time', 'From Time') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="time" name="from_time" class="form-control"
+                            <input type="time" name="from_time" class="tk-input"
                                 value="{{ old('from_time') }}">
                         </div>
-                        <div class="col-2 leave-to-time-div d-none mb-3">
-                            <label class="form-label" for=""><?= get_label('to_time', 'To Time') ?> <span
+                        <div class="col-2 leave-to-time-div d-none mb-3 tk-field">
+                            <label class="tk-label" for=""><?= get_label('to_time', 'To Time') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="time" name="to_time" class="form-control" value="{{ old('to_time') }}">
+                            <input type="time" name="to_time" class="tk-input" value="{{ old('to_time') }}">
                         </div>
-                        <div class="col-2 leave-days-div mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('days', 'Days') ?></label>
-                            <input type="text" id="total_days" class="form-control" value="1"
+                        <div class="col-2 leave-days-div mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('days', 'Days') ?></label>
+                            <input type="text" id="total_days" class="tk-input" value="1"
                                 placeholder="" disabled>
                         </div>
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 tk-field">
                             <div class="form-check form-switch">
                                 <input class="form-check-input leaveVisibleToAll" type="checkbox"
                                     name="leaveVisibleToAll" id="leaveVisibleToAll">
@@ -1084,25 +1088,25 @@
                                         data-bs-original-title="{{ get_label('leave_visible_to_info', 'Disabled: Requestee, Admin, and Leave Editors, along with selected users, will be able to know when the requestee is on leave. Enabled: All team members will be able to know when the requestee is on leave.') }}"></i></label>
                             </div>
                         </div>
-                        <div class="col-12 leaveVisibleToDiv mb-3">
-                            <select class="form-select tom_users_select"
+                        <div class="col-12 leaveVisibleToDiv mb-3 tk-field">
+                            <select class="tk-select tom_users_select"
                                 data-placeholder="<?= get_label('type_to_search_users_leave_visible_to', 'Type To Search Users Leave Visible To') ?>"
-                                name="visible_to_ids[]" data-leave-visible-to-users="true" multiple>
+                                name="visible_to_ids[]" data-leave-visible-to-users="true" data-initial-limit="100" multiple>
                         </select>
                         </div>
-                    <div class="col-12 mb-3">
-                        <label for="description" class="form-label"><?= get_label('reason', 'Reason') ?> <span
+                    <div class="col-12 mb-3 tk-field">
+                        <label for="description" class="tk-label"><?= get_label('reason', 'Reason') ?> <span
                                 class="asterisk">*</span></label>
-                        <textarea class="form-control" name="reason"
+                        <textarea class="tk-input" name="reason"
                             placeholder="<?= get_label('please_enter_leave_reason', 'Please enter leave reason') ?>"></textarea>
                     </div>
                     @if (is_admin_or_leave_editor())
-                        <div class="col-12 mb-3">
-                            <label for="comment" class="form-label"><?= get_label('comment', 'Comment') ?></label>
-                            <textarea class="form-control" name="comment"
+                        <div class="col-12 mb-3 tk-field">
+                            <label for="comment" class="tk-label"><?= get_label('comment', 'Comment') ?></label>
+                            <textarea class="tk-input" name="comment"
                                 placeholder="<?= get_label('optional_comment_placeholder', 'Please Enter Comment, if Any') ?>"></textarea>
                         </div>
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 tk-field">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="create_is_paid_toggle" name="is_paid" value="1">
                                 <label class="form-check-label" for="create_is_paid_toggle">
@@ -1117,15 +1121,15 @@
                             <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                                 <input type="radio" class="btn-check" name="status" id="create_lr_pending"
                                     value="pending" checked>
-                                <label class="btn btn-outline-primary"
+                                <label class="tk-btn tk-btn-outline"
                                     for="create_lr_pending"><?= get_label('pending', 'Pending') ?></label>
                                 <input type="radio" class="btn-check" name="status" id="create_lr_approved"
                                     value="approved">
-                                <label class="btn btn-outline-primary"
+                                <label class="tk-btn tk-btn-outline"
                                     for="create_lr_approved"><?= get_label('approved', 'Approved') ?></label>
                                 <input type="radio" class="btn-check" name="status" id="create_lr_rejected"
                                     value="rejected">
-                                <label class="btn btn-outline-primary"
+                                <label class="tk-btn tk-btn-outline"
                                     for="create_lr_rejected"><?= get_label('rejected', 'Rejected') ?></label>
                             </div>
                         </div>
@@ -1133,11 +1137,11 @@
                 </div>
             </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="tk-btn tk-btn-outline" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
                     <button type="submit" id="submit_btn"
-                        class="btn btn-primary"><?= get_label('create', 'Create') ?></button>
+                        class="tk-btn tk-btn-primary"><?= get_label('create', 'Create') ?></button>
                 </div>
             </form>
         </div>
@@ -1228,13 +1232,13 @@
                 <div class="modal-body">
                     <div class="row">
                         @if (is_admin_or_leave_editor())
-                            <div class="col-12 mb-3">
-                                <label class="form-label"><?= get_label('user', 'User') ?> <span
+                            <div class="col-12 mb-3 tk-field">
+                                <label class="tk-label"><?= get_label('user', 'User') ?> <span
                                         class="asterisk">*</span></label>
-                                <input type="text" id="leaveUser" class="form-control" disabled>
+                                <input type="text" id="leaveUser" class="tk-input" disabled>
                             </div>
                         @endif
-                        <div class="col-12">
+                        <div class="col-12 tk-field">
                             <div class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" id="updatePartialLeave"
                                     name="partialLeave">
@@ -1242,34 +1246,34 @@
                                     for="updatePartialLeave"><?= get_label('partial_leave', 'Partial Leave') ?>?</label>
                             </div>
                         </div>
-                        <div class="col-5 leave-from-date-div mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('from_date', 'From date') ?> <span
+                        <div class="col-5 leave-from-date-div mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('from_date', 'From date') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="update_start_date" name="from_date" class="form-control"
+                            <input type="text" id="update_start_date" name="from_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
-                        <div class="col-5 leave-to-date-div mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('to_date', 'To date') ?> <span
+                        <div class="col-5 leave-to-date-div mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('to_date', 'To date') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="update_end_date" name="to_date" class="form-control"
+                            <input type="text" id="update_end_date" name="to_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
-                        <div class="col-2 leave-from-time-div d-none mb-3">
-                            <label class="form-label" for=""><?= get_label('from_time', 'From Time') ?> <span
+                        <div class="col-2 leave-from-time-div d-none mb-3 tk-field">
+                            <label class="tk-label" for=""><?= get_label('from_time', 'From Time') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="time" name="from_time" class="form-control">
+                            <input type="time" name="from_time" class="tk-input">
                         </div>
-                        <div class="col-2 leave-to-time-div d-none mb-3">
-                            <label class="form-label" for=""><?= get_label('to_time', 'To Time') ?> <span
+                        <div class="col-2 leave-to-time-div d-none mb-3 tk-field">
+                            <label class="tk-label" for=""><?= get_label('to_time', 'To Time') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="time" name="to_time" class="form-control">
+                            <input type="time" name="to_time" class="tk-input">
                         </div>
-                        <div class="col-2 leave-days-div mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('days', 'Days') ?></label>
-                            <input type="text" id="update_total_days" class="form-control" value="1"
+                        <div class="col-2 leave-days-div mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('days', 'Days') ?></label>
+                            <input type="text" id="update_total_days" class="tk-input" value="1"
                                 placeholder="" disabled>
                         </div>
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 tk-field">
                             <div class="form-check form-switch">
                                 <input class="form-check-input leaveVisibleToAll" type="checkbox"
                                     name="leaveVisibleToAll" id="updateLeaveVisibleToAll">
@@ -1281,26 +1285,26 @@
                                         data-bs-original-title="{{ get_label('leave_visible_to_info', 'Disabled: Requestee, Admin, and Leave Editors, along with selected users, will be able to know when the requestee is on leave. Enabled: All team members will be able to know when the requestee is on leave.') }}"></i></label>
                             </div>
                         </div>
-                        <div class="col-12 leaveVisibleToDiv mb-3">
-                            <select class="form-select tom_users_select"
+                        <div class="col-12 leaveVisibleToDiv mb-3 tk-field">
+                            <select class="tk-select tom_users_select"
                                 data-placeholder="<?= get_label('type_to_search_users_leave_visible_to', 'Type To Search Users Leave Visible To') ?>"
-                                name="visible_to_ids[]" data-leave-visible-to-users="true" multiple>
+                                name="visible_to_ids[]" data-leave-visible-to-users="true" data-initial-limit="100" multiple>
                             </select>
                         </div>
-                        <div class="col-12 mb-3">
-                            <label for="description" class="form-label"><?= get_label('reason', 'Reason') ?> <span
+                        <div class="col-12 mb-3 tk-field">
+                            <label for="description" class="tk-label"><?= get_label('reason', 'Reason') ?> <span
                                     class="asterisk">*</span></label>
-                            <textarea class="form-control" name="reason"
+                            <textarea class="tk-input" name="reason"
                                 placeholder="<?= get_label('please_enter_leave_reason', 'Please enter leave reason') ?>"></textarea>
                         </div>
                         @if (is_admin_or_leave_editor())
-                            <div class="col-12 mb-3">
+                            <div class="col-12 mb-3 tk-field">
                                 <label for="comment"
-                                    class="form-label"><?= get_label('comment', 'Comment') ?></label>
-                                <textarea class="form-control" name="comment"
+                                    class="tk-label"><?= get_label('comment', 'Comment') ?></label>
+                                <textarea class="tk-input" name="comment"
                                     placeholder="<?= get_label('optional_comment_placeholder', 'Please Enter Comment, if Any') ?>"></textarea>
                             </div>
-                            <div class="col-12 mb-3">
+                            <div class="col-12 mb-3 tk-field">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="is_paid_toggle" name="is_paid" value="1">
                                     <label class="form-check-label" for="is_paid_toggle">
@@ -1318,25 +1322,25 @@
                             <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                                 <input type="radio" class="btn-check" name="status" id="update_lr_pending"
                                     value="pending" {{ $disabled }}>
-                                <label class="btn btn-outline-primary"
+                                <label class="tk-btn tk-btn-outline"
                                     for="update_lr_pending"><?= get_label('pending', 'Pending') ?></label>
                                 <input type="radio" class="btn-check" name="status" id="update_lr_approved"
                                     value="approved" {{ $disabled }}>
-                                <label class="btn btn-outline-primary"
+                                <label class="tk-btn tk-btn-outline"
                                     for="update_lr_approved"><?= get_label('approved', 'Approved') ?></label>
                                 <input type="radio" class="btn-check" name="status" id="update_lr_rejected"
                                     value="rejected" {{ $disabled }}>
-                                <label class="btn btn-outline-primary"
+                                <label class="tk-btn tk-btn-outline"
                                     for="update_lr_rejected"><?= get_label('rejected', 'Rejected') ?></label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="tk-btn tk-btn-outline" data-bs-dismiss="modal">
                         <?= get_label('close', 'Close') ?>
                     </button>
-                    <button type="submit" class="btn btn-primary"
+                    <button type="submit" class="tk-btn tk-btn-primary"
                         id="submit_btn"><?= get_label('update', 'Update') ?></label></button>
                 </div>
             </form>
@@ -5523,58 +5527,50 @@
                         aria-label="{{ get_label('close', 'Close') }}"></button>
                 </div>
                 <div class="modal-body row g-3">
-                    <div class="col-md-6">
-                        <label for="name" class="form-label">{{ get_label('full_name', 'Full Name') }} <span
+                    <div class="col-md-6 tk-field">
+                        <label for="name" class="tk-label">{{ get_label('full_name', 'Full Name') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control"
+                        <input type="text" name="name" class="tk-input"
                             placeholder="{{ get_label('full_name', 'Full Name') }}" required>
                     </div>
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
+                    <div class="col-md-6 tk-field">
+                        <label for="email" class="tk-label">{{ get_label('email', 'Email') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="email" name="email" class="form-control"
+                        <input type="email" name="email" class="tk-input"
                             placeholder="{{ get_label('email', 'Email') }}" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 tk-field">
                         <label for="phone"
-                            class="form-label">{{ get_label('phone_number', 'Phone Number') }}</label>
-                        <input type="text" name="phone" class="form-control"
+                            class="tk-label">{{ get_label('phone_number', 'Phone Number') }}</label>
+                        <input type="text" name="phone" class="tk-input"
                             placeholder="{{ get_label('phone_number', 'Phone Number') }}">
                     </div>
-                    <div class="col-md-6">
-                        <label for="position" class="form-label">{{ get_label('position', 'Position') }}</label>
-                        <input type="text" name="position" class="form-control"
+                    <div class="col-md-6 tk-field">
+                        <label for="position" class="tk-label">{{ get_label('position', 'Position') }}</label>
+                        <input type="text" name="position" class="tk-input"
                             placeholder="{{ get_label('position', 'Position') }}">
                     </div>
-                    <div class="col-md-6">
-                        <label for="source" class="form-label">{{ get_label('source', 'Source') }}</label>
-                        <input type="text" name="source" class="form-control"
+                    <div class="col-md-6 tk-field">
+                        <label for="source" class="tk-label">{{ get_label('source', 'Source') }}</label>
+                        <input type="text" name="source" class="tk-input"
                             placeholder="{{ get_label('source', 'Source') }}">
                     </div>
-                    <div class="col-12">
-                        <label for="attachments" class="form-label fw-semibold">
+                    <div class="col-12 tk-field">
+                        <label for="attachments" class="tk-label">
                             {{ get_label('attachments', 'Attachments') }}
-                            <span
-                                class="text-muted fw-normal small">({{ get_label('optional', 'Optional') }})</span>
+                            <span class="text-muted fw-normal small">({{ get_label('optional', 'Optional') }})</span>
                         </label>
-                        <div class="bg-light rounded border px-3 py-3">
-                            <div class="mb-2">
-                                <input type="file" name="attachments[]" id="attachments"
-                                    class="form-control file-input" multiple>
-                            </div>
-                            <div id="file-list" class="mt-2">
-                                <h6 class="text-muted small mb-1">
-                                    {{ get_label('selected_files', 'Selected Files') }}</h6>
-                                <ul class="list-group list-group-sm file-names-list" id="file-names"></ul>
-                            </div>
-                            <small
-                                class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
+                        <input type="file" name="attachments[]" id="attachments" class="tk-file-input file-input" multiple>
+                        <div id="file-list" class="d-none mt-3">
+                            <h6 class="small">{{ get_label('selected_files', 'Selected Files:') }}</h6>
+                            <ul class="list-unstyled mb-0 file-names-list" id="file-names"></ul>
                         </div>
+                        <small class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
                     </div>
-                    <div class="col-md-6">
-                        <label for="status" class="form-label">{{ get_label('status', 'Status') }}</label>
+                    <div class="col-md-6 tk-field">
+                        <label for="status" class="tk-label">{{ get_label('status', 'Status') }}</label>
                         @if (isset($statuses) && $statuses->isNotEmpty())
-                            <select name="status_id" class="form-select" required>
+                            <select name="status_id" class="tk-select" required>
                                 <option value="">{{ get_label('select_status', 'Select Status') }}</option>
                                 @foreach ($statuses as $status)
                                     <option class="badge bg-label-{{ $status->color }}"
@@ -5614,52 +5610,44 @@
                         aria-label="{{ get_label('close', 'Close') }}"></button>
                 </div>
                 <div class="modal-body row g-3">
-                    <div class="col-md-6">
-                        <label for="name" class="form-label">{{ get_label('full_name', 'Full Name') }} <span
+                    <div class="col-md-6 tk-field">
+                        <label for="name" class="tk-label">{{ get_label('full_name', 'Full Name') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" id="candidateName" required>
+                        <input type="text" name="name" class="tk-input" id="candidateName" required>
                     </div>
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
+                    <div class="col-md-6 tk-field">
+                        <label for="email" class="tk-label">{{ get_label('email', 'Email') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="email" name="email" class="form-control" id="candidateEmail" required>
+                        <input type="email" name="email" class="tk-input" id="candidateEmail" required>
                     </div>
-                    <div class="col-md-6">
-                        <label for="phone" class="form-label">{{ get_label('phone', 'Phone') }}</label>
-                        <input type="text" name="phone" class="form-control" id="candidatePhone">
+                    <div class="col-md-6 tk-field">
+                        <label for="phone" class="tk-label">{{ get_label('phone', 'Phone') }}</label>
+                        <input type="text" name="phone" class="tk-input" id="candidatePhone">
                     </div>
-                    <div class="col-md-6">
-                        <label for="position" class="form-label">{{ get_label('position', 'Position') }}</label>
-                        <input type="text" name="position" class="form-control" id="candidatePosition">
+                    <div class="col-md-6 tk-field">
+                        <label for="position" class="tk-label">{{ get_label('position', 'Position') }}</label>
+                        <input type="text" name="position" class="tk-input" id="candidatePosition">
                     </div>
-                    <div class="col-md-6">
-                        <label for="source" class="form-label">{{ get_label('source', 'Source') }}</label>
-                        <input type="text" name="source" class="form-control" id="candidateSource">
+                    <div class="col-md-6 tk-field">
+                        <label for="source" class="tk-label">{{ get_label('source', 'Source') }}</label>
+                        <input type="text" name="source" class="tk-input" id="candidateSource">
                     </div>
-                    <div class="col-12">
-                        <label for="attachments" class="form-label fw-semibold">
+                    <div class="col-12 tk-field">
+                        <label for="attachments" class="tk-label">
                             {{ get_label('attachments', 'Attachments') }}
-                            <span
-                                class="text-muted fw-normal small">({{ get_label('optional', 'Optional') }})</span>
+                            <span class="text-muted fw-normal small">({{ get_label('optional', 'Optional') }})</span>
                         </label>
-                        <div class="bg-light rounded border px-3 py-3">
-                            <div class="mb-2">
-                                <input type="file" name="attachments[]" id="attachments"
-                                    class="form-control file-input" multiple>
-                            </div>
-                            <div id="file-list" class="mt-2">
-                                <h6 class="text-muted small mb-1">
-                                    {{ get_label('selected_files', 'Selected Files') }}</h6>
-                                <ul class="list-group list-group-sm file-names-list" id="file-names"></ul>
-                            </div>
-                            <small
-                                class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
+                        <input type="file" name="attachments[]" id="attachments" class="tk-file-input file-input" multiple>
+                        <div id="file-list" class="d-none mt-3">
+                            <h6 class="small">{{ get_label('selected_files', 'Selected Files:') }}</h6>
+                            <ul class="list-unstyled mb-0 file-names-list" id="file-names"></ul>
                         </div>
+                        <small class="text-muted d-block mt-2">{{ get_label('accepted_file_types', 'Accepted file types: pdf, doc, docx, jpg, png') }}</small>
                     </div>
-                    <div class="col-md-6">
-                        <label for="status" class="form-label">{{ get_label('status', 'Status') }}</label>
+                    <div class="col-md-6 tk-field">
+                        <label for="status" class="tk-label">{{ get_label('status', 'Status') }}</label>
                         @if (isset($statuses) && $statuses->isNotEmpty())
-                            <select name="status_id" class="form-select" id="candidateStatusId" required>
+                            <select name="status_id" class="tk-select" id="candidateStatusId" required>
                                 <option value="">{{ get_label('select_status', 'Select Status') }}</option>
                                 @foreach ($statuses as $status)
                                     <option class="badge bg-label-{{ $status->color }}"

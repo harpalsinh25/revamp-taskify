@@ -96,6 +96,29 @@
 .tk-btn-lg { height: var(--ctrl-h-lg, 38px); padding: 0 18px; font-size: var(--fs-md); }
 .tk-btn-block { width: 100%; }
 
+/* Toggle / Radio Button Group support */
+.btn-check:checked + .tk-btn {
+    background: oklch(from var(--signal) l c h / 0.14);
+    border-color: var(--signal);
+    color: var(--signal);
+    z-index: 1;
+}
+.btn-group .tk-btn {
+    border-radius: 0;
+    margin-left: -1px;
+}
+.btn-group > .btn-check:first-child + .tk-btn,
+.btn-group > .tk-btn:first-child {
+    margin-left: 0;
+    border-top-left-radius: var(--r-2);
+    border-bottom-left-radius: var(--r-2);
+}
+.btn-group > .tk-btn:last-child,
+.btn-group > .btn-check:nth-last-child(2) + .tk-btn {
+    border-top-right-radius: var(--r-2);
+    border-bottom-right-radius: var(--r-2);
+}
+
 /* icon-only button */
 .tk-iconbtn {
     display: inline-flex; align-items: center; justify-content: center;
@@ -104,6 +127,64 @@
     transition: background var(--t-1) var(--ease), color var(--t-1) var(--ease);
 }
 .tk-iconbtn:hover { background: var(--bg-2); color: var(--fg-0); }
+.tk-iconbtn .tk-ic { width: 16px; height: 16px; }
+
+/* Tom Select (.tk-select) fixes so the wrapper styling doesn't break the control */
+.ts-wrapper.tk-select {
+    padding: 0 !important;
+    height: auto !important;
+    border: none !important;
+    background: transparent !important;
+}
+.ts-wrapper.tk-select .ts-control {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    color: var(--fg-0);
+    font-size: var(--fs-base);
+    min-height: var(--ctrl-h-md);
+    padding: 0 11px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    transition: border-color var(--t-1) var(--ease);
+}
+.ts-wrapper.tk-select .ts-control > input {
+    color: var(--fg-0);
+    font-size: var(--fs-base);
+}
+.ts-wrapper.tk-select.focus .ts-control {
+    border-color: var(--line-2);
+    box-shadow: none;
+}
+/* Ensure Tom Select dropdowns are always on top of modals */
+.ts-dropdown {
+    z-index: 9999 !important;
+}
+.ts-dropdown.tk-select {
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-2) !important;
+    box-shadow: var(--shadow-2) !important;
+    color: var(--fg-0) !important;
+}
+/* Remove tag styling from single select items (dropdown_input makes them look like tags otherwise) */
+.ts-wrapper.tk-select.single .ts-control .item {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: var(--fg-0) !important;
+    box-shadow: none !important;
+    font-size: var(--fs-base) !important;
+}
+.ts-dropdown.tk-select .option {
+    padding: 8px 11px;
+}
+.ts-dropdown.tk-select .option.active,
+.ts-dropdown.tk-select .option:hover {
+    background: var(--bg-2) !important;
+    color: var(--fg-0) !important;
+}
 .tk-iconbtn .tk-ic { width: 16px; height: 16px; }
 
 /* ----------------------------------------------------------------------------
@@ -145,6 +226,38 @@
 .tk-inputgroup input { flex: 1; border: 0; background: transparent; outline: none; color: var(--fg-0); font-size: var(--fs-base); padding: 0; height: 100%; }
 .tk-inputgroup > span { display: inline-flex; align-items: center; padding: 0 4px; color: var(--fg-3); flex: none; font-size: 1.1rem; }
 .tk-inputgroup > span:hover { color: var(--fg-0); }
+
+/* File input styling */
+.tk-file-input {
+    width: 100%; height: var(--ctrl-h-md); padding: 0;
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2);
+    color: var(--fg-3); font-size: var(--fs-base); font-family: inherit;
+    transition: border-color var(--t-1) var(--ease);
+    cursor: pointer;
+    line-height: var(--ctrl-h-md);
+}
+.tk-file-input:hover {
+    border-color: var(--line-2);
+}
+.tk-file-input:focus {
+    outline: none; border-color: var(--line-2);
+}
+.tk-file-input::file-selector-button {
+    height: 100%;
+    padding: 0 14px;
+    margin-right: 12px;
+    background: var(--bg-3);
+    border: none;
+    border-right: 1px solid var(--line);
+    color: var(--fg-1);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--t-1) var(--ease);
+}
+.tk-file-input::file-selector-button:hover {
+    background: var(--bg-1);
+}
 
 /* ----------------------------------------------------------------------------
    5. BADGES / TAGS / STATUS PILLS / CHIPS

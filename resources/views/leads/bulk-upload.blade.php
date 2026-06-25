@@ -95,8 +95,7 @@
                         </div>
                         <form id="upload-form" enctype="multipart/form-data">
                             @csrf
-                            <input type="file" name="file" id="file" required class="form-control mb-3"
-                                accept=".xlsx, .xls, .csv">
+                            <input type="file" name="file" id="file" required class="tk-file-input mb-3" accept=".xlsx, .xls, .csv">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bx bx-upload me-1"></i>
                                 {{ get_label('upload_and_continue', 'Upload & Continue') }}

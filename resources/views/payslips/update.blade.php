@@ -66,90 +66,90 @@
                             <input type="hidden" id="total_leave_days_value" value="0">
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="user_id"><?= get_label('select_user', 'Select user') ?> <span class="asterisk">*</span></label>
-                        <select class="form-select tom_users_select" name="user_id" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false">
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="user_id"><?= get_label('select_user', 'Select user') ?> <span class="asterisk">*</span></label>
+                        <select class="tk-select tom_users_select" name="user_id" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false">
                             <option value="{{ $payslip->user_id }}" selected>{{ $payslip->user->first_name }} {{ $payslip->user->last_name }}</option>
                         </select>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="payslip_month"><?= get_label('payslip_month', 'Payslip month') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="month" id="payslip_month" name="month" value="{{ old('month', $payslip->month) }}">
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="payslip_month"><?= get_label('payslip_month', 'Payslip month') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="month" id="payslip_month" name="month" value="{{ old('month', $payslip->month) }}">
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="basic_salary"><?= get_label('basic_salary', 'Basic salary') ?> <span class="asterisk">*</span></label>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="basic_salary"><?= get_label('basic_salary', 'Basic salary') ?> <span class="asterisk">*</span></label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                            <input class="form-control" type="number" id="basic_salary" name="basic_salary" min="0" placeholder="<?= get_label('please_enter_basic_salary', 'Please enter basic salary') ?>" value="{{ old('basic_salary', $payslip->basic_salary),0 }}">
+                            <input class="tk-input" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" type="number" id="basic_salary" name="basic_salary" min="0" placeholder="<?= get_label('please_enter_basic_salary', 'Please enter basic salary') ?>" value="{{ old('basic_salary', $payslip->basic_salary),0 }}">
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="working_days"><?= get_label('working_days', 'Working days') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="number" id="working_days" name="working_days" min="0" max="31" step="0.5" placeholder="<?= get_label('please_enter_working_days', 'Please enter working days') ?>" value="{{ old('working_days', $payslip->working_days) }}">
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="working_days"><?= get_label('working_days', 'Working days') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="number" id="working_days" name="working_days" min="0" max="31" step="0.5" placeholder="<?= get_label('please_enter_working_days', 'Please enter working days') ?>" value="{{ old('working_days', $payslip->working_days) }}">
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="lop_days"><?= get_label('lop_days', 'Loss of pay days') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="number" id="lop_days" name="lop_days" step="0.25" min="0" placeholder="<?= get_label('please_enter_lop_days', 'Please enter loss of pay days') ?>" value="{{ old('lop_days', $payslip->lop_days) ?? 0 }}">
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="lop_days"><?= get_label('lop_days', 'Loss of pay days') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="number" id="lop_days" name="lop_days" step="0.25" min="0" placeholder="<?= get_label('please_enter_lop_days', 'Please enter loss of pay days') ?>" value="{{ old('lop_days', $payslip->lop_days) ?? 0 }}">
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="paid_days"><?= get_label('paid_days', 'Paid days') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control" type="number" id="paid_days" name="paid_days" value="{{ old('paid_days', $payslip->paid_days) }}" readonly>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="paid_days"><?= get_label('paid_days', 'Paid days') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="number" id="paid_days" name="paid_days" value="{{ old('paid_days', $payslip->paid_days) }}" readonly>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="bonus"><?= get_label('bonus', 'Bonus') ?> <span class="asterisk">*</span></label>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="bonus"><?= get_label('bonus', 'Bonus') ?> <span class="asterisk">*</span></label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                            <input class="form-control" type="number" id="bonus" name="bonus" min="0" placeholder="<?= get_label('please_enter_bonus', 'Please enter bonus') ?>" value="{{ old('bonus', $payslip->bonus) ?? 0 }}">
+                            <input class="tk-input" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" type="number" id="bonus" name="bonus" min="0" placeholder="<?= get_label('please_enter_bonus', 'Please enter bonus') ?>" value="{{ old('bonus', $payslip->bonus) ?? 0 }}">
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="incentives"><?= get_label('incentives', 'Incentives') ?> <span class="asterisk">*</span></label>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="incentives"><?= get_label('incentives', 'Incentives') ?> <span class="asterisk">*</span></label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                            <input class="form-control" type="number" id="incentives" name="incentives" min="0" placeholder="<?= get_label('please_enter_incentives', 'Please enter incentives') ?>" value="{{ old('incentives', $payslip->incentives) ?? 0 }}">
+                            <input class="tk-input" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" type="number" id="incentives" name="incentives" min="0" placeholder="<?= get_label('please_enter_incentives', 'Please enter incentives') ?>" value="{{ old('incentives', $payslip->incentives) ?? 0 }}">
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="leave_deduction"><?= get_label('leave_deduction', 'Leave deduction') ?> <span class="asterisk">*</span></label>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="leave_deduction"><?= get_label('leave_deduction', 'Leave deduction') ?> <span class="asterisk">*</span></label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                            <input class="form-control" type="number" id="leave_deduction" name="leave_deduction" value="{{ old('leave_deduction', $payslip->leave_deduction) }}" readonly>
+                            <input class="tk-input" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" type="number" id="leave_deduction" name="leave_deduction" value="{{ old('leave_deduction', $payslip->leave_deduction) }}" readonly>
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="over_time_hours"><?= get_label('over_time_hours', 'Over time hours') ?></label>
-                        <input class="form-control" type="number" step="0.5" id="over_time_hours" name="ot_hours" min="0" placeholder="<?= get_label('please_enter_over_time_hours', 'Please enter over time hours') ?>" value="{{ old('ot_hours', $payslip->ot_hours ?? 0) }}">
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="over_time_hours"><?= get_label('over_time_hours', 'Over time hours') ?></label>
+                        <input class="tk-input" type="number" step="0.5" id="over_time_hours" name="ot_hours" min="0" placeholder="<?= get_label('please_enter_over_time_hours', 'Please enter over time hours') ?>" value="{{ old('ot_hours', $payslip->ot_hours ?? 0) }}">
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="over_time_rate"><?= get_label('over_time_rate', 'Over time rate') ?> <span class="asterisk">*</span></label>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="over_time_rate"><?= get_label('over_time_rate', 'Over time rate') ?> <span class="asterisk">*</span></label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                            <input class="form-control" type="number" id="over_time_rate" name="ot_rate" min="0" placeholder="<?= get_label('please_enter_over_time_rate', 'Please enter over time rate') ?>" value="{{ old('ot_rate', $payslip->ot_rate ?? 0) }}">
+                            <input class="tk-input" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" type="number" id="over_time_rate" name="ot_rate" min="0" placeholder="<?= get_label('please_enter_over_time_rate', 'Please enter over time rate') ?>" value="{{ old('ot_rate', $payslip->ot_rate ?? 0) }}">
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="over_time_payment"><?= get_label('over_time_payment', 'Over time payment') ?> <span class="asterisk">*</span></label>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="over_time_payment"><?= get_label('over_time_payment', 'Over time payment') ?> <span class="asterisk">*</span></label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                            <input class="form-control" type="number" id="over_time_payment" name="ot_payment" value="{{ old('ot_payment', $payslip->ot_payment ?? 0) }}" readonly>
+                            <input class="tk-input" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" type="number" id="over_time_payment" name="ot_payment" value="{{ old('ot_payment', $payslip->ot_payment ?? 0) }}" readonly>
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="status"><?= get_label('payment_status', 'Payment status') ?> <span class="asterisk">*</span></label>
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="status"><?= get_label('payment_status', 'Payment status') ?> <span class="asterisk">*</span></label>
                         <div class="btn-group btn-group d-flex justify-content-center" role="group" aria-label="Basic radio toggle button group">
                             <input type="radio" class="btn-check" id="ps_paid" name="status" value="1" {{ old('status', $payslip->status) == '1' ? 'checked' : '' }}>
-                            <label class="btn btn-outline-primary" for="ps_paid"><?= get_label('paid', 'Paid') ?></label>
+                            <label class="tk-btn tk-btn-outline" for="ps_paid"><?= get_label('paid', 'Paid') ?></label>
                             <input type="radio" class="btn-check" id="ps_unpaid" name="status" value="0" {{ old('status', $payslip->status) == '0' ? 'checked' : '' }}>
-                            <label class="btn btn-outline-primary" for="ps_unpaid"><?= get_label('unpaid', 'Unpaid') ?></label>
+                            <label class="tk-btn tk-btn-outline" for="ps_unpaid"><?= get_label('unpaid', 'Unpaid') ?></label>
                         </div>
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="payment_date"><?= get_label('payment_date', 'Payment date') ?></label>
-                        <input type="text" id="payment_date" name="payment_date" class="form-control" placeholder="<?= get_label('please_select', 'Please select') ?>" value="{{ !is_null($payslip->payment_date)?format_date(date('Y-m-d', strtotime($payslip->payment_date)),false,'Y-m-d',get_php_date_time_format()):'' }}" data-defaultDate="false" autocomplete="off">
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="payment_date"><?= get_label('payment_date', 'Payment date') ?></label>
+                        <input type="text" id="payment_date" name="payment_date" class="tk-input" placeholder="<?= get_label('please_select', 'Please select') ?>" value="{{ !is_null($payslip->payment_date)?format_date(date('Y-m-d', strtotime($payslip->payment_date)),false,'Y-m-d',get_php_date_time_format()):'' }}" data-defaultDate="false" autocomplete="off">
                     </div>
-                    <div class="mb-3 col-md-4">
-                        <label class="form-label" for="payment_method_id"><?= get_label('payment_method', 'Payment method') ?></label>
-                        <select name="payment_method_id" class="form-select tom_static_select" data-placeholder="<?= get_label('Please select', 'Please select') ?>" data-allow-clear="true">
+                    <div class="mb-3 col-md-4 tk-field">
+                        <label class="tk-label" for="payment_method_id"><?= get_label('payment_method', 'Payment method') ?></label>
+                        <select name="payment_method_id" class="tk-select tom_static_select" data-placeholder="<?= get_label('Please select', 'Please select') ?>" data-allow-clear="true">
                             <option value=""><?= get_label('Please select', 'Please select') ?></option>
                             @foreach ($payment_methods as $payment_method)
                             <option value="{{$payment_method->id}}" {{ old('payment_method_id', $payslip->payment_method_id ?? '') == $payment_method->id ? 'selected' : '' }}>{{$payment_method->title}}</option>
@@ -160,18 +160,18 @@
                             <a href="{{ url('payment-methods') }}"><button type="button" class="btn btn-sm btn-primary action_manage_payment_methods" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('manage_payment_methods', 'Manage payment methods') ?>"><i class="bx bx-list-ul"></i></button></a>
                         </div>
                     </div>
-                    <div class="mb-3 col-md-5">
-                        <label class="form-label" for="allowance_id"><?= get_label('allowance', 'Allowance') ?></label>
-                        <select id="allowance_id" name="allowance_id" class="form-select tom_allowances_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
+                    <div class="mb-3 col-md-5 tk-field">
+                        <label class="tk-label" for="allowance_id"><?= get_label('allowance', 'Allowance') ?></label>
+                        <select id="allowance_id" name="allowance_id" class="tk-select tom_allowances_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
                         </select>
                         <div class="mt-2">
                             <a href="javascript:void(0);" class="openCreateAllowanceModal"><button type="button" class="btn btn-sm btn-primary action_create_allowances" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_allowance', 'Create allowance') ?>"><i class="bx bx-plus"></i></button></a>
                             <a href="{{ url('allowances') }}"><button type="button" class="btn btn-sm btn-primary action_manage_allowances" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('manage_allowances', 'Manage allowances') ?>"><i class="bx bx-list-ul"></i></button></a>
                         </div>
                     </div>
-                    <div class="mb-3 col-md-7">
-                        <label class="form-label" for="deduction_id"><?= get_label('deduction', 'Deduction') ?></label>
-                        <select id="deduction_id" name="deduction_id" class="form-select tom_deductions_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
+                    <div class="mb-3 col-md-7 tk-field">
+                        <label class="tk-label" for="deduction_id"><?= get_label('deduction', 'Deduction') ?></label>
+                        <select id="deduction_id" name="deduction_id" class="tk-select tom_deductions_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
                         </select>
                         <div class="mt-2">
                             <a href="javascript:void(0);" class="openCreateDeductionModal"><button type="button" class="btn btn-sm btn-primary action_create_deductions" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_deduction', 'Create deduction') ?>"><i class="bx bx-plus"></i></button></a>
@@ -181,16 +181,16 @@
                     <div class="row">
                         <div class="col-md-5" id="payslip-allowances">
                             <div class="d-flex">
-                                <div class="mb-3 col-md-6 mx-1">
-                                    <label class="form-label text-muted" for="allowance_0_title"><?= get_label('allowance', 'Allowance') ?></label>
-                                    <input type="text" id="allowance_0_title" class="form-control" placeholder="<?= get_label('allowance', 'Allowance') ?>" readonly>
+                                <div class="mb-3 col-md-6 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for="allowance_0_title"><?= get_label('allowance', 'Allowance') ?></label>
+                                    <input type="text" id="allowance_0_title" class="tk-input" placeholder="<?= get_label('allowance', 'Allowance') ?>" readonly>
                                 </div>
-                                <div class="mb-3 col-md-4 mx-1">
-                                    <label class="form-label text-muted" for="allowance_0_amount"><?= get_label('amount', 'Amount') ?> ({{$general_settings['currency_symbol']}})</label>
-                                    <input type="text" id="allowance_0_amount" class="form-control" placeholder="<?= get_label('amount', 'Amount') ?>" readonly>
+                                <div class="mb-3 col-md-4 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for="allowance_0_amount"><?= get_label('amount', 'Amount') ?> ({{$general_settings['currency_symbol']}})</label>
+                                    <input type="text" id="allowance_0_amount" class="tk-input" placeholder="<?= get_label('amount', 'Amount') ?>" readonly>
                                 </div>
-                                <div class="mb-3 col-md-1 mx-1">
-                                    <label class="form-label text-muted" for="allowance_0_action"><?= get_label('action', 'Action') ?></label>
+                                <div class="mb-3 col-md-1 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for="allowance_0_action"><?= get_label('action', 'Action') ?></label>
                                     <button type="button" class="btn btn-sm btn-success add-allowance my-1"><i class="bx bx-check"></i></button>
                                 </div>
                             </div>
@@ -206,13 +206,13 @@
                             <div class="payslip-allowance">
                                 <div class="d-flex">
                                     <input type="hidden" id=allowance_{{$displayIndex}} value="{{$allowance->id}}" name="allowances[]">
-                                    <div class="mb-3 col-md-6 mx-1">
-                                        <input type="text" id="allowance_{{$displayIndex}}_title" class="form-control" value="{{$allowance->title}}" readonly>
+                                    <div class="mb-3 col-md-6 mx-1 tk-field">
+                                        <input type="text" id="allowance_{{$displayIndex}}_title" class="tk-input" value="{{$allowance->title}}" readonly>
                                     </div>
-                                    <div class="mb-3 col-md-4 mx-1">
-                                        <input type="text" id="allowance_{{$displayIndex}}_amount" class="form-control" value="{{$allowance->amount}}" readonly>
+                                    <div class="mb-3 col-md-4 mx-1 tk-field">
+                                        <input type="text" id="allowance_{{$displayIndex}}_amount" class="tk-input" value="{{$allowance->amount}}" readonly>
                                     </div>
-                                    <div class="mb-3 col-md-1 mx-1">
+                                    <div class="mb-3 col-md-1 mx-1 tk-field">
                                         <button type="button" class="btn btn-sm btn-danger remove-allowance my-1" data-count="{{$displayIndex}}"><i class="bx bx-trash"></i></button>
                                     </div>
                                 </div>
@@ -222,21 +222,21 @@
                         </div>
                         <div class="col-md-7" id="payslip-deductions">
                             <div class="d-flex">
-                                <div class="mb-3 col-md-5 mx-1">
-                                    <label class="form-label text-muted" for="deduction_0_title"><?= get_label('deduction', 'Deduction') ?></label>
-                                    <input type="text" id="deduction_0_title" class="form-control" placeholder="<?= get_label('deduction', 'Deduction') ?>" readonly>
+                                <div class="mb-3 col-md-5 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for="deduction_0_title"><?= get_label('deduction', 'Deduction') ?></label>
+                                    <input type="text" id="deduction_0_title" class="tk-input" placeholder="<?= get_label('deduction', 'Deduction') ?>" readonly>
                                 </div>
                                 <input type="hidden" id="deduction_0_type">
-                                <div class="mb-3 col-md-3 mx-1">
-                                    <label class="form-label text-muted" for="deduction_0_amount"><?= get_label('amount', 'Amount') ?> ({{$general_settings['currency_symbol']}})</label>
-                                    <input type="text" id="deduction_0_amount" class="form-control" placeholder="<?= get_label('amount', 'Amount') ?>" readonly>
+                                <div class="mb-3 col-md-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for="deduction_0_amount"><?= get_label('amount', 'Amount') ?> ({{$general_settings['currency_symbol']}})</label>
+                                    <input type="text" id="deduction_0_amount" class="tk-input" placeholder="<?= get_label('amount', 'Amount') ?>" readonly>
                                 </div>
-                                <div class="mb-3 col-md-3 mx-1">
-                                    <label class="form-label text-muted" for="deduction_0_percentage"><?= get_label('percentage', 'Percentage') ?></label>
-                                    <input type="number" id="deduction_0_percentage" class="form-control" placeholder="<?= get_label('percentage', 'Percentage') ?>" readonly>
+                                <div class="mb-3 col-md-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for="deduction_0_percentage"><?= get_label('percentage', 'Percentage') ?></label>
+                                    <input type="number" id="deduction_0_percentage" class="tk-input" placeholder="<?= get_label('percentage', 'Percentage') ?>" readonly>
                                 </div>
-                                <div class="mb-3 col-md-1 mx-1">
-                                    <label class="form-label text-muted" for="deduction_0_action"><?= get_label('action', 'Action') ?></label>
+                                <div class="mb-3 col-md-1 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for="deduction_0_action"><?= get_label('action', 'Action') ?></label>
                                     <button type="button" class="btn btn-sm btn-success add-deduction my-1"><i class="bx bx-check"></i></button>
                                 </div>
                             </div>
@@ -248,17 +248,17 @@
                             <div class="payslip-deduction">
                                 <div class="d-flex">
                                     <input type="hidden" id=deduction_{{$displayIndex}} value="{{$deduction->id}}" name="deductions[]">
-                                    <div class="mb-3 col-md-5 mx-1">
-                                        <input type="text" id="deduction_{{$displayIndex}}_title" class="form-control" value="{{$deduction->title}}" readonly>
+                                    <div class="mb-3 col-md-5 mx-1 tk-field">
+                                        <input type="text" id="deduction_{{$displayIndex}}_title" class="tk-input" value="{{$deduction->title}}" readonly>
                                     </div>
                                     <input type="hidden" id="deduction_{{$displayIndex}}_type">
-                                    <div class="mb-3 col-md-3 mx-1">
-                                        <input type="text" id="deduction_{{$displayIndex}}_amount" class="form-control" value="{{$deduction->amount}}" readonly>
+                                    <div class="mb-3 col-md-3 mx-1 tk-field">
+                                        <input type="text" id="deduction_{{$displayIndex}}_amount" class="tk-input" value="{{$deduction->amount}}" readonly>
                                     </div>
-                                    <div class="mb-3 col-md-3 mx-1">
-                                        <input type="number" id="deduction_{{$displayIndex}}_percentage" class="form-control" value="{{$deduction->percentage}}" readonly>
+                                    <div class="mb-3 col-md-3 mx-1 tk-field">
+                                        <input type="number" id="deduction_{{$displayIndex}}_percentage" class="tk-input" value="{{$deduction->percentage}}" readonly>
                                     </div>
-                                    <div class="mb-3 col-md-1 mx-1">
+                                    <div class="mb-3 col-md-1 mx-1 tk-field">
                                         <button type="button" class="btn btn-sm btn-danger remove-deduction my-1" data-count="{{$displayIndex}}"><i class="bx bx-trash"></i></button>
                                     </div>
                                 </div>
@@ -269,10 +269,10 @@
                     </div>
                     <div class="d-flex">
                         <div class="col-md-5 mt-4">
-                            <label class="form-label" for=""><?= get_label('total_allowances', 'Total allowances') ?> ({{$general_settings['currency_symbol']}}) : <span id="total_allowance">{{ $payslip->total_allowance ?? 0.00 }}</span></label>
+                            <label class="tk-label" for=""><?= get_label('total_allowances', 'Total allowances') ?> ({{$general_settings['currency_symbol']}}) : <span id="total_allowance">{{ $payslip->total_allowance ?? 0.00 }}</span></label>
                         </div>
                         <div class="col-md-7 mt-4 mx-4">
-                            <label class="form-label" for=""><?= get_label('total_deductions', 'Total deductions') ?> ({{$general_settings['currency_symbol']}}) : <span id="total_deduction">{{ $payslip->total_deductions ?? 0.00 }}</span></label>
+                            <label class="tk-label" for=""><?= get_label('total_deductions', 'Total deductions') ?> ({{$general_settings['currency_symbol']}}) : <span id="total_deduction">{{ $payslip->total_deductions ?? 0.00 }}</span></label>
                         </div>
                     </div>
                     <div class="d-flex">
@@ -298,9 +298,9 @@
                 <input type="hidden" name="total_deductions" id="hidden_total_deductions" value="{{ $payslip->total_deductions ?? 0 }}">
                 <input type="hidden" name="allowance_ids" id="allowance_ids" value="{{ implode(',', $payslip->allowances->pluck('id')->toArray()) }}">
                 <input type="hidden" name="deduction_ids" id="deduction_ids" value="{{ implode(',', $payslip->deductions->pluck('id')->toArray()) }}">
-                <div class="mb-3 col-md-12 mt-4">
-                    <label for="description" class="form-label"><?= get_label('note', 'Note') ?></label>
-                    <textarea class="form-control" name="note" rows="3" placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>">{{ old('note', $payslip->note ?? '') }}</textarea>
+                <div class="mb-3 col-md-12 mt-4 tk-field">
+                    <label for="description" class="tk-label"><?= get_label('note', 'Note') ?></label>
+                    <textarea class="tk-input" name="note" rows="3" placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>">{{ old('note', $payslip->note ?? '') }}</textarea>
                 </div>
                 <div class="mt-4 text-end">
                     <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>

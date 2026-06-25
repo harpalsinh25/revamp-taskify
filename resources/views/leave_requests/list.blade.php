@@ -219,22 +219,22 @@
                     <div class="row g-3 align-items-end tk-filter-row">
                         <x-advanced-date-filters prefix="lr" />
                         @if (is_admin_or_leave_editor())
-                            <div class="col-md-4">
-                                <label class="form-label" for="lr_user_filter"><?= get_label('select_users', 'Select Users') ?></label>
-                                <select class="form-select tom_users_select" id="lr_user_filter"
+                            <div class="col-md-4 tk-field">
+                                <label class="tk-label" for="lr_user_filter"><?= get_label('select_users', 'Select Users') ?></label>
+                                <select class="tk-select tom_users_select" id="lr_user_filter"
                                     data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
                                 </select>
                             </div>
                         @endif
-                        <div class="col-md-4">
-                            <label class="form-label" for="lr_action_by_filter"><?= get_label('select_actions_by', 'Select Actions By') ?></label>
-                            <select class="form-select tom_users_select" id="lr_action_by_filter"
+                        <div class="col-md-4 tk-field">
+                            <label class="tk-label" for="lr_action_by_filter"><?= get_label('select_actions_by', 'Select Actions By') ?></label>
+                            <select class="tk-select tom_users_select" id="lr_action_by_filter"
                                 data-placeholder="<?= get_label('select_actions_by', 'Select Actions By') ?>" multiple>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="lr_status_filter"><?= get_label('select_statuses', 'Select statuses') ?></label>
-                            <select class="form-select tom_static_select" id="lr_status_filter"
+                        <div class="col-md-4 tk-field">
+                            <label class="tk-label" for="lr_status_filter"><?= get_label('select_statuses', 'Select statuses') ?></label>
+                            <select class="tk-select tom_static_select" id="lr_status_filter"
                                 data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>"
                                 data-allow-clear="true" multiple>
                                 <option value="pending"><?= get_label('pending', 'Pending') ?></option>
@@ -242,9 +242,9 @@
                                 <option value="rejected"><?= get_label('rejected', 'Rejected') ?></option>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="lr_type_filter"><?= get_label('select_types', 'Select Types') ?></label>
-                            <select class="form-select tom_static_select" id="lr_type_filter"
+                        <div class="col-md-4 tk-field">
+                            <label class="tk-label" for="lr_type_filter"><?= get_label('select_types', 'Select Types') ?></label>
+                            <select class="tk-select tom_static_select" id="lr_type_filter"
                                 data-placeholder="<?= get_label('select_types', 'Select Types') ?>"
                                 data-allow-clear="true" multiple>
                                 <option value="full"><?= get_label('full', 'Full') ?></option>

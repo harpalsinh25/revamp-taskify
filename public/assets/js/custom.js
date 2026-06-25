@@ -6013,6 +6013,8 @@ function initTomSelectWithAjax(selector, type) {
         }
         if (isMultiple) {
             plugins.push("remove_button");
+        } else {
+            plugins.push("dropdown_input");
         }
 
         new TomSelect(el, {

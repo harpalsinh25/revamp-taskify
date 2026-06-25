@@ -112,7 +112,7 @@
                         </div>
 
                         <div class="rounded-3 border border-dashed p-3 text-center" style="border-style: dashed !important; border-width: 1px !important;">
-                            <input type="file" name="logo" id="logo" class="form-control form-control-sm text-center mx-auto" style="max-width: 350px;" accept="image/png">
+                            <input type="file" name="logo" id="logo" class="tk-file-input text-center mx-auto" style="max-width: 350px;" accept="image/png">
                             <p class="text-muted small mb-0 mt-2" style="font-size: 0.75rem;">Recommended Size: larger than 512 x 512</p>
                             <p class="text-muted small mt-1 mb-0" style="font-size: 0.75rem;">Current: <code>{{ $pwaSettings['logo'] ?? '/images/icons/logo-512x512.png' }}</code></p>
                         </div>

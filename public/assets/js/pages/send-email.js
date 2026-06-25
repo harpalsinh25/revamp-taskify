@@ -85,8 +85,8 @@ function initCustomEmailTab() {
         validateScheduledEmail(e, this, '#customScheduleToggle');
     });
 
-    // Initialize select2 for email recipients
-    initEmailSelect2('.to_emails');
+    // Initialize Tom Select for email recipients
+    initEmailTomSelect('.to_emails');
 
     // Initialize TinyMCE for custom email body if available
     if (typeof tinymce !== 'undefined') {
@@ -228,9 +228,9 @@ function updatePlaceholderFields(placeholders) {
         placeholders.forEach(function (placeholder) {
             const label = placeholder.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             placeholderHtml += `
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">${label}</label>
-                    <input type="text" class="form-control"
+                <div class="col-md-6 mb-3 tk-field">
+                    <label class="tk-label">${label}</label>
+                    <input type="text" class="tk-input"
                            required
                            name="placeholders[${placeholder}]"
                            placeholder="Enter ${label}">
@@ -243,62 +243,65 @@ function updatePlaceholderFields(placeholders) {
     $('#placeholderFields').html(placeholderHtml);
 }
 
-// Initialize Email Select2
-function initEmailSelect2(selector) {
-    $(selector).select2({
-        tags: true,
-        tokenSeparators: [',', ' '],
-        placeholder: LABEL_CONSTANTS.pleaseEnterName,
-        width: '100%',
-        ajax: {
-            url: '/search', // your endpoint that returns users with email
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return {
-                    q: params.term,
-                    type: 'users', // or whatever type is relevant
-                };
-            },
-            processResults: function (data) {
-                return {
-                    results: data.results.map(function (item) {
-                        return {
-                            id: item.email,
-                            text: item.email,
-                        };
-                    }),
-                };
-            },
-            cache: true,
-        },
-        createTag: function (params) {
-            var term = $.trim(params.term);
-
-            if (term === '' || !validateEmail(term)) {
-                return null;
-            }
-
-            return {
-                id: term,
-                text: term,
-                newTag: true
-            };
-        },
-        language: {
-            inputTooShort: function () {
-                return LABEL_CONSTANTS.pleaseTypeAtLeast;
-            },
-            searching: function () {
-                return LABEL_CONSTANTS.searching;
-            },
-            noResults: function () {
-                return LABEL_CONSTANTS.noResultsFound;
-            },
-        },
-        escapeMarkup: function (markup) {
-            return markup;
+// Initialize Email TomSelect
+function initEmailTomSelect(selector) {
+    document.querySelectorAll(selector).forEach(function (el) {
+        if (el.tomselect) {
+            el.tomselect.destroy();
         }
+
+        new TomSelect(el, {
+            valueField: 'id',
+            labelField: 'text',
+            searchField: 'text',
+            plugins: ['remove_button', 'clear_button'],
+            create: function (input) {
+                if (validateEmail(input)) {
+                    return {
+                        id: input,
+                        text: input
+                    };
+                }
+                return false;
+            },
+            createOnBlur: true,
+            createFilter: function (input) {
+                return validateEmail(input);
+            },
+            load: function (query, callback) {
+                if (!query.length) return callback();
+
+                $.ajax({
+                    url: '/search',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        q: query,
+                        type: 'users'
+                    },
+                    error: function () {
+                        callback();
+                    },
+                    success: function (res) {
+                        var results = res.results.map(function (item) {
+                            return {
+                                id: item.email,
+                                text: item.email
+                            };
+                        });
+                        callback(results);
+                    }
+                });
+            },
+            render: {
+                option_create: function(data, escape) {
+                    return '<div class="create">Add <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+                },
+                no_results: function(data, escape) {
+                    return '<div class="no-results">' + LABEL_CONSTANTS.noResultsFound + '</div>';
+                }
+            }
+        });
     });
 }
 

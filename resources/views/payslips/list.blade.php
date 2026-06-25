@@ -28,31 +28,31 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <input class="form-control" type="month" id="filter_payslip_month" name="month">
+                <div class="col-md-4 mb-3 tk-field">
+                    <input class="tk-input" type="month" id="filter_payslip_month" name="month">
                 </div>
                 @if(isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-3">
-                    <select class="form-select tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
+                <div class="col-md-4 mb-3 tk-field">
+                    <select class="tk-select tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <select class="form-select tom_users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>                                                
+                <div class="col-md-4 mb-3 tk-field">
+                    <select class="tk-select tom_users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>                                                
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <select class="form-select tom_clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>                        
+                <div class="col-md-4 mb-3 tk-field">
+                    <select class="tk-select tom_clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>                        
                     </select>
                 </div>
                 @endif
-                <div class="col-md-4 mb-3">
-                    <select class="form-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+                <div class="col-md-4 mb-3 tk-field">
+                    <select class="tk-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
                         <option value="1"><?= get_label('paid', 'Paid') ?></option>
                         <option value="0"><?= get_label('unpaid', 'Unpaid') ?></option>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3 d-flex align-items-end">
-                    <button class="btn btn-secondary clear-payslips-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
+                    <button class="tk-btn tk-btn-secondary clear-payslips-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
                         <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
                     </button>
                 </div>

@@ -122,7 +122,7 @@
                         <div class="d-flex align-items-center gap-3 p-3 border border-dashed rounded" style="border-style: dashed !important; border-width: 2px !important; border-color: var(--line) !important; min-height: 110px;">
                             <img src="{{ asset('storage/photos/no-image.jpg') }}" alt="user-avatar" class="d-block rounded-circle object-fit-cover" height="75" width="75" id="uploadedAvatar" />
                             <div class="flex-grow-1">
-                                <input type="file" class="tk-input account-file-input" id="photo" name="profile" accept="image/*">
+                                <input type="file" class="tk-file-input account-file-input" id="photo" name="profile" accept="image/*">
                                 <small class="text-muted mt-1 d-block">Allowed JPG, JPEG, PNG, GIF, BMP or WEBP.</small>
                             </div>
                         </div>
