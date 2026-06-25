@@ -3069,16 +3069,6 @@ $(document).ready(function () {
                 var clearButtonClass = multi_select_value
                     ? "clear-" + multi_select_value + "-filters"
                     : "clear-" + data_type + "-filters";
-                // Create the "Clear Filters" button
-                var $clearFiltersButton = $(
-                    '<button type="button" class="btn btn-secondary w-100 ' +
-                        clearButtonClass +
-                        '">' +
-                        '<i class="bx bx-refresh me-1"></i>' +
-                        label_clear_filters +
-                        "</button>",
-                );
-
                 // Try to find the filter row by checking parents from closest to furthest
                 var $filterRow = $();
                 $toolbar
@@ -3100,11 +3090,25 @@ $(document).ready(function () {
                         }
                     });
 
+                var isTkFilter = $filterRow.hasClass("tk-filter-row");
+                var btnClass = isTkFilter ? "tk-btn tk-btn-outline" : "btn btn-secondary";
+
+                // Create the "Clear Filters" button
+                var $clearFiltersButton = $(
+                    '<button type="button" class="' + btnClass + ' w-100 ' +
+                        clearButtonClass +
+                        '">' +
+                        '<i class="bx bx-refresh me-1"></i>' +
+                        label_clear_filters +
+                        "</button>",
+                );
+
                 if ($filterRow.length > 0) {
                     // Remove old clear filter button if already exists
                     $filterRow.find(".clear-filters-container").remove();
+                    var filterColClass = isTkFilter ? "col-lg-3 col-md-4 col-12 d-flex align-items-end clear-filters-container" : "col-md-auto d-flex align-items-end clear-filters-container";
                     var $filterCol = $(
-                        '<div class="col-md-auto d-flex align-items-end clear-filters-container"></div>',
+                        '<div class="' + filterColClass + '"></div>',
                     );
                     $filterCol.append($clearFiltersButton);
                     $filterRow.append($filterCol);
@@ -6015,6 +6019,7 @@ function initTomSelectWithAjax(selector, type) {
             valueField: "id",
             labelField: "text",
             searchField: "text",
+            dropdownParent: "body",
             plugins: plugins,
             preload: true,
             load: function (query, callback) {

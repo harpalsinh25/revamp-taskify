@@ -21,7 +21,7 @@
                         <div class="app-brand justify-content-center">
                             <a href="{{ url('/') }}" class="app-brand-link gap-2">
                                 <span class="app-brand-logo demo">
-                                    <img src="{{ asset($general_settings['full_logo']) }}" width="300px" alt="" />
+                                    <img src="{{asset($general_settings['full_logo']) }}" width="300px" alt="" />
                                 </span>
                             </a>
                         </div>

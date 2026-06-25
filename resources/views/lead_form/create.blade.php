@@ -39,20 +39,20 @@
                             <hr>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="title" class="form-label">{{ get_label('title', 'Form Title') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="title" class="tk-label">{{ get_label('title', 'Form Title') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="title" name="title" required
+                            <input type="text" class="tk-input" id="title" name="title" required
                                 placeholder="{{ get_label('enter_form_title', 'Enter a descriptive title for your form') }}"
                                 value="{{ old('title') }}">
                             @error('title')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="source_id" class="form-label">{{ get_label('source', 'Lead Source') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="source_id" class="tk-label">{{ get_label('source', 'Lead Source') }} <span
                                     class="text-danger">*</span></label>
-                            <select class="form-select select2" id="select_lead_source" name="source_id"
+                            <select class="tk-select tom_select" id="select_lead_source" name="source_id"
                                 data-single-select="true" data-allow-clear="false" data-consider-workspace="true" required>
                                 <option value="">{{ get_label('select_source', 'Select Source') }}</option>
                                 @foreach ($sources as $source)
@@ -64,10 +64,10 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="stage_id" class="form-label">{{ get_label('stage', 'Initial Stage') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="stage_id" class="tk-label">{{ get_label('stage', 'Initial Stage') }} <span
                                     class="text-danger">*</span></label>
-                            <select class="form-select select2" id="select_lead_stage" name="stage_id"
+                            <select class="tk-select tom_select" id="select_lead_stage" name="stage_id"
                                 data-single-select="true" data-allow-clear="false" data-consider-workspace="true" required>
                                 <option value="">{{ get_label('select_stage', 'Select Stage') }}</option>
                                 @foreach ($stages as $stage)
@@ -78,10 +78,10 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="assigned_to" class="form-label">{{ get_label('assigned_to', 'Assign To') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="assigned_to" class="tk-label">{{ get_label('assigned_to', 'Assign To') }} <span
                                     class="text-danger">*</span></label>
-                            <select class="form-select select2" id="select_lead_assignee" name="assigned_to"
+                            <select class="tk-select tom_select" id="select_lead_assignee" name="assigned_to"
                                 data-single-select="true" data-allow-clear="false" data-consider-workspace="true" required>
                                 <option value="">{{ get_label('select_user', 'Select User') }}</option>
                                 @foreach ($users as $user)
@@ -94,10 +94,10 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-12 mb-3 tk-field">
                             <label for="description"
-                                class="form-label">{{ get_label('description', 'Description') }}</label>
-                            <textarea class="form-control" id="description" name="description" rows="3"
+                                class="tk-label">{{ get_label('description', 'Description') }}</label>
+                            <textarea class="tk-input" id="description" name="description" rows="3"
                                 placeholder="{{ get_label('enter_description', 'Provide a brief description of the form\'s purpose (optional)') }}">{{ old('description') }}</textarea>
                             @error('description')
                                 <span class="text-danger">{{ $message }}</span>
@@ -110,7 +110,7 @@
                             <hr>
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-12 mb-3 tk-field">
                             <div class="alert alert-info">
                                 <strong>{{ get_label('note', 'Note') }}:</strong>
                                 {{ get_label('mandatory_fields', 'The following fields are mandatory and automatically included:') }}
@@ -123,7 +123,7 @@
                         <div class="col-md-12">
                             <div id="mandatoryFields">
                                 @foreach (\App\Models\LeadFormField::REQUIRED_FIELDS as $index => $field)
-                                    <div class="field-row bg-light mb-3 rounded border p-3" data-id="{{ $index }}">
+                                    <div class="field-row tk-card mb-3 p-3" data-id="{{ $index }}">
                                         <div class="row align-items-center">
                                             <div class="col-md-4">
                                                 <strong>{{ \App\Models\LeadFormField::MAPPABLE_FIELDS[$field] }}</strong>
@@ -160,17 +160,17 @@
                             <div id="fieldsContainer" class="sortable"></div>
                         </div>
 
-                        <div class="col-md-12 mb-3">
-                            <button type="button" class="btn btn-outline-primary" onclick="addField()">
+                        <div class="col-md-12 mb-3 tk-field">
+                            <button type="button" class="tk-btn tk-btn-outline" onclick="addField()">
                                 <i class="bx bx-plus"></i> {{ get_label('add_field', 'Add Field') }}
                             </button>
                         </div>
 
                         <div class="mt-4 text-start">
-                            <button type="submit" class="btn btn-primary me-2"
+                            <button type="submit" class="tk-btn tk-btn-primary me-2"
                                 id="submit_btn">{{ get_label('create', 'Create') }}</button>
                             <button type="reset"
-                                class="btn btn-outline-secondary">{{ get_label('cancel', 'Cancel') }}</button>
+                                class="tk-btn tk-btn-outline">{{ get_label('cancel', 'Cancel') }}</button>
                         </div>
                     </div>
                 </form>

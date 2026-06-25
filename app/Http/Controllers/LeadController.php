@@ -986,22 +986,22 @@ class LeadController extends Controller
         $actions .= '</button>';
         $actions .= '<ul class="dropdown-menu">';
 
-        $actions .= '<li><a href="' . route('leads.show', ['id' => $lead->id]) . '" class="dropdown-item text-info d-block" data-id="' . $lead->id . '">';
+        $actions .= '<li><a href="' . route('leads.show', ['id' => $lead->id]) . '" class="dropdown-item text-dark d-block" data-id="' . $lead->id . '">';
         $actions .= '<i class="bx bx-show me-2"></i>' . get_label('view', 'View') . '</a></li>';
 
         if ($canEdit) {
             $actions .= '<li><a href="' . route('leads.edit', ['id' => $lead->id]) . '" class="dropdown-item edit-lead d-block" data-id="' . $lead->id . '">';
-            $actions .= '<i class="bx bx-edit text-primary me-2"></i>' . get_label('update', 'Update') . '</a></li>';
+            $actions .= '<i class="bx bx-edit text-dark me-2"></i>' . get_label('update', 'Update') . '</a></li>';
         }
 
         if (!$isConverted) {
-            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item text-primary convert-to-client d-block" data-id="' . $lead->id . '">';
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item text-dark convert-to-client d-block" data-id="' . $lead->id . '">';
             $actions .= '<i class="bx bxs-analyse me-2"></i>' . get_label('convert_to_client', 'Convert To Client') . '</a></li>';
         }
 
         if ($canDelete) {
             $actions .= '<li><hr class="dropdown-divider"></li>';
-            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-danger d-block" data-id="' . $lead->id . '" data-type="leads" data-table="table">';
+            $actions .= '<li><a href="javascript:void(0);" class="dropdown-item delete text-dark d-block" data-id="' . $lead->id . '" data-type="leads" data-table="table">';
             $actions .= '<i class="bx bx-trash me-2"></i>' . get_label('delete', 'Delete') . '</a></li>';
         }
 

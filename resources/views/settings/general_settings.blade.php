@@ -48,7 +48,7 @@
                             </div>
 
                             <div class="mb-3 col-md-4">
-                                <label for="full_logo" class="form-label"><?= get_label('full_logo', 'Full Logo') ?> <a data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('view_current_full_logo', 'View current full logo') ?>" href="{{asset($general_settings['full_logo'])}}" data-lightbox="full logo" data-title="<?= get_label('current_full_logo', 'Current full logo') ?>"> <i class='bx bx-show-alt text-primary'></i></a></label>
+                                <label for="full_logo" class="form-label"><?= get_label('full_logo', 'Full Logo') ?> <a data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="<?= get_label('view_current_full_logo', 'View current full logo') ?>" href="{{asset($general_settings['full_logo'])}}" data-lightbox="full_logo" data-title="<?= get_label('current_full_logo', 'Current full logo') ?>"> <i class='bx bx-show-alt text-primary'></i></a></label>
                                 <input type="file" class="form-control" id="full_logo" name="full_logo">
                             </div>
                             <div class="mb-3 col-md-4">

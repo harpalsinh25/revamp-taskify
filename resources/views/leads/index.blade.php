@@ -100,7 +100,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card mt-4">
                     <div class="card-datatable table-responsive text-nowrap">
                         <input type="hidden" id="data_type" value="leads">
                         <input type="hidden" id="data-table" value="leads_table">

@@ -5,8 +5,8 @@ $visibleColumns = getUserPreferences('meetings');
 $user = getAuthenticatedUser();
 @endphp
 {{$slot}}
-<div class="card mb-4">
-    <div class="card-body">
+<div class="card mb-4 border shadow-none">
+    <div class="card-body p-3">
         <div class="row g-3 align-items-end tk-filter-row mb-0">
             <x-advanced-date-filters prefix="meeting" />
             @if(isAdminOrHasAllDataAccess())
@@ -29,9 +29,9 @@ $user = getAuthenticatedUser();
         </div>
     </div>
 </div>
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive text-nowrap">
+<div class="card border shadow-none">
+    <div class="card-body p-0">
+        <div class="table-responsive text-nowrap tk-table">
             <input type="hidden" id="data_type" value="meetings">
             <input type="hidden" id="data_table" value="meetings_table">
             <input type="hidden" id="save_column_visibility">

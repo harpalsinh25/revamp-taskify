@@ -38,10 +38,10 @@
                             <hr>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="first_name" class="form-label">{{ get_label('first_name', 'First Name') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="first_name" class="tk-label">{{ get_label('first_name', 'First Name') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="first_name" class="tk-input" required
+                            <input type="text" id="first_name" name="first_name" class="tk-input" required
                                 placeholder="{{ get_label('enter_first_name', 'Enter first name') }}"
                                 value="{{ $lead->first_name }}">
                             @error('first_name')
@@ -49,10 +49,10 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="last_name" class="form-label">{{ get_label('last_name', 'Last Name') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="last_name" class="tk-label">{{ get_label('last_name', 'Last Name') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="last_name" class="tk-input" required
+                            <input type="text" id="last_name" name="last_name" class="tk-input" required
                                 placeholder="{{ get_label('enter_last_name', 'Enter last name') }}"
                                 value="{{ $lead->last_name }}">
                             @error('last_name')
@@ -60,10 +60,10 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">{{ get_label('email', 'Email') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="email" class="tk-label">{{ get_label('email', 'Email') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="email" name="email" class="tk-input" required
+                            <input type="email" id="email" name="email" class="tk-input" required
                                 placeholder="{{ get_label('enter_email', 'Enter email address') }}"
                                 value="{{ $lead->email }}">
                             @error('email')
@@ -71,9 +71,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 tk-field">
                             <label
-                                class="form-label">{{ get_label('country_code_and_phone_number', 'Country code and phone number') }}</label>
+                                class="tk-label">{{ get_label('country_code_and_phone_number', 'Country code and phone number') }}</label>
                             <div class="tk-inputgroup">
                                 <input type="tel" name="phone" id="phone" class="tk-input"
                                     value="{{ $lead->phone }}">
@@ -85,9 +85,9 @@
                                 value="{{ $lead->country_iso_code }}">
                         </div>
 
-                        <div class="col-md-4 mb-3">
-                            <label for="lead_sources"
-                                class="form-label">{{ get_label('lead_sources', 'Lead Sources') }}</label>
+                        <div class="col-md-4 mb-3 tk-field">
+                            <label for="select_lead_source"
+                                class="tk-label">{{ get_label('lead_sources', 'Lead Sources') }}</label>
                             <select class="tk-select tom_select" name="source_id" id="select_lead_source"
                                 data-allow-clear="false" data-consider-workspace="true">
                                 @if($lead->source)
@@ -100,8 +100,8 @@
                         </div>
 
 
-                        <div class="col-md-4 mb-3">
-                            <label for="lead_stages" class="form-label">{{ get_label('lead_stages', 'Lead Stages') }} <span
+                        <div class="col-md-4 mb-3 tk-field">
+                            <label for="select_lead_stage" class="tk-label">{{ get_label('lead_stages', 'Lead Stages') }} <span
                                     class="text-danger">*</span></label>
                             <select class="tk-select tom_select" name="stage_id" id="select_lead_stage"
                                 data-allow-clear="false" data-consider-workspace="true" required>
@@ -114,8 +114,8 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-4 mb-3">
-                            <label for="assign_to" class="form-label">{{ get_label('assigned_to', 'Assign To') }} <span
+                        <div class="col-md-4 mb-3 tk-field">
+                            <label for="select_lead_assignee" class="tk-label">{{ get_label('assigned_to', 'Assign To') }} <span
                                     class="text-danger">*</span></label>
                             <select name="assigned_to" class="tk-select tom_select" id="select_lead_assignee"
                                 data-allow-clear="false" data-consider-workspace="true" required>
@@ -136,9 +136,9 @@
                             <hr>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="job_title" class="form-label">{{ get_label('job_title', 'Job Title') }}</label>
-                            <input type="text" name="job_title" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="job_title" class="tk-label">{{ get_label('job_title', 'Job Title') }}</label>
+                            <input type="text" id="job_title" name="job_title" class="tk-input"
                                 placeholder="{{ get_label('enter_job_title', 'Enter job title') }}"
                                 value="{{ $lead->job_title }}">
                             @error('job_title')
@@ -146,9 +146,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="industry" class="form-label">{{ get_label('industry', 'Industry') }}</label>
-                            <input type="text" name="industry" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="industry" class="tk-label">{{ get_label('industry', 'Industry') }}</label>
+                            <input type="text" id="industry" name="industry" class="tk-input"
                                 placeholder="{{ get_label('enter_industry', 'Enter industry') }}"
                                 value="{{ $lead->industry }}">
                             @error('industry')
@@ -156,10 +156,10 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="company" class="form-label">{{ get_label('company', 'Company') }} <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="company" class="tk-label">{{ get_label('company', 'Company') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="company" class="tk-input" required
+                            <input type="text" id="company" name="company" class="tk-input" required
                                 placeholder="{{ get_label('enter_company', 'Enter company name') }}"
                                 value="{{ $lead->company }}">
                             @error('company')
@@ -167,9 +167,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="website" class="form-label">{{ get_label('website', 'Website') }}</label>
-                            <input type="text" name="website" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="website" class="tk-label">{{ get_label('website', 'Website') }}</label>
+                            <input type="text" id="website" name="website" class="tk-input"
                                 placeholder="{{ get_label('enter_website', 'Enter company website') }}"
                                 value="{{ $lead->website }}">
                             @error('website')
@@ -183,9 +183,9 @@
                             <hr>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="linkedin" class="form-label">{{ get_label('linkedin', 'LinkedIn') }}</label>
-                            <input type="url" name="linkedin" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="linkedin" class="tk-label">{{ get_label('linkedin', 'LinkedIn') }}</label>
+                            <input type="url" id="linkedin" name="linkedin" class="tk-input"
                                 placeholder="{{ get_label('enter_linkedin_url', 'Enter LinkedIn URL') }}"
                                 value="{{ $lead->linkedin }}">
                             @error('linkedin')
@@ -193,9 +193,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="instagram" class="form-label">{{ get_label('instagram', 'Instagram') }}</label>
-                            <input type="url" name="instagram" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="instagram" class="tk-label">{{ get_label('instagram', 'Instagram') }}</label>
+                            <input type="url" id="instagram" name="instagram" class="tk-input"
                                 placeholder="{{ get_label('enter_instagram_url', 'Enter Instagram URL') }}"
                                 value="{{ $lead->instagram }}">
                             @error('instagram')
@@ -203,9 +203,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="facebook" class="form-label">{{ get_label('facebook', 'Facebook') }}</label>
-                            <input type="url" name="facebook" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="facebook" class="tk-label">{{ get_label('facebook', 'Facebook') }}</label>
+                            <input type="url" id="facebook" name="facebook" class="tk-input"
                                 placeholder="{{ get_label('enter_facebook_url', 'Enter Facebook URL') }}"
                                 value="{{ $lead->facebook }}">
                             @error('facebook')
@@ -213,9 +213,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="pinterest" class="form-label">{{ get_label('pinterest', 'Pinterest') }}</label>
-                            <input type="url" name="pinterest" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="pinterest" class="tk-label">{{ get_label('pinterest', 'Pinterest') }}</label>
+                            <input type="url" id="pinterest" name="pinterest" class="tk-input"
                                 placeholder="{{ get_label('enter_pinterest_url', 'Enter Pinterest URL') }}"
                                 value="{{ $lead->pinterest }}">
                             @error('pinterest')
@@ -228,9 +228,9 @@
                             <h5>{{ get_label('address', 'Address') }}</h5>
                             <hr>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="city" class="form-label">{{ get_label('city', 'City') }}</label>
-                            <input type="text" name="city" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="city" class="tk-label">{{ get_label('city', 'City') }}</label>
+                            <input type="text" id="city" name="city" class="tk-input"
                                 placeholder="{{ get_label('please_enter_city', 'Please enter city') }}"
                                 value="{{ $lead->city }}">
                             @error('city')
@@ -238,9 +238,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="state" class="form-label">{{ get_label('state', 'State') }}</label>
-                            <input type="text" name="state" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="state" class="tk-label">{{ get_label('state', 'State') }}</label>
+                            <input type="text" id="state" name="state" class="tk-input"
                                 placeholder="{{ get_label('please_enter_state', 'Please enter state') }}"
                                 value="{{ $lead->state }}">
                             @error('state')
@@ -248,9 +248,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="zip" class="form-label">{{ get_label('zip_code', 'Zip Code') }}</label>
-                            <input type="number" name="zip" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="zip" class="tk-label">{{ get_label('zip_code', 'Zip Code') }}</label>
+                            <input type="number" id="zip" name="zip" class="tk-input"
                                 placeholder="{{ get_label('please_enter_zip_code', 'Please enter ZIP code') }}"
                                 value="{{ $lead->zip }}">
                             @error('zip')
@@ -258,9 +258,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="country" class="form-label">{{ get_label('country', 'Country') }}</label>
-                            <input type="text" name="country" class="tk-input"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="country" class="tk-label">{{ get_label('country', 'Country') }}</label>
+                            <input type="text" id="country" name="country" class="tk-input"
                                 placeholder="{{ get_label('please_enter_country', 'Please enter country') }}"
                                 value="{{ $lead->country }}">
                             @error('country')
@@ -272,8 +272,8 @@
                     </div>
                     <!-- Submit Button -->
                     <div class="mt-4 text-end">
-                        <button type="submit" class="btn btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>
-                        <button type="reset" class="btn btn-outline-secondary"><?= get_label('cancel', 'Cancel') ?></button>
+                        <button type="submit" class="tk-btn tk-btn-primary me-2" id="submit_btn"><?= get_label('update', 'Update') ?></button>
+                        <button type="reset" class="tk-btn tk-btn-outline"><?= get_label('cancel', 'Cancel') ?></button>
                     </div>
                 </form>
             </div>

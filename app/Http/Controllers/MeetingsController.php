@@ -348,16 +348,11 @@ class MeetingsController extends Controller
                     foreach ($meeting->users as $user) {
                         $userHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/users/profile/{$user->id}") . "' title='{$user->first_name} {$user->last_name}'><img src='" . ($user->photo ? asset('storage/' . $user->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                     }
-                    if ($canEdit) {
-                        $userHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-meeting update-users-clients" data-id="' . $meeting->id . '"><span class="bx bx-edit"></span></a></li>';
-                    }
-                    $userHtml .= '</ul>';
+                              $userHtml .= '</ul>';
                 } else {
                     $userHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                     if ($canEdit) {
-                        $userHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-meeting update-users-clients" data-id="' . $meeting->id . '">' .
-                            '<span class="bx bx-edit"></span>' .
-                            '</a>';
+                       
                     }
                 }
 
@@ -368,15 +363,13 @@ class MeetingsController extends Controller
                         $clientHtml .= "<li class='avatar avatar-sm pull-up'><a href='" . url("/clients/profile/{$client->id}") . "' title='{$client->first_name} {$client->last_name}'><img src='" . ($client->photo ? asset('storage/' . $client->photo) : asset('storage/photos/no-image.jpg')) . "' alt='Avatar' class='rounded-circle' /></a></li>";
                     }
                     if ($canEdit) {
-                        $clientHtml .= '<li title=' . get_label('update', 'Update') . '><a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-meeting update-users-clients" data-id="' . $meeting->id . '"><span class="bx bx-edit"></span></a></li>';
+                       
                     }
                     $clientHtml .= '</ul>';
                 } else {
                     $clientHtml = '<span class="badge bg-primary">' . get_label('not_assigned', 'Not Assigned') . '</span>';
                     if ($canEdit) {
-                        $clientHtml .= '<a href="javascript:void(0)" class="btn btn-icon btn-sm btn-outline-primary btn-sm rounded-circle edit-meeting update-users-clients" data-id="' . $meeting->id . '">' .
-                            '<span class="bx bx-edit"></span>' .
-                            '</a>';
+                       
                     }
                 }
 

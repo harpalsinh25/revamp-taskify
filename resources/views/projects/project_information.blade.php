@@ -645,29 +645,27 @@
                         <div class="card mb-3 border shadow-none">
                             <div class="card-body p-3">
                                 <div class="row g-3 align-items-end tk-filter-row">
-                                    <div class="col-6">
-                                        <label class="form-label" for="activity_log_between_date"><?= get_label('date_between', 'Date between') ?></label>
-                                        <div class="input-group input-group-merge">
-                                            <input type="text" id="activity_log_between_date" class="form-control form-control-sm" placeholder="<?= get_label('date_between', 'Date between') ?>" autocomplete="off">
-                                        </div>
+                                    <div class="col-6 tk-field">
+                                        <label class="tk-label" for="activity_log_between_date"><?= get_label('date_between', 'Date between') ?></label>
+                                        <input type="text" id="activity_log_between_date" class="tk-input" placeholder="<?= get_label('date_between', 'Date between') ?>" autocomplete="off">
                                     </div>
                                     @if ($auth_user->can('manage_users'))
-                                    <div class="col-6">
-                                        <label class="form-label" for="user_filter"><?= get_label('actioned_by_users', 'Actioned By Users') ?></label>
-                                        <select class="form-select form-select-sm tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?>" multiple>
+                                    <div class="col-6 tk-field">
+                                        <label class="tk-label" for="user_filter"><?= get_label('actioned_by_users', 'Actioned By Users') ?></label>
+                                        <select class="tk-select tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?>" multiple>
                                         </select>
                                     </div>
                                     @endif
                                     @if ($auth_user->can('manage_clients'))
-                                    <div class="col-6">
-                                        <label class="form-label" for="client_filter"><?= get_label('actioned_by_clients', 'Actioned By Clients') ?></label>
-                                        <select class="form-select form-select-sm tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?>" multiple>
+                                    <div class="col-6 tk-field">
+                                        <label class="tk-label" for="client_filter"><?= get_label('actioned_by_clients', 'Actioned By Clients') ?></label>
+                                        <select class="tk-select tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?>" multiple>
                                         </select>
                                     </div>
                                     @endif
-                                    <div class="col-6">
-                                        <label class="form-label" for="activity_filter"><?= get_label('activities', 'Activities') ?></label>
-                                        <select class="form-select form-select-sm tom_static_select" id="activity_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_activities', 'Select Activities') ?>" data-allow-clear="true" multiple>
+                                    <div class="col-6 tk-field">
+                                        <label class="tk-label" for="activity_filter"><?= get_label('activities', 'Activities') ?></label>
+                                        <select class="tk-select tom_static_select" id="activity_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_activities', 'Select Activities') ?>" data-allow-clear="true" multiple>
                                             <option value="created"><?= get_label('created', 'Created') ?></option>
                                             <option value="updated"><?= get_label('updated', 'Updated') ?></option>
                                             <option value="duplicated"><?= get_label('duplicated', 'Duplicated') ?></option>
@@ -677,9 +675,9 @@
                                             <option value="updated_priority"><?= get_label('updated_priority', 'Updated priority') ?></option>
                                         </select>
                                     </div>
-                                    <div class="col-6">
-                                        <label class="form-label" for="type_filter"><?= get_label('types', 'Types') ?></label>
-                                        <select class="form-select form-select-sm tom_static_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
+                                    <div class="col-6 tk-field">
+                                        <label class="tk-label" for="type_filter"><?= get_label('types', 'Types') ?></label>
+                                        <select class="tk-select tom_static_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
                                             <option value="task">{{ get_label('project', 'Project') }}</option>
                                             <option value="task">{{ get_label('task', 'Task') }}</option>
                                             <option value="milestone">{{ get_label('milestone', 'Milestone') }}</option>

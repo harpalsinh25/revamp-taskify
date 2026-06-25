@@ -58,38 +58,38 @@ let fieldIndex = window.appConfig && window.appConfig.fieldIndex ? window.appCon
 function addField() {
     const container = document.getElementById('fieldsContainer');
     const fieldHtml = `
-        <div class="field-row border rounded p-3 mb-3 bg-white" id="field-${fieldIndex}" data-id="${fieldIndex}">
+        <div class="field-row tk-card mb-3 p-3" id="field-${fieldIndex}" data-id="${fieldIndex}">
             <div class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">${window.appConfig.labels.field_label} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="fields[${fieldIndex}][label]" required
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label">${window.appConfig.labels.field_label} <span class="text-danger">*</span></label>
+                    <input type="text" class="tk-input" name="fields[${fieldIndex}][label]" required
                            placeholder="${window.appConfig.labels.enter_field_label}">
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">${window.appConfig.labels.field_type} <span class="text-danger">*</span></label>
-                    <select class="form-select" name="fields[${fieldIndex}][type]" onchange="toggleOptions(${fieldIndex})" required>
+                <div class="col-md-2 tk-field">
+                    <label class="tk-label">${window.appConfig.labels.field_type} <span class="text-danger">*</span></label>
+                    <select class="tk-select" name="fields[${fieldIndex}][type]" onchange="toggleOptions(${fieldIndex})" required>
                         <option value="">${window.appConfig.labels.select_type}</option>
                         ${window.appConfig.fieldTypes.map(type => `<option value="${type.value}">${type.label}</option>`).join('')}
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">${window.appConfig.labels.map_to}</label>
-                    <select class="form-select" name="fields[${fieldIndex}][name]" onchange="toggleMapping(${fieldIndex})">
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label">${window.appConfig.labels.map_to}</label>
+                    <select class="tk-select" name="fields[${fieldIndex}][name]" onchange="toggleMapping(${fieldIndex})">
                         <option value="">${window.appConfig.labels.custom_field}</option>
                         ${window.appConfig.mappableFields.map(field => `<option value="${field.value}">${field.label}</option>`).join('')}
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">${window.appConfig.labels.required}</label>
-                    <select class="form-select" name="fields[${fieldIndex}][is_required]">
+                <div class="col-md-2 tk-field">
+                    <label class="tk-label">${window.appConfig.labels.required}</label>
+                    <select class="tk-select" name="fields[${fieldIndex}][is_required]">
                         <option value="0">${window.appConfig.labels.no}</option>
                         <option value="1">${window.appConfig.labels.yes}</option>
                     </select>
                 </div>
-                <div class="col-md-2 text-end">
-                    <label class="form-label"> </label>
+                <div class="col-md-2 text-end tk-field">
+                    <label class="tk-label"> </label>
                     <div>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="removeField(${fieldIndex})">
+                        <button type="button" class="tk-btn tk-btn-danger tk-btn-sm" onclick="removeField(${fieldIndex})">
                             <i class="bx bx-trash"></i>
                         </button>
                     </div>
@@ -99,13 +99,13 @@ function addField() {
             <!-- Options Container -->
             <div class="options-container mt-3" id="options_container_${fieldIndex}" style="display:none;">
                 <div class="row">
-                    <div class="col-md-12">
-                        <label class="form-label">${window.appConfig.labels.options}</label>
+                    <div class="col-md-12 tk-field">
+                        <label class="tk-label">${window.appConfig.labels.options}</label>
                         <div class="options-list mb-2" id="options_list_${fieldIndex}"></div>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="option_input_${fieldIndex}"
+                            <input type="text" class="tk-input" id="option_input_${fieldIndex}"
                                    placeholder="${window.appConfig.labels.add_option}">
-                            <button class="btn btn-outline-primary" type="button" onclick="addOption(${fieldIndex})">
+                            <button class="tk-btn tk-btn-outline" type="button" onclick="addOption(${fieldIndex})">
                                 ${window.appConfig.labels.add}
                             </button>
                         </div>

@@ -495,17 +495,17 @@
                             <div class="tab-pane fade {{ $activeTab == 'activity_log' ? 'active show' : '' }}"
                                 id="navs-top-activity-log" role="tabpanel">
                                 <div class="col-12">
-                                    <div class="row mt-4">
-                                        <div class="col-md-4 mb-3">
-                                            <div class="input-group input-group-merge">
-                                                <input type="text" id="activity_log_between_date" class="form-control"
-                                                    placeholder="<?= get_label('date_between', 'Date between') ?>"
-                                                    autocomplete="off">
-                                            </div>
+                                    <div class="row mt-4 tk-filter-row">
+                                        <div class="col-md-4 mb-3 tk-field">
+                                            <label class="tk-label" for="activity_log_between_date"><?= get_label('date_between', 'Date between') ?></label>
+                                            <input type="text" id="activity_log_between_date" class="tk-input"
+                                                placeholder="<?= get_label('date_between', 'Date between') ?>"
+                                                autocomplete="off">
                                         </div>
                                         @if ($auth_user->can('manage_users'))
-                                            <div class="col-md-4 mb-3">
-                                                <select class="form-select users_select" id="user_filter"
+                                            <div class="col-md-4 mb-3 tk-field">
+                                                <label class="tk-label" for="user_filter"><?= get_label('actioned_by_users', 'Actioned By Users') ?></label>
+                                                <select class="tk-select tom_users_select" id="user_filter"
                                                     aria-label="Default select example"
                                                     data-placeholder="<?= get_label('select_actioned_by_users', 'Select Actioned By Users') ?>"
                                                     multiple>
@@ -513,44 +513,33 @@
                                             </div>
                                         @endif
                                         @if ($auth_user->can('manage_clients'))
-                                            <div class="col-md-4 mb-3">
-                                                <select class="form-select clients_select" id="client_filter"
+                                            <div class="col-md-4 mb-3 tk-field">
+                                                <label class="tk-label" for="client_filter"><?= get_label('actioned_by_clients', 'Actioned By Clients') ?></label>
+                                                <select class="tk-select tom_clients_select" id="client_filter"
                                                     aria-label="Default select example"
                                                     data-placeholder="<?= get_label('select_actioned_by_clients', 'Select Actioned By Clients') ?>"
                                                     multiple>
                                                 </select>
                                             </div>
                                         @endif
-                                        <div class="col-md-4 mb-3">
-                                            <select class="form-select js-example-basic-multiple" id="activity_filter"
+                                        <div class="col-md-4 mb-3 tk-field">
+                                            <label class="tk-label" for="activity_filter"><?= get_label('activities', 'Activities') ?></label>
+                                            <select class="tk-select tom_static_select" id="activity_filter"
                                                 aria-label="Default select example"
                                                 data-placeholder="<?= get_label('select_activities', 'Select Activities') ?>"
                                                 data-allow-clear="true" multiple>
-                                                <option value="created">
-                                                    <?= get_label('created', 'Created') ?>
-                                                </option>
-                                                <option value="updated">
-                                                    <?= get_label('updated', 'Updated') ?>
-                                                </option>
-                                                <option value="duplicated">
-                                                    <?= get_label('duplicated', 'Duplicated') ?>
-                                                </option>
-                                                <option value="uploaded">
-                                                    <?= get_label('uploaded', 'Uploaded') ?>
-                                                </option>
-                                                <option value="deleted">
-                                                    <?= get_label('deleted', 'Deleted') ?>
-                                                </option>
-                                                <option value="updated_status">
-                                                    <?= get_label('updated_status', 'Updated status') ?>
-                                                </option>
-                                                <option value="updated_priority">
-                                                    <?= get_label('updated_priority', 'Updated priority') ?>
-                                                </option>
+                                                <option value="created"><?= get_label('created', 'Created') ?></option>
+                                                <option value="updated"><?= get_label('updated', 'Updated') ?></option>
+                                                <option value="duplicated"><?= get_label('duplicated', 'Duplicated') ?></option>
+                                                <option value="uploaded"><?= get_label('uploaded', 'Uploaded') ?></option>
+                                                <option value="deleted"><?= get_label('deleted', 'Deleted') ?></option>
+                                                <option value="updated_status"><?= get_label('updated_status', 'Updated status') ?></option>
+                                                <option value="updated_priority"><?= get_label('updated_priority', 'Updated priority') ?></option>
                                             </select>
                                         </div>
-                                        <div class="col-md-4 mb-3">
-                                            <select class="form-select js-example-basic-multiple" id="type_filter"
+                                        <div class="col-md-4 mb-3 tk-field">
+                                            <label class="tk-label" for="type_filter"><?= get_label('types', 'Types') ?></label>
+                                            <select class="tk-select tom_static_select" id="type_filter"
                                                 aria-label="Default select example"
                                                 data-placeholder="<?= get_label('select_types', 'Select types') ?>"
                                                 data-allow-clear="true" multiple>

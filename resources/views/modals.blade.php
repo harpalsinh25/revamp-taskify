@@ -3900,42 +3900,42 @@
                     <input type="hidden" name="table" value="meetings_table">
                     <div class="modal-body">
                         <div class="row">
-                            <div class="mb-3">
-                                <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
+                            <div class="mb-3 tk-field">
+                                <label for="title" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                         class="asterisk">*</span></label>
-                                <input class="form-control" type="text" name="title"
+                                <input class="tk-input" type="text" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label" for=""><?= get_label('starts_at', 'Starts at') ?>
+                            <div class="col-md-4 mb-3 tk-field">
+                                <label class="tk-label" for=""><?= get_label('starts_at', 'Starts at') ?>
                                     <span class="asterisk">*</span></label>
-                                <input type="text" id="start_date" name="start_date" class="form-control"
+                                <input type="text" id="start_date" name="start_date" class="tk-input"
                                     value="">
                             </div>
-                            <div class="col-md-2 mb-3">
-                                <label class="form-label" for=""><?= get_label('time', 'Time') ?> <span
+                            <div class="col-md-2 mb-3 tk-field">
+                                <label class="tk-label" for=""><?= get_label('time', 'Time') ?> <span
                                         class="asterisk">*</span></label>
-                                <input type="time" name="start_time" class="form-control">
+                                <input type="time" name="start_time" class="tk-input">
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label" for="end_date_time"><?= get_label('ends_at', 'Ends at') ?>
+                            <div class="col-md-4 mb-3 tk-field">
+                                <label class="tk-label" for="end_date_time"><?= get_label('ends_at', 'Ends at') ?>
                                     <span class="asterisk">*</span></label>
-                                <input type="text" id="end_date" name="end_date" class="form-control"
+                                <input type="text" id="end_date" name="end_date" class="tk-input"
                                     value="">
                             </div>
-                            <div class="col-md-2 mb-3">
-                                <label class="form-label" for=""><?= get_label('time', 'Time') ?> <span
+                            <div class="col-md-2 mb-3 tk-field">
+                                <label class="tk-label" for=""><?= get_label('time', 'Time') ?> <span
                                         class="asterisk">*</span></label>
-                                <input type="time" name="end_time" class="form-control">
+                                <input type="time" name="end_time" class="tk-input">
                             </div>
                         </div>
                         <div class="row">
-                            <div class="mb-3">
-                                <label class="form-label"
+                            <div class="mb-3 tk-field">
+                                <label class="tk-label"
                                     for="user_id"><?= get_label('select_users', 'Select users') ?></label>
-                                <select class="form-control users_select" name="user_ids[]" multiple="multiple"
+                                <select class="tk-select tom_users_select" name="user_ids[]" multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                                     @if ($guard == 'web')
                                         <option value="{{ $auth_user->id }}" selected>{{ $auth_user->first_name }}
@@ -3945,10 +3945,10 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="mb-3">
-                                <label class="form-label"
+                            <div class="mb-3 tk-field">
+                                <label class="tk-label"
                                     for="client_id"><?= get_label('select_clients', 'Select clients') ?></label>
-                                <select class="form-control clients_select" name="client_ids[]"
+                                <select class="tk-select tom_clients_select" name="client_ids[]"
                                     multiple="multiple"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
                                     @if ($guard == 'client')
@@ -3965,10 +3965,10 @@
                         @endif
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary"
+                        <button type="button" class="tk-btn tk-btn-outline"
                             data-bs-dismiss="modal"><?= get_label('close', 'Close') ?></button>
                         <button type="submit" id="submit_btn"
-                            class="btn btn-primary me-2"><?= get_label('create', 'Create') ?></button>
+                            class="tk-btn tk-btn-primary me-2"><?= get_label('create', 'Create') ?></button>
                     </div>
                 </form>
             </div>
@@ -4971,10 +4971,10 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="name" class="form-label">{{ get_label('name', 'Name') }}
+                            <label for="name" class="tk-input-label">{{ get_label('name', 'Name') }}
                                 <span class="asterisk">*</span>
                             </label>
-                            <input class="form-control" type="text" name="name"
+                            <input class="tk-input" type="text" name="name"
                                 placeholder="{{ get_label('please_enter_name', 'Please Enter Name') }}">
                             @error('title')
                                 <span class="text-danger">{{ $message }}</span>

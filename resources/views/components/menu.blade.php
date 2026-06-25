@@ -238,7 +238,8 @@ $pendingLeaveRequestsCount = $query->count();
         }
     }
 </style>
-<div class="offcanvas-lg offcanvas-start border-0 d-flex flex-row tk-sidebar-z" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="position: fixed; top: 0; bottom: 0; left: 0; width: max-content; background: transparent; box-shadow: none; pointer-events: auto;">
+{{-- We add max-width: 312px to prevent this wrapper from becoming wider than 312px and invisibly blocking clicks on the left side of your input fields. --}}
+<div class="offcanvas-lg offcanvas-start border-0 d-flex flex-row tk-sidebar-z" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="position: fixed; top: 0; bottom: 0; left: 0; width: max-content; max-width: 312px; background: transparent; box-shadow: none; pointer-events: auto;">
 
 {{-- ============================ RAIL ============================ --}}
 <aside class="tk-rail" style="transform: none !important; position: relative !important; left: 0 !important; z-index: 2 !important; height: 100%; transition: none !important;" aria-label="{{ get_label('primary_navigation', 'Primary navigation') }}">
