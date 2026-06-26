@@ -38,13 +38,13 @@
 {{-- Date Filter Inputs --}}
 @foreach ($filters as $filter)
     @if (isset($filterLabels[$filter]))
-        <div class="{{ $colClass }}">
+        <div class="{{ $colClass }} tk-field">
             @if ($showLabel)
-                <label class="form-label small text-muted mb-1">{{ $filterLabels[$filter] }}</label>
+                <label class="tk-label small text-muted mb-1">{{ $filterLabels[$filter] }}</label>
             @endif
             <div class="tk-inputgroup">
                 @if ($showIcons)
-                    <span><i class="bx bx-calendar"></i></span>
+                    <i class="bx bx-calendar tk-ic"></i>
                 @endif
                 <input type="text" id="{{ $prefix }}_{{ $filter }}"
                     name="{{ $prefix }}_{{ $filter }}" placeholder="{{ $filterLabels[$filter] }}"

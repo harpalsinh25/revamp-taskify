@@ -302,32 +302,32 @@ $('#add-item').on('click', function (e) {
             amount = amount.toFixed(decimal_points);
             html = '<div class="estimate-invoice-item"><div class="d-flex">' +
                 '<input type="hidden" id=item_' + items_count + ' name="item[]">' +
-                '<div class="mb-3 col-md-2 mx-1">' +
-                '<input type="text" id="item_' + items_count + '_title" name="title[]" class="form-control" readonly>' +
+                '<div class="col-md-2 mb-3 mx-1 tk-field">' +
+                '<input type="text" id="item_' + items_count + '_title" name="title[]" class="tk-input" readonly>' +
                 '</div>' +
-                '<div class="mb-3 col-md-2 mx-1">' +
-                '<textarea class="form-control" id="item_' + items_count + '_description" name="description[]" readonly></textarea>' +
+                '<div class="col-md-2 mb-3 mx-1 tk-field">' +
+                '<textarea class="tk-input" id="item_' + items_count + '_description" name="description[]" readonly></textarea>' +
                 '</div>' +
-                '<div class="mb-3 col-md-1 mx-1">' +
-                '<input type="number" name="quantity[]" step="0.25" id="item_' + items_count + '_quantity" onchange="update_amount(' + items_count + ')" class="form-control" min="0.25">' +
+                '<div class="col-md-1 mb-3 mx-1 tk-field">' +
+                '<input type="number" name="quantity[]" step="0.25" id="item_' + items_count + '_quantity" onchange="update_amount(' + items_count + ')" class="tk-input" min="0.25">' +
                 '</div>' +
-                '<div class="mb-3 col-md-1 mx-1">' +
-                '<select class="form-select" name="unit[]" id="item_' + items_count + '_unit">' +
+                '<div class="col-md-1 mb-3 mx-1 tk-field">' +
+                '<select class="tk-select tom_static_select" name="unit[]" id="item_' + items_count + '_unit">' +
                 units +
                 '</select>' +
                 '</div>' +
-                '<div class="mb-3 col-md-2 mx-1">' +
-                '<input type="text" name="rate[]" id="item_' + items_count + '_rate" onchange="update_amount(' + items_count + ')" class="form-control decimal-currency">' +
+                '<div class="col-md-2 mb-3 mx-1 tk-field">' +
+                '<input type="text" name="rate[]" id="item_' + items_count + '_rate" onchange="update_amount(' + items_count + ')" class="tk-input decimal-currency">' +
                 '</div>' +
-                '<div class="mb-3 col-md-1 mx-1">' +
-                '<select class="form-select" name="tax[]" id="item_' + items_count + '_tax" onchange="update_amount(' + items_count + ');">' +
+                '<div class="col-md-1 mb-3 mx-1 tk-field">' +
+                '<select class="tk-select tom_static_select" name="tax[]" id="item_' + items_count + '_tax" onchange="update_amount(' + items_count + ');">' +
                 taxes +
                 '</select>' +
                 '<div class="item_' + items_count + '_tax_title"></div>' +
                 '<input class="item_' + items_count + '_tax_title" type="hidden" name="tax_amount[]"></input>' +
                 '</div>' +
-                '<div class="mb-3 col-md-2 mx-1">' +
-                '<input type="text" id="item_' + items_count + '_amount" class="form-control decimal-currency" name="amount[]" onchange="updateTotals()">' +
+                '<div class="col-md-2 mb-3 mx-1 tk-field">' +
+                '<input type="text" id="item_' + items_count + '_amount" class="tk-input decimal-currency" name="amount[]" onchange="updateTotals()">' +
                 '</div>' +
                 '<div class="mx-1">' +
                 '<button type="button" class="btn btn-sm btn-danger my-1 remove-estimate-invoice-item" data-count=' + items_count + '><i class="bx bx-trash"></i></button>' +

@@ -29,25 +29,28 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="row">
-                <x-advanced-date-filters prefix="payment" :filters="['date_between']" />
+                <x-advanced-date-filters prefix="payment" :filters="['date_between']" colClass="col-md-3" />
                 @if(isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-3">
-                    <select class="form-select tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
+                <div class="col-md-3 mb-3 tk-field">
+                    <label class="tk-label small text-muted mb-1"><?= get_label('users', 'Users') ?></label>
+                    <select class="tk-select tom_users_select" id="user_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_users', 'Select Users') ?>" multiple>
                     </select>
                 </div>
                 @endif
-                <div class="col-md-4 mb-3">
-                    <select class="form-select tom_invoices_select" id="invoice_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_invoices', 'Select Invoices') ?>" multiple>
+                <div class="col-md-3 mb-3 tk-field">
+                    <label class="tk-label small text-muted mb-1"><?= get_label('invoices', 'Invoices') ?></label>
+                    <select class="tk-select tom_invoices_select" id="invoice_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_invoices', 'Select Invoices') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <select class="form-select tom_static_select" id="payment_method_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_payment_methods', 'Select payment methods') ?>" data-allow-clear="true" multiple>
+                <div class="col-md-3 mb-3 tk-field">
+                    <label class="tk-label small text-muted mb-1"><?= get_label('payment_methods', 'Payment methods') ?></label>
+                    <select class="tk-select tom_static_select" id="payment_method_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_payment_methods', 'Select payment methods') ?>" data-allow-clear="true" multiple>
                         @foreach ($payment_methods as $pm)
                         <option value="{{$pm->id}}">{{$pm->title}}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4 mb-3 d-flex align-items-end">
+                <div class="col-md-3 mb-3 d-flex align-items-end">
                     <button class="btn btn-secondary clear-payments-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
                         <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
                     </button>

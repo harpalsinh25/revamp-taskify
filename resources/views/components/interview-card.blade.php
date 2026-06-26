@@ -3,19 +3,19 @@
         <div class="card-body">
             {{$slot}}
             <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label"><?= get_label('date_between', 'Date Between') ?></label>
-                    <div class="input-group input-group-merge">
-                        <span class="input-group-text"><i class="bx bx-calendar"></i></span>
-                        <input type="text" class="form-control" id="interview_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label"><?= get_label('date_between', 'Date Between') ?></label>
+                    <div class="tk-inputgroup">
+                        <i class="bx bx-calendar tk-ic"></i>
+                        <input type="text" id="interview_date_between" placeholder="<?= get_label('date_between', 'Date Between') ?>" autocomplete="off">
                     </div>
                     <input type="hidden" id="interview_date_between_from" name="start_date" />
                     <input type="hidden" id="interview_date_between_to" name="end_date" />
                 </div>
                 
-                <div class="col-md-3">
-                    <label class="form-label"><?= get_label('sort_by', 'Sort By') ?></label>
-                    <select class="form-select tom_static_select" id="sort" name="sort" aria-label="Default select example" data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label"><?= get_label('sort_by', 'Sort By') ?></label>
+                    <select class="tk-select tom_static_select" id="sort" name="sort" aria-label="Default select example" data-placeholder="<?= get_label('select_sort_by', 'Select Sort By') ?>" data-allow-clear="true">
                         <option></option>
                         <option value="newest" <?= request()->sort && request()->sort == 'newest' ? 'selected' : '' ?>><?= get_label('newest', 'Newest') ?></option>
                         <option value="oldest" <?= request()->sort && request()->sort == 'oldest' ? 'selected' : '' ?>><?= get_label('oldest', 'Oldest') ?></option>
@@ -24,9 +24,9 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label"><?= get_label('status', 'Status') ?></label>
-                    <select class="form-select tom_static_select" id="interview_status" name="status" aria-label="Default select example" data-placeholder="{{ get_label('filter_by_statuses', 'Filter by statuses') }}" data-allow-clear="true" multiple>
+                <div class="col-md-3 tk-field">
+                    <label class="tk-label"><?= get_label('status', 'Status') ?></label>
+                    <select class="tk-select tom_static_select" id="interview_status" name="status" aria-label="Default select example" data-placeholder="{{ get_label('filter_by_statuses', 'Filter by statuses') }}" data-allow-clear="true" multiple>
                         <option value="scheduled">Scheduled</option>
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>

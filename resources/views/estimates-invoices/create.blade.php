@@ -28,26 +28,26 @@
                 <input type="hidden" name="redirect_url" value="{{ url('estimates-invoices') }}">
                 @csrf
                 <div class="row">
-                    <div class="mb-3 col-md-12">
-                        <label class="form-label" for=""><?= get_label('etimate_invoice', 'Estimate/Invoice') ?> <span class="asterisk">*</span></label>
-                        <select class="form-select" name="type" id="type">
+                    <div class="col-md-12 mb-3 tk-field">
+                        <label class="tk-label" for=""><?= get_label('etimate_invoice', 'Estimate/Invoice') ?> <span class="asterisk">*</span></label>
+                        <select class="tk-select tom_static_select" name="type" id="type">
                             <option value=""><?= get_label('please_select', 'Please select') ?></option>
                             <option value="estimate"><?= get_label('estimate', 'Estimate') ?></option>
                             <option value="invoice"><?= get_label('invoice', 'Invoice') ?></option>
                         </select>
                     </div>
-                    <div class="mb-3 col-md-6">
-                        <label class="form-label" for=""><?= get_label('select_client', 'Select client') ?> <span class="asterisk">*</span></label>
-                        <select class="form-control clients_select" id="client_id" name="client_id" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false" data-single-select="true">
+                    <div class="col-md-6 mb-3 tk-field">
+                        <label class="tk-label" for=""><?= get_label('select_client', 'Select client') ?> <span class="asterisk">*</span></label>
+                        <select class="tk-select tom_clients_select" id="client_id" name="client_id" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false" data-single-select="true">
                         </select>
                     </div>
-                    <div class="mb-3 col-md-6">
-                        <label class="form-label" for=""><?= get_label('status', 'Status') ?></label>
-                        <select class="form-control js-example-basic-multiple" name="status" id="status" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
+                    <div class="col-md-6 mb-3 tk-field">
+                        <label class="tk-label" for=""><?= get_label('status', 'Status') ?></label>
+                        <select class="tk-select tom_static_select" name="status" id="status" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true">
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for=""><?= get_label('billing_details', 'Billing details') ?></label>
+                        <label class="tk-label" for=""><?= get_label('billing_details', 'Billing details') ?></label>
                         <a href="javascript:void(0);" class="edit-billing-details"><i class="bx bx-edit mx-1"></i></a>
                         <address>
                             <span class="billing_name">--</span><br>
@@ -67,25 +67,25 @@
                     <input type="hidden" name="country" id="country" value="">
                     <input type="hidden" name="zip_code" id="zip_code" value="">
                     <input type="hidden" name="phone" id="contact" value="">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" for=""><?= get_label('note', 'Note') ?></label>
-                        <textarea class="form-control" placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>" name="note"></textarea>
+                    <div class="col-md-6 mb-3 tk-field">
+                        <label class="tk-label" for=""><?= get_label('note', 'Note') ?></label>
+                        <textarea class="tk-input" placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>" name="note"></textarea>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('from_date', 'From date') ?> <span class="asterisk">*</span></label>
-                        <input type="text" id="start_date" name="from_date" class="form-control" placeholder="" autocomplete="off">
+                    <div class="col-md-3 mb-3 tk-field">
+                        <label for="nameBasic" class="tk-label"><?= get_label('from_date', 'From date') ?> <span class="asterisk">*</span></label>
+                        <input type="text" id="start_date" name="from_date" class="tk-input" placeholder="" autocomplete="off">
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('to_date', 'To date') ?> <span class="asterisk">*</span></label>
-                        <input type="text" id="end_date" name="to_date" class="form-control" placeholder="" autocomplete="off">
+                    <div class="col-md-3 mb-3 tk-field">
+                        <label for="nameBasic" class="tk-label"><?= get_label('to_date', 'To date') ?> <span class="asterisk">*</span></label>
+                        <input type="text" id="end_date" name="to_date" class="tk-input" placeholder="" autocomplete="off">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" for=""><?= get_label('personal_note', 'Personal note') ?></label>
-                        <textarea class="form-control" placeholder="<?= get_label('please_enter_personal_note_if_any', 'Please enter personal note if any') ?>" name="personal_note"></textarea>
+                    <div class="col-md-6 mb-3 tk-field">
+                        <label class="tk-label" for=""><?= get_label('personal_note', 'Personal note') ?></label>
+                        <textarea class="tk-input" placeholder="<?= get_label('please_enter_personal_note_if_any', 'Please enter personal note if any') ?>" name="personal_note"></textarea>
                     </div>
-                    <div class="mb-3 col-md-6">
-                        <label class="form-label" for=""><?= get_label('item', 'Item') ?> <span class="asterisk">*</span></label>
-                        <select id="item_id" name="item_id" class="form-control items_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true" data-single-select="true">                            
+                    <div class="col-md-6 mb-3 tk-field">
+                        <label class="tk-label" for=""><?= get_label('item', 'Item') ?> <span class="asterisk">*</span></label>
+                        <select id="item_id" name="item_id" class="tk-select tom_items_select" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="true" data-single-select="true">                            
                         </select>
                         <div class="mt-2">
                             <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_item_modal"><button type="button" class="btn btn-sm btn-primary action_create_items" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_item', 'Create item') ?>"><i class="bx bx-plus"></i></button></a>
@@ -95,34 +95,34 @@
                     <div class="row">
                         <div class="col-md-12" id="estimate-invoice-items">
                             <div class="d-flex">
-                                <div class="mb-3 col-md-2 mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('product_service', 'Product/Service') ?> <span class="asterisk">*</span></label>
-                                    <input type="text" id="item_0_title" class="form-control" readonly>
+                                <div class="col-md-2 mb-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for=""><?= get_label('product_service', 'Product/Service') ?> <span class="asterisk">*</span></label>
+                                    <input type="text" id="item_0_title" class="tk-input" readonly>
                                 </div>
-                                <div class="mb-3 col-md-2 mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('description', 'Description') ?></label>
-                                    <textarea class="form-control" id="item_0_description" readonly></textarea>
+                                <div class="col-md-2 mb-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for=""><?= get_label('description', 'Description') ?></label>
+                                    <textarea class="tk-input" id="item_0_description" readonly></textarea>
                                 </div>
-                                <div class="mb-3 col-md-1 mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('quantity', 'Quantity') ?> <span class="asterisk">*</span></label>
-                                    <input type="number" step="0.25" id="item_0_quantity" placeholder="1" class="form-control" min="0.25" value="1" onchange="update_amount(0,0)">
+                                <div class="col-md-1 mb-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for=""><?= get_label('quantity', 'Quantity') ?> <span class="asterisk">*</span></label>
+                                    <input type="number" step="0.25" id="item_0_quantity" placeholder="1" class="tk-input" min="0.25" value="1" onchange="update_amount(0,0)">
                                 </div>
-                                <div class="mb-3 col-md-1 mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('unit', 'Unit') ?></label>
-                                    <select class="form-select" id="item_0_unit">
+                                <div class="col-md-1 mb-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for=""><?= get_label('unit', 'Unit') ?></label>
+                                    <select class="tk-select tom_static_select" id="item_0_unit">
                                         <option value=""><?= get_label('select', 'Select') ?></option>
                                         @foreach ($units as $unit)
                                         <option value="{{$unit->id}}">{{$unit->title}}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="mb-3 col-md-2 mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('rate', 'Rate') ?> ({{$general_settings['currency_symbol']}}) <span class="asterisk">*</span></label>
-                                    <input type="text" id="item_0_rate" placeholder="{{format_currency(0,0)}}" class="form-control decimal-currency" min="0" onchange="update_amount(0,0)">
+                                <div class="col-md-2 mb-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for=""><?= get_label('rate', 'Rate') ?> ({{$general_settings['currency_symbol']}}) <span class="asterisk">*</span></label>
+                                    <input type="text" id="item_0_rate" placeholder="{{format_currency(0,0)}}" class="tk-input decimal-currency" min="0" onchange="update_amount(0,0)">
                                 </div>
-                                <div class="mb-3 col-md-1 mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('tax', 'Tax') ?></label>
-                                    <select class="form-select" id="item_0_tax" onchange="update_amount(0,0)">
+                                <div class="col-md-1 mb-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for=""><?= get_label('tax', 'Tax') ?></label>
+                                    <select class="tk-select tom_static_select" id="item_0_tax" onchange="update_amount(0,0)">
                                         <option value=""><?= get_label('select', 'Select') ?></option>
                                         @foreach ($taxes as $tax)
                                         <option value="{{$tax->id}}">{{$tax->title}}</option>
@@ -130,12 +130,12 @@
                                     </select>
                                     <div class="item_0_tax_title"></div>
                                 </div>
-                                <div class="mb-3 col-md-2 mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('amount', 'Amount') ?> ({{$general_settings['currency_symbol']}}) <span class="asterisk">*</span></label>
-                                    <input type="text" id="item_0_amount" placeholder="{{format_currency(0,0)}}" class="form-control decimal-currency" min="0" onchange="updateTotals()">
+                                <div class="col-md-2 mb-3 mx-1 tk-field">
+                                    <label class="tk-label text-muted" for=""><?= get_label('amount', 'Amount') ?> ({{$general_settings['currency_symbol']}}) <span class="asterisk">*</span></label>
+                                    <input type="text" id="item_0_amount" placeholder="{{format_currency(0,0)}}" class="tk-input decimal-currency" min="0" onchange="updateTotals()">
                                 </div>
                                 <div class="mx-1">
-                                    <label class="form-label text-muted" for=""><?= get_label('action', 'Action') ?></label>
+                                    <label class="tk-label text-muted" for=""><?= get_label('action', 'Action') ?></label>
                                     <button type="button" class="btn btn-sm btn-success my-1" id="add-item"><i class="bx bx-check"></i></button>
                                 </div>
                             </div>
@@ -144,23 +144,23 @@
                     <input type="hidden" name="item_ids" id="item_ids">
                     <div class="d-flex">
                         <div class="col-md-8"></div>
-                        <div class="col-md-4 mt-4 text-end">
+                        <div class="col-md-4 mt-4 text-end tk-field">
                             <h6><?= get_label('sub_total', 'Sub total') ?> ({{$general_settings['currency_symbol']}})</h6>
-                            <input type="text" class="form-control decimal-currency" name="total" id="sub_total" placeholder="{{format_currency(0,0)}}" value="{{format_currency(0,0)}}" onchange="updateFinalTotal()">
+                            <input type="text" class="tk-input decimal-currency text-end" name="total" id="sub_total" placeholder="{{format_currency(0,0)}}" value="{{format_currency(0,0)}}" onchange="updateFinalTotal()">
                         </div>
                     </div>
                     <div class="d-flex">
                         <div class="col-md-8"></div>
-                        <div class="col-md-4 mt-4 text-end">
+                        <div class="col-md-4 mt-4 text-end tk-field">
                             <h6><?= get_label('tax', 'Tax') ?> ({{$general_settings['currency_symbol']}})</h6>
-                            <input type="text" class="form-control decimal-currency" name="tax_amount" id="total_tax" placeholder="{{format_currency(0,0)}}" value="{{format_currency(0,0)}}" onchange="updateFinalTotal()">
+                            <input type="text" class="tk-input decimal-currency text-end" name="tax_amount" id="total_tax" placeholder="{{format_currency(0,0)}}" value="{{format_currency(0,0)}}" onchange="updateFinalTotal()">
                         </div>
                     </div>
                     <div class="d-flex">
                         <div class="col-md-8"></div>
-                        <div class="col-md-4 mt-4 text-end">
+                        <div class="col-md-4 mt-4 text-end tk-field">
                             <h6><?= get_label('final_total', 'Final total') ?> ({{$general_settings['currency_symbol']}})</h6>
-                            <input type="text" class="form-control decimal-currency" name="final_total" id="final_total" placeholder="{{format_currency(0,0)}}" value="{{format_currency(0,0)}}">
+                            <input type="text" class="tk-input decimal-currency text-end" name="final_total" id="final_total" placeholder="{{format_currency(0,0)}}" value="{{format_currency(0,0)}}">
                         </div>
                     </div>
                     <div class="mt-4 text-end">

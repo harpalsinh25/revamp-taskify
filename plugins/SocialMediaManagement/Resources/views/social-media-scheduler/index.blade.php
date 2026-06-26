@@ -63,11 +63,11 @@
             @php
                 $visibleColumns = getUserPreferences('socials');
             @endphp
-            <div class="tk-card mb-4">
+            <div class="tk-card mb-4 overflow-visible">
                 <div class="tk-card-body" style="padding:14px">
                     <div class="row align-items-center">
-                        <div class="col-md-3 mb-3 mb-md-0">
-                            <select class="form-select tom_static_select" id="select_social_platforms"
+                        <div class="col-md-3 mb-3 mb-md-0 tk-field">
+                            <select class="tk-select tom_static_select" id="select_social_platforms"
                                 name="platform" aria-label="Default select example"
                                 data-placeholder="<?= get_label('filter_by_platform', 'Filter By Platform') ?>"
                                 data-allow-clear="true">
@@ -86,8 +86,8 @@
                                     <?= get_label('pinterest', 'Pinterest') ?></option>
                             </select>
                         </div>
-                        <div class="col-md-3 mb-3 mb-md-0">
-                            <select class="form-select tom_static_select" id="select_social_stastuses"
+                        <div class="col-md-3 mb-3 mb-md-0 tk-field">
+                            <select class="tk-select tom_static_select" id="select_social_stastuses"
                                 name="status" aria-label="Default select example"
                                 data-placeholder="<?= get_label('select_by_status', 'Select By Status') ?>"
                                 data-allow-clear="true">

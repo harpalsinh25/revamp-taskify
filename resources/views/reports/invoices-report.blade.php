@@ -96,29 +96,29 @@
             <!-- Filters Row -->
             <div class="row g-3 align-items-end">
                 <x-advanced-date-filters prefix="report" />
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('types', 'Types') }}</label>
-                    <select class="form-select tom_static_select" id="type_filter" aria-label="{{ get_label('select_types', 'Select types') }}" data-placeholder="<?= get_label('select_types', 'Select types') ?>" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('types', 'Types') }}</label>
+                    <select class="tk-select tom_static_select" id="type_filter" aria-label="{{ get_label('select_types', 'Select types') }}" data-placeholder="<?= get_label('select_types', 'Select types') ?>" multiple>
                         <option value="estimate">{{ get_label('estimates', 'Estimates') }}</option>
                         <option value="invoice">{{ get_label('invoices', 'Invoices') }}</option>
                     </select>
                 </div>
                 @if (!isClient() || isAdminOrHasAllDataAccess())
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('clients', 'Clients') }}</label>
-                    <select class="form-select tom_clients_select" id="client_filter" aria-label="{{ get_label('select_clients', 'Select Clients') }}" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('clients', 'Clients') }}</label>
+                    <select class="tk-select tom_clients_select" id="client_filter" aria-label="{{ get_label('select_clients', 'Select Clients') }}" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
                     </select>
                 </div>
                 @endif
                 @if(isAdminOrHasAllDataAccess())
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('user_creators', 'User Creators') }}</label>
-                    <select class="form-select tom_users_select" id="user_creators_filter" aria-label="{{ get_label('select_user_creators', 'Select User Creators') }}" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('user_creators', 'User Creators') }}</label>
+                    <select class="tk-select tom_users_select" id="user_creators_filter" aria-label="{{ get_label('select_user_creators', 'Select User Creators') }}" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('client_creators', 'Client Creators') }}</label>
-                    <select class="form-select tom_clients_select" id="client_creators_filter" aria-label="{{ get_label('select_client_creators', 'Select Client Creators') }}" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('client_creators', 'Client Creators') }}</label>
+                    <select class="tk-select tom_clients_select" id="client_creators_filter" aria-label="{{ get_label('select_client_creators', 'Select Client Creators') }}" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>
                     </select>
                 </div>
                 @endif

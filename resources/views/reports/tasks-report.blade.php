@@ -118,31 +118,31 @@
         <div class="card-body">
             <div class="row g-3 align-items-end">
                 <x-advanced-date-filters prefix="report" />
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('projects', 'Projects') }}</label>
-                    <select class="form-select tom_projects_select" id="project_filter" aria-label="{{ get_label('select_projects', 'Select Projects') }}" multiple data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('projects', 'Projects') }}</label>
+                    <select class="tk-select tom_projects_select" id="project_filter" aria-label="{{ get_label('select_projects', 'Select Projects') }}" multiple data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>">
                     </select>
                 </div>
                 @if(isAdminOrHasAllDataAccess())
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('users', 'Users') }}</label>
-                    <select class="form-select tom_users_select" id="user_filter" aria-label="{{ get_label('select_users', 'Select Users') }}" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('users', 'Users') }}</label>
+                    <select class="tk-select tom_users_select" id="user_filter" aria-label="{{ get_label('select_users', 'Select Users') }}" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('clients', 'Clients') }}</label>
-                    <select class="form-select tom_clients_select" id="client_filter" aria-label="{{ get_label('select_clients', 'Select Clients') }}" multiple data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('clients', 'Clients') }}</label>
+                    <select class="tk-select tom_clients_select" id="client_filter" aria-label="{{ get_label('select_clients', 'Select Clients') }}" multiple data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>">
                     </select>
                 </div>
                 @endif
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('status', 'Status') }}</label>
-                    <select class="form-select tom_statuses_filter" id="status_filter" aria-label="{{ get_label('select_statuses', 'Select Statuses') }}" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('status', 'Status') }}</label>
+                    <select class="tk-select tom_statuses_filter" id="status_filter" aria-label="{{ get_label('select_statuses', 'Select Statuses') }}" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('priority', 'Priority') }}</label>
-                    <select class="form-select tom_priorities_filter" id="priority_filter" aria-label="{{ get_label('select_priorities', 'Select Priorities') }}" multiple data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('priority', 'Priority') }}</label>
+                    <select class="tk-select tom_priorities_filter" id="priority_filter" aria-label="{{ get_label('select_priorities', 'Select Priorities') }}" multiple data-placeholder="<?= get_label('select_priorities', 'Select Priorities') ?>">
                     </select>
                 </div>
             </div>

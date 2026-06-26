@@ -1359,10 +1359,10 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                    <div class="col mb-3 tk-field">
+                        <label for="nameBasic" class="tk-label"><?= get_label('type', 'Type') ?> <span
                                 class="asterisk">*</span></label>
-                        <input type="text" class="form-control" name="type"
+                        <input type="text" class="tk-input" name="type"
                             placeholder="<?= get_label('please_enter_contract_type', 'Please enter contract type') ?>" />
                     </div>
                 </div>
@@ -1390,10 +1390,10 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                    <div class="col mb-3 tk-field">
+                        <label for="nameBasic" class="tk-label"><?= get_label('type', 'Type') ?> <span
                                 class="asterisk">*</span></label>
-                        <input type="text" class="form-control" name="type" id="contract_type"
+                        <input type="text" class="tk-input" name="type" id="contract_type"
                             placeholder="<?= get_label('please_enter_contract_type', 'Please enter contract type') ?>" />
                     </div>
                 </div>
@@ -1422,58 +1422,58 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" name="title" class="form-control"
+                            <input type="text" name="title" class="tk-input"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                         </div>
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('value', 'Value') ?> <span
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('value', 'Value') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input type="text" name="value" class="form-control currency"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input type="text" name="value" class="tk-input currency"
                                     placeholder="<?= get_label('please_enter_value', 'Please enter value') ?>">
                             </div>
                         </div>
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('starts_at', 'Starts at') ?>
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('starts_at', 'Starts at') ?>
                                 <span class="asterisk">*</span></label>
-                            <input type="text" id="start_date" name="start_date" class="form-control"
+                            <input type="text" id="start_date" name="start_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('ends_at', 'Ends at') ?> <span
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('ends_at', 'Ends at') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="end_date" name="end_date" class="form-control"
+                            <input type="text" id="end_date" name="end_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
                         @if (!isClient())
-                            <label class="form-label"
-                                for=""><?= get_label('select_client', 'Select client') ?> <span
-                                    class="asterisk">*</span></label>
-                            <div class="col-12 mb-3">
-                                <select class="form-select tom_clients_select" name="client_id"
+                            <div class="col-12 mb-3 tk-field">
+                                <label class="tk-label"
+                                    for=""><?= get_label('select_client', 'Select client') ?> <span
+                                        class="asterisk">*</span></label>
+                                <select class="tk-select tom_clients_select" name="client_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-allow-clear="false" data-single-select="true">
                                 </select>
                             </div>
                         @endif
-                        <label class="form-label"
-                            for=""><?= get_label('select_project', 'Select project') ?> <span
-                                class="asterisk">*</span></label>
-                        <div class="col-12 mb-3">
-                            <select class="form-select tom_projects_select" name="project_id"
+                        <div class="col-12 mb-3 tk-field">
+                            <label class="tk-label"
+                                for=""><?= get_label('select_project', 'Select project') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="tk-select tom_projects_select" name="project_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
                         </div>
-                        <label class="form-label"
-                            for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
-                                class="asterisk">*</span></label>
-                        <div class="col-12 mb-3">
-                            <select class="form-select tom_contract_types_select" name="contract_type_id"
+                        <div class="col-12 mb-3 tk-field">
+                            <label class="tk-label"
+                                for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="tk-select tom_contract_types_select" name="contract_type_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
@@ -1491,10 +1491,12 @@
                             </div>
                         </div>
                     </div>
-                    <label for="description"
-                        class="form-label"><?= get_label('description', 'Description') ?></label>
-                    <textarea class="form-control" name="description" id="contract_description"
-                        placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    <div class="tk-field mb-3">
+                        <label for="description"
+                            class="tk-label"><?= get_label('description', 'Description') ?></label>
+                        <textarea class="tk-input" name="description" id="contract_description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
@@ -1521,56 +1523,56 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="edit_contract_title" name="title" class="form-control"
+                            <input type="text" id="edit_contract_title" name="title" class="tk-input"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>">
                         </div>
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('value', 'Value') ?> <span
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('value', 'Value') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
                                 <input type="text" id="value" name="value"
-                                    class="form-control currency"
+                                    class="tk-input currency"
                                     placeholder="<?= get_label('please_enter_value', 'Please enter value') ?>">
                             </div>
                         </div>
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('starts_at', 'Starts at') ?>
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('starts_at', 'Starts at') ?>
                                 <span class="asterisk">*</span></label>
-                            <input type="text" id="update_start_date" name="start_date" class="form-control"
+                            <input type="text" id="update_start_date" name="start_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
-                        <div class="col-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('ends_at', 'Ends at') ?> <span
+                        <div class="col-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('ends_at', 'Ends at') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="update_end_date" name="end_date" class="form-control"
+                            <input type="text" id="update_end_date" name="end_date" class="tk-input"
                                 placeholder="" autocomplete="off">
                         </div>
-                        <label class="form-label" for=""><?= get_label('select_client', 'Select client') ?>
-                            <span class="asterisk">*</span></label>
-                        <div class="col-12 mb-3">
-                            <select class="form-select tom_clients_select" id="client_id" name="client_id"
+                        <div class="col-12 mb-3 tk-field">
+                            <label class="tk-label" for=""><?= get_label('select_client', 'Select client') ?>
+                                <span class="asterisk">*</span></label>
+                            <select class="tk-select tom_clients_select" id="client_id" name="client_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
                         </div>
-                        <label class="form-label"
-                            for=""><?= get_label('select_project', 'Select project') ?> <span
-                                class="asterisk">*</span></label>
-                        <div class="col-12 mb-3">
-                            <select class="form-select tom_projects_select" id="project_id" name="project_id"
+                        <div class="col-12 mb-3 tk-field">
+                            <label class="tk-label"
+                                for=""><?= get_label('select_project', 'Select project') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="tk-select tom_projects_select" id="project_id" name="project_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
                             </select>
                         </div>
-                        <label class="form-label"
-                            for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
-                                class="asterisk">*</span></label>
-                        <div class="col-12 mb-3">
-                            <select class="form-select tom_contract_types_select" id="contract_type_id"
+                        <div class="col-12 mb-3 tk-field">
+                            <label class="tk-label"
+                                for=""><?= get_label('select_contract_type', 'Select contract type') ?> <span
+                                    class="asterisk">*</span></label>
+                            <select class="tk-select tom_contract_types_select" id="contract_type_id"
                                 name="contract_type_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-allow-clear="false" data-single-select="true">
@@ -1589,10 +1591,12 @@
                             </div>
                         </div>
                     </div>
-                    <label for="description"
-                        class="form-label"><?= get_label('description', 'Description') ?></label>
-                    <textarea class="form-control" name="description" id="update_contract_description"
-                        placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    <div class="tk-field mb-3">
+                        <label for="description"
+                            class="tk-label"><?= get_label('description', 'Description') ?></label>
+                        <textarea class="tk-input" name="description" id="update_contract_description"
+                            placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
+                    </div>
                     <div class="col-12 mb-3 mt-3">
                         <label class="form-label"><?= get_label('contract_pdf', 'Contract PDF') ?> <small
                                 class="text-muted">
@@ -1625,10 +1629,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
@@ -1657,10 +1661,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title" id="pm_title"
+                            <input type="text" class="tk-input" name="title" id="pm_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
                     </div>
@@ -1689,18 +1693,18 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-6 tk-field mb-3">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                        <div class="col-md-6 tk-field mb-3">
+                            <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input class="form-control currency" type="text" name="amount"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input class="currency" type="text" name="amount"
                                     placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                             </div>
                         </div>
@@ -1730,18 +1734,18 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-6 tk-field mb-3">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" id="allowance_title" name="title"
+                            <input type="text" class="tk-input" id="allowance_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                        <div class="col-md-6 tk-field mb-3">
+                            <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input class="form-control currency" type="text" id="allowance_amount"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input class="currency" type="text" id="allowance_amount"
                                     name="amount"
                                     placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                             </div>
@@ -1772,34 +1776,34 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-12 tk-field mb-3">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                        <div class="col-md-12 tk-field mb-3">
+                            <label for="nameBasic" class="tk-label"><?= get_label('type', 'Type') ?> <span
                                     class="asterisk">*</span></label>
-                            <select id="deduction_type" name="type" class="form-select">
+                            <select id="deduction_type" name="type" class="tk-select">
                                 <option value=""><?= get_label('please_select', 'Please select') ?></option>
                                 <option value="amount"><?= get_label('amount', 'Amount') ?></option>
                                 <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
                             </select>
                         </div>
-                        <div class="col-md-12 d-none mb-3" id="amount_div">
-                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                        <div class="col-md-12 tk-field d-none mb-3" id="amount_div">
+                            <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input class="form-control currency" type="text" name="amount"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input class="currency" type="text" name="amount"
                                     placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                             </div>
                         </div>
-                        <div class="col-md-12 d-none mb-3" id="percentage_div">
-                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                        <div class="col-md-12 tk-field d-none mb-3" id="percentage_div">
+                            <label class="tk-label" for=""><?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span></label>
-                            <input class="form-control" type="number" name="percentage" min="0"
+                            <input class="tk-input" type="number" name="percentage" min="0"
                                 max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>">
                         </div>
@@ -1829,35 +1833,35 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-12 tk-field mb-3">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" id="deduction_title" name="title"
+                            <input type="text" class="tk-input" id="deduction_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                        <div class="col-md-12 tk-field mb-3">
+                            <label for="nameBasic" class="tk-label"><?= get_label('type', 'Type') ?> <span
                                     class="asterisk">*</span></label>
-                            <select id="update_deduction_type" name="type" class="form-select">
+                            <select id="update_deduction_type" name="type" class="tk-select">
                                 <option value=""><?= get_label('please_select', 'Please select') ?></option>
                                 <option value="amount"><?= get_label('amount', 'Amount') ?></option>
                                 <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
                             </select>
                         </div>
-                        <div class="col-md-12 mb-3" id="update_amount_div">
-                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                        <div class="col-md-12 tk-field mb-3" id="update_amount_div">
+                            <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input class="form-control currency" type="text" id="deduction_amount"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input class="currency" type="text" id="deduction_amount"
                                     name="amount"
                                     placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3" id="update_percentage_div">
-                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                        <div class="col-md-12 tk-field mb-3" id="update_percentage_div">
+                            <label class="tk-label" for=""><?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span></label>
-                            <input class="form-control" type="number" id="deduction_percentage"
+                            <input class="tk-input" type="number" id="deduction_percentage"
                                 name="percentage" min="0" max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>">
                         </div>
@@ -1873,6 +1877,30 @@
             </form>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof TomSelect !== 'undefined') {
+                if (document.getElementById('deduction_type')) {
+                    new TomSelect("#deduction_type", {
+                        create: false,
+                        sortField: {
+                            field: "text",
+                            direction: "asc"
+                        }
+                    });
+                }
+                if (document.getElementById('update_deduction_type')) {
+                    new TomSelect("#update_deduction_type", {
+                        create: false,
+                        sortField: {
+                            field: "text",
+                            direction: "asc"
+                        }
+                    });
+                }
+            }
+        });
+    </script>
 @endif
 @if (Request::is('taxes'))
     <div class="modal fade" id="create_tax_modal" tabindex="-1" aria-hidden="true">
@@ -1887,34 +1915,34 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-12 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                        <div class="col-md-12 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('type', 'Type') ?> <span
                                     class="asterisk">*</span></label>
-                            <select id="deduction_type" name="type" class="form-select">
+                            <select id="deduction_type" name="type" class="tk-select">
                                 <option value=""><?= get_label('please_select', 'Please select') ?></option>
                                 <option value="amount"><?= get_label('amount', 'Amount') ?></option>
                                 <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
                             </select>
                         </div>
-                        <div class="col-md-12 d-none mb-3" id="amount_div">
-                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                        <div class="col-md-12 d-none mb-3 tk-field" id="amount_div">
+                            <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input class="form-control currency" type="text" name="amount"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input class="tk-input currency" type="text" name="amount"
                                     placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                             </div>
                         </div>
-                        <div class="col-md-12 d-none mb-3" id="percentage_div">
-                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                        <div class="col-md-12 d-none mb-3 tk-field" id="percentage_div">
+                            <label class="tk-label" for=""><?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span></label>
-                            <input class="form-control" type="number" name="percentage" min="0"
+                            <input class="tk-input" type="number" name="percentage" min="0"
                                 max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>">
                         </div>
@@ -1943,36 +1971,36 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-12 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" id="tax_title" name="title"
+                            <input type="text" class="tk-input" id="tax_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('type', 'Type') ?> <span
+                        <div class="col-md-12 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('type', 'Type') ?> <span
                                     class="asterisk">*</span></label>
-                            <select id="update_tax_type" name="type" class="form-select" disabled>
+                            <select id="update_tax_type" name="type" class="tk-select" disabled>
                                 <option value=""><?= get_label('please_select', 'Please select') ?></option>
                                 <option value="amount"><?= get_label('amount', 'Amount') ?></option>
                                 <option value="percentage"><?= get_label('percentage', 'Percentage') ?></option>
                             </select>
                         </div>
-                        <div class="col-md-12 mb-3" id="update_amount_div">
-                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                        <div class="col-md-12 mb-3 tk-field" id="update_amount_div">
+                            <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input class="form-control currency" type="text" id="tax_amount"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input class="tk-input currency" type="text" id="tax_amount"
                                     name="amount"
                                     placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>"
                                     disabled>
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3" id="update_percentage_div">
-                            <label class="form-label" for=""><?= get_label('percentage', 'Percentage') ?>
+                        <div class="col-md-12 mb-3 tk-field" id="update_percentage_div">
+                            <label class="tk-label" for=""><?= get_label('percentage', 'Percentage') ?>
                                 <span class="asterisk">*</span></label>
-                            <input class="form-control" type="number" id="tax_percentage" name="percentage"
+                            <input class="tk-input" type="number" id="tax_percentage" name="percentage"
                                 min="0" max="100"
                                 placeholder="<?= get_label('please_enter_percentage', 'Please enter percentage') ?>"
                                 disabled>
@@ -2003,16 +2031,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-12 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-12 mb-3 tk-field">
                             <label for="nameBasic"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control" name="description"
+                                class="tk-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="tk-input" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
                     </div>
@@ -2040,16 +2068,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-12 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" id="unit_title" name="title"
+                            <input type="text" class="tk-input" id="unit_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-12 mb-3 tk-field">
                             <label for="nameBasic"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control" id="unit_description" name="description"
+                                class="tk-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="tk-input" id="unit_description" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
                     </div>
@@ -2078,22 +2106,22 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('price', 'Price') ?> <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('price', 'Price') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control currency" name="price"
+                            <input type="text" class="tk-input currency" name="price"
                                 placeholder="<?= get_label('please_enter_price', 'Please enter price') ?>" />
                         </div>
                         @if (isset($units) && is_iterable($units))
-                            <div class="col-md-6 mb-3">
-                                <label for="nameBasic" class="form-label"><?= get_label('unit', 'Unit') ?></label>
-                                <select class="form-select tom_static_select" name="unit_id"
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label for="nameBasic" class="tk-label"><?= get_label('unit', 'Unit') ?></label>
+                                <select class="tk-select tom_static_select" name="unit_id"
                                     data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                     data-allow-clear="true">
                                     <option></option>
@@ -2103,10 +2131,10 @@
                                 </select>
                             </div>
                         @endif
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 tk-field">
                             <label for="nameBasic"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control" name="description"
+                                class="tk-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="tk-input" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
                     </div>
@@ -2134,22 +2162,22 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" id="item_title" name="title"
+                            <input type="text" class="tk-input" id="item_title" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('price', 'Price') ?> <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('price', 'Price') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control currency" id="item_price" name="price"
+                            <input type="text" class="tk-input currency" id="item_price" name="price"
                                 placeholder="<?= get_label('please_enter_price', 'Please enter price') ?>" />
                         </div>
                         @if (isset($units) && is_iterable($units))
-                            <div class="col-md-6 mb-3">
-                                <label for="nameBasic" class="form-label"><?= get_label('unit', 'Unit') ?></label>
-                                <select class="form-select tom_static_select" id="item_unit_id"
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label for="nameBasic" class="tk-label"><?= get_label('unit', 'Unit') ?></label>
+                                <select class="tk-select tom_static_select" id="item_unit_id"
                                     name="unit_id"
                                     data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                     data-allow-clear="true">
@@ -2160,10 +2188,10 @@
                                 </select>
                             </div>
                         @endif
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 tk-field">
                             <label for="nameBasic"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control" id="item_description" name="description"
+                                class="tk-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="tk-input" id="item_description" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
                     </div>
@@ -2486,46 +2514,46 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('name', 'Name') ?> <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('name', 'Name') ?> <span
                                     class="asterisk">*</span></label>
-                            <input name="update_name" id="update_name" class="form-control"
+                            <input name="update_name" id="update_name" class="tk-input"
                                 placeholder="<?= get_label('please_enter_name', 'Please enter name') ?>"
                                 value="{{ $estimate_invoice->name ?? '' }}" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('contact', 'Contact') ?></label>
-                            <input name="update_contact" id="update_contact" class="form-control"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('contact', 'Contact') ?></label>
+                            <input name="update_contact" id="update_contact" class="tk-input"
                                 placeholder="<?= get_label('please_enter_contact', 'Please enter contact') ?>"
                                 value="{{ $estimate_invoice->phone ?? '' }}">
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('address', 'Address') ?></label>
-                            <textarea class="form-control" placeholder="<?= get_label('please_enter_address', 'Please enter address') ?>"
+                        <div class="col-md-12 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('address', 'Address') ?></label>
+                            <textarea class="tk-input" placeholder="<?= get_label('please_enter_address', 'Please enter address') ?>"
                                 name="update_address" id="update_address" required>{{ $estimate_invoice->address ?? '' }}</textarea>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('city', 'City') ?></label>
-                            <input name="update_city" id="update_city" class="form-control"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('city', 'City') ?></label>
+                            <input name="update_city" id="update_city" class="tk-input"
                                 placeholder="<?= get_label('please_enter_city', 'Please enter city') ?>"
                                 value="{{ $estimate_invoice->city ?? '' }}">
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('state', 'State') ?></label>
-                            <input name="update_contact" id="update_state" class="form-control"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('state', 'State') ?></label>
+                            <input name="update_contact" id="update_state" class="tk-input"
                                 placeholder="<?= get_label('please_enter_state', 'Please enter state') ?>"
                                 value="{{ $estimate_invoice->city ?? '' }}" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('country', 'Country') ?></label>
-                            <input name="update_country" id="update_country" class="form-control"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('country', 'Country') ?></label>
+                            <input name="update_country" id="update_country" class="tk-input"
                                 placeholder="<?= get_label('please_enter_country', 'Please enter country') ?>"
                                 value="{{ $estimate_invoice->country ?? '' }}" required>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 tk-field">
                             <label for="nameBasic"
-                                class="form-label"><?= get_label('zip_code', 'Zip code') ?></label>
-                            <input name="update_zip_code" id="update_zip_code" class="form-control"
+                                class="tk-label"><?= get_label('zip_code', 'Zip code') ?></label>
+                            <input name="update_zip_code" id="update_zip_code" class="tk-input"
                                 placeholder="<?= get_label('please_enter_zip_code', 'Please enter zip code') ?>"
                                 value="{{ $estimate_invoice->zip_code ?? '' }}" required>
                         </div>
@@ -2556,16 +2584,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title"
+                            <input type="text" class="tk-input" name="title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col mb-3">
+                        <div class="col mb-3 tk-field">
                             <label for="description"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control" name="description"
+                                class="tk-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="tk-input" name="description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
                     </div>
@@ -2594,16 +2622,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                        <div class="col mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" class="form-control" name="title" id="expense_type_title"
+                            <input type="text" class="tk-input" name="title" id="expense_type_title"
                                 placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                         </div>
-                        <div class="col mb-3">
+                        <div class="col mb-3 tk-field">
                             <label for="description"
-                                class="form-label"><?= get_label('description', 'Description') ?></label>
-                            <textarea class="form-control" name="description" id="expense_type_description"
+                                class="tk-label"><?= get_label('description', 'Description') ?></label>
+                            <textarea class="tk-input" name="description" id="expense_type_description"
                                 placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"></textarea>
                         </div>
                     </div>
@@ -2632,50 +2660,50 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                         class="asterisk">*</span></label>
-                                <input type="text" class="form-control" name="title"
+                                <input type="text" class="tk-input" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label"><?= get_label('expense_type', 'Expense type') ?> <span
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label class="tk-label"><?= get_label('expense_type', 'Expense type') ?> <span
                                         class="asterisk">*</span></label>
-                                <select class="form-select tom_expense_types_select" name="expense_type_id"
+                                <select class="tk-select tom_expense_types_select" name="expense_type_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true" data-allow-clear="false">
                                 </select>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label"><?= get_label('user', 'User') ?></label>
-                                <select class="form-select tom_users_select" name="user_id"
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label class="tk-label"><?= get_label('user', 'User') ?></label>
+                                <select class="tk-select tom_users_select" name="user_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true">
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                         class="asterisk">*</span></label>
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                    <input class="form-control currency" type="text" name="amount"
+                                <div class="tk-inputgroup">
+                                    <span>{{ $general_settings['currency_symbol'] }}</span>
+                                    <input class="tk-input currency" type="text" name="amount"
                                         placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                                 </div>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3 tk-field">
                                 <label for="nameBasic"
-                                    class="form-label"><?= get_label('expense_date', 'Expense date') ?> <span
+                                    class="tk-label"><?= get_label('expense_date', 'Expense date') ?> <span
                                         class="asterisk">*</span></label>
-                                <input type="text" id="expense_date" name="expense_date" class="form-control"
+                                <input type="text" id="expense_date" name="expense_date" class="tk-input"
                                     placeholder="" autocomplete="off">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
-                                <textarea class="form-control" name="note"
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label for="nameBasic" class="tk-label"><?= get_label('note', 'Note') ?></label>
+                                <textarea class="tk-input" name="note"
                                     placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
                             </div>
                         </div>
@@ -2704,16 +2732,16 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nameBasic" class="form-label"><?= get_label('title', 'Title') ?> <span
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label for="nameBasic" class="tk-label"><?= get_label('title', 'Title') ?> <span
                                         class="asterisk">*</span></label>
-                                <input type="text" class="form-control" id="expense_title" name="title"
+                                <input type="text" class="tk-input" id="expense_title" name="title"
                                     placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>" />
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label"><?= get_label('expense_type', 'Expense type') ?> <span
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label class="tk-label"><?= get_label('expense_type', 'Expense type') ?> <span
                                         class="asterisk">*</span></label>
-                                <select class="form-select tom_expense_types_select" id="expense_type_id"
+                                <select class="tk-select tom_expense_types_select" id="expense_type_id"
                                     name="expense_type_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true" data-allow-clear="false">
@@ -2721,35 +2749,35 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label"><?= get_label('user', 'User') ?></label>
-                                <select class="form-select tom_users_select" id="expense_user_id" name="user_id"
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label class="tk-label"><?= get_label('user', 'User') ?></label>
+                                <select class="tk-select tom_users_select" id="expense_user_id" name="user_id"
                                     data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                     data-single-select="true">
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                         class="asterisk">*</span></label>
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                    <input class="form-control currency" type="text" id="expense_amount"
+                                <div class="tk-inputgroup">
+                                    <span>{{ $general_settings['currency_symbol'] }}</span>
+                                    <input class="tk-input currency" type="text" id="expense_amount"
                                         name="amount"
                                         placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                                 </div>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3 tk-field">
                                 <label for="nameBasic"
-                                    class="form-label"><?= get_label('expense_date', 'Expense date') ?> <span
+                                    class="tk-label"><?= get_label('expense_date', 'Expense date') ?> <span
                                         class="asterisk">*</span></label>
                                 <input type="text" id="update_expense_date" name="expense_date"
-                                    class="form-control" placeholder="" autocomplete="off">
+                                    class="tk-input" placeholder="" autocomplete="off">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
-                                <textarea class="form-control" id="expense_note" name="note"
+                            <div class="col-md-6 mb-3 tk-field">
+                                <label for="nameBasic" class="tk-label"><?= get_label('note', 'Note') ?></label>
+                                <textarea class="tk-input" id="expense_note" name="note"
                                     placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
                             </div>
                         </div>
@@ -2779,25 +2807,25 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><?= get_label('user', 'User') ?></label>
-                            <select class="form-select tom_users_select" name="user_id"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label class="tk-label"><?= get_label('user', 'User') ?></label>
+                            <select class="tk-select tom_users_select" name="user_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><?= get_label('invoice', 'Invoice') ?></label>
-                            <select class="form-select tom_invoices_select" name="invoice_id"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label class="tk-label"><?= get_label('invoice', 'Invoice') ?></label>
+                            <select class="tk-select tom_invoices_select" name="invoice_id"
                                 data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
                                 data-single-select="true">
                             </select>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><?= get_label('payment_method', 'Payment method') ?></label>
-                            <select class="form-select tom_static_select" name="payment_method_id"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label class="tk-label"><?= get_label('payment_method', 'Payment method') ?></label>
+                            <select class="tk-select tom_static_select" name="payment_method_id"
                                 data-placeholder="<?= get_label('Please select', 'Please select') ?>"
                                 data-allow-clear="true">
                                 <option></option>
@@ -2808,28 +2836,28 @@
                                 @endisset
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label" for=""><?= get_label('amount', 'Amount') ?> <span
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label class="tk-label" for=""><?= get_label('amount', 'Amount') ?> <span
                                     class="asterisk">*</span></label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input class="form-control currency" type="text" name="amount"
+                            <div class="tk-inputgroup">
+                                <span>{{ $general_settings['currency_symbol'] }}</span>
+                                <input class="tk-input currency" type="text" name="amount"
                                     placeholder="<?= get_label('please_enter_amount', 'Please enter amount') ?>">
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 tk-field">
                             <label for="nameBasic"
-                                class="form-label"><?= get_label('payment_date', 'Payment date') ?> <span
+                                class="tk-label"><?= get_label('payment_date', 'Payment date') ?> <span
                                     class="asterisk">*</span></label>
-                            <input type="text" id="payment_date" name="payment_date" class="form-control"
+                            <input type="text" id="payment_date" name="payment_date" class="tk-input"
                                 placeholder="{{ get_label('please_select', 'Please Select') }}"
                                 autocomplete="off">
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nameBasic" class="form-label"><?= get_label('note', 'Note') ?></label>
-                            <textarea class="form-control" name="note"
+                        <div class="col-md-6 mb-3 tk-field">
+                            <label for="nameBasic" class="tk-label"><?= get_label('note', 'Note') ?></label>
+                            <textarea class="tk-input" name="note"
                                 placeholder="<?= get_label('please_enter_note_if_any', 'Please enter note if any') ?>"></textarea>
                         </div>
                     </div>
@@ -4847,10 +4875,10 @@
                 <div class="border-bottom pb-3">
                     <ul class="nav nav-pills nav-fill bg-light rounded-3 p-1" role="tablist">
                         <li class="nav-item">
-                            <button class="nav-link active rounded-2 fw-medium" data-tab="all" role="tab" aria-selected="true">
+                            <button class="nav-link active text-white rounded-2 fw-medium" data-tab="all" role="tab" aria-selected="true">
                                 <span class="d-none d-sm-inline">{{ get_label('all_results', 'All Results') }}</span>
                                 <span class="d-sm-none">{{ get_label('all', 'All') }}</span>
-                                <span class="badge bg-primary ms-2" id="allCount">0</span>
+                                <span class="badge bg-primary text-white ms-2" id="allCount">0</span>
                             </button>
                         </li>
                         <li class="nav-item">
@@ -5687,15 +5715,15 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="statusName" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="statusName"
+                    <div class="tk-field mb-3">
+                        <label for="statusName" class="tk-label">Name</label>
+                        <input type="text" class="tk-input" name="name" id="statusName"
                             placeholder="Enter status name" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                    <div class="tk-field mb-3">
+                        <label for="nameBasic" class="tk-label"><?= get_label('color', 'Color') ?> <span
                                 class="asterisk">*</span></label>
-                        <select class="form-select select-bg-label-primary" id="color" name="color">
+                        <select class="tk-select select-bg-label-primary" id="color" name="color">
                             <option class="badge bg-label-success" value="primary"
                                 {{ old('color') == 'primary' ? 'selected' : '' }}>
                                 <?= get_label('primary', 'Primary') ?>
@@ -5746,15 +5774,15 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="editStatusName" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="editStatusName"
+                    <div class="tk-field mb-3">
+                        <label for="editStatusName" class="tk-label">Name</label>
+                        <input type="text" class="tk-input" name="name" id="editStatusName"
                             placeholder="Enter new name" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="nameBasic" class="form-label"><?= get_label('color', 'Color') ?> <span
+                    <div class="tk-field mb-3">
+                        <label for="nameBasic" class="tk-label"><?= get_label('color', 'Color') ?> <span
                                 class="asterisk">*</span></label>
-                        <select class="form-select select-bg-label-primary" id="status_color" name="color"
+                        <select class="tk-select select-bg-label-primary" id="status_color" name="color"
                             required>
                             <option class="badge bg-label-success" value="primary">
                                 <?= get_label('primary', 'Primary') ?>
@@ -5840,59 +5868,59 @@
                     </div>
                     <div class="modal-body row g-3">
                         {{-- Candidate --}}
-                        <div class="form-group col-md-6">
-                            <label for="candidate_id" class="form-label">Candidate <span class="text-danger">*</span></label>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="candidate_id" class="tk-label">Candidate <span class="text-danger">*</span></label>
                             @if (Route::currentRouteName() == 'interviews.index')
-                                <select class="form-select select-interview-candidate"
+                                <select class="tk-select select-interview-candidate"
                                     id="select_interview_candidate" name="candidate_id" required
                                     data-placeholder="{{ get_label('select_candidate', 'Select Candidate') }}"
                                     data-single-select="true">
                                 </select>
                             @else
-                                <select name="candidate_id" class="form-select" required>
+                                <select name="candidate_id" class="tk-select" required>
                                     <option value="{{ $candidate->id }}">{{ $candidate->name }}</option>
                                 </select>
                             @endif
                         </div>
                         {{-- Interviewer --}}
-                        <div class="form-group col-md-6">
-                            <label for="interviewer_id" class="form-label">Interviewer <span class="text-danger">*</span></label>
-                            <select class="form-select select-interview-interviewer"
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="interviewer_id" class="tk-label">Interviewer <span class="text-danger">*</span></label>
+                            <select class="tk-select select-interview-interviewer"
                                 id="select_interview_interviewer" name="interviewer_id" required
                                 data-placeholder="{{ get_label('select_interviewer', 'Select Interviewer') }}"
                                 data-single-select="true">
                             </select>
                         </div>
                         {{-- Round --}}
-                        <div class="form-group col-md-6">
-                            <label for="round" class="form-label">Round <span class="text-danger">*</span></label>
-                            <input type="text" name="round" class="form-control"
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="round" class="tk-label">Round <span class="text-danger">*</span></label>
+                            <input type="text" name="round" class="tk-input"
                                 placeholder="e.g. Technical, HR" required>
                         </div>
                         {{-- Scheduled At --}}
-                        <div class="form-group col-md-6">
-                            <label for="scheduled_at" class="form-label">Scheduled At <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="scheduled_at" class="form-control" required>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="scheduled_at" class="tk-label">Scheduled At <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="scheduled_at" class="tk-input" required>
                         </div>
                         {{-- Mode --}}
-                        <div class="form-group col-md-6">
-                            <label for="mode" class="form-label">Mode <span class="text-danger">*</span></label>
-                            <select name="mode" class="form-select" required>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="mode" class="tk-label">Mode <span class="text-danger">*</span></label>
+                            <select name="mode" class="tk-select" required>
                                 <option value="">Select Mode</option>
                                 <option value="online">Online</option>
                                 <option value="offline">Offline</option>
                             </select>
                         </div>
                         {{-- Location --}}
-                        <div class="form-group col-md-6">
-                            <label for="location" class="form-label">Location</label>
-                            <input type="text" name="location" class="form-control"
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="location" class="tk-label">Location</label>
+                            <input type="text" name="location" class="tk-input"
                                 placeholder="e.g. Zoom link or Office Room No.">
                         </div>
                         {{-- Status --}}
-                        <div class="form-group col-md-6">
-                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select name="status" class="form-select" required>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="status" class="tk-label">Status <span class="text-danger">*</span></label>
+                            <select name="status" class="tk-select" required>
                                 <option value="">Select Status</option>
                                 <option value="scheduled">Scheduled</option>
                                 <option value="completed">Completed</option>
@@ -5927,11 +5955,11 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body row g-3">
-                        <div class="form-group col-md-6">
-                            <label for="candidate_id" class="form-label">Candidate</label>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="candidate_id" class="tk-label">Candidate</label>
                             @if (Route::currentRouteName() == 'interviews.index')
                                 <select name="candidate_id" id="candidate_id"
-                                    class="form-control select-interview-candidate" required
+                                    class="tk-select select-interview-candidate" required
                                     data-placeholder="{{ get_label('select_candidate', 'Select Candidate') }}"
                                     data-single-select="true">
                                     @foreach ($candidates as $candidate)
@@ -5941,15 +5969,15 @@
                                     @endforeach
                                 </select>
                             @else
-                                <select name="candidate_id" id="candidate_id" class="form-control" required>
+                                <select name="candidate_id" id="candidate_id" class="tk-select" required>
                                     <option value="{{ $candidate->id }}">{{ $candidate->name }}</option>
                                 </select>
                             @endif
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="interviewer_id" class="form-label">Interviewer</label>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="interviewer_id" class="tk-label">Interviewer</label>
                             <select name="interviewer_id" id="interviewer_id"
-                                class="form-control select-interview-interviewer" required
+                                class="tk-select select-interview-interviewer" required
                                 data-placeholder="{{ get_label('select_interviewer', 'Select Interviewer') }}"
                                 data-single-select="true">
                                 @foreach ($users as $user)
@@ -5959,33 +5987,33 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="round" class="form-label">Round</label>
-                            <input type="text" name="round" id="round" class="form-control"
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="round" class="tk-label">Round</label>
+                            <input type="text" name="round" id="round" class="tk-input"
                                 placeholder="e.g. Technical, HR" required>
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="scheduled_at" class="form-label">Scheduled At</label>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="scheduled_at" class="tk-label">Scheduled At</label>
                             <input type="datetime-local" name="scheduled_at" id="scheduled_at"
-                                class="form-control" required>
+                                class="tk-input" required>
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="mode" class="form-label">Mode</label>
-                            <select name="mode" id="mode" class="form-control" required>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="mode" class="tk-label">Mode</label>
+                            <select name="mode" id="mode" class="tk-select" required>
                                 <option value="">Select Mode</option>
                                 <option value="online">Online</option>
                                 <option value="offline">Offline</option>
                             </select>
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="location" class="form-label">Location</label>
-                            <input type="text" name="location" id="location" class="form-control"
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="location" class="tk-label">Location</label>
+                            <input type="text" name="location" id="location" class="tk-input"
                                 placeholder="e.g. Zoom link or Office Room No.">
                         </div>
                         <!-- New Status Field for Editing -->
-                        <div class="form-group col-md-6">
-                            <label for="status" class="form-label">Status</label>
-                            <select name="status" id="status" class="form-control" required>
+                        <div class="tk-field col-md-6 mb-3">
+                            <label for="status" class="tk-label">Status</label>
+                            <select name="status" id="status" class="tk-select" required>
                                 <option value="">Select Status</option>
                                 <option value="scheduled">Scheduled</option>
                                 <option value="completed">Completed</option>

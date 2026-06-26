@@ -25,21 +25,21 @@
             </div>
         </div>
         <!-- Date Range Filter - Left Aligned with Appropriate Width -->
-        <div class="card mb-4">
+        <div class="card mb-4 overflow-visible">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4 col-lg-3 mb-3">
-                        <div class="input-group input-group-merge">
-                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
-                            <input type="text" class="form-control" id="social_date_between"
+                    <div class="col-md-4 col-lg-3 mb-3 tk-field">
+                        <div class="tk-inputgroup">
+                            <span class="tk-ic"><i class="bx bx-calendar"></i></span>
+                            <input type="text" id="social_date_between"
                                 placeholder="<?= get_label('select_date_range', 'Select date range') ?>" autocomplete="off">
                         </div>
                         <input type="hidden" id="social_start_date" name="startDate">
                         <input type="hidden" id="social_end_date" name="endDate">
 
                     </div>
-                    <div class="col-md-3 col-lg-2 mb-3">
-                        <select id="dateRangeSelect" class="form-select js-example-basic-multiple"
+                    <div class="col-md-3 col-lg-2 mb-3 tk-field">
+                        <select id="dateRangeSelect" class="tk-select js-example-basic-multiple"
                             aria-label="Date range selection">
                             <option value="7">{{ get_label('last_7_days', 'Last 7 days') }}</option>
                             <option value="30" selected>{{ get_label('last_30_days', 'Last 30 days') }}</option>

@@ -36,18 +36,18 @@
                         $possibleStatuses = ['sent', 'accepted', 'draft', 'declined', 'expired', 'not_specified'];
                         $totalEstimates = array_sum(array_map(fn($status) => getStatusCount($status, 'estimate'), $possibleStatuses)); // Total estimates
                         @endphp
-                        <button type="button" class="btn btn-outline-success status-badge" data-status="" data-type="estimate">
+                        <button type="button" class="tk-btn tk-btn-outline status-badge d-flex align-items-center gap-2" data-status="" data-type="estimate">
                             {{ get_label('all','All') }}
-                            <span class="badge bg-white text-success">{{ getStatusCount('', 'estimate') }}</span>
+                            <span class="tk-badge tk-badge-success">{{ getStatusCount('', 'estimate') }}</span>
                         </button>
                         @foreach($possibleStatuses as $status)
                         @php
                         $count = getStatusCount($status, 'estimate');
                         $percentage = $totalEstimates > 0 ? round(($count / $totalEstimates) * 100, 2) : 0; // Calculate percentage
                         @endphp
-                        <button type="button" class="btn btn-outline-{{ getStatusColor($status) }} status-badge" data-status="{{ $status }}" data-type="estimate">
+                        <button type="button" class="tk-btn tk-btn-outline status-badge d-flex align-items-center gap-2" data-status="{{ $status }}" data-type="estimate">
                             {{ get_label($status, ucfirst(str_replace('_', ' ', $status))) }}
-                            <span class="badge bg-white text-{{ getStatusColor($status) }}">
+                            <span class="tk-badge tk-badge-{{ getStatusColor($status) }}">
                                 {{ $count }} ({{ $percentage }}%)
                             </span>
                         </button>
@@ -64,18 +64,18 @@
                         $possibleStatuses = ['partially_paid', 'fully_paid', 'draft', 'cancelled', 'due', 'not_specified'];
                         $totalInvoices = array_sum(array_map(fn($status) => getStatusCount($status, 'invoice'), $possibleStatuses)); // Total invoices
                         @endphp
-                        <button type="button" class="btn btn-outline-success status-badge" data-status="" data-type="invoice">
+                        <button type="button" class="tk-btn tk-btn-outline status-badge d-flex align-items-center gap-2" data-status="" data-type="invoice">
                             {{ get_label('all','All') }}
-                            <span class="badge bg-white text-success">{{ getStatusCount('', 'invoice') }}</span>
+                            <span class="tk-badge tk-badge-success">{{ getStatusCount('', 'invoice') }}</span>
                         </button>
                         @foreach($possibleStatuses as $status)
                         @php
                         $count = getStatusCount($status, 'invoice');
                         $percentage = $totalInvoices > 0 ? round(($count / $totalInvoices) * 100, 2) : 0; // Calculate percentage
                         @endphp
-                        <button type="button" class="btn btn-outline-{{ getStatusColor($status) }} status-badge" data-status="{{ $status }}" data-type="invoice">
+                        <button type="button" class="tk-btn tk-btn-outline status-badge d-flex align-items-center gap-2" data-status="{{ $status }}" data-type="invoice">
                             {{ get_label($status, ucfirst(str_replace('_', ' ', $status))) }}
-                            <span class="badge bg-white text-{{ getStatusColor($status) }}">
+                            <span class="tk-badge tk-badge-{{ getStatusColor($status) }}">
                                 {{ $count }} ({{ $percentage }}%)
                             </span>
                         </button>
@@ -86,31 +86,35 @@
 
             <div class="row g-3 align-items-end tk-filter-row mb-0">
                 <x-advanced-date-filters prefix="ie" />
-                <div class="col-md-4 mb-0">
-                    <select class="form-select js-example-basic-multiple" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
+                <div class="col-md-4 mb-0 tk-field">
+                    <label class="tk-label"><?= get_label('types', 'Types') ?></label>
+                    <select class="tk-select tom_static_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select types') ?>" data-allow-clear="true" multiple>
                         <option value="estimate"><?= get_label('estimates', 'Estimates') ?></option>
                         <option value="invoice"><?= get_label('invoices', 'Invoices') ?></option>
                     </select>
                 </div>
                 @if (!isClient() || isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-0">
-                    <select class="form-select clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+                <div class="col-md-4 mb-0 tk-field">
+                    <label class="tk-label"><?= get_label('clients', 'Clients') ?></label>
+                    <select class="tk-select tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
                     </select>
                 </div>
                 @endif
                 @if(isAdminOrHasAllDataAccess())
-                <div class="col-md-4 mb-0">
-                    <select class="form-select users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>
+                <div class="col-md-4 mb-0 tk-field">
+                    <label class="tk-label"><?= get_label('user_creators', 'User Creators') ?></label>
+                    <select class="tk-select tom_users_select" id="user_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_user_creators', 'Select User Creators') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4 mb-0">
-                    <select class="form-select clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>
+                <div class="col-md-4 mb-0 tk-field">
+                    <label class="tk-label"><?= get_label('client_creators', 'Client Creators') ?></label>
+                    <select class="tk-select tom_clients_select" id="client_creators_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_client_creators', 'Select Client Creators') ?>" multiple>
                     </select>
                 </div>
                 @endif
                 <div class="col-md-4 mb-0 d-flex align-items-center">
                     <button class="btn btn-secondary clear-estimates-invoices-filters" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ get_label('clear_filters', 'Clear Filters') }}">
-                        <i class="bx bx-refresh"></i>
+                        <i class="bx bx-refresh"></i> {{ get_label('clear_filters', 'Clear Filters') }}
                     </button>
                 </div>
             </div>

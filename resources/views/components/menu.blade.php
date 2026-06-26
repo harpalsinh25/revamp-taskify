@@ -270,7 +270,7 @@ $pendingLeaveRequestsCount = $query->count();
 <aside class="tk-panel" id="tk-context-panel" style="transform: none !important; position: relative !important; left: 0 !important; z-index: 1 !important; height: 100%; transition: none !important;" aria-label="{{ get_label('secondary_navigation', 'Secondary navigation') }}">
     {{-- Workspace switcher (logic preserved from the legacy menu) --}}
     <div class="tk-panel-head">
-       <div class="btn-group dropend tk-ws w-100">
+       <div class="btn-group dropdown tk-ws w-100">
     <button type="button"
         class="btn {{ getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin') ? 'dropdown-toggle' : '' }}"
         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -280,7 +280,7 @@ $pendingLeaveRequestsCount = $query->count();
     </button>
 
     @if (getAuthenticatedUser()->hasVerifiedEmail() || getAuthenticatedUser()->hasRole('admin'))
-        <ul class="dropdown-menu p-2 ">
+        <ul class="dropdown-menu p-2 shadow" style="z-index: 1055 !important;">
 
             @if ($total_workspaces > 0)
                 @foreach ($workspaces as $workspace)

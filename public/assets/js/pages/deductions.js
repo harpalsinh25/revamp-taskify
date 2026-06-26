@@ -37,6 +37,9 @@ $(document).on('click', '.edit-deduction', function () {
             $('#deduction_id').val(response.deduction.id);
             $('#deduction_title').val(response.deduction.title);
             $('#update_deduction_type').val(response.deduction.type);
+            if (document.getElementById('update_deduction_type').tomselect) {
+                document.getElementById('update_deduction_type').tomselect.setValue(response.deduction.type);
+            }
             if (response.deduction.type == 'amount') {
                 $('#update_amount_div').removeClass('d-none');
                 $('#update_percentage_div').addClass('d-none');

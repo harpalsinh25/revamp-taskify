@@ -69,7 +69,7 @@ if ($remainingUnreadNotificationsCount < 0) {
             {{-- Notifications (unchanged logic + IDs/classes) --}}
             @if (getAuthenticatedUser()->can('manage_system_notifications'))
                 <div class="dropdown">
-                    <a class="tk-icon-btn" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"
+                    <a class="tk-icon-btn position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"
                         title="{{ get_label('notifications', 'Notifications') }}">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9ZM10 21a2 2 0 0 0 4 0"/></svg>

@@ -135,8 +135,8 @@ $(document).ready(function () {
     // Switch tab and update state
     function switchTab(tab) {
         currentTab = tab;
-        $('.nav-link[data-tab]').removeClass('active').attr('aria-selected', 'false');
-        $(`.nav-link[data-tab="${tab}"]`).addClass('active').attr('aria-selected', 'true');
+        $('.nav-link[data-tab]').removeClass('active text-white').attr('aria-selected', 'false');
+        $(`.nav-link[data-tab="${tab}"]`).addClass('active text-white').attr('aria-selected', 'true');
         renderSearchResults(allSearchResults, tab);
         currentHighlightIndex = -1;
 
@@ -156,8 +156,8 @@ $(document).ready(function () {
     // Reset tabs
     function resetTabs() {
         currentTab = 'all';
-        $('.nav-link[data-tab]').removeClass('active').attr('aria-selected', 'false');
-        $('.nav-link[data-tab="all"]').addClass('active').attr('aria-selected', 'true');
+        $('.nav-link[data-tab]').removeClass('active text-white').attr('aria-selected', 'false');
+        $('.nav-link[data-tab="all"]').addClass('active text-white').attr('aria-selected', 'true');
         updateTabCounts({});
     }
 
@@ -243,7 +243,7 @@ $(document).ready(function () {
                             <div class="d-flex align-items-center">
                                 <i class="bx ${getModuleIcon(module)} text-primary me-2"></i>
                                 <small class="text-primary fw-semibold text-uppercase">${module}</small>
-                                <span class="badge bg-primary ms-auto">${resultsToShow[module].length}</span>
+                                <span class="badge bg-primary text-white ms-auto">${resultsToShow[module].length}</span>
                             </div>
                         </div>
                     `);

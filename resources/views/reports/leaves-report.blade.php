@@ -120,14 +120,14 @@
         <div class="card-body">
             <div class="row g-3 align-items-end">
                 <x-advanced-date-filters prefix="report" />
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('users', 'Users') }}</label>
-                    <select class="form-select tom_users_select" id="user_filter" aria-label="{{ get_label('select_users', 'Select Users') }}" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('users', 'Users') }}</label>
+                    <select class="tk-select tom_users_select" id="user_filter" aria-label="{{ get_label('select_users', 'Select Users') }}" multiple data-placeholder="<?= get_label('select_users', 'Select Users') ?>">
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">{{ get_label('status', 'Status') }}</label>
-                    <select class="form-select tom_statuses_filter" id="status_filter" aria-label="{{ get_label('select_statuses', 'Select Statuses') }}" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label">{{ get_label('status', 'Status') }}</label>
+                    <select class="tk-select tom_statuses_filter" id="status_filter" aria-label="{{ get_label('select_statuses', 'Select Statuses') }}" multiple data-placeholder="<?= get_label('select_statuses', 'Select Statuses') ?>">
                         <option value="approved">{{ get_label('approved', 'Approved') }}</option>
                         <option value="pending">{{ get_label('pending', 'Pending') }}</option>
                         <option value="rejected">{{ get_label('rejected', 'Rejected') }}</option>

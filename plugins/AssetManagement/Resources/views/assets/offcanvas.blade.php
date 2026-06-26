@@ -56,21 +56,21 @@
                     <h6 class="fw-semibold mb-3"><i class="bx bx-info-circle me-2"></i>{{ get_label('asset_information', 'Asset Information') }}</h6>
                     <div class="row g-3">
                         <!-- Asset Name -->
-                        <div class="col-md-6">
-                            <label for="create-asset-name" class="form-label">{{ get_label('asset_name', 'Asset Name') }} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="create-asset-name" name="name" maxlength="255" placeholder="{{ get_label('enter_asset_name', 'Enter asset name') }}">
+                        <div class="col-md-6 tk-field">
+                            <label for="create-asset-name" class="tk-label">{{ get_label('asset_name', 'Asset Name') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="tk-input" id="create-asset-name" name="name" maxlength="255" placeholder="{{ get_label('enter_asset_name', 'Enter asset name') }}">
                         </div>
 
                         <!-- Asset Tag -->
-                        <div class="col-md-6">
-                            <label for="create-asset-tag" class="form-label">{{ get_label('asset_tag', 'Asset Tag') }} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="create-asset-tag" name="asset_tag" maxlength="255" placeholder="{{ get_label('enter_asset_tag', 'Enter asset tag') }}">
+                        <div class="col-md-6 tk-field">
+                            <label for="create-asset-tag" class="tk-label">{{ get_label('asset_tag', 'Asset Tag') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="tk-input" id="create-asset-tag" name="asset_tag" maxlength="255" placeholder="{{ get_label('enter_asset_tag', 'Enter asset tag') }}">
                         </div>
 
                         <!-- Category -->
-                        <div class="col-md-6">
-                            <label for="create-asset-category" class="form-label">{{ get_label('category', 'Category') }} <span class="text-danger">*</span></label>
-                            <select class="form-select tom_static_select" id="create-asset-category" name="category_id" required data-placeholder="{{ get_label('select_category', 'Select Category') }}">
+                        <div class="col-md-6 tk-field">
+                            <label for="create-asset-category" class="tk-label">{{ get_label('category', 'Category') }} <span class="text-danger">*</span></label>
+                            <select class="tk-select tom_static_select" id="create-asset-category" name="category_id" required data-placeholder="{{ get_label('select_category', 'Select Category') }}">
                                 <option value=""></option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -87,9 +87,9 @@
                         </div>
 
                         <!-- Status -->
-                        <div class="col-md-6">
-                            <label for="create-asset-status" class="form-label">{{ get_label('status', 'Status') }} <span class="text-danger">*</span></label>
-                            <select class="form-select tom_static_select" id="create-asset-status" name="status" data-placeholder="{{ get_label('select_status', 'Select Status') }}">
+                        <div class="col-md-6 tk-field">
+                            <label for="create-asset-status" class="tk-label">{{ get_label('status', 'Status') }} <span class="text-danger">*</span></label>
+                            <select class="tk-select tom_static_select" id="create-asset-status" name="status" data-placeholder="{{ get_label('select_status', 'Select Status') }}">
                                 <option value="available">{{ get_label('available', 'Available') }}</option>
                                 <option value="non-functional">{{ get_label('non_functional', 'Non-Functional') }}</option>
                                 <option value="lost">{{ get_label('lost', 'Lost') }}</option>
@@ -105,22 +105,22 @@
                     <h6 class="fw-semibold mb-3"><i class="bx bx-purchase-tag me-2"></i>{{ get_label('purchase_details', 'Purchase Details') }}</h6>
                     <div class="row g-3">
                         <!-- Purchase Date -->
-                        <div class="col-md-6">
-                            <label for="create-asset-purchase-date" class="form-label">{{ get_label('purchase_date', 'Purchase Date') }}</label>
-                            <input type="date" class="form-control" id="create-asset-purchase-date" name="purchase_date">
+                        <div class="col-md-6 tk-field">
+                            <label for="create-asset-purchase-date" class="tk-label">{{ get_label('purchase_date', 'Purchase Date') }}</label>
+                            <input type="date" class="tk-input" id="create-asset-purchase-date" name="purchase_date">
                         </div>
                         <!-- Purchase Cost -->
-                        <div class="col-md-6">
-                            <label for="create-asset-purchase-cost" class="form-label">{{ get_label('purchase_cost', 'Purchase Cost') }}</label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input type="number" step="0.01" class="form-control" id="create-asset-purchase-cost" name="purchase_cost">
+                        <div class="col-md-6 tk-field">
+                            <label for="create-asset-purchase-cost" class="tk-label">{{ get_label('purchase_cost', 'Purchase Cost') }}</label>
+                            <div class="tk-inputgroup">
+                                <span class="tk-ic">{{ $general_settings['currency_symbol'] }}</span>
+                                <input type="number" step="0.01" id="create-asset-purchase-cost" name="purchase_cost">
                             </div>
                         </div>
                         <!-- Description -->
-                        <div class="col-12">
-                            <label for="create-asset-description" class="form-label">{{ get_label('description', 'Description') }}</label>
-                            <textarea class="form-control" id="create-asset-description" name="description" rows="4" placeholder="{{ get_label('enter_description', 'Enter description') }}"></textarea>
+                        <div class="col-12 tk-field">
+                            <label for="create-asset-description" class="tk-label">{{ get_label('description', 'Description') }}</label>
+                            <textarea class="tk-input" id="create-asset-description" name="description" rows="4" placeholder="{{ get_label('enter_description', 'Enter description') }}"></textarea>
                         </div>
                     </div>
                 </div>
@@ -194,17 +194,17 @@
                 <div class="mb-4">
                     <h6 class="fw-semibold mb-3"><i class="bx bx-info-circle me-2"></i>{{ get_label('asset_information', 'Asset Information') }}</h6>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="update-asset-name" class="form-label">{{ get_label('asset_name', 'Asset Name') }} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="update-asset-name" name="name" required maxlength="255">
+                        <div class="col-md-6 tk-field">
+                            <label for="update-asset-name" class="tk-label">{{ get_label('asset_name', 'Asset Name') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="tk-input" id="update-asset-name" name="name" required maxlength="255">
                         </div>
-                        <div class="col-md-6">
-                            <label for="update-asset-tag" class="form-label">{{ get_label('asset_tag', 'Asset Tag') }} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="update-asset-tag" name="asset_tag" required maxlength="255">
+                        <div class="col-md-6 tk-field">
+                            <label for="update-asset-tag" class="tk-label">{{ get_label('asset_tag', 'Asset Tag') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="tk-input" id="update-asset-tag" name="asset_tag" required maxlength="255">
                         </div>
-                        <div class="col-md-6">
-                            <label for="update-asset-category" class="form-label">{{ get_label('category', 'Category') }} <span class="text-danger">*</span></label>
-                            <select class="form-select tom_static_select" id="update-asset-category" name="category_id" required
+                        <div class="col-md-6 tk-field">
+                            <label for="update-asset-category" class="tk-label">{{ get_label('category', 'Category') }} <span class="text-danger">*</span></label>
+                            <select class="tk-select tom_static_select" id="update-asset-category" name="category_id" required
                                 data-placeholder="{{ get_label('select_category', 'Select Category') }}">
                                 <option value=""></option>
                                 @foreach ($categories as $category)
@@ -220,9 +220,9 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="col-md-6" id="update_asset_status_field">
-                            <label for="update-asset-status" class="form-label">{{ get_label('status', 'Status') }} <span class="text-danger">*</span></label>
-                            <select class="form-select tom_static_select" id="update-asset-status" name="status"
+                        <div class="col-md-6 tk-field" id="update_asset_status_field">
+                            <label for="update-asset-status" class="tk-label">{{ get_label('status', 'Status') }} <span class="text-danger">*</span></label>
+                            <select class="tk-select tom_static_select" id="update-asset-status" name="status"
                                 data-placeholder="{{ get_label('select_status', 'Select Status') }}">
                                 <option value="available">{{ get_label('available', 'Available') }}</option>
                                 <option value="non-functional">{{ get_label('non_functional', 'Non-Functional') }}</option>
@@ -238,20 +238,20 @@
                 <div class="mb-4">
                     <h6 class="fw-semibold mb-3"><i class="bx bx-purchase-tag me-2"></i>{{ get_label('purchase_details', 'Purchase Details') }}</h6>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="update-asset-purchase-date" class="form-label">{{ get_label('purchase_date', 'Purchase Date') }}</label>
-                            <input type="date" class="form-control" id="update-asset-purchase-date" name="purchase_date">
+                        <div class="col-md-6 tk-field">
+                            <label for="update-asset-purchase-date" class="tk-label">{{ get_label('purchase_date', 'Purchase Date') }}</label>
+                            <input type="date" class="tk-input" id="update-asset-purchase-date" name="purchase_date">
                         </div>
-                        <div class="col-md-6">
-                            <label for="update-asset-purchase-cost" class="form-label">{{ get_label('purchase_cost', 'Purchase Cost') }}</label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text">{{ $general_settings['currency_symbol'] }}</span>
-                                <input type="number" step="0.01" class="form-control" id="update-asset-purchase-cost" name="purchase_cost">
+                        <div class="col-md-6 tk-field">
+                            <label for="update-asset-purchase-cost" class="tk-label">{{ get_label('purchase_cost', 'Purchase Cost') }}</label>
+                            <div class="tk-inputgroup">
+                                <span class="tk-ic">{{ $general_settings['currency_symbol'] }}</span>
+                                <input type="number" step="0.01" id="update-asset-purchase-cost" name="purchase_cost">
                             </div>
                         </div>
-                        <div class="col-12">
-                            <label for="update-asset-description" class="form-label">{{ get_label('description', 'Description') }}</label>
-                            <textarea class="form-control" id="update-asset-description" name="description" rows="4"></textarea>
+                        <div class="col-12 tk-field">
+                            <label for="update-asset-description" class="tk-label">{{ get_label('description', 'Description') }}</label>
+                            <textarea class="tk-input" id="update-asset-description" name="description" rows="4"></textarea>
                         </div>
                     </div>
                 </div>
@@ -311,11 +311,11 @@
                 </h6>
                 <div class="row g-3">
                     {{-- Assign To User --}}
-                    <div class="col-12">
-                        <label for="create-asset-assign-to" class="form-label">
+                    <div class="col-12 tk-field">
+                        <label for="create-asset-assign-to" class="tk-label">
                             {{ get_label('assign_to_user', 'Assign To User') }} <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select tom_static_select" id="create-asset-assign-to"
+                        <select class="tk-select tom_static_select" id="create-asset-assign-to"
                             name="assigned_to"
                             data-placeholder="{{ get_label('select_user', 'Select User') }}" required>
                             <option value=""></option>
@@ -329,12 +329,12 @@
                     </div>
 
                     {{-- Select Assets --}}
-                    <div class="col-12">
-                        <label class="form-label">
+                    <div class="col-12 tk-field">
+                        <label class="tk-label">
                             {{ get_label('select_assets', 'Select Assets') }} <span class="text-danger">*</span>
                         </label>
                         <div id="available-assets-list">
-                            <select class="form-select tom_static_select" name="asset_ids[]"
+                            <select class="tk-select tom_static_select" name="asset_ids[]"
                                 data-placeholder="{{ get_label('select_assets', 'Select Assets') }}"
                                 multiple required>
                                 @foreach ($assets as $asset)
@@ -352,11 +352,11 @@
             </div>
 
             {{-- Notes --}}
-            <div class="mb-4">
-                <h6 class="fw-semibold mb-3">
+            <div class="mb-4 tk-field">
+                <h6 class="fw-semibold mb-3 tk-label">
                     <i class="bx bx-note me-2"></i>{{ get_label('notes', 'Notes') }}
                 </h6>
-                <textarea class="form-control" id="bulk-assign-notes" name="notes" rows="4"
+                <textarea class="tk-input" id="bulk-assign-notes" name="notes" rows="4"
                     placeholder="{{ get_label('enter_assignment_notes', 'Enter assignment notes...') }}"></textarea>
                 <div class="form-text">
                     <small class="text-muted">{{ get_label('optional_assignment_notes', 'Optional notes about this assignment') }}</small>
@@ -462,17 +462,17 @@
             <input type="hidden" name="dnr">
             <div class="row g-4">
                 <div class="col-12">
-                    <div class="mb-3">
-                        <label for="category-name" class="form-label fw-semibold">
+                    <div class="mb-3 tk-field">
+                        <label for="category-name" class="tk-label fw-semibold">
                             {{ get_label('category_name', 'Category Name') }} <span class="text-danger">*</span>
                         </label>
-                        <input type="text" name="name" class="form-control" id="category-name" required>
+                        <input type="text" name="name" class="tk-input" id="category-name" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="color" class="form-label fw-semibold">
+                    <div class="mb-3 tk-field">
+                        <label for="color" class="tk-label fw-semibold">
                             {{ get_label('color', 'Color') }} <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select tom_static_select" id="color" name="color">
+                        <select class="tk-select tom_static_select" id="color" name="color">
                             <option value="primary" {{ old('color') == 'primary' ? 'selected' : '' }}>
                                 {{ get_label('primary', 'Primary') }}
                             </option>
@@ -496,11 +496,11 @@
                             </option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="category-description" class="form-label fw-semibold">
+                    <div class="mb-3 tk-field">
+                        <label for="category-description" class="tk-label fw-semibold">
                             {{ get_label('description', 'Description') }} (optional)
                         </label>
-                        <textarea name="description" class="form-control" id="category-description" rows="3"></textarea>
+                        <textarea name="description" class="tk-input" id="category-description" rows="3"></textarea>
                     </div>
                 </div>
             </div>
@@ -532,17 +532,17 @@
             <input type="hidden" name="dnr">
             <div class="row g-4">
                 <div class="col-12">
-                    <div class="mb-3">
-                        <label for="categoryName" class="form-label fw-semibold">
+                    <div class="mb-3 tk-field">
+                        <label for="categoryName" class="tk-label fw-semibold">
                             {{ get_label('category_name', 'Category Name') }} <span class="text-danger">*</span>
                         </label>
-                        <input type="text" name="name" class="form-control" id="categoryName" required>
+                        <input type="text" name="name" class="tk-input" id="categoryName" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="category_color" class="form-label fw-semibold">
+                    <div class="mb-3 tk-field">
+                        <label for="category_color" class="tk-label fw-semibold">
                             {{ get_label('color', 'Color') }} <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select tom_static_select" id="category_color" name="color">
+                        <select class="tk-select tom_static_select" id="category_color" name="color">
                             <option value="primary" {{ old('color') == 'primary' ? 'selected' : '' }}>
                                 {{ get_label('primary', 'Primary') }}
                             </option>
@@ -566,11 +566,11 @@
                             </option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="categoryDescription" class="form-label fw-semibold">
+                    <div class="mb-3 tk-field">
+                        <label for="categoryDescription" class="tk-label fw-semibold">
                             {{ get_label('description', 'Description') }} (optional)
                         </label>
-                        <textarea name="description" class="form-control" id="categoryDescription" rows="3"></textarea>
+                        <textarea name="description" class="tk-input" id="categoryDescription" rows="3"></textarea>
                     </div>
                 </div>
             </div>
@@ -638,15 +638,15 @@
             <input type="hidden" id="editStatusId" />
 
             {{-- File Upload Section --}}
-            <div class="mb-4">
-                <h6 class="fw-semibold mb-3">
+            <div class="mb-4 tk-field">
+                <h6 class="fw-semibold mb-3 tk-label">
                     <i class="bx bx-file-import me-2"></i>{{ get_label('upload_excel_file', 'Upload Excel File') }}
                 </h6>
-                <div class="input-group">
-                    <span class="input-group-text">
+                <div class="tk-inputgroup">
+                    <span class="tk-ic">
                         <i class="bx bx-file"></i>
                     </span>
-                    <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required>
                 </div>
                 <div class="form-text mt-1">
                     <small class="text-muted">{{ get_label('accepted_formats', 'Accepted formats: XLSX, XLS, CSV') }}</small>

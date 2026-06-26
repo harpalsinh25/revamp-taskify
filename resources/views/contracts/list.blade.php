@@ -26,30 +26,30 @@ $visibleColumns = getUserPreferences('contracts');
         </div>
     </div>
     @if ($contracts > 0)
-    <div class="card mb-4">
+    <div class="card mb-4 overflow-visible">
         <div class="card-body">
             <div class="row g-3 align-items-end">
                 <x-advanced-date-filters prefix="contract" />
-                <div class="col-md-4">
-                    <label class="form-label"><?= get_label('projects', 'Projects') ?></label>
-                    <select class="form-select tom_projects_select" id="project_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label"><?= get_label('projects', 'Projects') ?></label>
+                    <select class="tk-select tom_projects_select" id="project_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_projects', 'Select Projects') ?>" multiple>
                     </select>
                 </div>
                 @if (!isClient() || isAdminOrHasAllDataAccess())
-                <div class="col-md-4">
-                    <label class="form-label"><?= get_label('clients', 'Clients') ?></label>
-                    <select class="form-select tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label"><?= get_label('clients', 'Clients') ?></label>
+                    <select class="tk-select tom_clients_select" id="client_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_clients', 'Select Clients') ?>" multiple>
                     </select>
                 </div>
                 @endif
-                <div class="col-md-4">
-                    <label class="form-label"><?= get_label('types', 'Types') ?></label>
-                    <select class="form-select tom_contract_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label"><?= get_label('types', 'Types') ?></label>
+                    <select class="tk-select tom_contract_types_select" id="type_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_types', 'Select Types') ?>" multiple>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label"><?= get_label('status', 'Status') ?></label>
-                    <select class="form-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
+                <div class="col-md-4 tk-field">
+                    <label class="tk-label"><?= get_label('status', 'Status') ?></label>
+                    <select class="tk-select tom_static_select" id="status_filter" aria-label="Default select example" data-placeholder="<?= get_label('select_statuses', 'Select statuses') ?>" data-allow-clear="true" multiple>
                         <option value="signed"><?= get_label('signed', 'Signed') ?></option>
                         <option value="not_signed"><?= get_label('not_signed', 'Not signed') ?></option>
                         <option value="partially_signed"><?= get_label('partially_signed', 'Partially signed') ?></option>
