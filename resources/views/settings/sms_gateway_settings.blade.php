@@ -56,13 +56,13 @@
                         @method('PUT')
                         
                         <div class="row mb-2">
-                            <div class="col-md-6 mb-2">
-                                <label for="base_url" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('base_url','Base URL')}} <span class="asterisk">*</span></label>
-                                <input type="text" class="form-control form-control-sm" name="base_url" value="{{$sms_gateway_settings['base_url'] ?? ''}}" placeholder="e.g. https://api.gateway.com/sms">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label for="base_url" class="tk-label mb-1" style="font-size: 0.8rem;">{{get_label('base_url','Base URL')}} <span class="asterisk">*</span></label>
+                                <input type="text" class="tk-input" name="base_url" value="{{$sms_gateway_settings['base_url'] ?? ''}}" placeholder="e.g. https://api.gateway.com/sms">
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label for="sms_gateway_method" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('method','Method')}} <span class="asterisk">*</span></label>
-                                <select class="form-select form-select-sm" name="sms_gateway_method">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label for="sms_gateway_method" class="tk-label mb-1" style="font-size: 0.8rem;">{{get_label('method','Method')}} <span class="asterisk">*</span></label>
+                                <select class="tk-select" name="sms_gateway_method">
                                     <option value="POST" {{ ($sms_gateway_settings && isset($sms_gateway_settings['sms_gateway_method']) && $sms_gateway_settings['sms_gateway_method'] == 'POST') ? 'selected' : '' }}>POST</option>
                                     <option value="GET" {{ ($sms_gateway_settings && isset($sms_gateway_settings['sms_gateway_method']) && $sms_gateway_settings['sms_gateway_method'] == 'GET') ? 'selected' : '' }}>GET</option>
                                 </select>
@@ -72,13 +72,13 @@
                         <div class="border-top pt-3 mb-3 mt-2">
                             <h6 class="text-secondary mb-2" style="font-size: 0.85rem;"><i class='bx bx-key me-1'></i> {{get_label('create_authorization_token','Create authorization token')}}</h6>
                             <div class="row mb-2">
-                                <div class="col-md-6 mb-2">
-                                    <label for="converterInputAccountSID" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('account_sid','Account SID')}}</label>
-                                    <input type="text" class="form-control form-control-sm" id="converterInputAccountSID" placeholder="Enter Account SID">
+                                <div class="col-md-6 mb-2 tk-field">
+                                    <label for="converterInputAccountSID" class="tk-label mb-1" style="font-size: 0.8rem;">{{get_label('account_sid','Account SID')}}</label>
+                                    <input type="text" class="tk-input" id="converterInputAccountSID" placeholder="Enter Account SID">
                                 </div>
-                                <div class="col-md-6 mb-2">
-                                    <label for="converterInputAuthToken" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('auth_token','Auth token')}}</label>
-                                    <input type="text" class="form-control form-control-sm" id="converterInputAuthToken" placeholder="Enter Auth Token">
+                                <div class="col-md-6 mb-2 tk-field">
+                                    <label for="converterInputAuthToken" class="tk-label mb-1" style="font-size: 0.8rem;">{{get_label('auth_token','Auth token')}}</label>
+                                    <input type="text" class="tk-input" id="converterInputAuthToken" placeholder="Enter Auth Token">
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-2 mt-1">
@@ -111,26 +111,26 @@
                                         <div class="row">
                                             <div class="col-md-12" id="header-rows">
                                                 <div class="d-flex align-items-end mb-2">
-                                                    <div class="col-md-5 mx-1">
-                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="header_key">{{get_label('key','Key')}}</label>
-                                                        <input type="text" id="header_key" class="form-control form-control-sm" placeholder="Header Key">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <label class="tk-label text-muted mb-1" style="font-size: 0.75rem;" for="header_key">{{get_label('key','Key')}}</label>
+                                                        <input type="text" id="header_key" class="tk-input" placeholder="Header Key">
                                                     </div>
-                                                    <div class="col-md-5 mx-1">
-                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="header_value">{{get_label('value','Value')}}</label>
-                                                        <input type="text" id="header_value" class="form-control form-control-sm" placeholder="Header Value">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <label class="tk-label text-muted mb-1" style="font-size: 0.75rem;" for="header_value">{{get_label('value','Value')}}</label>
+                                                        <input type="text" id="header_value" class="tk-input" placeholder="Header Value">
                                                     </div>
                                                     <div class="col-md-1 mx-3 text-center">
-                                                        <label class="form-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-header"><?= get_label('action', 'Action') ?></label>
+                                                        <label class="tk-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-header"><?= get_label('action', 'Action') ?></label>
                                                         <button type="button" class="btn btn-xs btn-success" id="add-header" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-check"></i></button>
                                                     </div>
                                                 </div>
                                                 @foreach ($sms_gateway_settings['header_data'] ?? [] as $key => $value)
                                                 <div class="d-flex header-row mb-2">
-                                                    <div class="col-md-5 mx-1">
-                                                        <input type="text" class="form-control form-control-sm" name="header_key[]" value="{{ $key }}">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <input type="text" class="tk-input" name="header_key[]" value="{{ $key }}">
                                                     </div>
-                                                    <div class="col-md-5 mx-1">
-                                                        <input type="text" class="form-control form-control-sm" name="header_value[]" value="{{ $value }}">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <input type="text" class="tk-input" name="header_value[]" value="{{ $value }}">
                                                     </div>
                                                     <div class="col-md-1 mx-3 text-center">
                                                         <button type="button" class="btn btn-xs btn-danger remove-header" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-trash"></i></button>
@@ -156,32 +156,32 @@
                                         <div class="tab-content bg-transparent shadow-none px-0 pt-2 pb-0">
                                             <div class="tab-pane fade show active" id="text-json-tab" role="tabpanel">
                                                 <div class="col-md-12">
-                                                    <textarea name="text_format_data" class="text_format_data form-control form-control-sm" rows="3" placeholder='{"to": "{only_mobile_number}", "message": "{message}"}' style="font-size: 0.8rem;">{{$sms_gateway_settings['text_format_data'] ?? ''}}</textarea>
+                                                    <textarea name="text_format_data" class="text_format_data tk-input" rows="3" placeholder='{"to": "{only_mobile_number}", "message": "{message}"}' style="font-size: 0.8rem;">{{$sms_gateway_settings['text_format_data'] ?? ''}}</textarea>
                                                 </div>
                                             </div>
                                             <div class="tab-pane fade" id="formdata-tab" role="tabpanel">
                                                 <div class="col-md-12" id="body-formdata-rows">
                                                     <div class="d-flex align-items-end mb-2">
-                                                        <div class="col-md-5 mx-1">
-                                                            <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="body_formdata_key">{{get_label('key','Key')}}</label>
-                                                            <input type="text" id="body_formdata_key" class="form-control form-control-sm" placeholder="Body Key">
+                                                        <div class="col-md-5 mx-1 tk-field">
+                                                            <label class="tk-label text-muted mb-1" style="font-size: 0.75rem;" for="body_formdata_key">{{get_label('key','Key')}}</label>
+                                                            <input type="text" id="body_formdata_key" class="tk-input" placeholder="Body Key">
                                                         </div>
-                                                        <div class="col-md-5 mx-1">
-                                                            <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="body_formdata_value">{{get_label('value','Value')}}</label>
-                                                            <input type="text" id="body_formdata_value" class="form-control form-control-sm" placeholder="Body Value">
+                                                        <div class="col-md-5 mx-1 tk-field">
+                                                            <label class="tk-label text-muted mb-1" style="font-size: 0.75rem;" for="body_formdata_value">{{get_label('value','Value')}}</label>
+                                                            <input type="text" id="body_formdata_value" class="tk-input" placeholder="Body Value">
                                                         </div>
                                                         <div class="col-md-1 mx-3 text-center">
-                                                            <label class="form-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-body-formdata"><?= get_label('action', 'Action') ?></label>
+                                                            <label class="tk-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-body-formdata"><?= get_label('action', 'Action') ?></label>
                                                             <button type="button" class="btn btn-xs btn-success" id="add-body-formdata" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-check"></i></button>
                                                         </div>
                                                     </div>
                                                     @foreach ($sms_gateway_settings['body_formdata'] ?? [] as $key => $value)
                                                     <div class="d-flex body-formdata-row mb-2">
-                                                        <div class="col-md-5 mx-1">
-                                                            <input type="text" class="form-control form-control-sm" name="body_key[]" value="{{ $key }}">
+                                                        <div class="col-md-5 mx-1 tk-field">
+                                                            <input type="text" class="tk-input" name="body_key[]" value="{{ $key }}">
                                                         </div>
-                                                        <div class="col-md-5 mx-1">
-                                                            <input type="text" class="form-control form-control-sm" name="body_value[]" value="{{ $value }}">
+                                                        <div class="col-md-5 mx-1 tk-field">
+                                                            <input type="text" class="tk-input" name="body_value[]" value="{{ $value }}">
                                                         </div>
                                                         <div class="col-md-1 mx-3 text-center">
                                                             <button type="button" class="btn btn-xs btn-danger remove-body-formdata" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-trash"></i></button>
@@ -196,26 +196,26 @@
                                         <div class="row">
                                             <div class="col-md-12" id="params-rows">
                                                 <div class="d-flex align-items-end mb-2">
-                                                    <div class="col-md-5 mx-1">
-                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="params_key">{{get_label('key','Key')}}</label>
-                                                        <input type="text" id="params_key" class="form-control form-control-sm" placeholder="Param Key">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <label class="tk-label text-muted mb-1" style="font-size: 0.75rem;" for="params_key">{{get_label('key','Key')}}</label>
+                                                        <input type="text" id="params_key" class="tk-input" placeholder="Param Key">
                                                     </div>
-                                                    <div class="col-md-5 mx-1">
-                                                        <label class="form-label text-muted mb-1" style="font-size: 0.75rem;" for="params_value">{{get_label('value','Value')}}</label>
-                                                        <input type="text" id="params_value" class="form-control form-control-sm" placeholder="Param Value">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <label class="tk-label text-muted mb-1" style="font-size: 0.75rem;" for="params_value">{{get_label('value','Value')}}</label>
+                                                        <input type="text" id="params_value" class="tk-input" placeholder="Param Value">
                                                     </div>
                                                     <div class="col-md-1 mx-3 text-center">
-                                                        <label class="form-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-params"><?= get_label('action', 'Action') ?></label>
+                                                        <label class="tk-label text-muted mb-1 d-block" style="font-size: 0.75rem;" for="add-params"><?= get_label('action', 'Action') ?></label>
                                                         <button type="button" class="btn btn-xs btn-success" id="add-params" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-check"></i></button>
                                                     </div>
                                                 </div>
                                                 @foreach ($sms_gateway_settings['params_data'] ?? [] as $key => $value)
                                                 <div class="d-flex params-row mb-2">
-                                                    <div class="col-md-5 mx-1">
-                                                        <input type="text" class="form-control form-control-sm" name="params_key[]" value="{{ $key }}">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <input type="text" class="tk-input" name="params_key[]" value="{{ $key }}">
                                                     </div>
-                                                    <div class="col-md-5 mx-1">
-                                                        <input type="text" class="form-control form-control-sm" name="params_value[]" value="{{ $value }}">
+                                                    <div class="col-md-5 mx-1 tk-field">
+                                                        <input type="text" class="tk-input" name="params_value[]" value="{{ $value }}">
                                                     </div>
                                                     <div class="col-md-1 mx-3 text-center">
                                                         <button type="button" class="btn btn-xs btn-danger remove-params" style="height: 31px; width: 31px; display: inline-flex; align-items: center; justify-content: center;"><i class="bx bx-trash"></i></button>
@@ -308,12 +308,12 @@
                         @method('PUT')
                         
                         <div class="mb-2">
-                            <label for="whatsapp_access_token" class="form-label mb-1" style="font-size: 0.8rem;">{{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }} <span class="asterisk">*</span></label>
-                            <input type="text" class="form-control form-control-sm" name="whatsapp_access_token" value="{{$whatsapp_settings['whatsapp_access_token'] ?? ''}}" placeholder="Enter Access Token">
+                            <label for="whatsapp_access_token" class="tk-label mb-1" style="font-size: 0.8rem;">{{ get_label('whatsapp_access_token', 'WhatsApp Access Token') }} <span class="asterisk">*</span></label>
+                            <input type="text" class="tk-input" name="whatsapp_access_token" value="{{$whatsapp_settings['whatsapp_access_token'] ?? ''}}" placeholder="Enter Access Token">
                         </div>
                         <div class="mb-3">
-                            <label for="whatsapp_phone_number_id" class="form-label mb-1" style="font-size: 0.8rem;">{{get_label('whatsapp_phone_number_id', 'WhatsApp Phone Number ID')}} <span class="asterisk">*</span></label>
-                            <input type="text" class="form-control form-control-sm" name="whatsapp_phone_number_id" value="{{$whatsapp_settings['whatsapp_phone_number_id'] ?? ''}}" placeholder="Enter Phone Number ID">
+                            <label for="whatsapp_phone_number_id" class="tk-label mb-1" style="font-size: 0.8rem;">{{get_label('whatsapp_phone_number_id', 'WhatsApp Phone Number ID')}} <span class="asterisk">*</span></label>
+                            <input type="text" class="tk-input" name="whatsapp_phone_number_id" value="{{$whatsapp_settings['whatsapp_phone_number_id'] ?? ''}}" placeholder="Enter Phone Number ID">
                         </div>
                         
                         <div class="d-flex justify-content-end flex-wrap gap-2 border-top pt-3">
@@ -351,8 +351,8 @@
                         @method('PUT')
                         
                         <div class="mb-3">
-                            <label for="slack_bot_token" class="form-label mb-1" style="font-size: 0.8rem;">{{ get_label('slack_bot_token', 'Slack bot token') }} <span class="asterisk">*</span></label>
-                            <input type="text" class="form-control form-control-sm" name="slack_bot_token" value="{{ $slack_settings['slack_bot_token'] ?? '' }}" placeholder="Enter Slack Bot Token">
+                            <label for="slack_bot_token" class="tk-label mb-1" style="font-size: 0.8rem;">{{ get_label('slack_bot_token', 'Slack bot token') }} <span class="asterisk">*</span></label>
+                            <input type="text" class="tk-input" name="slack_bot_token" value="{{ $slack_settings['slack_bot_token'] ?? '' }}" placeholder="Enter Slack Bot Token">
                         </div>
                         
                         <div class="d-flex justify-content-end flex-wrap gap-2 border-top pt-3">

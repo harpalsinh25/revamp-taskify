@@ -43,19 +43,19 @@
                     </div>
                     <div class="card-body pt-3 px-3 pb-3">
                         <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label mb-1" style="font-size: 0.8rem;">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label class="tk-label mb-1" style="font-size: 0.8rem;">
                                     <?= get_label('max_attempts', 'Max Attempts') ?> <small class="text-muted">(<?= get_label('max_attempts_info', 'Fill in if you want to set a limit; otherwise, leave it blank') ?>)</small>
                                     <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('max_attempts_info_1', 'The maximum number of login attempts allowed before the account is locked.') ?>"></i>
                                 </label>
-                                <input class="form-control form-control-sm" type="number" name="max_attempts" step="1" placeholder="5" value="{{ $general_settings['max_attempts'] ?? 5 }}" min="1">
+                                <input class="tk-input" type="number" name="max_attempts" step="1" placeholder="5" value="{{ $general_settings['max_attempts'] ?? 5 }}" min="1">
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label mb-1" style="font-size: 0.8rem;">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label class="tk-label mb-1" style="font-size: 0.8rem;">
                                     <?= get_label('lock_time', 'Lock Time (minutes)') ?> <small class="text-muted">(<?= get_label('lock_time_info', 'This will not apply if Max Attempts is left blank') ?>)</small>
                                     <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('lock_time_info_1', 'The duration in minutes for which the account will be locked after exceeding the maximum login attempts.') ?>"></i>
                                 </label>
-                                <input class="form-control form-control-sm" type="number" name="lock_time" step="1" placeholder="1" value="{{ $general_settings['lock_time'] ?? 1 }}" min="1">
+                                <input class="tk-input" type="number" name="lock_time" step="1" placeholder="1" value="{{ $general_settings['lock_time'] ?? 1 }}" min="1">
                             </div>
                         </div>
                     </div>
@@ -70,26 +70,26 @@
                     </div>
                     <div class="card-body pt-3 px-3 pb-3">
                         <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label mb-1" style="font-size: 0.8rem;">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label class="tk-label mb-1" style="font-size: 0.8rem;">
                                     <?= get_label('allowed_max_upload_size_in_mb_default_512', 'Allowed Max Upload Size (MB) - Default: 512') ?>
                                     <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('allowed_max_upload_size_info', 'Also, set the `upload_max_filesize` and `post_max_size` PHP configurations on your server accordingly to ensure the maximum upload size works as expected.') ?>"></i>
                                 </label>
-                                <input class="form-control form-control-sm" type="number" name="allowed_max_upload_size" step="1" placeholder="512" value="{{ !isset($general_settings['allowed_max_upload_size']) ? '512' : $general_settings['allowed_max_upload_size'] }}" min="1">
+                                <input class="tk-input" type="number" name="allowed_max_upload_size" step="1" placeholder="512" value="{{ !isset($general_settings['allowed_max_upload_size']) ? '512' : $general_settings['allowed_max_upload_size'] }}" min="1">
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label mb-1" style="font-size: 0.8rem;" for="max_files">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label class="tk-label mb-1" style="font-size: 0.8rem;" for="max_files">
                                     <?= get_label('max_files_allowed', 'Max Files Allowed') ?>
                                     <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('max_files_allowed_info', 'Set the maximum number of files that can be uploaded at a time. Also, set the `max_file_uploads` PHP configurations on your server accordingly to ensure the Max Files Allowed works as expected.') ?>"></i>
                                 </label>
-                                <input class="form-control form-control-sm" type="number" id="max_files" name="max_files" step="1" placeholder="10" value="{{ !isset($general_settings['max_files']) ? '10' : $general_settings['max_files'] }}" min="1">
+                                <input class="tk-input" type="number" id="max_files" name="max_files" step="1" placeholder="10" value="{{ !isset($general_settings['max_files']) ? '10' : $general_settings['max_files'] }}" min="1">
                             </div>
-                            <div class="col-md-12 mb-2">
-                                <label class="form-label mb-1" style="font-size: 0.8rem;" for="allowed_file_types">
+                            <div class="col-md-12 mb-2 tk-field">
+                                <label class="tk-label mb-1" style="font-size: 0.8rem;" for="allowed_file_types">
                                     <?= get_label('allowed_file_types', 'Allowed File Types') ?>
                                     <i class='bx bx-info-circle text-primary ms-1' data-bs-toggle="tooltip" data-bs-placement="top" title="<?= get_label('allowed_file_types_info', 'Specify the file types allowed for upload, separated by commas. Default: .pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt.') ?>"></i>
                                 </label>
-                                <input class="form-control form-control-sm" type="text" id="allowed_file_types" name="allowed_file_types" placeholder=".pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt" value="{{ !isset($general_settings['allowed_file_types']) ? '.pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt' : $general_settings['allowed_file_types'] }}">
+                                <input class="tk-input" type="text" id="allowed_file_types" name="allowed_file_types" placeholder=".pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt" value="{{ !isset($general_settings['allowed_file_types']) ? '.pdf, .doc, .docx, .png, .jpg, .xls, .xlsx, .zip, .rar, .txt' : $general_settings['allowed_file_types'] }}">
                             </div>
                         </div>
                     </div>
@@ -110,13 +110,13 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label mb-1" style="font-size: 0.8rem;" for="recaptcha_site_key"><?= get_label('recaptcha_site_key', 'Google reCAPTCHA Site Key') ?></label>
-                                <input class="form-control form-control-sm" type="text" id="recaptcha_site_key" name="recaptcha_site_key" placeholder="Enter your site key" value="{{ $general_settings['recaptcha_site_key'] ?? '' }}">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label class="tk-label mb-1" style="font-size: 0.8rem;" for="recaptcha_site_key"><?= get_label('recaptcha_site_key', 'Google reCAPTCHA Site Key') ?></label>
+                                <input class="tk-input" type="text" id="recaptcha_site_key" name="recaptcha_site_key" placeholder="Enter your site key" value="{{ $general_settings['recaptcha_site_key'] ?? '' }}">
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label mb-1" style="font-size: 0.8rem;" for="recaptcha_secret_key"><?= get_label('recaptcha_secret_key', 'Google reCAPTCHA Secret Key') ?></label>
-                                <input class="form-control form-control-sm" type="text" id="recaptcha_secret_key" name="recaptcha_secret_key" placeholder="Enter your secret key" value="{{ $general_settings['recaptcha_secret_key'] ?? '' }}">
+                            <div class="col-md-6 mb-2 tk-field">
+                                <label class="tk-label mb-1" style="font-size: 0.8rem;" for="recaptcha_secret_key"><?= get_label('recaptcha_secret_key', 'Google reCAPTCHA Secret Key') ?></label>
+                                <input class="tk-input" type="text" id="recaptcha_secret_key" name="recaptcha_secret_key" placeholder="Enter your secret key" value="{{ $general_settings['recaptcha_secret_key'] ?? '' }}">
                             </div>
                         </div>
                     </div>

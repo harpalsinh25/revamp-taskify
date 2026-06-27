@@ -37,21 +37,21 @@
                         <div class="card-body pt-4">
                             <h6 class="text-primary mb-3"><i class='bx bx-slider-alt me-1'></i> <?= get_label('basic_settings', 'Basic Settings') ?></h6>
                             <div class="row mb-4">
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_api_key" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="openrouter_api_key" class="tk-label">
                                         <?= get_label('openrouter_api_key', 'OpenRouter API Key') ?>
                                         <span class="asterisk">*</span>
                                     </label>
-                                    <input class="form-control" type="text" name="openrouter_api_key"
+                                    <input class="tk-input" type="text" name="openrouter_api_key"
                                         id="openrouter_api_key"
                                         placeholder="<?= get_label('please_enter_openrouter_api_key', 'Please enter OpenRouter API Key') ?>"
                                         value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($ai_model_settings['openrouter_api_key'] ?? '')) : $ai_model_settings['openrouter_api_key'] ?? '' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_model" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="openrouter_model" class="tk-label">
                                         <?= get_label('openrouter_model', 'OpenRouter Model') ?>
                                     </label>
-                                    <select class="form-select" name="openrouter_model" id="openrouter_model">
+                                    <select class="tk-select" name="openrouter_model" id="openrouter_model">
                                         <option value="nousresearch/deephermes-3-mistral-24b-preview:free"
                                             <?= isset($ai_model_settings['openrouter_model']) && $ai_model_settings['openrouter_model'] === 'nousresearch/deephermes-3-mistral-24b-preview:free' ? 'selected' : '' ?>>
                                             DeepHermes 3 Mistral (Free)
@@ -74,16 +74,16 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_endpoint" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="openrouter_endpoint" class="tk-label">
                                         <?= get_label('openrouter_endpoint', 'OpenRouter Endpoint') ?>
                                     </label>
-                                    <input type="url" class="form-control" name="openrouter_endpoint"
+                                    <input type="url" class="tk-input" name="openrouter_endpoint"
                                         id="openrouter_endpoint" placeholder="Enter OpenRouter API endpoint"
                                         value="<?= $ai_model_settings['openrouter_endpoint'] ?? '' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_is_active" class="form-label d-block">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="openrouter_is_active" class="tk-label d-block">
                                         <?= get_label('is_active', 'Is Active') ?>
                                     </label>
                                     <div class="form-check form-switch mt-2">
@@ -100,14 +100,14 @@
                             <hr class="mb-4">
                             <h6 class="text-primary mb-3"><i class='bx bx-cog me-1'></i> <?= get_label('advanced_settings', 'Advanced Settings') ?></h6>
                             <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="openrouter_system_prompt" class="form-label">
+                                <div class="col-md-12 mb-3 tk-field">
+                                    <label for="openrouter_system_prompt" class="tk-label">
                                         <?= get_label('system_prompt', 'System Prompt') ?>
                                     </label>
-                                    <textarea class="form-control" name="openrouter_system_prompt" id="openrouter_system_prompt" rows="3"><?= $ai_model_settings['openrouter_system_prompt'] ?? 'You are a helpful assistant that writes concise, professional project or task descriptions.' ?></textarea>
+                                    <textarea class="tk-input" name="openrouter_system_prompt" id="openrouter_system_prompt" rows="3"><?= $ai_model_settings['openrouter_system_prompt'] ?? 'You are a helpful assistant that writes concise, professional project or task descriptions.' ?></textarea>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_temperature" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="openrouter_temperature" class="tk-label">
                                         <?= get_label('temperature', 'Temperature') ?>
                                         <i class="bx bx-info-circle text-primary ms-1" data-bs-toggle="tooltip"
                                             title="Controls randomness: 0 = deterministic, 2 = maximum randomness"></i>
@@ -122,35 +122,35 @@
                                         <small>2</small>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="openrouter_max_tokens" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="openrouter_max_tokens" class="tk-label">
                                         <?= get_label('max_tokens', 'Max Tokens') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="openrouter_max_tokens"
+                                    <input type="number" class="tk-input" name="openrouter_max_tokens"
                                         id="openrouter_max_tokens" min="1" max="4096"
                                         value="<?= $ai_model_settings['openrouter_max_tokens'] ?? '1024' ?>">
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="openrouter_top_p" class="form-label">
+                                <div class="col-md-4 mb-3 tk-field">
+                                    <label for="openrouter_top_p" class="tk-label">
                                         <?= get_label('top_p', 'Top P') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="openrouter_top_p"
+                                    <input type="number" class="tk-input" name="openrouter_top_p"
                                         id="openrouter_top_p" min="0" max="1" step="0.01"
                                         value="<?= $ai_model_settings['openrouter_top_p'] ?? '0.95' ?>">
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="openrouter_frequency_penalty" class="form-label">
+                                <div class="col-md-4 mb-3 tk-field">
+                                    <label for="openrouter_frequency_penalty" class="tk-label">
                                         <?= get_label('frequency_penalty', 'Frequency Penalty') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="openrouter_frequency_penalty"
+                                    <input type="number" class="tk-input" name="openrouter_frequency_penalty"
                                         id="openrouter_frequency_penalty" min="-2" max="2" step="0.1"
                                         value="<?= $ai_model_settings['openrouter_frequency_penalty'] ?? '0' ?>">
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="openrouter_presence_penalty" class="form-label">
+                                <div class="col-md-4 mb-3 tk-field">
+                                    <label for="openrouter_presence_penalty" class="tk-label">
                                         <?= get_label('presence_penalty', 'Presence Penalty') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="openrouter_presence_penalty"
+                                    <input type="number" class="tk-input" name="openrouter_presence_penalty"
                                         id="openrouter_presence_penalty" min="-2" max="2" step="0.1"
                                         value="<?= $ai_model_settings['openrouter_presence_penalty'] ?? '0' ?>">
                                 </div>
@@ -169,20 +169,20 @@
                         <div class="card-body pt-4">
                             <h6 class="text-primary mb-3"><i class='bx bx-slider-alt me-1'></i> <?= get_label('basic_settings', 'Basic Settings') ?></h6>
                             <div class="row mb-4">
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_api_key" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_api_key" class="tk-label">
                                         <?= get_label('gemini_api_key', 'Gemini API Key') ?>
                                         <span class="asterisk">*</span>
                                     </label>
-                                    <input class="form-control" type="text" name="gemini_api_key" id="gemini_api_key"
+                                    <input class="tk-input" type="text" name="gemini_api_key" id="gemini_api_key"
                                         placeholder="<?= get_label('please_enter_gemini_api_key', 'Please enter Gemini API Key') ?>"
                                         value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($ai_model_settings['gemini_api_key'] ?? '')) : $ai_model_settings['gemini_api_key'] ?? '' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_model" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_model" class="tk-label">
                                         <?= get_label('gemini_model', 'Gemini Model') ?>
                                     </label>
-                                    <select class="form-select" name="gemini_model" id="gemini_model">
+                                    <select class="tk-select" name="gemini_model" id="gemini_model">
                                         <option value="gemini-2.0-flash"
                                             <?= isset($ai_model_settings['gemini_model']) && $ai_model_settings['gemini_model'] === 'gemini-2.0-flash' ? 'selected' : '' ?>>
                                             Gemini 2.0 Flash (Default)
@@ -197,16 +197,16 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_endpoint" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_endpoint" class="tk-label">
                                         <?= get_label('gemini_endpoint', 'Gemini Endpoint') ?>
                                     </label>
-                                    <input type="url" class="form-control" name="gemini_endpoint"
+                                    <input type="url" class="tk-input" name="gemini_endpoint"
                                         id="gemini_endpoint" placeholder="Enter Gemini API endpoint"
                                         value="<?= $ai_model_settings['gemini_endpoint'] ?? '' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_is_active" class="form-label d-block">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_is_active" class="tk-label d-block">
                                         <?= get_label('is_active', 'Is Active') ?>
                                     </label>
                                     <div class="form-check form-switch mt-2">
@@ -223,8 +223,8 @@
                             <hr class="mb-4">
                             <h6 class="text-primary mb-3"><i class='bx bx-cog me-1'></i> <?= get_label('advanced_settings', 'Advanced Settings') ?></h6>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_temperature" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_temperature" class="tk-label">
                                         <?= get_label('temperature', 'Temperature') ?>
                                     </label>
                                     <input type="range" class="form-range" name="gemini_temperature"
@@ -237,27 +237,27 @@
                                         <small>2</small>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_max_output_tokens" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_max_output_tokens" class="tk-label">
                                         <?= get_label('max_output_tokens', 'Max Output Tokens') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="gemini_max_output_tokens"
+                                    <input type="number" class="tk-input" name="gemini_max_output_tokens"
                                         id="gemini_max_output_tokens" min="1" max="4096"
                                         value="<?= $ai_model_settings['gemini_max_output_tokens'] ?? '1024' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_top_k" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_top_k" class="tk-label">
                                         <?= get_label('top_k', 'Top K') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="gemini_top_k" id="gemini_top_k"
+                                    <input type="number" class="tk-input" name="gemini_top_k" id="gemini_top_k"
                                         min="1" max="100"
                                         value="<?= $ai_model_settings['gemini_top_k'] ?? '40' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="gemini_top_p" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="gemini_top_p" class="tk-label">
                                         <?= get_label('top_p', 'Top P') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="gemini_top_p" id="gemini_top_p"
+                                    <input type="number" class="tk-input" name="gemini_top_p" id="gemini_top_p"
                                         min="0" max="1" step="0.01"
                                         value="<?= $ai_model_settings['gemini_top_p'] ?? '0.95' ?>">
                                 </div>
@@ -286,11 +286,11 @@
                                             <?= isset($ai_model_settings['enable_fallback']) && $ai_model_settings['enable_fallback'] ? 'checked' : '' ?>>
                                     </div>
                                 </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="fallback_provider" class="form-label">
+                                <div class="col-md-12 mb-3 tk-field">
+                                    <label for="fallback_provider" class="tk-label">
                                         <?= get_label('fallback_provider', 'Fallback Provider') ?>
                                     </label>
-                                    <select class="form-select" name="fallback_provider" id="fallback_provider">
+                                    <select class="tk-select" name="fallback_provider" id="fallback_provider">
                                         <option value="">Select Fallback Provider</option>
                                         <option value="gemini"
                                             <?= isset($ai_model_settings['fallback_provider']) && $ai_model_settings['fallback_provider'] === 'gemini' ? 'selected' : '' ?>>
@@ -300,50 +300,50 @@
                                             OpenRouter</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="max_retries" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="max_retries" class="tk-label">
                                         <?= get_label('max_retries', 'Max Retries') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="max_retries" id="max_retries"
+                                    <input type="number" class="tk-input" name="max_retries" id="max_retries"
                                         min="0" max="10"
                                         value="<?= $ai_model_settings['max_retries'] ?? '2' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="retry_delay" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="retry_delay" class="tk-label">
                                         <?= get_label('retry_delay', 'Retry Delay (s)') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="retry_delay" id="retry_delay"
+                                    <input type="number" class="tk-input" name="retry_delay" id="retry_delay"
                                         min="1" value="<?= $ai_model_settings['retry_delay'] ?? '5' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="rate_limit_per_minute" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="rate_limit_per_minute" class="tk-label">
                                         <?= get_label('rate_limit_per_minute', 'Limit / Min') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="rate_limit_per_minute"
+                                    <input type="number" class="tk-input" name="rate_limit_per_minute"
                                         id="rate_limit_per_minute" min="1" max="60"
                                         value="<?= $ai_model_settings['rate_limit_per_minute'] ?? '15' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="rate_limit_per_day" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="rate_limit_per_day" class="tk-label">
                                         <?= get_label('rate_limit_per_day', 'Limit / Day') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="rate_limit_per_day"
+                                    <input type="number" class="tk-input" name="rate_limit_per_day"
                                         id="rate_limit_per_day" min="1"
                                         value="<?= $ai_model_settings['rate_limit_per_day'] ?? '1500' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="request_timeout" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="request_timeout" class="tk-label">
                                         <?= get_label('request_timeout', 'Timeout (s)') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="request_timeout"
+                                    <input type="number" class="tk-input" name="request_timeout"
                                         id="request_timeout" min="1" max="60"
                                         value="<?= $ai_model_settings['request_timeout'] ?? '15' ?>">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="max_prompt_length" class="form-label">
+                                <div class="col-md-6 mb-3 tk-field">
+                                    <label for="max_prompt_length" class="tk-label">
                                         <?= get_label('max_prompt_length', 'Max Length') ?>
                                     </label>
-                                    <input type="number" class="form-control" name="max_prompt_length"
+                                    <input type="number" class="tk-input" name="max_prompt_length"
                                         id="max_prompt_length" min="100" max="10000"
                                         value="<?= $ai_model_settings['max_prompt_length'] ?? '1000' ?>">
                                 </div>
@@ -358,20 +358,20 @@
                         </div>
                         <div class="card-body pt-4">
                             <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="default_prompt_prefix" class="form-label">
+                                <div class="col-md-12 mb-3 tk-field">
+                                    <label for="default_prompt_prefix" class="tk-label">
                                         <?= get_label('default_prompt_prefix', 'Default Prompt Prefix') ?>
                                     </label>
-                                    <input type="text" class="form-control" name="default_prompt_prefix"
+                                    <input type="text" class="tk-input" name="default_prompt_prefix"
                                         id="default_prompt_prefix"
                                         value="<?= $ai_model_settings['default_prompt_prefix'] ?? '' ?>">
                                     <small class="text-muted">Added before every prompt</small>
                                 </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="default_prompt_suffix" class="form-label">
+                                <div class="col-md-12 mb-3 tk-field">
+                                    <label for="default_prompt_suffix" class="tk-label">
                                         <?= get_label('default_prompt_suffix', 'Default Prompt Suffix') ?>
                                     </label>
-                                    <input type="text" class="form-control" name="default_prompt_suffix"
+                                    <input type="text" class="tk-input" name="default_prompt_suffix"
                                         id="default_prompt_suffix"
                                         value="<?= $ai_model_settings['default_prompt_suffix'] ?? '' ?>">
                                     <small class="text-muted">Added after every prompt</small>

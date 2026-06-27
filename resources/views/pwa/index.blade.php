@@ -47,9 +47,9 @@
 
                 <div class="row">
                     {{-- Name --}}
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="name">Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="name" class="form-control form-control-sm"
+                    <div class="col-md-6 mb-2 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="name">Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="name" class="tk-input"
                             value="{{ old('name', $pwaSettings['name'] ?? 'Taskify') }}" required>
                         @error('name')
                             <div class="text-danger small mt-1" style="font-size: 0.75rem;">{{ $message }}</div>
@@ -57,9 +57,9 @@
                     </div>
 
                     {{-- Short Name --}}
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="short_name">Short Name <span class="text-danger">*</span></label>
-                        <input type="text" name="short_name" id="short_name" class="form-control form-control-sm"
+                    <div class="col-md-6 mb-2 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="short_name">Short Name <span class="text-danger">*</span></label>
+                        <input type="text" name="short_name" id="short_name" class="tk-input"
                             value="{{ old('short_name', $pwaSettings['short_name'] ?? 'Taskify') }}" required>
                         @error('short_name')
                             <div class="text-danger small mt-1" style="font-size: 0.75rem;">{{ $message }}</div>
@@ -67,11 +67,11 @@
                     </div>
 
                     {{-- Theme Color --}}
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="theme_color">Theme Color <span class="text-danger">*</span></label>
+                    <div class="col-md-6 mb-2 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="theme_color">Theme Color <span class="text-danger">*</span></label>
                         <div class="d-flex align-items-center gap-2">
                             <input type="color" name="theme_color" id="theme_color"
-                                class="form-control form-control-color" style="width: 38px; height: 31px; padding: 2px;"
+                                class="tk-input form-control-color" style="width: 38px; height: 31px; padding: 2px;"
                                 value="{{ old('theme_color', $pwaSettings['theme_color'] ?? '#000000') }}" required>
                             <span class="text-muted small" style="font-size: 0.8rem;">{{ old('theme_color', $pwaSettings['theme_color'] ?? '#000000') }}</span>
                         </div>
@@ -81,11 +81,11 @@
                     </div>
 
                     {{-- Background Color --}}
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="background_color">Background Color <span class="text-danger">*</span></label>
+                    <div class="col-md-6 mb-2 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="background_color">Background Color <span class="text-danger">*</span></label>
                         <div class="d-flex align-items-center gap-2">
                             <input type="color" name="background_color" id="background_color"
-                                class="form-control form-control-color" style="width: 38px; height: 31px; padding: 2px;"
+                                class="tk-input form-control-color" style="width: 38px; height: 31px; padding: 2px;"
                                 value="{{ old('background_color', $pwaSettings['background_color'] ?? '#ffffff') }}" required>
                             <span class="text-muted small" style="font-size: 0.8rem;">{{ old('background_color', $pwaSettings['background_color'] ?? '#ffffff') }}</span>
                         </div>
@@ -95,17 +95,17 @@
                     </div>
 
                     {{-- Description --}}
-                    <div class="col-12 mb-2">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="description">Description <span class="text-danger">*</span></label>
-                        <textarea name="description" id="description" rows="3" class="form-control form-control-sm" required style="font-size: 0.8rem;">{{ old('description', $pwaSettings['description'] ?? 'A task management app to boost productivity') }}</textarea>
+                    <div class="col-12 mb-2 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="description">Description <span class="text-danger">*</span></label>
+                        <textarea name="description" id="description" rows="3" class="tk-input" required style="font-size: 0.8rem;">{{ old('description', $pwaSettings['description'] ?? 'A task management app to boost productivity') }}</textarea>
                         @error('description')
                             <div class="text-danger small mt-1" style="font-size: 0.75rem;">{{ $message }}</div>
                         @enderror
                     </div>
 
                     {{-- Logo --}}
-                    <div class="col-12 mb-3">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="logo">Logo <span class="text-danger">*</span></label>
+                    <div class="col-12 mb-3 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="logo">Logo <span class="text-danger">*</span></label>
                         <div class="alert alert-light-danger border-0 py-2 px-3 mb-2" style="font-size: 0.8rem; border-radius: 6px;" role="alert">
                             <i class="bx bx-info-circle me-2 fs-5 text-danger"></i>
                             Please upload minimum <strong>512x512 PNG</strong> logo or else it will not work.

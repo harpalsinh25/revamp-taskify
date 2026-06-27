@@ -39,21 +39,21 @@
                 @csrf
                 @method('PUT')
                 <div class="row">
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="api_key">{{ get_label('api_key', 'API Key') }}</label>
-                        <input class="form-control form-control-sm" type="text" name="api_key" id="api_key"
+                    <div class="col-md-6 mb-2 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="api_key">{{ get_label('api_key', 'API Key') }}</label>
+                        <input class="tk-input" type="text" name="api_key" id="api_key"
                             placeholder="{{ get_label('please_enter_your_google_api_key', 'Please Enter Your Google API Key') }}"
                             value="{{ config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($google_calendar_settings['api_key'])) : $google_calendar_settings['api_key'] }}">
                     </div>
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="calendar_id">{{ get_label('google_calendar_id', 'Google Calendar ID') }}</label>
-                        <input class="form-control form-control-sm" type="text" name="calendar_id" id="calendar_id"
+                    <div class="col-md-6 mb-2 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="calendar_id">{{ get_label('google_calendar_id', 'Google Calendar ID') }}</label>
+                        <input class="tk-input" type="text" name="calendar_id" id="calendar_id"
                             placeholder="{{ get_label('please_enter_your_google_calendar_id', 'Please Enter Your Google Calendar ID') }}"
                             value="{{ config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($google_calendar_settings['calendar_id'])) : $google_calendar_settings['calendar_id'] }}">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="calendar_name">{{get_label('calendar_name','Calendar Name')}}</label>
-                        <input class="form-control form-control-sm" type="text" name="calendar_name" id="calendar_name"
+                    <div class="col-md-6 mb-3 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="calendar_name">{{get_label('calendar_name','Calendar Name')}}</label>
+                        <input class="tk-input" type="text" name="calendar_name" id="calendar_name"
                             placeholder="{{ get_label('enter_your_calendar_name_to_be_displayed','Enter your calendar name to be displayed') }}"
                             value="{{ config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($google_calendar_settings['calendar_name'] ?? '')) : ($google_calendar_settings['calendar_name'] ?? '') }}">
                     </div>

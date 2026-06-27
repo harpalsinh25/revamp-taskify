@@ -33,41 +33,41 @@
                     </div>
                     <div class="card-body pt-4">
                         <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyEmail"><?= get_label('email', 'Email') ?></label>
-                                <input class="form-control" type="text" name="companyEmail" value="{{ old('companyEmail', $company_info['companyEmail']) }}" placeholder="<?= get_label('please_enter_company_email', 'Please Enter Company Email') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyEmail"><?= get_label('email', 'Email') ?></label>
+                                <input class="tk-input" type="text" name="companyEmail" value="{{ old('companyEmail', $company_info['companyEmail']) }}" placeholder="<?= get_label('please_enter_company_email', 'Please Enter Company Email') ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyPhone"><?= get_label('phone_number', 'Phone Number') ?></label>
-                                <input class="form-control" type="text" name="companyPhone" value="{{ old('companyPhone', $company_info['companyPhone']) }}" placeholder="<?= get_label('please_enter_company_phone_number', 'Please Enter Company Phone Number') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyPhone"><?= get_label('phone_number', 'Phone Number') ?></label>
+                                <input class="tk-input" type="text" name="companyPhone" value="{{ old('companyPhone', $company_info['companyPhone']) }}" placeholder="<?= get_label('please_enter_company_phone_number', 'Please Enter Company Phone Number') ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyAddress"><?= get_label('address', 'Address') ?></label>
-                                <input class="form-control" type="text" name="companyAddress" value="{{ old('companyAddress', $company_info['companyAddress']) }}" placeholder="<?= get_label('please_enter_company_address', 'Please Enter Company Address') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyAddress"><?= get_label('address', 'Address') ?></label>
+                                <input class="tk-input" type="text" name="companyAddress" value="{{ old('companyAddress', $company_info['companyAddress']) }}" placeholder="<?= get_label('please_enter_company_address', 'Please Enter Company Address') ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyCity"><?= get_label('city', 'City') ?></label>
-                                <input class="form-control" type="text" name="companyCity" value="{{ old('companyCity', $company_info['companyCity']) }}" placeholder="<?= get_label('please_enter_company_city', 'Please Enter Company City') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyCity"><?= get_label('city', 'City') ?></label>
+                                <input class="tk-input" type="text" name="companyCity" value="{{ old('companyCity', $company_info['companyCity']) }}" placeholder="<?= get_label('please_enter_company_city', 'Please Enter Company City') ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyState"><?= get_label('state', 'State') ?></label>
-                                <input class="form-control" type="text" name="companyState" value="{{ old('companyState', $company_info['companyState']) }}" placeholder="<?= get_label('please_enter_company_state', 'Please Enter Company State') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyState"><?= get_label('state', 'State') ?></label>
+                                <input class="tk-input" type="text" name="companyState" value="{{ old('companyState', $company_info['companyState']) }}" placeholder="<?= get_label('please_enter_company_state', 'Please Enter Company State') ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyCountry"><?= get_label('country', 'Country') ?></label>
-                                <input class="form-control" type="text" name="companyCountry" value="{{ old('companyCountry', $company_info['companyCountry']) }}" placeholder="<?= get_label('please_enter_company_country', 'Please Enter Company Country') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyCountry"><?= get_label('country', 'Country') ?></label>
+                                <input class="tk-input" type="text" name="companyCountry" value="{{ old('companyCountry', $company_info['companyCountry']) }}" placeholder="<?= get_label('please_enter_company_country', 'Please Enter Company Country') ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyZip"><?= get_label('zip_code', 'Zip Code') ?></label>
-                                <input class="form-control" type="text" name="companyZip" value="{{ old('companyZip', $company_info['companyZip']) }}" placeholder="<?= get_label('please_enter_company_zip_code', 'Please Enter Company Zip Code') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyZip"><?= get_label('zip_code', 'Zip Code') ?></label>
+                                <input class="tk-input" type="text" name="companyZip" value="{{ old('companyZip', $company_info['companyZip']) }}" placeholder="<?= get_label('please_enter_company_zip_code', 'Please Enter Company Zip Code') ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="companyWebsite"><?= get_label('website', 'Website') ?></label>
-                                <input class="form-control" type="text" name="companyWebsite" value="{{ old('companyWebsite', $company_info['companyWebsite']) }}" placeholder="<?= get_label('please_enter_company_website', 'Please Enter Company Website') ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="companyWebsite"><?= get_label('website', 'Website') ?></label>
+                                <input class="tk-input" type="text" name="companyWebsite" value="{{ old('companyWebsite', $company_info['companyWebsite']) }}" placeholder="<?= get_label('please_enter_company_website', 'Please Enter Company Website') ?>">
                             </div>
-                            <div class="mb-3 col-md-12">
-                                <label class="form-label" for="companyVatNumber"><?= get_label('vat_number', 'VAT Number') ?></label>
-                                <input class="form-control" type="text" name="companyVatNumber" value="{{ old('companyVatNumber', $company_info['companyVatNumber']) }}" placeholder="<?= get_label('please_enter_company_vat_number', 'Please Enter Company VAT Number') ?>">
+                            <div class="mb-3 col-md-12 tk-field">
+                                <label class="tk-label" for="companyVatNumber"><?= get_label('vat_number', 'VAT Number') ?></label>
+                                <input class="tk-input" type="text" name="companyVatNumber" value="{{ old('companyVatNumber', $company_info['companyVatNumber']) }}" placeholder="<?= get_label('please_enter_company_vat_number', 'Please Enter Company VAT Number') ?>">
                             </div>
                             
                             <div class="col-md-12 text-end mt-4">

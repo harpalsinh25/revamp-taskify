@@ -44,21 +44,21 @@
                 @csrf
                 @method('PUT')
                 <div class="row">
-                    <div class="mb-2 col-md-6">
-                        <label for="pusher_app_id" class="form-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_id', 'Pusher APP ID') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control form-control-sm" type="text" name="pusher_app_id" id="pusher_app_id" placeholder="<?= get_label('please_enter_pusher_app_id', 'Please enter pusher APP ID') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_id'])) : $pusher_settings['pusher_app_id'] ?>">
+                    <div class="mb-2 col-md-6 tk-field">
+                        <label for="pusher_app_id" class="tk-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_id', 'Pusher APP ID') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="text" name="pusher_app_id" id="pusher_app_id" placeholder="<?= get_label('please_enter_pusher_app_id', 'Please enter pusher APP ID') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_id'])) : $pusher_settings['pusher_app_id'] ?>">
                     </div>
-                    <div class="mb-2 col-md-6">
-                        <label for="pusher_app_key" class="form-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_key', 'Pusher APP key') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control form-control-sm" type="text" name="pusher_app_key" id="pusher_app_key" placeholder="<?= get_label('please_enter_pusher_app_key', 'Please enter pusher APP key') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_key'])) : $pusher_settings['pusher_app_key'] ?>">
+                    <div class="mb-2 col-md-6 tk-field">
+                        <label for="pusher_app_key" class="tk-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_key', 'Pusher APP key') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="text" name="pusher_app_key" id="pusher_app_key" placeholder="<?= get_label('please_enter_pusher_app_key', 'Please enter pusher APP key') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_key'])) : $pusher_settings['pusher_app_key'] ?>">
                     </div>
-                    <div class="mb-2 col-md-6">
-                        <label for="pusher_app_secret" class="form-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_secret', 'Pusher APP secret') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control form-control-sm" type="text" name="pusher_app_secret" id="pusher_app_secret" placeholder="<?= get_label('please_enter_pusher_app_secret', 'Please enter pusher APP secret') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_secret'])) : $pusher_settings['pusher_app_secret'] ?>">
+                    <div class="mb-2 col-md-6 tk-field">
+                        <label for="pusher_app_secret" class="tk-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_secret', 'Pusher APP secret') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="text" name="pusher_app_secret" id="pusher_app_secret" placeholder="<?= get_label('please_enter_pusher_app_secret', 'Please enter pusher APP secret') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_secret'])) : $pusher_settings['pusher_app_secret'] ?>">
                     </div>
-                    <div class="mb-3 col-md-6">
-                        <label for="pusher_app_cluster" class="form-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_cluster', 'Pusher APP cluster') ?> <span class="asterisk">*</span></label>
-                        <input class="form-control form-control-sm" type="text" name="pusher_app_cluster" id="pusher_app_cluster" placeholder="<?= get_label('please_enter_pusher_app_cluster', 'Please enter pusher APP cluster') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_cluster'])) : $pusher_settings['pusher_app_cluster'] ?>">
+                    <div class="mb-3 col-md-6 tk-field">
+                        <label for="pusher_app_cluster" class="tk-label mb-1" style="font-size: 0.8rem;"><?= get_label('pusher_app_cluster', 'Pusher APP cluster') ?> <span class="asterisk">*</span></label>
+                        <input class="tk-input" type="text" name="pusher_app_cluster" id="pusher_app_cluster" placeholder="<?= get_label('please_enter_pusher_app_cluster', 'Please enter pusher APP cluster') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($pusher_settings['pusher_app_cluster'])) : $pusher_settings['pusher_app_cluster'] ?>">
                     </div>
                     <div class="d-flex justify-content-end flex-wrap gap-2 border-top pt-3 col-12">
                         <button type="reset" class="btn btn-xs btn-outline-secondary py-1 px-3" style="font-size: 0.8rem;"><?= get_label('cancel', 'Cancel') ?></button>

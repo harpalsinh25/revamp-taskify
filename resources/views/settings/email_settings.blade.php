@@ -38,35 +38,35 @@
                     </div>
                     <div class="card-body pt-4">
                         <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label for="email" class="form-label"><?= get_label('email', 'E-mail') ?> <span class="asterisk">*</span></label>
-                                <input class="form-control" type="text" id="email" name="email" placeholder="<?= get_label('please_enter_email', 'Please enter email') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($email_settings['email'])) : $email_settings['email'] ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label for="email" class="tk-label"><?= get_label('email', 'E-mail') ?> <span class="asterisk">*</span></label>
+                                <input class="tk-input" type="text" id="email" name="email" placeholder="<?= get_label('please_enter_email', 'Please enter email') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($email_settings['email'])) : $email_settings['email'] ?>">
                             </div>
-                            <div class="mb-3 col-md-6 form-password-toggle">
-                                <label for="password" class="form-label"><?= get_label('password', 'Password') ?> <span class="asterisk">*</span></label>
+                            <div class="mb-3 col-md-6 form-password-toggle tk-field">
+                                <label for="password" class="tk-label"><?= get_label('password', 'Password') ?> <span class="asterisk">*</span></label>
                                 <div class="input-group input-group-merge">
-                                    <input class="form-control" id="password" type="password" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($email_settings['password'])) : $email_settings['password'] ?>">
+                                    <input class="tk-input" id="password" type="password" name="password" placeholder="<?= get_label('please_enter_password', 'Please enter password') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($email_settings['password'])) : $email_settings['password'] ?>">
                                     <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                 </div>
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="smtp_host" class="form-label"><?= get_label('smtp_host', 'SMTP host') ?> <span class="asterisk">*</span></label>
-                                <input class="form-control" type="text" id="smtp_host" name="smtp_host" placeholder="<?= get_label('please_enter_smtp_host', 'Enter SMTP host') ?>" value="<?= $email_settings['smtp_host'] ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label for="smtp_host" class="tk-label"><?= get_label('smtp_host', 'SMTP host') ?> <span class="asterisk">*</span></label>
+                                <input class="tk-input" type="text" id="smtp_host" name="smtp_host" placeholder="<?= get_label('please_enter_smtp_host', 'Enter SMTP host') ?>" value="<?= $email_settings['smtp_host'] ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="smtp_port" class="form-label"><?= get_label('smtp_port', 'SMTP port') ?> <span class="asterisk">*</span></label>
-                                <input class="form-control" type="text" id="smtp_port" name="smtp_port" placeholder="<?= get_label('please_enter_smtp_port', 'Enter SMTP port') ?>" value="<?= $email_settings['smtp_port'] ?>">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label for="smtp_port" class="tk-label"><?= get_label('smtp_port', 'SMTP port') ?> <span class="asterisk">*</span></label>
+                                <input class="tk-input" type="text" id="smtp_port" name="smtp_port" placeholder="<?= get_label('please_enter_smtp_port', 'Enter SMTP port') ?>" value="<?= $email_settings['smtp_port'] ?>">
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="email_content_type"><?= get_label('email_content_type', 'Email content type') ?> <span class="asterisk">*</span></label>
-                                <select class="form-select" id="email_content_type" name="email_content_type">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="email_content_type"><?= get_label('email_content_type', 'Email content type') ?> <span class="asterisk">*</span></label>
+                                <select class="tk-select" id="email_content_type" name="email_content_type">
                                     <option value="text" <?= $email_settings['email_content_type'] == 'text' ? 'selected' : '' ?>>Text</option>
                                     <option value="html" <?= $email_settings['email_content_type'] == 'html' ? 'selected' : '' ?>>HTML</option>
                                 </select>
                             </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label" for="smtp_encryption"><?= get_label('smtp_encryption', 'SMTP Encryption') ?> <span class="asterisk">*</span></label>
-                                <select class="form-select" id="smtp_encryption" name="smtp_encryption">
+                            <div class="mb-3 col-md-6 tk-field">
+                                <label class="tk-label" for="smtp_encryption"><?= get_label('smtp_encryption', 'SMTP Encryption') ?> <span class="asterisk">*</span></label>
+                                <select class="tk-select" id="smtp_encryption" name="smtp_encryption">
                                     <option value="off" <?= $email_settings['smtp_encryption'] == 'off' ? 'selected' : '' ?>>Off</option>
                                     <option value="ssl" <?= $email_settings['smtp_encryption'] == 'ssl' ? 'selected' : '' ?>>SSL</option>
                                     <option value="tls" <?= $email_settings['smtp_encryption'] == 'tls' ? 'selected' : '' ?>>TLS</option>

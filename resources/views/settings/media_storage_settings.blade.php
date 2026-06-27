@@ -37,9 +37,9 @@
                 @csrf
                 @method('PUT')
                 <div class="row">
-                    <div class="mb-2 col-md-12">
-                        <label class="form-label mb-1" style="font-size: 0.8rem;" for="media_storage_type"><?= get_label('select_storage_type', 'Select storage type') ?><span class="asterisk">*</span></label>
-                        <select class="form-select form-select-sm" id="media_storage_type" name="media_storage_type">
+                    <div class="mb-2 col-md-12 tk-field">
+                        <label class="tk-label mb-1" style="font-size: 0.8rem;" for="media_storage_type"><?= get_label('select_storage_type', 'Select storage type') ?><span class="asterisk">*</span></label>
+                        <select class="tk-select" id="media_storage_type" name="media_storage_type">
                             <option value=""><?= get_label('please_select', 'Please select') ?></option>
                             <option value="local" {{ $media_storage_settings['media_storage_type'] === 'local' ? 'selected' : '' }}><?= get_label('local_storage', 'Local storage') ?></option>
                             <option value="s3" {{ $media_storage_settings['media_storage_type'] === 's3' ? 'selected' : '' }}>Amazon AWS S3</option>
@@ -48,26 +48,26 @@
                     <div class="aws-s3-fields {{ $media_storage_settings['media_storage_type'] === 's3' ? '' : 'd-none' }} col-12">
                         @if (config('constants.ALLOW_MODIFICATION') === 1)
                         <div class="row">
-                            <div class="mb-2 col-md-6">
-                                <label for="s3_key" class="form-label mb-1" style="font-size: 0.8rem;">AWS S3 Access Key <span class="asterisk">*</span></label>
-                                <input class="form-control form-control-sm" type="text" name="s3_key" id="s3_key" placeholder="<?= get_label('please_enter_aws_s3_access_key', 'Please enter AWS S3 access key') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($media_storage_settings['s3_key'])) : $media_storage_settings['s3_key'] ?>">
+                            <div class="mb-2 col-md-6 tk-field">
+                                <label for="s3_key" class="tk-label mb-1" style="font-size: 0.8rem;">AWS S3 Access Key <span class="asterisk">*</span></label>
+                                <input class="tk-input" type="text" name="s3_key" id="s3_key" placeholder="<?= get_label('please_enter_aws_s3_access_key', 'Please enter AWS S3 access key') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($media_storage_settings['s3_key'])) : $media_storage_settings['s3_key'] ?>">
                             </div>
-                            <div class="mb-2 col-md-6 form-password-toggle">
-                                <label for="s3_secret" class="form-label mb-1" style="font-size: 0.8rem;">AWS S3 Secret Key <span class="asterisk">*</span></label>
+                            <div class="mb-2 col-md-6 form-password-toggle tk-field">
+                                <label for="s3_secret" class="tk-label mb-1" style="font-size: 0.8rem;">AWS S3 Secret Key <span class="asterisk">*</span></label>
                                 <div class="input-group input-group-merge input-group-sm">
-                                    <input class="form-control form-control-sm" type="password" name="s3_secret" id="s3_secret" placeholder="<?= get_label('please_enter_aws_s3_secret_key', 'Please enter AWS S3 secret key') ?>" value="<?= $media_storage_settings['s3_secret']  ?>">
+                                    <input class="tk-input" type="password" name="s3_secret" id="s3_secret" placeholder="<?= get_label('please_enter_aws_s3_secret_key', 'Please enter AWS S3 secret key') ?>" value="<?= $media_storage_settings['s3_secret']  ?>">
                                     <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                 </div>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="mb-2 col-md-6">
-                                <label for="s3_region" class="form-label mb-1" style="font-size: 0.8rem;">AWS S3 Region <span class="asterisk">*</span></label>
-                                <input class="form-control form-control-sm" type="text" name="s3_region" id="s3_region" placeholder="<?= get_label('please_enter_aws_s3_region', 'Please enter AWS S3 region') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($media_storage_settings['s3_region'])) : $media_storage_settings['s3_region'] ?>">
+                            <div class="mb-2 col-md-6 tk-field">
+                                <label for="s3_region" class="tk-label mb-1" style="font-size: 0.8rem;">AWS S3 Region <span class="asterisk">*</span></label>
+                                <input class="tk-input" type="text" name="s3_region" id="s3_region" placeholder="<?= get_label('please_enter_aws_s3_region', 'Please enter AWS S3 region') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($media_storage_settings['s3_region'])) : $media_storage_settings['s3_region'] ?>">
                             </div>
-                            <div class="mb-2 col-md-6">
-                                <label for="s3_bucket" class="form-label mb-1" style="font-size: 0.8rem;">AWS S3 Bucket <span class="asterisk">*</span></label>
-                                <input class="form-control form-control-sm" type="text" name="s3_bucket" id="s3_bucket" placeholder="<?= get_label('please_enter_aws_s3_bucket', 'Please enter AWS S3 bucket') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($media_storage_settings['s3_bucket'])) : $media_storage_settings['s3_bucket'] ?>">
+                            <div class="mb-2 col-md-6 tk-field">
+                                <label for="s3_bucket" class="tk-label mb-1" style="font-size: 0.8rem;">AWS S3 Bucket <span class="asterisk">*</span></label>
+                                <input class="tk-input" type="text" name="s3_bucket" id="s3_bucket" placeholder="<?= get_label('please_enter_aws_s3_bucket', 'Please enter AWS S3 bucket') ?>" value="<?= config('constants.ALLOW_MODIFICATION') === 0 ? str_repeat('*', strlen($media_storage_settings['s3_bucket'])) : $media_storage_settings['s3_bucket'] ?>">
                             </div>
                         </div>
                         @else

@@ -4872,13 +4872,23 @@
             </div>
             <!-- Search Tabs -->
             <div class="search-tabs d-none px-4 py-2" id="searchTabs">
+                <style>
+                    #searchTabs .nav-link.active,
+                    #searchTabs .nav-link.active span,
+                    #searchTabs .nav-link.active i {
+                        color: #ffffff !important;
+                    }
+                    .search-category-header .badge {
+                        color: #ffffff !important;
+                    }
+                </style>
                 <div class="border-bottom pb-3">
                     <ul class="nav nav-pills nav-fill bg-light rounded-3 p-1" role="tablist">
                         <li class="nav-item">
-                            <button class="nav-link active text-white rounded-2 fw-medium" data-tab="all" role="tab" aria-selected="true">
+                            <button class="nav-link active rounded-2 fw-medium" data-tab="all" role="tab" aria-selected="true">
                                 <span class="d-none d-sm-inline">{{ get_label('all_results', 'All Results') }}</span>
                                 <span class="d-sm-none">{{ get_label('all', 'All') }}</span>
-                                <span class="badge bg-primary text-white ms-2" id="allCount">0</span>
+                                <span class="badge bg-primary ms-2" id="allCount" style="color: #fff !important;">0</span>
                             </button>
                         </li>
                         <li class="nav-item">
@@ -5434,10 +5444,10 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="module" class="form-label">Module <span
+                            <div class="mb-3 tk-field">
+                                <label for="module" class="tk-label">Module <span
                                         class="text-danger">*</span></label>
-                                <select class="form-select" id="module" name="module" required>
+                                <select class="tk-select" id="module" name="module" required>
                                     <option value="">Select Module</option>
                                     <option value="project">Project</option>
                                     <option value="task">Task</option>
@@ -5447,18 +5457,18 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Field Label <span
+                            <div class="mb-3 tk-field">
+                                <label for="name" class="tk-label">Field Label <span
                                         class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="field_label" name="field_label"
+                                <input type="text" class="tk-input" id="field_label" name="field_label"
                                     required>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Is Required</label>
+                            <div class="mb-3 tk-field">
+                                <label class="tk-label">Is Required</label>
                                 <div class="d-flex gap-2">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="required"
@@ -5474,9 +5484,9 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="field_type" class="form-label">Field Type</label>
-                                <select class="form-select" id="field_type" name="field_type">
+                            <div class="mb-3 tk-field">
+                                <label for="field_type" class="tk-label">Field Type</label>
+                                <select class="tk-select" id="field_type" name="field_type">
                                     <option value="text">Text</option>
                                     <option value="number">Number</option>
                                     <option value="password">Password</option>
