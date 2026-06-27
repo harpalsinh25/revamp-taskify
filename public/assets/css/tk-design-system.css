@@ -40,10 +40,7 @@
 /* ----------------------------------------------------------------------------
    2. SURFACES — panel / card / tile
    ---------------------------------------------------------------------------- */
-.tk-panel {
-    background: var(--bg-1); border: 1px solid var(--line);
-    border-radius: var(--r-2); box-shadow: var(--shadow-1);
-}
+
 .tk-card {
     background: var(--bg-1); border: 1px solid var(--line);
     border-radius: var(--r-2); overflow: hidden;
@@ -620,4 +617,330 @@
     border-color: var(--line-2) !important;
     box-shadow: none !important;
     outline: none !important;
+}
+
+/* =====================================================================
+   TASKIFY v2 "Graphite Studio" — App shell chrome (rail + context panel)
+   ===================================================================== */
+
+/* ---- Shell layout: rail + panel fixed at the left, page offset ---- */
+body.v2-shell .tk-rail,
+body.v2-shell .tk-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 1040;
+}
+
+body.v2-shell .tk-rail {
+    left: 0;
+}
+
+body.v2-shell .tk-panel {
+    left: var(--rail-w);
+}
+
+body.v2-shell .layout-page {
+    padding-left: calc(var(--rail-w) + var(--panel-w)) !important;
+    transition: padding-left var(--t-2) var(--ease);
+}
+
+/* ---- RAIL (left icon sidebar) ---- */
+.tk-rail {
+    width: var(--rail-w);
+    background: var(--bg-0);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 4px;
+}
+
+.tk-rail-brand {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: var(--bg-2);
+}
+
+.tk-rail-brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.tk-rail-btn {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-2);
+    color: var(--fg-2);
+    isolation: isolate;
+    transition: color var(--t-1);
+    cursor: pointer;
+}
+
+.tk-rail-btn svg {
+    position: relative;
+    z-index: 2;
+    transition: transform var(--t-2) var(--ease);
+}
+
+.tk-rail-btn:hover {
+    color: var(--fg-0);
+}
+
+.tk-rail-btn:hover svg {
+    transform: scale(1.08);
+}
+
+.tk-rail-btn:not([data-active="true"]):hover::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 8px;
+    background: var(--bg-2);
+    z-index: 0;
+}
+
+.tk-rail-btn[data-active="true"] {
+    color: var(--fg-0);
+}
+
+.tk-rail-btn[data-active="true"]::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, var(--bg-3), var(--bg-2));
+    box-shadow: inset 0 0 0 1px var(--line-2);
+    z-index: 0;
+}
+
+.tk-rail-btn[data-active="true"]::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 18px;
+    background: var(--signal);
+    border-radius: 2px;
+    box-shadow: 0 0 8px var(--signal-glow);
+    z-index: 0;
+}
+
+.tk-rail-badge {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+}
+
+.tk-rail-foot {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.tk-rail-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: block;
+}
+
+.tk-rail-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ---- CONTEXT PANEL (per-module submenu) ---- */
+.tk-panel {
+    width: var(--panel-w);
+    background: var(--bg-1);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.tk-panel-head {
+    padding: 10px 12px 4px;
+}
+
+.tk-panel-search {
+    padding: 6px 12px 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+.tk-panel-search input {
+    width: 100%;
+    height: 30px;
+    padding: 0 10px;
+    font-size: var(--fs-base);
+    background: var(--bg-0);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    color: var(--fg-0);
+}
+
+.tk-panel-search input::placeholder {
+    color: var(--fg-3);
+}
+
+.tk-panel-search input:hover {
+    border-color: var(--line-2);
+}
+
+.tk-panel-search input:focus {
+    outline: none;
+    border-color: var(--fg-1);
+}
+
+.tk-panel-body {
+    flex: 1;
+    overflow: auto;
+    padding: 6px 8px 16px;
+}
+
+.tk-panel-pane[hidden] {
+    display: none;
+}
+
+.tk-panel-title {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--fg-0);
+    letter-spacing: var(--tracking-snug);
+    padding: 8px 8px 4px;
+}
+
+.tk-panel-group {
+    padding: 2px 0 8px;
+}
+
+.tk-panel-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-3);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    padding: 8px 8px 4px;
+    font-weight: 500;
+}
+
+.tk-panel-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    min-height: 28px;
+    font-size: var(--fs-base);
+    color: var(--fg-1);
+    text-align: left;
+    text-decoration: none;
+    transition: background var(--t-1), color var(--t-1);
+    cursor: pointer;
+}
+
+.tk-panel-item:hover {
+    background: var(--bg-2);
+    color: var(--fg-0);
+}
+
+.tk-panel-item[data-active="true"] {
+    background: var(--bg-3);
+    color: var(--fg-0);
+    font-weight: 500;
+}
+
+.tk-panel-item>span {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tk-panel-item i.bx {
+    font-size: 16px;
+    color: var(--fg-2);
+    flex: 0 0 auto;
+}
+
+.tk-panel-item:hover i.bx,
+.tk-panel-item[data-active="true"] i.bx {
+    color: var(--fg-0);
+}
+
+.tk-panel-item .badge {
+    flex: 0 0 auto;
+}
+
+/* Workspace switcher inside the panel head */
+.tk-ws {
+    width: 100%;
+}
+
+.tk-ws>.btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    background: var(--bg-1) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--fg-0) !important;
+    font-size: var(--fs-base) !important;
+    font-weight: 500 !important;
+    padding: 8px 12px !important;
+    border-radius: var(--r-2) !important;
+    transition: all var(--t-1) var(--ease);
+}
+
+.tk-ws>.btn::after {
+    margin-left: auto;
+    font-size: 15px !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center;
+}
+
+.tk-ws>.btn:hover,
+.tk-ws>.btn.show {
+    background: var(--bg-2) !important;
+    border-color: var(--line-2) !important;
+    color: var(--fg-0) !important;
+}
+
+/* Responsive: collapse the context panel below xl, rail stays */
+@media (max-width: 1199.98px) {
+    body.v2-shell .tk-panel {
+        transform: translateX(-100%);
+        transition: transform var(--t-2) var(--ease);
+    }
+
+    body.v2-shell .layout-page {
+        padding-left: var(--rail-w) !important;
+    }
+
+    body.v2-shell.tk-panel-open .tk-panel {
+        transform: none;
+    }
 }

@@ -21,22 +21,23 @@
                 : $tkUser->tasks()->whereNotNull('tasks.due_date')
                     ->whereBetween('tasks.due_date', [now()->startOfDay(), now()->endOfWeek()])->count();
         @endphp
-        <div class="tk-welcome d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="tk-welcome-main">
+        <div class="tk-card mt-4">
+            <div class="p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
                     @php
-                    $dashboardNow = now()->tz(config('app.timezone'));
-                @endphp
-                <div class="tk-welcome-eyebrow">{{ $dashboardNow->format('H:i') }} · {{ $dashboardNow->translatedFormat('D d M') }} · {{ get_label('wk', 'WK') }} {{ $dashboardNow->weekOfYear }}</div>
-                <h1 class="tk-welcome-title">{{ get_label('welcome_back', 'Welcome back') }}, {{ $tkUser->first_name }}.</h1>
-                <p class="tk-welcome-sub">
-                    <span class="tk-welcome-stat {{ $tkDeadlines > 0 ? 'tk-stat-warn' : '' }}">{{ $tkDeadlines }}</span>
-                    {{ $tkDeadlines == 1 ? get_label('deadline_this_week', 'deadline this week') : get_label('deadlines_this_week', 'deadlines this week') }}
-                    <span class="tk-welcome-dot">·</span>
-                    <span class="tk-welcome-stat">{{ $tkTotalTasks }}</span>
-                    {{ $tkTotalTasks == 1 ? get_label('task', 'task') : get_label('tasks', 'tasks') }}
-                </p>
+                        $dashboardNow = now()->tz(config('app.timezone'));
+                    @endphp
+                    <div class="tk-eyebrow mb-1">{{ $dashboardNow->format('H:i') }} · {{ $dashboardNow->translatedFormat('D d M') }} · {{ get_label('wk', 'WK') }} {{ $dashboardNow->weekOfYear }}</div>
+                    <h3 class="tk-fg-0 fw-bold mb-2">{{ get_label('welcome_back', 'Welcome back') }}, {{ $tkUser->first_name }}.</h3>
+                    <p class="tk-muted mb-0">
+                        <span class="fw-bold {{ $tkDeadlines > 0 ? 'text-danger' : 'tk-fg-0' }}">{{ $tkDeadlines }}</span>
+                        {{ $tkDeadlines == 1 ? get_label('deadline_this_week', 'deadline this week') : get_label('deadlines_this_week', 'deadlines this week') }}
+                        <span class="mx-2">·</span>
+                        <span class="fw-bold tk-fg-0">{{ $tkTotalTasks }}</span>
+                        {{ $tkTotalTasks == 1 ? get_label('task', 'task') : get_label('tasks', 'tasks') }}
+                    </p>
+                </div>
             </div>
-           
         </div>
 
 
