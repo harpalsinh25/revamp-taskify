@@ -1,8 +1,4 @@
-{{-- Taskify v2 — Docked task inspector (design-system right column).
-     Always visible beside the board/list. Populated by JS from existing
-     task endpoints (tasks.list / tasks.info / tasks.get-media) on task
-     click — no controller/route changes. Tabs: Subtask · Comments ·
-     Timeline · Media (embedded) + Activity (deep-link). --}}
+
 @php $inspUser = getAuthenticatedUser(); @endphp
 <aside class="tk-inspector-dock" id="task_inspector"
        data-task-info-url="{{ url('tasks/information') }}"

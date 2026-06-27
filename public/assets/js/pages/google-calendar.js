@@ -310,7 +310,7 @@ class GoogleCalendarManager {
                 extendedProps: {
                     ...event.extendedProps,
                     status: status,
-                    leaveUrl: (event.id ? (this.config.baseUrl + '/leave-requests/' + event.id) : null)
+                    leaveUrl: (event.id ? (this.config.baseUrl + '/leave-requests/' ) : null)
                 }
             };
         });
@@ -376,7 +376,7 @@ class GoogleCalendarManager {
         }
 
         const event = info.event;
-        const url = (event.extendedProps && event.extendedProps.leaveUrl) || (event.id ? (this.config.baseUrl + '/leave-requests/' + event.id) : null);
+        const url = (event.extendedProps && event.extendedProps.leaveUrl) || (event.id ? (this.config.baseUrl + '/leave-requests/' ) : null);
         if (url && url !== 'null') {
             window.location.href = url;
         } else {

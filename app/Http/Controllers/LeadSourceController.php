@@ -296,7 +296,7 @@ class LeadSourceController extends Controller
         $lead_source = LeadSource::find($id);
 
         if (!$lead_source) {
-            return response()->json(['error' => true, 'message' => 'Lead source not found.']);
+            return response()->json(['error' => true, 'message' => 'Lead sourcen ot found.']);
         }
 
         if ((bool) ($lead_source->is_default ?? false)) {
@@ -307,7 +307,7 @@ class LeadSourceController extends Controller
             return response()->json(['error' => true, 'message' => 'This lead source is used in lead forms. Please update or delete those forms first.']);
         }
 
-        $response = DeletionService::delete(LeadSource::class, $id, 'lead_source');
+        $response = DeletionService::delete(LeadSource::class, $id, 'lead source');
         return $response;
     }
 
