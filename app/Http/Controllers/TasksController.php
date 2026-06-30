@@ -700,7 +700,7 @@ class TasksController extends Controller
             // Prepare response array
             $response = [
                     'id' => $task->id,
-                'title' => "<a href='" . url("/tasks/information/{$task->id}") . "' target='_blank'><strong>{$task->title}</strong></a> <a href='javascript:void(0);' class='ms-2'>
+                'title' => "<a href='" . url("/tasks/information/{$task->id}") . "' target='_blank'>{$task->title}</a> <a href='javascript:void(0);' class='ms-2'>
                                 <i class='bx " . ($isFavorite ? 'bxs' : 'bx') . "-star favorite-icon text-warning' data-favorite='{$isFavorite}' data-id='{$task->id}' data-type='tasks' title='" . ($isFavorite ? get_label('remove_favorite', 'Click to remove from favorite') : get_label('add_favorite', 'Click to mark as favorite')) . "'></i>
                             </a><a href='javascript:void(0);' class='ms-2'>
                                 <i class='bx " . ($isPinned ? 'bxs' : 'bx') . "-pin pinned-icon text-success' data-pinned='{$isPinned}' data-id='{$task->id}' data-require_reload='0' data-table='task_table' data-type='tasks' title='" . ($isPinned ? get_label('click_unpin', 'Click to Unpin') : get_label('click_pin', 'Click to Pin')) . "'></i>
@@ -709,8 +709,8 @@ class TasksController extends Controller
                                     <i class='bx bx-message-rounded-dots text-danger' data-bs-toggle='tooltip' data-bs-placement='right' title='" . get_label('discussions', 'Discussions') . "'></i>
                                 </a>" : ""),
                     'project_id' => ($canManageProjects
-                    ? "<a href='" . url("/projects/information/{$task->project->id}") . "' target='_blank'><strong>" . $task->project->title . "</strong></a>"
-                    : "<strong>" . $task->project->title . "</strong>"
+                    ? "<a href='" . url("/projects/information/{$task->project->id}") . "' target='_blank'>" . $task->project->title . "</a>"
+                    : $task->project->title
                 ) . "<a href='javascript:void(0);' class='mx-2'>
                                 <i class='bx " . ($isFavoriteProject ? 'bxs' : 'bx') . "-star favorite-icon text-warning'
                                    data-favorite='{$isFavoriteProject}'

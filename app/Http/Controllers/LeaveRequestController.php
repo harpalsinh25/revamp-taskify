@@ -1479,7 +1479,7 @@ class LeaveRequestController extends Controller
         $excludeLeaveId = $request->input('exclude_leave_id', null); // Exclude current leave when editing
 
         // Check if requesting user has permission to view this user's balance
-        if ($userId != $this->user->id && !is_admin_or_leave_editor()) {
+        if ($userId != $this->user->id && !is_admin_or_leave_editor() && !$this->user->can('manage_leave_requests')) {
             return response()->json([
                 'error' => true,
                 'message' => 'Unauthorized access'

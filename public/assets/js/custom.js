@@ -219,14 +219,7 @@ $(document).on("click", ".delete", function (e) {
                 $("#confirmDelete").html(label_yes).attr("disabled", false);
                 $("#deleteModal").modal("hide");
                 if (response.error == false) {
-                    if (reload) {
-                        location.reload();
-                    } else {
-                        toastr.success(response.message);
-                        if (tableID) {
-                            $("#" + tableID).bootstrapTable("refresh");
-                        }
-                    }
+                    location.reload();
                 } else {
                     toastr.error(response.message);
                 }
@@ -300,31 +293,11 @@ $(document).on("click", ".delete-selected", function (e) {
                             .attr("disabled", false);
                         $("#confirmDeleteSelectedModal").modal("hide");
                         $("#" + table).bootstrapTable("refresh");
-                        if (type == "settings/languages") {
+                        if (response.error == false) {
                             location.reload();
                         } else {
-                            if (reload) {
-                                if (response.hasOwnProperty("message")) {
-                                    if (response.error == false) {
-                                        toastr.success(response["message"]);
-                                        setTimeout(
-                                            function () {
-                                                location.reload();
-                                            },
-                                            parseFloat(toastTimeOut) * 1000,
-                                        );
-                                    } else {
-                                        toastr.error(response["message"]);
-                                    }
-                                } else {
-                                    location.reload();
-                                }
-                            } else {
-                                if (response.error == false) {
-                                    toastr.success(response.message);
-                                } else {
-                                    toastr.error(response.message);
-                                }
+                            if (response.message) {
+                                toastr.error(response.message);
                             }
                         }
                     },
@@ -3674,8 +3647,8 @@ $(document).ready(function () {
 });
 $(document).ready(function () {
     // Listen for changes on the project select element within the modal
-    $('.selectTaskProject[name="project"]').on("change", function (e) {
-        var projectId = $(this).val();
+    $(document).on("change", '.selectTaskProject[name="project"]', function (e) {
+        var projectId = this.tomselect ? this.tomselect.getValue() : $(this).val();
         var currentModal = $(this).closest(".offcanvas"); // Adjust the selector to match your modal structure
         var usersSelect = currentModal.find('select[name="user_id[]"]');
         var modalId = currentModal.attr("id");
@@ -3826,7 +3799,14 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
                 .trigger("change");
             $overlay.find("#update_start_date").val(formattedStartDate);
             $overlay.find("#update_end_date").val(formattedEndDate);
-            $overlay.find("#update_project_title").val(response.project.title);
+            const projectSelect = $overlay.find("#update_project_title");
+            if (projectSelect.length && projectSelect[0].tomselect) {
+                projectSelect[0].tomselect.addOption({
+                    id: response.project.id,
+                    text: response.project.title,
+                });
+                projectSelect[0].tomselect.setValue(response.project.id, true);
+            }
             $overlay
                 .find("#task_description")
                 .val(response.task.description || "");
@@ -3860,7 +3840,7 @@ function editTask(taskId, isOffcanvas = true, baseUrl, js_date_format) {
                     labelField: "text",
                     searchField: "text",
                     placeholder: "Select a task list",
-                    plugins: ["clear_button"],
+                    plugins: ["clear_button", "dropdown_input"],
                     preload: true,
                     load: function (query, callback) {
                         fetch(
@@ -6021,7 +6001,6 @@ function initTomSelectWithAjax(selector, type) {
             valueField: "id",
             labelField: "text",
             searchField: "text",
-            dropdownParent: "body",
             plugins: plugins,
             preload: true,
             load: function (query, callback) {
@@ -6256,49 +6235,39 @@ $(document).ready(function () {
         var usersSelect = $("#create_task_offcanvas").find(
             'select[name="user_id[]"]',
         );
-        usersSelect.empty(); // Clear any previous options
-        if (projectId) {
-            $.ajax({
-                url: baseUrl + "/projects/get/" + projectId, // Endpoint to get users based on project
-                type: "GET",
-                success: function (response) {
-                    // Add the project users as options
+        if (!projectId) return;
+        $.ajax({
+            url: baseUrl + "/projects/get/" + projectId,
+            type: "GET",
+            success: function (response) {
+                var ts = usersSelect[0] && usersSelect[0].tomselect;
+                if (ts) {
+                    ts.clear(true);
+                    ts.clearOptions();
                     if (response.users && response.users.length > 0) {
-                        // Iterate through the users and add them to the select element
                         response.users.forEach(function (user) {
-                            var userOption = new Option(
-                                user.first_name + " " + user.last_name,
-                                user.id,
-                                false,
-                                false,
-                            );
-                            usersSelect.append(userOption);
+                            ts.addOption({ id: user.id, text: user.first_name + ' ' + user.last_name });
                         });
-                        // If task_accessibility is 'project_users', select the users automatically
-                        if (
-                            response.project.task_accessibility ===
-                            "project_users"
-                        ) {
-                            var projectUserIds = response.users.map(
-                                function (user) {
-                                    return user.id;
-                                },
-                            );
-                            // Set selected users
-                            usersSelect.val(projectUserIds);
+                        ts.refreshOptions(false);
+                        if (response.project.task_accessibility === "project_users") {
+                            response.users.forEach(function (user) {
+                                ts.addItem(String(user.id), true);
+                            });
                         }
-                        // Trigger select2 to update the selected values
-                        usersSelect.trigger("change");
-                    } else {
-                        // Handle case when there are no users
-                        usersSelect.val(null).trigger("change");
                     }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error loading project users:", error);
-                },
-            });
-        }
+                } else {
+                    usersSelect.empty();
+                    if (response.users && response.users.length > 0) {
+                        response.users.forEach(function (user) {
+                            usersSelect.append(new Option(user.first_name + ' ' + user.last_name, user.id));
+                        });
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading project users:", error);
+            },
+        });
     }
     // Check if the project is set via a hidden input (when project is not selectable)
     var projectInput = $('input[name="project"]'); // Cache the selector
@@ -6663,7 +6632,8 @@ $(document).ready(function () {
             plugins: ["clear_button"],
             preload: true,
             load: function (query, callback) {
-                var projectId = $('.selectTaskProject[name="project"]').val() || $('.selectTaskProject[name="project_id"]').val();
+                var projectEl = document.querySelector('.selectTaskProject[name="project"]') || document.querySelector('.selectTaskProject[name="project_id"]');
+                var projectId = projectEl && projectEl.tomselect ? projectEl.tomselect.getValue() : (projectEl ? projectEl.value : null);
                 if (!projectId) {
                     callback([]);
                     return;
@@ -6681,13 +6651,15 @@ $(document).ready(function () {
                     .catch(() => callback([]));
             }
         });
-        
-        if (!$('.selectTaskProject[name="project"]').val() && !$('.selectTaskProject[name="project_id"]').val()) {
+
+        var projectEl = document.querySelector('.selectTaskProject[name="project"]') || document.querySelector('.selectTaskProject[name="project_id"]');
+        var initialProjectId = projectEl && projectEl.tomselect ? projectEl.tomselect.getValue() : (projectEl ? projectEl.value : null);
+        if (!initialProjectId) {
             taskListTomSelect.disable();
         }
-        
-        $('.selectTaskProject[name="project"], .selectTaskProject[name="project_id"]').on("change", function () {
-            var projectId = $(this).val();
+
+        $(document).on("change", '.selectTaskProject[name="project"], .selectTaskProject[name="project_id"]', function () {
+            var projectId = this.tomselect ? this.tomselect.getValue() : $(this).val();
             if (projectId) {
                 taskListTomSelect.enable();
                 taskListTomSelect.clear();

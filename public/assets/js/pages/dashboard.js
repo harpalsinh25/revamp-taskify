@@ -498,13 +498,23 @@ class DashboardManager {
         }
     }
     updateTodoList(selector, todos) {
-        const container = $(selector);
-        container.html(''); // Clear existing content
-        let html = '';
-        if (container.length) {
-            if (Array.isArray(todos) && todos.length > 0) {
-                todos.forEach(todo => {
-                    html += `
+        const pendingContainer = $('#todos-overview .todo-list-pending');
+        const completedContainer = $('#todos-overview .todo-list-completed');
+        
+        if (!pendingContainer.length && !completedContainer.length) {
+            console.warn(`Todo containers not found`);
+            return;
+        }
+
+        pendingContainer.html('');
+        completedContainer.html('');
+        
+        let pendingHtml = '';
+        let completedHtml = '';
+        
+        if (Array.isArray(todos) && todos.length > 0) {
+            todos.forEach(todo => {
+                let html = `
                     <li class="list-group-item d-flex align-items-center px-3 py-2 border-0">
                         <div class="me-3">
                             <div class="form-check mb-0">
@@ -544,18 +554,31 @@ class DashboardManager {
                             </div>
                         </div>
                     </li>`;
-                });
-
-            } else {
-                html += `
+                
+                if (todo.is_completed == 1 || todo.is_completed === true || todo.is_completed === '1') {
+                    completedHtml += html;
+                } else {
+                    pendingHtml += html;
+                }
+            });
+        }
+        
+        if (pendingHtml === '') {
+            pendingHtml = `
                 <div class="d-flex justify-content-center align-items-center text-muted p-3">
                     <span>${label_no_todos_found}</span>
                 </div>`;
-            }
-            container.append(html);
-        } else {
-            console.warn(`Container ${selector} not found`);
         }
+        
+        if (completedHtml === '') {
+            completedHtml = `
+                <div class="d-flex justify-content-center align-items-center text-muted p-3">
+                    <span>${label_no_todos_found}</span>
+                </div>`;
+        }
+        
+        if(pendingContainer.length) pendingContainer.append(pendingHtml);
+        if(completedContainer.length) completedContainer.append(completedHtml);
     }
     updateTimeline(selector, activities) {
         const container = $(selector);

@@ -251,33 +251,31 @@
                         </div>
                         <a href="{{ url('meetings') }}" class="tk-card-link">{{ get_label('view_all', 'View all') }}</a>
                     </div>
-                    <div class="tk-card-body p-0">
+                    <div class="tk-card-body p-2 d-flex flex-column gap-2">
                         @if($tkUpcomingMeetings->count() > 0)
                             @foreach($tkUpcomingMeetings as $meeting)
                                 @php
                                     $startTime = \Carbon\Carbon::parse($meeting->start_date_time)->tz(config('app.timezone'));
                                     $endTime = \Carbon\Carbon::parse($meeting->end_date_time)->tz(config('app.timezone'));
-                                    $durationMins = $endTime->diffInMinutes($startTime);
-                                    $durationStr = $durationMins >= 60 ? floor($durationMins / 60) . 'h' . ($durationMins % 60 ? ' ' . ($durationMins % 60) . 'm' : '') : $durationMins . 'm';
-                                    
-                                    $now = now(config('app.timezone'));
-                                    $diffInMins = $startTime->diffInMinutes($now);
-                                    $isSoon = $now->isBefore($startTime) && $diffInMins <= 60;
+                                    $durationMins = (int) abs($startTime->diffInMinutes($endTime, false));
+                                    $durationStr = $durationMins >= 60 ? floor($durationMins / 60) . 'h' . ($durationMins % 60 > 0 ? ' ' . ($durationMins % 60) . 'm' : '') : $durationMins . 'm';
                                 @endphp
-                                <div class="sched-row" data-soon="{{ $isSoon ? 'true' : 'false' }}">
-                                    <div class="sched-time">
-                                        <span class="mono sched-t">{{ $startTime->format('H:i') }}</span>
-                                        <span class="mono sched-d">{{ $durationStr }}</span>
-                                    </div>
-                                    <div class="sched-content">
-                                        <div class="sched-name">
-                                            <a href="{{ url('meetings') }}">{{ $meeting->title }}</a>
+                                <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="transition: box-shadow 0.2s; box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.08);">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar avatar-sm flex-shrink-0">
+                                            <span class="avatar-initial rounded bg-label-info"><i class="bx bx-shape-polygon fs-6"></i></span>
                                         </div>
-                                        <span class="tag">{{ $startTime->format('M d') }}</span>
+                                        <div class="d-flex flex-column">
+                                            <a href="{{ url('meetings') }}" class="text-body fw-bold" style="font-size: 0.85rem; line-height: 1.2;">{{ $meeting->title }}</a>
+                                            <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                                <span><i class='bx bx-time-five'></i> {{ $startTime->format('H:i') }} ({{ $durationStr }})</span>
+                                                <span class="ms-2"><i class='bx bx-calendar'></i> {{ $startTime->format('M d, Y') }}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    @if($isSoon)
-                                        <span class="sched-soon mono">in {{ $diffInMins }}m</span>
-                                    @endif
+                                    <div class="d-flex flex-column align-items-end ms-2">
+                                        <span class="badge bg-label-info" style="font-size: 0.7rem;">{{ $startTime->diffForHumans() }}</span>
+                                    </div>
                                 </div>
                             @endforeach
                         @else
@@ -306,28 +304,78 @@
                         </div>
                         <a href="{{ url(getUserPreferences('tasks', 'default_view')) }}" class="tk-card-link">{{ get_label('view_all', 'View all') }}</a>
                     </div>
-                    <div class="tk-card-body p-0">
+                    <div class="tk-card-body p-2 d-flex flex-column gap-2">
                         @foreach($tkOverdueTasks as $task)
                             @php
                                 $dueDate = \Carbon\Carbon::parse($task->due_date)->tz(config('app.timezone'));
-                                $daysOverdue = now(config('app.timezone'))->startOfDay()->diffInDays($dueDate->startOfDay(), false);
-                                $daysOverdueAbs = abs($daysOverdue);
-                                $overdueStr = $daysOverdueAbs == 1 ? '1d ago' : $daysOverdueAbs . 'd ago';
+                                $overdueStr = $dueDate->diffForHumans();
                             @endphp
-                            <div class="sched-row tk-overdue-row" data-soon="true">
-                                <div class="sched-time">
-                                    <span class="mono sched-t text-danger">{{ $dueDate->format('M d') }}</span>
-                                    <span class="mono sched-d text-muted">{{ $dueDate->format('Y') }}</span>
-                                </div>
-                                <div class="sched-content">
-                                    <div class="sched-name">
-                                        <a href="{{ url('tasks/information/'.$task->id) }}">{{ $task->title }}</a>
+                            <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="transition: box-shadow 0.2s; box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.08);">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar avatar-sm flex-shrink-0">
+                                        <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-task fs-6"></i></span>
                                     </div>
-                                    @if($task->project)
-                                        <span class="tag">{{ $task->project->title }}</span>
-                                    @endif
+                                    <div class="d-flex flex-column">
+                                        <a href="{{ url('tasks/information/'.$task->id) }}" class="text-body fw-bold" style="font-size: 0.85rem; line-height: 1.2;">{{ $task->title }}</a>
+                                        <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                            @if($task->project)
+                                                <span><i class='bx bx-briefcase-alt-2'></i> {{ $task->project->title }}</span>
+                                                <span class="mx-1">|</span>
+                                            @endif
+                                            <span><i class='bx bx-calendar'></i> {{ $dueDate->format('M d, Y') }}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="sched-soon mono" style="background: oklch(from var(--err) l c h / 0.12); color: var(--err);">{{ $overdueStr }}</span>
+                                <div class="d-flex flex-column align-items-end ms-2">
+                                    <span class="badge bg-label-danger" style="font-size: 0.7rem;">{{ $overdueStr }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                @php
+                    $tkDueInvoices = $tkAllData 
+                        ? ($tkWs ? \App\Models\EstimatesInvoice::where('workspace_id', $tkWs->id)->where('type', 'invoice')->whereIn('status', ['due', 'partially_paid', 'draft'])->whereNotNull('to_date')->orderBy('to_date', 'asc')->limit(5)->get() : collect())
+                        : $tkUser->estimates_invoices()->where('type', 'invoice')->whereIn('status', ['due', 'partially_paid', 'draft'])->whereNotNull('to_date')->orderBy('to_date', 'asc')->limit(5)->get();
+                @endphp
+                @if($tkDueInvoices->count() > 0)
+                <div class="tk-card flex-grow-0" data-id="tk-due-invoices">
+                    <div class="tk-card-head">
+                        <div class="tk-card-head-main">
+                            <div class="tk-card-eyebrow text-warning">{{ get_label('action_needed', 'Action Needed') }}</div>
+                            <h3 class="tk-card-title">{{ get_label('due_invoices', 'Due Invoices') }}</h3>
+                        </div>
+                        <a href="{{ url('estimates-invoices') }}" class="tk-card-link">{{ get_label('view_all', 'View all') }}</a>
+                    </div>
+                    <div class="tk-card-body p-2 d-flex flex-column gap-2">
+                        @foreach($tkDueInvoices as $invoice)
+                            @php
+                                $dueDate = \Carbon\Carbon::parse($invoice->to_date)->tz(config('app.timezone'));
+                                $overdueStr = $dueDate->diffForHumans();
+                                $isOverdue = $dueDate->isPast();
+                            @endphp
+                            <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="transition: box-shadow 0.2s; box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.08);">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar avatar-sm flex-shrink-0">
+                                        <span class="avatar-initial rounded bg-label-{{ $isOverdue ? 'danger' : 'warning' }}"><i class="bx bx-receipt fs-6"></i></span>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <a href="{{ url('estimates-invoices/view/'.$invoice->id) }}" class="text-body fw-bold" style="font-size: 0.85rem; line-height: 1.2;">{{ $invoice->name ?: get_label('invoice', 'Invoice') . ' #' . $invoice->id }}</a>
+                                        <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                            @if($invoice->client)
+                                                <span><i class='bx bx-user'></i> {{ $invoice->client->first_name }} {{ $invoice->client->last_name }}</span>
+                                                <span class="mx-1">|</span>
+                                            @endif
+                                            <span><i class='bx bx-calendar'></i> {{ $dueDate->format('M d, Y') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-end gap-1 ms-2">
+                                    <span class="fw-bold text-dark" style="font-size: 0.95rem;">{{ format_currency($invoice->final_total) }}</span>
+                                    <span class="badge bg-label-{{ $isOverdue ? 'danger' : 'warning' }}" style="font-size: 0.7rem;">{{ $overdueStr }}</span>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -340,16 +388,32 @@
                             <div class="tk-card-eyebrow text-info">{{ get_label('todos', 'Todos') }}</div>
                             <h3 class="tk-card-title">{{ get_label('todos_overview', 'Todos overview') }}</h3>
                         </div>
-                        <div class="d-flex gap-3 align-items-center">
-                            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_todo_modal" class="tk-card-link text-primary" title="{{ get_label('create_todo', 'Create Todo') }}">
-                                <i class='bx bx-plus me-1'></i>{{ get_label('add', 'Add') }}
+                        <div class="d-flex gap-3 align-items-center mt-1">
+                            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_todo_modal" class="tk-card-link text-primary d-flex align-items-center" style="line-height: 1;" title="{{ get_label('create_todo', 'Create Todo') }}">
+                                <i class='bx bx-plus' style="font-size: 1.1rem; margin-right: 2px;"></i>{{ get_label('add', 'Add') }}
                             </a>
-                            <a href="{{ url('todos') }}" class="tk-card-link">{{ get_label('view_more', 'View more') }}</a>
+                            <a href="{{ url('todos') }}" class="tk-card-link d-flex align-items-center" style="line-height: 1;">{{ get_label('view_more', 'View more') }}</a>
                         </div>
                     </div>
-                    <div class="tk-card-body p-0 d-flex flex-column" style="min-height: 250px;">
+                    <div class="px-3 pt-2 border-bottom">
+                        <ul class="nav nav-tabs nav-tabs-custom tk-custom-tabs" role="tablist" style="margin-bottom: -1px;">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#todos-pending" type="button" role="tab" aria-selected="true" style="font-size: 0.85rem; font-weight: 500; padding: 0.5rem 1rem;">
+                                    {{ get_label('pending', 'Pending') }}
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#todos-completed" type="button" role="tab" aria-selected="false" style="font-size: 0.85rem; font-weight: 500; padding: 0.5rem 1rem;">
+                                    {{ get_label('completed', 'Completed') }}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tk-card-body p-0 d-flex flex-column" style="height: 300px;">
                         <div style="flex: 1 1 auto; overflow-y: auto; min-height: 0;">
-                            <ul class="p-0 m-0 todo-list list-group list-group-flush">
+                            <div class="tab-content p-0 m-0">
+                                <div class="tab-pane fade show active" id="todos-pending" role="tabpanel">
+                                    <ul class="p-0 m-0 todo-list todo-list-pending list-group list-group-flush">
                                 <div class="tk-loading-skeleton">
                                     <div class="skel-row">
                                         <span class="skel skel-check-icon"></span>
@@ -373,7 +437,13 @@
                                         </div>
                                     </div>
                                 </div>
-                            </ul>
+                                    </ul>
+                                </div>
+                                <div class="tab-pane fade" id="todos-completed" role="tabpanel">
+                                    <ul class="p-0 m-0 todo-list todo-list-completed list-group list-group-flush">
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -385,7 +455,7 @@
         <!-- Dependencies -->
         <script src="{{ asset('assets/js/apexcharts.js') }}"></script>
         <script src="{{ asset('assets/js/Sortable.min.js') }}"></script>
-        <script src="{{ asset('assets/js/pages/dashboard.js') }}"></script>
+        <script src="{{ asset('assets/js/pages/dashboard.js') }}?v={{ time() }}"></script>
     @else
         <div class="w-100 h-100 d-flex align-items-center justify-content-center">
             <span>{{ get_label('you_must_log_in_or_register', 'You must') }} <a href="{{ url('login') }}">{{ get_label('log_in', 'Log in') }}</a> {{ get_label('or', 'or') }} <a href="{{ url('register') }}">{{ get_label('register', 'Register') }}</a> {{ get_label('to_access', 'to access') }} {{ $general_settings['company_title'] }}!</span>

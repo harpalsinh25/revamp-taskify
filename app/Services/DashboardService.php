@@ -422,7 +422,6 @@ class DashboardService
         }
 
         return $workspace->todos()
-            ->where('is_completed', false)
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(static function ($todo) {

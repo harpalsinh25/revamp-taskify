@@ -9,10 +9,24 @@
     <script>
         (function () {
             try {
-                var t = localStorage.getItem("taskify.theme");
+                var t = localStorage.getItem("templateCustomizer-vertical-menu-template--Style") 
+                     || localStorage.getItem("templateCustomizer-vertical-menu-template-free--Style")
+                     || localStorage.getItem("taskify.theme")
+                     || localStorage.getItem("theme");
+                if (!t) {
+                    for (var i = 0; i < localStorage.length; i++) {
+                        var k = localStorage.key(i);
+                        if (k && k.indexOf('--Style') > -1) {
+                            t = localStorage.getItem(k);
+                            break;
+                        }
+                    }
+                }
                 if (t === "dark" || t === "light") {
                     document.documentElement.setAttribute("data-theme", t);
                     document.documentElement.setAttribute("data-bs-theme", t);
+                    document.documentElement.classList.remove("light-style", "dark-style");
+                    document.documentElement.classList.add(t + "-style");
                 }
             } catch (e) {}
         })();

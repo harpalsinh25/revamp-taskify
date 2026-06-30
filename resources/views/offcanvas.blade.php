@@ -887,7 +887,7 @@
                 <div class="col-md-12 mb-3">
                     <label for="title" class="form-label"><?= get_label('title', 'Title') ?> <span
                             class="asterisk">*</span></label>
-                    <input class="form-control ai-title" type="text" id="title" name="title"
+                    <input class="tk-input ai-title" type="text" id="title" name="title"
                         placeholder="<?= get_label('please_enter_title', 'Please enter title') ?>"
                         value="{{ old('title') }}">
                 </div>
@@ -900,7 +900,8 @@
                             <a href="{{ url('status/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_statuses', 'Manage statuses') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select statusDropdown" name="status_id" id="task_status_id">
+                    <select class="tk-select statusDropdown" name="status_id" id="task_status_id" data-placeholder="<?= get_label('please_select', 'Please select') ?>">
+                        <option></option>
                         @isset($statuses)
                             @foreach ($statuses as $status)
                                 <option value="{{ $status->id }}" data-color="{{ $status->color }}"
@@ -918,7 +919,7 @@
                             <a href="{{ url('priority/manage') }}" class="text-muted ms-1" data-bs-toggle="tooltip" title="<?= get_label('manage_priorities', 'Manage Priorities') ?>"><i class="bx bx-list-ul"></i></a>
                         </div>
                     </div>
-                    <select class="form-select priorityDropdown" name="priority_id" id="priority_id"
+                    <select class="tk-select priorityDropdown" name="priority_id" id="priority_id"
                         data-placeholder="<?= get_label('please_select', 'Please select') ?>">
                         <option></option>
                         @isset($priorities)
@@ -932,29 +933,32 @@
             </div>
             <div class="row">
                 <div class="col-md-12 mb-3">
-                    <label for="project_title" class="form-label"><?= get_label('project', 'Project') ?>
+                    <label class="form-label" for="project"><?= get_label('select_project', 'Select project') ?>
                         <span class="asterisk">*</span></label>
-                    <input class="form-control" type="text" id="update_project_title" readonly>
+                    <select class="tk-select selectTaskProject tom_projects_select" name="project" id="update_project_title"
+                        data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>"
+                        data-single-select="true" data-allow-clear="false">
+                    </select>
                 </div>
             </div>
             <div class="row">
                 <div class="mb-3">
                     <label class="form-label" for="user_id"><?= get_label('select_users', 'Select users') ?> <span
                             id="task_update_users_associated_with_project"></span></label>
-                    <select class="form-select tom_users_select" name="user_id[]" multiple="multiple"
-                        data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
+                    <select class="tk-select tom_users_select" name="user_id[]" multiple="multiple"
+                        data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>" data-allow-clear="false">
                     </select>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="start_date"><?= get_label('starts_at', 'Starts at') ?></label>
-                    <input type="text" id="update_start_date" name="start_date" class="form-control"
+                    <input type="text" id="update_start_date" name="start_date" class="tk-input"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="due_date"><?= get_label('ends_at', 'Ends at') ?></label>
-                    <input type="text" id="update_end_date" name="due_date" class="form-control"
+                    <input type="text" id="update_end_date" name="due_date" class="tk-input"
                         placeholder="{{ get_label('please_select', 'Please Select') }}" autocomplete="off">
                 </div>
             </div>
@@ -976,8 +980,8 @@
                 <label for="edit_task_list" class="form-label">
                     {{ get_label('task_list', 'Task List') }}
                 </label>
-                <select class="form-select tom_task_list_select" name="task_list_id" id="edit_task_list">
-                    <option value="">Select a task list</option>
+                <select class="tk-select tom_task_list_select" name="task_list_id" id="edit_task_list" data-placeholder="<?= get_label('type_to_search', 'Type to search') ?>">
+                    <option value=""></option>
                 </select>
             </div>
             <div class="row align-items-center mb-2">
@@ -1017,14 +1021,14 @@
             </div>
             <!-- Description Textarea -->
             <div class="mb-3">
-                <textarea class="form-control description ai-output" rows="5" name="description" id="task_description"
+                <textarea class="tk-textarea description ai-output" rows="5" name="description" id="task_description"
                     placeholder="<?= get_label('please_enter_description', 'Please enter description') ?>"><?= old('description') ?></textarea>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label"
                         for="billing_type">{{ get_label('billing_type', 'Billing Type') }}</label>
-                    <select class="form-select" name="billing_type" id="edit_billing_type">
+                    <select class="tk-select" name="billing_type" id="edit_billing_type">
                         <option value="none">{{ get_label('none', 'None') }}</option>
                         <option value="billable">{{ get_label('billable', 'Billable') }}</option>
                         <option value="non-billable">{{ get_label('non_billable', 'Non Billable') }}
@@ -1037,7 +1041,7 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label"
                         for="completion_percentage">{{ get_label('completion_percentage', 'Completion Percentage (%)') }}</label>
-                    <select class="form-select" name="completion_percentage" id="edit_completion_percentage">
+                    <select class="tk-select" name="completion_percentage" id="edit_completion_percentage">
                         @foreach (range(0, 100, 10) as $percentage)
                             <option value="{{ $percentage }}">{{ $percentage }}%</option>
                         @endforeach
@@ -1050,7 +1054,7 @@
             <div class="row">
                 <div class="mb-3">
                     <label class="form-label"><?= get_label('note', 'Note') ?></label>
-                    <textarea class="form-control" name="note" rows="3" id="taskNote"
+                    <textarea class="tk-textarea" name="note" rows="3" id="taskNote"
                         placeholder="<?= get_label('optional_note', 'Optional Note') ?>"></textarea>
                 </div>
             </div>
@@ -1075,7 +1079,7 @@
                 <div class="mb-3">
                     <label for="frequency-type"
                         class="form-label">{{ get_label('frequency_type', 'Frequency Type') }}</label>
-                    <select class="form-select" id="edit-frequency-type" name="frequency_type" required>
+                    <select class="tk-select" id="edit-frequency-type" name="frequency_type" required>
                         <option value="daily">{{ get_label('daily', 'Daily') }}</option>
                         <option value="weekly">{{ get_label('weekly', 'Weekly') }}</option>
                         <option value="monthly">{{ get_label('monthly', 'Monthly') }}</option>

@@ -3655,18 +3655,18 @@
         Request::is('users') ||
         Request::is('clients'))
     <div class="offcanvas offcanvas-end offcanvas-responsive" id="quickViewOffcanvas" tabindex="-1" aria-hidden="true">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="exampleModalLabel1" style="display:flex;align-items:center;gap:6px;">
-                <span id="typePlaceholder" class="mono" style="font-size:11px;color:var(--fg-1);font-weight:600;"></span>
-                <?= get_label('quick_view', 'Quick View') ?>
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title text-body" id="exampleModalLabel1" style="display:flex;align-items:center;gap:6px;">
+                <i class="bx bx-show text-primary"></i>
+                <?= get_label('quick_view', 'Quick View') ?>: <span id="typePlaceholder" class="badge bg-primary ms-1" style="font-size:11px;font-weight:600;"></span>
             </h5>
-            <button type="button" class="btn-close m-2 m-2 text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <h3 id="quickViewTitlePlaceholder" style="font-size:16px;margin:0 0 12px;" class="text-muted"></h3>
+            <h4 id="quickViewTitlePlaceholder" class="mb-4 text-primary" style="font-size:1.1rem;font-weight:600;"></h4>
             
             <div class="nav-align-top">
-                <ul class="nav nav-tabs mb-4" role="tablist">
+                <ul class="nav nav-tabs nav-tabs-custom tk-custom-tabs mb-4" role="tablist">
                     @if ($auth_user->can('manage_users'))
                         <li class="nav-item">
                             <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-quick-view-users" aria-controls="navs-top-quick-view-users">

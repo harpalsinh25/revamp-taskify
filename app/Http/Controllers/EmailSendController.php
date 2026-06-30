@@ -163,6 +163,17 @@ class EmailSendController extends Controller
 
             // Replace placeholders
             foreach ($placeholders as $key => $value) {
+                if (str_contains(strtolower($key), 'url') && $value) {
+                    if (!preg_match('~^(?:f|ht)tps?://|mailto:|tel:|/#~i', $value)) {
+                        if (str_starts_with($value, '/')) {
+                            $value = url($value);
+                        } elseif (!str_contains($value, '.')) {
+                            $value = url('/' . ltrim($value, '/')); 
+                        } else {
+                            $value = 'https://' . $value;
+                        }
+                    }
+                }
                 $body = str_replace("{{$key}}", $value, $body);
                 $subject = str_replace("{{$key}}", $value, $subject);
             }
@@ -323,6 +334,19 @@ class EmailSendController extends Controller
 
                 // Replace placeholders in body
                 foreach ($data['placeholders'] as $key => $value) {
+                    if (str_contains(strtolower($key), 'url') && $value) {
+                        if (!preg_match('~^(?:f|ht)tps?://|mailto:|tel:|/#~i', $value)) {
+                            if (str_starts_with($value, '/')) {
+                                $value = url($value);
+                            } elseif (!str_contains($value, '.')) {
+                                $value = url('/' . ltrim($value, '/')); 
+                            } else {
+                                $value = 'https://' . $value;
+                            }
+                        }
+                        // update the value in data to be saved to DB too
+                        $data['placeholders'][$key] = $value;
+                    }
                     $body = str_replace(['{' . $key . '}', '{{' . $key . '}}'], $value, $body);
                 }
             } else {

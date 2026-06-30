@@ -72,12 +72,7 @@ if ($remainingUnreadNotificationsCount < 0) {
                     <a class="tk-icon-btn position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false"
                         title="{{ get_label('notifications', 'Notifications') }}">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9ZM10 21a2 2 0 0 0 4 0"/></svg>
-                        <span id="unreadNotificationsCount"
-      class="tk-badge-counter tk-badge-counter-danger tk-badge-counter-nav
-      {{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}">
-    {{ $unreadNotificationsCount }}
-</span>
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9ZM10 21a2 2 0 0 0 4 0"/></svg><span id="unreadNotificationsCount" class="{{ $unreadNotificationsCount > 0 ? '' : 'd-none' }}" style="position: absolute !important; top: 20% !important; left: 80% !important; transform: translate(-50%, -50%) !important; width: 8px !important; height: 8px !important; background-color: var(--err, #ff3e1d) !important; border-radius: 50% !important; font-size: 0 !important; color: transparent !important; overflow: hidden; pointer-events: none; border: 1px solid var(--bg-1, #ffffff) !important; z-index: 10;">{{ $unreadNotificationsCount }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 350px;">
                         <li class="fixed-header border-bottom px-3 py-2">
@@ -86,7 +81,7 @@ if ($remainingUnreadNotificationsCount < 0) {
                                 <span class="text-uppercase">{{ get_label('notifications', 'Notifications') }}</span>
                             </div>
                         </li>
-                        <div id="unreadNotificationsContainer" class="scrollable-dropdown">
+                        <div id="unreadNotificationsContainer" class="scrollable-dropdown" style="max-height: 350px; overflow-y: auto;">
                             @if ($unreadNotificationsCount > 0)
                                 @foreach ($unreadNotifications as $notification)
                                     <li>

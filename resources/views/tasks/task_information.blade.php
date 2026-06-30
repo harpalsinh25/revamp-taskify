@@ -4,6 +4,23 @@
 @endsection
 @section('content')
     <div class="container-fluid">
+        <div class="d-flex justify-content-between mb-2 mt-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style1">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url('home') }}"><?= get_label('home', 'Home') ?></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ url('tasks') }}"><?= get_label('tasks', 'Tasks') ?></a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            <?= get_label('task_details', 'Task details') ?>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
     <header class="tk-proj-head mt-4 mb-4">
         <div class="tk-proj-headmain">
             <div class="tk-proj-eyebrow mono">
